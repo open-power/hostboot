@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,9 +107,6 @@ union tpm_sts_reg_t
         uint8_t rsvd2          : 1; // 07 // RO
     } PACKED;
 };
-
-
-
 
 /**
 *
@@ -505,7 +502,6 @@ errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
                              size_t& io_buflen,
                              int64_t i_accessType,
                              va_list i_args);
-
 
 }; // end TPMDD namespace
 

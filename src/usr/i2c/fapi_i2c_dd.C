@@ -113,9 +113,13 @@ errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
         // master target has to exist and can not be just sys target
         if( (i2cm == nullptr) || (i2cm == sys) )
         {
+            char* l_masterPath = l_i2cInfo.i2cMasterPath.toString();
             TRACFCOMP( g_trac_i2c, ERR_MRK"fapiI2cPerformOp() - "
                        "I2C Master path (%s) not valid",
-                       l_i2cInfo.i2cMasterPath.toString() );
+                       l_masterPath);
+            free(l_masterPath);
+            l_masterPath = nullptr;
+
             /*@
              * @errortype
              * @reasoncode       I2C::INVALID_MASTER_TARGET
@@ -317,18 +321,32 @@ errlHndl_t i2cRead( TARGETING::Target * i_target,
                       i_target,
                       o_buffer,
                       io_buffer_size,
-                      DEVICE_I2C_ADDRESS_OFFSET(i_i2cInfo->port,
-                                                i_i2cInfo->engine,
-                                                i_i2cInfo->devAddr,
-                                                i_offset_data_size,
-                                                i_offset_data) );
+                      DEVICE_I2C_ADDRESS_OFFSET(
+                                            i_i2cInfo->port,
+                                            i_i2cInfo->engine,
+                                            i_i2cInfo->devAddr,
+                                            i_offset_data_size,
+                                            i_offset_data,
+                                            i_i2cInfo->i2cMuxBusSelector,
+                                            &(i_i2cInfo->i2cMuxPath) ) );
 
     if( l_err )
     {
+
         TRACFCOMP(g_trac_i2c,
-            ERR_MRK"fapi i2cRead(): read failed on %d/%d/0x%X offsetSize=%d "
-            "with eid 0x%x", i_i2cInfo->port, i_i2cInfo->engine,
-            i_i2cInfo->devAddr, i_offset_data_size, l_err->eid());
+            ERR_MRK"fapi i2cRead(): read failed on %d/%d/0x%X, offsetSize=%d "
+            "with eid 0x%x", i_i2cInfo->port,
+            i_i2cInfo->engine, i_i2cInfo->devAddr, i_offset_data_size,
+            l_err->eid());
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_i2cInfo->i2cMuxPath.toString();
+        TRACFCOMP(g_trac_i2c, ERR_MRK"fapi i2cRead(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_i2cInfo->i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         if (i_offset_data_size > 0)
         {
@@ -358,14 +376,27 @@ errlHndl_t i2cWrite( TARGETING::Target * i_target,
                       i_buffer,
                       io_buffer_size,
                       DEVICE_I2C_ADDRESS(i_i2cInfo->port,
-                                         i_i2cInfo->engine,
-                                         i_i2cInfo->devAddr) );
+                                             i_i2cInfo->engine,
+                                             i_i2cInfo->devAddr,
+                                             i_i2cInfo->i2cMuxBusSelector,
+                                             &(i_i2cInfo->i2cMuxPath) ) );
+
     if( l_err )
     {
         TRACFCOMP(g_trac_i2c,
-            ERR_MRK"fapi i2cWrite(): write failed on %d/%d/0x%X length %d "
-            "with eid 0x%x", i_i2cInfo->port, i_i2cInfo->engine,
-            i_i2cInfo->devAddr, io_buffer_size, l_err->eid());
+            ERR_MRK"fapi i2cWrite(): write failed on %d/%d/0x%X, length %d "
+            "with eid 0x%x", i_i2cInfo->port,
+            i_i2cInfo->engine, i_i2cInfo->devAddr, io_buffer_size,
+            l_err->eid());
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_i2cInfo->i2cMuxPath.toString();
+        TRACFCOMP(g_trac_i2c, ERR_MRK"fapi i2cWrite(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_i2cInfo->i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
     }
 
 

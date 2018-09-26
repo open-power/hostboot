@@ -94,7 +94,6 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_TPM,
                        tpmPerformOp );
 
-
 // ------------------------------------------------------------------
 // tpmPerformOp
 // ------------------------------------------------------------------
@@ -146,6 +145,16 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                        tpmInfo.engine,
                        tpmInfo.port, tpmInfo.devAddr, tpmInfo.operation);
 
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"tpmPerformOp(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      tpmInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
+
             /*@
              * @errortype
              * @reasoncode     TPM_DISABLED_VIA_MRW
@@ -190,6 +199,15 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                            tpmInfo.port, tpmInfo.devAddr,
                            tpmInfo.operation, io_buflen);
 
+                // Printing mux info separately, if combined, nothing is displayed
+                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                          ERR_MRK"tpmPerformOp(): "
+                          "muxSelector=0x%X, muxPath=%s",
+                          tpmInfo.i2cMuxBusSelector,
+                          l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
 
                 /*@
                  * @errortype
@@ -276,6 +294,16 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                        tpmInfo.engine,
                        tpmInfo.port, tpmInfo.devAddr,
                        tpmInfo.operation, i_opType);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"tpmPerformOp(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      tpmInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             /*@
              * @errortype
@@ -430,7 +458,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 TRACFCOMP(g_trac_tpmdd,ERR_MRK
                     "tpmPresence: Sampled TPM vendor ID did not match expected "
                     "vendor ID! "
-                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X"
                     "Actual vendor ID=0x%08X, expected vendor ID=0x%08X.",
                     TARGETING::get_huid(i_pTpm),
                     tpmInfo.engine,
@@ -438,6 +466,16 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     static_cast<uint64_t>(tpmInfo.devAddr),
                     vendorId,
                     TPMDD::TPM_VENDORID);
+
+                // Printing mux info separately, if combined, nothing is displayed
+                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                          ERR_MRK"tpmPresence: "
+                          "muxSelector=0x%X, muxPath=%s",
+                          tpmInfo.i2cMuxBusSelector,
+                          l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
             }
 
             /*@
@@ -476,13 +514,23 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             {
                 TRACFCOMP(g_trac_tpmdd,ERR_MRK
                     "tpmPresence: tpmRead: Failed to read TPM family ID! "
-                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X. "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X",
                     TRACE_ERR_FMT,
                     TARGETING::get_huid(i_pTpm),
                     tpmInfo.engine,
                     tpmInfo.port,
                     static_cast<uint64_t>(tpmInfo.devAddr),
                     TRACE_ERR_ARGS(pError));
+
+                // Printing mux info separately, if combined, nothing is displayed
+                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                          ERR_MRK"tpmPresence: "
+                          "muxSelector=0x%X, muxPath=%s",
+                          tpmInfo.i2cMuxBusSelector,
+                          l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
             }
             break;
 
@@ -503,6 +551,16 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     static_cast<uint64_t>(tpmInfo.devAddr),
                     familyId,
                     TPMDD::TPM_FAMILYID);
+
+                // Printing mux info separately, if combined, nothing is displayed
+                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                          ERR_MRK"tpmPresence: "
+                          "muxSelector=0x%X, muxPath=%s",
+                          tpmInfo.i2cMuxBusSelector,
+                          l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
             }
 
             /*@
@@ -537,6 +595,17 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 static_cast<uint64_t>(tpmInfo.devAddr),
                 vendorId,
                 familyId);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                   INFO_MRK"tpmPresence: "
+                   "muxSelector=0x%X, muxPath=%s",
+                   tpmInfo.i2cMuxBusSelector,
+                   l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
+
             present = true;
         }
 
@@ -619,6 +688,9 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
     return present;
 }
 
+// ------------------------------------------------------------------
+// tpmPresenceDetect
+// ------------------------------------------------------------------
 errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
                              TARGETING::Target* i_target,
                              void* io_buffer,
@@ -693,7 +765,6 @@ errlHndl_t tpmRead ( void * o_buffer,
              retry <= TPM_MAX_RETRIES;
              retry++)
         {
-
             // Only write the byte address if we have data to write
             if( 0 != byteAddrSize )
             {
@@ -703,12 +774,13 @@ errlHndl_t tpmRead ( void * o_buffer,
                                 o_buffer,
                                 i_buflen,
                                 DEVICE_I2C_ADDRESS_OFFSET(
-                                       i_tpmInfo.port,
-                                       i_tpmInfo.engine,
-                                       i_tpmInfo.devAddr,
-                                       byteAddrSize,
-                                       reinterpret_cast<uint8_t*>(&byteAddr)));
-
+                                   i_tpmInfo.port,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.devAddr,
+                                   byteAddrSize,
+                                   reinterpret_cast<uint8_t*>(&byteAddr),
+                                   i_tpmInfo.i2cMuxBusSelector,
+                                   &(i_tpmInfo.i2cMuxPath) ) );
                 if( err )
                 {
                     TRACFCOMP(g_trac_tpmdd,
@@ -722,6 +794,16 @@ errlHndl_t tpmRead ( void * o_buffer,
                     TRACFBIN(g_trac_tpmdd, "byteAddr[]",
                              &byteAddr, byteAddrSize);
 
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmRead(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+
                     // Don't break here -- error handled below
                 }
             }
@@ -732,10 +814,12 @@ errlHndl_t tpmRead ( void * o_buffer,
                                 i_tpmInfo.i2cTarget,
                                 o_buffer,
                                 i_buflen,
-                                DEVICE_I2C_ADDRESS( i_tpmInfo.port,
-                                                    i_tpmInfo.engine,
-                                                    i_tpmInfo.devAddr ) );
-
+                                DEVICE_I2C_ADDRESS(
+                                              i_tpmInfo.port,
+                                              i_tpmInfo.engine,
+                                              i_tpmInfo.devAddr,
+                                              i_tpmInfo.i2cMuxBusSelector,
+                                              &(i_tpmInfo.i2cMuxPath) ) );
                 if( err )
                 {
                     TRACFCOMP(g_trac_tpmdd,
@@ -746,6 +830,16 @@ errlHndl_t tpmRead ( void * o_buffer,
                               i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmRead(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
 
                     // Don't break here -- error handled below
                 }
@@ -780,6 +874,16 @@ errlHndl_t tpmRead ( void * o_buffer,
                                    err_RETRY->eid(),
                                    retry, TPM_MAX_RETRIES);
 
+                        // Printing mux info separately, if combined, nothing is displayed
+                        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                        TRACFCOMP(g_trac_tpmdd,
+                                  ERR_MRK"tpmRead(): "
+                                  "muxSelector=0x%X, muxPath=%s",
+                                  i_tpmInfo.i2cMuxBusSelector,
+                                  l_muxPath);
+                        free(l_muxPath);
+                        l_muxPath = nullptr;
+
                         err_RETRY->collectTrace(TPMDD_COMP_NAME);
                     }
                     else
@@ -796,6 +900,16 @@ errlHndl_t tpmRead ( void * o_buffer,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
                                    retry, TPM_MAX_RETRIES);
+
+                        // Printing mux info separately, if combined, nothing is displayed
+                        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                        TRACFCOMP(g_trac_tpmdd,
+                                  ERR_MRK"tpmRead(): "
+                                  "muxSelector=0x%X, muxPath=%s",
+                                  i_tpmInfo.i2cMuxBusSelector,
+                                  l_muxPath);
+                        free(l_muxPath);
+                        l_muxPath = nullptr;
 
                         ERRORLOG::ErrlUserDetailsString(
                                   "Another ERROR found")
@@ -826,6 +940,16 @@ errlHndl_t tpmRead ( void * o_buffer,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
                                retry, TPM_MAX_RETRIES);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmRead(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
 
                     err->collectTrace(TPMDD_COMP_NAME);
 
@@ -930,11 +1054,13 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                 i_buffer,
                                 i_buflen,
                                 DEVICE_I2C_ADDRESS_OFFSET(
-                                       i_tpmInfo.port,
-                                       i_tpmInfo.engine,
-                                       i_tpmInfo.devAddr,
-                                       byteAddrSize,
-                                       reinterpret_cast<uint8_t*>(&byteAddr)));
+                                   i_tpmInfo.port,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.devAddr,
+                                   byteAddrSize,
+                                   reinterpret_cast<uint8_t*>(&byteAddr),
+                                   i_tpmInfo.i2cMuxBusSelector,
+                                   &(i_tpmInfo.i2cMuxPath) ) );
 
                 if( err )
                 {
@@ -946,6 +1072,17 @@ errlHndl_t tpmWrite ( void * i_buffer,
                               i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_tpmInfo.offset, byteAddrSize, i_buflen);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmWrite(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+
                     TRACFBIN(g_trac_tpmdd, "byteAddr[]",
                              &byteAddr, byteAddrSize);
 
@@ -959,9 +1096,12 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                 i_tpmInfo.i2cTarget,
                                 i_buffer,
                                 i_buflen,
-                                DEVICE_I2C_ADDRESS( i_tpmInfo.port,
-                                                    i_tpmInfo.engine,
-                                                    i_tpmInfo.devAddr ) );
+                                DEVICE_I2C_ADDRESS(
+                                             i_tpmInfo.port,
+                                             i_tpmInfo.engine,
+                                             i_tpmInfo.devAddr,
+                                             i_tpmInfo.i2cMuxBusSelector,
+                                             &(i_tpmInfo.i2cMuxPath) ) );
 
                 if( err )
                 {
@@ -973,6 +1113,16 @@ errlHndl_t tpmWrite ( void * i_buffer,
                               i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmWrite(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
 
                     // Don't break here -- error handled below
                 }
@@ -1007,6 +1157,16 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                    err_RETRY->eid(),
                                    retry, TPM_MAX_RETRIES);
 
+                        // Printing mux info separately, if combined, nothing is displayed
+                        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                        TRACFCOMP(g_trac_tpmdd,
+                                  ERR_MRK"tpmWrite(): "
+                                  "muxSelector=0x%X, muxPath=%s",
+                                  i_tpmInfo.i2cMuxBusSelector,
+                                  l_muxPath);
+                        free(l_muxPath);
+                        l_muxPath = nullptr;
+
                         err_RETRY->collectTrace(TPMDD_COMP_NAME);
                     }
                     else
@@ -1023,6 +1183,16 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
                                    retry, TPM_MAX_RETRIES);
+
+                        // Printing mux info separately, if combined, nothing is displayed
+                        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                        TRACFCOMP(g_trac_tpmdd,
+                                  ERR_MRK"tpmWrite(): "
+                                  "muxSelector=0x%X, muxPath=%s",
+                                  i_tpmInfo.i2cMuxBusSelector,
+                                  l_muxPath);
+                        free(l_muxPath);
+                        l_muxPath = nullptr;
 
                         ERRORLOG::ErrlUserDetailsString(
                                   "Another ERROR found")
@@ -1053,6 +1223,16 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
                                retry, TPM_MAX_RETRIES);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmWrite(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
 
                     err->collectTrace(TPMDD_COMP_NAME);
 
@@ -1388,6 +1568,8 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
         io_tpmInfo.i2cMasterPath = tpmData.i2cMasterPath;
         io_tpmInfo.tpmEnabled    = tpmData.tpmEnabled;
         io_tpmInfo.tpmTarget     = i_target;
+        io_tpmInfo.i2cMuxBusSelector = tpmData.i2cMuxBusSelector;
+        io_tpmInfo.i2cMuxPath    = tpmData.i2cMuxPath;
 
         // Convert attribute info to tpm_addr_size_t enum
         if ( tpmData.byteAddrOffset == 0x2 )
@@ -1482,12 +1664,21 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, e/p/dA=%d/%d/0x%X "
+    TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, e/p/dA=%d/%d/0x%X, "
               "En=%d, aS=%d, aO=%d",
               TARGETING::get_huid(i_target),
               io_tpmInfo.engine, io_tpmInfo.port, io_tpmInfo.devAddr,
               io_tpmInfo.tpmEnabled,
               io_tpmInfo.addrSize, tpmData.byteAddrOffset);
+
+    // Printing mux info separately, if combined, nothing is displayed
+    char* l_muxPath = io_tpmInfo.i2cMuxPath.toString();
+    TRACFCOMP(g_trac_tpmdd, "tpmReadAttributes(): "
+              "muxSelector=0x%X, muxPath=%s",
+              io_tpmInfo.i2cMuxBusSelector,
+              l_muxPath);
+    free(l_muxPath);
+    l_muxPath = nullptr;
 
     TRACDCOMP( g_trac_tpmdd,
                EXIT_MRK"tpmReadAttributes()" );
@@ -1563,8 +1754,10 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( TPMDD_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                io_tpmInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = io_tpmInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
@@ -1613,8 +1806,10 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( TPMDD_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                io_tpmInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = io_tpmInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
@@ -1687,6 +1882,16 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
                        i_tpmInfo.engine,
                        i_tpmInfo.port, i_tpmInfo.devAddr,
                        o_stsReg.value);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"tpmReadSTSRegValid(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      i_tpmInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             /*@
              * @errortype
@@ -1796,8 +2001,19 @@ errlHndl_t tpmPollForCommandReady( const tpm_info_t & i_tpmInfo)
                    "e/p/dA=%d/%d/0x%X, OP=%d, "
                    "STS=0x%X",
                    i_tpmInfo.engine,
-                   i_tpmInfo.port, i_tpmInfo.devAddr, i_tpmInfo.operation,
+                   i_tpmInfo.port, i_tpmInfo.devAddr,
+                   i_tpmInfo.operation,
                    stsReg.value );
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_tpmdd,
+                  ERR_MRK"tpmPollForCommandReady(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_tpmInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         /*@
          * @errortype
@@ -1819,9 +2035,10 @@ errlHndl_t tpmPollForCommandReady( const tpm_info_t & i_tpmInfo)
 
         err->collectTrace( TPMDD_COMP_NAME );
 
-        ERRORLOG::ErrlUserDetailsString(
-                  i_tpmInfo.i2cMasterPath.toString()).addToLog(err);
-
+        char* l_masterPath = i_tpmInfo.i2cMasterPath.toString();
+        ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+        free(l_masterPath);
+        l_masterPath = nullptr;
     }
     return err;
 
@@ -1885,11 +2102,21 @@ errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmPollForDataAvail() - "
                    "Timeout polling for dataAvail! "
-                   "e/p/dA=%d/%d/0x%X, OP=%d, "
-                   "STS=0x%X",
+                   "e/p/dA=%d/%d/0x%X, OP=%d, STS=0x%X",
                    i_tpmInfo.engine,
-                   i_tpmInfo.port, i_tpmInfo.devAddr, i_tpmInfo.operation,
+                   i_tpmInfo.port, i_tpmInfo.devAddr,
+                   i_tpmInfo.operation,
                    stsReg.value );
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_tpmdd,
+                  ERR_MRK"tpmPollForDataAvail(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_tpmInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         /*@
          * @errortype
@@ -1911,9 +2138,10 @@ errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
 
         err->collectTrace( TPMDD_COMP_NAME );
 
-        ERRORLOG::ErrlUserDetailsString(
-                  i_tpmInfo.i2cMasterPath.toString()).addToLog(err);
-
+        char* l_masterPath = i_tpmInfo.i2cMasterPath.toString();
+        ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+        free(l_masterPath);
+        l_masterPath = nullptr;
     }
     return err;
 
@@ -2049,11 +2277,20 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             // TPM is not expecting more data, we overflowed
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Overflow! "
-                       "e/p/dA=%d/%d/0x%X, blen=%d, "
-                       "clen=%d",
+                       "e/p/dA=%d/%d/0x%X, blen=%d, clen=%d",
                        i_tpmInfo.engine,
                        i_tpmInfo.port, i_tpmInfo.devAddr,
                        i_buflen, curByte);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"tpmWriteFifo(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      i_tpmInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             /*@
              * @errortype
@@ -2135,11 +2372,20 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmWriteFifo(): Timeout! "
-                   "e/p/dA=%d/%d/0x%X, blen=%d, "
-                   "clen=%d",
+                   "e/p/dA=%d/%d/0x%X, blen=%d, clen=%d",
                    i_tpmInfo.engine,
                    i_tpmInfo.port, i_tpmInfo.devAddr,
                    i_buflen, curByte);
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_tpmdd,
+                  ERR_MRK"tpmWriteFifo(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_tpmInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         /*@
          * @errortype
@@ -2177,11 +2423,20 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             // TPM is expecting more data even though we think we are done
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Underflow! "
-                       "e/p/dA=%d/%d/0x%X, blen=%d, "
-                       "clen=%d",
+                       "e/p/dA=%d/%d/0x%X, blen=%d, clen=%d",
                        i_tpmInfo.engine,
                        i_tpmInfo.port, i_tpmInfo.devAddr,
                        i_buflen, curByte);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"tpmWriteFifo(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      i_tpmInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             /*@
              * @errortype
@@ -2254,11 +2509,20 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
                 // TPM is expecting more data even though we think we are done
                 TRACFCOMP( g_trac_tpmdd,
                            ERR_MRK"tpmReadFifo(): Data Overflow! "
-                           "e/p/dA=%d/%d/0x%X, blen=%d, "
-                           "clen=%d",
+                           "e/p/dA=%d/%d/0x%X, blen=%d, clen=%d",
                            i_tpmInfo.engine,
                            i_tpmInfo.port, i_tpmInfo.devAddr,
                            io_buflen, curByte + burstCount);
+
+                // Printing mux info separately, if combined, nothing is displayed
+                char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                          ERR_MRK"tpmReadFifo(): "
+                          "muxSelector=0x%X, muxPath=%s",
+                          i_tpmInfo.i2cMuxBusSelector,
+                          l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
 
                 /*@
                  * @errortype
@@ -2317,11 +2581,20 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmReadFifo(): Timeout! "
-                   "e/p/dA=%d/%d/0x%X, blen=%d, "
-                   "clen=%d",
+                   "e/p/dA=%d/%d/0x%X, blen=%d, clen=%d",
                    i_tpmInfo.engine,
                    i_tpmInfo.port, i_tpmInfo.devAddr,
                    io_buflen, curByte);
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i_tpmInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_tpmdd,
+                  ERR_MRK"tpmReadFifo(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i_tpmInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         /*@
          * @errortype

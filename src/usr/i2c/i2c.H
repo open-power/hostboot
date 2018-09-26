@@ -639,12 +639,11 @@ void i2cSetSwitches( TARGETING::Target * i_target,
 *
 */
 errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
-                         TARGETING::Target * i_target,
-                         void * io_buffer,
-                         size_t & io_buflen,
-                         int64_t i_accessType,
-                         misc_args_t & i_args );
-
+                        TARGETING::Target * i_target,
+                        void * io_buffer,
+                        size_t & io_buflen,
+                        int64_t i_accessType,
+                        misc_args_t & i_args );
 
 /**
  * @brief Does the real work of reading from the I2C device.

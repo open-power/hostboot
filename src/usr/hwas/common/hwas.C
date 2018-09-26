@@ -582,6 +582,57 @@ errlHndl_t check_current_proc_mem_to_use_is_still_valid (bool o_match)
     return l_err;
 }
 
+/**
+ * @brief Do presence detect on only MUX targets and enable HWAS state
+ *
+ * @param[in] i_sysTarget the top level target (CLASS_SYS)
+ * @return    errlHndl_t  return nullptr if no error,
+ *                        else return a handle to an error entry
+ *
+ */
+errlHndl_t discoverMuxTargetsAndEnable(const Target &i_sysTarget)
+{
+    HWAS_DBG(ENTER_MRK"discoverMuxTargetsAndEnable");
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Only get MUX targets
+        const PredicateCTM l_muxPred(CLASS_CHIP, TYPE_I2C_MUX);
+        TARGETING::PredicatePostfixExpr l_muxPredExpr;
+        l_muxPredExpr.push(&l_muxPred);
+        TargetHandleList l_pMuxCheckPres;
+        targetService().getAssociated( l_pMuxCheckPres, (&i_sysTarget),
+            TargetService::CHILD, TargetService::ALL, &l_muxPredExpr);
+
+        // Do the presence detect on only MUX targets
+        l_err = platPresenceDetect(l_pMuxCheckPres);
+
+        // If an issue with platPresenceDetect, then exit, returning
+        // error back to caller
+        if (nullptr != l_err)
+        {
+            break;
+        }
+
+        // Enable the HWAS State for the MUXes
+        const bool l_present(true);
+        const bool l_functional(true);
+        const uint32_t l_errlEid(0);
+        for (TargetHandle_t pTarget : l_pMuxCheckPres)
+        {
+            // set HWAS state to show MUX is present and functional
+            enableHwasState(pTarget, l_present, l_functional, l_errlEid);
+        }
+    } while (0);
+
+    HWAS_DBG(EXIT_MRK"discoverMuxTargetsAndEnable exit with %s",
+             (nullptr == l_err ? "no error" : "error"));
+
+    return l_err;
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
@@ -635,7 +686,17 @@ errlHndl_t discoverTargets()
         HWAS_DBG("pSys %.8X - marked present",
             pSys->getAttr<ATTR_HUID>());
 
-        // find list of all we need to call platPresenceDetect against
+        // Certain targets have dependencies on the MUX, so it is best to
+        // presence detect and enable the MUX before moving on to these targets.
+        // Please take this into consideration if code needs to be rearranged
+        // in the future.
+        errl = discoverMuxTargetsAndEnable(*pSys);
+
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
+
         PredicateCTM predEnc(CLASS_ENC);
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
@@ -698,10 +759,13 @@ errlHndl_t discoverTargets()
             uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
             bzero(pgData, sizeof(pgData));
 
+            // Cache the target type
+            auto l_targetType = pTarget->getAttr<ATTR_TYPE>();
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
-                (pTarget->getAttr<ATTR_TYPE>() != TYPE_TPM) &&
-                (pTarget->getAttr<ATTR_TYPE>() != TYPE_SP) &&
-                (pTarget->getAttr<ATTR_TYPE>() != TYPE_BMC) )
+                (l_targetType != TYPE_TPM) &&
+                (l_targetType != TYPE_SP) &&
+                (l_targetType != TYPE_BMC) &&
+                (l_targetType != TYPE_I2C_MUX) )
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
@@ -720,7 +784,7 @@ errlHndl_t discoverTargets()
                     errlCommit(errl, HWAS_COMP_ID);
                     // errl is now NULL
                 }
-                else if (pTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
+                else if (l_targetType == TYPE_PROC)
                 {
                     // read partialGood vector from these as well.
                     errl = platReadPartialGood(pTarget, pgData);

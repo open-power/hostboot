@@ -161,11 +161,20 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_nvdimm,
                        ERR_MRK"nvdimmPerformOp(): Device Overflow! "
-                       "p/e/dA=%d/%d/0x%X, offset=0x%X, len=0x%X "
-                       "devSizeKB=0x%X", i2cInfo.port, i2cInfo.engine,
+                       "e/p/dA=%d/%d/0x%X, offset=0x%X, len=0x%X "
+                       "devSizeKB=0x%X",
+                       i2cInfo.engine, i2cInfo.port,
                        i2cInfo.devAddr, i2cInfo.offset, io_buflen,
-                       i2cInfo.devSize_KB);
+                       i2cInfo.devSize_KB );
 
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmPerformOp(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      i2cInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             /*@
              * @errortype
@@ -201,11 +210,20 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
 
         TRACFCOMP( g_trac_nvdimm,
                    "nvdimmPerformOp():  i_opType=%d "
-                   "p/e/dA=%d/%d/0x%X, offset=0x%X, len=0x%X, "
+                   "e/p/dA=%d/%d/0x%X, offset=0x%X, len=0x%X, "
                    "snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X", i_opType,
-                   i2cInfo.port, i2cInfo.engine, i2cInfo.devAddr,
+                   i2cInfo.engine, i2cInfo.port, i2cInfo.devAddr,
                    i2cInfo.offset, io_buflen, l_snglChipSize,
-                   i2cInfo.chipCount, i2cInfo.devSize_KB);
+                   i2cInfo.chipCount, i2cInfo.devSize_KB );
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_nvdimm, "nvdimmPerformOp(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i2cInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
         // Do the read or write
         while(l_remainingOpLen > 0)
@@ -453,29 +471,41 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
              retry <= NVDIMM_MAX_RETRIES;
              retry++)
         {
-
             // Only write the byte address if we have data to write
             if( 0 != i_byteAddressSize )
             {
                 // Use the I2C OFFSET Interface for the READ
-                l_err = deviceOp( DeviceFW::READ,
-                                i_target,
-                                o_buffer,
-                                i_buflen,
-                                DEVICE_I2C_ADDRESS_OFFSET(
-                                       i_i2cInfo.port,
-                                       i_i2cInfo.engine,
-                                       i_i2cInfo.devAddr,
-                                       i_byteAddressSize,
-                                       reinterpret_cast<uint8_t*>(i_byteAddress)));
+                l_err = deviceOp(DeviceFW::READ,
+                                 i_target,
+                                 o_buffer,
+                                 i_buflen,
+                                 DEVICE_I2C_ADDRESS_OFFSET(
+                                  i_i2cInfo.port,
+                                  i_i2cInfo.engine,
+                                  i_i2cInfo.devAddr,
+                                  i_byteAddressSize,
+                                  reinterpret_cast<uint8_t*>(i_byteAddress),
+                                  i_i2cInfo.i2cMuxBusSelector,
+                                  &(i_i2cInfo.i2cMuxPath)));
 
                 if( l_err )
                 {
                     TRACFCOMP(g_trac_nvdimm,
                               ERR_MRK"nvdimmReadData(): I2C Read-Offset failed on "
-                              "%d/%d/0x%X aS=%d",
+                              "%d/%d/0x%X, aS=%d",
                               i_i2cInfo.port, i_i2cInfo.engine,
-                              i_i2cInfo.devAddr, i_byteAddressSize);
+                              i_i2cInfo.devAddr,
+                              i_byteAddressSize);
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i2cInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+
                     TRACFBIN(g_trac_nvdimm, "i_byteAddress[]",
                              i_byteAddress, i_byteAddressSize);
 
@@ -486,19 +516,32 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
             {
                 // Do the actual read via I2C
                 l_err = deviceOp( DeviceFW::READ,
-                                i_target,
-                                o_buffer,
-                                i_buflen,
-                                DEVICE_I2C_ADDRESS( i_i2cInfo.port,
-                                                    i_i2cInfo.engine,
-                                                    i_i2cInfo.devAddr ) );
+                                  i_target,
+                                  o_buffer,
+                                  i_buflen,
+                                  DEVICE_I2C_ADDRESS(
+                                                i_i2cInfo.port,
+                                                i_i2cInfo.engine,
+                                                i_i2cInfo.devAddr,
+                                                i_i2cInfo.i2cMuxBusSelector,
+                                                &(i_i2cInfo.i2cMuxPath) ) );
 
                 if( l_err )
                 {
                     TRACFCOMP(g_trac_nvdimm,
                               ERR_MRK"nvdimmReadData(): I2C Read failed on "
-                              "%d/%d/0x%0X", i_i2cInfo.port, i_i2cInfo.engine,
-                              i_i2cInfo.devAddr);
+                              "%d/%d/0x%0X",
+                              i_i2cInfo.port, i_i2cInfo.engine,
+                              i_i2cInfo.devAddr );
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i2cInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
 
                     // Don't break here -- error handled below
                 }
@@ -744,10 +787,20 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
             }
 
             TRACUCOMP(g_trac_nvdimm,"nvdimmWrite() Loop: %d/%d/0x%X "
-                "writeBuflen=%d, offset=0x%X, bAS=%d, diffs=%d/%d",
+                "writeBuflen=%d, offset=0x%X, "
+                "bAS=%d, diffs=%d/%d",
                 i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr,
                 newBufLen, i_i2cInfo.offset, byteAddrSize,
                 data_left, diff_wps);
+
+            // Printing mux info separately, if combined, nothing is displayed
+            char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+            TRACFCOMP(g_trac_nvdimm, "nvdimmWrite(): "
+                      "muxSelector=0x%X, muxPath=%s",
+                      i_i2cInfo.i2cMuxBusSelector,
+                      l_muxPath);
+            free(l_muxPath);
+            l_muxPath = nullptr;
 
             // Perform the requested write operation
             err = nvdimmWriteData( i_target,
@@ -831,19 +884,20 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
               retry <= NVDIMM_MAX_RETRIES;
               retry++)
          {
-             // Do the actual data write
-             err = deviceOp( DeviceFW::WRITE,
-                             i_target,
-                             i_dataToWrite,
-                             i_dataLen,
-                             DEVICE_I2C_ADDRESS_OFFSET(
-                                            i_i2cInfo.port,
-                                            i_i2cInfo.engine,
-                                            i_i2cInfo.devAddr,
-                                            i_byteAddressSize,
-                                            reinterpret_cast<uint8_t*>(
-                                            i_byteAddress)));
-
+            // Do the actual data write
+            err = deviceOp( DeviceFW::WRITE,
+                            i_target,
+                            i_dataToWrite,
+                            i_dataLen,
+                            DEVICE_I2C_ADDRESS_OFFSET(
+                                        i_i2cInfo.port,
+                                        i_i2cInfo.engine,
+                                        i_i2cInfo.devAddr,
+                                        i_byteAddressSize,
+                                        reinterpret_cast<uint8_t*>(
+                                        i_byteAddress),
+                                        i_i2cInfo.i2cMuxBusSelector,
+                                        &(i_i2cInfo.i2cMuxPath) ));
 
              if ( err == nullptr )
              {
@@ -861,6 +915,15 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                            i_i2cInfo.devAddr, i_dataLen,
                            i_i2cInfo.offset, i_i2cInfo.addrSize, retry);
 
+                 // Printing mux info separately, if combined, nothing is displayed
+                 char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmWriteData(): "
+                           "muxSelector=0x%X, muxPath=%s",
+                           i_i2cInfo.i2cMuxBusSelector,
+                           l_muxPath);
+                 free(l_muxPath);
+                 l_muxPath = nullptr;
+
                  err->collectTrace(NVDIMM_COMP_NAME);
 
                  // break from retry loop
@@ -875,6 +938,15 @@ errlHndl_t nvdimmWriteData( TARGETING::Target * i_target,
                            i_i2cInfo.devAddr, i_dataLen,
                            i_i2cInfo.offset, i_i2cInfo.addrSize,
                            i_i2cInfo.writePageSize);
+
+                 // Printing mux info separately, if combined, nothing is displayed
+                 char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmWriteData(): "
+                           "muxSelector=0x%X, muxPath=%s",
+                           i_i2cInfo.i2cMuxBusSelector,
+                           l_muxPath);
+                 free(l_muxPath);
+                 l_muxPath = nullptr;
 
                  // If op will be attempted again: save error and continue
                  if ( retry < NVDIMM_MAX_RETRIES )
@@ -1043,7 +1115,7 @@ errlHndl_t nvdimmReadAttributes ( TARGETING::Target * i_target,
                ENTER_MRK"nvdimmReadAttributes()" );
 
     // These variables will be used to hold the NVDIMM attribute data
-    // 'EepromNvInfo' struct is kept the same as nvdimm_addr_t via the 
+    // 'EepromNvInfo' struct is kept the same as nvdimm_addr_t via the
     // attributes.
     TARGETING::EepromNvInfo nvdimmData;
 
@@ -1090,6 +1162,8 @@ errlHndl_t nvdimmReadAttributes ( TARGETING::Target * i_target,
     o_i2cInfo.devSize_KB     = nvdimmData.maxMemorySizeKB;
     o_i2cInfo.chipCount      = nvdimmData.chipCount;
     o_i2cInfo.writeCycleTime = nvdimmData.writeCycleTime;
+    o_i2cInfo.i2cMuxBusSelector = nvdimmData.i2cMuxBusSelector;
+    o_i2cInfo.i2cMuxPath     = nvdimmData.i2cMuxPath;
 
     // Convert attribute info to nvdimm_addr_size_t enum
     if ( nvdimmData.byteAddrOffset == 0x3 )
@@ -1146,6 +1220,14 @@ errlHndl_t nvdimmReadAttributes ( TARGETING::Target * i_target,
               o_i2cInfo.chipCount, o_i2cInfo.addrSize,
               nvdimmData.byteAddrOffset, o_i2cInfo.writeCycleTime);
 
+    // Printing mux info separately, if combined, nothing is displayed
+    char* l_muxPath = o_i2cInfo.i2cMuxPath.toString();
+    TRACFCOMP(g_trac_nvdimm, "nvdimmReadAttributes(): "
+              "muxSelector=0x%X, muxPath=%s",
+              o_i2cInfo.i2cMuxBusSelector,
+              l_muxPath);
+    free(l_muxPath);
+    l_muxPath = nullptr;
 
     TRACDCOMP( g_trac_nvdimm,
                EXIT_MRK"nvdimmReadAttributes()" );
@@ -1222,8 +1304,10 @@ errlHndl_t nvdimmGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( NVDIMM_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
@@ -1272,8 +1356,10 @@ errlHndl_t nvdimmGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( NVDIMM_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
@@ -1362,7 +1448,13 @@ void add_to_list( std::list<EEPROM::EepromInfo_t>& i_list,
         }
 
         i_list.push_back(nv_info);
-        TRACFCOMP(g_trac_nvdimm,"--Adding i2cm=%.8X, eng=%d, port=%d, addr=%.2X for %.8X", TARGETING::get_huid(i2cm),nvdimmData.engine,nvdimmData.port, nv_info.devAddr,  TARGETING::get_huid(nv_info.assocTarg));
+        TRACFCOMP(g_trac_nvdimm,"--Adding i2cm=%.8X, eng=%d, port=%d, "
+                                "addr=%.2X for %.8X",
+                                TARGETING::get_huid(i2cm),
+                                nvdimmData.engine,
+                                nvdimmData.port,
+                                nv_info.devAddr,
+                                TARGETING::get_huid(nv_info.assocTarg));
     }
 }
 
@@ -1377,7 +1469,7 @@ bool isNVDIMM( TARGETING::Target * i_target )
 {
     // Not the most elegant way of doing it but the hybrid attributes
     // are at the MCS level. Need to find my way up to MCS and check
-    // if the dimm is hybrid 
+    // if the dimm is hybrid
 
     TARGETING::TargetHandleList l_mcaList;
     getParentAffinityTargets(l_mcaList, i_target, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
@@ -1392,15 +1484,15 @@ bool isNVDIMM( TARGETING::Target * i_target )
             // 2-D array. [MCA][DIMM]
             TARGETING::ATTR_EFF_HYBRID_type l_hybrid;
             TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE_type l_hybrid_type;
-            
+
             if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
                 l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
             {
-                //Using huid to lookup the hybrid attribute for the current dimm 
+                //Using huid to lookup the hybrid attribute for the current dimm
                 const auto l_dimm_huid = TARGETING::get_huid(i_target);
                 const auto l_mca_huid = TARGETING::get_huid(l_mcaList[0]);
 
-                return (l_hybrid[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_IS_HYBRID && 
+                return (l_hybrid[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_IS_HYBRID &&
                         l_hybrid_type[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM);
             }
         }

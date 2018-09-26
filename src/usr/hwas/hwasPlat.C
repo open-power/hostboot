@@ -479,12 +479,13 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 #endif
         }
 
+        // Cache the attribute type
+        auto l_attrType = pTarget->getAttr<ATTR_TYPE>();
         // if CLASS_SP
         // Hostboot is told everything it needs to know about the
         //  SP at compile time so just mark the target as present
         //  by default
-        if ((pTarget->getAttr<ATTR_TYPE>() == TYPE_SP) ||
-            (pTarget->getAttr<ATTR_TYPE>() ==  TYPE_BMC))
+        if ((l_attrType == TYPE_SP) || (l_attrType ==  TYPE_BMC))
         {
             HWAS_DBG("pTarget %.8X - detected present",
                 pTarget->getAttr<ATTR_HUID>());
@@ -518,7 +519,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // trully tied to processor PG.  So remove from list since
         // the DVPD present detect hook has been called
         // TODO RTC 169572 -- Fix correctly by reworking DVPD
-        if (pTarget->getAttr<ATTR_TYPE>() == TYPE_MCS)
+        if (l_attrType == TYPE_MCS)
         {
             // erase this target, and 'increment' to next
             pTarget_it = io_targets.erase(pTarget_it);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,6 +40,23 @@ namespace GPIO
         uint8_t i2cPort;
         uint8_t engine;
         uint8_t i2cDeviceAddr;
+        uint8_t i2cMuxBusSelector;
+        TARGETING::EntityPath i2cMuxPath;
+
+        /**
+         *  @brief Construct a default gpioAddr_t
+         */
+        gpioAddr_t()
+            : i2cMasterPath(),
+              deviceType(INVALID_GPIO),
+              portAddr(0),
+              i2cPort(0),
+              engine(0),
+              i2cDeviceAddr(0),
+              i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
+              i2cMuxPath()
+        {
+        }
     };
 
     /**

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/i2c.H $                                           */
+/* $Source: src/usr/i2c/i2c_common.H $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,8 @@ struct misc_args_t
     uint64_t timeout_count;
     uint64_t offset_length;
     uint8_t* offset_buffer;
+    uint8_t  i2cMuxBusSelector;
+    const    TARGETING::EntityPath* i2cMuxPath;
 
     TARGETING::I2cSwitches switches;
 
@@ -75,7 +77,9 @@ struct misc_args_t
                   polling_interval_ns(0),
                   timeout_count(0),
                   offset_length(0),
-                  offset_buffer(NULL)
+                  offset_buffer(nullptr),
+                  i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
+                  i2cMuxPath(nullptr)
                   {
                       memset(&switches, 0x0, sizeof(switches));
                   };

@@ -27,6 +27,7 @@
  *
  *  @brief Implementation of classes to log FSI FFDC
  */
+#include <string.h>     // strlen
 #include "errlud_i2c.H"
 #include <i2c/i2creasoncodes.H>
 #include <i2c/eepromddreasoncodes.H>
@@ -50,7 +51,7 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
 {
     // Set up Ud instance variables
     iv_CompId = I2C_COMP_ID;
-    iv_Version = 1;
+    iv_Version = 2;
     iv_SubSection = I2C_UDT_PARAMETERS;
 
     //***** Memory Layout *****
@@ -69,7 +70,11 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     // 2 bytes  : Bit Rate Divisor
     // 8 bytes  : Timeout Interval
     // 8 bytes  : Timeout Count;
+    // 1 byte   : I2C MUX Bus Selector
+    // N bytes  : I2C MUX path in string form
 
+    // Cache the MUX path in string form for reference and easy access
+    char *l_muxPath = i_args.i2cMuxPath->toString();
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)*2
@@ -80,7 +85,9 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
                                         +sizeof(uint8_t)*3
                                         +sizeof(uint64_t)
                                         +sizeof(uint16_t)
-                                        +sizeof(uint64_t)*2 ) );
+                                        +sizeof(uint64_t)*2
+                                        +sizeof(uint8_t)
+                                        +(strlen(l_muxPath) +1) ) );
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
     uint16_t tmp16 = 0;
@@ -157,6 +164,18 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
+    // Begin Version 2 Data
+    tmp8 = i_args.i2cMuxBusSelector;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
+    l_pBuf += strlen(l_muxPath);
+    l_pBuf = '\0';   // add a terminator for ease of parsing
+    ++l_pBuf;
+
+    free(l_muxPath);
+    l_muxPath = nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -181,7 +200,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
 {
     // Set up Ud instance variables
     iv_CompId = EEPROM_COMP_ID;
-    iv_Version = 2;
+    iv_Version = 3;
     iv_SubSection = EEPROM_UDT_PARAMETERS;
 
     //***** Memory Layout *****
@@ -199,13 +218,20 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     // 8 bytes  : Device Size (in KB)
     // 8 bytes  : Chip Count
     // 8 bytes  : Write Cycle Time
+    // 1 byte   : I2C MUX Bus Selector
+    // N bytes  : I2C MUX path in string form
+
+    // Cache the MUX path in string form for reference and easy access
+    char *l_muxPath = i_i2cInfo.i2cMuxPath.toString();
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)*2
                                         +sizeof(uint32_t)
                                         +sizeof(uint64_t)*6
                                         +sizeof(uint8_t)
-                                        +sizeof(uint64_t)*4 ));
+                                        +sizeof(uint64_t)*4
+                                        +sizeof(uint8_t)
+                                        +(strlen(l_muxPath) +1) ) );
 
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
@@ -278,6 +304,18 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
+    // Begin Version 3 Data
+    tmp8 = i_i2cInfo.i2cMuxBusSelector;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
+    l_pBuf += strlen(l_muxPath);
+    l_pBuf = '\0';   // add a terminator for ease of parsing
+    ++l_pBuf;
+
+    free(l_muxPath);
+    l_muxPath = nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -301,7 +339,7 @@ UdNvdimmParms::UdNvdimmParms( uint8_t i_opType,
 {
     // Set up Ud instance variables
     iv_CompId = NVDIMM_COMP_ID;
-    iv_Version = 2;
+    iv_Version = 3;
     iv_SubSection = NVDIMM_UDT_PARAMETERS;
 
     //***** Memory Layout *****
@@ -318,13 +356,20 @@ UdNvdimmParms::UdNvdimmParms( uint8_t i_opType,
     // 8 bytes  : Device Size (in KB)
     // 8 bytes  : Chip Count
     // 8 bytes  : Write Cycle Time
+    // 1 byte   : I2C MUX Bus Selector
+    // N bytes  : I2C MUX path in string form
+
+    // Cache the MUX path in string form for reference and easy access
+    char *l_muxPath = i_i2cInfo.i2cMuxPath.toString();
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)*2
                                         +sizeof(uint32_t)
-                                        +sizeof(uint64_t)*6
+                                        +sizeof(uint64_t)*5
                                         +sizeof(uint8_t)
-                                        +sizeof(uint64_t)*3 ));
+                                        +sizeof(uint64_t)*4
+                                        +sizeof(uint8_t)
+                                        +(strlen(l_muxPath) +1) ) );
 
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
@@ -393,6 +438,18 @@ UdNvdimmParms::UdNvdimmParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
+    // Begin Version 3 Data
+    tmp8 = i_i2cInfo.i2cMuxBusSelector;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
+    l_pBuf += strlen(l_muxPath);
+    l_pBuf = '\0';   // add a terminator for ease of parsing
+    ++l_pBuf;
+
+    free(l_muxPath);
+    l_muxPath = nullptr;
 }
 
 //------------------------------------------------------------------------------

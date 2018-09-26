@@ -189,9 +189,9 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromPerformOp(): Device Overflow! "
-                       "C-p/e/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X "
-                       "devSizeKB=0x%X", i2cInfo.chip, i2cInfo.port,
-                       i2cInfo.engine, i2cInfo.devAddr, i2cInfo.offset,
+                       "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X "
+                       "devSizeKB=0x%X", i2cInfo.chip, i2cInfo.engine,
+                       i2cInfo.port, i2cInfo.devAddr, i2cInfo.offset,
                        io_buflen, i2cInfo.devSize_KB);
 
 
@@ -236,11 +236,20 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 
         TRACFCOMP( g_trac_eeprom,
                    "eepromPerformOp():  i_opType=%d "
-                   "C-p/e/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, "
+                   "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, "
                    "snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X", i_opType,
-                   i2cInfo.chip, i2cInfo.port, i2cInfo.engine, i2cInfo.devAddr,
+                   i2cInfo.chip, i2cInfo.engine, i2cInfo.port, i2cInfo.devAddr,
                    i2cInfo.offset, io_buflen, l_snglChipSize,
                    i2cInfo.chipCount, i2cInfo.devSize_KB);
+
+        // Printing mux info separately, if combined, nothing is displayed
+        char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+        TRACFCOMP(g_trac_eeprom, "eepromPerformOp(): "
+                  "muxSelector=0x%X, muxPath=%s",
+                  i2cInfo.i2cMuxBusSelector,
+                  l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
 
 #ifdef __HOSTBOOT_RUNTIME
         // Disable Sensor Cache if the I2C master target is MEMBUF
@@ -766,17 +775,19 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
             // Only write the byte address if we have data to write
             if( 0 != i_byteAddressSize )
             {
-                // Use the I2C OFFSET Interface for the READ
+                // Use the I2C MUX OFFSET Interface for the READ
                 l_err = deviceOp( DeviceFW::READ,
-                                i_target,
-                                o_buffer,
-                                i_buflen,
-                                DEVICE_I2C_ADDRESS_OFFSET(
-                                       i_i2cInfo.port,
-                                       i_i2cInfo.engine,
-                                       i_i2cInfo.devAddr,
-                                       i_byteAddressSize,
-                                       reinterpret_cast<uint8_t*>(i_byteAddress)));
+                                  i_target,
+                                  o_buffer,
+                                  i_buflen,
+                                  DEVICE_I2C_ADDRESS_OFFSET(
+                                  i_i2cInfo.port,
+                                  i_i2cInfo.engine,
+                                  i_i2cInfo.devAddr,
+                                  i_byteAddressSize,
+                                  reinterpret_cast<uint8_t*>(i_byteAddress),
+                                  i_i2cInfo.i2cMuxBusSelector,
+                                  &(i_i2cInfo.i2cMuxPath)));
 
                 if( l_err )
                 {
@@ -798,9 +809,12 @@ errlHndl_t eepromReadData( TARGETING::Target * i_target,
                                 i_target,
                                 o_buffer,
                                 i_buflen,
-                                DEVICE_I2C_ADDRESS( i_i2cInfo.port,
-                                                    i_i2cInfo.engine,
-                                                    i_i2cInfo.devAddr ) );
+                                DEVICE_I2C_ADDRESS(
+                                             i_i2cInfo.port,
+                                             i_i2cInfo.engine,
+                                             i_i2cInfo.devAddr,
+                                             i_i2cInfo.i2cMuxBusSelector,
+                                             &(i_i2cInfo.i2cMuxPath) ) );
 
                 if( l_err )
                 {
@@ -1244,8 +1258,9 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                                             i_i2cInfo.devAddr,
                                             i_byteAddressSize,
                                             reinterpret_cast<uint8_t*>(
-                                            i_byteAddress)));
-
+                                            i_byteAddress),
+                                            i_i2cInfo.i2cMuxBusSelector,
+                                            &(i_i2cInfo.i2cMuxPath) ) );
 
              if ( err == NULL )
              {
@@ -1277,6 +1292,15 @@ errlHndl_t eepromWriteData( TARGETING::Target * i_target,
                            i_i2cInfo.devAddr, i_dataLen,
                            i_i2cInfo.offset, i_i2cInfo.addrSize,
                            i_i2cInfo.writePageSize);
+
+                 // Printing mux info separately, if combined, nothing is displayed
+                 char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+                 TRACFCOMP(g_trac_eeprom, ERR_MRK"eepromWriteData():"
+                           "muxSelector=0x%X, muxPath=%s",
+                           i_i2cInfo.i2cMuxBusSelector,
+                           l_muxPath);
+                 free(l_muxPath);
+                 l_muxPath = nullptr;
 
                  // If op will be attempted again: save error and continue
                  if ( retry < EEPROM_MAX_RETRIES )
@@ -1609,6 +1633,8 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.devSize_KB     = eepromData.maxMemorySizeKB;
         o_i2cInfo.chipCount      = eepromData.chipCount;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
+        o_i2cInfo.i2cMuxBusSelector = eepromData.i2cMuxBusSelector;
+        o_i2cInfo.i2cMuxPath     = eepromData.i2cMuxPath;
 
         // Convert attribute info to eeprom_addr_size_t enum
         if ( eepromData.byteAddrOffset == 0x3 )
@@ -1667,6 +1693,14 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
               o_i2cInfo.chipCount, o_i2cInfo.addrSize,
               eepromData.byteAddrOffset, o_i2cInfo.writeCycleTime);
 
+    // Printing mux info separately, if combined, nothing is displayed
+    char* l_muxPath = o_i2cInfo.i2cMuxPath.toString();
+    TRACFCOMP(g_trac_eeprom, "eepromReadAttributes(): "
+              "muxSelector=0x%X, muxPath=%s",
+              o_i2cInfo.i2cMuxBusSelector,
+              l_muxPath);
+    free(l_muxPath);
+    l_muxPath = nullptr;
 
     TRACDCOMP( g_trac_eeprom,
                EXIT_MRK"eepromReadAttributes()" );
@@ -1746,8 +1780,10 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( EEPROM_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
@@ -1799,8 +1835,10 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
 
             err->collectTrace( EEPROM_COMP_NAME );
 
-            ERRORLOG::ErrlUserDetailsString(
-                i_i2cInfo.i2cMasterPath.toString()).addToLog(err);
+            char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_masterPath).addToLog(err);
+            free(l_masterPath);
+            l_masterPath = nullptr;
 
             break;
         }
