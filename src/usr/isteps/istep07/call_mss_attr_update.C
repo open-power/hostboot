@@ -70,6 +70,8 @@
 //HRMOR
 #include <sys/misc.h>
 
+#include <isteps/mem_utils.H>
+
 namespace   ISTEP_07
 {
 

@@ -156,30 +156,6 @@ bool is_sapphire_load(void);
 bool is_avp_load(void);
 
 /**
- * @brief Utility function to obtain the highest known address in the system
- */
-uint64_t get_top_mem_addr();
-
-/**
- * @brief Utility function to obtain the highest known address in a given proc
- *
- * @param[in] i_proc: Proc that we want to calculate the top address for
- */
-uint64_t get_top_mem_addr(Target* i_proc);
-
-/**
- * @brief Utility function to obtain the lowest known address in the system
- */
-uint64_t get_bottom_mem_addr();
-
-/**
- * @brief Utility function to obtain the lowest known address in a given proc
- *
- * @param[in] i_proc: Proc that we want to calculate the bottom address for
- */
-uint64_t get_bottom_mem_addr(Target* i_proc);
-
-/**
  * Order two processor targets by NODE_ID then CHIP_ID.
  * @param[in] First processor target
  * @param[in] Second processor target
@@ -196,6 +172,6 @@ bool orderByNodeAndPosition(  Target* i_firstProc,
  */
 uint8_t  is_fused_mode( );
 
-}
+} // TARGETING
 
 #endif // __TARGETING_COMMON_UTIL_H

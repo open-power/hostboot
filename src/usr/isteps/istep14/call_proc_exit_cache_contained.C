@@ -58,6 +58,8 @@
 #include <scom/centaurScomCache.H>
 #endif
 
+#include <isteps/mem_utils.H>
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;

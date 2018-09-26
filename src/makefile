@@ -213,6 +213,7 @@ EXTENDED_MODULES += node_comm
 EXTENDED_MODULES += $(if $(CONFIG_NVDIMM),nvdimm)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += mmio
+EXTENDED_MODULES += smf
 
 #***************************************
 # Working test modules

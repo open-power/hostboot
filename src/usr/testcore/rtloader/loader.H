@@ -48,6 +48,7 @@
 #include <util/utilrsvdmem.H>
 #include <sys/misc.h>
 #include <errno.h>
+#include <isteps/mem_utils.H>
 
 
 trace_desc_t* g_trac_hbrt = NULL;
@@ -656,7 +657,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 }
             }
 
-            cv_comm_phys_addr = TARGETING::get_top_mem_addr();
+            cv_comm_phys_addr = ISTEP::get_top_mem_addr();
 
             assert (cv_comm_phys_addr != 0,
                     "rt_get_comm: Top of memory was 0!");
