@@ -80,6 +80,7 @@
 #include <errno.h>
 #include <vmmconst.h>
 #include <runtime/customize_attrs_for_payload.H>
+#include <isteps/mem_utils.H>
 namespace RUNTIME
 {
 
@@ -1171,7 +1172,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             // "supported offset values are all values of the
             // form i x 2 exp `r`, where 0 <= i <= 2 exp `j`, and j and r are
             // implementation-dependent values having the properties that
-            // 12 <= r <= 26". (Texted quoted from PowerISA Doc) 
+            // 12 <= r <= 26". (Texted quoted from PowerISA Doc)
             // Basis the above, value of r is 26, which sets the offset
             // granularity to 64MB, therefore value of i is '2', which makes the
             // offset to 128MB.
@@ -1201,7 +1202,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
             }
             // Opal data goes at top_of_mem
-            l_topMemAddr = TARGETING::get_top_mem_addr();
+            l_topMemAddr = ISTEP::get_top_mem_addr();
             assert (l_topMemAddr != 0,
                     "populate_HbRsvMem: Top of memory was 0!");
 

@@ -69,6 +69,9 @@
 #include    <p9_xip_section_append.H>
 #include    <p9n2_quad_scom_addresses_fld.H>
 
+#include    <secureboot/smf_utils.H>
+#include    <isteps/mem_utils.H>
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -173,60 +176,16 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR);
     uint64_t    l_lpcrVal   =   cpu_spr_value(CPU_SPR_LPCR);
 
-    uint8_t l_smfEnabled = 0;
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_ENABLED,
-                           FAPI_SYSTEM,
-                           l_smfEnabled));
-
-    if(l_smfEnabled)
+    if(SECUREBOOT::SMF::isSmfEnabled())
     {
-        uint8_t l_riskLevel = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL,
-                               FAPI_SYSTEM,
-                               l_riskLevel));
-        TARGETING::Target* l_pMasterProc = nullptr;
-        l_errl = TARGETING::targetService()
-                                .queryMasterProcChipTargetHandle(l_pMasterProc);
+        l_errl = SECUREBOOT::SMF::checkRiskLevelForSmf();
         if(l_errl)
         {
             break;
         }
 
-        auto l_masterProcModel =l_pMasterProc->getAttr<TARGETING::ATTR_MODEL>();
-
-        // SMF is enabled by default on Axone, so need to check the risk level
-        // only on P9C/P9N.
-        if(l_riskLevel < 4 &&
-          ((l_masterProcModel == TARGETING::MODEL_CUMULUS) ||
-           (l_masterProcModel == TARGETING::MODEL_NIMBUS)))
-        {
-            /*@
-            * @errortype
-            * @reasoncode  ISTEP::RC_RISK_LEVEL_TOO_LOW
-            * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid    ISTEP::MOD_APPLY_HCODE_GEN_CPU_REGS
-            * @userdata1   Current risk level of the system
-            * @devdesc     SMF is enabled on the system of incorrect risk level
-            * @custdesc    A problem occurred during the IPL of the system.
-            */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           ISTEP::MOD_APPLY_HCODE_GEN_CPU_REGS,
-                                           ISTEP::RC_RISK_LEVEL_TOO_LOW,
-                                           l_riskLevel,
-                                           0,
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            break;
-        }
-
         // Set the secure bit (41) on if SMF is enabled
         l_msrVal |= MSR_SMF_MASK;
-    }
-
-    if(l_errl)
-    {
-fapi_try_exit:
-        break;
     }
 
     // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
@@ -482,7 +441,7 @@ void* host_build_stop_image (void *io_pArgs)
         //If running Sapphire need to place this at the top of memory instead
         if(is_sapphire_load())
         {
-            l_memBase = get_top_mem_addr();
+            l_memBase = get_top_homer_mem_addr();
             assert (l_memBase != 0,
                     "host_build_stop_image: Top of memory was 0!");
             l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;

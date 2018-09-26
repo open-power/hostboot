@@ -29,5 +29,6 @@ SUBDIRS += ext.d
 SUBDIRS += trusted.d
 SUBDIRS += runtime.d
 SUBDIRS += node_comm.d
+SUBDIRS += smf.d
 
 include ${ROOTPATH}/config.mk

@@ -58,6 +58,20 @@ namespace UTIL
     // is reserved for invalid sensor
     static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
 
+    // WARNING: addition of risk levels that don't support SMF will have a
+    // significant effect on the behavior of SMF code. Please ensure that
+    // (at least) src/usr/secureboot/smf/smf_utils.C is updated
+    // accordingly!
+    typedef enum
+    {
+        P9N22_P9C12_RUGBY_FAVOR_SECURITY               = 0x00,
+        P9N22_P9C12_RUGBY_FAVOR_PERFORMANCE            = 0x01,
+        P9N22_NO_RUGBY_MITIGATIONS                     = 0x02,
+        P9N22_P9N23_JAVA_PERF                          = 0x03,
+        P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY    = 0x04,
+        P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_PERFORMANCE = 0x05,
+    } Risk_level;
+
 /**
  *  @brief Creates a standard error log of tracing type
  *
