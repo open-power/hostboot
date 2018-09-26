@@ -539,6 +539,15 @@
   </targetType>
 
   <targetType>
+    <id>chip-processor-axone</id>
+    <parent>chip-processor-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>chip-processor-cumulus</id>
     <parent>chip-processor-power9</parent>
     <attribute>
@@ -1570,6 +1579,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-capp-axone</id>
+    <parent>unit-capp-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-capp-cumulus</id>
     <parent>unit-capp-power9</parent>
     <attribute>
@@ -2117,6 +2135,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-npu-axone</id>
+    <parent>unit-npu-power9</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>AXONE</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-npu-cumulus</id>
     <parent>unit-npu-power9</parent>
     <attribute>
@@ -2193,6 +2220,24 @@
     <attribute>
       <default>NX</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-obus-axone</id>
+    <parent>unit-obus-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-obus-brick-axone</id>
+    <parent>unit-obus-brick-power9</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>AXONE</default>
     </attribute>
   </targetType>
 
@@ -2333,6 +2378,15 @@
     <attribute>
       <id>TYPE</id>
       <default>SMPGROUP</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-occ-axone</id>
+    <parent>unit-occ-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
     </attribute>
   </targetType>
 
@@ -2538,6 +2592,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-perv-axone</id>
+    <parent>unit-perv-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-perv-cumulus</id>
     <parent>unit-perv-power9</parent>
     <attribute>
@@ -2572,6 +2635,15 @@
     <attribute>
       <default>PERV</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-phb-axone</id>
+    <parent>unit-phb-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
     </attribute>
   </targetType>
 
@@ -2627,6 +2699,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-ppe-axone</id>
+    <parent>unit-ppe-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-ppe-cumulus</id>
     <parent>unit-ppe-power9</parent>
     <attribute>
@@ -2662,6 +2743,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-sbe-axone</id>
+    <parent>unit-sbe-power9</parent>
+    <attribute>
+      <default>AXONE</default>
+      <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-sbe-cumulus</id>
     <parent>unit-sbe-power9</parent>
     <attribute>
@@ -2692,6 +2782,15 @@
     <attribute>
       <default>SBE</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-xbus-axone</id>
+    <parent>unit-xbus-power9</parent>
+    <attribute>
+      <default>CUMULUS</default>
+      <id>MODEL</id>
     </attribute>
   </targetType>
 
