@@ -139,10 +139,9 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
         uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] +
                                     l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1]);
-        uint64_t l_def_NUM_RANKS_DENOMINATOR = ((l_def_NUM_RANKS == literal_0x0) | l_def_NUM_RANKS);
         fapi2::ATTR_MEM_EFF_DRAM_TREFI_Type l_TGT1_ATTR_MEM_EFF_DRAM_TREFI;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TREFI, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TREFI));
-        uint64_t l_def_REFRESH_INTERVAL = (l_TGT1_ATTR_MEM_EFF_DRAM_TREFI / (literal_8 * l_def_NUM_RANKS_DENOMINATOR));
+        uint64_t l_def_REFRESH_INTERVAL = (l_TGT1_ATTR_MEM_EFF_DRAM_TREFI / (literal_8 * l_def_NUM_RANKS));
         fapi2::ATTR_MEM_EFF_DRAM_TRFC_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRFC;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC));
         fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR;
