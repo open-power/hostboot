@@ -144,7 +144,13 @@ void* call_host_set_voltages(void *io_pArgs)
             fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_F_T, l_stepError,
                                       HWPF_COMP_ID, TYPE_PROC)                  &&
             fapiHWPCallWrapperHandler(P9_SYS_CHIPLET_SCOMINIT, l_stepError,
-                                           HWPF_COMP_ID, TYPE_PROC);
+                                      HWPF_COMP_ID, TYPE_PROC)                  &&
+            // Make call to p9_io_obus_image_build
+            fapiHWPCallWrapperHandler(P9_IO_OBUS_IMAGE_BUILD, l_stepError,
+                                      HWPF_COMP_ID, TYPE_OBUS)                  &&
+            // Make call to p9_io_xbus_image_build
+            fapiHWPCallWrapperHandler(P9_IO_XBUS_IMAGE_BUILD, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC);
         }
     }while( 0 );
 
