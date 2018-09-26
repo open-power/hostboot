@@ -25,6 +25,8 @@
 #ifndef __TPMDDIF_H
 #define __TPMDDIF_H
 
+#include "usr/devicefw/driverif.H"  // I2C_MUX::NOT_APPLICABLE
+
 namespace TPMDD
 {
 
@@ -79,6 +81,9 @@ struct tpm_info_t
     size_t  offset;             ///< TPM Device register offset
     tpm_addr_size_t addrSize;   ///< I2C Addr size
 
+    uint8_t i2cMuxBusSelector;  ///< The Selector for the I2C MUX
+    TARGETING::EntityPath i2cMuxPath;  ///< I2C MUX path
+
     /**
      *  @brief Construct a default tpm_info_t
      */
@@ -93,7 +98,9 @@ struct tpm_info_t
           tpmEnabled(false),
           devAddr(0),
           offset(0),
-          addrSize(LAST_DEVICE_TYPE)
+          addrSize(LAST_DEVICE_TYPE),
+          i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
+          i2cMuxPath()
     {
     }
 };

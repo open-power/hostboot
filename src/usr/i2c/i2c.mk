@@ -25,4 +25,5 @@
 # common objects with runtime
 OBJS += eepromdd.o
 OBJS += errlud_i2c.o
+OBJS += mux_i2c.o
 OBJS += $(if $(CONFIG_NVDIMM),nvdimmdd.o,)

@@ -64,6 +64,7 @@ enum i2cModuleId
     I2C_CHOOSE_EEPROM_PAGE              = 0x0E,
     FAPI_I2C_PERFORM_OP                 = 0x0F,
     READ_I2C_ATTRIBUTES                 = 0x10,
+    I2C_ACCESS_MUX                      = 0x11,
 };
 
 
@@ -95,6 +96,8 @@ enum i2cReasonCode
     I2C_INVALID_EEPROM_PAGE_REQUEST      = I2C_COMP_ID | 0x11,   // Invalid EEPROM page request
     I2C_FAILURE_UNLOCKING_EEPROM_PAGE    = I2C_COMP_ID | 0x12,   // Error while attempting to unlock the eeprom page
     INVALID_MASTER_TARGET                = I2C_COMP_ID | 0x13,   // Master I2C target not valid
+    I2C_MUX_TARGET_NOT_FOUND             = I2C_COMP_ID | 0x14,   // The MUX target is not valid (null)
+    I2C_MUX_TARGET_NON_FUNCTIONAL        = I2C_COMP_ID | 0x15,   // The MUX target is non functional
 };
 
 

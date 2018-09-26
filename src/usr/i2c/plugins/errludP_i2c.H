@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,8 @@ public:
         // 2 bytes  : Bit Rate Divisor
         // 8 bytes  : Polling Interval in ns
         // 8 bytes  : Timeout Count;
+        // 1 byte   : I2C MUX Bus Selector
+        // N bytes  : I2C MUX path in string form
 
         uint8_t op = TO_UINT8(l_databuf);
         l_databuf += sizeof(uint8_t);
@@ -145,6 +147,15 @@ public:
         i_parser.PrintNumber("Timeout Count","%.16lX",TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);
 
+        if (i_version >= 2 )
+        {
+            i_parser.PrintNumber("I2C Mux Selector","%.2lX",TO_UINT8(l_databuf));
+            l_databuf += sizeof(uint8_t);
+            i_parser.PrintString("I2C Mux Path", l_databuf);
+            // Increment past the NULL terminated string + 1 (null terminator)
+            l_databuf += strlen(l_databuf) + 1;
+
+        }
     }
 
 private:
@@ -207,6 +218,8 @@ public:
         // 8 bytes  : Device Size (in KB)
         // 8 bytes  : Chip Count
         // 8 bytes  : Write Cycle Time
+        // 1 byte   : I2C MUX Bus Selector
+        // N bytes  : I2C MUX path in string form
 
         uint8_t op = TO_UINT8(l_databuf);
         l_databuf += sizeof(uint8_t);
@@ -256,6 +269,14 @@ public:
         i_parser.PrintNumber("Write Cycle Time","%.16lX",TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);
 
+        if (i_version >= 3 )
+        {
+            i_parser.PrintNumber("I2C Mux Selector","%.2lX",TO_UINT8(l_databuf));
+            l_databuf += sizeof(uint8_t);
+            i_parser.PrintString("I2C Mux Path", l_databuf);
+            // Increment past the NULL terminated string + 1 (null terminator)
+            l_databuf += (strlen(l_databuf) + 1);
+        }
     }
 
 private:

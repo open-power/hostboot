@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -300,7 +300,9 @@ class I2CTest: public CxxTest::TestSuite
                                     testData[i].size,
                                     DEVICE_I2C_ADDRESS( testData[i].port,
                                                         testData[i].engine,
-                                                        testData[i].devAddr ) );
+                                                        testData[i].devAddr,
+                                                        0xFF,
+                                                        nullptr) );
 
                     if( err )
                     {
@@ -529,7 +531,9 @@ class I2CTest: public CxxTest::TestSuite
                                                     testData[i].devAddr,
                                                     sizeof(testData[i].offset),
                                                     reinterpret_cast<uint8_t*>(
-                                                    &(testData[i].offset))));
+                                                    &(testData[i].offset)),
+                                                    0xFF,
+                                                    nullptr));
 
                         if( err )
                         {
@@ -840,7 +844,9 @@ class I2CTest: public CxxTest::TestSuite
                             size,
                             DEVICE_I2C_ADDRESS( 0x0,
                                                 0x0,
-                                                0x50 ) );
+                                                0x50,
+                                                0xFF,
+                                                nullptr) );
 
             if( !err )
             {
@@ -902,7 +908,9 @@ class I2CTest: public CxxTest::TestSuite
                                 dataSize,
                                 DEVICE_I2C_ADDRESS( 0x0,
                                                     0x0,
-                                                    0x50 ) );
+                                                    0x50,
+                                                    0xFF,
+                                                    nullptr) );
 
                 if( NULL == err )
                 {
@@ -979,7 +987,9 @@ class I2CTest: public CxxTest::TestSuite
                                     data_size,
                                     DEVICE_I2C_ADDRESS( 0,
                                                         0,
-                                                        0xAC ) );
+                                                        0xAC,
+                                                        0xFF,
+                                                        nullptr) );
 
                 }
 

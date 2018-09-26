@@ -57,7 +57,7 @@ typedef enum
  * @brief Structure of common parameters needed by different parts of
  *      the code.
  */
-typedef struct
+struct eeprom_addr_t
 {
     uint64_t port;
     uint64_t engine;
@@ -70,7 +70,29 @@ typedef struct
     uint64_t devSize_KB;     // in kilobytes
     uint64_t chipCount;      // number of chips making up eeprom device
     uint64_t writeCycleTime;  // in milliseconds
-} eeprom_addr_t;
+    uint8_t i2cMuxBusSelector;
+    TARGETING::EntityPath i2cMuxPath;
+
+    /**
+     *  @brief Construct a default eeprom_addr_t
+     */
+    eeprom_addr_t()
+        : port(0),
+          engine(0),
+          devAddr(0),
+          chip(0),
+          offset(0),
+          addrSize(LAST_DEVICE_TYPE),
+          i2cMasterPath(),
+          writePageSize(0),
+          devSize_KB(0),
+          chipCount(0),
+          writeCycleTime(0),
+          i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
+          i2cMuxPath()
+    {
+    }
+};
 
 /**
 *

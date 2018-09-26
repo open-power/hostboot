@@ -41,6 +41,14 @@
 
 #endif // not PARSER
 
+namespace I2C_MUX
+{
+    enum SELECTOR: uint8_t
+    {
+        NOT_APPLICABLE = 0xFF,
+    };
+}
+
 namespace DeviceFW
 {
     /** @enum AccessType_DriverOnly
@@ -57,6 +65,7 @@ namespace DeviceFW
         FSI_I2C,
         SBEFIFOSCOM,
         I2CSCOM,
+        I2C_MUX,
         LAST_DRIVER_ACCESS_TYPE
     };
 
@@ -119,22 +128,29 @@ namespace DeviceFW
     /**
      * @brief Macro that handles the I2C parameters
      */
-    #define DEVICE_I2C_PARMS(port, engine, devAddr, offset_len, offset)\
+    #define DEVICE_I2C_PARMS(port, engine, devAddr, offset_len,\
+                             offset, muxSelector, i_i2cMuxPath)\
         static_cast<uint64_t>( port ),\
         static_cast<uint64_t>( engine ),\
         static_cast<uint64_t>( devAddr ),\
         static_cast<uint64_t>( offset_len ),\
-        static_cast<uint8_t*>( offset )
+        static_cast<uint8_t*>( offset ),\
+        static_cast<uint64_t>( muxSelector), \
+        static_cast<const TARGETING::EntityPath*>(i_i2cMuxPath)
 
     /**
      * Construct the device addressing parameters for the I2C device ops.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
-     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
+     * @param[in] i_i2cMuxBusSelector - The I2C MUX bus selector
+     * @param[in] i_i2cMuxPath - The I2C MUX entity path
+     * @note '0' and 'nullptr' added to line up with other DeviceFW::I2C
      */
-    #define DEVICE_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
-        DeviceFW::I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
+    #define DEVICE_I2C_ADDRESS( i_port, i_engine, i_devAddr, \
+                                i_i2cMuxBusSelector, i_i2cMuxPath )\
+        DeviceFW::I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
+                                0, nullptr, i_i2cMuxBusSelector, i_i2cMuxPath)
 
     /**
      * Construct the device addressing parameters for the I2C-offset device ops.
@@ -143,10 +159,13 @@ namespace DeviceFW
      * @param[in] i_devAddr - The device address on a given engine/port.
      * @param[in] i_offset_len - Length of offset (in bytes)
      * @param[in] i_offset - Offset into I2C device
+     * @param[in] i_i2cMuxBusSelector - The I2C MUX bus selector
+     * @param[in] i_i2cMuxPath - The I2C MUX entity path
      */
-    #define DEVICE_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
-        DeviceFW::I2C,  DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
-
+    #define DEVICE_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr,\
+                    i_offset_len, i_offset, i_i2cMuxBusSelector, i_i2cMuxPath)\
+        DeviceFW::I2C,  DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
+                    i_offset_len, i_offset, i_i2cMuxBusSelector, i_i2cMuxPath)
 
     /**
      * Construct the device addressing parameters for locking the page
@@ -162,7 +181,8 @@ namespace DeviceFW
      *             want to lock the page mutex or not. This bool allows
      *             us to switch pages mid read without hitting a deadlock.
      */
-#define DEVICE_I2C_CONTROL_PAGE_OP( i_port, i_engine, i_shouldLock, i_desired_page, i_lockMutex )\
+#define DEVICE_I2C_CONTROL_PAGE_OP( i_port, i_engine, i_shouldLock,\
+                                    i_desired_page, i_lockMutex )\
             DeviceFW::I2C,\
             static_cast<uint64_t>(i_port),\
             static_cast<uint64_t>(i_engine),\
@@ -177,42 +197,50 @@ namespace DeviceFW
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
-     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
+     * @note '0' and 'nullptr' added to line up with other DeviceFW::I2C
      */
     #define DEVICE_HOSTI2C_ADDRESS( i_port, i_engine, i_devAddr )\
-        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
+        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
+                                            0, nullptr)
 
     /**
-     * Construct the device addressing parameters for the Host I2C-offset device ops.
+     * Construct the device addressing parameters for the Host I2C-offset
+     * device ops.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
      * @param[in] i_offset_len - Length of offset (in bytes)
      * @param[in] i_offset - Offset into I2C device
      */
-    #define DEVICE_HOSTI2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
-        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+    #define DEVICE_HOSTI2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr,\
+                                           i_offset_len, i_offset)\
+        DeviceFW::HOSTI2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
+                                            i_offset_len, i_offset)
 
     /**
      * Construct the device addressing parameters for the FSI I2C device ops.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
-     * @note '0' and 'NULL' added to line up with other DeviceFW::I2C
+     * @note '0' and 'nullptr' added to line up with other DeviceFW::I2C
      */
     #define DEVICE_FSI_I2C_ADDRESS( i_port, i_engine, i_devAddr )\
-        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, 0, NULL)
+        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine,\
+                                            i_devAddr, 0, nullptr)
 
     /**
-     * Construct the device addressing parameters for the FSI I2C-offset device ops.
+     * Construct the device addressing parameters for the FSI I2C-offset
+     * device ops.
      * @param[in] i_port - Which port to use from the I2C master.
      * @param[in] i_engine - Which I2C master engine to use.
      * @param[in] i_devAddr - The device address on a given engine/port.
      * @param[in] i_offset_len - Length of offset (in bytes)
      * @param[in] i_offset - Offset into I2C device
      */
-    #define DEVICE_FSI_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
-        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+    #define DEVICE_FSI_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr,\
+                                           i_offset_len, i_offset)\
+        DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
+                                            i_offset_len, i_offset)
 
     /** Construct the device addressing parameters for the SBE FIFO Scom
      *  device ops.

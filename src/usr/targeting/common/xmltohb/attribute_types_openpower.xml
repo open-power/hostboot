@@ -333,6 +333,24 @@
         <type>uint8_t</type>
         <default>0</default>
       </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>

@@ -56,7 +56,7 @@ typedef enum
  * @brief Structure of common parameters needed by different parts of
  *      the code.
  */
-typedef struct
+struct nvdimm_addr_t
 {
     uint64_t port;
     uint64_t engine;
@@ -68,7 +68,28 @@ typedef struct
     uint64_t devSize_KB;     // in kilobytes
     uint64_t chipCount;      // number of chips making up nvdimm device
     uint64_t writeCycleTime;  // in milliseconds
-} nvdimm_addr_t;
+    uint8_t  i2cMuxBusSelector;
+    TARGETING::EntityPath i2cMuxPath;
+
+    /**
+     *  @brief Construct a default nvdimm_addr_t
+     */
+    nvdimm_addr_t()
+        : port(0),
+          engine(0),
+          devAddr(0),
+          offset(0),
+          addrSize(LAST_DEVICE_TYPE),
+          i2cMasterPath(),
+          writePageSize(0),
+          devSize_KB(0),
+          chipCount(0),
+          writeCycleTime(0),
+          i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
+          i2cMuxPath()
+    {
+    }
+};
 
 /*
  * @brief Miscellaneous enums for NVDIMM
@@ -102,7 +123,7 @@ enum
 *       usrif.H
 *
 * @param [in] i_args - This is an argument list for the device driver
-*       framework.  This argument list consists of the internal offset 
+*       framework.  This argument list consists of the internal offset
 *       to use on the slave I2C device.
 *
 * @return errlHndl_t - NULL if successful, otherwise a pointer to the
@@ -119,9 +140,9 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
 /*
  * @brief On the NV Controller, the page is selected by writing to offset
  *        0x00 with the page you would like to switch too. e.g. to activate
- *        page 1, write 0x01 to offset 0x00. The user will need to select 
+ *        page 1, write 0x01 to offset 0x00. The user will need to select
  *        the page as appropriate.
- *        Each page contains 256 offsets (0xFF). This function checks if 
+ *        Each page contains 256 offsets (0xFF). This function checks if
  *        the offset is outside of 0xFF boundary.
  *
  * @param[in] i_offset - The requested read/write offset to the NVDIMM.

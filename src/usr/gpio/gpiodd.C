@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <devicefw/driverif.H>
 #include "gpiodd.H"
 #include <gpio/gpioddreasoncodes.H>
-
 
 trace_desc_t * g_trac_gpio = NULL;
 TRAC_INIT( & g_trac_gpio, GPIO_COMP_NAME, KILOBYTE );
@@ -187,7 +186,9 @@ errlHndl_t gpioRead( TARGETING::Target * i_target,
                       i_gpioInfo.engine,
                       i_gpioInfo.i2cDeviceAddr,
                       GPIO_ADDR_SIZE,
-                      reinterpret_cast<uint8_t*>(&(i_gpioInfo.portAddr))
+                      reinterpret_cast<uint8_t*>(&(i_gpioInfo.portAddr)),
+                      i_gpioInfo.i2cMuxBusSelector,
+                      &(i_gpioInfo.i2cMuxPath)
                     )
                   );
     if(err)
@@ -217,7 +218,9 @@ errlHndl_t gpioWrite ( TARGETING::Target * i_target,
                     DEVICE_I2C_ADDRESS
                     ( i_gpioInfo.i2cPort,
                       i_gpioInfo.engine,
-                      i_gpioInfo.i2cDeviceAddr
+                      i_gpioInfo.i2cDeviceAddr,
+                      i_gpioInfo.i2cMuxBusSelector,
+                      &(i_gpioInfo.i2cMuxPath)
                     )
                   );
     if(err)
@@ -312,6 +315,8 @@ errlHndl_t gpioReadAttributes ( TARGETING::Target * i_target,
         io_gpioInfo.engine        = gpioData.engine;
         io_gpioInfo.i2cPort       = gpioData.port;
         io_gpioInfo.i2cDeviceAddr = gpioData.devAddr;
+        io_gpioInfo.i2cMuxBusSelector = gpioData.i2cMuxBusSelector;
+        io_gpioInfo.i2cMuxPath    = gpioData.i2cMuxPath;
     }
 
     return err;

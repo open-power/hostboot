@@ -40,6 +40,8 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludstring.H>  // ERRORLOG::ErrlUserDetailsString
+#include <targeting/common/entitypath.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/predicates/predicates.H>
@@ -56,9 +58,7 @@
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
 #include <i2c/nvdimmif.H>
-
-// TODO RTC 94872 Remove the following include in a future commit
-#include <initservice/initserviceif.H>
+#include <hwas/common/hwas.H>  // HwasState
 
 // ----------------------------------------------
 // Globals
@@ -77,7 +77,6 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
-
 
 // ----------------------------------------------
 // Defines
@@ -125,6 +124,15 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          int64_t i_accessType,
                          va_list i_args )
 {
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cPerformOp() opType(%s), "
+              "i_target(0x%X), io_buffer(%p), io_buflen(%d),  "
+              "i_accessType(%d)",
+              i_opType == DeviceFW::READ ? "READ" : "WRITE",
+              TARGETING::get_huid(i_target),
+              io_buffer,
+              io_buflen,
+              i_accessType);
+
     errlHndl_t err = NULL;
 
     // Get the input args our of the va_list
@@ -137,7 +145,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
-
 
     // Set both Host and FSI switches to 0 so that they get set later by
     // attribute in i2cCommonOp()
@@ -163,7 +170,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                                     l_desiredPage,
                                     l_lockMutex,
                                     args );
-
 
             if( err )
             {
@@ -202,30 +208,34 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                                                I2C_FAILURE_UNLOCKING_EEPROM_PAGE,
                                                TARGETING::get_huid(i_target),
                                                0x0,
-                                               true /*Add HB SW Callout*/ );
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
                 // TODO RTC 148705: Callout downstream DIMMs
                 err->collectTrace(I2C_COMP_NAME, 256 );
             }
         }
 
     }
+    // Else this is not a page operation, call the normal common function
     else
     {
         args.offset_length = va_arg( i_args, uint64_t);
+        uint8_t* temp = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
+        args.i2cMuxBusSelector = va_arg( i_args, uint64_t);
+        args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(va_arg(i_args, uint64_t));
+
         if ( args.offset_length != 0 )
         {
-            args.offset_buffer = reinterpret_cast<uint8_t*>
-                                                 (va_arg(i_args, uint64_t));
-        }
-            // Else, call the normal common function
-            err = i2cCommonOp( i_opType,
-                               i_target,
-                               io_buffer,
-                               io_buflen,
-                               i_accessType,
-                               args );
-    }
+            args.offset_buffer = temp;
 
+        }
+
+        err = i2cCommonOp( i_opType,
+                           i_target,
+                           io_buffer,
+                           io_buflen,
+                           i_accessType,
+                           args );
+    }
 
     TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cPerformOp() - %s",
@@ -257,6 +267,8 @@ errlHndl_t host_i2cPerformOp( DeviceFW::OperationType i_opType,
                               int64_t i_accessType,
                               va_list i_args )
 {
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"host_i2cPerformOp()" );
+
     errlHndl_t err = NULL;
 
     // Get the input args our of the va_list
@@ -271,11 +283,13 @@ errlHndl_t host_i2cPerformOp( DeviceFW::OperationType i_opType,
     // via va_list, as well
 
     args.offset_length = va_arg( i_args, uint64_t);
+    uint8_t* temp = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
+    args.i2cMuxBusSelector = va_arg( i_args, uint64_t);
+    args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(va_arg(i_args, uint64_t));
 
     if ( args.offset_length != 0 )
     {
-        args.offset_buffer = reinterpret_cast<uint8_t*>
-                                             (va_arg(i_args, uint64_t));
+        args.offset_buffer = temp;
     }
 
     // Set Host switch to 1 and FSI switch to 0
@@ -292,7 +306,7 @@ errlHndl_t host_i2cPerformOp( DeviceFW::OperationType i_opType,
                        args );
 
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"host_i2cPerformOp() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
 
@@ -322,6 +336,8 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
                              int64_t i_accessType,
                              va_list i_args )
 {
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"fsi_i2cPerformOp()" );
+
     errlHndl_t err = NULL;
 
     // Get the input args our of the va_list
@@ -336,11 +352,13 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
     // via va_list, as well
 
     args.offset_length = va_arg( i_args, uint64_t);
+    uint8_t* temp = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
+    args.i2cMuxBusSelector = va_arg( i_args, uint64_t);
+    args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(va_arg(i_args, uint64_t));
 
     if ( args.offset_length != 0 )
     {
-        args.offset_buffer = reinterpret_cast<uint8_t*>
-                                             (va_arg(i_args, uint64_t));
+        args.offset_buffer = temp;
     }
 
     // Set FSI switch to 1 and Host switch to 0
@@ -357,7 +375,7 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
                        args );
 
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"fsi_i2cPerformOp() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
 
@@ -460,7 +478,7 @@ errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
                                              I2C_INVALID_EEPROM_PAGE_REQUEST,
                                              TARGETING::get_huid(i_target),
                                              i_desiredPage,
-                                             true );
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             l_err->collectTrace( I2C_COMP_NAME, 256 );
         }
     }
@@ -518,7 +536,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                                            I2C_MASTER_SENTINEL_TARGET,
                                            i_opType,
                                            0x0,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             l_err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -555,7 +573,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                                                  I2C_INVALID_EEPROM_PAGE_MUTEX,
                                                  TARGETING::get_huid(i_target),
                                                  0x0,
-                                                 true /*Add HB SW Callout*/ );
+                                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
                 l_err->collectTrace( I2C_COMP_NAME, 256 );
                 break;
@@ -569,7 +587,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
         if( l_err )
         {
             TRACFCOMP(g_trac_i2c,
-                    "Error in i2cPageSwitchOp::i2cSetBusVariables()");
+                      ERR_MRK"Error in i2cPageSwitchOp::i2cSetBusVariables()");
 
             // Error means we need to unlock the page mutex prematurely
             l_mutex_needs_unlock = true;
@@ -583,7 +601,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                                             (page_array ) ) )
         {
             TRACFCOMP(g_trac_i2c,
-                    "i2cPageSwitchOp() - Cannot find ATTR_EEPROM_PAGE_ARRAY");
+                      "i2cPageSwitchOp() - Cannot find ATTR_EEPROM_PAGE_ARRAY");
             /*@
              * @errortype
              * @reasoncode      I2C_ATTRIBUTE_NOT_FOUND
@@ -599,7 +617,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                                              I2C_ATTRIBUTE_NOT_FOUND,
                                              TARGETING::get_huid(i_target),
                                              0x0,
-                                             true );
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             l_err->collectTrace( I2C_COMP_NAME, 256 );
             l_mutex_needs_unlock = true;
             break;
@@ -639,16 +657,29 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
             uint8_t * l_zeroBuffer = static_cast<uint8_t*>(malloc(l_zeroBuflen));
             memset(l_zeroBuffer, 0, l_zeroBuflen);
 
-
             TRACUCOMP(g_trac_i2c,"i2cPageSwitchOp args! \n"
                     "misc_args_t: port:%d / engine: %d: devAddr: %x: skip_mode_step(%d):\n"
                     "with_stop(%d): read_not_write(%d): bus_speed: %d: bit_rate_divisor: %d:\n"
-                    "polling_interval_ns: %d: timeout_count: %d: offset_length: %d",
+                    "polling_interval_ns: %d: timeout_count: %d: offset_length: %d, ",
                     i_args.port, i_args.engine, i_args.devAddr, i_args.skip_mode_setup,
                     i_args.with_stop, i_args.read_not_write, i_args.bus_speed,
                     i_args.bit_rate_divisor, i_args.polling_interval_ns, i_args.timeout_count,
-                    i_args.offset_length );
+                    i_args.offset_length);
 
+            // Printing mux info separately, if combined, nothing is displayed
+            if (i_args.i2cMuxPath)
+            {
+                char* l_muxPath = i_args.i2cMuxPath->toString();
+                TRACUCOMP(g_trac_i2c, "i2cPageSwitchOp(): muxSelector=0x%X, muxPath=%s",
+                          i_args.i2cMuxBusSelector, l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
+            }
+            else
+            {
+                TRACUCOMP(g_trac_i2c, "i2cPageSwitchOp(): muxSelector=0x%X, muxPath=NULL",
+                          i_args.i2cMuxBusSelector);
+            }
 
             // Retry MAX_NACK_RETRIES so we can bypass nacks caused by a busy bus.
             // Other Nack errors are expected and caused by the empty write
@@ -807,7 +838,7 @@ bool i2cPageUnlockOp( TARGETING::Target * i_target,
                                              I2C_INVALID_EEPROM_PAGE_MUTEX,
                                              TARGETING::get_huid(i_target),
                                              0x0,
-                                             true /*Add HB SW Callout*/ );
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             l_err->collectTrace( I2C_COMP_NAME, 256 );
             errlCommit(l_err, I2C_COMP_ID);
@@ -844,6 +875,217 @@ void i2cSetSwitches( TARGETING::Target * i_target,
     return;
 }
 
+
+
+/**
+*
+* @brief Retrieves the I2C MUX target from the given Entity Path
+*
+* @param [in] i_i2cMuxPath - the Entity Path for the I2C MUX
+*
+* @param [out] o_target - The I2C MUX target if Entity Path is found, valid and
+*                         functional, else this is set to nullptr
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*                      error log.
+*
+*/
+// ------------------------------------------------------------------
+// i2cGetI2cMuxTarget
+// ------------------------------------------------------------------
+errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
+                                TARGETING::Target * &o_target )
+{
+    errlHndl_t l_err(nullptr);
+    o_target = nullptr;
+
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cGetI2cMuxTarget()" );
+
+    do
+    {
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+
+        // Retrieve the I2C MUX target from path
+        o_target = l_targetService.toTarget(i_i2cMuxPath);
+
+        if ( nullptr == o_target )
+        {
+            char* l_muxPath = i_i2cMuxPath.toString();
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX Entity Path (%s)"
+                               " could not be converted to a target.",
+                               l_muxPath );
+
+
+            /*@
+             * @errortype
+             * @reasoncode  I2C_MUX_TARGET_NOT_FOUND
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    I2C_ACCESS_MUX
+             * @devdesc     I2C mux path target is null
+             * @custdesc    Unexpected boot firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                I2C_ACCESS_MUX,
+                                I2C_MUX_TARGET_NOT_FOUND,
+                                0,
+                                0,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            // Collect the MUX entity path info
+            ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
+
+            // Release the mux memory
+            free(l_muxPath);
+            l_muxPath = nullptr;
+
+            l_err->collectTrace( I2C_COMP_NAME, 256);
+
+            break;
+        }
+
+        // Is the target functional
+        TARGETING::HwasState l_hwasState =
+                                o_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if ( !l_hwasState.poweredOn  ||
+             !l_hwasState.present    ||
+             !l_hwasState.functional )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX target (0x%X) "
+                               "is non functional.",
+                               TARGETING::get_huid(o_target) );
+            /*@
+             * @errortype
+             * @reasoncode     I2C_MUX_TARGET_NON_FUNCTIONAL
+             * @severity       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid       I2C_ACCESS_MUX
+             * @userdata1      I2C MUX Target Huid
+             * @devdesc        I2C mux path target is not functional
+             * @custdesc       Unexpected boot firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                I2C_ACCESS_MUX,
+                                I2C_MUX_TARGET_NON_FUNCTIONAL,
+                                TARGETING::get_huid(o_target),
+                                0,
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            // Collect the MUX entity path info
+            char* l_muxPath = i_i2cMuxPath.toString();
+            ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
+            free(l_muxPath);
+            l_muxPath = nullptr;
+
+            l_err->collectTrace( I2C_COMP_NAME, 256);
+
+            // Don't return a non functional target
+            o_target = nullptr;
+
+            break;
+        }
+    } while( 0 );
+
+    TRACUCOMP( g_trac_i2c, EXIT_MRK"i2cGetI2cMuxTarget() - %s",
+               ((NULL == l_err) ? "No Error" : "With Error") );
+
+    return l_err;
+} // end i2cGetI2cMuxTarget
+
+
+/**
+*
+* @brief Retrieves the MUX target and sets the MUX to the given bus selector
+*
+* @param[in] i_masterTarget - I2C Master Target device
+*
+* @param[in] i_args - A copy of the structure containing arguments
+*                     needed for a command transaction.
+*
+* @pre i_masterTarget and i_args.i2cMuxPath must not be nullptrs;
+*      i_args.i2cMuxBusSelector must not be I2C_MUX::NOT_APPLICABLE
+*
+* @return errlHndl_t - NULL if successful, otherwise a pointer to the
+*       error log.
+*
+*/
+// ------------------------------------------------------------------
+// i2cAccessMux
+// ------------------------------------------------------------------
+errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
+                         misc_args_t i_args /* make a copy */ )
+{
+    TRACUCOMP( g_trac_i2c,
+               ENTER_MRK"i2cAccessMux(): "
+               "e/p/devAddr= %d/%d/0x%x, offset=0x%x/%p",
+               i_args.engine, i_args.port, i_args.devAddr,
+               i_args.offset_length, i_args.offset_buffer );
+
+    // Printing mux info separately, if combined, nothing is displayed
+    if (i_args.i2cMuxPath)
+    {
+        char* l_muxPath = i_args.i2cMuxPath->toString();
+        TRACUCOMP(g_trac_i2c, "i2cAccessMux(): muxSelector=0x%X, muxPath=%s",
+                  i_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
+    }
+    else
+    {
+        TRACUCOMP(g_trac_i2c, "i2cAccessMux(): muxSelector=0x%X, muxPath=NULL",
+                  i_args.i2cMuxBusSelector);
+    }
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        TARGETING::TargetHandle_t l_i2cMuxTarget(nullptr);
+
+        l_err = i2cGetI2cMuxTarget(*(i_args.i2cMuxPath),
+                                   l_i2cMuxTarget);
+
+        // If an issue getting the MUX target, then return error
+        if (l_err)
+        {
+            break;
+        }
+
+        TARGETING::I2cMuxInfo l_muxData;
+
+        if (! (l_i2cMuxTarget->tryGetAttr<TARGETING::ATTR_I2C_MUX_INFO>(l_muxData)) )
+        {
+            TRACFCOMP(g_trac_i2c,
+            "i2cAccessMux(): get attributes failed");
+            break;
+        }
+
+        uint8_t l_muxSelector = i_args.i2cMuxBusSelector;
+        uint8_t *l_ptrMuxSelector = &l_muxSelector;
+        size_t l_muxSelectorSize = sizeof(l_muxSelector);
+
+        i_args.i2cMuxBusSelector = I2C_MUX::NOT_APPLICABLE;
+        l_err = DeviceFW::deviceOp(
+                     DeviceFW::WRITE,
+                     i_masterTarget,
+                     l_ptrMuxSelector,
+                     l_muxSelectorSize,
+                     DEVICE_I2C_ADDRESS(l_muxData.port,
+                                        l_muxData.engine,
+                                        l_muxData.devAddr,
+                                        i_args.i2cMuxBusSelector,
+                                        i_args.i2cMuxPath));
+    } while (0);
+
+    TRACUCOMP( g_trac_i2c,
+               EXIT_MRK"i2cAccessMux() - %s",
+               ((NULL == l_err) ? "No Error" : "With Error") );
+
+    return l_err;
+}  // i2cAccessMux
+
 // ------------------------------------------------------------------
 // i2cCommonOp
 // ------------------------------------------------------------------
@@ -862,10 +1104,25 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 
     TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cCommonOp(): i_opType=%d, aType=%d, "
-               "p/e/devAddr= %d/%d/0x%x, len=%d, offset=%x/%p",
-               (uint64_t) i_opType, i_accessType, i_args.port, i_args.engine,
+               "e/p/devAddr= %d/%d/0x%x, len=%d, offset=0x%x/%p",
+               static_cast<uint64_t>(i_opType), i_accessType, i_args.engine, i_args.port,
                i_args.devAddr, io_buflen, i_args.offset_length,
                i_args.offset_buffer);
+
+    // Printing mux info separately, if combined, nothing is displayed
+    if (i_args.i2cMuxPath)
+    {
+        char* l_muxPath = i_args.i2cMuxPath->toString();
+        TRACUCOMP(g_trac_i2c, "i2cCommonOp(): muxSelector=0x%X, muxPath=%s",
+                  i_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
+    }
+    else
+    {
+        TRACUCOMP(g_trac_i2c, "i2cCommonOp(): muxSelector=0x%X, muxPath=NULL",
+                  i_args.i2cMuxBusSelector);
+    }
 
     do
     {
@@ -891,7 +1148,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                                            I2C_MASTER_SENTINEL_TARGET,
                                            i_opType,
                                            0x0,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -901,11 +1158,10 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         //Set Host vs Fsi switches if not done already
         i2cSetSwitches(i_target, i_args);
 
-
         // Get the mutex for the requested engine
         mutex_success = i2cGetEngineMutex( i_target,
-                                       i_args,
-                                       engineLock );
+                                           i_args,
+                                           engineLock );
 
         if( !mutex_success )
         {
@@ -915,9 +1171,24 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         }
 
         // Lock on this engine
-        (void)mutex_lock( engineLock );
+        recursive_mutex_lock( engineLock );
         mutex_needs_unlock = true;
 
+        if ( (I2C_MUX::NOT_APPLICABLE != i_args.i2cMuxBusSelector) &&
+             (nullptr != i_args.i2cMuxPath) )
+        {
+            err = i2cAccessMux(i_target, i_args );
+        }
+
+        if ( err )
+        {
+            TRACFCOMP(g_trac_i2c,
+                      ERR_MRK"i2cCommonOp() - There is an issue accessing "
+                       "the I2C MUX");
+
+            // Skip performing the actual I2C Operation
+            break;
+        }
 
         // Calculate variables related to I2C Bus Speed in 'args' struct
         err =  i2cSetBusVariables( i_target, I2C_BUS_SPEED_FROM_MRW, i_args);
@@ -927,7 +1198,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
             // Skip performing the actual I2C Operation
             break;
         }
-
 
         /*******************************************************/
         /*  Perform the I2C Operation                          */
@@ -994,9 +1264,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                             newBufLen,
                             i_args );
 
-
             free( newBuffer );
-
         }
 
         /***********************************************/
@@ -1064,7 +1332,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                                            I2C_INVALID_OP_TYPE,
                                            i_opType,
                                            userdata2,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -1081,14 +1349,13 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                             i_args );
             break;
         }
-
     } while( 0 );
 
     // Check if we need to unlock the mutex
     if ( mutex_needs_unlock == true )
     {
         // Unlock
-        (void) mutex_unlock( engineLock );
+        recursive_mutex_unlock( engineLock );
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Unlocked engine: %d",
                    i_args.engine );
@@ -1097,7 +1364,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
     // If there is an error, add FFDC
     if ( err != NULL )
     {
-
         // Add parameter info to log
         // @todo RTC 114298- update this for new parms/switches
         I2C::UdI2CParms( i_opType,
@@ -1112,13 +1378,12 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 
     }
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cCommonOp() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
 
     return err;
 } // end i2cCommonOp
-
 
 
 // ------------------------------------------------------------------
@@ -1182,14 +1447,12 @@ bool i2cPresence( TARGETING::Target * i_target,
                    INFO_MRK"Obtaining lock for engine: %d",
                    args.engine );
 
-        (void)mutex_lock( engineLock );
+        recursive_mutex_lock( engineLock );
         mutex_needs_unlock = true;
 
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Locked on engine: %d",
                    args.engine );
-
-
 
         // Set I2C Mode (Host vs FSI) for the target
         args.switches.useHostI2C = 0;
@@ -1346,7 +1609,7 @@ bool i2cPresence( TARGETING::Target * i_target,
     if ( mutex_needs_unlock == true )
     {
         // Unlock
-        (void) mutex_unlock( engineLock );
+        recursive_mutex_unlock( engineLock );
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Unlocked engine: %d",
                    args.engine );
@@ -1381,12 +1644,28 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
     status_reg_t status;
     fifo_reg_t fifo;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cRead()" );
 
     TRACSCOMP( g_trac_i2cr,
-               "I2C READ  START : engine %.2X : port %.2X : devAddr %.2X : len %d",
-               i_args.engine, i_args.port, i_args.devAddr, i_buflen );
+               "I2C READ  START : engine %.2X : port %.2X : devAddr %.2X : "
+               "len %d",
+               i_args.engine, i_args.port, i_args.devAddr, i_buflen);
+
+    // Printing mux info separately, if combined, nothing is displayed
+    if (i_args.i2cMuxPath)
+    {
+        char* l_muxPath = i_args.i2cMuxPath->toString();
+        TRACSCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, muxPath=%s",
+                  i_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
+    }
+    else
+    {
+        TRACSCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, muxPath=NULL",
+                  i_args.i2cMuxBusSelector);
+    }
 
     do
     {
@@ -1404,7 +1683,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
 
         for( bytesRead = 0; bytesRead < i_buflen; bytesRead++ )
         {
-            TRACDCOMP( g_trac_i2c,
+            TRACUCOMP( g_trac_i2c,
                        INFO_MRK"Reading byte (%d) out of (%d)",
                        (bytesRead+1), i_buflen );
 
@@ -1519,8 +1798,23 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
             TRACUCOMP( g_trac_i2cr,
                        "I2C READ  DATA  : engine %.2X : port %.2x : "
                        "devAddr %.2X : byte %d : %.2X (0x%lx)",
-                       i_args.engine, i_args.port, i_args.devAddr, bytesRead,
-                       fifo.byte_0, fifo.value );
+                       i_args.engine, i_args.port, i_args.devAddr,
+                       bytesRead, fifo.byte_0, fifo.value );
+
+            // Printing mux info separately, if combined, nothing is displayed
+            if (i_args.i2cMuxPath)
+            {
+                char* l_muxPath = i_args.i2cMuxPath->toString();
+                TRACUCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, "
+                          "muxPath=%s", i_args.i2cMuxBusSelector, l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
+            }
+            else
+            {
+                TRACUCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, "
+                          "muxPath=NULL", i_args.i2cMuxBusSelector);
+            }
         }
 
         if( err )
@@ -1539,10 +1833,26 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACSCOMP( g_trac_i2cr,
-               "I2C READ  END   : engine %.2X : port %.2x : devAddr %.2X : len %d",
+               "I2C READ  END   : engine %.2X : port %.2x : devAddr %.2X : "
+               "len %d",
                i_args.engine, i_args.port, i_args.devAddr, i_buflen );
 
-    TRACDCOMP( g_trac_i2c,
+    // Printing mux info separately, if combined, nothing is displayed
+    if (i_args.i2cMuxPath)
+    {
+        char* l_muxPath = i_args.i2cMuxPath->toString();
+        TRACSCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, muxPath=%s",
+                  i_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
+    }
+    else
+    {
+        TRACSCOMP(g_trac_i2c, "i2cRead(): muxSelector=0x%X, muxPath=NULL",
+                  i_args.i2cMuxBusSelector);
+    }
+
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cRead()" );
 
     return err;
@@ -1565,9 +1875,23 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
     TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cWrite()" );
 
-    TRACSCOMP( g_trac_i2cr,
-               "I2C WRITE START : engine %.2X : port %.2X : devAddr %.2X : len %d",
-               i_args.engine, i_args.port, i_args.devAddr, io_buflen );
+    TRACSCOMP( g_trac_i2c,
+               "I2C WRITE START : engine %.2X : port %.2x : devAddr %.2X : "
+               "len %d", i_args.engine, i_args.port, i_args.devAddr, io_buflen);
+
+    // Printing mux info separately, if combined, nothing is displayed
+    if (i_args.i2cMuxPath)
+    {
+        char* l_muxPath = i_args.i2cMuxPath->toString();
+        TRACSCOMP(g_trac_i2c, "i2cWrite(): muxSelector=0x%X, muxPath=%s",
+                  i_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+    }
+    else
+    {
+        TRACSCOMP(g_trac_i2c, "i2cWrite(): muxSelector=0x%X, muxPath=NULL",
+                  i_args.i2cMuxBusSelector);
+    }
 
     do
     {
@@ -1635,8 +1959,8 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACSCOMP( g_trac_i2cr,
-               "I2C WRITE END   : engine %.2X: port %.2X : devAddr %.2X : len %d",
-               i_args.engine, i_args.port, i_args.devAddr, io_buflen );
+               "I2C WRITE END   : engine %.2X: port %.2X : devAddr %.2X : "
+               "len %d", i_args.engine, i_args.port, i_args.devAddr, io_buflen);
 
     TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cWrite()" );
@@ -1653,7 +1977,7 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cSetup(): buf_len=%d, r_nw=%d, w_stop=%d, sms=%d",
                i_buflen, i_args.read_not_write, i_args.with_stop,
                i_args.skip_mode_setup);
@@ -1763,7 +2087,7 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetup()" );
 
     return err;
@@ -1866,7 +2190,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cWaitForCmdComp()" );
 
     // Define the registers that we'll use
@@ -1944,7 +2268,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cWaitForCmdComp()" );
 
     return err;
@@ -1959,7 +2283,7 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cReadStatusReg()" );
 
     do
@@ -1994,7 +2318,7 @@ errlHndl_t i2cReadStatusReg ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cReadStatusReg()" );
 
     return err;
@@ -2013,7 +2337,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
     bool busArbiLostFound = false;
     uint64_t intRegVal = 0x0;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cCheckForErrors()" );
 
     do
@@ -2224,7 +2548,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cCheckForErrors()" );
 
     return err;
@@ -2246,7 +2570,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
     // Define regs we'll be using
     status_reg_t status;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cWaitForFifoSpace()" );
 
     do
@@ -2334,7 +2658,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cWaitForFifoSpace()" );
 
     return err;
@@ -2349,7 +2673,7 @@ errlHndl_t i2cSendStopSignal(TARGETING::Target * i_target,
 
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cSendStopSignal" );
 
     do
@@ -2433,7 +2757,7 @@ errlHndl_t i2cToggleClockLine(TARGETING::Target * i_target,
 
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cToggleClockLine()" );
 
     do
@@ -2494,7 +2818,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
     // I2C Bus Speed Array
     TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cForceResetAndUnlock()" );
 
     do
@@ -2523,7 +2847,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                                            I2C_ATTRIBUTE_NOT_FOUND,
                                            TARGETING::get_huid(i_target),
                                            0x0,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -2533,7 +2857,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
         uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
         if (i_args.switches.useFsiI2C == 1)
         {
-            TRACDCOMP( g_trac_i2c,INFO_MRK
+            TRACUCOMP( g_trac_i2c,INFO_MRK
                       "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
             l_numPorts = FSI_MODE_MAX_PORT;
         }
@@ -2582,8 +2906,27 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                               "limitations.  Disable diag mode on e2 = %d, "
                               "secure mode enabled = %d",
                               TARGETING::get_huid(i_target),
-                              i_args.engine, port,l_disable_diag_mode,
+                              i_args.engine, port,
+                              l_disable_diag_mode,
                               SECUREBOOT::enabled());
+
+                    // Printing mux info separately, if combined, nothing is displayed
+                    if (i_args.i2cMuxPath)
+                    {
+                        char* l_muxPath = i_args.i2cMuxPath->toString();
+                        TRACFCOMP(g_trac_i2c, INFO_MRK"i2cForceResetAndUnlock(): "
+                                  "muxSelector=0x%X, muxPath=%s",
+                                  i_args.i2cMuxBusSelector, l_muxPath);
+                        free(l_muxPath);
+                        l_muxPath = nullptr;
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_i2c, INFO_MRK"i2cForceResetAndUnlock(): "
+                                  "muxSelector=0x%X, muxPath=NULL",
+                                  i_args.i2cMuxBusSelector);
+                    }
+
                     continue;
                 }
             }
@@ -2691,7 +3034,7 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cReset()" );
 
     // Writing to the Status Register does a full I2C reset.
@@ -2742,7 +3085,7 @@ errlHndl_t i2cReset ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cReset()" );
 
     return err;
@@ -2765,7 +3108,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
     // I2C Bus Speed Array
     TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cSendSlaveStop()" );
 
     do
@@ -2795,7 +3138,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                                            I2C_ATTRIBUTE_NOT_FOUND,
                                            TARGETING::get_huid(i_target),
                                            0x0,
-                                           true /*Add HB SW Callout*/ );
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -2805,7 +3148,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
         uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
         if (i_args.switches.useFsiI2C == 1)
         {
-            TRACDCOMP( g_trac_i2c,INFO_MRK
+            TRACUCOMP( g_trac_i2c,INFO_MRK
                       "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
             l_numPorts = FSI_MODE_MAX_PORT;
         }
@@ -2824,7 +3167,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             //   presence detect here to remove this workaround
             if ( (i_args.engine == 1) && (port >= 4) )
             {
-                TRACDCOMP( g_trac_i2c,
+                TRACUCOMP( g_trac_i2c,
                   "Saw Errors resetting these devices, temporarily skipping engine: %d, port: %d",
                    i_args.engine, port);
                 continue;
@@ -2918,8 +3261,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                            "Not seeing SCL (%d) high "
                            "after %d ns of polling (max=%d). "
                            "Full status register = 0x%.16llX. "
-                           "Inhibiting sending slave stop to e%/p% for "
-                           "HUID 0x%08X.",
+                           "Inhibiting sending slave stop to e%/p%, "
+                           "for HUID 0x%08X.",
                            status_reg.scl_input_level,
                            delay_ns,
                            I2C_RESET_POLL_DELAY_TOTAL_NS,
@@ -2927,6 +3270,24 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                            i_args.engine,
                            port,
                            TARGETING::get_huid(i_target));
+
+                // Printing mux info separately, if combined, nothing is displayed
+                if (i_args.i2cMuxPath)
+                {
+                    char* l_muxPath = i_args.i2cMuxPath->toString();
+                    TRACFCOMP(g_trac_i2c, ERR_MRK"i2cSendSlaveStop(): "
+                              "muxSelector=0x%X, muxPath=%s",
+                              i_args.i2cMuxBusSelector, l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_i2c, ERR_MRK"i2cSendSlaveStop(): "
+                              "muxSelector=0x%X, muxPath=NULL",
+                              i_args.i2cMuxBusSelector);
+                }
+
                 continue;
             }
 
@@ -2967,7 +3328,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cSendSlaveStop()" );
 
     return err;
@@ -2986,7 +3347,7 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
     // Master Regs
     interrupt_reg_t intreg;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cGetInterrupts()" );
 
     do
@@ -3011,7 +3372,7 @@ errlHndl_t i2cGetInterrupts ( TARGETING::Target * i_target,
         o_intRegValue = intreg.value;
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cGetInterrupts( int reg val: %016llx)",
                o_intRegValue );
 
@@ -3103,6 +3464,21 @@ errlHndl_t i2cSetBusVariables ( TARGETING::Target * i_target,
               io_args.engine, io_args.port, io_args.devAddr,
               i_speed, io_args.bus_speed, io_args.bit_rate_divisor,
               io_args.polling_interval_ns, io_args.timeout_count);
+
+    // Printing mux info separately, if combined, nothing is displayed
+    if (io_args.i2cMuxPath)
+    {
+        char* l_muxPath = io_args.i2cMuxPath->toString();
+        TRACUCOMP(g_trac_i2c, "i2cSetBusVariables(): muxSelector=0x%X, "
+                  "muxPath=%s", io_args.i2cMuxBusSelector, l_muxPath);
+        free(l_muxPath);
+        l_muxPath = nullptr;
+    }
+    else
+    {
+        TRACUCOMP(g_trac_i2c, "i2cSetBusVariables(): muxSelector=0x%X, "
+                  "muxPath=NULL", io_args.i2cMuxBusSelector);
+    }
 
     TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetBusVariables()" );
@@ -3269,7 +3645,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                         TWO_UINT32_TO_UINT64(
                                             i_processOperation,
                                             i_processType),
-                                        true /*Add HB SW Callout*/ );
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
                 err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -3316,7 +3692,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                      ( engine != 0 ) &&
                      (io_args.switches.useFsiI2C == 1) )
                 {
-                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                    TRACUCOMP( g_trac_i2c,INFO_MRK
                         "Only reset engine 0 for FSI");
                     continue;
                 }
@@ -3325,7 +3701,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 if ( ( engine == 0 ) &&
                      (io_args.switches.useHostI2C == 1) )
                 {
-                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                    TRACUCOMP( g_trac_i2c,INFO_MRK
                         "Never touch engine 0 for Host");
                     continue;
                 }
@@ -3345,7 +3721,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 size_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
                 if (io_args.switches.useFsiI2C == 1)
                 {
-                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                    TRACUCOMP( g_trac_i2c,INFO_MRK
                       "Using FSI I2c, use numports: %d", FSI_MODE_MAX_PORT);
                     l_numPorts = FSI_MODE_MAX_PORT;
                 }
@@ -3413,7 +3789,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 TRACUCOMP( g_trac_i2c,
                        INFO_MRK"i2cProcessActiveMasters: Obtaining lock for "
                        "engine: %d", engine );
-                (void)mutex_lock( engineLock );
+                recursive_mutex_lock( engineLock );
                 mutex_needs_unlock = true;
                 TRACUCOMP( g_trac_i2c,INFO_MRK
                            "i2cProcessActiveMasters: Locked on engine: %d",
@@ -3579,7 +3955,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 if ( mutex_needs_unlock == true )
                 {
                     // Unlock
-                    (void) mutex_unlock( engineLock );
+                    recursive_mutex_unlock( engineLock );
                     TRACUCOMP( g_trac_i2c,INFO_MRK
                               "i2cProcessActiveMasters: Unlocked engine: %d",
                               engine );
@@ -3661,7 +4037,7 @@ errlHndl_t i2cSetupActiveMasters ( i2cProcessType i_setupType,
 // ------------------------------------------------------------------
 void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
 {
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cSetAccessMode(): %d", i_setModeType );
 
     TARGETING::I2cSwitches switches;
@@ -3728,7 +4104,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
                            INFO_MRK"Obtaining lock for engine: %d",
                            args.engine );
 
-                (void)mutex_lock( engineLocks[engine] );
+                recursive_mutex_lock( engineLocks[engine] );
 
                 TRACUCOMP( g_trac_i2c,
                            INFO_MRK"Locked on engine: %d",
@@ -3754,7 +4130,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
 
                     tgt->setAttr<TARGETING::ATTR_I2C_SWITCHES>(switches);
 
-                    TRACFCOMP( g_trac_i2c,"i2cSetAccessMode: tgt=0x%X "
+                    TRACUCOMP( g_trac_i2c,"i2cSetAccessMode: tgt=0x%X "
                                "I2C_SWITCHES updated: host=%d, fsi=%d",
                                TARGETING::get_huid(tgt), switches.useHostI2C,
                                switches.useFsiI2C);
@@ -3769,7 +4145,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
                 args.engine = engine;
                 if ( engineLocks[engine] != NULL )
                 {
-                    (void) mutex_unlock( engineLocks[engine] );
+                    recursive_mutex_unlock( engineLocks[engine] );
                     TRACUCOMP( g_trac_i2c,
                                INFO_MRK"Unlocked engine: %d",
                                args.engine );
@@ -3779,7 +4155,7 @@ void i2cSetAccessMode( i2cSetAccessModeType i_setModeType )
 
     } while( 0 );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetAccessMode");
 
     return;
@@ -3797,7 +4173,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cRegisterOp()");
 
     uint64_t op_addr = 0x0;
@@ -3866,7 +4242,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
               i_args.switches.useFsiI2C, op_size,
               i_reg, op_addr, (*io_data_64) );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cRegisterOp()" );
 
     return err;
@@ -4126,19 +4502,19 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
         for(auto const& i2cm : l_i2cInfo)
         {
-            TRACDCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(pChipTarget));
+            TRACUCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(pChipTarget));
             /* I2C Busses */
             std::list<EEPROM::EepromInfo_t>::iterator l_eep =
                 l_eepromInfo.begin();
             while( l_eep != l_eepromInfo.end() )
             {
-                TRACDCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
+                TRACUCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
                 DeviceInfo_t l_currentDI;
 
                 //ignore the devices that aren't on the current target
                 if( l_eep->i2cMaster != pChipTarget )
                 {
-                    TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                    TRACUCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
                     l_eep = l_eepromInfo.erase(l_eep);
                     continue;
                 }
@@ -4146,7 +4522,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 //skip the devices that are on a different engine
                 else if( l_eep->engine != i2cm.engine)
                 {
-                    TRACDCOMP(g_trac_i2c,"skipping umatched engine");
+                    TRACUCOMP(g_trac_i2c,"skipping umatched engine");
                     ++l_eep;
                     continue;
                 }
@@ -4185,7 +4561,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                         break;
                 }
 
-                TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_eep->devAddr);
+                TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->devAddr);
                 o_deviceInfo.push_back(l_currentDI);
                 l_eep = l_eepromInfo.erase(l_eep);
             } //end of eeprom iter
@@ -4239,20 +4615,20 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
     #ifdef CONFIG_NVDIMM
             for (auto& l_nv : l_nvdimmInfo)
             {
-                TRACDCOMP(g_trac_i2c,"nvdimm loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_nv.i2cMaster), l_nv.engine );
+                TRACUCOMP(g_trac_i2c,"nvdimm loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_nv.i2cMaster), l_nv.engine );
                 DeviceInfo_t l_currentDI;
 
                 //ignore the devices that aren't on the current target
                 if( l_nv.i2cMaster != pChipTarget )
                 {
-                    TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                    TRACUCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
                     continue;
                 }
 
                 //skip the devices that are on a different engine
                 else if( l_nv.engine != i2cm.engine)
                 {
-                    TRACDCOMP(g_trac_i2c,"skipping umatched engine");
+                    TRACUCOMP(g_trac_i2c,"skipping umatched engine");
                     continue;
                 }
 
@@ -4268,7 +4644,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 strcpy(l_currentDI.deviceLabel,
                     "?unknown,unknown,nvdimm,nvdimm");
 
-                TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_nv.devAddr);
+                TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_nv.devAddr);
                 o_deviceInfo.push_back(l_currentDI);
             } //end of nvdimm iter
     #endif
