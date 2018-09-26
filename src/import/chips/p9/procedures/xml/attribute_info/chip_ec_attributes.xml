@@ -50,6 +50,24 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SEPARATE_CORE_DBG_CNTL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Support for the CDIAL LS_DBG_CTRL was dropped, so individual
+       debug dials need to be used.  See George Rohrbaugh.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_ONE_NPU_TOP</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
