@@ -101,43 +101,6 @@ const std::vector<std::pair<uint64_t, uint64_t>> pdaBitTraits<fapi2::ENUM_ATTR_E
 };
 
 ///
-/// @brief Helper function for changing the DRAM bit
-/// @tparam W the DRAM width
-/// @tparam TT the DRAM width traits class
-/// @param[in] i_target - the MCA target
-/// @param[in] i_dram - the DRAM on which to operate
-/// @param[in] i_state - the state to write the bit(s) to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< uint8_t W, typename TT = pdaBitTraits<W> >
-fapi2::ReturnCode change_dram_bit_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_dram,
-        const mss::states& i_state)
-{
-    fapi2::buffer<uint64_t> l_data;
-
-    // Note: the following avoids "undefined reference to" errors due to the set max dram below
-    // The use of traits and a const reference messes with it
-    constexpr auto NUM_DRAM = TT::NUM_DRAMS;
-
-    // Check bounds
-    FAPI_ASSERT(i_dram < NUM_DRAM,
-                fapi2::MSS_PDA_DRAM_OUT_OF_RANGE().
-                set_MCA_TARGET(i_target).
-                set_DRAM(i_dram).
-                set_MAX_DRAM(NUM_DRAM),
-                "%s was passed DRAM value of %lu which is not below the max value of %lu",
-                mss::c_str(i_target), i_dram, NUM_DRAM);
-
-    FAPI_TRY(mss::getScom(i_target, TT::BIT_MAP[i_dram].first, l_data));
-    FAPI_TRY(l_data.writeBit(i_state, TT::BIT_MAP[i_dram].second, TT::NUM_BITS));
-    FAPI_TRY(mss::putScom(i_target, TT::BIT_MAP[i_dram].first, l_data));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Writes the data bit enable for the properly inputted DRAM
 /// @param[in] i_target - the MCA target
 /// @param[in] i_dram - the DRAM on which to operate
@@ -216,7 +179,7 @@ fapi_try_exit:
 /// @param[in] i_target a fapi2::Target MCA
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-fapi2::ReturnCode configure_timings( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode configure_timings_and_enable( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     // Fun fact, we're hitting all of the bits in this reg, no need for RMW
     fapi2::buffer<uint64_t> l_data;
@@ -226,8 +189,7 @@ fapi2::ReturnCode configure_timings( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     // 2) Have a 0 delay between the MRS being sent and starting the 0/1 latching
     // 3) Hold the delay for as long as possible (safer and easier than figuring out how long to hold the values)
     mss::wc::set_pda_mode(l_data, mss::states::ON);
-    mss::wc::set_pda_dq_on_delay(l_data, START_DELAY_VALUE);
-    mss::wc::set_pda_dq_off_delay(l_data, HOLD_DELAY_VALUE);
+    configure_timings(l_data);
 
     // Set that reg
     FAPI_TRY(mss::wc::write_config3(i_target, l_data));
@@ -282,7 +244,7 @@ fapi2::ReturnCode enter( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
               i_rank, mss::c_str(i_target) );
 
     // Now sets up all of the PDA regs now that we are in PDA mode
-    FAPI_TRY(configure_timings(l_mca));
+    FAPI_TRY(configure_timings_and_enable(l_mca));
     FAPI_TRY(blast_dram_config(l_mca, mss::states::OFF_N));
 
 fapi_try_exit:
