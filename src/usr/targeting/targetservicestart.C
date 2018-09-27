@@ -478,8 +478,34 @@ static void initializeAttributes(TargetService& i_targetService,
             }
             TARG_INF( "Setting RISK_LEVEL=%d", l_riskLevel );
             l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
+
+            //Set the SBE Console enablement based on our console enablement
+            ATTR_LPC_CONSOLE_CNFG_type l_consoleOn = LPC_CONSOLE_CNFG_ENABLE;
+#ifdef CONFIG_CONSOLE
+            l_consoleOn = LPC_CONSOLE_CNFG_DISABLE;
+#endif
+            l_pMasterProcChip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_consoleOn);
+
         }
 
+        // Loop around all processors
+        TargetHandleList l_allProcChips;
+        getAllChips(l_allProcChips, TYPE_PROC, false);
+        for(auto l_chip : l_allProcChips)
+        {
+            // value for master set above
+            if( l_chip == l_pMasterProcChip )
+            {
+                continue;
+            }
+
+            //Turn the SBE Console enablement off for all slave chips
+            ATTR_LPC_CONSOLE_CNFG_type l_consoleOff = LPC_CONSOLE_CNFG_DISABLE;
+            l_chip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_consoleOff);
+        }
+
+
+        // Do some special memory-preserving work
         if(i_isMpipl)
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);

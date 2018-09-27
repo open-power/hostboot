@@ -704,6 +704,13 @@
         <persistency>volatile-zeroed</persistency>
     </attribute>
 
+    <!-- Make this writeable so we can choose the value based on our CONFIG -->
+    <attribute>
+       <id>ATTR_LPC_CONSOLE_CNFG</id>
+       <persistency>volatile-zeroed</persistency>
+       <writeable/>
+    </attribute>
+
     <!-- This is only enabled for Wafer Test -->
     <attribute>
         <id>ATTR_START_CBS_FIFO_RESET_SKIP</id>
