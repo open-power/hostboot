@@ -599,11 +599,19 @@ bool __queryUcsCentaur<TYPE_MEMBUF>( ExtensibleChip * i_chip )
 
     uint32_t o_activeAttn = false;
 
-    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_CS_FIR");
+    // We can't use the GLOBAL_CS_FIR. It will not clear automatically when a
+    // channel has failed because the hardware clocks have stopped. Also, since
+    // it is a virtual register there really is no way to clear it. Fortunately
+    // we have the INTER_STATUS_REG that will tell us if there is an active
+    // attention. Note that we clear this register as part of the channel
+    // failure cleanup. So we can rely on this register to determine if there is
+    // a new channel failure.
+
+    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("INTER_STATUS_REG");
 
     if ( SUCCESS == fir->Read() )
     {
-        o_activeAttn = !fir->BitStringIsZero();
+        o_activeAttn = fir->IsBitSet(2); // Centaur checkstop bit.
     }
 
     return o_activeAttn;
