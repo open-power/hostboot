@@ -240,6 +240,108 @@ PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( 1 )
 
 #undef PLUGIN_RCD_PARITY_UE_SIDEEFFECTS
 
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Clears and ignores MBSFIR[3:4] if both are on at the same time. Masks
+ *         them at threshold of 32 per day.
+ * @param  i_mbChip MEMBUF chip.
+ * @param  io_sc    Step code data struct
+ * @return SUCCESS if both MBSFIR[3] and MBSFIR[4] are on.
+ *         PRD_SCAN_COMM_REGISTER_ZERO if not.
+ */
+int32_t mbsInternalTimeoutPrecheck( ExtensibleChip * i_mbChip,
+                                    STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[mbsInternalTimeoutPrecheck] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get MBSFIR
+        SCAN_COMM_REGISTER_CLASS * mbsFir = i_mbChip->getRegister("MBSFIR");
+
+        o_rc = mbsFir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MBSFIR read failed for 0x%08x",
+                      i_mbChip->getHuid() );
+            break;
+        }
+
+        if ( mbsFir->IsBitSet(3) && mbsFir->IsBitSet(4) )
+        {
+            // We are going to ignore this attention. If there is a system
+            // checkstop, we will have to return a DD02 so that the rule code
+            // can try to find something else as the root cause. Otherwise,
+            // apply the "threshold and mask" policy.
+
+            if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
+            {
+                o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+            }
+            else
+            {
+                // Add Centaur callout just in case.
+                io_sc.service_data->SetCallout( i_mbChip->getTrgt() );
+
+                // Clear MBSFIR[3:4].
+                SCAN_COMM_REGISTER_CLASS * mbsFirAnd =
+                    i_mbChip->getRegister("MBSFIR_AND");
+
+                mbsFirAnd->setAllBits();
+                mbsFirAnd->ClearBit(3);
+                mbsFirAnd->ClearBit(4);
+
+                o_rc = mbsFirAnd->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "MBSFIR_AND write failed for 0x%08x",
+                              i_mbChip->getHuid() );
+                    break;
+                }
+
+                if ( io_sc.service_data->IsAtThreshold() )
+                {
+                    // Prevent a predictive error, if needed.
+                    if ( !mfgMode() && !io_sc.service_data->isMemChnlFail() )
+                    {
+                        io_sc.service_data->clearServiceCall();
+                    }
+
+                    // Mask MBSFIR[3:4].
+                    SCAN_COMM_REGISTER_CLASS * mbsFirMaskOr =
+                        i_mbChip->getRegister("MBSFIR_MASK_OR");
+
+                    mbsFirMaskOr->SetBit(3);
+                    mbsFirMaskOr->SetBit(4);
+
+                    o_rc = mbsFirMaskOr->Write();
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC "MBSFIR_MASK_OR write failed for "
+                                  "0x%08x", i_mbChip->getHuid() );
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Legitimate internal timeout, make the error log predictive.
+            io_sc.service_data->SetCallout( i_mbChip->getTrgt() );
+            io_sc.service_data->setServiceCall();
+        }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( cen_centaur, mbsInternalTimeoutPrecheck );
+
 //##############################################################################
 //
 //                                  MBSECCFIRs

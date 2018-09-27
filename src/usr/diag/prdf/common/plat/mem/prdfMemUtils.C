@@ -619,6 +619,8 @@ bool __queryUcsCentaur<TYPE_MEMBUF>( ExtensibleChip * i_chip )
 
 //------------------------------------------------------------------------------
 
+// This excludes CHIFIR[16,19:21] to avoid a loop in isolation. Also excludes
+// CHIFIR[61] due to a hardware workaround, see __queryUcsChifir_61().
 template<TARGETING::TYPE T>
 bool __queryUcsChifir( ExtensibleChip * i_chip );
 
@@ -639,15 +641,57 @@ bool __queryUcsChifir<TYPE_DMI>( ExtensibleChip * i_chip )
     {
         // Make sure to ignore CHIFIR[16,19:21], which simply say there is an
         // attention on the Centaur. Otherwise, we will get stuck in a loop.
+        // CHIFIR[61] is also ignored as it needs to be looked for later
+        // for a special MBS timeout case.
         if ( 0 != (  fir->GetBitFieldJustified( 0,64) &
                     ~mask->GetBitFieldJustified(0,64) &
                      act0->GetBitFieldJustified(0,64) &
                      act1->GetBitFieldJustified(0,64) &
-                     0xffff63ffffffffffull ) )
+                     0xffff63fffffffffbull ) )
         {
             o_activeAttn = true;
         }
     }
+
+    return o_activeAttn;
+}
+
+//------------------------------------------------------------------------------
+
+// WORKAROUND:
+// This function only queries for CHIFIR[61]. There is a hardware workaround
+// that changes some behavior. CHIFIR[16] will no longer report channel failure
+// attentions from the Centaur. Also, any time there is a channel failure
+// attention from the Centaur, CHIFIR[61] will get set. In addition, CHIFIR[61]
+// can report an attention on its own, no need for Centaur attention. Therefore,
+// we must workaround the workaround and isolate to CHIFIR[61] only after
+// analyzing the Centaur.
+template<TARGETING::TYPE T>
+bool __queryUcsChifir_61( ExtensibleChip * i_chip );
+
+template<>
+bool __queryUcsChifir_61<TYPE_DMI>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    uint32_t o_activeAttn= false;
+
+    // Check if there is an active UCS attention on CHIFIR[61]
+    SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister( "CHIFIR"      );
+    SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister( "CHIFIR_MASK" );
+    SCAN_COMM_REGISTER_CLASS * act0 = i_chip->getRegister( "CHIFIR_ACT0" );
+    SCAN_COMM_REGISTER_CLASS * act1 = i_chip->getRegister( "CHIFIR_ACT1" );
+
+    if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read()) )
+    {
+        if ( fir->IsBitSet(61) & !mask->IsBitSet(61) & act0->IsBitSet(61) &
+             act1->IsBitSet(61) )
+        {
+            o_activeAttn = true;
+        }
+    }
+
 
     return o_activeAttn;
 }
@@ -756,8 +800,9 @@ bool __queryChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
         if ( !tmpChnlFail ) break; // nothing more to do.
 
         // Check for an active attention on the CHIFIR or IOMCFIR.
-        if ( __queryUcsChifir<TYPE_DMI>( i_dmiChip) ||
-             __queryUcsIomcfir<TYPE_DMI>(i_dmiChip) )
+        if ( __queryUcsChifir   <TYPE_DMI>(i_dmiChip) ||
+             __queryUcsChifir_61<TYPE_DMI>(i_dmiChip) ||
+             __queryUcsIomcfir  <TYPE_DMI>(i_dmiChip) )
         {
             o_chnlFail = true;
             break; // nothing more to do.
@@ -926,7 +971,8 @@ bool __analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
             o_analyzed = true; break; // analysis complete
         }
 
-        // Now, look for unit checkstops in the CHIFIR.
+        // Now, look for unit checkstops in the CHIFIR, excluding
+        // CHIFIR[16,19:21,61].
         if ( __queryUcsChifir<TYPE_DMI>(dmiChip) )
         {
             // Analyze UNIT_CS on the DMI chip.
@@ -941,6 +987,16 @@ bool __analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
         {
             // Analyze UNIT_CS on the MEMBUF chip.
             if ( SUCCESS == membChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true; break; // analysis complete
+            }
+        }
+
+        // Now, look for unit checkstop from CHIFIR[61].
+        if ( __queryUcsChifir_61<TYPE_DMI>(dmiChip) )
+        {
+            // Analyze UNIT_CS on the DMI chip.
+            if ( SUCCESS == dmiChip->Analyze(io_sc, UNIT_CS) )
             {
                 o_analyzed = true; break; // analysis complete
             }
