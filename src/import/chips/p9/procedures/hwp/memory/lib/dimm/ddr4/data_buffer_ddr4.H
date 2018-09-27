@@ -28,7 +28,7 @@
 /// @brief Code to support data_buffer_ddr4
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -48,11 +48,6 @@
 namespace mss
 {
 // TK:LRDIMM Verify this functionality and data (looked good to me, but more eyes are better - SPG)
-// TK:LRDIMM Create automatic function space selector code
-// The idea behind this is
-// 1) function space 0 is the default
-// 2) we want to be able to say "here's a bunch of buffer control words, hit the appropriate function space before each is needed)
-// Will greatly simplify code
 
 enum nibble : size_t
 {
@@ -74,7 +69,7 @@ enum db02_def : size_t
     FUNC_SPACE_7 = 7,
 
     // From DB02 spec - F[3:0]BC7x control word
-    MAX_FUNC_SPACE = 7,
+    MAX_FUNC_SPACE = FUNC_SPACE_7,
 
     // 4 bit BCWs
     DQ_RTT_NOM_CW = 0x0,
@@ -248,6 +243,9 @@ static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET
 {
     uint8_t l_sim = 0;
     mss::is_simulation(l_sim);
+
+    // DES first - make sure those CKE go high and stay there
+    io_inst.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
 
     FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",
@@ -484,13 +482,14 @@ inline fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DI
     }
 
     cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, i_state, mss::tmrc());
+    FAPI_INF("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
     FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-}// namespace ddr4
+} // namespace ddr4
 } // namespace mss
 
 #endif
