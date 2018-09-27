@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -54,6 +54,7 @@ chip p9_mcs
         reset       (&, 0x05010801);
         mask        (|, 0x05010805);
         capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFIR_MASK
@@ -61,6 +62,7 @@ chip p9_mcs
         name        "P9 MCS target MCFIR MASK";
         scomaddr    0x05010803;
         capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFIR_ACT0
@@ -69,6 +71,7 @@ chip p9_mcs
         scomaddr    0x05010806;
         capture     group default;
         capture     req nonzero("MCFIR");
+        capture     group MirrorConfig;
     };
 
     register MCFIR_ACT1
@@ -77,6 +80,7 @@ chip p9_mcs
         scomaddr    0x05010807;
         capture     group default;
         capture     req nonzero("MCFIR");
+        capture     group MirrorConfig;
     };
 
 # Include registers not defined by the xml
