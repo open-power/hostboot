@@ -27,7 +27,7 @@
 /// @file ccs.H
 /// @brief Run and manage the CCS engine
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
