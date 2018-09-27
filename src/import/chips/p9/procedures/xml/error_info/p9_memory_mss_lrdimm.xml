@@ -28,7 +28,7 @@
 <!-- @brief Error xml for mss_freq -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
-<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
@@ -70,6 +70,20 @@
     </description>
     <ffdc>CW_DATA_LEN</ffdc>
     <ffdc>BCW</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PBA_INVALID_BUFFER</rc>
+    <description>
+      Set if a buffer is invalid after it was passed into PBA
+    </description>
+    <ffdc>BUFFER</ffdc>
+    <ffdc>MAX</ffdc>
     <ffdc>TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>

@@ -67,6 +67,7 @@ enum sizes
     MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
     MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x8's there are 9 DRAM for 72 bits
     MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DRAM for 72 bits
+    MAX_LRDIMM_BUFFERS = MAX_DRAMS_X8,
 
     NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
 
@@ -200,6 +201,10 @@ enum ffdc_function_codes
     // CW engine information
     CW_DATA_ENGINE = 117,
     CW_INFO_ENGINE = 118,
+
+    // PBA function codes
+    PBA_EXECUTE_CONTAINER = 80,
+    PBA_EXECUTE_VECTOR = 81,
 };
 
 enum states

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <p9n2_mc_scom_addresses_fld.H>
 
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
@@ -156,6 +157,7 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             DDR4_IPW_LOOP_DIS = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_IPW_LOOP_DIS,
             DDR4_VLEVEL_BANK_GROUP = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP,
             VPROTH_PSEL_MODE = MCA_DDRPHY_PC_CONFIG0_P0_VPROTH_PSEL_MODE,
+            PBA_ENABLE = P9N2_MCA_DDRPHY_PC_CONFIG0_P0_PBA_ENABLE,
         };
 
 };
@@ -330,6 +332,21 @@ inline void set_refresh_control( fapi2::buffer<uint64_t>& o_data, const uint64_t
 {
     FAPI_INF("set init_cal refresh_control: %d", i_state);
     o_data.insertFromRight<TT::INIT_CAL_REFRESH_CONTROL, TT::INIT_CAL_REFRESH_CONTROL_LEN>(i_state);
+}
+
+///
+/// @brief Set PBA_ENABLE
+/// @tparam T fapi2 Target Type - defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_pba_enable( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    FAPI_INF("set_pba_enable: %s", (i_state == mss::HIGH) ? "high" : "low");
+    io_data.writeBit<TT::PBA_ENABLE>(i_state);
 }
 
 ///
