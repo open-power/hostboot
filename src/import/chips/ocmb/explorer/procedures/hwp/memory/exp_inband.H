@@ -87,7 +87,8 @@
 #include <exp_data_structs.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <chips/ocmb/explorer/common/include/exp_data_structs.H>
+#include <chips/centaur/procedures/hwp/memory/lib/shared/dimmConsts.H>
 
 namespace mss
 {
@@ -144,7 +145,7 @@ void forceLE(const T& i_input, std::vector<uint8_t>& io_data)
         io_data.push_back(l_byte);
 
         // Shift higher byte value into lowest no matter existing endianness
-        l_temp >>= mss::BITS_PER_BYTE;
+        l_temp >>= BITS_PER_BYTE;
     }
 }
 
@@ -194,7 +195,7 @@ bool readLE(const std::vector<uint8_t>& i_input, uint32_t& io_idx, T& o_data)
     {
         l_idx--;
         uint8_t v = i_input[l_idx];
-        o_data <<= mss::BITS_PER_BYTE;
+        o_data <<= BITS_PER_BYTE;
         o_data |= v;
     }
 
