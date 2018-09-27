@@ -132,11 +132,19 @@ actionclass replay_timeout_UERE
     funccall("ClearMbsSecondaryBits");
 };
 
+/** Handles cases where both MBSFIR[3:4] are on, else calls out self. */
+actionclass mbs_internal_timeout_precheck
+{
+    threshold32pday;
+    funccall("mbsInternalTimeoutPrecheck");
+};
+
 /** Handles RCD parity errors, if present. Otherwise, calls out self (TH 1). */
 actionclass mbs_internal_timeout
 {
     try ( funccall("analyzeMbaRcdParityError0"),
-          try ( funccall("analyzeMbaRcdParityError1"), self_th_1 ) );
+          try ( funccall("analyzeMbaRcdParityError1"),
+                mbs_internal_timeout_precheck ) );
 };
 
 /** Handles RCD parity errors, if present. Otherwise, calls out lvl 2 (TH 1). */

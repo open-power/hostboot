@@ -396,7 +396,7 @@ group gCHIFIR filter priority( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
     /** CHIFIR[61]
      *  DSFF channel timeout
      */
-    (rCHIFIR, bit(61)) ? self_th_1_UERE;
+    (rCHIFIR, bit(61)) ? dsffChannelTimeout_UERE;
 
     /** CHIFIR[62]
      *  SCOM error

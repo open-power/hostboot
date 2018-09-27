@@ -46,3 +46,9 @@ actionclass dmi_bus_th_1_UERE
     dmi_bus_th_1;
 };
 
+actionclass dsffChannelTimeout_UERE
+{
+    SueSource;
+    threshold1;
+    funccall("dsffChannelTimeoutCheck");
+};
