@@ -57,6 +57,7 @@
         name        "P9 MCS target MEMCFG REG";
         scomaddr    0x0501080a;
         capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFGPA
@@ -64,6 +65,7 @@
         name        "P9 MCS target MCFGPA";
         scomaddr    0x0501080b;
         capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFGPM
@@ -71,6 +73,7 @@
         name        "P9 MCS target MCFGPM";
         scomaddr    0x0501080c;
         capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFGPMA
@@ -78,5 +81,6 @@
         name        "P9 MCS target MCFGPMA";
         scomaddr    0x0501080d;
         capture     group default;
+        capture     group MirrorConfig;
     };
 

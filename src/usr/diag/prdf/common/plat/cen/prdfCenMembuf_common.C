@@ -28,6 +28,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginDef.H>
 #include <prdfPluginMap.H>
+#include <UtilHash.H> // for Util::hashString
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
@@ -73,6 +74,12 @@ PRDF_PLUGIN_DEFINE( cen_centaur, Initialize );
 int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                      bool & o_analyzed )
 {
+    // The hardware team requested that we capture the MCFIR in the FFDC.
+    ExtensibleChip * dmiChip = getConnectedParent( i_chip,  TYPE_DMI );
+    ExtensibleChip * miChip  = getConnectedParent( dmiChip, TYPE_MI  );
+    miChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                              Util::hashString("MirrorConfig") );
+
     // Check for a channel failure before analyzing this chip.
     o_analyzed = MemUtils::analyzeChnlFail<TYPE_MEMBUF>( i_chip, io_sc );
 
