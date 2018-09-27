@@ -131,10 +131,25 @@ inline void set_dram_enable( fapi2::buffer<uint64_t>& io_data, const mss::states
 
 ///
 /// @brief Configures PDA timings
+/// @param[in,out] io_buffer buffer on which the PDA timings live
+/// @note Configuring timings is a helper function, as it is used both in PDA and PBA
+/// PBA requires that we set the timings, but not enable PDA mode in the WC config, so we have a helper function
+///
+inline void configure_timings( fapi2::buffer<uint64_t>& io_buffer )
+{
+    // So we want to:
+    // Have a 0 delay between the MRS being sent and starting the 0/1 latching
+    mss::wc::set_pda_dq_on_delay(io_buffer, START_DELAY_VALUE);
+    // Hold the delay for as long as possible (safer and easier than figuring out how long to hold the values)
+    mss::wc::set_pda_dq_off_delay(io_buffer, HOLD_DELAY_VALUE);
+}
+
+///
+/// @brief Configures PDA timings
 /// @param[in] i_target a fapi2::Target MCA
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-fapi2::ReturnCode configure_timings( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+fapi2::ReturnCode configure_timings_and_enable( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
 /// @brief Configures all DRAM level configuration bits to the inputted settings
@@ -187,11 +202,47 @@ fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const uint64_t i_rank );
 
 ///
+/// @brief Helper function for changing the DRAM bit
+/// @tparam W the DRAM width
+/// @tparam TT the DRAM width traits class
+/// @param[in] i_target - the MCA target
+/// @param[in] i_dram - the DRAM on which to operate
+/// @param[in] i_state - the state to write the bit(s) to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< uint8_t W, typename TT = pdaBitTraits<W> >
+fapi2::ReturnCode change_dram_bit_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_dram,
+        const mss::states& i_state)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Note: the following avoids "undefined reference to" errors due to the set max dram below
+    // The use of traits and a const reference messes with it
+    constexpr auto NUM_DRAM = TT::NUM_DRAMS;
+
+    // Check bounds
+    FAPI_ASSERT(i_dram < NUM_DRAM,
+                fapi2::MSS_PDA_DRAM_OUT_OF_RANGE().
+                set_MCA_TARGET(i_target).
+                set_DRAM(i_dram).
+                set_MAX_DRAM(NUM_DRAM),
+                "%s was passed DRAM value of %lu which is not below the max value of %lu",
+                mss::c_str(i_target), i_dram, NUM_DRAM);
+
+    FAPI_TRY(mss::getScom(i_target, TT::BIT_MAP[i_dram].first, l_data));
+    FAPI_TRY(l_data.writeBit(i_state, TT::BIT_MAP[i_dram].second, TT::NUM_BITS));
+    FAPI_TRY(mss::putScom(i_target, TT::BIT_MAP[i_dram].first, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Writes the data bit enable for the properly inputted DRAM
 /// @param[in] i_target - the MCA target
 /// @param[in] i_dram - the DRAM on which to operate
 /// @param[in] i_state - the state to write the bit(s) to
-/// @param[in] i_delay the delay to use for the PDA command
 /// @note PDA is LOW enable, so 0's means ON. ON will configure the register to 0's
 ///
 fapi2::ReturnCode change_dram_bit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
@@ -303,7 +354,6 @@ class commands
     private:
         // The following is a map of target/DIMM pairs as the key to a map of
         // the MRS command as the key to the DRAM's to toggle. An explanation as to the data structure is included below
-        // Note: due to HB compile, a vector is used instead of a map
 
         // PDA compression is a little complex, but is organized to allow us to minimize the number of commands run
         // Each individual map is designed to further minimize the number of commands run
