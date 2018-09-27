@@ -353,10 +353,8 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             // Core checkstop not enabled, terminate.
             io_sc.service_data->setFlag( ServiceDataCollector::TERMINATE );
 
-            // TODO: RTC 144705 - We can no longer use SH, we'll need to pick
-            // either SW or HW
-            // PHYP was unresponsive, be sure to get SH content.
-            //io_sc.service_data->SetDump(CONTENT_SH, i_chip->GetChipHandle());
+            // PHYP was unresponsive, be sure to get SW content.
+            io_sc.service_data->SetDump(CONTENT_SW, i_chip->GetChipHandle());
             break;
         }
 
@@ -391,9 +389,8 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             // If we waited and never cleared, terminate machine.
             io_sc.service_data->setFlag( ServiceDataCollector::TERMINATE );
 
-            // TODO: RTC 144705
-            // PHYP was unresponsive, so get SH content.
-            //io_sc.service_data->SetDump(CONTENT_SH, i_chip->GetChipHandle());
+            // PHYP was unresponsive, so get SW content.
+            io_sc.service_data->SetDump(CONTENT_SW, i_chip->GetChipHandle());
         }
     } while(0);
     return SUCCESS;
