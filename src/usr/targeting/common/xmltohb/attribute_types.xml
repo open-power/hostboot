@@ -171,6 +171,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -842,6 +843,7 @@
     </simpleType>
     <writeable/>
     <ignoreEkb/>
+    <no_export/>
     <hwpfToHbAttrMap>
       <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
       <macro>DIRECT</macro>
@@ -858,6 +860,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1378,10 +1381,11 @@
     <readable/>
     <simpleType>
       <uint8_t>
-        <default>0x10</default>
+        <default>0xFF</default>
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1596,6 +1600,7 @@
       </uint32_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1703,6 +1708,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <!-- Required by FSP -->
@@ -1894,6 +1900,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1953,6 +1960,7 @@
         <default>256</default>
       </uint32_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2259,6 +2267,7 @@
       </uint32_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2435,6 +2444,7 @@
       </uint64_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -2684,6 +2694,7 @@
     <readable/>
     <writeable/>
     <ignoreEkb/>
+    <no_export/>
     <hwpfToHbAttrMap>
       <id>ATTR_ISTEP_MODE</id>
       <macro>DIRECT</macro>
@@ -6435,6 +6446,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <enumerationType>
@@ -6588,6 +6600,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7177,6 +7190,7 @@
       </int8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7216,6 +7230,7 @@
         <default>0x4</default>
       </uint32_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7228,6 +7243,7 @@
         <default>0x800000</default>
       </uint32_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7238,6 +7254,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7248,6 +7265,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7258,6 +7276,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7268,6 +7287,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -7278,6 +7298,7 @@
     <simpleType>
       <uint32_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -8007,23 +8028,6 @@
     <writeable/>
     <simpleType>
       <uint64_t/>
-    </simpleType>
-  </attribute>
-
-  <attribute>
-    <description>
-      Used to tell INTRP code whether to use the XIVE HW Reset
-      or a software based reset.
-      0 = Software based reset
-      1 = XIVE HW reset
-    </description>
-    <id>XIVE_HW_RESET</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
     </simpleType>
   </attribute>
 
