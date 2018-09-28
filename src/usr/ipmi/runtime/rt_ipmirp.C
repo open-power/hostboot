@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
  */
 
 #include "../ipmirp.H"
-#include "../ipmiconfig.H"
 #include "../ipmidd.H"
 #include <ipmi/ipmi_reasoncodes.H>
 #include <ipmi/ipmiif.H>
