@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <ipmi/ipmisel.H>
-#include "ipmiconfig.H"
 #include <ipmi/ipmi_reasoncodes.H>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiif.H>

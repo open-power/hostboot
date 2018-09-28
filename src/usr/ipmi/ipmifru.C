@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
  */
 
 #include "ipmifru.H"
-#include "ipmiconfig.H"
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
 
