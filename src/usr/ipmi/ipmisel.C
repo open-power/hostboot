@@ -31,7 +31,6 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <ipmi/ipmisel.H>
-#include "ipmiconfig.H"
 #include <ipmi/ipmi_reasoncodes.H>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiif.H>

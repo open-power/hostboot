@@ -28,7 +28,6 @@
  */
 
 #include "ipmifru.H"
-#include "ipmiconfig.H"
 #include <devicefw/driverif.H>
 #include <devicefw/userif.H>
 
