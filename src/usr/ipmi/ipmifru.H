@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <ipmi/ipmiif.H>
-#include "ipmibt.H"
 #include <console/consoleif.H>
 
 
