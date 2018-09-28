@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -179,15 +179,24 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
-         * @brief IPMI resource provider
+         * @brief IPMI
          */
 #ifdef CONFIG_BMC_IPMI
         {
-            "libipmi.so",                               // taskname
+            "libipmibase.so",                           // taskname
             NULL,                                       // no ptr to fnct
             {
 
                 START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+        {
+            "libipmiext.so",                            // taskname
+            NULL,                                       // no ptr to fnct
+            {
+
+                INIT_TASK,                              // task type
                 EXT_IMAGE,                              // Extended Module
             }
         },
