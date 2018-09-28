@@ -49,21 +49,21 @@ extern "C"
         // get connected dimms from mba
         l_dimms = l_mba.getChildren<TARGET_TYPE_DIMM>();
 
-        // find the paired dimm
+        // find the paired dimm (different port slct, same dimm slct)
         for ( auto const& dimm : l_dimms )
         {
             uint8_t l_tmpPs = 0;
             FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, dimm, l_tmpPs) );
 
-            // DIMM on same port slct
-            if ( l_tmpPs == l_curPs )
+            // DIMM on different port slct
+            if ( l_tmpPs != l_curPs )
             {
                 uint8_t l_tmpDs = 0;
                 FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, dimm,
                                         l_tmpDs) );
 
-                // different DIMM from the current one
-                if ( l_tmpDs != l_curDs )
+                // same DIMM select as the current DIMM
+                if ( l_tmpDs == l_curDs )
                 {
                     // found the paired DIMM
                     o_pairedDimm = dimm;
