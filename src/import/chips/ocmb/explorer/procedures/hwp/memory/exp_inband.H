@@ -87,8 +87,7 @@
 #include <exp_data_structs.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
-#include <chips/ocmb/explorer/common/include/exp_data_structs.H>
-#include <chips/centaur/procedures/hwp/memory/lib/shared/dimmConsts.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
