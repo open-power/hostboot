@@ -1840,30 +1840,30 @@ _\s\()_section:
 
 typedef enum
 {
-    P9_XIP_SECTION_SBE_LOADERTEXT = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_SBE_LOADERDATA = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_SBE_TEXT       = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_SBE_DATA       = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_SBE_BASE       = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTION_SBE_BASELOADER = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTION_SBE_OVERRIDES  = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTION_SBE_RINGS      = P9_XIP_SECTIONS_PLUS(7),
-    P9_XIP_SECTION_SBE_OVERLAYS   = P9_XIP_SECTIONS_PLUS(8),
-    P9_XIP_SECTION_SBE_HBBL       = P9_XIP_SECTIONS_PLUS(9),
-    P9_XIP_SECTIONS_SBE           = P9_XIP_SECTIONS_PLUS(10) // # sections
+    P9_XIP_SECTION_SBE_LOADERTEXT     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_SBE_PIBREPRDATA    = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_SBE_TEXT           = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_SBE_DATA           = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_SBE_BASE           = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_SBE_BASELOADER     = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTION_SBE_OVERRIDES      = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_SBE_RINGS          = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTION_SBE_OVERLAYS       = P9_XIP_SECTIONS_PLUS(8),
+    P9_XIP_SECTION_SBE_HBBL           = P9_XIP_SECTIONS_PLUS(9),
+    P9_XIP_SECTIONS_SBE               = P9_XIP_SECTIONS_PLUS(10) // # sections
 } p9_xip_section_sbe_t;
 
-#define P9_XIP_SECTION_NAMES_SBE(var)    \
-    P9_XIP_SECTION_NAMES(var,            \
-                         ".loader_text", \
-                         ".loader_data", \
-                         ".text",        \
-                         ".data",        \
-                         ".base",        \
-                         ".baseloader",  \
-                         ".overrides",   \
-                         ".rings",       \
-                         ".overlays",    \
+#define P9_XIP_SECTION_NAMES_SBE(var)       \
+    P9_XIP_SECTION_NAMES(var,               \
+                         ".loader_text",    \
+                         ".pibrepr_data",   \
+                         ".text",           \
+                         ".data",           \
+                         ".base",           \
+                         ".baseloader",     \
+                         ".overrides",      \
+                         ".rings",          \
+                         ".overlays",       \
                          ".hbbl")
 
 /**************************************************************************/
