@@ -503,18 +503,12 @@ int32_t __getPortAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
     uint64_t mrnkBits = ranks2bits( num_mrnk );
     uint64_t srnkBits = ranks2bits( num_srnk );
 
+    // Get the number of configured address bits for the row and column.
+    uint8_t rowBits = getRowNumConfig<TYPE_MBA>( mba );
+    uint8_t colBits = getColNumConfig<TYPE_MBA>( mba );
+
     do
     {
-        // Get the number of configured address bits for the row and column.
-        uint8_t rowBits, colBits;
-        o_rc = getDimmRowCol( mba, rowBits, colBits );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getDimmConfig() failed. HUID:0x%08X",
-                      i_chip->GetId());
-            break;
-        }
-
         // The attribute used in getDimmRowCol() returns a value for colBits
         // which includes c2-c0. Those bits are tied to zero and are not
         // included in col. Therefore, we need to subtract 3 to get the real

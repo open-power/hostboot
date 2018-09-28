@@ -420,14 +420,18 @@ template<TARGETING::TYPE T>
 uint8_t getDramGen( TARGETING::TargetHandle_t i_trgt );
 
 /**
- * @brief   Get DIMM number of rows and columns
- * @param   i_mba    MBA target
- * @param   o_rowNum Number of rows
- * @param   o_colNum Number of columns
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ * @param  i_trgt MBA target
+ * @return The number of row bits configured on this memory target.
  */
-int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
-                       uint8_t & o_colNum );
+template<TARGETING::TYPE T>
+uint8_t getRowNumConfig( TARGETING::TargetHandle_t i_trgt );
+
+/**
+ * @param  i_trgt MBA target
+ * @return The number of column bits configured on this memory target.
+ */
+template<TARGETING::TYPE T>
+uint8_t getColNumConfig( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Returns a sorted list of configured master ranks for an MCA or MBA.

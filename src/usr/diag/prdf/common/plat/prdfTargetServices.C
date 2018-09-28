@@ -1389,39 +1389,24 @@ uint8_t getDramGen<TYPE_MBA>( TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
-                       uint8_t & o_colNum )
+template<>
+uint8_t getRowNumConfig<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt )
 {
-    #define PRDF_FUNC "[PlatServices::getDimmRowCol] "
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
-    int32_t o_rc = FAIL;
-    do
-    {
-        if ( TYPE_MBA != getTargetType( i_mba ) )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid Target. HUID:0X%08X",
-                      getHuid( i_mba ) );
-            break;
-        }
+    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_ROWS>();
+}
 
-        ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
-        if ( MODEL_CUMULUS == l_procModel )
-        {
-            o_rowNum = i_mba->getAttr<ATTR_CEN_EFF_DRAM_ROWS>();
-            o_colNum = i_mba->getAttr<ATTR_CEN_EFF_DRAM_COLS>();
-        }
-        else // NIMBUS or something without CENTAURs
-        {
-            o_rowNum = i_mba->getAttr<ATTR_EFF_DRAM_ROWS>();
-            o_colNum = i_mba->getAttr<ATTR_EFF_DRAM_COLS>();
-        }
+//------------------------------------------------------------------------------
 
-        o_rc = SUCCESS;
+template<>
+uint8_t getColNumConfig<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
-    }while(0);
-
-    return o_rc;
-    #undef PRDF_FUNC
+    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_COLS>();
 }
 
 //------------------------------------------------------------------------------
