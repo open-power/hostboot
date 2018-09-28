@@ -533,9 +533,6 @@
     <attribute>
       <id>VPD_REC_NUM</id>
     </attribute>
-    <attribute>
-      <id>XIVE_HW_RESET</id>
-    </attribute>
   </targetType>
 
   <targetType>
@@ -712,6 +709,10 @@
     </attribute>
     <attribute>
       <id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
+    </attribute>
+    <attribute>
+      <id>TIME_BASE</id>
+      <default>0x800000</default>
     </attribute>
     <attribute>
       <default>4</default>
