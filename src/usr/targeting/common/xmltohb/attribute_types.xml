@@ -1385,30 +1385,6 @@
   </attribute>
 
   <attribute>
-    <id>EFF_DRAM_COLS</id>
-    <!-- @fixme -->
-    <description>Number of DRAM columns. Initialized and used by HWPs.</description>
-    <simpleType>
-      <uint8_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>EFF_DRAM_ROWS</id>
-    <!-- @fixme -->
-    <description>Number of DRAM rows. Initialized and used by HWPs.</description>
-    <simpleType>
-      <uint8_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
     <description>
        Bitmask of threads to enable for each processor,
        Zero means enable all architected threads
