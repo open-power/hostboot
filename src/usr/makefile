@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -64,8 +64,9 @@ SUBDIRS += gpio.d
 SUBDIRS += lpc.d
 SUBDIRS += console.d
 SUBDIRS += errldisplay.d
-SUBDIRS += ipmi.d
-SUBDIRS += htmgt.d
+SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmibase.d)
+SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmiext.d)
+SUBDIRS += $(if $(CONFIG_HTMGT),htmgt.d)
 SUBDIRS += xz.d
 
 include ${ROOTPATH}/config.mk

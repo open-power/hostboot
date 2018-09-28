@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -170,7 +170,8 @@ EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
 EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
-EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi)
+EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmibase)
+EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
 EXTENDED_MODULES += secure_boot
 EXTENDED_MODULES += xz
 

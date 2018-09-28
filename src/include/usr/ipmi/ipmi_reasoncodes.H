@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Artem Senichev                                                     */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -32,13 +32,16 @@ namespace IPMI
 {
     enum IPMIModuleId
     {
-        MOD_IPMISRV_SEND        = 0x01, // IPMI::send/IPMI::sendrecv
-        MOD_IPMISRV_REPLY       = 0x02, // IPMI::respond
-        MOD_IPMISENSOR          = 0x03, // IPMI::sensor
-        MOD_IPMIDCMI            = 0x04, // IPMI::sensor
-        MOD_IPMIRT              = 0x05, // rt IPMI::send/IPMI::sendrecv
-        MOD_IPMISRV_POSTEVENT   = 0x06, // IpmiRP::postEvent
-        MOD_IPMIFRU_INV         = 0x07, // IPMI:fruInventory
+        MOD_IPMISRV_SEND            = 0x01, // IPMI::send/IPMI::sendrecv
+        MOD_IPMISRV_REPLY           = 0x02, // IPMI::respond
+        MOD_IPMISENSOR              = 0x03, // IPMI::sensor
+        MOD_IPMIDCMI                = 0x04, // IPMI::sensor
+        MOD_IPMIRT                  = 0x05, // rt IPMI::send/IPMI::sendrecv
+        MOD_IPMISRV_POSTEVENT       = 0x06, // IpmiRP::postEvent
+        MOD_IPMIFRU_INV             = 0x07, // IPMI:fruInventory
+        MOD_IPMISENSOR_TYPE         = 0x08, // IPMI::getSensorType
+        MOD_IPMISENSOR_ENTITY_ID    = 0x09, // IPMI::getSensorEntityId
+        MOD_IPMISENSOR_NAME         = 0x0a, // IPMI::getSensorName
     };
 
     enum IPMIReasonCode
@@ -56,6 +59,8 @@ namespace IPMI
         RC_SENSOR_READING_NOT_AVAIL     = IPMI_COMP_ID | 0x0b,
         RC_GET_SENSOR_TYPE_CMD_FAILED   = IPMI_COMP_ID | 0x0c,
         RC_INVALID_VPD_DATA             = IPMI_COMP_ID | 0x0e,
+        RC_SENSOR_NOT_FOUND             = IPMI_COMP_ID | 0x0f,
+        RC_INVALID_SENSOR_NUMBER        = IPMI_COMP_ID | 0x10,
     };
 };
 
