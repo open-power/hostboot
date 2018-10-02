@@ -280,6 +280,18 @@
 </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
+    <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
+    <ffdc>VOLT_TARGET</ffdc>
+    <ffdc>SUPPLIED_NUMBER</ffdc>
+    <ffdc>EXPECTED_NUMBER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
     <description>
       When considering the frequencies in the MRW and the max supported
