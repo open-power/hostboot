@@ -53,7 +53,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>volt_vpp</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -115,7 +114,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>freq_bias_percentage</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -131,7 +129,6 @@
         <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
         <writeable/>
         <array> 2 2 4</array>
-        <mssAccessorName>eff_dimm_spare</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -184,7 +181,6 @@
         </enum>
         <writeable/>
         <array> 2</array>
-        <mssAccessorName>eff_dram_wr_vref</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -198,7 +194,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2</array>
-        <mssAccessorName>eff_dram_wr_vref_schmoo</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -212,7 +207,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2</array>
-        <mssAccessorName>eff_dram_wrddr4_vref_schmoo</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -366,7 +360,6 @@
         <enum>SLOWEXIT = 0, FASTEXIT = 1</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dram_dll_ppd</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -452,7 +445,6 @@
         </enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dram_pasr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -471,7 +463,6 @@
         <enum>SRT = 0, ASR = 1</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dram_asr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -490,7 +481,6 @@
         <enum>NORMAL = 0, EXTEND = 1</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dram_srt</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -508,7 +498,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_mpr_loc</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -965,7 +954,6 @@
         <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -977,7 +965,6 @@
         <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_addr_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -996,7 +983,6 @@
         </enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_test_valid</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1016,7 +1002,6 @@
          </enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_param_valid</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1027,7 +1012,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_wr_eye_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1038,7 +1022,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_rd_eye_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1049,7 +1032,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_dqs_clk_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1060,7 +1042,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_rd_gate_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1071,7 +1052,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_schmoo_addr_cmd_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1135,7 +1115,6 @@
         </enum>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_ibm_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1208,7 +1187,6 @@
         <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
-        <mssAccessorName>mem_port_fail_throttle</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1295,7 +1273,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>dimm_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1306,7 +1283,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>dimm_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1317,7 +1293,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>channel_pair_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1328,7 +1303,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>channel_pair_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1339,7 +1313,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>dimm_maxpower</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1405,7 +1378,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>runtime_mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1436,7 +1408,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dimm_functional_vector</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2126,7 +2097,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 4 4</array>
-        <mssAccessorName>slew_rate_data</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2143,7 +2113,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 4 4</array>
-        <mssAccessorName>slew_rate_adr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2155,7 +2124,6 @@
         <writeable/>
         <array>2</array>
 
-        <mssAccessorName>schmoo_multiple_setup_call</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2169,7 +2137,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_buffer_latency</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2180,7 +2147,6 @@
         <valueType>uint64</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName> eff_lrdimm_word_x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2195,7 +2161,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>lrdimm_mr12_reg</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2211,7 +2176,6 @@
         <valueType>uint64</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>lrdimm_additional_cntl_words</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2225,7 +2189,6 @@
         <enum>NORMAL = 0, 2X_MULT = 2, 4X_MULT = 4</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>lrdimm_rank_mult_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2238,7 +2201,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_vpd_version</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2252,7 +2214,6 @@
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_120 = 0x02</enum>
         <writeable/>
-        <mssAccessorName>volt_override</mssAccessorName>
     </attribute>
 
    <attribute>
@@ -2263,7 +2224,6 @@
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_1350 = 0x01, VOLT_1200 = 0x02</enum>
         <writeable/>
-        <mssAccessorName>vddr_overide_spd</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2273,7 +2233,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>vmem_regulator_max_dimm_count</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2295,7 +2254,6 @@
         <valueType>uint8</valueType>
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
-        <mssAccessorName>vccd_override</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2312,7 +2270,6 @@
         <enum>UNTESTED = 0, 700K = 700, 600K = 600, 500K = 500, 400K = 400, 300K = 300, 200K = 200,  UNLIMITED = 8</enum>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_mac</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2330,7 +2287,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_module_bus_width</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2453,7 +2409,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_bc06</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2563,7 +2518,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bc1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2574,7 +2528,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc2x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2585,7 +2538,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc3x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2596,7 +2548,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc4x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2607,7 +2558,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2618,7 +2568,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bc6x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2629,7 +2578,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f70bc7x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2640,7 +2588,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc8x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2651,7 +2598,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bc9x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2662,7 +2608,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bcax</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2673,7 +2618,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f30bcbx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2684,7 +2628,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bccx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2695,7 +2638,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bcdx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2706,7 +2648,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bcex</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2717,7 +2658,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f0bcfx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2728,7 +2668,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f1bccx</mssAccessorName>
         </attribute>
         <attribute>
         <id>ATTR_EFF_DIMM_DDR4_F1BCDx</id>
@@ -2738,7 +2677,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f1bcdx</mssAccessorName>
         </attribute>
         <attribute>
         <id>ATTR_EFF_DIMM_DDR4_F1BCEx</id>
@@ -2748,7 +2686,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f1bcex</mssAccessorName>
         </attribute>
         <attribute>
         <id>ATTR_EFF_DIMM_DDR4_F1BCFx</id>
@@ -2758,7 +2695,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f1bcfx</mssAccessorName>
         </attribute>
 
     <attribute>
@@ -2769,7 +2705,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc0x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2780,7 +2715,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2791,7 +2725,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc2x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2802,7 +2735,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc3x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2813,7 +2745,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc4x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2824,7 +2755,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2835,7 +2765,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f4bc6x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2846,7 +2775,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f5bc0x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2857,7 +2785,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f5bc1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2868,7 +2795,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f5bc2x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2879,7 +2805,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f5bc3x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2890,7 +2815,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f5bc5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2912,7 +2836,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f6bc0x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2923,7 +2846,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f6bc1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2934,7 +2856,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f6bc2x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2945,7 +2866,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f6bc3x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2967,7 +2887,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f6bc5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2978,7 +2897,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bc8x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2989,7 +2907,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bc9x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3000,7 +2917,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bcax</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3011,7 +2927,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bcbx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3022,7 +2937,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bccx</mssAccessorName>
     </attribute>
 
    <attribute>
@@ -3033,7 +2947,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bcdx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3044,7 +2957,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bcex</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3055,7 +2967,6 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
-        <mssAccessorName>eff_dimm_ddr4_f74bcfx</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3071,7 +2982,6 @@
         <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
         <array>2 2</array>
         <writeable/>
-        <mssAccessorName>eff_dram_ron</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3212,7 +3122,6 @@
         <writeable/>
         <array> 2 </array>
         <mssUnits> nck </mssUnits>
-        <mssAccessorName>eff_dram_txs</mssAccessorName>
     </attribute>
 
     <attribute>

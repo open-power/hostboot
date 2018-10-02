@@ -239,7 +239,6 @@
     <initToZero/>
     <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
-    <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -284,7 +283,6 @@
     <platInit/>
     <initToZero/>
     <!-- Ineffective for Nimbus -->
-    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -300,7 +298,6 @@
     <mssUnits>cW</mssUnits>
     <initToZero/>
     <!-- Ineffective for Nimbus -->
-    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr3</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -343,7 +340,6 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_avdd_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -355,7 +351,6 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vdd_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -367,7 +362,6 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vcs_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -379,7 +373,6 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vpp_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -391,7 +384,6 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vddr_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -462,7 +454,6 @@
     <default>ON</default>
     <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
-    <mssAccessorName>mrw_prefetch_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -480,7 +471,6 @@
     <default>OFF</default>
     <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
-    <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -571,7 +561,6 @@
       MT2666 = 2666
     </enum>
     <default> 1866, 2133, 2400, 2666 </default>
-    <mssAccessorName>mrw_supported_freq</mssAccessorName>
   </attribute>
 
   <attribute>
