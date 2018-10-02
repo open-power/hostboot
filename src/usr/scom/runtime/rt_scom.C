@@ -32,6 +32,7 @@
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
 #include <xscom/piberror.H>
+#include <runtime/hbrt_utilities.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
@@ -286,7 +287,8 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                                         l_err);
                 }
 
-                // Note: no trace buffer available at runtime
+                l_err->collectTrace( SCOM_COMP_NAME, 256);
+                l_err->collectTrace( HBRT_TRACE_NAME, 256);
             }
         }
         else // Hypervisor interface not initialized
@@ -308,6 +310,8 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
 
             l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
+            l_err->collectTrace( SCOM_COMP_NAME, 256);
+            l_err->collectTrace( HBRT_TRACE_NAME, 256);
         }
 
     } while(0);

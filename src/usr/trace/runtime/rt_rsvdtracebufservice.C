@@ -96,6 +96,15 @@ void RsvdTraceBufService::retrieveDataFromLastCrash()
     g_hostInterfaces->puts(
                         " >> RsvdTraceBufService::retrieveDataFromLastCrash\n");
 
+    /*@
+     * @errortype    ERRL_SEV_INFORMATIONAL
+     * @moduleid     RUNTIME::MOD_INIT_RT_RES_MEM_TRACE_BUF
+     * @reasoncode   RUNTIME::RC_RT_RES_TRACE_BUF_DUMPED
+     * @userdata1    unused
+     * @userdata2    unused
+     * @devdesc      Copy of trace buffer from previous HBRT run
+     * @custdesc     Informational log containing historic data
+     */
     iv_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                      RUNTIME::MOD_INIT_RT_RES_MEM_TRACE_BUF,
                                      RUNTIME::RC_RT_RES_TRACE_BUF_DUMPED,
