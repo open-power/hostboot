@@ -22,3 +22,55 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gen_mss_voltage_traits.H
+/// @brief Contains voltage traits information
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
+#ifndef _GEN_MSS_VOLTAGE_TRAITS_H_
+#define _GEN_MSS_VOLTAGE_TRAITS_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+///
+/// @class Traits and policy class for voltage code
+/// @tparam M mss::mc_type memory controller type
+/// @tparam D mss::spd::device_type DRAM device type (generation)
+///
+template< mss::mc_type M, mss::spd::device_type D >
+class voltage_traits;
+
+///
+/// @class Traits and policy class for voltage code - specialization for the NIMBUS memory controller type
+///
+template<>
+class voltage_traits<mss::mc_type::NIMBUS, mss::spd::device_type::DDR4>
+{
+    public:
+        //////////////////////////////////////////////////////////////
+        // Target types
+        //////////////////////////////////////////////////////////////
+        static constexpr fapi2::TargetType VOLTAGE_TARGET_TYPE = fapi2::TARGET_TYPE_MCBIST;
+        static constexpr fapi2::TargetType SPD_TARGET_TYPE = fapi2::TARGET_TYPE_MCS;
+
+        //////////////////////////////////////////////////////////////
+        // Traits values
+        //////////////////////////////////////////////////////////////
+        // List of attribute setter functions for setting voltage rail values
+        // This vector is defined in the p9 space: lib/eff_config/nimbus_mss_voltage.C
+        static const std::vector<fapi2::ReturnCode (*)(const fapi2::Target<VOLTAGE_TARGET_TYPE>&, uint32_t)> voltage_setters;
+};
+
+
+} // ns mss
+#endif
