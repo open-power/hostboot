@@ -63,7 +63,6 @@
     2400 = 2400
   </enum>
   <platInit/>
-  <mssAccessorName>freq_mca_mhz</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
