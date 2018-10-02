@@ -42,18 +42,10 @@
 #include <fapi2.H>
 
 // mss lib
-#include <generic/memory/lib/spd/spd_facade.H>
-#include <lib/eff_config/attr_setters.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/find.H>
-#include <lib/utils/checker.H>
+#include <generic/memory/lib/utils/voltage/gen_mss_volt.H>
 
-using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCS;
-using fapi2::TARGET_TYPE_MCA;
-using fapi2::TARGET_TYPE_DIMM;
-using fapi2::FAPI2_RC_SUCCESS;
 
 extern "C"
 {
@@ -65,52 +57,13 @@ extern "C"
     ///
     fapi2::ReturnCode p9_mss_volt( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
-        // Loop through MCS
         for (const auto& l_mcs : i_targets)
         {
-            FAPI_INF("Populating decoder cache for %s", mss::c_str(l_mcs));
-
-            //Factory cache is per MCS
-            std::vector< mss::spd::facade > l_spd_facades;
-            FAPI_TRY( get_spd_decoder_list(l_mcs, l_spd_facades) );
-
-            // Get dimms for each MCS
-            for ( const auto& l_cache : l_spd_facades )
-            {
-                const auto l_dimm = l_cache.get_dimm_target();
-                uint8_t l_dimm_nominal = 0;
-                uint8_t l_dimm_endurant = 0;
-
-                // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
-                FAPI_TRY( l_cache.operable_nominal_voltage(l_dimm_nominal) );
-                FAPI_TRY( l_cache.endurant_nominal_voltage(l_dimm_endurant) );
-
-                //Check to make sure 1.2 V is both operable and endurant, fail if it is not
-                FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
-                              fapi2::MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE().
-                              set_ACTUAL_OPERABLE(l_dimm_nominal).
-                              set_ACTUAL_ENDURANT(l_dimm_endurant).
-                              set_EXPECTED_OPERABLE(mss::spd::OPERABLE).
-                              set_EXPECTED_ENDURANT(mss::spd::ENDURANT).
-                              set_DIMM_TARGET(l_dimm),
-                              "%s: DIMM is not operable (%d) expected (%d)"
-                              " and/or endurant (%d) expected (%d) at 1.2V",
-                              mss::c_str(l_dimm),
-                              l_dimm_nominal,
-                              mss::spd::OPERABLE,
-                              l_dimm_endurant,
-                              mss::spd::ENDURANT);
-            } // l_dimm
-
-            // Set the attributes for this MCS, values are in mss_const.H
-            FAPI_TRY (mss::set_voltage_attributes (l_mcs,
-                                                   mss::DDR4_NOMINAL_VOLTAGE,
-                                                   mss::DDR4_VPP_VOLTAGE),
-                      "Failed to set volt attributes");
+            FAPI_TRY( (mss::setup_voltage_rail_values<mss::mc_type::NIMBUS, mss::spd::device_type::DDR4>(l_mcs)),
+                      "Failed setup_voltage_rail_values for %s", mss::c_str(l_mcs) );
         } // mcs
 
         FAPI_INF("End mss volt");
-        return FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -483,6 +483,47 @@ fapi_try_exit:
     return false;
 }
 
+///
+/// @brief ATTR_MSS_VOLT_VDDR setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_MCBIST
+/// @param[in] i_value value to set - cannot be const because FAPI_ATTR_SET expects non-const
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vddr(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VOLT_VDDR, l_mcbist, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MSS_VOLT_VDDR: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VOLT_VPP setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_MCBIST
+/// @param[in] i_value value to set - cannot be const because FAPI_ATTR_SET expects non-const
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vpp(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VOLT_VPP, l_mcbist, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MSS_VOLT_VPP: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    return fapi2::current_err;
+}
 } // close mss namespace
 
 #endif

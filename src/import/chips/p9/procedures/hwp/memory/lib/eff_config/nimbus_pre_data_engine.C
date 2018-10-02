@@ -35,7 +35,6 @@
 
 #include <generic/memory/lib/utils/index.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/eff_config/attr_setters.H>
 #include <generic/memory/lib/data_engine/pre_data_init.H>
 #include <generic/memory/lib/utils/find.H>
 
