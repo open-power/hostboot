@@ -157,7 +157,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_bank_group_bits</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -176,7 +175,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_columns_bits</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -526,7 +524,6 @@
         <writeable/>
         <array> 2 </array>
         <mssUnits> nck </mssUnits>
-        <mssAccessorName>eff_dram_tmaw</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -565,7 +562,6 @@
         <mssUnit>decode from SPD spec</mssUnit>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -707,7 +703,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>4 4</array>
-        <mssAccessorName>row_repair_data</mssAccessorName>
     </attribute>
 
     <attribute>
