@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -150,7 +150,7 @@ namespace PNOR
         RC_PNOR_READ_NOT_SUPPORTED   = PNOR_COMP_ID | 0x1F,
         RC_PNOR_WRITE_NOT_SUPPORTED  = PNOR_COMP_ID | 0x20,
         RC_NON_ECC_PROTECTED_SECTION = PNOR_COMP_ID | 0x21,
-        RC_WRITABLE_PERM_FAIL        = PNOR_COMP_ID | 0x22,
+        // Skipping RC_WRITABLE_PERM_FAIL - no longer used
         RC_WRITE_TRACKED_PERM_FAIL   = PNOR_COMP_ID | 0x23,
         //termination_rc
         RC_PARTITION_TABLE_NOT_FOUND = PNOR_COMP_ID | 0x24,
@@ -167,6 +167,7 @@ namespace PNOR
         RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2C,
         RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x2D,
         RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x2E,
+        RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x2F,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

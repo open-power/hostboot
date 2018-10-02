@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -498,31 +498,30 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     // Handle section permissions
                     if (o_TOC[secId].misc & FFS_MISC_READ_ONLY)
                     {
-                        // Need to set permissions to allow writing to virtual
-                        // addresses, but prevents the kernel from ejecting
-                        // dirty pages (no WRITE_TRACKED).
+                        // Need to set permissions to READ_ONLY as per the
+                        // PNOR layout.
                         int rc = mm_set_permission(
                                                 (void*)o_TOC[secId].virtAddr,
                                                 o_TOC[secId].size,
-                                                WRITABLE);
+                                                READ_ONLY);
                         if (rc)
                         {
-                            TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE for section %s.",
+                            TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to READ_ONLY for section %s.",
                                       cv_EYECATCHER[secId]);
                             /*@
                             * @errortype
                             * @moduleid PNOR::MOD_PNORRP_READTOC
-                            * @reasoncode PNOR::RC_WRITABLE_PERM_FAIL
+                            * @reasoncode PNOR::RC_READ_ONLY_PERM_FAIL
                             * @userdata1 PNOR section id
                             * @userdata2 PNOR section vaddr
                             * @devdesc Could not set permissions of the
-                            * given PNOR section to WRITABLE
+                            * given PNOR section to READ_ONLY
                             * @custdesc A problem occurred while reading PNOR partition table
                             */
                             l_errhdl = new ERRORLOG::ErrlEntry(
                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_PNORRP_READTOC,
-                                            PNOR::RC_WRITABLE_PERM_FAIL,
+                                            PNOR::RC_READ_ONLY_PERM_FAIL,
                                             secId,
                                             o_TOC[secId].virtAddr,
                                             true /*Add HB SW Callout*/);
