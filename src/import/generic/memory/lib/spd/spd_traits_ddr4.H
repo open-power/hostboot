@@ -3368,7 +3368,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_1866
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 0, 1 for data rates <= 1866";
 
         template <typename T>
@@ -3387,7 +3387,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_2400
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 0, 1 for 1866 < data rates <= 2400";
 
         template <typename T>
@@ -3406,7 +3406,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_3200
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 0, 1 for 2400 < data rates <= 3200";
 
         template <typename T>
@@ -3425,7 +3425,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_1866
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 2, 3 for data rates <= 1866";
 
         template <typename T>
@@ -3444,7 +3444,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_2400
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 2, 3 for 1866 < data rates <= 2400";
 
         template <typename T>
@@ -3463,7 +3463,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_3200
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0b01;
+        static constexpr size_t COMPARISON_VAL = 0b111;
         static constexpr const char* FIELD_STR = "DRAM ODT RTT_PARK, package rank 2, 3 for 2400 < data rates <= 3200";
 
         template <typename T>

@@ -48,6 +48,7 @@
 #include <lib/shared/mss_kind.H>
 #include <lib/phy/dp16.H>
 #include <lib/mss_attribute_accessors_manual.H>
+#include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 
 namespace mss
 {
@@ -4496,8 +4497,10 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01) );
-    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23) );
+    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01),
+              "%s failed to decode RTT_PARK for ranks 0/1", mss::c_str(iv_mcs) );
+    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23),
+              "%s failed to decode RTT_PARK for ranks 2/3", mss::c_str(iv_mcs) );
 
     // Setting the four rank values for this dimm
     // Rank 0 and 1 have the same value, l_decoder_val_01
@@ -5249,21 +5252,10 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
 
         // Find our blob in the vector of blob pointers
         uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
-        uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {};
 
-        // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
-        // This will fill the VPD attributes with 0's which is perfectly ok.
-        for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
-        {
-            uint8_t l_num_master_ranks = 0;
-            FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
-            l_rank_count_dimm[mss::index(d)] = l_num_master_ranks;
-        }
-
-        // This value will, of course, be 0 if there is no DIMM in the port.
-        // Which shouldn't happen w/the DIMM check above.
-        l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
-        l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+        // Sets up the number of ranks for this port
+        FAPI_TRY(configure_vpd_ranks<mss::proc_type::NIMBUS>(p, l_vpd_info), "%s failed to configure the ranks on the VPD",
+                 mss::c_str(p));
 
         FAPI_INF("%s. VPD info - rank count for dimm_0: %d, dimm_1: %d",
                  mss::c_str(i_target), l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);

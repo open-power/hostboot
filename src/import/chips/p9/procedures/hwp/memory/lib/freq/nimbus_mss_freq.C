@@ -131,8 +131,8 @@ fapi2::ReturnCode set_freq<mss::proc_type::NIMBUS>(
 
 ///
 /// @brief      Gets the number of master ranks per DIMM - specialization for NIMBUS and MCA
-/// @param[in]  i_target the target on which to set the frequency values
-/// @param[out]  o_master_ranks number of master ranks per DIMM
+/// @param[in]  i_target the target on which to get the number of master ranks per DIMM
+/// @param[out] o_master_ranks number of master ranks per DIMM
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
@@ -152,6 +152,20 @@ template<>
 fapi2::ReturnCode max_allowed_dimm_freq<mss::proc_type::NIMBUS>(uint32_t* o_allowed_dimm_freq)
 {
     return mss::max_allowed_dimm_freq(o_allowed_dimm_freq);
+}
+
+///
+/// @brief      Gets the DIMM type - specialization for NIMBUS and MCA
+/// @param[in]  i_target the target on which to get the DIMM types
+/// @param[out] o_dimm_type DIMM types
+/// @return     FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_dimm_type<mss::proc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    uint8_t* o_dimm_type)
+{
+    return mss::eff_dimm_type(i_target, o_dimm_type);
 }
 
 ///
