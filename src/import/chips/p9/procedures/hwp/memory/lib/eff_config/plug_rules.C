@@ -72,15 +72,28 @@ fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds )
     // TK:LRDIMM Create appropriate check for LRDIMM(s) here
     for(const auto& l_kind : i_kinds)
     {
+        // Prints out an error message if we have LRDIMM's
+        // We don't want to exit with an error as we are in development, but want to know we have LRDIMM
+        if( l_kind.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+        {
+            FAPI_ERR("%s has an LRDIMM plugged into it!", mss::c_str(l_kind.iv_target));
+        }
+
+#if 0
+
         FAPI_ASSERT( l_kind.iv_dimm_type != fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
                      fapi2::MSS_PLUG_RULES_LRDIMM_UNSUPPORTED()
                      .set_DIMM_TARGET(l_kind.iv_target),
                      "%s has an LRDIMM plugged and is currently unsupported",
                      mss::c_str(l_kind.iv_target) );
+#endif
     }
 
+#if 0
 fapi_try_exit:
     return fapi2::current_err;
+#endif
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
