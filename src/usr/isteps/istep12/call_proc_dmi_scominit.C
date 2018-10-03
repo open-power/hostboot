@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,8 @@
 
 // HWP
 #include    <p9_io_dmi_scominit.H>
+
+#include    <mmio/mmio.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -101,6 +103,22 @@ void* call_proc_dmi_scominit (void *io_pArgs)
                      "SUCCESS :  p9_io_dmi_scominit HWP");
         }
 
+    }
+
+    // map OCMBs into Hostboot memory
+    l_err = MMIO::mmioSetup();
+    if ( l_err )
+    {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  call_proc_dmi_scominit, unable to"
+                " initialize MMIO!",
+                l_err->reasonCode() );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, ISTEP_COMP_ID );
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_dmi_scominit exit" );

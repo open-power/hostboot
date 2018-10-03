@@ -453,6 +453,13 @@ const compId_t EXPSCOM_COMP_ID = 0x3600;
 const char EXPSCOM_COMP_NAME[] = "expscom";
 //@}
 
+/** @name MMIO
+ *  Hostboot MMIO Interface
+ */
+//@{
+const compId_t MMIO_COMP_ID = 0x3700;
+const char MMIO_COMP_NAME[] = "mmio";
+
 /** @name NVRAM
  *  NVRAM Support component
  */

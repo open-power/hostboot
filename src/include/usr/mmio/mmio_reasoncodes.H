@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mmio/mmio.H $                                 */
+/* $Source: src/include/usr/mmio/mmio_reasoncodes.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,23 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __USR_MMIO_MMIO_H
-#define __USR_MMIO_MMIO_H
+#ifndef __MMIO_REASONCODES_H
+#define __MMIO_REASONCODES_H
 
-/** @file  mmio.H
- *  @brief Provides the interface to initialize MMIO operations
- *  */
+#include <hbotcompid.H>
 
 namespace MMIO
 {
-/**
- * @brief Memory map OCMBs.
- * This function maps OCMB memory and registers it into Hostboot virtual memory.
- *
- * @return  nullptr on success, valid error log(errlHndl_t) if an error occurred
- */
-errlHndl_t mmioSetup();
+    enum MMIOModuleId
+    {
+        MOD_MMIO_INVALID             = 0x00,
+        MOD_MMIO_SETUP               = 0x01,
+        MOD_MMIO_PERFORM_OP          = 0x02,
+        MOD_MMIO_GET_PROC_SCOM       = 0x03,
+        MOD_MMIO_SET_PROC_SCOM       = 0x04,
+    };
 
-}; // End namespace
+    enum MMIOReasonCode
+    {
+        RC_INVALID                   = MMIO_COMP_ID | 0x00,
+        RC_INVALID_SETUP             = MMIO_COMP_ID | 0x01,
+        RC_INVALID_BUFFER            = MMIO_COMP_ID | 0x02,
+        RC_INSUFFICIENT_BUFFER       = MMIO_COMP_ID | 0x03,
+        RC_INCORRECT_BUFFER_LENGTH   = MMIO_COMP_ID | 0x04,
+        RC_INVALID_OFFSET            = MMIO_COMP_ID | 0x05,
+        RC_INVALID_OFFSET_ALIGNMENT  = MMIO_COMP_ID | 0x06,
+        RC_INVALID_ACCESS_LIMIT      = MMIO_COMP_ID | 0x07,
+        RC_BAD_MMIO_READ             = MMIO_COMP_ID | 0x08,
+        RC_BAD_MMIO_WRITE            = MMIO_COMP_ID | 0x09,
+        RC_PROC_NOT_FOUND            = MMIO_COMP_ID | 0x0A,
+    };
+};
 
 #endif

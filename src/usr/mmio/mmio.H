@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mmio/mmio.H $                                 */
+/* $Source: src/usr/mmio/mmio.H $                                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,23 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __USR_MMIO_MMIO_H
-#define __USR_MMIO_MMIO_H
+#ifndef __MMIO_H
+#define __MMIO_H
 
 /** @file  mmio.H
- *  @brief Provides the interface to initialize MMIO operations
+ *  @brief Provides interface to perform MMIO operations to Explorer chips
  *  */
 
 namespace MMIO
 {
 /**
- * @brief Memory map OCMBs.
- * This function maps OCMB memory and registers it into Hostboot virtual memory.
+ * @brief Complete the MMIO operation.
+ * This function performs read or write operations on OCMBs by accessing
+ * virtual memory that was previously memory mapped to the OCMBs.
+ * It follows a pre-defined function prototype in order to be registered
+ * with the device driver framework.
  *
- * @return  nullptr on success, valid error log(errlHndl_t) if an error occurred
+ * @param[in]     i_opType    Operation type, see driverif.H
+ * @param[in]     i_target    MMIO target
+ * @param[in/out] io_buffer   Read:   Pointer to output data storage
+ *                            Write:  Pointer to input data storage
+ * @param[in/out] io_buflen   Input:  Read:  size of data to read (in bytes)
+ *                                    Write: Size of data to write
+ *                            Output: Read:  Size of output data
+ *                                    Write: Size of data written
+ * @param[in]   i_accessType  Access type
+ * @param[in]   i_args        This is an argument list for DD framework.
+ *                            In this function, there are two arguments,
+ *                            the offset (bytes) into the device, and the number
+ *                            of bytes to read at a time (device limitation).
+ * @return  errlHndl_t
  */
-errlHndl_t mmioSetup();
-
+errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
+                             TARGETING::TargetHandle_t i_target,
+                             void* io_buffer,
+                             size_t& io_buflen,
+                             int64_t i_accessType,
+                             va_list i_args);
 }; // End namespace
 
 #endif
