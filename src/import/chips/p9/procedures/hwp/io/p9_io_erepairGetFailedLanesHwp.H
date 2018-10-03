@@ -194,6 +194,7 @@ fapi2::ReturnCode determineRepairLanesProc(
     uint8_t*                           i_buf,
     uint32_t                           i_bufSz,
     const uint8_t                      i_clkGroup,
+    EREPAIR::erepairVpdType            i_vpdType,
     std::vector<uint8_t>&              o_txFailLanes,
     std::vector<uint8_t>&              o_rxFailLanes)
 {
@@ -207,8 +208,14 @@ fapi2::ReturnCode determineRepairLanesProc(
     fapi2::ReturnCode l_rc                      = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_busNum;
     fapi2::current_err                          = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::MvpdRecord l_vpdRecord               = fapi2::MVPD_RECORD_VWML;
 
     FAPI_INF(">> determineRepairLanesProc - BufSize:%d ClkGrp:%d ", i_bufSz, i_clkGroup);
+
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
+    {
+        l_vpdRecord = fapi2::MVPD_RECORD_MER0;
+    }
 
     // Get the parent chip target
     l_chipTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -259,9 +266,6 @@ fapi2::ReturnCode determineRepairLanesProc(
             l_fabricBus->interface = (l_temp & 0x0F);
 #endif
 
-            // We do not need the check of processor ID because
-            // a MVPD read is specific to a Processor
-
             // Check if we have the matching the Fabric Bus types
             //if((l_tgtType == fapi2::TARGET_TYPE_OBUS) &&
             //   (l_fabricBus->type != PROCESSOR_OPT))
@@ -269,21 +273,43 @@ fapi2::ReturnCode determineRepairLanesProc(
             //    continue;
             //}
 
-            FAPI_INF("Type:%d IF:%d ", l_fabricBus->type, l_fabricBus->interface);
-
-            if(l_fabricBus->type != EREPAIR::PROCESSOR_EDIP)
-            {
-                continue;
-            }
-
-            // Check if we have the matching fabric bus interface
+            // Get fabric unit position
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                    i_target,
                                    l_busNum));
 
-            FAPI_INF("Channel:%d BusNum:%d ", l_fabricBus->device.fabricBus, l_busNum);
+            FAPI_INF("ChipPos:%d ProcId:%d ",
+                     l_chipPosition, l_fabricBus->device.processor_id);
+            FAPI_INF("BusNum:%d Channel:%d ", l_busNum, l_fabricBus->device.fabricBus);
+            FAPI_INF("Type:%d IF:%d ", l_fabricBus->type, l_fabricBus->interface);
 
-            if(l_fabricBus->device.fabricBus != ((i_clkGroup << 4) | l_busNum))
+            // Check if we have the correct Proc ID
+            if( (l_chipPosition != l_fabricBus->device.processor_id) &&
+                (l_fabricBus->type == EREPAIR::PROCESSOR_EDIP) )
+            {
+                FAPI_INF("Invalidate Fabric vpd record");
+
+                // Reset lane value to invalidate record and
+                // update number of records accordingly
+                l_fabricBus->failBit = 0;
+                l_vpdHeadPtr->availNumRecord--;
+
+                FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, i_bufSz);
+
+                /*** Write the updated eRepair buffer back to MVPD ***/
+                FAPI_TRY( setMvpdField(
+                              l_vpdRecord,
+                              fapi2::MVPD_KEYWORD_PDI,
+                              l_chipTarget,
+                              i_buf,
+                              i_bufSz),
+                          "Update erepair fabric data to VPD failed w/rc=0x%x",
+                          static_cast<uint64_t>(fapi2::current_err) );
+                continue;
+            }
+
+            if( (l_fabricBus->type != EREPAIR::PROCESSOR_EDIP) ||
+                (l_fabricBus->device.fabricBus != ((i_clkGroup << 4) | l_busNum)) )
             {
                 continue;
             }
@@ -348,10 +374,20 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
     fapi2::ReturnCode l_rc                      = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_CHIP_UNIT_POS_Type              l_busNum;
     fapi2::current_err                          = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::MBvpdRecord l_vpdRecord         = fapi2::MBVPD_RECORD_VEIR;
+    size_t l_mBufSize                      = 0;
 
     FAPI_INF(">> determineRepairLanesMemBuf - BufSize:%d ", i_bufSz);
 
-    // Get the chip position
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
+    {
+        l_vpdRecord = fapi2::MBVPD_RECORD_MER0;
+    }
+
+    // Get buf size
+    l_mBufSize = i_bufSz;
+
+    // Get the Centaur chip position
     uint32_t l_chipPosition;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POS,
                            i_target,
@@ -414,16 +450,43 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
             l_memBus->interface = (l_temp & 0x0F);
 #endif
 
+            // Get DMI chip unit position
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_dmiTarget,
+                                   l_busNum));
+
+            FAPI_INF("ChipPos:%d CentaurId:%d ",
+                     l_chipPosition, l_memBus->device.proc_centaur_id);
+            FAPI_INF("BusNum:%d Channel:%d ", l_busNum, l_memBus->device.memChannel);
+
             // Check if we have the correct Centaur ID
             // NOTE: We do not prefer to make the check of Centaur ID if the
             // system is known to have CDIMMs. This check is applicable
             // only for systems with ISDIMM because in the ISDIMM systems
             // the Lane eRepair data for multiple Centaurs is maintained in
             // a common VPD.
-
-            if(l_chipPosition != l_memBus->device.proc_centaur_id)
+            // DMI<-->MemBuf uniquely identify the bus
+            if( (l_chipPosition != l_memBus->device.proc_centaur_id) ||
+                (l_busNum       != l_memBus->device.memChannel) )
             {
-                FAPI_INF("DIMM:%d ChipPos:%d ", l_customDimm, l_chipPosition);
+                FAPI_INF("Invalidate Centaur vpd record");
+
+                // Reset lane value to invalidate record and
+                // update number of records accordingly
+                l_memBus->failBit = 0;
+                l_vpdHeadPtr->availNumRecord--;
+
+                FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_mBufSize);
+
+                /*** Write the updated eRepair buffer back to Centaur FRU VPD ***/
+                FAPI_TRY( setMBvpdField(
+                              l_vpdRecord,
+                              fapi2::MBVPD_KEYWORD_PDI,
+                              i_target,
+                              i_buf,
+                              l_mBufSize),
+                          "Update erepair centaur data to VPD failed w/rc=0x%x",
+                          static_cast<uint64_t>(fapi2::current_err) );
                 continue;
             }
 
@@ -431,18 +494,6 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
 
             // Check if we have the matching the Memory Bus types
             if(l_memBus->type != EREPAIR::MEMORY_EDIP)
-            {
-                continue;
-            }
-
-            // Check if we have the matching memory bus interface
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                   l_dmiTarget,
-                                   l_busNum));
-
-            FAPI_INF("Channel:%d BusNum:%d ", l_memBus->device.memChannel, l_busNum);
-
-            if(l_memBus->device.memChannel != l_busNum)
             {
                 continue;
             }
@@ -505,22 +556,45 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
             l_memBus->interface = (l_temp & 0x0F);
 #endif
 
-            FAPI_INF("Type:%d IF:%d ", l_memBus->type, l_memBus->interface);
-
-            // Check if we have the matching the Memory Bus types
-            if(l_memBus->type != EREPAIR::MEMORY_EDIP)
-            {
-                continue;
-            }
-
-            // Check if we have the matching memory bus interface
+            // Get DMI chip unit position
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                    l_dmiTarget,
                                    l_busNum));
 
-            FAPI_INF("Channel:%d BusNum:%d ", l_memBus->device.memChannel, l_busNum);
+            FAPI_INF("ChipPos:%d CentaurId:%d ",
+                     l_chipPosition, l_memBus->device.proc_centaur_id);
+            FAPI_INF("BusNum:%d Channel:%d ", l_busNum, l_memBus->device.memChannel);
 
-            if(l_memBus->device.memChannel != l_busNum)
+            // Check if we have the correct Centaur ID and matching DMI bus i/f.
+            // DMI<-->MemBuf uniquely identify the bus
+            if( (l_chipPosition != l_memBus->device.proc_centaur_id) ||
+                (l_busNum       != l_memBus->device.memChannel) )
+            {
+                FAPI_INF("Invalidate Centaur vpd record");
+
+                // Set lane value as 0xFF to invalidate record and
+                // update number of records accordingly
+                l_memBus->failBit = EREPAIR::INVALID_FAIL_LANE_NUMBER;
+                l_vpdHeadPtr->numRecords--;
+
+                FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_mBufSize);
+
+                /*** Write the updated eRepair buffer back to Centaur FRU VPD ***/
+                FAPI_TRY( setMBvpdField(
+                              l_vpdRecord,
+                              fapi2::MBVPD_KEYWORD_PDI,
+                              i_target,
+                              i_buf,
+                              l_mBufSize),
+                          "Update erepair centaur data to VPD failed w/rc=0x%x",
+                          static_cast<uint64_t>(fapi2::current_err) );
+                continue;
+            }
+
+            FAPI_INF("Type:%d IF:%d ", l_memBus->type, l_memBus->interface);
+
+            // Check if we have the matching the Memory Bus types
+            if(l_memBus->type != EREPAIR::MEMORY_EDIP)
             {
                 continue;
             }
@@ -570,6 +644,7 @@ fapi2::ReturnCode determineRepairLanesDMI(
     const fapi2::Target < K >&           i_target,
     uint8_t*                           i_buf,
     uint32_t                           i_bufSz,
+    EREPAIR::erepairVpdType            i_vpdType,
     std::vector<uint8_t>&              o_txFailLanes,
     std::vector<uint8_t>&              o_rxFailLanes)
 {
@@ -582,9 +657,15 @@ fapi2::ReturnCode determineRepairLanesDMI(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chipTarget;
     fapi2::ReturnCode l_rc                      = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_busNum;
-    fapi2::current_err                          = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::current_err                    = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::MvpdRecord l_vpdRecord         = fapi2::MVPD_RECORD_VWML;
 
     FAPI_INF(">> determineRepairLanesMemDMI - BufSize:%d ", i_bufSz);
+
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
+    {
+        l_vpdRecord = fapi2::MVPD_RECORD_MER0;
+    }
 
     // Get the parent chip target
     l_chipTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -635,29 +716,44 @@ fapi2::ReturnCode determineRepairLanesDMI(
             l_memBus->interface = (l_temp & 0x0F);
 #endif
 
-            // Check if we have the correct Centaur ID
-            // NOTE: We do not prefer to make the check of Centaur ID if the
-            // system is known to have CDIMMs. This check is applicable
-            // only for systems with ISDIMM because in the ISDIMM systems
-            // the Lane eRepair data for multiple Centaurs is maintained in
-            // a common VPD.
-
-            FAPI_INF("Type:%d IF:%d ", l_memBus->type, l_memBus->interface);
-
-            // Check if we have the matching the Memory Bus types
-            if(l_memBus->type != EREPAIR::MEMORY_EDIP)
-            {
-                continue;
-            }
-
-            // Check if we have the matching memory bus interface
+            // Get DMI chip unit position
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                    i_target,
                                    l_busNum));
 
-            FAPI_INF("Channel:%d BusNum:%d ", l_memBus->device.memChannel, l_busNum);
+            FAPI_INF("ChipPos:%d ProcId:%d ",
+                     l_chipPosition, l_memBus->device.proc_centaur_id);
+            FAPI_INF("BusNum:%d Channel:%d ", l_busNum, l_memBus->device.memChannel);
+            FAPI_INF("Type:%d IF:%d ", l_memBus->type, l_memBus->interface);
 
-            if(l_memBus->device.memChannel != l_busNum)
+            // Check if we have the correct Proc ID
+            if( (l_chipPosition != l_memBus->device.proc_centaur_id) &&
+                (l_memBus->type == EREPAIR::MEMORY_EDIP) )
+            {
+                FAPI_INF("Invalidate DMI vpd record");
+
+                // Reset lane value to invalidate record and
+                // update number of records accordingly
+                l_memBus->failBit = 0;
+                l_vpdHeadPtr->availNumRecord--;
+
+                FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, i_bufSz);
+
+                /*** Write the updated eRepair buffer back to MVPD ***/
+                FAPI_TRY( setMvpdField(
+                              l_vpdRecord,
+                              fapi2::MVPD_KEYWORD_PDI,
+                              l_chipTarget,
+                              i_buf,
+                              i_bufSz),
+                          "Update erepair dmi data to VPD failed w/rc=0x%x",
+                          static_cast<uint64_t>(fapi2::current_err) );
+                continue;
+            }
+
+            // Check if we have the matching the Memory Bus types
+            if( (l_busNum       != l_memBus->device.memChannel) ||
+                (l_memBus->type != EREPAIR::MEMORY_EDIP) )
             {
                 continue;
             }
@@ -819,6 +915,7 @@ fapi2::ReturnCode retrieveRepairDataProc(
                   l_retBuf,
                   l_bufSize,
                   i_clkGroup,
+                  i_vpdType,
                   o_txFailLanes,
                   o_rxFailLanes),
               "Call to determineRepairLanesProc failed w/rc=0x%x",
@@ -1100,6 +1197,7 @@ fapi2::ReturnCode retrieveRepairDataDMI(
                   i_target,
                   l_retBuf,
                   l_bufSize,
+                  i_vpdType,
                   o_txFailLanes,
                   o_rxFailLanes),
               "Call to determineRepairLanesDMI failed w/rc=0x%x",
