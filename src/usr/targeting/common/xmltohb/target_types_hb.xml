@@ -85,6 +85,14 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>chip-ocmb</id>
+    <attribute>
+      <default>0</default>
+      <id>MMIO_VM_ADDR</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
       <id>ASSUME_SBE_QUIESCED</id>

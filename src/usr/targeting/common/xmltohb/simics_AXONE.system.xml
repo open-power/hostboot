@@ -7373,6 +7373,14 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <!-- TODO RTC 201493 -  Need to remove these sets (all 16 of them) of
+              OMI_INBAND_BAR_BASE_ADDR_OFFSET once p9a_omi_setup_bars
+              is working -->
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 16GB -->
+        <default>0x30400000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7438,6 +7446,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 18GB -->
+        <default>0x30480000000</default>
     </attribute>
 </targetInstance>
 
@@ -7505,6 +7518,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 24GB -->
+        <default>0x30600000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7570,6 +7588,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 26GB -->
+        <default>0x30680000000</default>
     </attribute>
 </targetInstance>
 
@@ -7637,6 +7660,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 32GB -->
+        <default>0x30800000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7702,6 +7730,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 34GB -->
+        <default>0x30880000000</default>
     </attribute>
 </targetInstance>
 
@@ -7769,6 +7802,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 40GB -->
+        <default>0x30A00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7834,6 +7872,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 42GB -->
+        <default>0x30A80000000</default>
     </attribute>
 </targetInstance>
 
@@ -7901,6 +7944,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 48GB -->
+        <default>0x30C00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7966,6 +8014,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 50GB -->
+        <default>0x30C80000000</default>
     </attribute>
 </targetInstance>
 
@@ -8033,6 +8086,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 56GB -->
+        <default>0x30E00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8098,6 +8156,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 58GB -->
+        <default>0x30E80000000</default>
     </attribute>
 </targetInstance>
 
@@ -8165,6 +8228,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 64GB -->
+        <default>0x31000000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8230,6 +8298,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 66GB -->
+        <default>0x31080000000</default>
     </attribute>
 </targetInstance>
 
@@ -8297,6 +8370,11 @@
         <id>TYPE</id>
         <default>OMI</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 72GB -->
+        <default>0x31200000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8362,6 +8440,11 @@
     <attribute>
         <id>TYPE</id>
         <default>OMI</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 74GB -->
+        <default>0x31280000000</default>
     </attribute>
 </targetInstance>
 

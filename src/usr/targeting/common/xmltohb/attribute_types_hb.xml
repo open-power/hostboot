@@ -750,6 +750,21 @@
   </attribute>
 
   <attribute>
+    <id>MMIO_VM_ADDR</id>
+    <description>
+            Virtual memory address this device has been mapped to.
+    </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>MPIPL_HB_MDRT_COUNT</id>
     <description>Actual MDRT count in Memory Preserving IPL mode.</description>
     <simpleType>

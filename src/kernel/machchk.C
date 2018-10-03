@@ -102,10 +102,21 @@ bool handleLoadUE(task_t* t)
                                 MMIO_IBSCOM_CHIP_MASK  |
                                 MMIO_IBSCOM_GROUP_MASK;
 
+            // Check if address is in OCMB MMIO Range.
+            //   Base mask bits are always set for OCMB.
+            //   ~Combined mask bits can not be set for OCMB.
+            uint64_t combOcmbMask = MMIO_OCMB_BASE_MASK |
+                                    MMIO_OCMB_BASE_RANGE;
+
             if(((phys & MMIO_IBSCOM_BASE_MASK) == MMIO_IBSCOM_BASE_MASK) &&
                ((phys & ~combMask) == 0))
             {
                 ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
+            }
+            else if(((phys & MMIO_OCMB_BASE_MASK) == MMIO_OCMB_BASE_MASK) &&
+                    ((phys & ~combOcmbMask) == 0))
+            {
+                ueMagicValue = MMIO_OCMB_UE_DETECTED;
             }
             else
             {
