@@ -119,6 +119,7 @@ include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_funcs.mk
 include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mbs_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mba_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_ddrphy_scom.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_row_repair.mk
 
 
 include ${ROOTPATH}/config.mk
