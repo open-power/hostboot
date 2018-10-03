@@ -83,6 +83,7 @@ class frequency_traits<mss::proc_type::NIMBUS>
         static constexpr uint64_t VPD_KEYWORD_MAX = 255;
         static constexpr const char* VPD_BLOB_NAME = "MR";
         static constexpr auto VPD_BLOB = fapi2::MemVpdData::MR;
+        static constexpr auto LRDIMM_TYPE = fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;
 
         // Coding minion, why have these explicitly defined frequency values?
         // Isn't the supported frequency vector used for this purpose?
