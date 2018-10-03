@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 #include <generic/memory/lib/data_engine/pre_data_init.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <vpd_access.H>
 
 namespace mss
@@ -75,13 +76,70 @@ fapi2::ReturnCode set_freq(const fapi2::Target<T>& i_target,
 /// @brief      Gets the number of master ranks per DIMM
 /// @tparam P mss::proc_type on which to operate
 /// @tparam T fapi2::TargetType on which to set the frequency
-/// @param[in]  i_target the target on which to set the frequency values
-/// @param[out]  o_master_ranks number of master ranks per DIMM
+/// @param[in]  i_target the target on which to get the number of master ranks per DIMM
+/// @param[out] o_master_ranks number of master ranks per DIMM
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, fapi2::TargetType T>
 fapi2::ReturnCode get_master_rank_per_dimm(const fapi2::Target<T>& i_target,
         uint8_t* o_master_ranks);
+
+///
+/// @brief      Gets the number of master ranks per DIMM
+/// @tparam P mss::proc_type on which to operate
+/// @tparam T fapi2::TargetType on which to get the DIMM types
+/// @param[in]  i_target the target on which to get the DIMM types
+/// @param[out] o_dimm_type DIMM types
+/// @return     FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P, fapi2::TargetType T>
+fapi2::ReturnCode get_dimm_type(const fapi2::Target<T>& i_target,
+                                uint8_t* o_dimm_type);
+
+///
+/// @brief      Configures the number of ranks in the VPD accessor dependent upon DIMM type
+/// @tparam P mss::proc_type on which to operate
+/// @tparam TT Traits associated with the processor type
+/// @param[in]  i_target the target on which to set the frequency values
+/// @param[in,out]  io_vpd_info VPD information that needs to be configured
+/// @return     FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+fapi2::ReturnCode configure_vpd_ranks(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+                                      fapi2::VPDInfo<TT::VPD_TARGET_TYPE>& io_vpd_info)
+{
+    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
+
+    // ATTR to update
+    // Note: this flat out assumes that we have two DIMM per port max. This goes against the directive to have arrays be dynamic in length and derived from ATTR's
+    FAPI_TRY( get_master_rank_per_dimm<P>(i_target, &(l_rank_count_dimm[0])) );
+    FAPI_TRY( get_dimm_type<P>(i_target, &(l_dimm_type[0])) );
+
+    // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
+    // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
+    // As such, they act as a single load, similar to a 1R DIMM would
+    // per the IBM signal integrity team, the 1R DIMM settings should be used for LRDIMM's
+    // So, if we are LRDIMM's and have ranks, we want to only note it as a 1R DIMM for purposes of querying the VPD
+    FAPI_DBG("%s for DIMM 0 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+    FAPI_DBG("%s for DIMM 1 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+
+    l_rank_count_dimm[0] = ((l_dimm_type[0] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[0] > 0)) ? 1 : l_rank_count_dimm[0];
+    l_rank_count_dimm[1] = ((l_dimm_type[1] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[1] > 0)) ? 1 : l_rank_count_dimm[1];
+
+    FAPI_DBG("after LR modification %s for DIMM 0 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+    FAPI_DBG("after LR modification %s for DIMM 1 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+
+    io_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
+    io_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief      Sets frequency attributes
@@ -208,7 +266,6 @@ template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
                                        std::vector<std::vector<uint32_t>>& o_vpd_supported_freqs)
 {
-    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
     uint8_t l_vpd_blob[TT::VPD_KEYWORD_MAX] = {};
 
     // This bitmap will keep track of the ports we visit.
@@ -244,12 +301,8 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>
             continue;
         }
 
-        // ATTR to update
-        // Note: this flat out assumes that we have two DIMM per port max. This goes against the directive to have arrays be dynamic in length and derived from ATTR's
-        FAPI_TRY( get_master_rank_per_dimm<P>(p, &(l_rank_count_dimm[0])) );
-
-        l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
-        l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+        // Configures the number of ranks for the VPD configuration
+        FAPI_TRY( configure_vpd_ranks<P>(p, l_vpd_info), "%s failed to configure VPD ranks", mss::c_str(p));
         l_vpd_info.iv_is_config_ffdc_enabled = false;
 
         // Iterate through all supported memory freqs
