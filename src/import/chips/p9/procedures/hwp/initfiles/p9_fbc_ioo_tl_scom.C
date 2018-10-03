@@ -399,7 +399,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<9, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS0_FBC_ENABLED)
                     {
@@ -417,7 +418,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<17, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS0_FBC_ENABLED)
                     {
@@ -435,7 +437,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<41, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS0_FBC_ENABLED)
                     {
@@ -453,7 +456,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<49, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS0_FBC_ENABLED)
                     {
@@ -591,7 +595,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<9, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS3_FBC_ENABLED)
                     {
@@ -609,7 +614,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<17, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS3_FBC_ENABLED)
                     {
@@ -627,7 +633,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<41, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS3_FBC_ENABLED)
                     {
@@ -645,7 +652,8 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         l_scom_buffer.insert<49, 7, 57, uint64_t>(literal_0x3C );
                     }
                 }
-                else if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+
+                if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
                 {
                     if (l_def_OBUS3_FBC_ENABLED)
                     {
@@ -784,36 +792,60 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 if (l_def_OBUS0_FBC_ENABLED)
                 {
                     l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0b0001 );
+                }
+
+                if (l_def_OBUS0_FBC_ENABLED)
+                {
                     l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0b0001 );
                 }
 
                 if (l_def_OBUS0_FBC_ENABLED)
                 {
                     l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0b0100 );
+                }
+
+                if (l_def_OBUS0_FBC_ENABLED)
+                {
                     l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0100 );
                 }
 
                 if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0b0001 );
+                }
+
+                if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_0b0001 );
                 }
 
                 if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b0100 );
+                }
+
+                if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0b0100 );
                 }
 
                 if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<32, 4, 60, uint64_t>(literal_0b0001 );
+                }
+
+                if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_0b0001 );
                 }
 
                 if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<36, 4, 60, uint64_t>(literal_0b0100 );
+                }
+
+                if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<44, 4, 60, uint64_t>(literal_0b0100 );
                 }
 
@@ -821,6 +853,11 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                      && l_def_OBUS3_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0001 );
+                }
+
+                if ((((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && ( ! l_def_OBUS2_FBC_ENABLED))
+                     && l_def_OBUS3_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0001 );
                 }
 
@@ -828,6 +865,11 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                      && l_def_OBUS3_FBC_ENABLED))
                 {
                     l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b0100 );
+                }
+
+                if ((((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && ( ! l_def_OBUS2_FBC_ENABLED))
+                     && l_def_OBUS3_FBC_ENABLED))
+                {
                     l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b0100 );
                 }
 
