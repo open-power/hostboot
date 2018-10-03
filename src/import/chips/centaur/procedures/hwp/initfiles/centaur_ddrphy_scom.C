@@ -10668,6 +10668,22 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             {
             }
 
+            if (l_def_is_ddr4)
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0001 );
+            }
+            else if (l_def_not_ddr4)
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0000 );
+            }
+
+            if (l_def_not_ddr4)
+            {
+            }
+            else if (l_def_is_ddr4)
+            {
+            }
+
             if (l_def_not_ddr4)
             {
                 l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_0b0 );
@@ -22515,6 +22531,24 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             if (literal_1)
             {
                 l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (l_def_is_ddr4)
+            {
+            }
+            else if (l_def_not_ddr4)
+            {
+            }
+
+            if (l_def_not_ddr4)
+            {
+                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
+                l_scom_buffer.insert<54, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if (l_def_is_ddr4)
+            {
+                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<54, 1, 63, uint64_t>(literal_0b1 );
             }
 
             if (l_def_is_ddr4)

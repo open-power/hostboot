@@ -6397,6 +6397,39 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<9, 11, 53, uint64_t>(l_def_mba23_refresh_interval );
             }
 
+            if (literal_1)
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<20, 10, 53, uint64_t>(literal_0b00000000000 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if (literal_1)
+            {
+                l_scom_buffer.insert<5, 4, 60, uint64_t>(literal_0b0111 );
+            }
+
+            if ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0))
+            {
+                l_scom_buffer.insert<9, 11, 53, uint64_t>(l_def_mba01_refresh_interval );
+            }
+            else if ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1))
+            {
+                l_scom_buffer.insert<9, 11, 53, uint64_t>(l_def_mba23_refresh_interval );
+            }
+
             if (((((l_def_ddr4_1600_13_12_11 == literal_1) || (l_def_ddr4_1600_14_13_12 == literal_1))
                   || (l_def_ddr4_1600_14_13_12R == literal_1)) || (l_def_IS3A_IS3B == literal_1)))
             {
