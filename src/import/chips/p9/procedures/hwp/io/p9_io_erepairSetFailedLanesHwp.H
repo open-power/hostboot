@@ -519,7 +519,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
 
-            FAPI_INF("repairLaneCnt-1:it:%d ", l_repairLane);
+            FAPI_INF("repairLaneCnt-1:it:%d numRepair:%d bufSize:%d ", l_repairLane, l_numRepairs, i_bufSz);
 
             // Parse the VPD for fabric and memory eRepair records
             for(;
@@ -529,9 +529,11 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                 l_overWritePtr =
                     reinterpret_cast<eRepairMemBus*> (l_vpdDataPtr);
 
-                FAPI_DBG("repairLaneCnt-2:repariCnt:%d numRepair:%d byteparsed:%d bufSize:%d ", l_repairCnt, l_numRepairs,
-                         l_bytesParsed,
-                         i_bufSz);
+                FAPI_INF("repairLaneCnt-2:erepairCnt:%d byteparsed:%d erprlane:%02x ChipNum:%d BusNum:%d",
+                         l_repairCnt, l_bytesParsed, l_repairLane, l_chipNum, l_busNum);
+                FAPI_INF("repairLaneCnt-2:Centaur Id:%d MemChannel:%d type:%d IF:%d FailBit:%d ",
+                         l_overWritePtr->device.proc_centaur_id, l_overWritePtr->device.memChannel,
+                         l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->failBit);
 
                 if( (l_overWritePtr->device.proc_centaur_id == l_chipNum) &&
                     (l_overWritePtr->device.memChannel      == l_busNum ) &&
@@ -539,8 +541,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                     (((i_interface == EREPAIR::DRIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_DRIVE)) ||
                      ((i_interface == EREPAIR::RECEIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_RECEIVE))) )
                 {
-                    FAPI_INF("repairLaneCnt-3:Found match: Dev id:%d type:%d IF:%d  Bus:%d ", l_overWritePtr->device.proc_centaur_id,
-                             l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.memChannel);
+                    FAPI_INF("repairLaneCnt-3:Found record match");
 
                     if(l_repairLane == EREPAIR::INVALID_FAIL_LANE_NUMBER)
                     {
@@ -755,7 +756,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
 
-            FAPI_INF("repairLaneCnt-1:it:%d ", l_repairLane);
+            FAPI_INF("repairLaneCnt-1:it:%d numRepair:%d bufSize:%d ", l_repairLane, l_numRepairs, i_bufSz);
 
             // Parse the VPD for fabric and memory eRepair records
             for(;
@@ -765,9 +766,11 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                 l_overWritePtr =
                     reinterpret_cast<eRepairMemBus_cdimm*> (l_vpdDataPtr);
 
-                FAPI_INF("repairLaneCnt-2:erepairCnt:%d numRepair:%d byteparsed:%d bufSize:%d ", l_repairCnt, l_numRepairs,
-                         l_bytesParsed,
-                         i_bufSz);
+                FAPI_INF("repairLaneCnt-2:erepairCnt:%d byteparsed:%d erprlane:%02x ChipNum:%d BusNum:%d",
+                         l_repairCnt, l_bytesParsed, l_repairLane, l_chipNum, l_busNum);
+                FAPI_INF("repairLaneCnt-2:Centaur Id:%d MemChannel:%d type:%d IF:%d FailBit:%d ",
+                         l_overWritePtr->device.proc_centaur_id, l_overWritePtr->device.memChannel,
+                         l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->failBit);
 
                 if( (l_overWritePtr->device.proc_centaur_id == l_chipNum) &&
                     (l_overWritePtr->device.memChannel      == l_busNum ) &&
@@ -777,9 +780,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                     (((i_interface == EREPAIR::DRIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_DRIVE)) ||
                      ((i_interface == EREPAIR::RECEIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_RECEIVE))) )
                 {
-                    FAPI_INF("repairLaneCnt-3:Found match: Dev id:%d type:%d IF:%d  Bus:%d FailBit:%d erprlane:%02x",
-                             l_overWritePtr->device.proc_centaur_id, l_overWritePtr->type, l_overWritePtr->interface,
-                             l_overWritePtr->device.memChannel, l_overWritePtr->failBit, l_repairLane);
+                    FAPI_INF("repairLaneCnt-3:Found record match");
 
                     if(l_repairLane == EREPAIR::INVALID_FAIL_LANE_NUMBER)
                     {
