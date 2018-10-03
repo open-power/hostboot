@@ -242,15 +242,52 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             continue;
         }
 
-        // Check if chiplet is reporting a PLL unlock in bits 25-28
-        if ((errReg->GetBitFieldJustified(25, 4) != 0) &&
-            (! cfgReg->IsBitSet(12))) // And not masked
+        if ( i_chpltType == TYPE_PROC )
         {
-            pllErrFound = true;
-            break;
+            // Check only bits 26, 28 in TP error register
+            if ( (errReg->IsBitSet(26) || errReg->IsBitSet(28)) &&
+                 (! cfgReg->IsBitSet(12)) )
+            {
+                pllErrFound = true;
+                break;
+            }
+        }
+        else
+        {
+            // Check if chiplet is reporting a PLL unlock in bits 25-28
+            if ((errReg->GetBitFieldJustified(25, 4) != 0) &&
+                (! cfgReg->IsBitSet(12))) // And not masked
+            {
+                pllErrFound = true;
+                break;
+            }
+        }
+
+        // If we're looking at the PEC chiplet (MF-ref errors), also check TP
+        if ( i_chpltType == TYPE_PEC )
+        {
+            // Check bits 25, 27 in TP error reg
+            errReg = chplt->getRegister("TP_ERROR_REG");
+            cfgReg = chplt->getRegister("TP_CONFIG_REG");
+
+            rc  = errReg->ForceRead();
+            rc |= cfgReg->Read();
+
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC "TP_ERR_REG read failed for 0x%08x",
+                         chplt->getHuid());
+                continue;
+            }
+
+            if ( (errReg->IsBitSet(25) || errReg->IsBitSet(27)) &&
+                 (! cfgReg->IsBitSet(12)) )
+            {
+                pllErrFound = true;
+                break;
+            }
         }
     }
-
     return pllErrFound;
     #undef PRDF_FUNC
 }
@@ -491,6 +528,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     if (PCI_PLL_UNLOCK & i_errType)
     {
+        MaskChipletPll(i_chip, TYPE_PROC);
         MaskChipletPll(i_chip, TYPE_PEC);
     }
 
