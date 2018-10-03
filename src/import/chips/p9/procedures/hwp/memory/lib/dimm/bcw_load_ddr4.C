@@ -117,7 +117,7 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
             // Function space 5
             { FUNC_SPACE_5, FUNC_SPACE_SELECT_CW,   FUNC_SPACE_5,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
-            { FUNC_SPACE_5, BUFF_TRAIN_CONFIG_CW,   eff_dimm_ddr4_f5bc6x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_5, DRAM_VREF_CW,           eff_dimm_ddr4_f5bc6x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
 
 
             // So, we always want to know what function space we're in
