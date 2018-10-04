@@ -548,7 +548,12 @@ void IpmiSEL::execute(void)
     //Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
-    while(true)
+    INITSERVICE::registerShutdownEvent(IPMI_COMP_ID, iv_msgQ,
+                                       IPMISEL::MSG_STATE_SHUTDOWN_SEL,
+                                       INITSERVICE::IPMI_SEL_PRIORITY);
+    bool l_terminate = false;
+
+    while(!l_terminate)
     {
         msg_t* msg = msg_wait(iv_msgQ);
 
@@ -571,20 +576,19 @@ void IpmiSEL::execute(void)
 
             case IPMISEL::MSG_STATE_SHUTDOWN:
                 IPMI_TRAC(INFO_MRK "ipmisel shutdown event");
+                l_terminate = true;
 
                 //Respond that we are done shutting down.
                 msg_respond(iv_msgQ, msg);
                 break;
 
             case IPMISEL::MSG_STATE_SHUTDOWN_SEL:
-                IPMI_TRAC(INFO_MRK "ipmisel "
-                   "shutdown message from ipmirp");
-                 msg->type = IPMI::MSG_STATE_SHUTDOWN_SEL;
-                //Respond that we are done shutting down.
+                IPMI_TRAC(INFO_MRK "ipmisel shutdown message from initservice");
+                l_terminate = true;
                 msg_respond(iv_msgQ, msg);
                 break;
         }
-    } // while(1)
+    }
     IPMI_TRAC(EXIT_MRK "message loop");
     return;
 } // execute
