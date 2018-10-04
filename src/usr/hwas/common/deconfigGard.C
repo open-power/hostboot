@@ -568,13 +568,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         {
             GardRecord l_gardRecord = *l_itr;
 
-            //Continue only with FATAL/UNRECOVERABLE gard errors.
-            if((l_gardRecord.iv_errorType != GARD_Fatal)&&
-               (l_gardRecord.iv_errorType != GARD_Unrecoverable))
-            {
-                //Skip recoverable gard records
-                continue;
-            }
             // Find the associated Target
             Target * l_pTarget =
                 targetService().toTarget(l_gardRecord.iv_targetId);
@@ -587,6 +580,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 HWAS_INF_BIN("Could not find Target for:",
                              &(l_gardRecord.iv_targetId),
                              sizeof(l_gardRecord.iv_targetId));
+                continue;
+            }
+
+            //Continue only with FATAL/UNRECOVERABLE gard errors.
+            //All gard on node deosnt need resource recovery
+            if(((l_gardRecord.iv_errorType != GARD_Fatal)&&
+               (l_gardRecord.iv_errorType != GARD_Unrecoverable))||
+               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE))
+            {
+                //Skip recoverable gard records
                 continue;
             }
 
@@ -726,9 +729,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
                 continue;
             }
-            //Continue only with recoverable gard errors.
+            //Continue only with recoverable or non node gard errors.
             if((l_gardRecord.iv_errorType == GARD_Fatal)||
-               (l_gardRecord.iv_errorType == GARD_Unrecoverable))
+               (l_gardRecord.iv_errorType == GARD_Unrecoverable)||
+               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE))
             {
                 //Skip non-recoverable gard records
                 continue;
