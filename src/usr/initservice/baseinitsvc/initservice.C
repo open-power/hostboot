@@ -965,6 +965,9 @@ void InitService::_doShutdown(uint64_t i_status,
                  i_error_info,
                  true); // Force write
 
+    // Ensure all traces get flushed to the console
+    TRAC_FLUSH_BUFFERS();
+
     shutdown(iv_worst_status,
              i_payload_base,
              i_payload_entry,
