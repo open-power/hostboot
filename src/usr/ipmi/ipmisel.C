@@ -101,7 +101,7 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 #endif
     msg->type = MSG_SEND_ESEL;
     msg->data[0] = i_eid;
-    eselInitData *eselData = 
+    eselInitData *eselData =
     new eselInitData(i_selEventList, i_eselData, i_dataSize);
 
     msg->extra_data = eselData;
@@ -142,7 +142,7 @@ void process_esel(msg_t *i_msg)
     {
         IPMI_TRAC(ENTER_MRK"sel list size %d", l_data->selInfoList.size());
         std::vector<sel_info_t*>::iterator it;
-        for (it = l_data->selInfoList.begin(); it != l_data->selInfoList.end(); 
+        for (it = l_data->selInfoList.begin(); it != l_data->selInfoList.end();
         ++it)
         {
             sel_info_t *l_sel = *it;
@@ -151,12 +151,12 @@ void process_esel(msg_t *i_msg)
             l_data->selEvent = true;
 
             //If sensor type is sys event then need to send the oem sel
-            //to handle procedure callout        
+            //to handle procedure callout
             if (l_sel->sensorType == TARGETING::SENSOR_TYPE_SYS_EVENT)
             {
                 //oem sel data
                 l_data->selEvent = false;
-                l_oemSel.record_type = 
+                l_oemSel.record_type =
                 record_type_oem_sel_for_procedure_callout;
                 l_oemSel.event_data1 = l_sel->eventOffset;
                 l_sel->eventOffset = SENSOR::UNDETERMINED_SYSTEM_HW_FAILURE;
@@ -172,7 +172,7 @@ void process_esel(msg_t *i_msg)
             l_eSel.event_dir_type = l_sel->eventDirType;
             l_eSel.event_data1 = l_sel->eventOffset;
             memcpy(l_data->eSel,&l_eSel,sizeof(selRecord));
-                
+
 
             uint32_t l_send_count = MAX_SEND_COUNT;
             while (l_send_count > 0)
@@ -503,7 +503,12 @@ void IpmiSEL::execute(void)
     //Mark as an independent daemon so if it crashes we terminate.
     task_detach();
 
-    while(true)
+    INITSERVICE::registerShutdownEvent(iv_msgQ,
+                                       IPMISEL::MSG_STATE_SHUTDOWN_SEL,
+                                       INITSERVICE::IPMI_SEL_PRIORITY);
+    bool l_terminate = false;
+
+    while(!l_terminate)
     {
         msg_t* msg = msg_wait(iv_msgQ);
 
@@ -526,20 +531,19 @@ void IpmiSEL::execute(void)
 
             case IPMISEL::MSG_STATE_SHUTDOWN:
                 IPMI_TRAC(INFO_MRK "ipmisel shutdown event");
+                l_terminate = true;
 
                 //Respond that we are done shutting down.
                 msg_respond(iv_msgQ, msg);
                 break;
 
             case IPMISEL::MSG_STATE_SHUTDOWN_SEL:
-                IPMI_TRAC(INFO_MRK "ipmisel "
-                   "shutdown message from ipmirp");
-                 msg->type = IPMI::MSG_STATE_SHUTDOWN_SEL;
-                //Respond that we are done shutting down.
+                IPMI_TRAC(INFO_MRK "ipmisel shutdown message from initservice");
+                l_terminate = true;
                 msg_respond(iv_msgQ, msg);
                 break;
         }
-    } // while(1)
+    }
     IPMI_TRAC(EXIT_MRK "message loop");
     return;
 } // execute

@@ -665,36 +665,10 @@ void IpmiRP::execute(void)
             // we wait for the reply from the BMC.
         case IPMI::MSG_STATE_SHUTDOWN:
             {
-                // Poke the IPMI sel task to flush out any messages.
-                // This must be done before we shut down the device driver.
-                IPMI_TRAC(INFO_MRK "Sending shutdown to sel task");
-                Singleton<IpmiSEL>::instance();
-                msg_t *rmsg = msg_allocate();
-                rmsg->type = IPMISEL::MSG_STATE_SHUTDOWN_SEL;
-                msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
-
-                //Send the msg to the sel thread
-                int rc = msg_sendrecv_noblk(mq,rmsg,iv_msgQ);
-                if(rc)
-                {
-                    IPMI_TRAC(ERR_MRK "Failed (rc=%d) to send ipmiSEL flush "
-                        "message. We may have lost a sel.",rc);
-                }
-
+                l_shutdown_pending = true;    // Stop incoming new messages
                 iv_shutdown_msg = msg;        // Reply to this message
                 break;
             }
-
-        case IPMI::MSG_STATE_SHUTDOWN_SEL:
-            {
-                // The sel thread has responsed to us, so it must be flushed.
-                // We can now shutdown
-                IPMI_TRAC(INFO_MRK "MSG_SHUTDOWN_FROM_SEL: "
-                    "ipmi begin shutdown");
-                l_shutdown_pending = true;    // Stop incoming new messages
-                break;
-            }
-
         case IPMI::MSG_STATE_GRACEFUL_SHUTDOWN:
             {
                 IPMI_TRAC(INFO_MRK "MSG_STATE_GRACEFUL_SHUTDOWN: send power"
