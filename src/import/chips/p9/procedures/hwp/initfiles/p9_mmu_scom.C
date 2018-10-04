@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@ constexpr uint64_t literal_0x40DB000000000000 = 0x40DB000000000000;
 constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x0000FAF800FF = 0x0000FAF800FF;
-constexpr uint64_t literal_0x0400FAFC00FF = 0x0400FAFC00FF;
+constexpr uint64_t literal_0x0500FAFC0FFF = 0x0500FAFC0FFF;
 constexpr uint64_t literal_0x000000000000 = 0x000000000000;
 constexpr uint64_t literal_0x910000040F00 = 0x910000040F00;
 constexpr uint64_t literal_0x911100000F00 = 0x911100000F00;
@@ -176,7 +176,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
             else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0))
             {
-                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x0400FAFC00FF );
+                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x0500FAFC0FFF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c43ull, l_scom_buffer));
