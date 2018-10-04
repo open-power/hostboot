@@ -367,8 +367,6 @@ HCD_HDR_UINT32(g_pgpe_core_throttle_deassert_cnt, 0 );      // Core throttle de-
 HCD_HDR_UINT32(g_pgpe_aux_controls,             0 );        // Auxiliary Controls
 HCD_HDR_UINT32(g_pgpe_doptrace_offset,          0 );        // Deep Operational Trace Main Memory Buffer Offset
 HCD_HDR_UINT32(g_pgpe_doptrace_length,          0 );        // Deep Opeartional Trace Main Memory Buffer Length
-HCD_HDR_UINT32(g_pgpe_sram_region_start,        0 );        //
-HCD_HDR_UINT32(g_pgpe_sram_region_size,         0 );        //
 #ifdef __ASSEMBLER__
 .endm
 #else
