@@ -51,8 +51,6 @@ namespace IPMI
 
         MSG_STATE_SHUTDOWN,
 
-        MSG_STATE_SHUTDOWN_SEL,
-
         MSG_STATE_GRACEFUL_SHUTDOWN,
 
         // initiate a reboot request
@@ -74,7 +72,6 @@ namespace IPMI
     inline bool validShutdownRebootMsgType(const msg_type i_msgType)
     {
         return (   (i_msgType == MSG_STATE_SHUTDOWN)
-                || (i_msgType == MSG_STATE_SHUTDOWN_SEL)
                 || (i_msgType == MSG_STATE_GRACEFUL_SHUTDOWN)
                 || (i_msgType == MSG_STATE_INITIATE_POWER_CYCLE));
     }
