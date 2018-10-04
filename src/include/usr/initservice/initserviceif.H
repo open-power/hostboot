@@ -61,16 +61,16 @@ namespace INITSERVICE
         NOTIFY_FIRST                    = 0,
         HIGHEST_PRIORITY                = NOTIFY_FIRST,
         NO_PRIORITY                     = 16,
-        MBOX_PRIORITY                   = 17,
-        INTR_PRIORITY                   = 18,
-        PRESHUTDOWN_INIT_PRIORITY       = 19,
+        IPMI_SEL_PRIORITY               = 17,
+        MBOX_PRIORITY                   = 18,
+        INTR_PRIORITY                   = 19,
+        PRESHUTDOWN_INIT_PRIORITY       = 20,
         LOWEST_PRIORITY                 = 127,
         CONSOLE_PRIORITY                = LOWEST_PRIORITY,
         LAST_PRE_MEM_FLUSH_PRIORITY     = LOWEST_PRIORITY,
         HIGHEST_POST_MEM_FLUSH_PRIORITY = 128,  // 1st post mem flush callback
         PNOR_RP_PRIORITY                = HIGHEST_POST_MEM_FLUSH_PRIORITY,
         POST_MEM_FLUSH_NOTIFY_LAST      = 255
-
     };
 
 /**
