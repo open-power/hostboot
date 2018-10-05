@@ -391,6 +391,7 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
         secLength   =   (i_regList.size() * 8) + sizeof( FfdcSummSubSectHdr );
         secLength   =   (secLength > i_length) ? i_length : secLength;
 
+
         uint32_t l_currentLength    =   sizeof( FfdcSummSubSectHdr );
 
         for( itRegList = i_regList.begin(); itRegList != i_regList.end();
@@ -398,6 +399,7 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
         {
             if( l_currentLength > secLength )
             {
+
                 break;
             }
 
@@ -459,14 +461,6 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
     do
     {
-        //NOTE: Ensure this register list always matches with list in
-        //file p9_pm_recovery_ffdc_base.C
-        l_ppeRegList[ XSR ]     =   (char*) "XSR";
-        l_ppeRegList[ IAR ]     =   (char*) "IAR";
-        l_ppeRegList[ IR ]      =   (char*) "IR";
-        l_ppeRegList[ EDR ]     =   (char*) "EDR";
-        l_ppeRegList[ SPRG0 ]   =   (char*) "SPRG0";
-
         FfdcSummSubSectHdr* l_pSubSecHdr  =   (FfdcSummSubSectHdr*)i_buf;
         uint32_t* l_secBufPtr  =   (uint32_t*)( i_buf + sizeof( FfdcSummSubSectHdr ) );
 
@@ -502,7 +496,7 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
             break;
         }
 
-        secLength   =   (l_ppeRegList.size() * 4) + sizeof( FfdcSummSubSectHdr );
+        secLength   =   ( l_ppeRegList.size() * 4) + sizeof( FfdcSummSubSectHdr );
         secLength   =   (secLength > i_length) ? i_length : secLength;
 
         l_currentLength    =   sizeof( FfdcSummSubSectHdr );
@@ -572,7 +566,15 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
             if( l_rc )
             {
-                break;
+                if( SECTION_INVALID == l_rc )
+                {
+                    l_rc = PARSE_SUCCESS;
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
 
             i_parser.PrintBlank();
@@ -673,6 +675,20 @@ uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
     {
         //NOTE: Ensure this register list always matches with list in
         //file p9_pm_recovery_ffdc_occ.C
+        l_occRegMap.push_back( "CME 0 FIR" );
+        l_occRegMap.push_back( "CME 1 FIR" );
+        l_occRegMap.push_back( "CME 2 FIR" );
+        l_occRegMap.push_back( "CME 3 FIR" );
+        l_occRegMap.push_back( "CME 4 FIR" );
+        l_occRegMap.push_back( "CME 5 FIR" );
+        l_occRegMap.push_back( "CME 6 FIR" );
+        l_occRegMap.push_back( "CME 7 FIR" );
+        l_occRegMap.push_back( "CME 8 FIR" );
+        l_occRegMap.push_back( "CME 9 FIR" );
+        l_occRegMap.push_back( "CME 10 FIR" );
+        l_occRegMap.push_back( "CME 11 FIR" );
+        l_occRegMap.push_back( "OCC FIR" );
+        l_occRegMap.push_back( "PBA FIR" );
         l_occRegMap.push_back( "CCSR" );
         l_occRegMap.push_back( "QSSR" );
         l_occRegMap.push_back( "OCCFLG" );
@@ -746,6 +762,7 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
         {
             if( SECTION_INVALID == l_rc )
             {
+                l_rc = PARSE_SUCCESS;
                 continue;
             }
             else
@@ -753,6 +770,7 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
                 break;
             }
         }
+
     }
 
     return l_rc;
@@ -773,12 +791,12 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
     std::vector < std::string > l_qppmRegMap;
     uint32_t l_rc = PARSE_SUCCESS;
     char l_lineStr[LINE_LENGTH];
-    uint32_t l_qppmSectn = (i_length / (FFDC_SUMMARY_SIZE_QPPM_REG) );
+    uint32_t l_qppmSectn       =       (i_length / (FFDC_SUMMARY_SIZE_QPPM_REG) );
 
     const char* lines = "---------------------------------------------";
-
     //NOTE: Ensure this register list always matches with list in
     //file p9_pm_recovery_ffdc_qppm.C
+
     l_qppmRegMap.push_back( "GPMMR" );
     l_qppmRegMap.push_back( "EQ_SSHSRC" );
     l_qppmRegMap.push_back( "QPPM_DPLL_FREQ" );
@@ -806,6 +824,7 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
         {
             if( SECTION_INVALID == l_rc )
             {
+                l_rc = PARSE_SUCCESS;
                 continue;
             }
             else
@@ -829,7 +848,7 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
 bool parsePmFfdcData( void* i_buf, uint32_t i_length,
-                          ErrlUsrParser& i_parser, errlver_t i_subsec )
+                      ErrlUsrParser& i_parser, errlver_t i_subsec )
 {
     uint32_t l_rc = PARSE_SUCCESS;
     using namespace p9_stop_recov_ffdc;
