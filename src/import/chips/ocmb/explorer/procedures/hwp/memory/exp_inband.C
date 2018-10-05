@@ -469,6 +469,93 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+
+
+///
+/// @brief Converts a little endian data array to a sensor_cache_struct
+/// @param[in] i_data little endian data to process
+/// @param[out] o_data sensor cache structure
+/// @return true if success false if failure
+/// @note helper function - returning a bool and will have true FFDC in a separate function
+///
+bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+        sensor_cache_struct& o_data)
+{
+    uint32_t l_idx = 0;
+    bool l_rc = readLE(i_data, l_idx, o_data.status);
+    l_rc &= readLE(i_data, l_idx, o_data.ocmb_dts);
+    l_rc &= readLE(i_data, l_idx, o_data.mem_dts0);
+    l_rc &= readLE(i_data, l_idx, o_data.mem_dts1);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_reads);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_writes);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_activations);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_powerups);
+    l_rc &= readLE(i_data, l_idx, o_data.self_timed_refresh);
+    l_rc &= readLEArray(i_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0);
+    l_rc &= readLE(i_data, l_idx, o_data.frame_count);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_base);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_low);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_med);
+    l_rc &= readLE(i_data, l_idx, o_data.mba_arrival_histo_high);
+    l_rc &= readLE(i_data, l_idx, o_data.initial_packet1);
+    l_rc &= readLEArray(i_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1);
+
+    return l_rc;
+}
+
+///
+/// @brief Converts a little endian data array to a sensor_cache_struct
+/// @param[in] i_target OCMB target on which to operate
+/// @param[in] i_data little endian data to process
+/// @param[out] o_data sensor cache structure
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+/// @note helper function to allow for checking FFDC
+///
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
+        const std::vector<uint8_t>& i_data,
+        sensor_cache_struct& o_data)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ASSERT( sensor_cache_struct_from_little_endian(i_data,
+                 o_data),
+                 fapi2::EXP_INBAND_LE_DATA_RANGE()
+                 .set_TARGET(i_target)
+                 .set_FUNCTION(mss::exp::READ_SENSOR_CACHE_STRUCT)
+                 .set_DATA_SIZE(i_data.size())
+                 .set_MAX_INDEX(sizeof(sensor_cache_struct)),
+                 "%s Failed to convert from data to sensor_cache_struct data size %u expected size %u",
+                 mss::c_str(i_target), i_data.size(), sizeof(sensor_cache_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the complete 64 byte sensor cache on the selected Explorer
+///
+/// @param[in] i_target     The Explorer chip to read data from
+/// @param[out] o_data      The data read from the buffer
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode getSensorCache(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    sensor_cache_struct& o_data)
+{
+    std::vector<uint8_t> l_data(static_cast<int>(sizeof(o_data)));
+
+    // The sensor cache is accessed exclusively via 2 32-byte MMIO reads
+    FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_SENSOR_CACHE_ADDR, 32, l_data));
+
+    FAPI_TRY(sensor_cache_struct_from_little_endian(i_target, l_data, o_data));
+
+fapi_try_exit:
+    FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
+    return fapi2::current_err;
+}
+
 } // ns ib
 
 } // ns exp
