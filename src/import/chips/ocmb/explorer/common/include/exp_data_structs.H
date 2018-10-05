@@ -52,6 +52,8 @@ enum exp_struct_sizes
     MSDG_MAX_PSTATE = 1,
     PADDING_SIZE = 4,
     ARGUMENT_SIZE = 28,
+    SENSOR_CACHE_PADDING_SIZE_0 = 3,
+    SENSOR_CACHE_PADDING_SIZE_1 = 15,
 };
 
 ///
@@ -534,5 +536,53 @@ typedef struct user_input_msdg
     // [0] = 1 Emulation firmware mode
     uint16_t EmulationSupport;
 } user_input_msdg_t;
+
+///
+/// @class sensor_cache_struct
+/// @brief The sensor cache structure
+/// @note The data in the sensor cache is returned in 2 32-byte packets
+///
+typedef struct
+{
+    /*
+     * Packet 0
+     */
+    // Responses
+    // status[0] OCMB Onchip DTS Error Bit
+    // status[1] OCMB Onchip DTS Valid Bit
+    // status[2] OCMB Onchip DTS Present Bit
+    // status[3] MEM DTS0 Error Bit
+    // status[4] MEM DTS0 Valid Bit
+    // status[5] MEM DTS0 Present Bit
+    // status[6] MEM DTS1 Error Bit
+    // status[7] MEM DTS1 Valid Bit
+    // status[8] MEM DTS1 Present Bit
+    // status[9] Event Bit
+    // status[10] Initial Packet0 ('1' on first packet0 return, otherwise '0')
+    // status[11:15] Reserved
+    uint16_t status;
+
+    uint16_t ocmb_dts;          // On chip thermal sensor
+    uint16_t mem_dts0;          // External DIMM thermal sensor 0
+    uint16_t mem_dts1;          // External DIMM thermal sensor 1
+    uint32_t mba_reads;         // The number of reads that the sequencer has seen; wraps
+    uint32_t mba_writes;        // The number of writes that the sequencer has seen; wraps
+    uint32_t mba_activations;   // The number of bank activates seen; wraps
+    uint32_t mba_powerups;      // Counts the number of rising edges for a CKE; wraps
+    uint8_t self_timed_refresh; // The number of times that the sequencer exited self-timed refresh
+    uint8_t reserved0[SENSOR_CACHE_PADDING_SIZE_0];
+    uint32_t frame_count;       // Free running counter that is used as denominator for performance counts
+
+    /*
+     * Packet 1
+     */
+    uint32_t mba_arrival_histo_base; // Increments every MBA Idle Cycle
+    uint32_t mba_arrival_histo_low;  // Counts the number of times the low idle threshold was met
+    uint32_t mba_arrival_histo_med;  // Counts the number of times the med idle threshold was met
+    uint32_t mba_arrival_histo_high; // Counts the number of times the high idle threshold was met
+    uint8_t initial_packet1;         // initial_packet1[0] '1' on first packet1 return, otherwise '0'
+    //                               // initial_packet1[1:7] Reserved
+    uint8_t reserved1[SENSOR_CACHE_PADDING_SIZE_1];
+} sensor_cache_struct;
 
 #endif
