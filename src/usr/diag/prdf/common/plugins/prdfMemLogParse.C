@@ -2818,6 +2818,31 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str, TYPE i_type )
     }
 }
 
+// Gets the string representation for a single row repair entry.
+void getRowRepairEntry( uint8_t * i_buffer, char * o_str )
+{
+    uint32_t entrySize = ROW_REPAIR::ENTRY_SIZE;
+
+    UtilMem membuf( i_buffer, entrySize );
+
+    uint8_t rank; membuf >> rank;
+    snprintf( o_str, DATA_SIZE, "R:%1d ", rank );
+
+    char temp[DATA_SIZE];
+    uint8_t port; membuf >> port;
+    snprintf( temp, DATA_SIZE, "P:%1d", port );
+    strcat( o_str, temp );
+
+    strcat( o_str, "  " );
+
+    for ( int32_t b = 0; b < ROW_REPAIR::ROW_REPAIR_SIZE; b++ )
+    {
+        uint8_t byte; membuf >> byte;
+        snprintf( temp, DATA_SIZE, "%02x", byte );
+        strcat( o_str, temp );
+    }
+}
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -3380,6 +3405,32 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
         getBadDqBitmapEntry( i_buffer, data, i_type );
 
         i_parser.PrintString( " BAD_DQ_BITMAP", data );
+    }
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseRowRepairVpd( uint8_t * i_buffer, uint32_t i_buflen,
+                        ErrlUsrParser & i_parser )
+{
+    bool rc = true;
+
+    if ( NULL == i_buffer ) return false; // Something failed in parser.
+
+    uint32_t entrySize = ROW_REPAIR::ENTRY_SIZE;
+
+    const uint32_t entries = i_buflen / entrySize;
+
+    i_parser.PrintNumber( " ROW_REPAIR_VPD", "%d", entries );
+
+    for ( uint32_t i = 0; i < entries; i++ )
+    {
+        char data[DATA_SIZE];
+        getRowRepairEntry( &i_buffer[i*entrySize], data );
+
+        i_parser.PrintString( "", data );
     }
 
     return rc;

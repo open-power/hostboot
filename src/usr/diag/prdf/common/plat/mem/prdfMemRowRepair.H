@@ -85,6 +85,12 @@ class MemRowRepair
         return ( iv_data[ROW_REPAIR::ROW_REPAIR_SIZE-1] & 0x01 );
     }
 
+    /**
+     * @brief  Queries if there are is any row repair data present.
+     * @return TRUE if any row repair data present.
+     */
+    bool nonZero() const;
+
   private: // instance variables
 
     TARGETING::TargetHandle_t iv_dimm; ///< Target DIMM

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,6 +124,15 @@ bool parseDramRepairsData( uint8_t * i_buffer, uint32_t i_buflen,
  */
 bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
                           ErrlUsrParser & i_parser, TARGETING::TYPE i_type );
+
+/**
+ * @brief Parses Row Repair VPD (data in Row Repair Data attributes).
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ */
+bool parseRowRepairVpd( uint8_t * i_buffer, uint32_t i_buflen,
+                        ErrlUsrParser & i_parser );
 
 /**
  * @brief Parses Bad DQ Bitmap data (Used in IPL UE isolation).
