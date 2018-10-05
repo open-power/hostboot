@@ -72,7 +72,7 @@ OBJS += p9_i2ctests.o
 ################################################################################
 endif
 
-TESTS += ${shell ls src/usr/fapi2/test/*TestCxx.H | sort | xargs)}
+TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
