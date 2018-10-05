@@ -121,6 +121,8 @@ static const uint64_t EXPLR_IB_CMD_ADDR =  EXPLR_IB_MMIO_OFFSET | EXPLR_IB_CMD_S
 static const uint64_t EXPLR_IB_RSP_ADDR =  EXPLR_IB_MMIO_OFFSET | EXPLR_IB_RSP_SRAM_ADDR;
 static const uint64_t EXPLR_IB_DATA_ADDR = EXPLR_IB_MMIO_OFFSET | EXPLR_IB_DATA_SRAM_ADDR;
 
+static const uint64_t EXPLR_IB_SENSOR_CACHE_ADDR = EXPLR_IB_MMIO_OFFSET | 0x40084200;
+
 //--------------------------------------------------------------------------------
 // Utilities
 //--------------------------------------------------------------------------------
@@ -263,6 +265,29 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
         i_target,
         const std::vector<uint8_t>& i_data,
         host_fw_response_struct& o_response);
+
+///
+/// @brief Converts a little endian data array to a sensor_cache_struct
+/// @param[in] i_data little endian data to process
+/// @param[out] o_data sensor cache structure
+/// @return true if success false if failure
+/// @note helper function - returning a bool and will have true FFDC in a separate function
+///
+bool sensor_cache_struct_from_little_endian(const std::vector<uint8_t>& i_data,
+        sensor_cache_struct& o_data);
+
+///
+/// @brief Converts a little endian data array to a sensor_cache_struct
+/// @param[in] i_target OCMB target on which to operate
+/// @param[in] i_data little endian data to process
+/// @param[out] o_data sensor cache structure
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+/// @note helper function to allow for checking FFDC
+///
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
+        const std::vector<uint8_t>& i_data,
+        sensor_cache_struct& o_data);
 
 //--------------------------------------------------------------------------------
 // Write operations
@@ -428,6 +453,19 @@ fapi2::ReturnCode getOCCfg(
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     host_fw_response_struct& o_rsp) ;
+
+
+
+
+/// @brief Reads the complete 64 byte sensor cache on the selected Explorer
+///
+/// @param[in] i_target     The Explorer chip to read data from
+/// @param[out] o_data      The data read from the buffer
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode getSensorCache(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    sensor_cache_struct& o_data) ;
 
 
 //--------------------------------------------------------------------------------
