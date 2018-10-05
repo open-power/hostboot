@@ -49,6 +49,7 @@ enum ffdc_codes
     EXP_I2C_GET_FIELD = 0x0000,
     EXP_I2C_SET_FIELD = 0x0001,
     READ_HOST_FW_RESPONSE_STRUCT = 0x0003,
+    READ_SENSOR_CACHE_STRUCT = 0x0004,
 };
 
 namespace i2c
