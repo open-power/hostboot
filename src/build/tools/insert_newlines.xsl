@@ -23,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="xml" indent="no" omit-xml-declaration="yes"/>
+    <xsl:output method="xml" indent="yes" omit-xml-declaration="yes"/>
 
     <!-- Copy everything from the source file to the destination as it is but
          add newlines if the current match is a child element of the root node.
