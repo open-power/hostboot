@@ -253,12 +253,6 @@ void IpmiDD::pollCtrl(void)
                     msg_send(iv_eventQ, msg);
                     iv_eagains = false;
                 }
-                // Check on shutdown if idle
-                else if (iv_shutdown_now)
-                {
-                    mutex_unlock(&iv_mutex);
-                    break;  // exit loop and terminate task
-                }
             }
             // If we see the B2H_ATN, there's a response waiting
             else if (ctrl & CTRL_B2H_ATN)
@@ -457,25 +451,9 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
 }
 
 /**
- * @brief shutdown the device driver
- */
-void IpmiDD::handleShutdown(void)
-{
-    IPMI_TRAC(ENTER_MRK "handle Shutdown" );
-    mutex_lock(&iv_mutex);
-    iv_shutdown_now = true; // signal  poll controller to terminate
-
-    // TODO: RTC 116600 mask interrupts
-
-    mutex_unlock(&iv_mutex);
-    IPMI_TRAC(EXIT_MRK "handle Shutdown" );
-}
-
-/**
  * @brief  Constructor
  */
 IpmiDD::IpmiDD(void):
-    iv_shutdown_now(false),
     iv_eagains(false),
     iv_eventQ(msg_q_create())
 {

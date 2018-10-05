@@ -78,7 +78,6 @@ IpmiRP::IpmiRP(void):
     iv_recv_buffer_size(IPMI::g_recv_buffer_size),
     iv_retries(IPMI::g_retries),
     iv_shutdown_msg(NULL),
-    iv_shutdown_now(false),
     iv_graceful_shutdown_pending(false),
     iv_chassis_power_mod(IPMI::CHASSIS_POWER_OFF)
 {
@@ -180,15 +179,9 @@ void IpmiRP::timeoutThread(void)
     while (true)
     {
         mutex_lock(&iv_mutex);
-        while ((iv_timeoutq.size() == 0) && !iv_shutdown_now)
+        while ((iv_timeoutq.size() == 0))
         {
             sync_cond_wait(&iv_cv, &iv_mutex);
-        }
-
-        // shutting down...
-        if (iv_shutdown_now)
-        {
-            break; // return and terminate thread
         }
 
         msg_t*& msq_msg = iv_timeoutq.front();
@@ -554,7 +547,8 @@ void IpmiRP::attach(void)
 
     msg_q_t mq = Singleton<IpmiDD>::instance().eventQueue();
 
-    while (!iv_shutdown_now)
+    /* FIXME: Never shut down */
+    while (1)
     {
         /* Forward it into the internal message queue */
         msg_send(iv_msgQ, msg_wait(mq));
@@ -740,24 +734,15 @@ void IpmiRP::execute(void)
         }
 
         // Once quiesced, reply to shutdown msg and exit.
-        // For IPMI based systems if we received the soft power off (graceful
-        // shutdown) request then we have more processing to do, so respond
-        // to the first shutdown message and instead of exiting we go back
-        // and wait for the post memory flush shutdown message then send a
-        // power off command to the BMC
+        // Shutdown simply puts us in a state we deny all further requests bar
+        // those from PnorIpmiDD. Access to the PNOR must be provided right up
+        // until we call the shutdown syscall, so there's no point at which we
+        // can deallocate the resources consumed by IpmiRP, IpmiDD or
+        // PnorIpmiDD.
         if (l_shutdown_pending && iv_respondq.empty() && iv_sendq.empty())
         {
-            if(iv_graceful_shutdown_pending)
-            {
-
-                IPMI_TRAC(INFO_MRK "reply to the MSG_STATE_SHUTDOWN message");
-                msg_respond(iv_msgQ, iv_shutdown_msg);
-            }
-            else
-            {
-                shutdownNow();
-                break; // exit loop and terminate task
-            }
+            IPMI_TRAC(INFO_MRK "reply to the MSG_STATE_SHUTDOWN message");
+            msg_respond(iv_msgQ, iv_shutdown_msg);
         }
     }
 
@@ -943,32 +928,6 @@ void IpmiRP::queueForResponse(IPMI::Message& i_msg)
 
     mutex_unlock(&iv_mutex);
     return;
-}
-
-///
-/// @brief handle shutdown.
-/// Queued messages to send have been sent and all responses complete.
-/// Now that we are quiesced, deallocate resources and respond to the
-/// shutdown message
-///
-void IpmiRP::shutdownNow(void)
-{
-    IPMI_TRAC(INFO_MRK "IpmiRP::shutdownNow() ");
-
-    mutex_lock(&iv_mutex);
-    iv_shutdown_now = true; // Shutdown underway
-
-    // Wake up Time out thread to terminate.
-    sync_cond_signal(&iv_cv);
-    mutex_unlock(&iv_mutex);
-
-    // TODO: RTC 116600 unRegisterMsgQ for interrupts
-
-    // Shut down device driver
-    Singleton<IpmiDD>::instance().handleShutdown();
-
-    // reply back to shutdown requester that we are shutdown
-    msg_respond(iv_msgQ, iv_shutdown_msg);
 }
 
 namespace IPMI
