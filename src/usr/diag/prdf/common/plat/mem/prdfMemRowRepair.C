@@ -47,6 +47,21 @@ using namespace TARGETING;
 
 //------------------------------------------------------------------------------
 
+bool MemRowRepair::nonZero() const
+{
+    bool o_nonZero = false;
+
+    for ( uint32_t i = 0; i < ROW_REPAIR::ROW_REPAIR_SIZE; i++ )
+    {
+        if ( 0 != iv_data[i] )
+        {
+            o_nonZero = true;
+            break;
+        }
+    }
+
+    return o_nonZero;
+}
 
 //##############################################################################
 //                              Utility Functions

@@ -91,6 +91,19 @@ void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
                             CaptureData & io_cd );
 
 /**
+ * @brief Queries the Row Repair attributes for the content of the DRAM repairs
+ *        VPD and adds it to the capture data.
+ * @param i_trgt An MBA or MCA target.
+ * @param io_cd  Capture data struct.
+ * @note  This function will be used to capture row repair data into the
+ *        capture data struct. Other functions can call this function and
+ *        update the error log.
+ */
+template<TARGETING::TYPE T>
+void captureRowRepairVpd( TARGETING::TargetHandle_t i_trgt,
+                          CaptureData & io_cd );
+
+/**
  * @brief Queries the IUE threshold variable for the IUE counts and adds them
  *        to the capture data.
  * @param i_trgt An MBA or MCA target.

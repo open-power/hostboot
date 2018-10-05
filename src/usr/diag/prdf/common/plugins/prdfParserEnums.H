@@ -178,6 +178,7 @@ namespace ROW_REPAIR
     enum
     {
         ROW_REPAIR_SIZE = 4, // 4 byte (32 bit) repair
+        ENTRY_SIZE = sizeof(uint8_t)*2 + ROW_REPAIR_SIZE,
     };
 } // namespace ROW_REPAIR
 

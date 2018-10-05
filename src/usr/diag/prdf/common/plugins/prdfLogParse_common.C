@@ -471,6 +471,10 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
                  parseBadDqBitmap( sigData, sigDataSize, i_parser,
                                    l_targetType );
             }
+            else if ( Util::hashString("ROW_REPAIR_VPD") == sigId )
+            {
+                 parseRowRepairVpd( sigData, sigDataSize, i_parser );
+            }
             else if ( (Util::hashString(TD_CTLR_DATA::START) == sigId) ||
                       (Util::hashString(TD_CTLR_DATA::END)   == sigId) )
             {

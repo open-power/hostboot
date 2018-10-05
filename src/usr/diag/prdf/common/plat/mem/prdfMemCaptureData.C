@@ -39,6 +39,7 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfMemRowRepair.H>
 
 
 
@@ -334,6 +335,87 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
+{
+    #define PRDF_FUNC "[captureRowRepairVpd] "
+
+    // Get the maximum capture data size.
+    static const size_t sz_rank  = sizeof(uint8_t);
+    static const size_t sz_port  = sizeof(uint8_t);
+    static const size_t sz_entry = ROW_REPAIR::ROW_REPAIR_SIZE;
+    static const size_t sz_word  = sizeof(CPU_WORD);
+
+    do
+    {
+        std::vector<MemRank> masterRanks;
+        getMasterRanks<T>( i_trgt, masterRanks );
+        if( masterRanks.empty() )
+        {
+            PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
+            break;
+        }
+
+        // Get the maximum capture data size.
+        size_t sz_maxData = masterRanks.size() * (sz_rank + sz_port + sz_entry);
+
+        // Adjust the size for endianness.
+        sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
+
+        // Initialize to 0.
+        uint8_t capData[sz_maxData];
+        memset( capData, 0x00, sz_maxData );
+
+        // Iterate all ranks to get VPD data
+        uint32_t idx = 0;
+        for ( auto & rank : masterRanks )
+        {
+            // Iterate all dimms per rank
+            TargetHandleList dimmList = getConnectedDimms( i_trgt, rank );
+            for ( auto & dimm : dimmList )
+            {
+                MemRowRepair rowRepair;
+
+                if ( SUCCESS != getRowRepairData<T>(dimm, rank, rowRepair) )
+                {
+                    PRDF_ERR( PRDF_FUNC "getRowRepairData() failed: dimm=0x%08x"
+                            " rank=0x%02x", getHuid(i_trgt), rank.getKey() );
+                    continue; // skip this dimm
+                }
+
+                if ( rowRepair.nonZero() ) // make sure the data is non-zero
+                {
+                    // Add the rank, port, then the entry data.
+                    capData[idx] = rank.getMaster();
+                    idx += sz_rank;
+                    capData[idx] = getDimmPort<T>( dimm );
+                    idx += sz_port;
+                    memcpy(&capData[idx], rowRepair.getData(), sz_entry);
+                    idx += sz_entry;
+                }
+            }
+        }
+
+        if( 0 == idx ) break; // Nothing to capture
+
+        // Fix endianness issues with non PPC machines.
+        size_t sz_capData = idx;
+        sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
+        for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
+            ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+
+        // Add data to capture data.
+        BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
+        io_cd.Add( i_trgt, Util::hashString("ROW_REPAIR_VPD"), bs );
+
+    }while(0);
+
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template<>
 void captureIueCounts<McaDataBundle*>( TARGETING::TargetHandle_t i_trgt,
                                        McaDataBundle * i_db,
@@ -423,6 +505,9 @@ void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd<TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip->getTrgt(), cd);
 
+    // Add Row Repair data from VPD
+    captureRowRepairVpd<TYPE_MBA>(i_chip->getTrgt(), cd);
+
 }
 
 //------------------------------------------------------------------------------
@@ -451,6 +536,9 @@ void addEccData<TYPE_MBA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
 
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd<TYPE_MBA, DIMMS_PER_RANK::MBA>( i_trgt, cd );
+
+    // Add Row Repair data from VPD.
+    captureRowRepairVpd<TYPE_MBA>( i_trgt, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
 }
