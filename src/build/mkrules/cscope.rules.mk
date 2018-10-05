@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +33,8 @@ cscope:
 	$(C2) "    CSCOPE"
 	$(C1)(cd $(ROOTPATH)/obj/cscope ; rm -f cscope.* ; \
 	      find ../../ -name '*.[CHchS]' -type f -fprint cscope.files; \
-	      cscope -bqk)
+	      cscope -bk)
+# removed -q as it caused a segfault in obj/modules/testfapi2/testfapi2.C
 
 .PHONY: ctags
 ctags:
