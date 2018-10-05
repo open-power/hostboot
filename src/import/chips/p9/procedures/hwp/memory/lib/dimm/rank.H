@@ -306,6 +306,44 @@ namespace rank
 {
 
 ///
+/// @class rank_pair_data
+/// @brief Structure that contains the rank pairs for all rank pair registers
+///
+struct rank_pair_data
+{
+    ///
+    /// @brief Default constructor initialize all values to 0's
+    ///
+    constexpr rank_pair_data() :
+        iv_rp_reg0(0),
+        iv_rp_reg1(0),
+        iv_rp_reg2(0),
+        iv_rp_reg3(0)
+    {}
+    ///
+    /// @brief Constructor that sets register values
+    /// @param[in] i_rp_reg0 value for RP register 0
+    /// @param[in] i_rp_reg1 value for RP register 0
+    /// @param[in] i_rp_reg2 value for RP register 0
+    /// @param[in] i_rp_reg3 value for RP register 0
+    ///
+    constexpr rank_pair_data( const uint16_t i_rp_reg0,
+                              const uint16_t i_rp_reg1,
+                              const uint16_t i_rp_reg2,
+                              const uint16_t i_rp_reg3) :
+        iv_rp_reg0(i_rp_reg0),
+        iv_rp_reg1(i_rp_reg1),
+        iv_rp_reg2(i_rp_reg2),
+        iv_rp_reg3(i_rp_reg3)
+    {}
+
+    uint16_t iv_rp_reg0; //  Primary +  secondary 0/1
+    uint16_t iv_rp_reg1; //  Primary +  secondary 2/3
+    uint16_t iv_rp_reg2; // Tertiary + quaternary 0/1
+    uint16_t iv_rp_reg3; // Tertiary + quaternary 2/3
+};
+
+///
 /// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rank the rank number to be mapped
@@ -714,7 +752,7 @@ fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<T>& i_target,
 ///
 template< fapi2::TargetType T>
 fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<T>& i_target,
-        std::pair<uint64_t, uint64_t>& o_registers);
+        rank_pair_data& o_registers);
 
 ///
 /// @brief Setup the rank information in the port

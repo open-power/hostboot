@@ -86,17 +86,93 @@ namespace rank
 // the plug rules (which may be OpenPOWER, IBM, etc.) Some also won't make sense
 // -- 3 rank DIMM? -- but it doesn't take up much space and lord knows stranger things
 // have happened ... Won't hurt to have this defined JustInCase(tm).
-// Index by [DIMM1 rank count][DIMM0 rank count] and first is the RANK_PAIR0 register,
-// second is RANK_PAIR1.
-//
+// Index by [DIMM1 rank count][DIMM0 rank count]
+// Order and values for the below structure
+// Each value represents a rank pair configuration register's proper settings
+//  Primary +  secondary 0/1
+//  Primary +  secondary 2/3
+// Tertiary + quaternary 0/1
+// Tertiary + quaternary 2/3
 // TODO RTC 160869: Review hard coded values, possibly make into traits?
-static const std::vector< std::vector< std::pair< uint64_t, uint64_t > > > rank_pair_assignments =
+static const std::vector< std::vector< rank_pair_data > > rank_pair_assignments =
 {
-    { {0x0000, 0x0000}, {0x1000, 0x0000}, {0x1030, 0x0000}, {0x1530, 0x0000}, {0x1537, 0x0000} },
-    { {0x0000, 0x9000}, {0x1000, 0x9000}, {0x1030, 0x9000}, {0x1530, 0x9000}, {0x1537, 0x9000} },
-    { {0x0000, 0x90B0}, {0x1000, 0x90B0}, {0x1030, 0x90B0}, {0x1530, 0x90B0}, {0x1537, 0x90B0} },
-    { {0x0000, 0x9DB0}, {0x1000, 0x9DB0}, {0x1030, 0x9DB0}, {0x1530, 0x9DB0}, {0x1537, 0x9DB0} },
-    { {0x0000, 0x9DBF}, {0x1000, 0x9DBF}, {0x1030, 0x9DBF}, {0x1530, 0x9DBF}, {0x1537, 0x9DBF} },
+    {
+        {0x0000, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x0000, 0x0000, 0x0000}  // 0 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9000, 0x0000, 0x0000}  // 1 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x90B0, 0x0000, 0x0000}  // 2 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9DB0, 0x0000, 0x0000}  // 3 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9DBF, 0x0000, 0x0000}  // 4 ranks DIMM 1, 4 ranks DIMM0
+    },
+};
+
+// Defines the same rank pair tables but this time for LRDIMM
+// Nimbus only allows us to have all LR or all RDIMM plugged on a given port, so we're ok having two tables
+// TK update these leaving the same as above for a whick review
+static const std::vector< std::vector< rank_pair_data > > lr_rank_pair_assignments =
+{
+    {
+        {0x0000, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x0000, 0x0000, 0x0000}, // 0 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x0000, 0x0000, 0x0000}  // 0 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9000, 0x0000, 0x0000}  // 1 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x90B0, 0x0000, 0x0000}, // 2 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x90B0, 0x0000, 0x0000}  // 2 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9DB0, 0x0000, 0x0000}, // 3 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9DB0, 0x0000, 0x0000}  // 3 ranks DIMM 1, 4 ranks DIMM0
+    },
+    {
+        {0x0000, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 1 ranks DIMM0
+        {0x1030, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 2 ranks DIMM0
+        {0x1530, 0x9DBF, 0x0000, 0x0000}, // 4 ranks DIMM 1, 3 ranks DIMM0
+        {0x1537, 0x9DBF, 0x0000, 0x0000}  // 4 ranks DIMM 1, 4 ranks DIMM0
+    },
 };
 
 //
@@ -346,12 +422,12 @@ fapi_try_exit:
 ///
 /// @brief Given a target, get the rank pair assignments, based on DIMMs
 /// @param[in] i_target the target (MCA or MBA?)
-/// @param[out] o_registers the regiter settings for the appropriate rank pairs
+/// @param[out] o_registers the register settings for the appropriate rank pairs
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
 fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        std::pair<uint64_t, uint64_t>& o_registers)
+        rank_pair_data& o_registers)
 {
     // TODO RTC:160869 add enum for rank pair 0 when it gets created
     typedef rankPairTraits<fapi2::TARGET_TYPE_MCA, 0> RPT;
@@ -371,10 +447,11 @@ fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>
     // Need only to check the first array entry since we need a valid primary rank in RP0 due to plug rules.
     o_registers = (l_regs[0] == 0) ?
                   rank_pair_assignments[l_rank_count[1]][l_rank_count[0]] :
-                  std::make_pair(static_cast<uint64_t>(l_regs[0]), static_cast<uint64_t>(l_regs[1]));
+                  rank_pair_data(l_regs[0], l_regs[1], 0, 0);
 
-    FAPI_DBG("rank pair assignments for %s. [%d,%d] (0x%08llx, 0x%08llx)",
-             mss::c_str(i_target), l_rank_count[1], l_rank_count[0], o_registers.first, o_registers.second);
+    FAPI_DBG("rank pair assignments for %s. [%d,%d] (RP0:0x%04x, RP1:0x%04x, RP2:0x%04x, RP3:0x%04x)",
+             mss::c_str(i_target), l_rank_count[1], l_rank_count[0],
+             o_registers.iv_rp_reg0, o_registers.iv_rp_reg1, o_registers.iv_rp_reg2, o_registers.iv_rp_reg3);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -405,22 +482,26 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     const fapi2::buffer<uint64_t> l_csid_data = mss::chip_ec_nimbus_lt_2_0(i_target) ? DD1_CSID : DD2_CSID;
 
     // Gets the rankpairs
-    std::pair<uint64_t, uint64_t> l_rp_registers;
+    rank_pair_data l_rp_registers;
     FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
 
-    FAPI_DBG("setting rank pairs for %s. 0x%08llx, 0x%08llx csid: 0x%016llx",
-             mss::c_str(i_target), l_rp_registers.first, l_rp_registers.second, l_csid_data);
+    FAPI_DBG("setting rank pairs for %s. 0x%04x, 0x%04x 0x%04x, 0x%04x, csid: 0x%016llx",
+             mss::c_str(i_target), l_rp_registers.iv_rp_reg0, l_rp_registers.iv_rp_reg0,
+             l_rp_registers.iv_rp_reg2, l_rp_registers.iv_rp_reg3, l_csid_data);
 
     // need an extra pair of parens to make FAPI_TRY parsing work correctly
-    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 0 >(i_target, l_rp_registers.first)) );
-    FAPI_TRY( (mss::rank::write_rank_pair_reg< 2, 0 >(i_target, l_rp_registers.second)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 0 >(i_target, l_rp_registers.iv_rp_reg0)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 2, 0 >(i_target, l_rp_registers.iv_rp_reg1)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 1 >(i_target, l_rp_registers.iv_rp_reg2)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 2, 1 >(i_target, l_rp_registers.iv_rp_reg3)) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
 
     // Set primary and secondary mirror in RANK_GROUP register.
-    l_rp_reg = l_rp_registers.first;
+    // TK tertiary/quaternary will be coming in a new commit
+    l_rp_reg = l_rp_registers.iv_rp_reg0;
     FAPI_TRY( mss::rank::set_mirror_bits<0>(i_target, l_rp_reg, l_rank_group) );
     FAPI_TRY( mss::rank::set_mirror_bits<1>(i_target, l_rp_reg, l_rank_group) );
-    l_rp_reg = l_rp_registers.second;
+    l_rp_reg = l_rp_registers.iv_rp_reg1;
     FAPI_TRY( mss::rank::set_mirror_bits<2>(i_target, l_rp_reg, l_rank_group) );
     FAPI_TRY( mss::rank::set_mirror_bits<3>(i_target, l_rp_reg, l_rank_group) );
 
@@ -582,14 +663,15 @@ fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_tar
     fapi2::buffer<uint64_t> l_rank_valid;
     uint64_t l_rank_pri = 0;
     uint64_t l_rank_sec = 0;
-    std::pair<uint64_t, uint64_t> l_rp_registers;
+    rank_pair_data l_rp_registers;
     FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
 
+    // TK tertiary/quaternary will be coming in a new commit
     FAPI_DBG("seeing rank pair registers: 0x%016lx 0x%016lx, rank %d",
-             l_rp_registers.first, l_rp_registers.second, i_rank);
+             l_rp_registers.iv_rp_reg0, l_rp_registers.iv_rp_reg1, i_rank);
 
     // Check RP0
-    l_rank_valid = l_rp_registers.first;
+    l_rank_valid = l_rp_registers.iv_rp_reg0;
     l_rank_valid.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
     l_rank_valid.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
 
@@ -612,7 +694,7 @@ fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_tar
     }
 
     // Check RP2
-    l_rank_valid = l_rp_registers.second;
+    l_rank_valid = l_rp_registers.iv_rp_reg1;
     l_rank_valid.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
     l_rank_valid.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
 
