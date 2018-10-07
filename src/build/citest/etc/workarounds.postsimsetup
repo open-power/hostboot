@@ -37,4 +37,5 @@
 mkdir -p $sb/simu/data/cec-chip/
 sbex -t 1067370 -f aix@auscmvc1.austin.ibm.com@2035 -r fips921 -d $sb/../
 
+
 ##########################################################################
