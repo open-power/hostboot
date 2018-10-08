@@ -31,8 +31,18 @@ import shlex
 #------------------------------------------------------------------------------
 toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
-numProcs = os.environ.get( "NUM_PROCS");
-dimmsPerProc = os.environ.get( "DIMMS_PER_PROC");
+numProcs = "0"
+if os.environ.has_key("NUM_PROCS"):
+    numProcs = os.environ.get("NUM_PROCS");
+elif simenv.num_procs > 0:
+    numProcs = str(simenv.num_procs)
+
+dimmsPerProc = "0"
+if os.environ.has_key("DIMMS_PER_PROC"):
+    dimmsPerProc = os.environ.get("DIMMS_PER_PROC");
+elif simenv.num_dimms > 0:
+    dimmsPerProc = str(simenv.num_dimms)
+
 numCentaurPerProcParm = "";
 numCentaurPerProc = "0";
 dimmType = "ISDIMM";

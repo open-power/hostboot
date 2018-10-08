@@ -59,6 +59,7 @@ my $mvpdFile = "procmvpd.dat";
 my $mvpdFile_ven = "procmvpd_ven.dat";
 my $mvpdFile_p9n = "procmvpd_p9n.dat";
 my $mvpdFile_p9c = "procmvpd_p9c.dat";
+my $mvpdFile_p9a = "procmvpd_p9a.dat";
 my $cvpdFile = "cvpd.dat";
 my $cvpdCdimmFile = "cvpd_cdimm.dat";
 my $dvpdFile = "dvpd.dat";
@@ -324,6 +325,10 @@ sub createMVPDData
             {
                 $sourceFile = "$dataPath/$mvpdFile_p9c";
             }
+            elsif( $procChipType eq "p9a")
+            {
+                 $sourceFile = "$dataPath/$mvpdFile_p9a";
+            }
             else
             {
                 $sourceFile = "$dataPath/$mvpdFile";
@@ -383,6 +388,10 @@ sub createCVPDData
     elsif($procChipType eq "p9c")
     {
         $numProcs = 4;
+    }
+    elsif( $procChipType eq "p9a")
+    {
+        $numProcs = 2;
     }
 
     #Centaurs are populated based on populated Processors and special
@@ -607,8 +616,17 @@ sub getMemoryConfig
             }
             elsif( $procChipType eq "p9n")
             {
-            #There are no centaurs within a NIMBUS machine, but need to set
-            #up the mcs array.
+                #There are no centaurs within a NIMBUS machine, but need to set
+                #up the mcs array.
+                if( $mcs < $numMcsPerProc)
+                {
+                    $mcsArray[$mcs] = 1;
+                }
+            }
+            elsif( $procChipType eq "p9a")
+            {
+                #There are no centaurs within an AXONE machine, but need to set
+                #up the mcs array.
                 if( $mcs < $numMcsPerProc)
                 {
                     $mcsArray[$mcs] = 1;
@@ -622,6 +640,4 @@ sub getMemoryConfig
     }
 
     debugMsg( "mcsArray=@mcsArray" );
-
-
 }

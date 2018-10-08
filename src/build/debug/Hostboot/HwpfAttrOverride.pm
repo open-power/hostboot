@@ -70,6 +70,7 @@ use constant TARGET_TYPE_PHB => 0x00800000;
 use constant TARGET_TYPE_L4 =>  0x00000200;
 use constant TARGET_TYPE_MC => 0x01000000;
 use constant TARGET_TYPE_MCC => 0x08000000;
+use constant TARGET_TYPE_OMIC => 0x04000000;
 use constant TARGET_TYPE_OMI => 0x02000000;
 use constant TARGET_TYPE_OMIC => 0x04000000;
 use constant TARGET_TYPE_OCMB => 0x10000000;
