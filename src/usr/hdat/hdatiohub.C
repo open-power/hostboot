@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -938,7 +938,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             l_hub->hdatMRID = l_mruId;
 
             //memory map version
-            l_hub->hdatMemMapVersion = 2;
+            l_hub->hdatMemMapVersion = 3;
 
             l_hub->hdatFab0PresDetect = l_pProcTarget->
                    getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();
