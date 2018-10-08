@@ -198,7 +198,36 @@ uint64_t mwd::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
     return 0;
 }
 
-// TK:LRDIMM update all of this file to have the actual LRDIMM training steps
+///
+/// @brief Deconfigures calibration steps depending upon LRDIMM type
+/// @param[in] i_dimm_type - DIMM type
+/// @param[in] i_sim - simulation mode or not
+/// @param[in,out] io_cal_steps - the bit mask of calibration steps
+/// @return a vector of the calibration steps to run
+///
+void deconfigure_steps(const uint8_t i_dimm_type, const bool i_sim, fapi2::buffer<uint32_t>& io_cal_steps)
+{
+    // If the DIMM type is an LRDIMM, configure for LRDIMM
+    if(i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
+    {
+        FAPI_INF("LRDIMM: deconfigure WR VREF 2D");
+        // We clear WRITE_CTR_2D_VREF as the HW calibration algorithm will not work with LRDIMM
+        io_cal_steps.clearBit<WRITE_CTR_2D_VREF>();
+        return;
+    }
+
+    FAPI_INF("Not LRDIMM: deconfigure all LRDIMM specific steps");
+    // Otherwise, clear all LRDIMM calibration steps
+    io_cal_steps.clearBit<DB_ZQCAL>()
+    .clearBit<MREP>()
+    .clearBit<MRD_COARSE>()
+    .clearBit<MRD_FINE>()
+    .clearBit<DWL>()
+    .clearBit<MWD_COARSE>()
+    .clearBit<MWD_FINE>()
+    .clearBit<HWL>();
+}
+
 
 } // ns lrdimm
 

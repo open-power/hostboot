@@ -120,6 +120,10 @@ extern "C"
             // we configured on this port.
             std::vector<uint64_t> l_pairs;
 
+            // DIMM type
+            uint8_t l_dimm_type[mss::MAX_DIMM_PER_PORT] = {};
+            FAPI_TRY(mss::eff_dimm_type(p, &l_dimm_type[0]), "%s failed to access DIMM type", mss::c_str(p));
+
             // Grab the attribute which contains the information on what cal steps we should run
             // if the i_specal_training bits have not been specified.
             if (i_special_training == 0)
@@ -181,7 +185,8 @@ extern "C"
                 bool l_cal_fail = false;
                 FAPI_INF("Execute cal on rp %d %s", rp, mss::c_str(p));
 
-                for(const auto& l_step : mss::training::steps_factory(l_cal_steps_enabled, l_sim))
+                // Per plug rules, mixing LRDIMM and RDIMM shouldn't be allowed, so we're ok grabbing the value from DIMM0
+                for(const auto& l_step : mss::training::steps_factory(l_dimm_type[0], l_cal_steps_enabled, l_sim))
                 {
                     FAPI_TRY( l_step->execute( p, rp, l_cal_abort_on_error) );
                 }

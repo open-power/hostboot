@@ -1211,8 +1211,15 @@ fapi_try_exit:
 ///
 std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps, const bool i_sim)
 {
-    // TK:LRDIMM Update the factory to add in LRDIMM training steps
+    FAPI_INF("Running factory for cal_steps:0x%08x %s mode", i_cal_steps, i_sim ? "simulation" : "hardware");
     std::vector<std::shared_ptr<step>> l_steps;
+
+    // MREP
+    if(i_cal_steps.getBit<mss::cal_steps::MREP>())
+    {
+        FAPI_INF("LRDIMM: MREP is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::mrep>());
+    }
 
     // WR LVL
     if(i_cal_steps.getBit<mss::cal_steps::WR_LEVEL>())
@@ -1222,16 +1229,10 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     }
 
     // INITIAL_PAT_WR
-    // Note: simulation contains a bug where the DDR4 model does not match the DDR4 hardware
-    // As such, if the simulation IPW bug is set, do not create a step for initial pattern write
-    if(!i_sim && i_cal_steps.getBit<mss::cal_steps::INITIAL_PAT_WR>())
+    if(i_cal_steps.getBit<mss::cal_steps::INITIAL_PAT_WR>())
     {
         FAPI_INF("Initial pattern write is enabled");
         l_steps.push_back(std::make_shared<initial_pattern_write>());
-    }
-    else if(i_sim)
-    {
-        FAPI_INF("Initial pattern write was requested, but the simulation for it is bugged! Skipping IPW");
     }
 
     // DQS_ALIGN
@@ -1273,7 +1274,6 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         l_steps.push_back(std::make_shared<wr_vref_latch>( WR_VREF ));
     }
 
-
     // WRITE_CTR_2D_VREF or WRITE_CTR
     if(WR_VREF || WRITE_CTR)
     {
@@ -1290,17 +1290,14 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         l_steps.push_back(std::make_shared<coarse_wr_rd>());
     }
 
-    // We can't run custom pattern RD as it requires initial pattern write, so skipping it in SIM mode
-    const bool CUSTOM_RD = (!i_sim) && i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>();
-
     // Run custom WR CTR and custom RD CTR together
-    if(CUSTOM_RD && i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
+    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>() && i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
     {
         FAPI_INF("Custom RD_CTR and Custom WR_CTR are enabled");
         l_steps.push_back(std::make_shared<custom_training_facade>());
     }
     // Training Advanced Read - aka custom pattern RD CTR
-    else if(CUSTOM_RD)
+    else if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>())
     {
         FAPI_INF("Custom RD_CTR is enabled");
         l_steps.push_back(std::make_shared<custom_read_ctr>());
@@ -1315,6 +1312,62 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
 
     return l_steps;
 }
+
+///
+/// @brief Creates the vector of training steps to loop over with an LRDIMM switch included
+/// @param[in] i_dimm_type - the DIMM type - used to select LRDIMM vs not
+/// @param[in] i_cal_steps - the bit mask of calibration steps
+/// @param[in] i_sim - simulation mode or not
+/// @return a vector of the calibration steps to run
+///
+std::vector<std::shared_ptr<step>> steps_factory(const uint8_t i_dimm_type, const fapi2::buffer<uint32_t>& i_cal_steps,
+                                const bool i_sim)
+{
+    // We need to modify the calibration steps, so create a copy
+    auto l_cal_steps = i_cal_steps;
+
+    // Deconfigure based upon DIMM type (don't run LR if we're not LR)
+    mss::training::lrdimm::deconfigure_steps(i_dimm_type, i_sim, l_cal_steps);
+
+    // Deconfigure based upon simulation mode
+    sim::deconfigure_steps(i_sim, l_cal_steps);
+
+    // Print the configured calibration steps
+    FAPI_INF("Configured calibration steps are 0x%08x for DIMM type: %u %s mode",
+             l_cal_steps, i_dimm_type, i_sim ? "simulation" : "hardware");
+
+    // Run the standard factory
+    return steps_factory(l_cal_steps, i_sim);
+}
+
+namespace sim
+{
+
+///
+/// @brief Deconfigures steps based upon simulation mode
+/// @param[in] i_sim - simulation mode or not
+/// @param[in,out] io_cal_steps calibration steps to deconfigure
+///
+void deconfigure_steps(const bool i_sim, fapi2::buffer<uint32_t>& io_cal_steps)
+{
+    // If we're not in sim mode, everything can run a-ok
+    if(!i_sim)
+    {
+        FAPI_INF("We're not in simulation mode, we can run with all configured steps");
+        return;
+    }
+
+    FAPI_INF("In simulation mode. Deconfiguring initial pattern write and training advanced read");
+    // Otherwise, deconfigure those steps
+    // Note: simulation contains a bug where the DDR4 model does not match the DDR4 hardware
+    // As such, if the simulation IPW bug is set, do not create a step for initial pattern write
+    io_cal_steps.clearBit<mss::cal_steps::INITIAL_PAT_WR>();
+
+    // We can't run custom pattern RD as it requires initial pattern write, so skipping it in SIM mode
+    io_cal_steps.clearBit<mss::cal_steps::TRAINING_ADV_RD>();
+}
+
+} // ns sim
 
 } // ns training
 
