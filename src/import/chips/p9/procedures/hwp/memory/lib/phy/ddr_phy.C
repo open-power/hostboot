@@ -872,8 +872,8 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     std::vector<uint64_t> l_pairs;
 
     // Setup the DP16 IO TX, DLL/VREG. They use freq which is an MCBIST attribute
-    FAPI_TRY( mss::dp16::reset_io_tx_config0(i_target) );
-    FAPI_TRY( mss::dp16::reset_dll_vreg_config1(i_target) );
+    FAPI_TRY( mss::dp16::reset_io_tx_config0(i_target), "%s failed reset_io_tx_config0", mss::c_str(i_target) );
+    FAPI_TRY( mss::dp16::reset_dll_vreg_config1(i_target), "%s failed reset_dll_vreg_config1", mss::c_str(i_target) );
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
@@ -889,67 +889,67 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Section 5.2.1.3 PC Rank Pair 0 on page 177
         // Section 5.2.1.4 PC Rank Pair 1 on page 179
-        FAPI_TRY( mss::rank::set_rank_pairs(p) );
+        FAPI_TRY( mss::rank::set_rank_pairs(p), "%s failed set_rank_pairs", mss::c_str(p) );
 
         // Section 5.2.4.1 DP16 Data Bit Enable 0 on page 284
         // Section 5.2.4.2 DP16 Data Bit Enable 1 on page 285
         // Section 5.2.4.3 DP16 Data Bit Disable 0 on page 288
         // Section 5.2.4.4 DP16 Data Bit Disable 1 on page 289
-        FAPI_TRY( mss::dp16::reset_data_bit_enable(p) );
+        FAPI_TRY( mss::dp16::reset_data_bit_enable(p), "%s failed reset_data_bit_enable", mss::c_str(p) );
 
         // Load bad bits from the attribute
-        FAPI_TRY( mss::dp16::reset_bad_bits(p) );
+        FAPI_TRY( mss::dp16::reset_bad_bits(p), "%s failed reset_bad_bits", mss::c_str(p) );
 
-        FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
+        FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs), "%s failed get_rank_pairs", mss::c_str(p) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
-        FAPI_TRY( mss::dp16::reset_write_clock_enable(p, l_pairs) );
-        FAPI_TRY( mss::dp16::reset_read_clock_enable(p, l_pairs) );
+        FAPI_TRY( mss::dp16::reset_write_clock_enable(p, l_pairs), "%s failed reset_write_clock_enable", mss::c_str(p) );
+        FAPI_TRY( mss::dp16::reset_read_clock_enable(p, l_pairs), "%s failed reset_read_clock_enable", mss::c_str(p) );
 
         // Reset Read VREF according to ATTR_MSS_VPD_MT_VREF_MC_RD value
-        FAPI_TRY( mss::dp16::reset_rd_vref(p) );
+        FAPI_TRY( mss::dp16::reset_rd_vref(p), "%s failed dp16::reset", mss::c_str(p) );
 
         // PHY Control reset
-        FAPI_TRY( mss::pc::reset(p) );
+        FAPI_TRY( mss::pc::reset(p), "%s failed pc::reset", mss::c_str(p) );
 
         // Write Control reset
-        FAPI_TRY( mss::wc::reset(p) );
+        FAPI_TRY( mss::wc::reset(p), "%s failed wc::reset", mss::c_str(p) );
 
         // Read Control reset
-        FAPI_TRY( mss::rc::reset(p) );
+        FAPI_TRY( mss::rc::reset(p), "%s failed rc::reset", mss::c_str(p) );
 
         // Reset the SEQ block
-        FAPI_TRY( mss::seq::reset(p) );
+        FAPI_TRY( mss::seq::reset(p), "%s failed seq::reset", mss::c_str(p) );
 
         // Reset the AC Boost controls from the values in VPD
-        FAPI_TRY( mss::dp16::reset_ac_boost_cntl(p) );
+        FAPI_TRY( mss::dp16::reset_ac_boost_cntl(p), "%s failed reset_ac_boost_cntl", mss::c_str(p) );
 
         // Reset the CTLE controls from the values in VPD
-        FAPI_TRY( mss::dp16::reset_ctle_cntl(p) );
+        FAPI_TRY( mss::dp16::reset_ctle_cntl(p), "%s failed reset_ctle_cntl", mss::c_str(p) );
 
         // Shove the ADR delay values from VPD into the ADR delay registers
-        FAPI_TRY( mss::adr::reset_delay(p) );
+        FAPI_TRY( mss::adr::reset_delay(p), "%s failed reset_delay", mss::c_str(p) );
 
         // Write tsys adr and tsys data
-        FAPI_TRY( mss::adr32s::reset_tsys_adr(p) );
-        FAPI_TRY( mss::dp16::reset_tsys_data(p) );
+        FAPI_TRY( mss::adr32s::reset_tsys_adr(p), "%s failed reset_tsys_adr", mss::c_str(p) );
+        FAPI_TRY( mss::dp16::reset_tsys_data(p), "%s failed reset_tsys_data", mss::c_str(p) );
 
         // Resets all of the IO impedances
-        FAPI_TRY( mss::reset_io_impedances(p) );
+        FAPI_TRY( mss::reset_io_impedances(p), "%s failed reset_io_impedances", mss::c_str(p) );
 
         // Resets all WR VREF related registers
-        FAPI_TRY( mss::dp16::reset_wr_vref_registers(p));
+        FAPI_TRY( mss::dp16::reset_wr_vref_registers(p), "%s failed reset_wr_vref_registers", mss::c_str(p) );
 
         // Set the blue waterfall range to its initial value
-        FAPI_TRY( mss::dp16::reset_drift_limits(p) );
+        FAPI_TRY( mss::dp16::reset_drift_limits(p), "%s failed reset_drift_limits", mss::c_str(p) );
 
         //
         // Workarounds
         //
-        FAPI_TRY( mss::workarounds::dp16::dqs_polarity(p) );
-        FAPI_TRY( mss::workarounds::dp16::rd_dia_config5(p) );
-        FAPI_TRY( mss::workarounds::dp16::dqsclk_offset(p) );
-        FAPI_TRY( mss::workarounds::seq::odt_config(p) );
+        FAPI_TRY( mss::workarounds::dp16::dqs_polarity(p), "%s failed dqs_polarity", mss::c_str(p) );
+        FAPI_TRY( mss::workarounds::dp16::rd_dia_config5(p), "%s failed rd_dia_config5", mss::c_str(p) );
+        FAPI_TRY( mss::workarounds::dp16::dqsclk_offset(p), "%s failed dqsclk_offset", mss::c_str(p) );
+        FAPI_TRY( mss::workarounds::seq::odt_config(p), "%s failed odt_config", mss::c_str(p) );
     }
 
 fapi_try_exit:

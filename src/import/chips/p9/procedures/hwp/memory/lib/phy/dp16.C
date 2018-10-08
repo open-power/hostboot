@@ -4067,8 +4067,8 @@ fapi2::ReturnCode reset_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
     {
         uint8_t l_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
 
-        FAPI_TRY( mss::bad_dq_bitmap(d, &(l_bad_dq[0][0])) );
-        FAPI_TRY( reset_bad_bits_helper(d, l_bad_dq) );
+        FAPI_TRY( mss::bad_dq_bitmap(d, &(l_bad_dq[0][0])), "%s failed bad_dq_bitmap", mss::c_str(d) );
+        FAPI_TRY( reset_bad_bits_helper(d, l_bad_dq), "%s failed reset_bad_bits_helper", mss::c_str(d) );
     }
 
 fapi_try_exit:
@@ -4151,13 +4151,14 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
     std::vector<uint64_t> l_ranks;
 
     // Loop over the ranks, makes things simpler than looping over the DIMM (surprisingly)
-    FAPI_TRY( rank::ranks(i_target, l_ranks) );
+    FAPI_TRY( rank::ranks(i_target, l_ranks), "%s failed ranks::ranks", mss::c_str(i_target) );
 
     for (const auto& r : l_ranks)
     {
         uint64_t l_rp = 0;
         const uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
-        FAPI_TRY( mss::rank::get_pair_from_rank(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), r, l_rp) );
+        FAPI_TRY( mss::rank::get_pair_from_rank(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), r, l_rp),
+                  "%s failed get_pair_from_rank rank:%u", mss::c_str(i_target), r );
 
         FAPI_INF("%s processing bad bits for DIMM%d rank %d (%d) rp %d", mss::c_str(i_target), l_dimm_index, mss::index(r), r,
                  l_rp);
@@ -4183,9 +4184,11 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
                          mss::c_str(i_target), a.first, l_register_value,
                          l_bad_bits[l_byte_index], l_bad_bits[l_byte_index + 1]);
 
-                FAPI_TRY( mss::putScom(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), a.first, l_register_value) );
+                FAPI_TRY( mss::putScom(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), a.first, l_register_value),
+                          "%s failed mss::putScom rank:%u scom: 0x%016lx", mss::c_str(i_target), r, a.first );
 
-                FAPI_TRY(reset_dqs_disable(i_target, l_register_value, a.second));
+                FAPI_TRY(reset_dqs_disable(i_target, l_register_value, a.second), "%s failed reset_dqs_disable rank:%u scom: 0x%016lx",
+                         mss::c_str(i_target), r, a.first );
                 l_byte_index += 2;
             }
         }

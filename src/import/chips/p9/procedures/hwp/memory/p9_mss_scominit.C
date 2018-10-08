@@ -82,7 +82,7 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
 
             if (l_rc)
             {
-                FAPI_ERR("Error from p9.mca.scom.initfile");
+                FAPI_ERR("%s Error from p9.mca.scom.initfile", mss::c_str(l_mca_target));
                 fapi2::current_err = l_rc;
                 goto fapi_try_exit;
             }
@@ -98,7 +98,7 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
 
         if (l_rc)
         {
-            FAPI_ERR("Error from p9.ddrphy.scom.initfile");
+            FAPI_ERR("%s Error from p9.ddrphy.scom.initfile", mss::c_str(l_mca_target));
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
@@ -108,18 +108,18 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
 
     if (l_rc)
     {
-        FAPI_ERR("Error from p9.mcbist.scom.initfile");
+        FAPI_ERR("%s Error from p9.mcbist.scom.initfile", mss::c_str(i_target));
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
     }
 
     // Initialize via scoms for non-static PHY items.
-    FAPI_TRY( mss::phy_scominit(i_target) );
+    FAPI_TRY( mss::phy_scominit(i_target), "%s failed phy_scominit", mss::c_str(i_target) );
 
     // Do FIRry things
-    FAPI_TRY( mss::unmask::after_scominit(i_target) );
+    FAPI_TRY( mss::unmask::after_scominit(i_target), "%s failed after_scominit", mss::c_str(i_target) );
 
 fapi_try_exit:
-    FAPI_INF("End MSS SCOM init");
+    FAPI_INF("%s End MSS SCOM init ReturnCode:0x%016lx", mss::c_str(i_target), uint64_t(fapi2::current_err));
     return fapi2::current_err;
 }
