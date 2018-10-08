@@ -448,6 +448,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
         "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
         "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
+        "HDAT",        /**< PNOR::HDAT           : Hdat Data */
 #endif
     };
 

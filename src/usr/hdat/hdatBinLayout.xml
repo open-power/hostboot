@@ -1,0 +1,193 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/hdat/hdatBinLayout.xml $                              -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2018                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+Layout Description
+<metadata> Element -> Contains high-level information about the HDAT binary layout.
+    <maxSize>      -> Max size of HDAT pnor section
+    <version>      -> Version
+    <tocSize>      -> size of TOC
+    <checkSum/>    -> Checksum of whole HDAT Binary Image.
+</metadata>
+<section> Element ->  Contains information about a HDAT binary entity
+    <description>   -> Text description of the binary entity
+    <eyeCatch>      -> Name of the Entity foreg: SLOTMAP
+    <fileName>      -> Binary File name
+    <instance>      -> Instance foreg:, proc0 , proc1
+</section>
+-->
+
+<hdat>
+    <metadata>
+        <maxSize>0x4000</maxSize>
+        <version>10.5d</version>
+        <tocSize>0x1000</tocSize>
+        <checksum/>
+    </metadata>
+    <section>
+        <description>Slot Map Table Area binary data</description>
+        <eyeCatch>SLOTMAP_TABLE</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>slotmapproc0</fileName>
+    </section>
+    <section>
+        <description>Slot Map Table Area binary data</description>
+        <eyeCatch>SLOTMAP_TABLE</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>slotmapproc1</fileName>
+    </section>
+    <section>
+        <description>Slot Map Table Area binary data</description>
+        <eyeCatch>SLOTMAP_TABLE</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>slotmapproc2</fileName>
+    </section>
+    <section>
+        <description>Slot Map Table Area binary data</description>
+        <eyeCatch>SLOTMAP_TABLE</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>slotmapproc3</fileName>
+    </section>
+    <section>
+        <description>Slot Map Entry details binary data</description>
+        <eyeCatch>SLOTMAP_ENTRY</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>slotdetailsproc0</fileName>
+    </section>
+    <section>
+        <description>Slot Map Entry details binary data</description>
+        <eyeCatch>SLOTMAP_ENTRY</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>slotdetailsproc1</fileName>
+    </section>
+    <section>
+        <description>Slot Map Entry details binary data</description>
+        <eyeCatch>SLOTMAP_ENTRY</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>slotdetailsproc2</fileName>
+    </section>
+    <section>
+        <description>Slot Map Entry details binary data</description>
+        <eyeCatch>SLOTMAP_ENTRY</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>slotdetailsproc3</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 0 6gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_6GPU</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>smplinkproc0_oc1</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 1 6gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_6GPU</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>smplinkproc1_oc1</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 2 6gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_6GPU</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>smplinkproc2_oc1</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 3 6gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_6GPU</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>smplinkproc3_oc1</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 0 4gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_4GPU</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>smplinkproc0_oc2</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 1 4gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_4GPU</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>smplinkproc1_oc2</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 2 4gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_4GPU</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>smplinkproc2_oc2</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 3 4gpu binary data</description>
+        <eyeCatch>SMPLINK_INFO_4GPU</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>smplinkproc3_oc2</fileName>
+    </section>
+    <section>
+        <description>I2c Map info binary data</description>
+        <eyeCatch>I2CMAP_INFO</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>i2cmapproc0</fileName>
+    </section>
+    <section>
+        <description>I2c Map info  binary data</description>
+        <eyeCatch>I2CMAP_INFO</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>i2cmapproc1</fileName>
+    </section>
+    <section>
+        <description>I2c Map info binary data</description>
+        <eyeCatch>I2CMAP_INFO</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>i2cmapproc2</fileName>
+    </section>
+    <section>
+        <description>I2c Map info  binary data</description>
+        <eyeCatch>I2CMAP_INFO</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>i2cmapproc3</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 0 data</description>
+        <eyeCatch>SMPLINK_INFO</eyeCatch>
+        <instance>proc0</instance>
+        <fileName>smplinkproc0</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 1 data</description>
+        <eyeCatch>SMPLINK_INFO</eyeCatch>
+        <instance>proc1</instance>
+        <fileName>smplinkproc1</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 2 data</description>
+        <eyeCatch>SMPLINK_INFO</eyeCatch>
+        <instance>proc2</instance>
+        <fileName>smplinkproc2</fileName>
+    </section>
+    <section>
+        <description>SMP Link proc 3 data</description>
+        <eyeCatch>SMPLINK_INFO</eyeCatch>
+        <instance>proc3</instance>
+        <fileName>smplinkproc3</fileName>
+    </section>
+</hdat>
+

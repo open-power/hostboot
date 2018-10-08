@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -391,7 +391,15 @@ sub processProcessor
 
     my $parent_target =
              $targetObj->getTargetParent($targetObj->getTargetParent($target));
-    my $proc_id = $targetObj->getAttribute($parent_target, "POSITION");
+    my $proc_id = 0;         
+    if (!($targetObj->isBadAttribute($parent_target, "POSITION")))
+    {
+      $proc_id = $targetObj->getAttribute($parent_target, "POSITION");
+    }
+    else
+    {
+      $targetObj->writeReport("ERROR::proc id not found for $parent_target \n");
+    }
     my $node_id = getParentNodeId($targetObj,$parent_target);
     my $hosti2centryid = ($node_id << 24) | ($proc_id << 16);
 
