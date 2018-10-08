@@ -903,6 +903,25 @@ class custom_training_facade : public step
 ///
 std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps, const bool i_sim);
 
+///
+/// @brief Creates the vector of training steps to loop over with an LRDIMM switch included
+/// @param[in] i_dimm_type - the DIMM type - used to select LRDIMM vs not
+/// @param[in] i_cal_steps - the bit mask of calibration steps
+/// @param[in] i_sim - simulation mode or not
+/// @return a vector of the calibration steps to run
+///
+std::vector<std::shared_ptr<step>> steps_factory(const uint8_t i_dimm_type, const fapi2::buffer<uint32_t>& i_cal_steps,
+                                const bool i_sim);
+namespace sim
+{
+///
+/// @brief Deconfigures steps based upon simulation mode
+/// @param[in] i_sim - simulation mode or not
+/// @param[in,out] io_cal_steps calibration steps to deconfigure
+///
+void deconfigure_steps(const bool i_sim, fapi2::buffer<uint32_t>& io_cal_steps);
+} // ns sim
+
 } // ns training
 
 } // ns mss
