@@ -110,8 +110,9 @@ fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_tgt)
         // 9    Spare Lane Deployed                 recoverable
         l_cen_fir_mask.clearBit<9>();
         l_cen_fir_action1.setBit<9>();
-        // 10   Max Spares Exceeded                 unit_cs
+        // 10   Max Spares Exceeded                 recoverable
         l_cen_fir_mask.clearBit<10>();
+        l_cen_fir_action1.setBit<10>();
         // 11   Recal or Dynamic Repair Error       recoverable
         l_cen_fir_mask.clearBit<11>();
         l_cen_fir_action1.setBit<11>();
