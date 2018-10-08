@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -27,7 +27,6 @@ ROOTPATH = ../../..
 MODULE = hdat
 
 EXTRAINCDIR += ../vpd
-EXTRAINCDIR += ../../include/usr/vpd
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
 OBJS += hdatutil.o

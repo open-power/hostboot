@@ -86,6 +86,8 @@ COPY_FILES = \
     src/build/buildpnor/memd_creation.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
+    src/usr/targeting/common/genHDATstructures.pl:openpower \
+    src/usr/hdat/genHdatBin.pl:openpower \
     src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower \
     src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
     src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
@@ -96,6 +98,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/simics_CUMULUS_CDIMM.system.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_AXONE.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
+    src/usr/hdat/hdatBinLayout.xml:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
     src/usr/targeting/common/xmltohb/bios.xsd:openpower \
