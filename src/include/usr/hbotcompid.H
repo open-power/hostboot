@@ -445,6 +445,14 @@ const compId_t NVDIMM_COMP_ID = 0x3500;
 const char NVDIMM_COMP_NAME[] = "nvdimm";
 //@}
 
+/** @name NVRAM
+ *  NVRAM Support component
+ */
+//@{
+const compId_t NVRAM_COMP_ID = 0x3900;
+const char NVRAM_COMP_NAME[] = "nvram";
+//@}
+
 /** @name HDAT
  *  HDAT component
  *  @Note HDAT_COMP_ID=0x9000 matches with what
