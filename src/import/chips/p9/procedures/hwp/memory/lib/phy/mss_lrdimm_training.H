@@ -233,6 +233,15 @@ class mwd : public step
 // TK:LRDIMM Identify if Host Interface Read Training is any different
 // TK:LRDIMM Identify if Host Interface Write training Training is any different
 
+///
+/// @brief Deconfigures calibration steps depending upon LRDIMM type
+/// @param[in] i_dimm_type - DIMM type
+/// @param[in] i_sim - simulation mode or not
+/// @param[in,out] io_cal_steps - the bit mask of calibration steps
+/// @return a vector of the calibration steps to run
+///
+void deconfigure_steps(const uint8_t i_dimm_type, const bool i_sim, fapi2::buffer<uint32_t>& io_cal_steps);
+
 } // ns training
 
 } // ns lrdimm
