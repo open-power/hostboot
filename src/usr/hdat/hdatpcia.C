@@ -161,6 +161,9 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             break;
         }
 
+        // Get the fused core support info
+        bool l_fused_core_support = is_fused_mode();
+
         l_coreThreadCount = l_pTopLevel->getAttr<ATTR_THREAD_COUNT>();
         uint64_t en_thread_mask =
           l_pTopLevel->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
@@ -199,6 +202,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             l_procStatus =
                 HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD;
         }
+
         //for each procs in the system
         TARGETING::PredicateCTM l_procFilter(CLASS_CHIP, TYPE_PROC);
         TARGETING::PredicateHwas l_pred;
@@ -210,62 +214,64 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                                     TARGETING::targetService().begin(),
                                     TARGETING::targetService().end(),
                                     &l_presentProc);
-        for (;l_filter;++l_filter)
+        if (l_fused_core_support == false)
         {
-            TARGETING::Target* l_pProcTarget = *l_filter;
-            uint32_t Procstatus = 0;
+            for (;l_filter;++l_filter)
+            {
+                TARGETING::Target* l_pProcTarget = *l_filter;
+                uint32_t Procstatus = 0;
 
-            uint32_t l_procFabricId =
+                uint32_t l_procFabricId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
-            uint64_t l_procIntrBase =
+                uint64_t l_procIntrBase =
                       l_pProcTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
-            uint32_t l_procPosition =
+                uint32_t l_procPosition =
                     l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-            TARGETING::PredicateCTM l_corePredicate(TARGETING::CLASS_UNIT,
+                TARGETING::PredicateCTM l_corePredicate(TARGETING::CLASS_UNIT,
                                                     TARGETING::TYPE_CORE);
 
-            //Cores with partial good data are present and reported
-            //Cores that are present but not functional, also reported
-            TARGETING::PredicateHwas l_predPresent;
-            l_predPresent.present(true);
+                //Cores with partial good data are present and reported
+                //Cores that are present but not functional, also reported
+                TARGETING::PredicateHwas l_predPresent;
+                l_predPresent.present(true);
 
-            TARGETING::PredicatePostfixExpr l_PresentCore;
-            l_PresentCore.push(&l_corePredicate).push(&l_predPresent).And();
+                TARGETING::PredicatePostfixExpr l_PresentCore;
+                l_PresentCore.push(&l_corePredicate).push(&l_predPresent).And();
 
-            TARGETING::TargetHandleList l_coreList;
+                TARGETING::TargetHandleList l_coreList;
 
-            TARGETING::targetService().getAssociated(l_coreList, l_pProcTarget,
+                TARGETING::targetService().getAssociated(l_coreList, l_pProcTarget,
                                                 TARGETING::TargetService::CHILD,
                                                 TARGETING::TargetService::ALL,
                                                 &l_PresentCore);
 
-            for (uint32_t l_idx = 0; l_idx < l_coreList.size(); ++l_idx)
-            {
-                HDAT_DBG("Core list size %d PCIA offset 0x%016llX",
+                for (uint32_t l_idx = 0; l_idx < l_coreList.size(); ++l_idx)
+                {
+                    HDAT_DBG("Core list size %d PCIA offset 0x%016llX",
                         l_coreList.size(),(uint64_t) &this->iv_spPcia[index]);
-                TARGETING::Target* l_pTarget = l_coreList[l_idx];
-                uint32_t l_coreNum =
+                    TARGETING::Target* l_pTarget = l_coreList[l_idx];
+                    uint32_t l_coreNum =
                             l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-                for ( uint32_t l_threadIndex=0;
+                    for ( uint32_t l_threadIndex=0;
                         l_threadIndex < l_enabledThreads; ++l_threadIndex)
-                {
-                    l_errl = hdatSetCoreInfo(index,
-                                            l_pTarget,l_pProcTarget);
-                    if(l_errl)
                     {
-                        HDAT_ERR("Error [0x%08X] in call to set core info",
+                        l_errl = hdatSetCoreInfo(index,
+                                            l_pTarget,l_pProcTarget);
+                        if(l_errl)
+                        {
+                            HDAT_ERR("Error [0x%08X] in call to set core info",
                                                           l_errl->reasonCode());
-                        break;
-                    }
-                    this->iv_spPcia[index].hdatThreadData.
-                    pciaThreadData[l_threadIndex].pciaPhysThreadId =
+                            break;
+                        }
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadData[l_threadIndex].pciaPhysThreadId =
                                                                 l_threadIndex;
 
-                    HDAT_DBG("HdatPcia thread idx %d, thread id %d ",
+                        HDAT_DBG("HdatPcia thread idx %d, thread id %d ",
                         l_threadIndex, this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
@@ -278,113 +284,320 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                                            PPPPP is the core number
                                                  left shift by 2 bits
                                            TT    is thread id
-                    */
-                    // PIR generation for split core mode
-                    uint32_t     l_ThreadProcIdReg =  l_procFabricId << 11 |
-                                             l_procPosition << 8  |
-                                             l_coreNum << 2       |
-                                             l_threadIndex;
+                        */
+                        // PIR generation for split core mode
+                        uint32_t     l_ThreadProcIdReg =  l_procFabricId << 11 |
+                                                          l_procPosition << 8  |
+                                                          l_coreNum << 2       |
+                                                          l_threadIndex;
 
-                    hdatSetPciaHdrs(&this->iv_spPcia[index]);
-                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus
-                        = l_procStatus;
-                    this->iv_spPcia[index].hdatThreadData.
+                        hdatSetPciaHdrs(&this->iv_spPcia[index]);
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus
+                            = l_procStatus;
+                        this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaProcIdReg =
                         l_ThreadProcIdReg;
 
-                    this->iv_spPcia[index].hdatThreadData.
+                        this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaInterruptLine =
                         l_ThreadProcIdReg;
 
-                    Procstatus = isFunctional(l_pTarget) ?
+                        Procstatus = isFunctional(l_pTarget) ?
                                            HDAT_PROC_USABLE :
                                            HDAT_PROC_NOT_USABLE;
-                    l_procStatus &= ~HDAT_PROC_STAT_MASK;
-                    l_procStatus |= Procstatus;
+                        l_procStatus &= ~HDAT_PROC_STAT_MASK;
+                        l_procStatus |= Procstatus;
 
-                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
                         (static_cast<hdatProcStatus> (l_procStatus)
                         ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
 
-                    //IBASE ADDRESS + NNNN + 000
-                    //Where NNNN = Thread Number =
-                    //         (Core Number * Number of threads) + Thread Number
-                    uint64_t l_ibase = l_procIntrBase +
+                        //IBASE ADDRESS + NNNN + 000
+                        //Where NNNN = Thread Number =
+                        //         (Core Number * Number of threads) + Thread Number
+                        uint64_t l_ibase = l_procIntrBase +
                               (l_coreNum * 0x1000 * l_coreThreadCount) +
                               l_threadIndex * 0x1000;
 
-                    this->iv_spPcia[index].hdatThreadData.
-                    pciaThreadData[l_threadIndex].pciaIbaseAddr.hi  =
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadData[l_threadIndex].pciaIbaseAddr.hi  =
                                ((l_ibase & 0xFFFFFFFF00000000ull) >> 32);
-                    this->iv_spPcia[index].hdatThreadData.
-                    pciaThreadData[l_threadIndex].pciaIbaseAddr.hi |=
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadData[l_threadIndex].pciaIbaseAddr.hi |=
                                 HDAT_REAL_ADDRESS_MASK;
 
-                    this->iv_spPcia[index].hdatThreadData.
-                    pciaThreadData[l_threadIndex].pciaIbaseAddr.lo  =
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadData[l_threadIndex].pciaIbaseAddr.lo  =
                                 (l_ibase & 0x00000000FFFFFFFFull);
 
-                    if(HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
+                        if(HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
                             this->iv_spPcia[index].hdatCoreData.pciaProcStatus))
-                    {
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CPU_TIME_BASE].hdatOffset = 0;
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CPU_TIME_BASE].hdatSize = 0;
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CACHE_SIZE].hdatOffset = 0;
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CACHE_SIZE].hdatSize = 0;
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatOffset = 0;
-                        this->iv_spPcia[index].hdatPciaIntData
-                            [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatSize = 0;
-                    }
-                    // Need to setup header information for Thread Array Data
-                    this->iv_spPcia[index].hdatThreadData.pciaThreadOffsetToData
+                        {
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_TIME_BASE].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_TIME_BASE].hdatSize = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CACHE_SIZE].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CACHE_SIZE].hdatSize = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatSize = 0;
+                        }
+                        // Need to setup header information for Thread Array Data
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadOffsetToData
                         = offsetof(hdatPciaThreadUniqueData_t, pciaThreadData);
-                    this->iv_spPcia[index].hdatThreadData.pciaThreadNumEntries
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadNumEntries
                         = l_enabledThreads;
-                    this->iv_spPcia[index].hdatThreadData.
+                        this->iv_spPcia[index].hdatThreadData.
                         pciaThreadSizeAllocated = sizeof(hdatPciaThreadArray_t);
-                    this->iv_spPcia[index].hdatThreadData.pciaThreadSizeActual =
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadSizeActual =
                         sizeof(hdatPciaThreadArray_t);
 
+                    }
+                    if(NULL != l_errl)
+                    {
+                        //Break if there is an error
+                        HDAT_ERR("Error [0x%08X] in call to get chip parent failed",
+                                                l_errl->reasonCode());
+                        break;
+                    }
+                    index++;
+                    if ((HDAT_RESERVE_FOR_CCM == (HDAT_RESERVE_FOR_CCM &
+                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus))||
+                    (HDAT_PROC_NOT_INSTALLED != (HDAT_PROC_STAT_BITS &
+                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus)))
+                    {
+                        // The PCIA is a fixed size, but wanted it padded to a 128
+                        // byte boundary
+                        uint32_t l_rem=0, l_pad=0;
+                        l_rem=0; l_pad=0;
+                        // Pad to 128 bytes
+                        l_rem = this->iv_spPcia[index-1].hdatHdr.hdatSize % 128;
+                        l_pad = l_rem ? (128 - l_rem ) : 0;
+                        uint8_t *l_addr=
+                        reinterpret_cast<uint8_t *> (this->iv_spPcia);
+                        // padding is allocated for size of PCIA entry. If it was
+                        // smaller than 128 bytes, then you may need to bump it up
+                        l_addr += l_pad;
+                        this->iv_spPcia  =
+                            reinterpret_cast<hdatSpPcia_t *>(l_addr);
+                    }
                 }
                 if(NULL != l_errl)
                 {
                     //Break if there is an error
-                    HDAT_ERR("Error [0x%08X] in call to get chip parent failed",
-                                                l_errl->reasonCode());
                     break;
                 }
-                index++;
-                if ((HDAT_RESERVE_FOR_CCM == (HDAT_RESERVE_FOR_CCM &
-                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus))||
-                   (HDAT_PROC_NOT_INSTALLED != (HDAT_PROC_STAT_BITS &
-                    this->iv_spPcia[index].hdatCoreData.pciaProcStatus)))
-                {
-                    // The PCIA is a fixed size, but wanted it padded to a 128
-                    // byte boundary
-                    uint32_t l_rem=0, l_pad=0;
-                    l_rem=0; l_pad=0;
-                    // Pad to 128 bytes
-                    l_rem = this->iv_spPcia[index-1].hdatHdr.hdatSize % 128;
-                    l_pad = l_rem ? (128 - l_rem ) : 0;
-                    uint8_t *l_addr=
-                    reinterpret_cast<uint8_t *> (this->iv_spPcia);
-                    // padding is allocated for size of PCIA entry. If it was
-                    // smaller than 128 bytes, then you may need to bump it up
-                    l_addr += l_pad;
-                    this->iv_spPcia  =
-                        reinterpret_cast<hdatSpPcia_t *>(l_addr);
-                }
             }
-            if(NULL != l_errl)
+        }
+        else
+        {
+            index = 0;
+            //ATTR_THREAD_COUNT always return 4 ir-respective of fused or
+            //non-fused mode. Updating the thread count to 8 only in case
+            //of fused core mode
+            l_coreThreadCount = l_coreThreadCount * 2;
+
+            for (;l_filter;++l_filter)
             {
-                //Break if there is an error
-                break;
-            }
+                TARGETING::Target* l_pProcTarget = *l_filter;
+                uint32_t l_procStatus = HDAT_PROC_USABLE;
+
+                uint32_t l_procFabricId =
+                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+
+                uint32_t l_procPosition =
+                    l_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+                //Get the the EQ(Quad id) targets
+                TARGETING::TargetHandleList l_eqList;
+                TARGETING::PredicateCTM
+                    l_eqFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ);
+
+                //Check the presence of EQs
+                TARGETING::PredicateHwas l_predEqPresent;
+                l_predEqPresent.present(true);
+
+                TARGETING::PredicatePostfixExpr l_presentEq;
+                l_presentEq.push(&l_eqFilter).push(&l_predEqPresent).And();
+
+                TARGETING::targetService().getAssociated(
+                    l_eqList,
+                    l_pProcTarget,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &l_presentEq);
+
+                TARGETING::ATTR_CHIP_UNIT_type l_eqId = 0;
+                for(uint32_t l_eqIdx = 0; l_eqIdx < l_eqList.size();
+                    ++l_eqIdx)
+                {
+                    TARGETING::Target* l_pTarget = l_eqList[l_eqIdx];
+                    l_eqId = l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                    //Get the the EX targets
+                    TARGETING::TargetHandleList l_exList;
+                    TARGETING::PredicateCTM
+                        l_exFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_EX);
+
+                    //Check the presence of EXs
+                    TARGETING::PredicateHwas l_predExPresent;
+                    l_predExPresent.present(true);
+
+                    TARGETING::PredicatePostfixExpr l_presentEx;
+                    l_presentEx.push(&l_exFilter).push(&l_predExPresent).And();
+
+                    TARGETING::targetService().getAssociated(
+                        l_exList,
+                        l_pTarget,
+                        TARGETING::TargetService::CHILD,
+                        TARGETING::TargetService::ALL,
+                        &l_presentEx);
+
+                    HDAT_DBG("thread count :0x%.8X", l_coreThreadCount);
+                    TARGETING::ATTR_CHIP_UNIT_type l_exId = 0;
+                    for(uint32_t l_exIdx = 0; l_exIdx < l_exList.size();
+                        ++l_exIdx)
+                    {
+                        HDAT_DBG("PCIA offset 0x%016llX",
+                            (uint64_t) &this->iv_spPcia[index]);
+
+                        TARGETING::Target* l_pExTarget = l_exList[l_exIdx];
+                        l_exId =
+                            l_pExTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+                        //Resetting the proc status
+                        l_procStatus = HDAT_PROC_USABLE;
+
+                        l_errl = hdatSetCoreInfo(index, l_pExTarget,
+                                                 l_pProcTarget);
+                        if(l_errl)
+                        {
+                            HDAT_ERR("Error [0x%08X] in call to set core info",
+                                                          l_errl->reasonCode());
+                            break;
+                        }
+
+                        for ( uint32_t l_threadIndex=0;
+                            l_threadIndex < l_coreThreadCount; ++l_threadIndex)
+                        {
+                            this->iv_spPcia[index].hdatThreadData.
+                            pciaThreadData[l_threadIndex].pciaPhysThreadId =
+                                                                l_threadIndex;
+
+                            HDAT_DBG("HdatPcia thread idx %d, thread id %d ",
+                                l_threadIndex,
+                                this->iv_spPcia[index].hdatThreadData.
+                                pciaThreadData[l_threadIndex].pciaPhysThreadId);
+
+                            /* Proc ID Reg for fused core is NNNNCCC0QQQPTTT
+                               Where           NNNN   is node number
+                                                      left shift by 11 bits
+                                               CCC    is Chip
+                                                      left shift by 8 bits
+                                               QQQ    is Quad id
+                                                      left shift by 4 bits
+                                               P      is the core
+                                                      left shift by 3 bits
+                                                      chiplet pair number
+                                               TTT    is thread id
+                             */
+                            uint32_t l_threadProcIdReg = 0;
+                            // PIR generation for fused core mode
+                            l_threadProcIdReg =  l_procFabricId << 11 |
+                                                 l_procPosition << 8  |
+                                                 l_eqId << 4          |
+                                                 l_exId << 3          |
+                                                 l_threadIndex;
+
+                            this->iv_spPcia[index].hdatThreadData.
+                                pciaThreadData[l_threadIndex].pciaProcIdReg =
+                                l_threadProcIdReg;
+                        }
+
+                        if (l_pExTarget->getAttr<TARGETING::ATTR_HWAS_STATE>
+                            ().functional == false)
+                        {
+                            l_procStatus = HDAT_PROC_NOT_USABLE;
+                        }
+
+                        hdatSetPciaHdrs(&this->iv_spPcia[index]);
+                            this->iv_spPcia[index].hdatCoreData.pciaProcStatus
+                            = l_procStatus;
+
+                        l_procStatus |= HDAT_EIGHT_THREAD;
+
+                        uint32_t l_stat = this->iv_spPcia[index].hdatCoreData.
+                            pciaProcStatus & HDAT_PROC_STAT_MASK;
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
+                           (static_cast<hdatProcStatus> (l_procStatus)
+                           | l_stat ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
+
+                        if(HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus))
+                        {
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_TIME_BASE].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_TIME_BASE].hdatSize = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CACHE_SIZE].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CACHE_SIZE].hdatSize = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatOffset = 0;
+                            this->iv_spPcia[index].hdatPciaIntData
+                                [HDAT_PCIA_DA_CPU_ATTRIBUTES].hdatSize = 0;
+                        }
+                        // Need to setup header information for
+                        // Thread Array Data
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadOffsetToData
+                        = offsetof(hdatPciaThreadUniqueData_t, pciaThreadData);
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadNumEntries
+                            = l_coreThreadCount;
+                        this->iv_spPcia[index].hdatThreadData.
+                        pciaThreadSizeAllocated = sizeof(hdatPciaThreadArray_t);
+                        this->iv_spPcia[index].hdatThreadData.pciaThreadSizeActual =
+                            sizeof(hdatPciaThreadArray_t);
+                        if(NULL != l_errl)
+                        {
+                            //Break if there is an error
+                            HDAT_ERR("Error [0x%08X] in call to get chip parent failed",
+                                     l_errl->reasonCode());
+                            break;
+                        }
+                        index++;
+                        if ((HDAT_RESERVE_FOR_CCM == (HDAT_RESERVE_FOR_CCM &
+                            this->iv_spPcia[index].hdatCoreData.pciaProcStatus))||
+                            (HDAT_PROC_NOT_INSTALLED != (HDAT_PROC_STAT_BITS &
+                            this->iv_spPcia[index].hdatCoreData.pciaProcStatus)))
+                        {
+                            // The PCIA is a fixed size, but wanted it padded to a 128
+                            // byte boundary
+                            uint32_t l_rem=0, l_pad=0;
+                            l_rem=0; l_pad=0;
+                            // Pad to 128 bytes
+                            l_rem = this->iv_spPcia[index-1].hdatHdr.hdatSize % 128;
+                            l_pad = l_rem ? (128 - l_rem ) : 0;
+                            uint8_t *l_addr=
+                            reinterpret_cast<uint8_t *> (this->iv_spPcia);
+                            // padding is allocated for size of PCIA entry. If it was
+                            // smaller than 128 bytes, then you may need to bump it up
+                            l_addr += l_pad;
+                            this->iv_spPcia  =
+                            reinterpret_cast<hdatSpPcia_t *>(l_addr);
+                        }
+                    } //End of EX list
+                } //End of EQ list
+                if(NULL != l_errl)
+                {
+                    //Break if there is an error
+                    break;
+                }
+            } //End of Proc list
         }
         //End offset - starting offset divided by index
         //for calculating each PCIA size.
@@ -424,9 +637,12 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
             break;
         }
 
-        if(i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_CORE)
+        if((i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_CORE) &&
+            (i_pCoreTarget->getAttr<ATTR_TYPE>() != TYPE_EX))
         {
             HDAT_ERR("Input Target type is not valid");
+            HDAT_ERR("Input Target type is not valid %x",
+                   i_pCoreTarget->getAttr<ATTR_TYPE>());
             /*@
              * @errortype
              * @moduleid         HDAT::MOD_PCIA_SET_CORE_INF
