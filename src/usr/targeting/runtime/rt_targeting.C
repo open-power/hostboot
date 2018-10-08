@@ -715,14 +715,25 @@ int hbrt_update_prep(void)
     TRACFCOMP(g_trac_hbrt, ENTER_MRK" prepare_hbrt_update");
     TRACFCOMP(g_trac_targeting, ENTER_MRK" hbrt_update_prep");
     errlHndl_t pError = nullptr;
-    UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID);
-    void *l_lidStructPtr = nullptr;
-    void* l_newMem = nullptr;
+
+    // Define a structure to defer the application of the new targeting data
+    //  until after we've processed every node
+    typedef struct MemChunk
+    {
+        uint8_t* curTarg;
+        size_t curSize;
+        uint8_t* newTarg;
+        size_t newSize;
+    } MemChunk_t;
+    std::vector<MemChunk_t> l_allMemChunks;
 
     for(NODE_ID l_nodeId = NODE0;
         l_nodeId < Singleton<AttrRP>::instance().getNodeCount();
         l_nodeId++)
     {
+        void* l_newMem = nullptr;
+        void *l_lidStructPtr = nullptr;
+
         // Get size and location of attributes in reserved memory
         uint64_t l_attr_size = 0;
         uint64_t l_rsvdMem = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
@@ -734,11 +745,7 @@ int hbrt_update_prep(void)
         void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
 
         // Set LID for this node
-        pError = l_lidMgr.setLidId(Util::TARGETING_BINARY_LIDID + l_nodeId);
-        if(pError)
-        {
-            break;
-        }
+        UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID+l_nodeId);
 
         // Create lidMgr and get size of Targeting Binary LID
         size_t l_lidSize = 0;
@@ -787,7 +794,8 @@ int hbrt_update_prep(void)
         {
             l_newMem = calloc(l_lidDataSize,1);
             memcpy( l_newMem, l_lidStructPtr, l_lidSize );
-            // note - original lid data is no longer used after this
+            // note - original lid data is no longer used after this,
+            //        lid memory is deleted as part of object destructor
         }
         else
         {
@@ -826,58 +834,82 @@ int hbrt_update_prep(void)
             break;
         }
 
-        // Copy new LID Structure data over current Reserved Memory data
-        size_t l_copySize = std::min(l_lidDataSize, l_attr_size);
-        TRACFCOMP( g_trac_targeting,
-                   "hbrt_update_prep: Copy 0x%0.8x bytes of targeting data",
-                   l_copySize);
-        memcpy(l_rsvdMemPtr,
-               l_newMem,
-               l_copySize);
-        TRACFCOMP( g_trac_targeting,
-                   "RsvdMem @ %p, LidMem @ %p",
-                   l_rsvdMemPtr, l_newMem );
+        // Save off the memory addresses we need to copy later, if we do the
+        //  memcpy now we break current targeting which means the UtilLidMgr
+        //  call won't work in the next iteration of this loop
+        MemChunk_t l_memChunk = { reinterpret_cast<uint8_t*>(l_rsvdMemPtr),
+                                  l_attr_size,
+                                  reinterpret_cast<uint8_t*>(l_newMem),
+                                  l_lidDataSize };
+        l_allMemChunks.push_back(l_memChunk);
 
-        // Set any remaining bytes to zero
-        size_t l_setSize = l_attr_size - l_copySize;
-        if(l_setSize)
-        {
-            TRACFCOMP( g_trac_targeting,
-                       "hbrt_update_prep: Set 0x%0.8x bytes to 0",
-                       l_setSize);
-            memset(reinterpret_cast<void*>(
-                       reinterpret_cast<uint64_t>(l_rsvdMemPtr) + l_copySize),
-                   0,
-                   l_setSize);
-        }
-    }
-
-    // Delete the scratch space for the new attributes
-    if( l_newMem )
-    {
-        free( l_newMem );
-        l_newMem = nullptr;
-    }
-
-    // Release the LID with new targeting structure
-    errlHndl_t l_lidErr = l_lidMgr.releaseLidImage();
-    if( l_lidErr )
-    {
-        // just commit this log instead of failing the operation
-        errlCommit(l_lidErr,TARG_COMP_ID);
     }
 
     // Add the traces onto any error log and commit it
-    int rc = ERRL_GETRC_SAFE(pError);
+    int l_rc = ERRL_GETRC_SAFE(pError);
     if(pError)
     {
+        TRACFCOMP( g_trac_targeting,
+                   "Error retrieving new data (%.4X), skipping apply",
+                   l_rc);
+        pError->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
         pError->collectTrace(TARG_COMP_NAME);
         errlCommit(pError,TARG_COMP_ID);
+
+        // If anything went wrong we don't want to whack our memory
+        for( auto l_memChunk : l_allMemChunks )
+        {
+            // Delete the scratch space for the new attributes
+            if( l_memChunk.newTarg )
+            {
+                free( l_memChunk.newTarg );
+                l_memChunk.newTarg = nullptr;
+            }
+        }
+        l_allMemChunks.clear();
+    }
+
+    // Handle all of the live memory updates
+    //  This MUST be the last thing we do since attributes go wacky in between
+    for( auto l_memChunk : l_allMemChunks )
+    {
+        // Copy new LID Structure data over current Reserved Memory data
+        size_t l_copySize = std::min(l_memChunk.newSize,
+                                     l_memChunk.curSize);
+        TRACFCOMP( g_trac_targeting,
+                   "hbrt_update_prep: Copy 0x%0.8x bytes of targeting data",
+                   l_copySize);
+        TRACFCOMP( g_trac_targeting,
+                   "RsvdMem @ %p, LidMem @ %p",
+                   l_memChunk.curTarg, l_memChunk.newTarg );
+        memcpy(l_memChunk.curTarg,
+               l_memChunk.newTarg,
+               l_copySize);
+
+        // Set any remaining bytes to zero
+        //  Note: earlier checks ensure curSize >= l_copySize
+        size_t l_setSize = l_memChunk.curSize - l_copySize;
+        if(l_setSize)
+        {
+            TRACFCOMP( g_trac_targeting,
+                       "hbrt_update_prep: Set 0x%0.8x bytes to 0 @%p",
+                       l_setSize, l_memChunk.curTarg + l_copySize);
+            memset(l_memChunk.curTarg + l_copySize,
+                   0,
+                   l_setSize);
+        }
+
+        // Delete the scratch space for the new attributes
+        if( l_memChunk.newTarg )
+        {
+            free( l_memChunk.newTarg );
+            l_memChunk.newTarg = nullptr;
+        }
     }
 
     TRACFCOMP(g_trac_targeting, EXIT_MRK" hbrt_update_prep");
-    TRACFCOMP(g_trac_hbrt, EXIT_MRK" prepare_hbrt_update: rc=%.X", rc);
-    return rc;
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" prepare_hbrt_update: rc=%.X", l_rc);
+    return l_rc;
 }
 
     //------------------------------------------------------------------------
