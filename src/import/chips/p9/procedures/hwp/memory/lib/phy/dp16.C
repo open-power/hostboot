@@ -4483,8 +4483,11 @@ fapi2::ReturnCode write_force_dq_capture( const fapi2::Target<fapi2::TARGET_TYPE
         const mss::states i_state)
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
-
     fapi2::buffer<uint64_t> l_data;
+
+    // read the data from one of the RD_DIA_CONFIG5 registers
+    // because the value should be the same for other registers
+    FAPI_TRY(mss::getScom(i_target, MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0, l_data));
     l_data.writeBit<TT::FORCE_FIFO_CAPTURE>(i_state);
 
     FAPI_TRY( mss::scom_blastah(i_target, TT::RD_DIA_CONFIG5_REG, l_data) );

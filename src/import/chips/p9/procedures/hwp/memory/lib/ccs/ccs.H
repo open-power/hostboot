@@ -215,7 +215,6 @@ enum
     STAT_HUNG = 0x0ull,
 };
 
-
 ///
 /// @class instruction_t
 /// @brief Class for ccs instructions
@@ -491,6 +490,30 @@ inline instruction_t<T> des_command()
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
     return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), NO_CHIP_SELECT_ACTIVE,
                             rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+}
+
+///
+/// @brief Create, initialize a NTTM read CCS command
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @return the Device Deselect CCS instruction
+/// @note need to setup 4 cycles delay
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> nttm_read_command()
+{
+    // setup 4 cycles delay
+    constexpr uint64_t NTTM_READ_DELAY = 4;
+    // No.. there's no field for this one. it's an undocumented bit
+    constexpr uint64_t NTTM_MODE_FORCE_READ = 33;
+
+    // get the des_command
+    auto l_command = des_command<T>();
+    // set to CCS_INST_ARR1 register
+    l_command.arr1.template setBit<NTTM_MODE_FORCE_READ>();
+    l_command.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(NTTM_READ_DELAY);
+
+    return l_command;
 }
 
 ///
@@ -994,6 +1017,30 @@ template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer)
 {
     return mss::putScom(i_target, TT::MODEQ_REG, i_buffer);
+}
+
+///
+/// @brief config the NTTM
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_mcbist the target to operate
+/// @param[in] i_nttm_mode NTTM we need to turn on or off (i.e. ON, OFF)
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline fapi2::ReturnCode configure_nttm( const fapi2::Target<T>& i_target,
+        const mss::states i_nttm_mode)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(read_mode(i_target, l_data));
+
+    l_data.writeBit<TT::NTTM_MODE>(i_nttm_mode);
+
+    FAPI_TRY(write_mode(i_target, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
