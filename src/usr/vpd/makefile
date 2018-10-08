@@ -43,9 +43,10 @@ BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb33
 BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:f83bbcdd56defb5d155399774c4d721de25a8e96
 BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 
-# P9 Module VPD
+# P9 (and P9 Prime) Module VPD
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
 BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:939f91a9359b917c525dd7cd4ea80a03b1c08714
+BINARY_FILES += $(IMGDIR)/procmvpd_p9a.dat:939f91a9359b917c525dd7cd4ea80a03b1c08714
 
 # CDIMM Format - download 4k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd_cdimm.dat:b12431fbc14304edd31e74405cdcb27560a8e00b

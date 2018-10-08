@@ -278,6 +278,7 @@ simics.tar_CONTENTS = \
     img/procmvpd_ven.dat \
     img/procmvpd_p9n.dat \
     img/procmvpd_p9c.dat \
+    img/procmvpd_p9a.dat \
     img/cvpd.dat \
     img/dvpd.dat \
     img/cvpd_cdimm.dat \

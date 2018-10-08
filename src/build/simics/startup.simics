@@ -1,41 +1,46 @@
+
 # Initialize HB search paths.
+$sandbox_base = (shell "printenv SANDBOXBASE")
+$script_dir = $sandbox_base + "/obj/ppc/simu/scripts"
+add-directory $script_dir
 $hb_startup_path = (lookup-file hbfw/startup.simics)
 $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
-$model = (shell "printenv CEC_MODEL")
 $machine_name = (shell "printenv MACHINE")
-$hb_machine = "unknown"
-if ($model == "p9_nimbus") {$hb_machine = "nimbus"}
-if ($model == "p9zz_1s2u") {$hb_machine = "zztop"}
-if ($model == "p9_cumulus") {
-    if ($machine_name == "CUMULUS_CDIMM") { $hb_machine = "cumulus_cdimm" }
-    if ($machine_name != "CUMULUS_CDIMM") { $hb_machine = "cumulus" }
-}
-if ($model == "p9_axone") {$hb_machine = "axone"}
+$hb_machine = $machine_name
 
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
-
 # Setup some common vars to use across machine types
-$hb_masterproc = ""
-@simenv.hb_masterproc = quiet_run_command("get-master-proc")[0]
+$hb_masterproc = (get-master-proc)
 echo "Master Proc is: "+$hb_masterproc
-
+$hb_masterproc_cecchip = (get-master-cec-chip)
+echo "Master Proc Cec-Chip is: "+$hb_masterproc_cecchip
+#New Simics flow can simply get the string from get-master-pnor command
 $hb_pnor = ""
+$hb_pnor = (get-master-pnor)
 
-@simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
-try {
-    @SIM_get_object(simenv.hb_pnor[0])
-} except {
-    # Default to Nimbus name
-    foreach $pnor in (get-object-list -all BmcCmp) {
-       $hb_pnor = ($pnor)
+if ($hb_pnor == NIL) {
+    try {
+        @simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
+        @SIM_get_object(simenv.hb_pnor[0])
+    } except {
+        # Default to Nimbus name
+        foreach $pnor in (get-object-list -all BmcCmp) {
+            $hb_pnor = ($pnor)
+        }
+        $hb_pnor = $hb_pnor+".sfc_master_mem"
     }
 }
-
 echo "Master PNOR is: "+$hb_pnor
+
+$hb_mode = 1  #Old Mode -- No simics internals changed
+$runsim_lookup = (lookup-file -query "%simics%/runsim")
+if ($runsim_lookup) {
+    $hb_mode = 0 #New Mode -- Some simics internal changes
+}
 
 # Choose a default core to start with
 $hb_cpu = "system_cmp0.cpu0_0_00_0"
@@ -51,8 +56,10 @@ foreach $cc in (get-object-list p9_proc) {
 # Load HB debug tools.
 try {
     run-python-file (lookup-file hbfw/simics-debug-framework.py)
+}   except { echo "ERROR: Failed to load Simics debug framework (simics-debug-framework.py)" }
+try {
     run-python-file (lookup-file hbfw/hb-simdebug.py)
-} except { echo "ERROR: Failed to load Hostboot debug tools." }
+} except { echo "ERROR: Failed to load Hostboot debug tools (hb-simdebug.py)" }
 
 # Determine security state
 $hw_security=(shell "echo $SECURITY_HW_POLICY")
@@ -82,6 +89,10 @@ foreach $procX in (get-object-list p9_proc) {
     #     "TRUE"=jumper applied(security disabled, default)
     #     "FALSE"=jumper removed(security enabled)
     (($procX)->secure_jumper=$jumperApplied)
+}
+
+if ($hb_mode == 0) {
+    run-command-file (lookup-file hbfw/standalone.simics)
 }
 
 ########################### WORKAROUNDS ####################################

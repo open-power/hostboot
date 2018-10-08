@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -355,9 +355,18 @@ hb_simsetup()
     hb_fipssetup
 
     DRIVER=`cat ${PROJECT_ROOT}/src/build/citest/etc/bbuild`
+    SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
 
     needs_machine_variable
-    execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
+    if [ "${MACHINE}" == "AXONE" ]; then
+        echo "mkdir -p ${SANDBOXBASE}/simics"
+        execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
+        echo "tar ${SIMICS_LEVEL}  -C ${SANDBOXBASE}/simics/"
+        execute_in_sandbox "tar -xf ${SIMICS_LEVEL} -C ${SANDBOXBASE}/simics/" "ppc"
+        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./INSTALL.sh" "ppc"
+    else
+        execute_in_sandbox "start_simics -no_start -machine ${MACHINE}"  "ppc"
+    fi
 
     echo "Running workarounds (postsimsetup)."
     cp ${PROJECT_ROOT}/src/build/citest/etc/workarounds.postsimsetup ${SANDBOXBASE}/src
@@ -367,7 +376,6 @@ hb_simsetup()
     # Put a starter copy of errl to simics directory; refresh w/ "hb errlparser"
     cd ${SANDBOXBASE}/simics
     ln -sf  ${DRIVER}/obj/x86.nfp/errl/nfp/tool/errl
-
 }
 
 hb_startsimics()
@@ -411,8 +419,17 @@ hb_startsimics()
         echo "File DNE ${PROJECT_ROOT}/obj/genfiles/config.h"
         exit -1
     fi
-    execute_in_sandbox \
-        "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
+
+    if [ "${MACHINE}" == "AXONE" ]; then
+        #export MYDIR=$bb/obj/ppc/hbfw/simics/startup.simics
+        #then /runsim -m axone -o hb_script_to_run=$MYDIR
+        export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
+        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} -o hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor"
+        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} -o hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor" "ppc"
+    else
+        execute_in_sandbox \
+            "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
+    fi
 }
 
 hb_rsync_call()

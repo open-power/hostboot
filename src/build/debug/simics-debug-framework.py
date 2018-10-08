@@ -90,35 +90,35 @@ class DebugFrameworkIPCMessage:
 # types into the appropriate simics interface.
 #
 class DebugFrameworkProcess:
-    process = ""                # subprocess object.
-    tool = ""                   # string - tool module name.
-    toolOptions = ""            # string - tool options
-    outputToString = None       # mode - String output instead of STDOUT.
-    imgPath = None              # Image dir path override.
-    result = ""                 # Result string for Usage-mode.
-    outputFile = None           # Output file for results in addition to STDOUT
+    process = "";               # subprocess object.
+    tool = "";                  # string - tool module name.
+    toolOptions = "";           # string - tool options
+    outputToString = None;      # mode - String output instead of STDOUT.
+    imgPath = None;             # Image dir path override.
+    result = "";                # Result string for Usage-mode.
+    outputFile = None;          # Output file for results in addition to STDOUT
 
     def __init__(self, tool = "Printk", toolOptions = "",
                        outputToString = None, usage = None,
                        imgPath = None,
                        outputFile = None):
         # Assign instance 'imgPath' variable.
-        self.imgPath = imgPath if imgPath else (os.environ['HB_TOOLPATH']+"/")
+        self.imgPath = imgPath if imgPath else (os.environ['HB_TOOLPATH']+"/");
 
         # Determine sub-process arguments.
-        process_args = [self.imgPath+"simics-debug-framework.pl"]
+        process_args = [self.imgPath+"simics-debug-framework.pl"];
         if (usage): # Pass --usage if Usage mode selected.
-            process_args = process_args + [ "--usage" ]
-            outputToString = True
+            process_args = process_args + [ "--usage" ];
+            outputToString = True;
 
         # Spawn sub-process
         self.process = subprocess.Popen(process_args,
                                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         # Update instance variables.
-        self.tool = tool
-        self.toolOptions = toolOptions
-        self.outputToString = outputToString
-        self.outputFile = open(outputFile, 'w') if outputFile else None
+        self.tool = tool;
+        self.toolOptions = toolOptions;
+        self.outputToString = outputToString;
+        self.outputFile = open(outputFile, 'w') if outputFile else None;
 
     # Read a message from the process pipe.
     def recvMsg(self):
@@ -169,9 +169,9 @@ class DebugFrameworkProcess:
 
         addr = int(match.group(1))
         size = int(match.group(2))
-        data = map(ord, match.group(3).decode("hex"))
+        data = map(ord, match.group(3).decode("hex"));
 
-        conf.system_cmp0.phys_mem.memory[[addr, addr+size-1]] = data
+        conf.system_cmp0.phys_mem.memory[[addr, addr+size-1]] = data;
 
     # Read data from PNOR.
     #    This message has data of the format "0dADDRESS,0dSIZE".
@@ -304,22 +304,22 @@ def register_hb_debug_framework_tools():
     files = os.listdir(os.environ['HB_TOOLPATH']+"/Hostboot")
 
     # Filter out any prefixed with '_' (utility module) or a '.' (hidden file).
-    pattern = re.compile("[^\._]")
+    pattern = re.compile("[^\._]");
     files = [f for f in files if pattern.match(f)]
 
     # Filter out modules written for vbu only
-    pattern = re.compile("AutoIpl|ContTrace")
+    pattern = re.compile("AutoIpl|ContTrace");
     files = [f for f in files if not pattern.match(f)]
 
     # Remove the .pm extension from the tool modules.
-    files = [re.sub("\.pm","",f) for f in files]
+    files = [re.sub("\.pm","",f) for f in files];
 
     # Create an entry for each module.
     for tool in files:
         # Get usage information for each module, fix text to HTML-like.
         usage = run_hb_debug_framework(tool, usage = 1)
-        usage = re.sub("<","&lt;", usage)
-        usage = re.sub(">","&gt;", usage)
+        usage = re.sub("<","&lt;", usage);
+        usage = re.sub(">","&gt;", usage);
         usage = re.sub("\t","        ",usage)
         usage = "<pre>"+usage+"</pre>"
 
@@ -372,11 +372,6 @@ def getHRMOR():
     result = SIM_get_object(simenv.hb_cpu).hrmor
     return result
 
-# Fetch the current HRMOR value for inputted cpu obj
-def getHrmorCpu(cpu):
-    # Use the cpu object to get the hrmor value
-    iface = SIM_get_interface(cpu, "int_register")
-    return iface.read(iface.get_number("hrmor"))
 
 # Read simics memory and return a list of strings such as ['0x0','0x2b','0x8']
 # representing the data read from simics. The list returned may be handed
@@ -409,20 +404,20 @@ def writeLong(address,datvalue):
 def writeSimicsMemory(address,data):
     address = address + getHRMOR()
     size = len(data)
-    conf.system_cmp0.phys_mem.memory[[address, address+size-1]] = data
+    conf.system_cmp0.phys_mem.memory[[address, address+size-1]] = data;
 
 # Convert an integer to a byte list <size> bytes long.
 def intToList(n,size):
     lst = []
     for i in range(size):
-        b = n & 0xFF
+        b = n & 0xFF;
         lst.insert(0,b)
         n = n >> 8
     return lst
 
 # Convert a byte list to an integer.
 def listToInt(l):
-    i = 0
+    i = 0;
     for c in l:
         i = (i << 8) | c
     return i
@@ -503,19 +498,14 @@ def magic_instruction_callback(user_arg, cpu, arg):
     # Disable our handler if someone tells us to
     if( os.environ.has_key('HB_DISABLE_MAGIC')
         and (os.environ['HB_DISABLE_MAGIC'] == '1') ):
-        #print 'Skipping HB magic (disabled)', arg
-        return
-
-    #Only respond to haps for cpu model types we care about (mambo)
-    if 'mambo_core' not in cpu.classname:
-        #print 'Skipping HB magic (Not a Mambo core)', arg
+        print 'Skipping HB magic (disabled)', arg
         return
 
     # Disable our handler if we aren't inside HB part of IPL
     #   If HB is running then HRMOR==128MB (ignoring high bits)
     #   0x40000000=1GB, 0x8000000=128MB
-    if( (getHrmorCpu(cpu) % 0x40000000) != 0x8000000 ):
-        #print 'Skipping HB magic (outside of HB)', arg
+    if( (cpu.hrmor % 0x40000000) != 0x8000000 ):
+        print 'Skipping HB magic (outside of HB)', arg
         return
 
     if arg == 7006:   # MAGIC_SHUTDOWN
@@ -545,7 +535,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #print 'loading payload from', flash_file, 'to 0x%x' % load_addr
         #cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         #SIM_run_alone( run_command, cmd )
-      print "MAGIC_LOAD_PAYLOAD not implemented\n"
+      print "MAGIC_LOAD_PAYLOAD not implemented\n";
 
     if arg == 7018:   # MAGIC_BREAK_ON_ERROR
         # Stop the simulation if an env var is set
@@ -633,8 +623,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 setLvlCommand = "%s"%(comp_str)+".log-level %d"%(log_level)
                 SIM_run_alone(run_command, setLvlCommand )
             else :
-                couldNotFindCommand = "shell \" Unable to find valid object on this system type, neither %s nor %s were found \""%(D1Proc0String, P9Proc0String)
-                SIM_run_alone(run_command, couldNotFindCommand )
+                print "Unable to find valid object on this system type, neither %s nor %s were found"%(D1Proc0String, P9Proc0String)
+
     if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
             #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
@@ -654,6 +644,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
             SIM_run_alone(run_command, stopCommand )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
+
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
         per_node = 0x200000000000   #32TB
@@ -712,7 +703,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
         # Figure out if we are running out of the cache or mainstore
         # Add the HRMOR if we're running from memory
-        if 'cache' not in mem_object:
+        if 'cache' not in mem_object and 'l3' not in mem_object:
+            #print "Did not find cache"
             hb_tracBinaryBuffer = (hb_tracBinaryBuffer +
                                    hb_hrmor -
                                     (per_node*node_num))
@@ -737,10 +729,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 os.environ['HB_TOOLPATH'],\
                 tracmerg[node_num])
 
-        cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
-
+        cmd3 = ""
+        if (simenv.hb_mode == 0): #new mode (Axone + beyond)
+            cmd3 = "(get-master-proc).reset-fsimbox-reg index=0x104"
+        else:
+            #old mode (Cumulus + prior)
+            cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
         saveCommand = "%s; %s; %s"%(cmd1,cmd2,cmd3)
-        #print "Command=%s" % (saveCommand)
 
         if (simenv.fileSystemOk == 1):
             SIM_run_alone(run_command, saveCommand )
