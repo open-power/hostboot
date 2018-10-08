@@ -167,6 +167,9 @@ const DepModInfo g_istep07Dependancies = {
         DEP_LIB(libsbe.so),
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libcen.so),
+#ifndef CONFIG_FSP_BUILD
+        DEP_LIB(libnvram.so),
+#endif
         NULL
     }
 };
