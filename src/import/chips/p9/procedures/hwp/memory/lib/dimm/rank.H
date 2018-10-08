@@ -48,7 +48,6 @@
 
 namespace mss
 {
-// TK:LRDIMM Update the rank code + pairings to take into account LRDIMM (1 primary rank per LR + secondary to quaternary per LR) aka 4 rank DIMM's
 
 enum
 {
@@ -61,13 +60,21 @@ enum
     // These enums represent the rank fields and valid bits from rank_pair_assignments
     EVEN_PRIMARY_RANK = 48,
     EVEN_SECONDARY_RANK = 52,
+    EVEN_TERTIARY_RANK = 48,
+    EVEN_QUATERNARY_RANK = 52,
     ODD_PRIMARY_RANK = 56,
     ODD_SECONDARY_RANK = 60,
+    ODD_TERTIARY_RANK = 56,
+    ODD_QUATERNARY_RANK = 60,
     RANK_LEN = 3,
     EVEN_PRIMARY_VALID = 51,
     EVEN_SECONDARY_VALID = 55,
+    EVEN_TERTIARY_VALID = 51,
+    EVEN_QUATERNARY_VALID = 55,
     ODD_PRIMARY_VALID = 59,
     ODD_SECONDARY_VALID = 63,
+    ODD_TERTIARY_VALID = 59,
+    ODD_QUATERNARY_VALID = 63,
 
 };
 
@@ -1194,7 +1201,7 @@ fapi_try_exit:
 ///
 template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
 fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
-                                     const std::vector<uint64_t> i_ranks )
+                                     const std::vector<uint64_t>& i_ranks )
 {
     // Read the rank pair register(s)
     fapi2::buffer<uint64_t> l_reg;
