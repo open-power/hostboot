@@ -1534,6 +1534,24 @@ fapi2::ReturnCode buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
         //updating local instance of QPMR header
         memcpy( &o_qpmrHdr, i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader, sizeof(QpmrHeaderLayout_t));
 
+        FAPI_ASSERT( ( SWIZZLE_4_BYTE(o_qpmrHdr.sgpeSramRegionStart) == OCC_SRAM_SGPE_BASE_ADDR ),
+                     fapi2::QPMR_HDR_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "QPMR SGPE Sram Region Start Mismatch Value=0x%x Expected=0x%x"
+                     ,o_qpmrHdr.sgpeSramRegionStart, OCC_SRAM_SGPE_BASE_ADDR);
+
+        FAPI_ASSERT( ( SWIZZLE_4_BYTE(o_qpmrHdr.sgpeSramRegionSize)  == OCC_SRAM_SGPE_REGION_SIZE ),
+                     fapi2::QPMR_HDR_BUILD_FAILURE()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "QPMR SGPE Sram Region Size Mismatch Value=0x%x Expected=0x%x"
+                     ,o_qpmrHdr.sgpeSramRegionSize, OCC_SRAM_SGPE_REGION_SIZE);
+
         FAPI_DBG("SGPE Boot Copier");
         rcTemp = copySectionToHomer( i_pChipHomer->qpmrRegion.sgpeRegion.l1BootLoader,
                                      pSgpeImg,
@@ -1949,6 +1967,26 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
                      "Failed to update PPMR region of HOMER" );
 
         memcpy( &io_ppmrHdr, pPpmrHdr, sizeof(PpmrHeader_t));
+
+
+        FAPI_ASSERT ( (SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_region_start) == OCC_SRAM_PGPE_BASE_ADDR),
+                      fapi2::P9_XIP_SECTION_PGPE_PPMR()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "PPMR PGPE Sram Region Start mismatch. Value=0x%x Expected=0x%x",
+                      SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_region_start), OCC_SRAM_PGPE_BASE_ADDR );
+
+        FAPI_ASSERT ( (SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_region_size) == OCC_SRAM_PGPE_REGION_SIZE),
+                      fapi2::P9_XIP_SECTION_PGPE_PPMR()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "PPMR PGPE Sram Region Size mismatch. Value=0x%x Expected=0x%x",
+                      SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_region_size), OCC_SRAM_PGPE_REGION_SIZE);
+
 
         rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.l1BootLoader,
                                      pPgpeImg,
