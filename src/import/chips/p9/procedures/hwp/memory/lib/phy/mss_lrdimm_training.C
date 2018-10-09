@@ -465,7 +465,7 @@ fapi2::ReturnCode mrep::analyze_result_for_each_nibble( const fapi2::Target<fapi
         (io_recorder.iv_final_delay == 0) )
     {
         io_recorder.iv_final_delay = i_delay;
-        FAPI_DBG( "%s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x",
+        FAPI_DBG( "MREP %s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x",
                   mss::c_str(i_target), i_buffer, i_nibble, i_delay );
     }
 
@@ -688,44 +688,6 @@ fapi_try_exit:
 /// @return l_cycles - the number of cycles a given calibration step wil take
 ///
 uint64_t mrep::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
-{
-    return 0;
-}
-
-///
-/// @brief Sets up and runs the calibration step
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair
-/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mrd::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                            const uint64_t i_rp,
-                            const uint8_t i_abort_on_error ) const
-{
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Executes a cal step with workarounds
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair
-/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mrd::execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                const uint64_t i_rp,
-                                const uint8_t i_abort_on_error ) const
-{
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Calculates the number of cycles a given calibration step will take
-/// @param[in] i_target - the MCA target on which to operate
-/// @return l_cycles - the number of cycles a given calibration step wil take
-///
-uint64_t mrd::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
     return 0;
 }
