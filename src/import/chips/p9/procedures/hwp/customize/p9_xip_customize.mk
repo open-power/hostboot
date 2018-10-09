@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE = p9_xip_customize
 lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
+lib$(PROCEDURE)_DEPLIBS+=p9_xip_section_append
 lib$(PROCEDURE)_DEPLIBS+=p9_ring_identification
 lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
 lib$(PROCEDURE)_DEPLIBS+=p9_get_mvpd_ring

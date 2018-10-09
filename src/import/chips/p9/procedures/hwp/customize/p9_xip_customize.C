@@ -48,6 +48,9 @@
 #include <p9_tor.H>
 #include <p9_scan_compression.H>
 #include <p9_infrastruct_help.H>
+#include <p9_perv_scom_addresses.H>
+
+#include <p9_xip_section_append.H>
 
 enum MvpdRingStatus
 {
@@ -98,6 +101,36 @@ typedef struct
     uint8_t  chipletNumUnderProcess;
 } VpdInsInsertProg_t;
 
+///////////////////////////////////////////////////////////////////////////////
+// Table structure for the expanded raw scoms
+///////////////////////////////////////////////////////////////////////////////
+////////// 1B Command // 1B LAST ROW // 2B PAD // 4B ADDR // 8B DATA //////////
+//////////////////////////////// N ROWS ///////////////////////////////////////
+
+typedef struct
+{
+    uint32_t cmd: 8;     // Getscom = 0, Putscom = 1, other val for future scope
+    uint32_t last_row: 8; // Set to 1, if last row
+    uint32_t pad: 16;    // Pad bytes for future use
+    uint32_t addr;       // Addr for the above cmd (getscom/putscom)
+    uint64_t data;       // Data for the above cmd (getscom/putscom)
+} ringExpand_tbl_t;
+
+#define EXPAND_RING_PUT_BASE_ADDR_MASK         0x0103E000
+#define EXPAND_RING_GET_BASE_ADDR_MASK         0x01038000
+#define EXPAND_RING_64BIT_LEN_MASK             0x00000040
+#define EXPAND_RING_HEADER                     0xA5A5A5A5A5A5A5A5ull
+#define PIB_REPR_SCAN_REGION_AND_TYPE_VALUE    0x0200000000000200ull
+#define ROW_LEN_IN_BYTES                       16
+#define ROW_LEN_IN_BITS                        128
+#define EXPAND_RING_PUTSCOM_CMD                1
+#define EXPAND_RING_GETSCOM_CMD                0
+#define SCOM_DATA_LEN_IN_BITS                  64
+#define RING_HEADER_SKIP_LEN_IN_BITS           64
+#define LAST_ROW                               1
+
+///////////////////////////////////////////////////////////////////////////////
+
 using namespace fapi2;
 
 #ifndef WIN32
@@ -127,6 +160,112 @@ using namespace fapi2;
                  "MBOX_ATTR_CLEAR: Error writing attr %s to seeprom image",\
                  #ID); \
     }
+
+fapi2::ReturnCode p9_expand_ring_util(
+    uint8_t*         o_tbl_scom_data,  // Ptr to table of scoms per the struct
+    uint32_t&        o_tbl_size_in_bytes, // Size of generated table in bytes
+    uint32_t         i_size_in_bits,  // in: size of raw ring data in bits
+    const uint8_t*   i_raw_data)  // in: raw ring data ptr
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint32_t rowIterCnt = 0;
+    uint8_t numScoms = (i_size_in_bits / SCOM_DATA_LEN_IN_BITS);
+    o_tbl_size_in_bytes = 0;
+
+    FAPI_DBG(">>p9_expand_ring_util i_size_in_bits %d", i_size_in_bits);
+
+    FAPI_ASSERT((o_tbl_scom_data != NULL) &&
+                (i_size_in_bits > 0) &&
+                (i_raw_data != NULL),
+                fapi2::EXPAND_RING_UTIL_INVALID_PARAMETERS().
+                set_OUT_IMAGE(o_tbl_scom_data).
+                set_IN_IMAGE_SIZE(i_size_in_bits).
+                set_IN_IMAGE((uint8_t*)i_raw_data),
+                "at least one input parameter not valid");
+
+    if(i_size_in_bits % SCOM_DATA_LEN_IN_BITS)
+    {
+        numScoms = numScoms + 1;
+    }
+
+    // Additional rows for ring implementation
+    // 1 row for Setting Scan type and region
+    // 1 row for Header
+    // 1 row in footer for Header check
+    // 1 row in footer to clear Scan type and region
+    numScoms = numScoms + 4;
+
+    ringExpand_tbl_t row;
+    row.cmd = EXPAND_RING_PUTSCOM_CMD;
+    row.last_row = 0;
+
+    // Set up the scan type and region
+    row.addr = PERV_TP_SCAN_REGION_TYPE; // Pervasive chiplet
+    row.addr = htobe32(row.addr);
+    row.data = PIB_REPR_SCAN_REGION_AND_TYPE_VALUE;
+    row.data  = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+    // Setup header
+    row.addr = EXPAND_RING_PUT_BASE_ADDR_MASK | EXPAND_RING_64BIT_LEN_MASK;
+    row.addr = htobe32(row.addr);
+    row.data = EXPAND_RING_HEADER;
+    row.data  = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    // Expand the ring into rows
+    for( uint32_t numBits = RING_HEADER_SKIP_LEN_IN_BITS; numBits < i_size_in_bits;
+         numBits = numBits + SCOM_DATA_LEN_IN_BITS )
+    {
+        if(numBits + SCOM_DATA_LEN_IN_BITS <= i_size_in_bits)
+        {
+            row.addr = EXPAND_RING_PUT_BASE_ADDR_MASK | EXPAND_RING_64BIT_LEN_MASK;
+            row.addr  = htobe32(row.addr);
+        }
+        else // 64bits are not available to copy
+        {
+            uint8_t remain = i_size_in_bits - numBits;
+            row.addr = EXPAND_RING_PUT_BASE_ADDR_MASK | remain;
+            row.addr = htobe32(row.addr);
+        }
+
+        memcpy((uint8_t*)&row.data, (i_raw_data + numBits / 8), 8); //8bytes copy
+        memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++)),
+                (uint8_t*)&row,
+                sizeof(ringExpand_tbl_t) );
+    }
+
+    // Setup footer, to verify the header bytes
+    row.cmd = EXPAND_RING_GETSCOM_CMD;
+    row.addr = EXPAND_RING_GET_BASE_ADDR_MASK;
+    row.addr = htobe32(row.addr);
+    row.data = EXPAND_RING_HEADER;
+    row.data  = htobe64(row.data);
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    // Clear Scan type and region and set last row byte
+    row.cmd = EXPAND_RING_PUTSCOM_CMD;
+    row.last_row = LAST_ROW;
+    row.addr = PERV_TP_SCAN_REGION_TYPE; // Pervasive chiplet
+    row.addr = htobe32(row.addr);
+    row.data = 0x0;
+    memcpy( (o_tbl_scom_data + (ROW_LEN_IN_BYTES * rowIterCnt++) ),
+            (uint8_t*)&row,
+            sizeof(ringExpand_tbl_t) );
+
+    //Update the number of bytes in the table
+    o_tbl_size_in_bytes = ROW_LEN_IN_BYTES * rowIterCnt;
+
+fapi_try_exit:
+    FAPI_DBG("<<p9_expand_ring_util");
+    return fapi2::current_err;
+}
+
 
 fapi2::ReturnCode writeMboxRegs (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
@@ -328,7 +467,7 @@ fapi2::ReturnCode get_overlays_ring(
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(0xff).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(2),
+                     set_OCCURRENCE(1),
                      "rs4_decompress() failed w/rc=%i for "
                      "ringId=0x%x, chipletId=0xff, occurrence=2 ",
                      l_rc, i_ringId );
@@ -2089,75 +2228,150 @@ ReturnCode p9_xip_customize (
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
-        uint8_t    l_pibmemRepVersion = 0;
-        uint64_t   l_pibmemRepData[4] = {0};
-        uint32_t   l_sizeMvpdFieldExpected = sizeof(l_pibmemRepVersion) + sizeof(l_pibmemRepData);
-        uint32_t   l_sizeMvpdField = 0;
-        uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
+        uint32_t   sizeMvpdField = 0;
+        uint8_t*   bufMvpdField = (uint8_t*)i_ringBuf1;
+        uint8_t    pibmemRepVersion = 0;
+        uint64_t   pibmemRepData[4] = {0};
+        uint32_t   sizeMvpdFieldExpected = sizeof(pibmemRepVersion) + sizeof(pibmemRepData);
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_PB,
-                               i_procTarget,
-                               NULL,
-                               l_sizeMvpdField),
-                  "getMvpdField(NULL buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        fapi2::ATTR_CHIP_EC_FEATURE_PIBMEM_REPAIR_AXONE_Type PIBMEM_REPAIR_AXONE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PIBMEM_REPAIR_AXONE, i_procTarget,
+                               PIBMEM_REPAIR_AXONE));
 
-        FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
-                     fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_MVPD_FIELD_SIZE(l_sizeMvpdField).
-                     set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
-                     "MVPD field size bug:\n"
-                     "  Returned MVPD field size of PB keyword = %d\n"
-                     "  Anticipated MVPD field size = %d",
-                     l_sizeMvpdField,
-                     l_sizeMvpdFieldExpected );
+        if(PIBMEM_REPAIR_AXONE) // Pibmem repair for Axone
+        {
+            MvpdKeyword mvpdKeyPdR = fapi2::MVPD_KEYWORD_PDR; // #R Repair rings
+            uint32_t maxRingByteSize = MAX_RING_BUF_SIZE;
+            uint8_t* dataVpd = (uint8_t*)i_ringBuf2;
+            uint8_t* careVpd = (uint8_t*)i_ringBuf2 + maxRingByteSize / 2;
+            uint8_t* scomTbl = (uint8_t*)i_ringBuf3;
+            uint32_t uncmpSize = 0;
+            uint32_t tblSize = 0;
+            uint8_t  evenOdd = 0;
+            RingId_t perv_pib_repr = 0x12;
+            uint32_t vpdRingSize = maxRingByteSize;
+            uint8_t  chipletId = 1; // Pervasive Chiplet
+            l_rc = INFRASTRUCT_RC_SUCCESS;
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_PB,
-                               i_procTarget,
-                               l_bufMvpdField,
-                               l_sizeMvpdField),
-                  "getMvpdField(valid buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+            // Memset the data
+            memset(dataVpd, 0, maxRingByteSize / 2);
+            memset(careVpd, 0, maxRingByteSize / 2);
+            memset(bufMvpdField, 0, maxRingByteSize);
 
-        // Copy over the data into suitable 8Byte containers
-        l_pibmemRepVersion = (uint8_t)(*l_bufMvpdField);
-        l_pibmemRepData[0] = htobe64( *((uint64_t*)(l_bufMvpdField + 1)) );
-        l_pibmemRepData[1] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 8)) );
-        l_pibmemRepData[2] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 16)) );
-        l_pibmemRepData[3] = htobe64( *((uint64_t*)(l_bufMvpdField + 1 + 24)) );
+            // Fetch rings from the MVPD:
+            // For Axone system, we should always find a repr ring if not then
+            // fail customize procedure.
+            FAPI_TRY( getMvpdRing( i_procTarget,
+                                   MVPD_RECORD_CP00,
+                                   mvpdKeyPdR,
+                                   chipletId,
+                                   evenOdd,
+                                   perv_pib_repr,
+                                   bufMvpdField,
+                                   vpdRingSize ),
+                      "getMvpdRing() failed for PIBREPR Ring w/rc=0x%08X",
+                      (uint64_t)fapi2::current_err );
 
-        FAPI_DBG("Retrieved Mvpd PB keyword field:\n");
-        FAPI_DBG(" l_pibmemRepVersion = 0x%02x\n"
-                 " l_pibmemRepData[1] = 0x%016llx\n"
-                 " l_pibmemRepData[1] = 0x%016llx\n"
-                 " l_pibmemRepData[2] = 0x%016llx\n"
-                 " l_pibmemRepData[3] = 0x%016llx\n",
-                 l_pibmemRepVersion,
-                 l_pibmemRepData[0],
-                 l_pibmemRepData[1],
-                 l_pibmemRepData[2],
-                 l_pibmemRepData[3]);
+            // Uncompress the RS4 to raw ring
+            l_rc = _rs4_decompress(
+                       dataVpd,
+                       careVpd,
+                       (maxRingByteSize / 2), // Max allowable raw ring size (in bytes)
+                       &uncmpSize,       // Actual raw ring size (in bits) on return.
+                       (CompressedScanData*)bufMvpdField );
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR0", l_pibmemRepData[0]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR0) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                         fapi2::XIPC_RS4_DECOMPRESS_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_RING_ID(perv_pib_repr).
+                         set_CHIPLET_ID(chipletId).
+                         set_LOCAL_RC(l_rc).
+                         set_OCCURRENCE(3),
+                         "rs4_decompress() for pibmem repair: Failed w/rc=%i "
+                         "for perv_pib_repr ringId=0x%02x, chipletId=0xff, "
+                         "occurrence=3 ", l_rc, perv_pib_repr );
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR1", l_pibmemRepData[1]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR1) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+            // Contruct repair table to encode raw bit stream into rows of scoms
+            // for the SBE bootloader to parse and execute in raw scoms
+            FAPI_TRY(p9_expand_ring_util(scomTbl, tblSize, uncmpSize, dataVpd),
+                     "Error in p9_expand_ring_util w/rc = 0x%08X",
+                     (uint64_t)fapi2::current_err );
 
-        FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR2", l_pibmemRepData[2]),
-                  "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR2) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+            FAPI_INF("p9_expand_ring_util returned a table of length %d from "
+                     "perv_pib_repr ring of size %d", tblSize, uncmpSize);
 
+            FAPI_TRY(p9_xip_section_append(
+                         (void*)scomTbl,
+                         tblSize,
+                         P9_XIP_SECTION_SBE_PIBREPRDATA,
+                         io_image,
+                         io_imageSize),
+                     "p9_xip_section_append() failed w/rc=0x%08X",
+                     (uint64_t)fapi2::current_err );
+        }
+        else // Other than Axone
+        {
+            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                                   MVPD_KEYWORD_PB,
+                                   i_procTarget,
+                                   NULL,
+                                   sizeMvpdField),
+                      "getMvpdField(NULL buffer) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+
+            FAPI_ASSERT( sizeMvpdField == sizeMvpdFieldExpected,
+                         fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_MVPD_FIELD_SIZE(sizeMvpdField).
+                         set_EXPECTED_SIZE(sizeMvpdFieldExpected),
+                         "MVPD field size bug:\n"
+                         "  Returned MVPD field size of PB keyword = %d\n"
+                         "  Anticipated MVPD field size = %d",
+                         sizeMvpdField,
+                         sizeMvpdFieldExpected );
+
+            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                                   MVPD_KEYWORD_PB,
+                                   i_procTarget,
+                                   bufMvpdField,
+                                   sizeMvpdField),
+                      "getMvpdField(valid buffer) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+
+            // Copy over the data into suitable 8Byte containers
+            pibmemRepVersion = (uint8_t)(*bufMvpdField);
+            pibmemRepData[0] = htobe64( *((uint64_t*)(bufMvpdField + 1)) );
+            pibmemRepData[1] = htobe64( *((uint64_t*)(bufMvpdField + 1 + 8)) );
+            pibmemRepData[2] = htobe64( *((uint64_t*)(bufMvpdField + 1 + 16)) );
+            pibmemRepData[3] = htobe64( *((uint64_t*)(bufMvpdField + 1 + 24)) );
+
+            FAPI_DBG("Retrieved Mvpd PB keyword field:\n");
+            FAPI_DBG(" pibmemRepVersion = 0x%02x\n"
+                     " pibmemRepData[1] = 0x%016llx\n"
+                     " pibmemRepData[1] = 0x%016llx\n"
+                     " pibmemRepData[2] = 0x%016llx\n"
+                     " pibmemRepData[3] = 0x%016llx\n",
+                     pibmemRepVersion,
+                     pibmemRepData[0],
+                     pibmemRepData[1],
+                     pibmemRepData[2],
+                     pibmemRepData[3]);
+
+            FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR0", pibmemRepData[0]),
+                      "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR0) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+
+            FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR1", pibmemRepData[1]),
+                      "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR1) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+
+            FAPI_TRY( p9_xip_set_scalar(io_image, "ATTR_PIBMEM_REPAIR2", pibmemRepData[2]),
+                      "p9_xip_set_scalar(ATTR_PIBMEM_REPAIR2) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+        }
     }
 
 #endif
-
-
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings
@@ -2166,6 +2380,23 @@ ReturnCode p9_xip_customize (
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
+        // Test supplied buffer spaces are big enough to hold max image size
+        FAPI_ASSERT( io_imageSize >= l_maxImageSize,
+                     fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_INPUT_IMAGE_SIZE(l_inputImageSize).
+                     set_IMAGE_BUF_SIZE(io_imageSize).
+                     set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                     set_RING_BUF_SIZE1(i_ringBufSize1).
+                     set_RING_BUF_SIZE2(i_ringBufSize2).
+                     set_OCCURRENCE(2),
+                     "One or more invalid input buffer sizes for HB_SBE phase:\n"
+                     "  l_maxImageSize=0x%016llx\n"
+                     "  io_imageSize=0x%016llx\n"
+                     "  io_ringSectionBufSize=0x%016llx\n",
+                     (uintptr_t)l_maxImageSize,
+                     (uintptr_t)io_imageSize,
+                     (uintptr_t)io_ringSectionBufSize );
 
         // Get the image size.
         l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
@@ -2296,23 +2527,6 @@ ReturnCode p9_xip_customize (
                          "Image size before VPD updates (=%d) already exceeds max image size (=%d)",
                          l_currentImageSize, l_maxImageSize );
 
-            // Test supplied buffer spaces are big enough to hold max image size
-            FAPI_ASSERT( io_imageSize >= l_maxImageSize,
-                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_INPUT_IMAGE_SIZE(l_inputImageSize).
-                         set_IMAGE_BUF_SIZE(io_imageSize).
-                         set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
-                         set_RING_BUF_SIZE1(i_ringBufSize1).
-                         set_RING_BUF_SIZE2(i_ringBufSize2).
-                         set_OCCURRENCE(2),
-                         "One or more invalid input buffer sizes for HB_SBE phase:\n"
-                         "  l_maxImageSize=0x%016llx\n"
-                         "  io_imageSize=0x%016llx\n"
-                         "  io_ringSectionBufSize=0x%016llx\n",
-                         (uintptr_t)l_maxImageSize,
-                         (uintptr_t)io_imageSize,
-                         (uintptr_t)io_ringSectionBufSize );
 
             // Copy, save and delete the .rings section, wherever it is (even if
             //   not the last section), and re-arrange other sections located above
