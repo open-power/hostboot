@@ -37,20 +37,17 @@
 
 #include <vector>
 #include <initializer_list>
-
 #include <fapi2.H>
 #include <mss.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/mss_training.H>
 #include <lib/phy/mss_lrdimm_training.H>
-
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/workarounds/seq_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/workarounds/ccs_workarounds.H>
-
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
@@ -61,6 +58,7 @@
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_dwl.H>
+    #include <lib/phy/mss_mrd_fine.H>
 #endif
 
 namespace mss
@@ -1226,6 +1224,13 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     }
 
 #ifdef LRDIMM_CAPABLE
+
+    // MRD_FINE
+    if(i_cal_steps.getBit<mss::cal_steps::MRD_FINE>())
+    {
+        FAPI_INF("LRDIMM: MRD_FINE is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::mrd_fine>());
+    }
 
     // DWL
     if(i_cal_steps.getBit<mss::cal_steps::DWL>())

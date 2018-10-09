@@ -50,6 +50,7 @@
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/rosetta_map/rosetta_map.H>
+#include <lib/phy/ddr_phy.H>
 
 // Disables LRDIMM support for HB
 #ifndef __HOSTBOOT_MODULE
@@ -605,51 +606,6 @@ class mrep : public step
             return fapi2::current_err;
         }
 
-};
-
-///
-/// @brief MPR training step
-///
-class mrd : public step
-{
-    public:
-        mrd() :
-            step("MRD")
-        {}
-
-        ///
-        /// @brief Default virtual destructor
-        ///
-        ~mrd() = default;
-
-        ///
-        /// @brief Sets up and runs the calibration step
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const uint64_t i_rp,
-                               const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Executes a cal step with workarounds
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const uint64_t i_rp,
-                                   const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Calculates the number of cycles a given calibration step will take
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @return l_cycles - the number of cycles a given calibration step wil take
-        ///
-        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const;
 };
 
 ///
