@@ -516,6 +516,42 @@ extern "C"
     }
 
     ///
+    /// @brief Parse error map error log helper
+    /// @param[in] i_target the MBA target
+    /// @param[in] i_memory_health '1' if MCBIST failed, '0' otherwise
+    /// @param[in] i_faulted_port the port index of the last fail
+    /// @param[in] i_faulted_rank the rank index of the last fail
+    /// @param[in] i_faulted_dimm the DIMM index of the last fail
+    /// @return FAPI2_RC_SUCCESS after logging any errors
+    ///
+    fapi2::ReturnCode parse_error_map_error_helper(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_memory_health,
+            const uint8_t i_faulted_port,
+            const uint8_t i_faulted_rank,
+            const uint8_t i_faulted_dimm)
+    {
+        // Callout the last faulted port & DIMM if we found any new bad bits
+        FAPI_ASSERT((i_memory_health == 0),
+                    fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
+                    set_MBA_TARGET(i_target).
+                    set_MBA_PORT_NUMBER(i_faulted_port).
+                    set_MBA_DIMM_NUMBER(i_faulted_dimm),
+                    "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run, port=%d rank=%d dimm=%d",
+                    mss::c_str(i_target),
+                    i_faulted_port,
+                    i_faulted_rank,
+                    i_faulted_dimm);
+
+        return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        // We're here, so we took a fail - log it as recovered, so we get callouts for PRD but don't fail out of training_adv
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    ///
     /// @brief parse the MCBIST error map and report spd if any bad bit found
     /// @param[in] i_target Centaur input mba
     /// @return FAPI2_RC_SUCCESS iff succesful
@@ -603,17 +639,8 @@ extern "C"
 
         //////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
 #ifdef __HOSTBOOT_MODULE
-        // In firmware, post an error log and callout the last faulted port & DIMM if we found any new bad bits
-        FAPI_ASSERT_NOEXIT((l_memory_health == 0),
-                           fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
-                           set_MBA_TARGET(i_target).
-                           set_MBA_PORT_NUMBER(l_faulted_port).
-                           set_MBA_DIMM_NUMBER(l_faulted_dimm),
-                           "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run, port=%d rank=%d dimm=%d",
-                           mss::c_str(i_target),
-                           l_faulted_port,
-                           l_faulted_rank,
-                           l_faulted_dimm);
+        // In firmware, post a recovered error log and callout the last faulted port & DIMM if we found any new bad bits
+        FAPI_TRY( parse_error_map_error_helper(i_target, l_memory_health, l_faulted_port, l_faulted_rank, l_faulted_dimm) );
 #else
         // In Cronus, assert and halt only if we found more than one bad nibble on a given rank
         FAPI_ASSERT((l_count == 0),
