@@ -50,6 +50,42 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIB_PCB_MUX_ERROR</rc>
+    <description>
+    PIB2PCB and PCB2PCB path mux are set to Zero (or) FSI2PCB path mux is set 1, So scoms cant be performed
+    Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
+    </description>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_SBE_PIB_REGION_FENCE_ERROR</rc>
+    <description>
+    PIB or SBE region fence is set to 1, So scoms cant be performed
+    Action:Switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_EXTRACT_SBE_RC_RUNNING</rc>
     <description>
     SBE engine is in running state, but an error was raised by external FW code.

@@ -30,8 +30,9 @@
 ///     1) Validating Usecase
 ///     2) (In non HB mode only) Check if VDN_PGOOD is set
 ///     3) Reading chip ec attribute detect if chip is NDD1 or later, and update memory location values
-///     4) Read the value of DBGPRO 0xE0005 & Store IAR as Current IAR
-///     5) Identify if PPE is halted from XSR Bit0, if not halted report error as infinite loop
+///     4) Read chip ec attribute to detect if Axone chip and modify PIBMEM start address location then check PIB/PCB Mux values & TP Region fences
+///     5) Read the value of DBGPRO 0xE0005 & Store IAR as Current IAR
+///     6) Identify if PPE is halted from XSR Bit0, if not halted report error as infinite loop
 /// Level 0 :
 ///     1) If Halted, Read the value of RAMDBG 0xE0003 & store SPRG0
 ///     2) Check if SPRG0 has address within valid PIBMEM range
@@ -57,7 +58,8 @@
 /// Level 2 :
 ///     1) Based on IAR value identifying the Memory Address range
 ///        OTPROM (0x000C0000  to 0x000C0378)
-///        PIBMEM (0xFFFE8000  to 0xFFFFFFFF)
+///        PIBMEM (0xFFFE8000  to 0xFFFFFFFF) - Nimbus & Cumulus
+///        PIBMEM (0xFFFC8000  to 0xFFFFFFFF) - Axone
 ///        SEEPROM(0x80000000  to 0x80038E18)
 ///     2) If IAR value is out of above address scope, report error
 /// Level 3 :
@@ -109,6 +111,8 @@
 
 //## auto_generated
 #include "p9_extract_sbe_rc.H"
+#include <p9a_perv_scom_addresses.H>
+#include <p9a_perv_scom_addresses_fld.H>
 #include <p9_ppe_common.H>
 #include <p9_ppe_utils.H>
 #include <p9_misc_scom_addresses.H>
@@ -127,27 +131,23 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     // FAPI_ASSERT condition constant
     const bool FAIL = false;
     // PIBMEM address offset constant
-    const uint32_t PIBMEM_ADDR_OFFSET = 0xFFFE8000;
     const uint32_t PIBMEM_SCOM_OFFSET = 0x00080000;
     const uint32_t NUM_OF_LOCATION = 4;
     // Address Range constants
     const uint32_t OTPROM_MIN_RANGE  = 0x000C0000;
     const uint32_t OTPROM_MAX_RANGE  = 0x000C0378;
-    const uint32_t PIBMEM_MIN_RANGE  = 0xFFFE8000;
+    const uint32_t PIBMEM_MIN_RANGE_NOT_AXONE  = 0xFFFE8000;
+    const uint32_t PIBMEM_MIN_RANGE_AXONE  = 0xFFFC8000;
     const uint32_t PIBMEM_MAX_RANGE  = 0xFFFFFFFF;
     const uint32_t SEEPROM_NDD1_MIN_RANGE = 0x80000000;
     const uint32_t SEEPROM_NDD1_MAX_RANGE = 0x80038E18;
     const uint32_t SEEPROM_NOT_NDD1_MIN_RANGE = 0xFF800000;
     const uint32_t SEEPROM_NOT_NDD1_MAX_RANGE = 0xFF838E18;
     // Interrupt Vector offsets locations
-    const uint32_t OTPROM_PROG_EXCEPTION_LOCATION  = 0x000C00E0;
-    const uint32_t PIBMEM_PROG_EXCEPTION_LOCATION  = 0xFFFE80E0;
-    const uint32_t OTPROM_INST_STORE_INTR_LOCATION = 0x000C0080;
-    const uint32_t PIBMEM_INST_STORE_INTR_LOCATION = 0xFFFE8080;
-    const uint32_t OTPROM_ALIGN_INTR_LOCATION      = 0x000C00C0;
-    const uint32_t PIBMEM_ALIGN_INTR_LOCATION      = 0xFFFE80C0;
-    const uint32_t OTPROM_DATA_STORE_INTR_LOCATION = 0x000C0060;
-    const uint32_t PIBMEM_DATA_STORE_INTR_LOCATION = 0xFFFE8060;
+    const uint32_t PROG_EXCEPTION_LOCATION  = 0x000000E0;
+    const uint32_t INST_STORE_INTR_LOCATION = 0x00000080;
+    const uint32_t ALIGN_INTR_LOCATION      = 0x000000C0;
+    const uint32_t DATA_STORE_INTR_LOCATION = 0x00000060;
 
     // OTPROM Address constants as per the image on 12/Jun/2017
     // These values might change on every recomilation of OTPROM binary
@@ -178,6 +178,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     fapi2::buffer<uint32_t> l_data32_lr;
     fapi2::buffer<uint32_t> l_data32_magicbyte;
     fapi2::buffer<uint8_t>  l_is_ndd1;
+    fapi2::buffer<uint8_t>  l_is_axone;
     fapi2::buffer<uint64_t> l_data64_dbg[NUM_OF_LOCATION];
     bool l_ppe_halt_state = true;
     bool l_data_mchk = false;
@@ -194,6 +195,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     uint32_t SEEPROM_MAX_RANGE;
     uint32_t MAGIC_NUMBER_MISMATCH_LOCATION;
     uint32_t OTPROM_IMAGE_END_LOCATION;
+    uint32_t PIBMEM_MIN_RANGE;
 
     FAPI_INF("p9_extract_sbe_rc : Entering ...");
 
@@ -242,6 +244,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
     FAPI_DBG("p9_extract_sbe_rc: Reading chip ec attribute");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTRACT_SBE_RC_P9NDD1_CHIPS, i_target_chip, l_is_ndd1));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9A_LOGIC_ONLY, i_target_chip, l_is_axone));
 
     if(l_is_ndd1)
     {
@@ -257,6 +260,49 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         OTPROM_IMAGE_END_LOCATION = NOT_NDD1_OTPROM_IMAGE_END_LOCATION;
         SEEPROM_MIN_RANGE = SEEPROM_NOT_NDD1_MIN_RANGE;
         SEEPROM_MAX_RANGE = SEEPROM_NOT_NDD1_MAX_RANGE;
+    }
+
+    if(l_is_axone)
+    {
+        FAPI_INF("p9_extract_sbe_rc: Detected as Axone chip");
+        PIBMEM_MIN_RANGE = PIBMEM_MIN_RANGE_AXONE;
+        //-------------------------------------- Axone Mux configs -------------------------------------------//
+        //    FSI2PCB(16)  |    PIB2PCB(18)    |    PCB2PCB(19)   |     Cannot Access   |    Can Access       //
+        //----------------------------------------------------------------------------------------------------//
+        //      1          |       0           |       0          |          PIB        |    EPS - Perv Only  //
+        //      0          |       1           |       0          |          PCB        |    PIB, SBE, EPS    //
+        //      0          |       0           |       1          |           -         |    PIB, PCB n/w     //
+        //----------------------------------------------------------------------------------------------------//
+
+        if(i_set_sdb)
+        {
+            //-- Check PIB/PCB Mux values not to select FSI2PCB path and Alteast PIB2PCB or PCB2PCB path must be 1 to have an active SCOM path
+            FAPI_DBG("p9_extract_sbe_rc: Reading Root control0");
+            FAPI_TRY(getCfamRegister(i_target_chip, PERV_ROOT_CTRL0_FSI, l_data32));
+
+            if((!(l_data32.getBit<P9A_PERV_ROOT_CTRL0_PIB2PCB_DC>()
+                  || l_data32.getBit<P9A_PERV_ROOT_CTRL0_PCB2PCB_DC>())) || l_data32.getBit<P9A_PERV_ROOT_CTRL0_FSI2PCB_DC>())
+            {
+                o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PIB_PCB_MUX_ERROR() .set_TARGET_CHIP(i_target_chip),
+                            "Both PIB2PCB and PCB2PCB path mux are set to Zero (or) FSI2PCB path mux is set 1");
+            }
+        }
+
+        //-- Check Perv Cplt_ctrl1 [pib(bit6) and sbe(bit9)] region fences should not be 1
+        FAPI_DBG("p9_extract_sbe_rc: Reading TP Chiplet Control 1 register");
+        FAPI_TRY(getScom(i_target_chip, PERV_TP_CPLT_CTRL1, l_data64));
+
+        if(l_data64.getBit<PERV_1_CPLT_CTRL1_UNUSED_9B>() || l_data64.getBit<PERV_1_CPLT_CTRL1_UNUSED_6B>())
+        {
+            o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_PIB_REGION_FENCE_ERROR() .set_TARGET_CHIP(i_target_chip),
+                        "PIB or SBE region fence is set to 1");
+        }
+    }
+    else
+    {
+        PIBMEM_MIN_RANGE = PIBMEM_MIN_RANGE_NOT_AXONE;
     }
 
     if(i_set_sdb)
@@ -306,7 +352,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         if ((PIBMEM_MIN_RANGE <= ppe_dbg_loc) && (ppe_dbg_loc <= PIBMEM_MAX_RANGE))
         {
             FAPI_DBG("p9_extract_sbe_rc : SPRG0 has address with in PIBMEM range");
-            pibmem_dbg_loc = (((ppe_dbg_loc - PIBMEM_ADDR_OFFSET) >> 3) + PIBMEM_SCOM_OFFSET);
+            pibmem_dbg_loc = (((ppe_dbg_loc - PIBMEM_MIN_RANGE) >> 3) + PIBMEM_SCOM_OFFSET);
 
             for(uint32_t i = 0; i <= NUM_OF_LOCATION; i++)
             {
@@ -523,8 +569,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
         //Program Interrupt
         if(MCS == 0x4 ||
-           (l_data32_lr - 0x4) == PIBMEM_PROG_EXCEPTION_LOCATION ||
-           (l_data32_curr_iar == OTPROM_PROG_EXCEPTION_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
+           ((l_data32_lr - 0x4) == (PIBMEM_MIN_RANGE + PROG_EXCEPTION_LOCATION)) ||
+           ((l_data32_curr_iar  == (OTPROM_MIN_RANGE +
+                                    PROG_EXCEPTION_LOCATION))) ) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -618,8 +665,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         }
         // Instruction storage interrupt
         else if(MCS == 0x5 ||
-                (l_data32_lr - 0x4) == PIBMEM_INST_STORE_INTR_LOCATION ||
-                (l_data32_curr_iar == OTPROM_INST_STORE_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
+                ((l_data32_lr - 0x4) == (PIBMEM_MIN_RANGE + INST_STORE_INTR_LOCATION)) ||
+                ((l_data32_curr_iar  == (OTPROM_MIN_RANGE +
+                                         INST_STORE_INTR_LOCATION))) )//PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -645,8 +693,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         }
         // Alignment interrupt
         else if(MCS == 0x6 ||
-                (l_data32_lr - 0x4) == PIBMEM_ALIGN_INTR_LOCATION ||
-                (l_data32_curr_iar == OTPROM_ALIGN_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
+                ((l_data32_lr - 0x4) == (PIBMEM_MIN_RANGE + ALIGN_INTR_LOCATION)) ||
+                ((l_data32_curr_iar  == (OTPROM_MIN_RANGE +
+                                         ALIGN_INTR_LOCATION))) )//PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -672,8 +721,9 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         }
         // Data storage interrupt
         else if(MCS == 0x7 ||
-                (l_data32_lr - 0x4) == PIBMEM_DATA_STORE_INTR_LOCATION ||
-                (l_data32_curr_iar == OTPROM_DATA_STORE_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
+                ((l_data32_lr - 0x4) == (PIBMEM_MIN_RANGE + DATA_STORE_INTR_LOCATION)) ||
+                ((l_data32_curr_iar  == (OTPROM_MIN_RANGE +
+                                         DATA_STORE_INTR_LOCATION))) )//PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
