@@ -630,7 +630,7 @@
     <scomRegister>PU_GPE1_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE2_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE3_GPEIVPR_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEDBG_OCI</scomRegister>
+    <scomRegister>PU_GPE2_GPEDBG_SCOM</scomRegister>
     <scomRegister>PU_GPE0_PPE_XIRAMDBG</scomRegister>
     <scomRegister>PU_GPE0_PPE_XIRAMEDR</scomRegister>
     <scomRegister>PU_GPE0_PPE_XIDBGPRO</scomRegister>
