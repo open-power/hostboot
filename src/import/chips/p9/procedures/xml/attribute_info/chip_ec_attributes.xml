@@ -7849,6 +7849,25 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW467590</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Enable MC WAT to inject stalls into Read Queue when Atomic Read Modify Write
+        Fetch operations request read buffer access. This produces a gap to allow the  
+        operation to complete.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+    </attribute> 
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW461448</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
