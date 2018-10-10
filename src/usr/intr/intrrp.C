@@ -1390,7 +1390,6 @@ void IntrRp::msgHandler()
                 {
                     // Run the functions that dump out
                     // interrupt info to slow buffer
-                    printTimaInfo();
                     printEsbStates();
                     printLSIInfo();
                     printPSIHBInfo();
@@ -3581,35 +3580,6 @@ void INTR::IntrRp::printLSIInfo() const
         l_mmioRead = (*targ_itr)->psiHbBaseAddr->lsiintlevel;
         TRACFCOMP(g_trac_intr, "                 lsiIntLevel  :  vAddr=0x%016lx    Value=0x%016lx", &(*targ_itr)->psiHbBaseAddr->lsiintlevel, l_mmioRead);
     }
-}
-
-void INTR::IntrRp::printTimaInfo() const
-{
-    TRACFCOMP(g_trac_intr, "---Thread Interrupt Management Area Info---");
-
-    volatile XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
-    reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
-
-    TRACFCOMP(g_trac_intr, "iv_xiveTmBar1Address:  0x%lx", iv_xiveTmBar1Address);
-    TRACFCOMP(g_trac_intr, "    qw0_0     = 0x%lx", this_ivpe_ptr->qw0_0);
-    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw0_1);
-    TRACFCOMP(g_trac_intr, "    qw1_0     = 0x%lx", this_ivpe_ptr->qw1_0);
-    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw1_1);
-    TRACFCOMP(g_trac_intr, "    qw2_0     = 0x%lx", this_ivpe_ptr->qw2_0);
-    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw2_1);
-
-    TRACFCOMP(g_trac_intr, "    nsr       = 0x%lx", this_ivpe_ptr->nsr);
-    TRACFCOMP(g_trac_intr, "    cppr      = 0x%lx", this_ivpe_ptr->cppr);
-    TRACFCOMP(g_trac_intr, "    ipb       = 0x%lx", this_ivpe_ptr->ipb);
-    TRACFCOMP(g_trac_intr, "    lsmfb     = 0x%lx", this_ivpe_ptr->lsmfb);
-    TRACFCOMP(g_trac_intr, "    ack       = 0x%lx", this_ivpe_ptr->ack);
-    TRACFCOMP(g_trac_intr, "    inc       = 0x%lx", this_ivpe_ptr->inc);
-    TRACFCOMP(g_trac_intr, "    age       = 0x%lx", this_ivpe_ptr->age);
-    TRACFCOMP(g_trac_intr, "    pipr      = 0x%lx", this_ivpe_ptr->pipr);
-    TRACFCOMP(g_trac_intr, "    cams_vt   = 0x%lx", this_ivpe_ptr->cams_vt);
-    TRACFCOMP(g_trac_intr, "    cams_rsv  = 0x%lx", this_ivpe_ptr->cams_rsv);
-    TRACFCOMP(g_trac_intr, "    cams_rsv1 = 0x%lx", this_ivpe_ptr->cams_rsv1);
-    TRACFCOMP(g_trac_intr, "    cams_prio = 0x%lx", this_ivpe_ptr->cams_prio);
 }
 
 void INTR::IntrRp::printPSIHBInfo() const
