@@ -297,7 +297,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                VMM_VADDR_WOFDATA_LID,
                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                     l_mm_rc),
-                               true); //software callout
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
                 break;
             }
@@ -329,7 +329,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                VMM_VADDR_WOFDATA_LID,
                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                     l_mm_rc),
-                               true); //software callout
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
             break;
         }
@@ -380,7 +380,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                              TWO_UINT32_TO_UINT64(
                                 l_lidNumber,
                                 l_img->version),
-                             true); //software callout
+                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
             break;
         }
@@ -409,7 +409,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                 l_img->version,
                                 WOF_IMAGE_VERSION),
                              l_lidNumber,
-                             true); //software callout
+                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
             break;
         }
@@ -465,7 +465,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                 TWO_UINT32_TO_UINT64(
                                     l_ent,
                                     l_ver),
-                                true); //software callout
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
                 break;
             }
@@ -495,7 +495,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                     l_ver,
                                     MAX_WOF_TABLES_VERSION),
                                 l_ent,
-                                true); //software callout
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
                 break;
             }
@@ -591,7 +591,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             * @userdata2[00:31]  Sort frequency
             * @userdata2[32:63]  Number of WOF tables checked
             * @devdesc           No WOF table match found
-            * @custdesc          Firmware Error
+            * @custdesc          Firmware Error or unsupported part
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -603,8 +603,28 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                     l_socketPower),
                             TWO_UINT32_TO_UINT64(
                                     l_sortFreq,
-                                    l_headers.size()),
-                            true); //software callout
+                                    l_headers.size()));
+            // Most likely problem is down-level code
+            if( INITSERVICE::spBaseServicesEnabled() )
+            {
+                l_errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+            }
+            else
+            {
+                l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+            }
+
+            // Next up is that some unsupported modules got installed
+            //  Using NO_DECONFIG because we want the boot to fail versus
+            //    using an unsupported part, possibly at a dangerous
+            //    voltage.
+            l_errl->addHwCallout( l_mProc,
+                                  HWAS::SRCI_PRIORITY_MED,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL );
+
             l_errl->collectTrace(FAPI_TRACE_NAME);
 
             // Add data
@@ -660,7 +680,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                    reinterpret_cast<uint64_t>(l_pWofImage),
                                    TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                         l_mm_rc),
-                                   true); //software callout
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errlCommit(l_tmpErr,FAPI2_COMP_ID);
         }
         l_mm_rc = mm_set_permission(l_pWofImage,
@@ -686,7 +706,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                    reinterpret_cast<uint64_t>(l_pWofImage),
                                    TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                         l_mm_rc),
-                                   true); //software callout
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errlCommit(l_tmpErr,FAPI2_COMP_ID);
         }
 #endif
