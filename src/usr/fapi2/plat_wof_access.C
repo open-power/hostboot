@@ -141,8 +141,11 @@ void addWofCompareDataToErrl( errlHndl_t &io_err,
 
     // Allocate WofData error buffer
     uint32_t l_data_len = sizeof(l_WOFentries) +
-                          l_WOFentries * sizeof(WofTablesHeader_t);
+                          l_WOFentries * sizeof(wofTableCompareData_t);
     uint8_t * l_data = new uint8_t[l_data_len];
+
+    // # of table entries in data
+    memcpy(l_data,&l_WOFentries,sizeof(l_WOFentries));
 
     wofTableCompareData_t * l_tableDataPtr =
         reinterpret_cast<wofTableCompareData_t*>(l_data + sizeof(l_WOFentries));
@@ -528,7 +531,6 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                 memcpy(o_wofData,
                        reinterpret_cast<uint8_t*>(l_wth),
                        l_ste[l_ent].size);
-
                 break;
             }
             else
