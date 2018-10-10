@@ -929,13 +929,6 @@ namespace INTR
             */
             void printLSIInfo() const;
 
-            /**
-            * Print out the Thread Interrupt Management Area (TIMA) info
-            *
-            * @return void
-            */
-            void printTimaInfo() const;
-
     };
 }; // INTR namespace
 
