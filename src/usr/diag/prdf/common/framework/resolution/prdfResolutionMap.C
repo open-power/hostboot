@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,7 +253,9 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
                                BitKey & io_bitList,
                                STEP_CODE_DATA_STRUCT & scd )
 {
+    /* See note below
     uint32_t lsize = o_list.size();
+    */
     int32_t l_rc = SUCCESS;
 
     if(iv_filter != NULL)
@@ -295,6 +297,13 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
             o_list.push_back( i->iv_res );
         }
     }
+
+    /* There are several cases in our filtering where we may get to a register
+     * and find nothing at attention. For example, the only active bit can't be
+     * blamed as the root cause of a checkstop. In this case, we don't want the
+     * default resolution. Otherwise, we will have erroneous callouts. I am
+     * going to leave this code here now, just in case, but eventually it should
+     * be removed once we have proved there are not adverse side effects.
     // we didn't find anything to add, so use default
     if( lsize == o_list.size() )
     {
@@ -312,6 +321,7 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
             o_list.push_back( defaultRes );
         }
     }
+    */
 
     if( iv_filter != NULL )
     {
