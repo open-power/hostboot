@@ -329,7 +329,7 @@ extern "C"
             if (valid_row_repair_entry(l_row_repair_entry, l_dram, l_srank, l_bg, l_bank, l_row))
             {
                 FAPI_INF("Found valid row repair request in VPD for DIMM %s, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                         mss::c_str(i_target), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                         mss::spd::c_str(i_target), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
 
                 // Do some sanity checking here
                 FAPI_ASSERT(l_dram < l_num_dram,
@@ -342,7 +342,7 @@ extern "C"
                             set_BANK(l_bank).
                             set_ROW(l_row),
                             "%s VPD contained out of bounds row repair entry: DRAM: %d mrank %d srank %d bg %d bank %d row 0x%05x",
-                            mss::c_str(i_target), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                            mss::spd::c_str(i_target), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
 
                 // Add this rank to the total number of ranks this DRAM appears in
                 ++io_dram_bad_in_ranks[l_dram];
@@ -411,7 +411,7 @@ extern "C"
                     set_DIMM_TARGET(i_target).
                     set_RANK(i_rank),
                     "%s Row repair valid for rank %d but DRAM repairs are disabled in MNFG flags",
-                    mss::c_str(i_target), i_rank);
+                    mss::spd::c_str(i_target), i_rank);
         return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
@@ -593,13 +593,13 @@ extern "C"
 
                     FAPI_TRY(l_dram_bitmap.setBit(DRAM_START_BIT + l_dram));
 
-                    FAPI_INF("Deploying row repair on DIMM %s, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                             mss::c_str(l_dimm), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                    FAPI_INF("%s Deploying row repair on DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                             mss::spd::c_str(l_dimm), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
                     FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
 
                     // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
-                    FAPI_INF("Updating bad bits on DIMM %s, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                             mss::c_str(l_dimm), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                    FAPI_INF("%s Updating bad bits on Port %d, DIMM %d, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                             mss::c_str(i_target_mba), l_port, l_dimm_index, l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
 
                     FAPI_TRY(dimmGetBadDqBitmap(i_target_mba, l_port, l_dimm_index, l_rank, l_bad_bits),
                              "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target_mba));

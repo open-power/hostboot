@@ -23,91 +23,69 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <p9c_mss_rowRepairFuncs.H>
+#include <generic/memory/lib/utils/find.H>
 
 using namespace fapi2;
 
 extern "C"
 {
-    ReturnCode __getPairedDimm(
-        const Target<TARGET_TYPE_DIMM>& i_target,
-        Target<TARGET_TYPE_DIMM>& o_pairedDimm )
-    {
-        std::vector<Target<TARGET_TYPE_DIMM>> l_dimms;
-        Target<TARGET_TYPE_MBA> l_mba;
-        uint8_t l_curPs = 0;
-        uint8_t l_curDs = 0;
-
-        // get port slct for our current target
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, i_target, l_curPs) );
-
-        // get dimm slct for our current target
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, i_target, l_curDs) );
-
-        // get parent mba
-        l_mba = i_target.getParent<TARGET_TYPE_MBA>();
-
-        // get connected dimms from mba
-        l_dimms = l_mba.getChildren<TARGET_TYPE_DIMM>();
-
-        // find the paired dimm (different port slct, same dimm slct)
-        for ( auto const& dimm : l_dimms )
-        {
-            uint8_t l_tmpPs = 0;
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, dimm, l_tmpPs) );
-
-            // DIMM on different port slct
-            if ( l_tmpPs != l_curPs )
-            {
-                uint8_t l_tmpDs = 0;
-                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, dimm,
-                                        l_tmpDs) );
-
-                // same DIMM select as the current DIMM
-                if ( l_tmpDs == l_curDs )
-                {
-                    // found the paired DIMM
-                    o_pairedDimm = dimm;
-                    break;
-                }
-            }
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
     ReturnCode is_sPPR_supported(
         const Target<TARGET_TYPE_DIMM>& i_target,
         bool& o_spprSupported )
     {
-        ATTR_ROW_REPAIR_SUPPORTED_MRW_Type l_rr1;
+        const auto& l_mba = mss::find_target<fapi2::TARGET_TYPE_MBA>(i_target);
+        uint8_t l_my_dimm_index = 0;
+
+        o_spprSupported = true;
+
+        ATTR_ROW_REPAIR_SUPPORTED_MRW_Type l_row_repair_supported_mrw
+        {ENUM_ATTR_ROW_REPAIR_SUPPORTED_MRW_SUPPORTED};
         FAPI_TRY ( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SUPPORTED_MRW,
-                                  Target<TARGET_TYPE_SYSTEM>(), l_rr1 ) );
+                                  Target<TARGET_TYPE_SYSTEM>(),
+                                  l_row_repair_supported_mrw ) );
 
-        ATTR_ROW_REPAIR_SPPR_SUPPORTED_Type l_rr2;
-        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED,
-                                 i_target, l_rr2 ) );
-
-        o_spprSupported = false;
-
-        if ( ENUM_ATTR_ROW_REPAIR_SUPPORTED_MRW_SUPPORTED == l_rr1 &&
-             ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED == l_rr2 )
+        // If sPPR isn't suppoerted per the MRW, we're done
+        if (l_row_repair_supported_mrw != ENUM_ATTR_ROW_REPAIR_SUPPORTED_MRW_SUPPORTED)
         {
-            // Check paired DIMM as well
-            Target<TARGET_TYPE_DIMM> l_pairedDimm;
-            FAPI_TRY( __getPairedDimm( i_target, l_pairedDimm ) );
+            FAPI_INF("%s sPPR is not supported per ATTR_ROW_REPAIR_SUPPORTED_MRW",
+                     mss::spd::c_str(i_target));
+            o_spprSupported = false;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
-            ATTR_ROW_REPAIR_SPPR_SUPPORTED_Type l_rr3;
-            FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED,
-                                     l_pairedDimm, l_rr3 ) );
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, i_target, l_my_dimm_index));
 
-            if ( ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED == l_rr3 )
+        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mba))
+        {
+            uint8_t l_dimm_index = 0;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm, l_dimm_index));
+
+            // If either of the DIMM pair (same DIMM select) doesn't support sPPR, neither can
+            if (l_dimm_index == l_my_dimm_index)
             {
-                o_spprSupported = true;
+                ATTR_ROW_REPAIR_SPPR_SUPPORTED_Type l_row_repair_supported_dimm
+                {ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED};
+                FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED,
+                                         l_dimm,
+                                         l_row_repair_supported_dimm ) );
+
+                if (l_row_repair_supported_dimm != ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED)
+                {
+                    FAPI_INF("%s sPPR is not supported per ATTR_ROW_REPAIR_SPPR_SUPPORTED",
+                             mss::spd::c_str(l_dimm));
+                    o_spprSupported = false;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }
             }
         }
 
+        // If we got here it means we've got sPPR support
+        return fapi2::FAPI2_RC_SUCCESS;
+
     fapi_try_exit:
+        // If we got here if means something failed, so return "no support" and the error code
+        o_spprSupported = false;
         return fapi2::current_err;
     }
 }
