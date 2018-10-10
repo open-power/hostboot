@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,13 @@ enum BootloaderTraces
     /** Bootloader PNOR Access getHBBSection started */
     BTLDR_TRC_PA_GETHBBSECTION_START         = 0x30,
 
+    /** Technically the below value falls here in the IPL flow between
+     *  BTLDR_TRC_PA_GETHBBSECTION_START + BTLDR_TRC_PA_FINDTOC_TOC1_HANDLEMMIO_RTN,
+     *  but the value is defined below in numerical order to help guarantee
+     *  it won't be re-used.
+    BTLDR_TRC_PA_FINDTOC_TOC1_LPC_RTN        = 0x36,
+    **/
+
     /** Bootloader PNOR Access findTOC handleMMIO to copy TOC ONE returned */
     BTLDR_TRC_PA_FINDTOC_TOC1_HANDLEMMIO_RTN = 0x31,
 
@@ -99,6 +106,9 @@ enum BootloaderTraces
 
     /** Bootloader PNOR Access getHBBSection findTOC returned */
     BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_RTN   = 0x35,
+
+    /** Bootloader PNOR Access findTOC handleMMIO LPC Error Check returned */
+    BTLDR_TRC_PA_FINDTOC_TOC1_LPC_RTN        = 0x36,
 
     /** Bootloader PNOR Access readTOC zeroSection returned */
     BTLDR_TRC_PA_READTOC_ZEROSECTION_RTN     = 0x41,
@@ -186,6 +196,9 @@ enum BootloaderTraces
 
     /** Bootloader main verifyContainer secure rom invalid */
     BTLDR_TRC_MAIN_VERIFY_INVALID_SECROM     = 0xFC,
+
+    /** Bootloader PNOR Access findTOC handleMMIO LPC ERR returned */
+    BTLDR_TRC_PA_FINDTOC_TOC1_LPC_ERR        = 0xFD,
 };
 
 #ifndef BOOTLOADER_TRACE

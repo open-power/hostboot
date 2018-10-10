@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -213,8 +213,6 @@ class LpcDD
 
         /** LPC Host Controller Reset Register */
         LPCHC_RESET_REG = 0x20FC,
-
-        OPB_ERROR_MASK = 0x20000FC3, /**< OPBM Error Bits MASK */
 
         LPCHC_ERROR_MASK = 0x000004FC /**< LPCHC Error Bits MASK */
 

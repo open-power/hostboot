@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,9 @@ namespace LPC
         LPC_PHYS_BASE = 0x6030000000000,
 
         FW_WINDOW_SIZE =  0x10000000, //Size of FW Window
+
+        OPB_ERROR_MASK = 0x20000FC3, /**< OPBM Error Bits MASK */
+
     };
 }
 

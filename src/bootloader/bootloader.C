@@ -431,11 +431,6 @@ namespace Bootloader{
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
 
-        //pnorEnd is the end of flash, which is base of lpc, plus
-        //the offset of the FW space, plus the TOP memory address in FW space
-        uint64_t l_pnorEnd = g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE
-                           + PNOR::LPC_TOP_OF_FLASH_OFFSET;
-
         //We dont know what the start of pnor is because we dont know the size
         uint64_t l_pnorStart = 0;
 
@@ -444,10 +439,11 @@ namespace Bootloader{
 
         // Get location of HB base code in PNOR from TOC
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
-        bl_pnorAccess::getHBBSection(l_pnorEnd,
+        bl_pnorAccess::getHBBSection(g_blData->blToHbData.lpcBAR,
                                      g_blData->bl_hbbSection,
                                      l_errCode,
                                      l_pnorStart);
+
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_GETHBBSECTION_RTN );
 
         if(PNOR::NO_ERROR == l_errCode)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,7 @@ enum pnorUtilErrorCodes
     HEADER_ERR                 = 0x00000800,
     ENTRY_ERR                  = 0x00001000,
     NO_HBB_SECTION             = 0x00002000,
+    LPC_ERR                    = 0x00004000,
 };
 
 enum
