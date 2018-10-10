@@ -839,6 +839,54 @@ class eff_dimm
         fapi2::ReturnCode cal_step_enable();
 
         ///
+        /// @brief Determines and sets the is_m386a8k40cm2_ctd7y values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode is_m386a8k40cm2_ctd7y();
+
+        ///
+        /// @brief if this dimm is M386A8K40CM2-CTD7Y
+        /// @param o_value record if this dimm is M386A8K40CM2-CTD7Y
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode is_m386a8k40cm2_ctd7y_helper(uint8_t& o_value)
+        {
+            constexpr uint8_t MODULE_PART_NUMBER_LENGTH_IN_BYTES = 20;
+            uint8_t l_module_pn[MODULE_PART_NUMBER_LENGTH_IN_BYTES] = {0};
+            uint8_t l_module_pn_object[MODULE_PART_NUMBER_LENGTH_IN_BYTES] = {'M', '3', '8', '6', 'A', '8', 'K', '4', '0', 'C', 'M', '2', '-', 'C', 'T', 'D', ' ', ' ', ' ', ' '};
+            uint16_t l_decoder_val = 0;
+
+            iv_spd_decoder.reg_manufacturer_id_code(l_decoder_val);
+#ifdef __HOSTBOOT_MODULE
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_MODULE_PART_NUMBER, iv_dimm, l_module_pn));
+
+            // Cronus mode is not setting up this attribute as it is only setup in centaur code
+            // Hostboot calls that centaur code always, so we can run without error in HB
+            // For now, we're going to just going to go with the 0 value for centaur
+            // We do a FAPI_TRY to avoid cronus compile errors
+#else
+            FAPI_TRY(fapi2::FAPI2_RC_SUCCESS);
+#endif
+
+            if(memcmp(l_module_pn, l_module_pn_object, MODULE_PART_NUMBER_LENGTH_IN_BYTES) != MEMCMP_EQUAL)
+            {
+                o_value = 0;
+            }
+
+            if(l_decoder_val == fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_IDT)
+            {
+                o_value = 1;
+            }
+            else
+            {
+                o_value = 0;
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Determines and sets the rdvref_enable_bit settings
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///

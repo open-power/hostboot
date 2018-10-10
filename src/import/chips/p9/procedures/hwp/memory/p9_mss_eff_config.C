@@ -379,6 +379,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         // Sets up the calibration steps
         FAPI_TRY( l_eff_dimm->cal_step_enable(),
                   "Failed cal_step_enable for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->is_m386a8k40cm2_ctd7y(),
+                  "Failed is m386a8k40cm2_ctd7y for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->rdvref_enable_bit(),
                   "Failed rdvref_enable_bit for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->training_adv_wr_pattern(),

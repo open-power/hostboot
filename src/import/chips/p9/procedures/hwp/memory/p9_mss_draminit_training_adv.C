@@ -47,6 +47,9 @@
 #include <lib/phy/mss_training.H>
 #include <lib/workarounds/dp16_workarounds.H>
 
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_lrdimm_training_helper.H>
+#endif
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -94,6 +97,9 @@ extern "C"
         {
             fapi2::buffer<uint32_t> l_cal_steps_enabled;
             std::vector<std::shared_ptr<mss::training::step>> l_steps;
+            // DIMM type
+            uint8_t l_dimm_type[mss::MAX_DIMM_PER_PORT] = {};
+            FAPI_TRY(mss::eff_dimm_type(p, &l_dimm_type[0]), "%s failed to access DIMM type", mss::c_str(p));
             FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled), "Error in p9_mss_draminit_training %s", mss::c_str(i_target) );
 
             if (!((l_cal_steps_enabled.getBit<mss::TRAINING_ADV_RD>()) || (l_cal_steps_enabled.getBit<mss::TRAINING_ADV_WR>())))
@@ -105,9 +111,9 @@ extern "C"
 
             // Clear all non training advanced bits
             l_cal_steps_enabled.clearBit<0, mss::TRAINING_ADV_RD>();
-
+            l_cal_steps_enabled.clearBit<mss::BUFFER_RD_VREF>().clearBit<mss::DRAM_WR_VREF>();
             // Gets the training steps to calibrate
-            l_steps = mss::training::steps_factory(l_cal_steps_enabled, l_sim);
+            l_steps = mss::training::steps_factory(l_dimm_type[0], l_cal_steps_enabled, l_sim);
 
             // Keep track of the last error seen by a rank pair
             fapi2::ReturnCode l_rank_pair_error(fapi2::FAPI2_RC_SUCCESS);
@@ -132,6 +138,22 @@ extern "C"
 
                 // Adjusts values for NVDIMM's
                 FAPI_TRY(mss::workarounds::nvdimm::adjust_rd_dq_delay(p, rp));
+
+#ifdef LRDIMM_CAPABLE
+                //add workaround after all step
+                {
+                    fapi2::buffer<uint8_t> l_is_m386a8k40cm2_ctd7y = 0;
+                    FAPI_TRY( mss::is_m386a8k40cm2_ctd7y(p, l_is_m386a8k40cm2_ctd7y), "Error in p9_mss_draminit_training %s",
+                              mss::c_str(i_target) );
+
+                    if(l_is_m386a8k40cm2_ctd7y)
+                    {
+                        FAPI_TRY(mss::training::lrdimm::workarounds::timing_workaround(p, rp, l_cal_abort_on_error), "%s add timing workaround",
+                                 mss::c_str(i_target));
+                    }
+                }
+#endif
+
             }// rank pairs
 
             // Resetting current_err.

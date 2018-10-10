@@ -4519,10 +4519,19 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b111, // 2R - 34Ohm
+        0b111, // 4R - 34Ohm
+    };
     std::vector< uint64_t > l_ranks;
 
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+
+    uint8_t l_ism386 = 0;
+    const uint8_t ZERO = 0;
+
     FAPI_TRY( eff_dram_rtt_nom(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
@@ -4534,7 +4543,18 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
 
     for (const auto& l_rank : l_ranks)
     {
-        l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = l_decoder_val;
+        // Workaround in m386a8k40cm2_ctd7y
+        // Use specific ODT values for specific dimm according to dimm part number.
+        FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
+
+        if(l_ism386 != ZERO)
+        {
+            l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
+        }
+        else
+        {
+            l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = l_decoder_val;
+        }
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_NOM, iv_mcs, l_mcs_attrs) );
@@ -4603,6 +4623,11 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b000, // 2R - disable
+        0b001, // 4R - 120Ohm
+    };
     std::vector< uint64_t > l_ranks;
 
     uint8_t l_decoder_val = 0;
@@ -4618,7 +4643,20 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
 
     for (const auto& l_rank : l_ranks)
     {
-        l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = l_decoder_val;
+        // Workaround in m386a8k40cm2_ctd7y
+        // Use specific ODT values for specific dimm according to dimm part number.
+        uint8_t l_ism386 = 0;
+        const uint8_t ZERO = 0;
+        FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
+
+        if(l_ism386 != ZERO)
+        {
+            l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
+        }
+        else
+        {
+            l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = l_decoder_val;
+        }
     }
 
     // Set the attribute
@@ -4679,25 +4717,48 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b000, // 2R - disable
+        0b010, // 4R - 120Ohm
+    };
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     uint8_t l_decoder_val_01 = 0;
     uint8_t l_decoder_val_23 = 0;
+    uint8_t l_ism386 = 0;
+    const uint8_t ZERO = 0;
 
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
-    // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01),
-              "%s failed to decode RTT_PARK for ranks 0/1", mss::c_str(iv_mcs) );
-    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23),
-              "%s failed to decode RTT_PARK for ranks 2/3", mss::c_str(iv_mcs) );
+    // Workaround in m386a8k40cm2_ctd7y
+    // Use specific ODT values for specific dimm according to dimm part number.
+    FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-    // Setting the four rank values for this dimm
-    // Rank 0 and 1 have the same value, l_decoder_val_01
-    // Rank 2 and 3 have the same value, l_decoder_val_23
-    l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK0] = l_decoder_val_01;
-    l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK1] = l_decoder_val_01;
-    l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK2] = l_decoder_val_23;
-    l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK3] = l_decoder_val_23;
+    if(l_ism386 != ZERO)
+    {
+        for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
+        {
+            // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+            // We do a bitwise mask here to only get the ODT for the current DIMM
+            l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
+        }
+    }
+    else
+    {
+        // Get the value from the LRDIMM SPD
+        FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01),
+                  "%s failed to decode RTT_PARK for ranks 0/1", mss::c_str(iv_mcs) );
+        FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23),
+                  "%s failed to decode RTT_PARK for ranks 2/3", mss::c_str(iv_mcs) );
+
+        // Setting the four rank values for this dimm
+        // Rank 0 and 1 have the same value, l_decoder_val_01
+        // Rank 2 and 3 have the same value, l_decoder_val_23
+        l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK0] = l_decoder_val_01;
+        l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK1] = l_decoder_val_01;
+        l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK2] = l_decoder_val_23;
+        l_mcs_attrs[iv_port_index][iv_dimm_index][ATTR_RANK3] = l_decoder_val_23;
+    }
 
     // Set the attribute
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_PARK, iv_mcs, l_mcs_attrs) );
@@ -5963,6 +6024,27 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
 }
 
 ///
+/// @brief Determines and sets the is_m386a8k40cm2_ctd7y values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::is_m386a8k40cm2_ctd7y()
+{
+    // Sets up the vector
+    uint8_t l_data;
+
+    // Sets up the vector
+    std::vector<uint8_t> l_data_vector(PORTS_PER_MCS, l_data);
+
+    FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_data));
+
+    // Sets the value
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_IS_M386A8K40CM2_CTD7Y, iv_mcs, UINT8_VECTOR_TO_1D_ARRAY(l_data_vector,
+                            PORTS_PER_MCS)));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
 /// @brief Determines and sets the rdvref_enable_bit settings
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
@@ -6046,6 +6128,11 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
         { 0xcc, 0xcc, 0xcc, 0xcc, }, // 4 ranks per DIMM
     };
 
+    constexpr uint8_t DRAM_ODT_VALUES_M386A8K40CM2[NUM_VALID_RANKS_CONFIGS][MAX_RANK_PER_DIMM] =
+    {
+        { 0x44, 0x88, 0x00, 0x00, }, // 2 ranks per DIMM
+        { 0x44, 0x88, 0x44, 0x88, }, // 4 ranks per DIMM
+    };
     // Masks on the ODT for a specific DIMM
     constexpr uint8_t DIMM_ODT_MASK[MAX_DIMM_PER_PORT] = { 0xf0, 0x0f };
 
@@ -6060,7 +6147,18 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
     {
         // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
         // We do a bitwise mask here to only get the ODT for the current DIMM
-        const auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
+        auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
+
+        // Workaround in m386a8k40cm2_ctd7y
+        // Use specific ODT values for specific dimm according to dimm part number.
+        uint8_t l_ism386 = 0;
+        const uint8_t ZERO = 0;
+        FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
+
+        if(l_ism386 != ZERO)
+        {
+            l_dram_odt = DRAM_ODT_VALUES_M386A8K40CM2[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
+        }
 
         // Do the final bitwise or
         l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt;

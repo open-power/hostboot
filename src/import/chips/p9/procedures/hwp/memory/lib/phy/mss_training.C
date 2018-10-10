@@ -1277,6 +1277,13 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         l_steps.push_back(std::make_shared<mss::training::lrdimm::mrd_coarse>());
     }
 
+    //VREF BUFFER_RD_VREF
+    if(i_cal_steps.getBit<mss::cal_steps::BUFFER_RD_VREF>())
+    {
+        FAPI_INF("LRDIMM: BUFFER_RD_VREF is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::vref<mss::training::lrdimm::vref_types::BUFFER_RD_VREF>>());
+    }
+
     // MRD_FINE
     if(i_cal_steps.getBit<mss::cal_steps::MRD_FINE>())
     {
@@ -1307,6 +1314,13 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     {
         FAPI_INF("LRDIMM: MWD COARSE is enabled");
         l_steps.push_back(std::make_shared<mss::training::lrdimm::mwd_coarse>());
+    }
+
+    //VREF DRAM_WR_VREF
+    if(i_cal_steps.getBit<mss::cal_steps::DRAM_WR_VREF>())
+    {
+        FAPI_INF("LRDIMM: DRAM_WR_VREF is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::vref<mss::training::lrdimm::vref_types::DRAM_WR_VREF>>());
     }
 
     //MWD FINE
@@ -1399,6 +1413,17 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         FAPI_INF("Custom WR_CTR is enabled");
         l_steps.push_back(std::make_shared<custom_write_ctr>());
     }
+
+#ifdef LRDIMM_CAPABLE
+
+    //VREF BUFFER_WR_VREF
+    if(i_cal_steps.getBit<mss::cal_steps::BUFFER_WR_VREF>())
+    {
+        FAPI_INF("LRDIMM: BUFFER_WR_VREF is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::buffer_wr_vref>());
+    }
+
+#endif
 
     return l_steps;
 }

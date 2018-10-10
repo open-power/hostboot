@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1913,7 +1913,10 @@
           [19] COARSE_RD
           [20] TRAINING_ADV_RD Only set for DD2.* machines
           [21] TRAINING_ADV_WR Only set for DD2.* machines
-          [22]:[31] Reserved for future use
+          [22] BUFFER_RD_VREF (LRDIMM)
+          [23] DRAM_WR_VREF (LRDIMM)
+          [24] BUFFER_WR_VREF (LRDIMM)
+          [25]:[31] Reserved for future use
 
           COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
 
@@ -1927,6 +1930,19 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>cal_step_enable</mssAccessorName>
+    </attribute>
+
+     <attribute>
+        <id>ATTR_MSS_IS_M386A8K40CM2_CTD7Y</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          is m386a8k40cm2_ctd7y or not
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>is_m386a8k40cm2_ctd7y</mssAccessorName>
     </attribute>
 
     <attribute>

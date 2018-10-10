@@ -195,11 +195,14 @@ enum cal_steps : uint64_t
     COARSE_RD         = 19, ///< Coarse Read Centering
     TRAINING_ADV_RD   = 20, ///< Flag for draminit training advance in the attribute/ CUSTOM_READ_CTR in code
     TRAINING_ADV_WR   = 21, ///< Flag for draminit training advance in the attribute/ CUSTOM_WRITE_CTR in code
+    BUFFER_RD_VREF    = 22, ///< (LRDIMM) Buffer read vref training
+    DRAM_WR_VREF      = 23, ///< (LRDIMM) DRAM write vref training
+    BUFFER_WR_VREF    = 24, ///< (LRDIMM) Buffer write vref training
 
     // TK:LRDIMM Update total calibration steps to have "LRDIMM" specific ones here
     // Not *exactly* a cal step but go w/it
-    RUN_ALL_CAL_STEPS          = 0xFFFFFC00,
-    RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7C00,
+    RUN_ALL_CAL_STEPS          = 0xFFFFFF80,
+    RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7F80,
 
     INITIAL_PAT_WR_TO_RD_CTR_LEN = inclusive_range(INITIAL_PAT_WR, READ_CTR),
     WR_VREF_TO_COARSE_RD_LEN = inclusive_range(WRITE_CTR_2D_VREF, COARSE_RD),

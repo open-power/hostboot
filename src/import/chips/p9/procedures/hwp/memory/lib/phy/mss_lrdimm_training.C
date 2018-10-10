@@ -61,7 +61,145 @@
 
 namespace mss
 {
+namespace ccs
+{
+///
+/// @brief Loads a WRITE command to the program of ccs instructions
+/// @param[in] i_target Dimm Target
+/// @param[in] i_rank Rank
+/// @param[in] i_bank_addr Bank Address
+/// @param[in] i_bank_group_addr Bank Group Address
+/// @param[in] i_column_addr Row Address to Write
+/// @return the write auto-precharge instruction
+///
+ccs::instruction_t wra_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                             const uint64_t i_rank,
+                             const fapi2::buffer<uint64_t>& i_bank_addr,
+                             const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                             const fapi2::buffer<uint64_t>& i_column_addr )
+{
+    ccs::instruction_t l_inst (i_rank); // sets CSn bits based on rank
+    constexpr uint8_t MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_10 = 10;
+    constexpr uint8_t MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_12 = 12;
 
+    l_inst = ccs::wr_command(i_rank, i_bank_addr, i_bank_group_addr, i_column_addr);
+
+    // Set A10 hi for auto precharge
+    l_inst.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_10>();
+    // Set A12 hi for b8 fly
+    l_inst.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_12>();
+
+    return l_inst;
+}
+
+///
+/// @brief Loads a READ command to the program of ccs instructions
+/// @param[in] i_target Dimm Target
+/// @param[in] i_rank Rank
+/// @param[in] i_bank_addr Bank Address
+/// @param[in] i_bank_group_addr Bank Group Address
+/// @param[in] i_column_addr Row Address to Read
+/// @return the Device Deselect CCS instruction
+ccs::instruction_t rda_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                             const uint64_t i_rank,
+                             const fapi2::buffer<uint64_t>& i_bank_addr,
+                             const fapi2::buffer<uint64_t>& i_bank_group_addr,
+                             const fapi2::buffer<uint64_t>& i_column_addr )
+{
+    ccs::instruction_t l_inst = ccs::rda_command(i_rank, i_bank_addr, i_bank_group_addr,
+                                i_column_addr);// sets CSn bits based on rank
+    constexpr uint8_t MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_12 = 12;
+
+    // Set A12 LOW for BC4, HI for BL8
+    l_inst.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_12>();
+
+    return l_inst;
+}
+
+///
+/// @brief Loads odt command to the program of ccs instructions
+/// @param[in] i_odt_values odt value
+/// @param[in] i_repeat the number of cycles to hold the ODT
+/// @return the Device Deselect CCS instruction
+///
+ccs::instruction_t odt_load(const uint8_t i_odt_values, const uint64_t i_repeat)
+{
+    auto l_odt = mss::ccs::odt_command(i_odt_values, i_repeat);
+
+    // Set RAS HI
+    l_odt.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_16>();
+    // Set CAS_n HI
+    l_odt.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_15>();
+    // Set WE_n HI
+    l_odt.arr0.template setBit<MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_14>();
+
+    return l_odt;
+}
+
+///
+/// @brief Configures registers for ccs execution
+/// @param[in] fapi2_mcbist_target The MCBIST target
+/// @param[in] fapi2_mca_target The MCA target
+/// @param[in, out] modeq_reg A buffer that holds data to write into ccs mode register
+/// @param[in, out] ecccntl_reg A buffer that holds data to write into recr register
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode config_ccs_regs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& fapi2_mcbist_target,
+                                  const fapi2::Target<fapi2::TARGET_TYPE_MCA>& fapi2_mca_target,
+                                  fapi2::buffer<uint64_t>& modeq_reg,
+                                  fapi2::buffer<uint64_t>& ecccntl_reg)
+{
+// configure modeq register
+    fapi2::buffer<uint64_t> l_temp = 0;
+    FAPI_TRY(mss::getScom(fapi2_mcbist_target, MCBIST_CCS_MODEQ, modeq_reg));
+    l_temp = modeq_reg;
+    l_temp.template clearBit<MCBIST_CCS_MODEQ_NTTM_MODE>();     // 1 = nontraditional transparent mode
+    l_temp.template clearBit<MCBIST_CCS_MODEQ_CFG_DGEN_FIXED_MODE>();
+
+    l_temp.template clearBit<MCBIST_CCS_MODEQ_STOP_ON_ERR>();      // 1 = stop on ccs error
+    l_temp.template setBit<MCBIST_CCS_MODEQ_UE_DISABLE>();      // 1 = hardware ignores UEs
+    l_temp.template setBit<MCBIST_CCS_MODEQ_COPY_CKE_TO_SPARE_CKE>();       // 1 = cope CKE to spare CKE
+    l_temp.template setBit<MCBIST_CCS_MODEQ_CFG_PARITY_AFTER_CMD>();       // 1 = OE driven on parity cycle
+    l_temp.template setBit<MCBIST_CCS_MODEQ_IDLE_PAT_ACTN>();       // ACTn Idle
+    l_temp.template setBit<MCBIST_CCS_MODEQ_IDLE_PAT_ADDRESS_16>();       // RASn Idle
+    l_temp.template setBit<MCBIST_CCS_MODEQ_IDLE_PAT_ADDRESS_15>();       // CASn Idle
+    l_temp.template setBit<MCBIST_CCS_MODEQ_IDLE_PAT_ADDRESS_14>();       // WEn Idle
+    l_temp.template clearBit<MCBIST_CCS_MODEQ_DDR_PARITY_ENABLE>();     // 0 = hardware sets parity
+    FAPI_TRY(mss::putScom(fapi2_mcbist_target, MCBIST_CCS_MODEQ, l_temp));
+
+    FAPI_TRY(mss::getScom(fapi2_mca_target, MCA_RECR, ecccntl_reg));
+    l_temp = ecccntl_reg;
+    l_temp.template insertFromRight<6, 3>(0b001);       // setup read delay pointer
+    FAPI_TRY(mss::putScom(fapi2_mca_target, MCA_RECR, l_temp));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restores registers to original values before ccs execution
+/// @param[in] i_mcbist_target The MCBIST target
+/// @param[in] i_mca_target The MCA target
+/// @param[in] i_modeq_reg Buffer that holds data to write into ccs mode register
+/// @param[in] i_ecccntl_reg Buffer that holds data to write into recr register
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode revert_config_regs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_mcbist_target,
+                                     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_mca_target,
+                                     const fapi2::buffer<uint64_t>& i_modeq_reg,
+                                     const fapi2::buffer<uint64_t>& i_ecccntl_reg)
+{
+    // Configure ccs mode register:
+    FAPI_TRY(mss::putScom(i_mcbist_target, MCBIST_CCS_MODEQ, i_modeq_reg));
+
+    // Configure recr register
+    FAPI_TRY(mss::putScom(i_mca_target, MCA_RECR, i_ecccntl_reg));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+}// ns ccs
 namespace training
 {
 
@@ -796,6 +934,888 @@ uint64_t mrep::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 {
     return 0;
 }
+
+///
+/// @brief Gets the number of VREF's to run on
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[out] o_num_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::BUFFER_RD_VREF>::get_num_vrefs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
+        i_target,
+        const uint64_t i_rp,
+        uint64_t& o_num_vref) const
+{
+    o_num_vref = MAX_LRDIMM_BUFFERS;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Gets the lowest possible VREF
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_min_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::BUFFER_RD_VREF>::get_min_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_min_vref) const
+{
+    using TT = VREFTraits<vref_types::BUFFER_RD_VREF>;
+    o_min_vref = TT::MIN_BOUND;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Gets the highest possible VREF
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_max_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::BUFFER_RD_VREF>::get_max_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_max_vref) const
+{
+    using TT = VREFTraits<vref_types::BUFFER_RD_VREF>;
+    o_max_vref = TT::MAX_BOUND;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Adds a command to the command structure
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_index the index of the VREF to go to
+/// @param[in] i_vref the VREF to go to
+/// @param[in,out] io_commands the commands structure to update
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::BUFFER_RD_VREF>::add_command( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_index,
+        const uint64_t i_vref,
+        mss::ddr4::pba::commands& io_commands) const
+{
+    std::vector<uint64_t> l_ranks;
+    FAPI_TRY( mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
+              "Failed get_ranks_in_pair in add_command<BUFFER_RD_VREF> %s",
+              mss::c_str(i_target) );
+
+    for(const auto l_rank : l_ranks)
+    {
+        // Skip over invalid ranks (NO_RANK)
+        if(l_rank == NO_RANK)
+        {
+            continue;
+        }
+
+        // VREF delay
+        constexpr uint64_t PBA_DELAY = 2000;
+        const mss::cw_info BCW(FUNC_SPACE_5, DRAM_VREF_CW, uint64_t(i_vref), PBA_DELAY, CW8_DATA_LEN, cw_info::BCW);
+
+        // Gets our DIMM from this rank
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+        FAPI_TRY(mss::rank::get_dimm_target_from_rank(i_target, l_rank, l_dimm),
+                 "%s failed to get DIMM from rank%u", mss::c_str(i_target), l_rank);
+
+        FAPI_TRY(io_commands.add_command( l_dimm, i_index, BCW ));
+
+        // Yes, always break out of this loop - we just need to get the DIMM for this loop, so here we are
+        break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Issues all of the commands from the command structure
+/// @param[in] i_commands the commands structure to update
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::BUFFER_RD_VREF>::issue_commands( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
+        i_target,
+        mss::ddr4::pba::commands& i_commands) const
+{
+    FAPI_TRY(mss::ddr4::pba::execute_commands(i_commands));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the lowest possible VREF
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_min_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::get_min_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_min_vref) const
+{
+    using TT = VREFTraits<vref_types::DRAM_WR_VREF>;
+    o_min_vref = TT::MIN_BOUND;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Gets the highest possible VREF
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_max_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::get_max_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_max_vref) const
+{
+    using TT = VREFTraits<vref_types::DRAM_WR_VREF>;
+    o_max_vref = TT::MAX_BOUND;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Gets the number of VREF's to run on
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[out] o_num_vref the number of VREF's to run against
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::get_num_vrefs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
+        i_target,
+        const uint64_t i_rp,
+        uint64_t& o_num_vref) const
+{
+    uint8_t l_rank_number = 0;
+    std::vector<uint64_t> l_ranks;
+
+    FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
+             "Failed get_ranks_in_pair in <vref_types::DRAM_WR_VREF>::get_num_vrefs %s",
+             mss::c_str(i_target));
+
+    for (const auto& l_rank : l_ranks)
+    {
+        // Skip over invalid ranks (NO_RANK)
+        if(l_rank == NO_RANK)
+        {
+            continue;
+        }
+
+        l_rank_number++;
+    }
+
+    o_num_vref = l_rank_number;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Adds a command to the command structure
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_index the index of the VREF to go to
+/// @param[in] i_vref the VREF to go to
+/// @param[in,out] io_program the program structure to update
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::add_command( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_index,
+        const uint64_t i_vref,
+        mss::ccs::program& io_program) const
+{
+    std::vector<uint64_t> l_ranks;
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+    uint64_t l_index = 0;
+    constexpr uint8_t VREF_DEFALT_RANGE = 0;
+
+    FAPI_TRY( mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
+              "Failed get_ranks_in_pair in add_command<DRAM_WR_VREF> %s",
+              mss::c_str(i_target) );
+
+    //base i_index find right rank
+    for(const auto l_rank : l_ranks)
+    {
+        if(l_rank == NO_RANK)
+        {
+            continue;
+        }
+
+        if(l_index == i_index)
+        {
+            FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_rank, l_dimm),
+                      "%s Failed get_dimm_target_from_rank in add_command<DRAM_WR_VREF>",
+                      mss::c_str(i_target));
+
+            FAPI_DBG("DRAM_WR_VREF:write vref l_rank = 0x%02x l_index = 0x%02x i_vref = 0x%02x",
+                     l_rank, l_index, i_vref);
+
+            FAPI_TRY(mss::ddr4::setup_latch_wr_vref_commands_by_rank(l_dimm,
+                     l_rank,
+                     VREF_DEFALT_RANGE,
+                     i_vref,
+                     io_program.iv_instructions),
+                     "%s Failed setup_latch_wr_vref_commands_by_rank in add_command<DRAM_WR_VREF>",
+                     mss::c_str(i_target));
+            break;
+        }
+
+        l_index++;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Issues all of the commands from the command structure
+/// @param[in] i_commands the commands structure to update
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note We want to always specialize this function
+///
+template<>
+fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::issue_commands( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        mss::ccs::program& i_program) const
+{
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+
+    FAPI_TRY( mss::ccs::execute(l_mcbist, i_program, i_target), "Failed ccs execute %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write the results to buffer generate PBA commands
+/// @param[in] i_target the DIMM target
+/// @param[in] i_result a vector of the vref result
+/// @param[out] o_container the PBA commands structure
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note a little helper to allow us to unit test that we generate the PBA commands ok
+///
+fapi2::ReturnCode buffer_wr_vref::write_result_to_buffers_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_target,
+        const std::vector<recorder>& i_result,
+        mss::ddr4::pba::commands& o_container) const
+{
+    // Get's the MCA
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+    uint8_t l_buffer = 0;
+    constexpr uint64_t HOST_VREF_RAG_POS = 6;
+    constexpr uint64_t HOST_VREF_RAG_LEN = 1;
+    uint8_t l_default_vref = 0;
+    fapi2::buffer<uint8_t> l_is_m386a8k40cm2_ctd7y = 0;
+
+    FAPI_TRY( mss::is_m386a8k40cm2_ctd7y(l_mca, l_is_m386a8k40cm2_ctd7y), "Error in p9_mss_draminit_training %s",
+              mss::c_str(i_target) );
+
+    FAPI_TRY(eff_dimm_ddr4_f5bc5x(i_target, l_default_vref));
+
+    // Clears out the PBA container to ensure we don't issue undesired commands
+    o_container.clear();
+
+    // Looops through and generates the PBA commands
+    for(const auto& l_recorder : i_result)
+    {
+        fapi2::buffer<uint8_t> l_bcw_value;
+        fapi2::buffer<uint8_t> l_vref_value;
+        bool l_range = false;
+
+        FAPI_DBG("%s buffer wr vref buffer:%u final values l_recorder.iv_final_delay = 0x%02x",
+                 mss::c_str(l_mca), l_buffer, l_recorder.iv_final_vref);
+
+        //workaround for better margin
+        if((l_is_m386a8k40cm2_ctd7y) && (mss::count_dimm(l_mca) == MAX_DIMM_PER_PORT))
+        {
+            constexpr uint8_t OFFSET = 2;
+
+            //means no find 0->1 transition, use original value
+            if(l_recorder.iv_final_vref == NOVLOW)
+            {
+                l_range = 0;
+                l_vref_value = l_default_vref - OFFSET;
+            }
+            else
+            {
+                FAPI_TRY(convert_vref_value(l_recorder.iv_final_vref + OFFSET, l_range, l_vref_value));
+            }
+        }
+        else
+        {
+            //means no find 0->1 transition, use original value
+            if(l_recorder.iv_final_vref == NOVLOW)
+            {
+                ++l_buffer;
+                continue;
+
+            }
+
+            FAPI_TRY(convert_vref_value(l_recorder.iv_final_vref, l_range, l_vref_value));
+        }
+
+        // Gets the BCW value for the buffer training control word
+        FAPI_TRY(eff_dimm_ddr4_f6bc4x(i_target, l_bcw_value));
+
+        // Modifies the BCW value accordingly
+        l_bcw_value.insertFromRight<HOST_VREF_RAG_POS, HOST_VREF_RAG_LEN>(l_range);
+
+        // Delay is for PBA, bumping it way out so we don't have issues
+        constexpr uint64_t SAFE_DELAY = 20000;
+        constexpr uint64_t PBA_DELAY = 255;
+
+        const mss::cw_info FINAL_SET_BCW_RANGE( FUNC_SPACE_6,
+                                                BUFF_TRAIN_CONFIG_CW,
+                                                l_bcw_value,
+                                                PBA_DELAY,
+                                                mss::CW8_DATA_LEN,
+                                                mss::cw_info::BCW);
+        const mss::cw_info FINAL_SET_BCW_VREF( FUNC_SPACE_5,
+                                               HOST_VREF_CW,
+                                               l_vref_value,
+                                               SAFE_DELAY,
+                                               mss::CW8_DATA_LEN,
+                                               mss::cw_info::BCW);
+
+        // Each buffer contains two nibbles
+        // Each nibble corresponds to one BCW
+        // Add in the buffer control words
+        FAPI_TRY(o_container.add_command(i_target, l_buffer, FINAL_SET_BCW_RANGE));
+        FAPI_TRY(o_container.add_command(i_target, l_buffer, FINAL_SET_BCW_VREF));
+
+        ++l_buffer;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write the result to buffer
+/// @param[in] i_target the DIMM target
+/// @param[in] i_result a vector of the results
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode buffer_wr_vref::write_result_to_buffers( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::vector<recorder>& i_result) const
+{
+    mss::ddr4::pba::commands l_container;
+
+    // Sets up the PBA commands
+    FAPI_TRY(write_result_to_buffers_helper( i_target,
+             i_result,
+             l_container),
+             "%s failed generating PBA commands",
+             mss::c_str(i_target));
+
+    // Issue the PBA to set the final results
+    if(!l_container.empty())
+    {
+        FAPI_TRY(mss::ddr4::pba::execute_commands(l_container));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief analyze with each nibble
+/// @param[in] i_target the MCA target
+/// @param[in] i_result the result need to analyze
+/// @param[in] i_buffer the buffer number
+/// @param[in] i_vref the vref we set
+/// @param[in, out] io_recorder we need to get and record
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode buffer_wr_vref::analyze_result_for_each_buffer( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint8_t i_result,
+        const uint8_t i_buffer,
+        const uint8_t i_vref,
+        recorder& io_recorder ) const
+{
+    if(i_result == 0)
+    {
+        io_recorder.iv_seen0 = true;
+    }
+    else if(i_result == 0xff)
+    {
+        if(io_recorder.iv_seen0)
+        {
+            io_recorder.iv_seen1 = true;
+        }
+    }
+
+    // Record the 0->1 transition only if:
+    // 1) we've seen a 0
+    // 2) we've seen a 1
+    // 3) we have not recorded a value prior (don't want to overwrite our good values) (not 0)
+    if( (io_recorder.iv_seen0 == true) &&
+        (io_recorder.iv_seen1 == true) &&
+        (io_recorder.iv_final_vref == NOVLOW) )
+    {
+        io_recorder.iv_final_vref = i_vref;
+        FAPI_DBG( "buffer_wr_vref %s buffer:%u found a 0->1 transition at vref 0x%02x",
+                  mss::c_str(i_target), i_buffer, i_vref );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief analyze the result of buffer host interface vref training
+/// @param[in] i_target the MCA target
+/// @param[in] i_vref the vref number we current set
+/// @param[in, out] io_recorders a vector of the host interface vref training results
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode buffer_wr_vref::analyze_result( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint8_t i_vref,
+        std::vector<recorder>& io_recorders) const
+{
+    data_response l_data;
+    uint8_t l_buffer = 0;
+    constexpr uint64_t BEATS_PER_BUFFER = 8;
+
+    FAPI_TRY( l_data.read(i_target),
+              "%s failed to read buffer_wr_vref data response vref:0x%02x",
+              mss::c_str(i_target),
+              i_vref );
+
+    for(uint8_t i = 0; i < BEATS_PER_BUFFER; i++)
+    {
+        FAPI_DBG( "%s vref:0x%02x burst%u: 0x%02x%02x%02x%02x%02x%02x%02x%02x%02x ",
+                  mss::c_str(i_target), i_vref, i,
+                  l_data.iv_buffer_beat[0][i], l_data.iv_buffer_beat[1][i], l_data.iv_buffer_beat[2][i], l_data.iv_buffer_beat[3][i],
+                  l_data.iv_buffer_beat[4][i], l_data.iv_buffer_beat[5][i], l_data.iv_buffer_beat[6][i], l_data.iv_buffer_beat[7][i],
+                  l_data.iv_buffer_beat[8][i]);
+    }
+
+    // Note: we want to update the value of the results recorder, so no const
+    for(auto& l_recorder : io_recorders)
+    {
+        // All beats should be the same, until proven otherwise, just use beat 0
+        constexpr uint64_t DEFAULT_BEAT = 0;
+        uint8_t l_buffer_result = l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT];
+
+        // need all beat be 0xff
+        for(uint8_t l_beat = 1; l_beat < BEATS_PER_BUFFER; l_beat++)
+        {
+            l_buffer_result = l_buffer_result & l_data.iv_buffer_beat[l_buffer][l_beat];
+        }
+
+        FAPI_DBG( "%s vref:0x%02x result buffer:%u data:0x%02x ",
+                  mss::c_str(i_target), i_vref,
+                  l_buffer, l_buffer_result);
+
+        FAPI_TRY(analyze_result_for_each_buffer( i_target,
+                 l_buffer_result,
+                 l_buffer,
+                 i_vref,
+                 l_recorder) );
+
+        l_buffer++;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief convert vref loop value to range number(1 or 2) and vref register value
+/// @param[in] i_vref the loop value
+/// @param[out] o_range range number
+/// @param[out] o_register_value vref register value
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode buffer_wr_vref::convert_vref_value(const uint8_t& i_vref,
+        bool& o_range,
+        uint8_t& o_register_value)const
+{
+    constexpr uint64_t SIXTY_PERCENT = 0x18;
+
+    if(i_vref < SIXTY_PERCENT)
+    {
+        o_range = 1;    //range 2
+        o_register_value = i_vref;
+    }
+    else
+    {
+        o_range = 0;    //range 1
+        o_register_value = i_vref - SIXTY_PERCENT;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Sets buffer host interface vref value
+/// @param[in] i_target the DIMM target
+/// @param[in] i_vref value
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Sets DA setting for buffer control word (F5BC5x,F6BC4x)
+///
+fapi2::ReturnCode buffer_wr_vref::set_vref(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_vref ) const
+{
+    mss::ccs::program l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+    std::vector<cw_info> l_bcws;
+
+    constexpr uint64_t HOST_VREF_RAG_POS = 6;
+    constexpr uint64_t HOST_VREF_RAG_LEN = 1;
+    constexpr uint64_t BCW_SAFE_DELAY = 2000;
+    fapi2::buffer<uint8_t> l_bcw_value;
+    fapi2::buffer<uint8_t> l_vref_value;
+    bool l_range = false;
+
+    uint8_t l_sim = 0;
+
+
+    FAPI_TRY(convert_vref_value(i_vref, l_range, l_vref_value));
+    // Gets the BCW value for the buffer training control word
+    FAPI_TRY(eff_dimm_ddr4_f6bc4x(i_target, l_bcw_value));
+
+    // Modifies the BCW value accordingly
+    l_bcw_value.insertFromRight<HOST_VREF_RAG_POS, HOST_VREF_RAG_LEN>(l_range);
+    l_bcws.push_back(cw_info(FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW, l_bcw_value,  mss::tmrc(), mss::CW8_DATA_LEN,
+                             cw_info::BCW));
+    l_bcws.push_back(cw_info(FUNC_SPACE_5, HOST_VREF_CW, l_vref_value, BCW_SAFE_DELAY, mss::CW8_DATA_LEN,
+                             cw_info::BCW));
+
+    FAPI_DBG("%s f6bc4x = 0x%02x, f5bc5x = 0x%02x for vref 0x%02x\n",  mss::c_str(i_target),
+             l_bcw_value,  l_vref_value,  i_vref);
+
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Ensure our CKE's are powered on
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
+
+    // Inserts the function space selects
+    FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
+
+    // Sets up the CCS instructions
+    FAPI_TRY(control_word_engine(i_target,
+                                 l_bcws,
+                                 l_sim,
+                                 l_program.iv_instructions));
+
+    // Make sure we leave everything powered on
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
+
+    // Issue CCS
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           l_mca) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets buffer host interface vref value
+/// @param[in] i_target the DIMM target
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Sets DA setting for buffer control word (F5BC5x,F6BC4x)
+///
+fapi2::ReturnCode buffer_wr_vref::restore_org_vref(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+{
+    mss::ccs::program l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+    std::vector<cw_info> l_bcws;
+
+    fapi2::buffer<uint8_t> l_f6bc4x;
+    fapi2::buffer<uint8_t> l_f5bc5x;
+    constexpr uint64_t BCW_SAFE_DELAY = 2000;
+
+    uint8_t l_sim = 0;
+
+    // Gets the BCW value for the buffer training control word
+    FAPI_TRY(eff_dimm_ddr4_f6bc4x(i_target, l_f6bc4x));
+    FAPI_TRY(eff_dimm_ddr4_f5bc5x(i_target, l_f5bc5x));
+
+    // Modifies the BCW value accordingly
+    l_bcws.push_back(cw_info(FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW, l_f6bc4x, mss::tmrc(), mss::CW8_DATA_LEN,
+                             cw_info::BCW));
+    l_bcws.push_back(cw_info(FUNC_SPACE_5, HOST_VREF_CW, l_f5bc5x, BCW_SAFE_DELAY, mss::CW8_DATA_LEN,
+                             cw_info::BCW));
+
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Ensure our CKE's are powered on
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
+
+    // Inserts the function space selects
+    FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
+
+    // Sets up the CCS instructions
+    FAPI_TRY(control_word_engine(i_target,
+                                 l_bcws,
+                                 l_sim,
+                                 l_program.iv_instructions));
+
+    // Make sure we leave everything powered on
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
+
+    // Issue CCS
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           l_mca) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Sets up and runs the calibration step
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode buffer_wr_vref::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       const uint64_t i_rp,
+                                       const uint8_t i_abort_on_error ) const
+{
+    std::vector<uint64_t> l_ranks;
+
+    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+
+    FAPI_TRY( mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
+              "Failed get_ranks_in_pair in add_command<BUFFER_WR_VREF> %s",
+              mss::c_str(i_target) );
+
+    for(const auto l_rank : l_ranks)
+    {
+        // Skip over invalid ranks (NO_RANK)
+        if(l_rank == NO_RANK)
+        {
+            continue;
+        }
+
+        // we only want to run one rank per DIMM
+        if((l_rank != 0) && (l_rank != 4))
+        {
+            continue;
+        }
+
+        const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
+        // Vector represents the number of LRDIMM buffers
+        std::vector<recorder> l_results_recorder(MAX_LRDIMM_BUFFERS);
+
+        //Write 0 to address 0 and read back, shmoo vref value, found 0->1 transition
+        //Use middle point of 0->1 transition and 100% as the best vref value
+        constexpr uint64_t WRITE_DATA = 0x0;
+        constexpr uint64_t VREF_PARAMETER = 0x0;
+
+        for(int8_t l_vref = MAX_VREF; l_vref >= 0; l_vref--)
+        {
+            // 1) Set the l_vref -> host issues BCW's
+            FAPI_TRY(set_vref(l_dimm, l_vref));
+            // 500ns delay for vref update
+            fapi2::delay(500, 0);
+
+            // 2) Write 0 to address 0 and read back
+            FAPI_TRY(conduct_write_read(l_dimm, l_vref, l_rank, WRITE_DATA));
+
+            // 3)  Analyze the results -> find 0->1 trainsition
+            FAPI_TRY(analyze_result(i_target, l_vref, l_results_recorder));
+        }
+
+        // 4) workaround , must do even numbers of read
+        FAPI_TRY(conduct_write_read(l_dimm, VREF_PARAMETER, l_rank, WRITE_DATA));
+
+        // 5) restore original vref
+        FAPI_TRY(restore_org_vref(l_dimm));
+        // 500ns delay for vref update
+        fapi2::delay(500, 0);
+
+        // 6)  calculate middle point of the 0->1 transition and the 100%
+        FAPI_TRY(calculate_best_vref(l_dimm, l_results_recorder));
+
+        // 7) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 4)
+        FAPI_TRY(write_result_to_buffers( l_dimm, l_results_recorder));
+        // 500ns delay for vref update
+        fapi2::delay(500, 0);
+
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write data to address 0 and read back
+/// @param[in] i_target the DIMM target
+/// @param[in] i_verf the vref number we current set
+/// @param[in] i_rank the rank number
+/// @param[in] i_write_data the data to write
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode buffer_wr_vref::conduct_write_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t& i_vref,
+        const uint64_t& i_rank,
+        const uint64_t& i_write_data) const
+{
+    using TT = ccsTraits<mss::mc_type::NIMBUS>;
+    uint8_t tRCD = 15;
+    uint8_t tWR = 15;           //set to highest min value initially.
+    uint8_t PL = 0;
+    uint8_t CWL = 0;
+    uint8_t CL = 0;
+    uint8_t AL = 0;
+
+    uint64_t l_delay = 0;
+    uint8_t WL = 0;
+    uint8_t RL = 0;
+    fapi2::buffer<uint64_t> modeq_reg;
+    fapi2::buffer<uint64_t> ecccntl_reg;
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_ports;
+    // Gets WR/RD ODT values
+    uint8_t l_rd_odt[MAX_RANK_PER_DIMM] = {};
+    uint8_t l_wr_odt[MAX_RANK_PER_DIMM] = {};
+    // Used for ODT values
+    const auto l_dimm_rank = mss::index(i_rank);
+
+    constexpr uint8_t ODT_CYCLE_LEN = 10;
+
+
+    // Create Program
+    mss::ccs::program l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    // Get timings from attributes:
+    FAPI_TRY(mss::eff_odt_rd(i_target, &l_rd_odt[0]));
+    FAPI_TRY(mss::eff_odt_wr(i_target, &l_wr_odt[0]));
+    FAPI_TRY(mss::eff_dram_trcd(i_target, tRCD));
+    FAPI_TRY(mss::eff_dram_twr(i_target, tWR));
+    FAPI_TRY(mss::eff_ca_parity_latency(i_target, PL));
+    FAPI_TRY(mss::eff_dram_cwl(i_target, CWL));
+    FAPI_TRY(mss::eff_dram_cl(i_target, CL));
+    FAPI_TRY(mss::eff_dram_al(i_target, AL));
+    WL = PL + CWL + AL;
+    RL = PL + CL + AL;
+
+    FAPI_DBG("TIMING PARAMETERS:\nPL = %d; CWL = %d; AL = %d; WL = %d; tRCD = %d; tWR = %d; ",
+             PL, CWL, AL, WL, tRCD, tWR);
+
+    //write
+    {
+
+        // activate instruciton
+        {
+            auto l_activate = ccs::act_command(i_rank);
+
+            l_delay = tRCD;
+            l_activate.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_activate);
+        }
+
+        // load wr command
+        {
+            auto l_wr = mss::ccs::wra_load(i_target, i_rank, 0, 0, 0);
+
+            l_delay = 0;
+            l_wr.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            //set write data for ccs write command
+            l_wr.arr1.template insertFromRight<TT::ARR1_READ_OR_WRITE_DATA, TT::ARR1_READ_OR_WRITE_DATA_LEN>(i_write_data);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_wr);
+        }
+
+        // add odt command
+        {
+            // ODT value buffer
+            uint8_t l_ccs_value = 0;
+            FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(l_wr_odt[l_dimm_rank], l_mca, l_ccs_value));
+
+            // Inserts ODT values
+            auto l_odt = mss::ccs::odt_load(l_ccs_value, WL + ODT_CYCLE_LEN);
+
+            l_delay = tWR + tRCD;
+            l_odt.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            //set write data for ccs write command
+            l_odt.arr1.template insertFromRight<TT::ARR1_READ_OR_WRITE_DATA, TT::ARR1_READ_OR_WRITE_DATA_LEN>(i_write_data);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_odt);
+        }
+    }
+
+    //read
+    {
+        // activate instruciton
+        {
+            auto l_activate = ccs::act_command(i_rank);
+
+            l_delay = tRCD;
+            l_activate.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_activate);
+        }
+
+        // load read command
+        {
+            auto l_rd = mss::ccs::rda_load(i_target, i_rank, 0, 0, 0);
+
+            l_delay = 1;
+            l_rd.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_rd);
+        }
+
+        // add odt command
+        {
+            // ODT value buffer
+            uint8_t l_ccs_value = 0;
+            FAPI_TRY(mss::ccs::convert_odt_attr_to_ccs(l_rd_odt[l_dimm_rank], l_mca, l_ccs_value));
+
+            // Inserts ODT values
+            auto l_odt = mss::ccs::odt_load(l_ccs_value, RL + ODT_CYCLE_LEN);
+
+            l_delay = tRCD;
+            l_odt.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
+
+            // Adds the instructions to the CCS program
+            l_program.iv_instructions.push_back(l_odt);
+        }
+    }
+    //set ports for ccs execution
+    l_ports.push_back(l_mca);
+
+    //---------------------------------------
+    // configure and execute ccs array
+    //---------------------------------------
+    {
+        FAPI_TRY(mss::ccs::config_ccs_regs(l_mcbist, l_mca, modeq_reg, ecccntl_reg));
+        FAPI_TRY(mss::ccs::execute(l_mcbist, l_program, l_ports));
+        FAPI_TRY(mss::ccs::revert_config_regs(l_mcbist, l_mca, modeq_reg, ecccntl_reg));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 #endif
 
 ///
@@ -814,9 +1834,7 @@ void deconfigure_steps(const uint8_t i_dimm_type,
     {
         FAPI_INF("LRDIMM: deconfigure WR VREF 2D and RD VREF 2D");
         // We clear WRITE_CTR_2D_VREF as the HW calibration algorithm will not work with LRDIMM
-        // Same for RD VREF
-        io_cal_steps.clearBit<WRITE_CTR_2D_VREF>()
-        .clearBit<READ_CTR_2D_VREF>();
+        io_cal_steps.clearBit<WRITE_CTR_2D_VREF>();
         return;
     }
 
@@ -825,11 +1843,14 @@ void deconfigure_steps(const uint8_t i_dimm_type,
     io_cal_steps.clearBit<DB_ZQCAL>()
     .clearBit<MREP>()
     .clearBit<MRD_COARSE>()
+    .clearBit<BUFFER_RD_VREF>()
     .clearBit<MRD_FINE>()
     .clearBit<DWL>()
     .clearBit<MWD_COARSE>()
+    .clearBit<DRAM_WR_VREF>()
     .clearBit<MWD_FINE>()
-    .clearBit<HWL>();
+    .clearBit<HWL>()
+    .clearBit<BUFFER_WR_VREF>();
 }
 
 } // ns lrdimm
