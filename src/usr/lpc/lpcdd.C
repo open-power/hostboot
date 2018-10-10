@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -523,7 +523,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         uint32_t * l_status_ptr
                                = reinterpret_cast<uint32_t*>(l_addr);
                         //Clear under mask - aka write 1 clears
-                        *l_status_ptr = OPB_ERROR_MASK;
+                        *l_status_ptr = LPC::OPB_ERROR_MASK;
                         eieio();
 
                         //Clear related bits in the LPCM OPB Master Accumulated
@@ -534,7 +534,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         uint32_t * l_accum_status_ptr
                                 = reinterpret_cast<uint32_t*>(l_addr);
                         //Clear under mask - aka write 1 clears
-                        *l_accum_status_ptr = OPB_ERROR_MASK;
+                        *l_accum_status_ptr = LPC::OPB_ERROR_MASK;
                         eieio();
 
                         //Reset LPCHC Logic
@@ -1116,7 +1116,7 @@ errlHndl_t LpcDD::checkForLpcErrors()
         eieio();
 
         // Mask error bits
-        opbm_err_union.data32 = (opbm_buffer & OPB_ERROR_MASK);
+        opbm_err_union.data32 = (opbm_buffer & LPC::OPB_ERROR_MASK);
         lpchc_err_union.data32 = (lpchc_buffer & LPCHC_ERROR_MASK);
 
         // First look for errors in the OPBM bit mask

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,9 +190,13 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
     } while(0);
 }
 
-void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
+void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
                             uint32_t& o_errCode, uint64_t& o_pnorStart)
 {
+    //pnorEnd is the end of flash, which is base of lpc, plus
+    //the offset of the FW space, plus the TOP memory address in FW space
+    uint64_t i_pnorEnd = i_lpcBar + LPC::LPCHC_FW_SPACE + PNOR::LPC_TOP_OF_FLASH_OFFSET;
+
     uint8_t *l_tocBuffer = g_blScratchSpace;
 
     //The first TOC is 1 TOC size + 1 page back from the end of the flash (+ 1)
@@ -203,6 +207,35 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
     {
         //@TODO RTC:138268 Set up multiple side of PNOR for bootloader
         o_errCode = 0;
+
+        uint64_t l_mmioStatusAddr = LPC::LPCHC_ERR_SPACE + i_lpcBar;
+
+        // First do a dummy LPC access (if an LPC error condition exists,
+        // an access can be necessary to get the error indicated in the
+        // status register. This read will force the error condition to
+        // properly be shown in the LPC error status reg
+        Bootloader::handleMMIO(l_mmioAddr,
+                    reinterpret_cast<uint64_t>(l_tocBuffer),
+                    Bootloader::WORDSIZE,
+                    Bootloader::WORDSIZE);
+
+        // Now Read OPB Master Status Reg offset (LPC Addr 0xC0010000)
+        Bootloader::handleMMIO(l_mmioStatusAddr,
+                               reinterpret_cast<uint64_t>(l_tocBuffer),
+                               Bootloader::WORDSIZE,
+                               Bootloader::WORDSIZE);
+
+        uint32_t *l_val = reinterpret_cast<uint32_t *>(l_tocBuffer);
+
+        // Check Error Condition
+        if (*l_val & LPC::OPB_ERROR_MASK)
+        {
+            //PNOR error found
+            o_errCode = PNOR::LPC_ERR;
+            BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_LPC_ERR);
+            //@TODO RTC:203989 Add LPC Error/Status Reg as part of FFDC
+            terminateExecuteTI();
+        }
 
         //Copy Table of Contents from PNOR flash to a local buffer
         Bootloader::handleMMIO(l_mmioAddr,
@@ -273,7 +306,7 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
 /**
  * @brief Get the hostboot base image
  */
-void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
+void bl_pnorAccess::getHBBSection(uint64_t i_lpcBar,
                                   PNOR::SectionData_t& o_hbbSection,
                                   uint32_t& o_errCode,
                                   uint64_t& o_pnorStart)
@@ -281,9 +314,11 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
     BOOTLOADER_TRACE(BTLDR_TRC_PA_GETHBBSECTION_START);
     do
     {
+
+        o_errCode = 0;
         PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS+1];
 
-        findTOC(i_pnorEnd, l_TOC, o_errCode, o_pnorStart);
+        findTOC(i_lpcBar, l_TOC, o_errCode, o_pnorStart);
 
         if(o_errCode != PNOR::NO_ERROR)
         {
@@ -318,6 +353,5 @@ void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
         }
     } while(0);
     BOOTLOADER_TRACE(BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_RTN);
-
 }
 
