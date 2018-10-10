@@ -796,24 +796,27 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 13) Takes the buffer out of MRD_FINE and sets it into mainline mode
+        // 13) set minimum eye sizes per buffer
+        set_minimum_eye_sizes(l_eye_sizes_dq);
+
+        // 14) Takes the buffer out of MRD_FINE and sets it into mainline mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // 14) take buffer, dram out of read preamble training mode
+        // 15) take buffer, dram out of read preamble training mode
         FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::OFF, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
                  mss::c_str(l_dimm), l_rank);
         FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::OFF), "%s failed set_buffer_rd_preamble_mode rank%u",
                  mss::c_str(l_dimm), l_rank);
 
-        // 15) Takes this rank out of MPR mode
+        // 16) Takes this rank out of MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 16) check errors
+        // 17) check errors
         FAPI_TRY( check_errors(l_dimm, l_dimm_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u",
                   mss::c_str(l_dimm), l_dimm_rank);
 
-        // 17) Writes the best delays to the buffers using PBA
+        // 18) Writes the best delays to the buffers using PBA
         FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_dimm_rank);
 

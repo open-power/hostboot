@@ -35,15 +35,21 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/shared/nimbus_defaults.H>
 #include <lib/dimm/mrs_traits_nimbus.H>
 #include <lib/phy/mss_lrdimm_training.H>
 
+#include <lib/phy/dp16.H>
+
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_lrdimm_training_helper.H>
 #endif
+
+using fapi2::TARGET_TYPE_MCA;
 
 namespace mss
 {
@@ -730,6 +736,181 @@ fapi2::ReturnCode clear_firs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY(l_mcbist_fir.clear<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>());
 
 fapi_try_exit :
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears error firs
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode clear_firs_mcbist_out_of_sync(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    //Initialize
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    fapi2::ReturnCode l_mcbist_rc = fapi2::FAPI2_RC_SUCCESS;
+    fir::reg<MCBIST_MCBISTFIRQ> l_mcbist_fir(l_mcbist, l_mcbist_rc);
+
+    // Checks the return codes from creating the FIR classes
+    FAPI_TRY(l_mcbist_rc, "%s failed to create MCBIST FIR class", mss::c_str(l_mcbist) );
+
+    //Clear Error Firs
+    FAPI_TRY(l_mcbist_fir.clear<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>());
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if all mca have dimm populated on mcbist
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+bool all_mca_config(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
+{
+    const uint8_t MAX_MCA_PER_MCBIST  = 4;
+    uint8_t l_mca_number = 0;
+    bool l_have_dimms = true;
+
+    //check all mca on this mcbist
+    for( const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        l_mca_number++;
+        l_have_dimms = l_have_dimms && (mss::count_dimm(l_mca) != 0);
+    }
+
+    return l_have_dimms && (l_mca_number == MAX_MCA_PER_MCBIST);
+}
+
+///
+/// @brief Modify the write delay and read delay using offset table
+/// @param[in] i_target the MCA target
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_offset_rd_delay_d_sam the offset table of read delay
+/// @param[in] i_wr_delay_offset the offset table of write delay
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode timing_workaround_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const std::vector<std::vector<std::vector<int8_t>>>& i_offset_rd_delay_d_sam,
+        const std::vector<shift_offset>& i_wr_delay_offset,
+        const uint8_t i_abort_on_error)
+{
+    uint8_t l_index = 0;
+
+    //only need workaround on 2DPC
+    if(mss::count_dimm(i_target) != MAX_DIMM_PER_PORT)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const auto l_fapi_pos = mss::fapi_pos(i_target);
+
+    for(const auto l_reg : mss::dp16Traits<TARGET_TYPE_MCA>::READ_DELAY_REG[i_rp])
+    {
+        constexpr uint64_t EVEN_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD;
+        constexpr uint64_t ODD_START = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_DELAY1;
+        constexpr uint64_t RD_DELAY_LEN = MCA_DDRPHY_DP16_READ_DELAY0_RANK_PAIR0_P0_0_01_RD_LEN;
+        auto l_sitable = i_offset_rd_delay_d_sam[l_fapi_pos][i_rp];
+        fapi2::buffer<uint64_t> l_buff;
+        int64_t l_data_even = 0;
+        int64_t l_data_odd = 0;
+        const uint64_t l_mc_dq_even = l_index * 2;
+        const uint64_t l_mc_dq_odd = l_index * 2 + 1;
+        uint64_t l_dimm_dq_even = 0;
+        uint64_t l_dimm_dq_odd = 0;
+
+        FAPI_TRY(mc_to_dimm_dq( i_target, l_mc_dq_even, l_dimm_dq_even ));
+        FAPI_TRY(mc_to_dimm_dq( i_target, l_mc_dq_odd, l_dimm_dq_odd ));
+
+        // Reads the register information
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_buff), "%s failed getscom to register 0x%016lx", mss::c_str(i_target), l_reg);
+
+        // Gets out the specific information and stores it
+        // Even delay
+        l_buff.extractToRight<EVEN_START, RD_DELAY_LEN>(l_data_even);
+        // Odd delay
+        l_buff.extractToRight<ODD_START, RD_DELAY_LEN>(l_data_odd);
+
+        l_data_even += l_sitable[l_dimm_dq_even];
+        l_data_odd += l_sitable[l_dimm_dq_odd];
+
+        // Assume register delay above 0
+        if (l_data_even < 0)
+        {
+            l_data_even = 0;
+        }
+
+        if (l_data_odd < 0)
+        {
+            l_data_odd = 0;
+        }
+
+        l_buff.insertFromRight<EVEN_START, RD_DELAY_LEN>(l_data_even);
+        l_buff.insertFromRight<ODD_START, RD_DELAY_LEN>(l_data_odd);
+
+        // Write
+        FAPI_TRY(mss::putScom(i_target, l_reg, l_buff));
+        l_index++;
+    }
+
+    l_index = 0;
+
+    for(const auto l_reg : mss::dp16Traits<fapi2::TARGET_TYPE_MCA>::WR_DQ_DELAY_REG[i_rp])
+    {
+        constexpr uint64_t WR_DELAY     = MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0_01_DELAYG;
+        constexpr uint64_t WR_DELAY_LEN = MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0_01_DELAYG_LEN;
+
+        fapi2::buffer<uint64_t> l_buff;
+        int64_t l_data = 0;
+
+        for(const auto l_dq : i_wr_delay_offset)
+        {
+            if((l_fapi_pos == l_dq.mca_num) && (i_rp == l_dq.rp_num) && (l_index == l_dq.dq_reg_num))
+            {
+
+                // Reads the register information
+                FAPI_TRY(mss::getScom(i_target, l_reg, l_buff), "%s failed getscom to register 0x%016lx", mss::c_str(i_target), l_reg);
+
+                // Gets out the specific information and stores it
+                l_buff.extractToRight<WR_DELAY, WR_DELAY_LEN>(l_data);
+                l_data += l_dq.offset;
+
+                // Assume register delay above 0
+                if (l_data < 0)
+                {
+                    l_data = 0;
+                }
+
+                l_buff.insertFromRight<WR_DELAY, WR_DELAY_LEN>(l_data);
+                // Write
+                FAPI_TRY(mss::putScom(i_target, l_reg, l_buff))
+
+            }
+        }
+
+        l_index++;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Modify the write delay and read delay
+/// @param[in] i_target the MCA target
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode timing_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint8_t i_abort_on_error )
+{
+    FAPI_TRY(timing_workaround_helper(i_target, i_rp, OFFSET_RD_DELAY_D_SAM, WR_DELAY_OFFSET, i_abort_on_error));
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 } // ns workarounds

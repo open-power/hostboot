@@ -855,6 +855,10 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK));
     }
 
+    // 1) Sets up the minimum eye sizes vector for this loop
+    // Note: this is for the DRAM WR VREF training and is on a per-rank basis (not per-buffer, not per-nibble, but per-rank)
+    setup_minimum_eye_sizes();
+
     // Loops over all ranks within this rank pair
     // MWD is a buffer to DRAM calibration step, so we need to calibrate all ranks seperately
     for (const auto& l_rank : l_ranks)
@@ -868,26 +872,26 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         // Gets the DIMM per RP
         const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
         const auto& l_dimm_rank = mss::index(l_rank);
-        std::vector<uint16_t> l_eye_sizes_dq(MAX_DQ_BITS);
+        std::vector<uint16_t> l_eye_sizes_dq(MAX_DQ_BITS, ~0);
         std::vector<std::pair<final_nibble_delay, final_nibble_delay>> l_final_nibble_delays_buffer(MAX_LRDIMM_BUFFERS);
 
         // Setup data pattern in the buffer MPR regs
-        // 1) Write the expected MPR pattern to the data buffers - host issues BCW commands to buffers (cw_info)
+        // 2) Write the expected MPR pattern to the data buffers - host issues BCW commands to buffers (cw_info)
         FAPI_TRY(lrdimm::set_expected_mpr_pattern(l_dimm, l_pattern), "%s failed set_expected_mpr_pattern rank%u, pattern%u",
                  mss::c_str(l_dimm), l_rank, l_pattern);
 
         // Setup per-lane compare for MWD
-        // 2) Configure the compare output on a per-bit level (each bit returns 0/1, rather than each nibble)
+        // 3) Configure the compare output on a per-bit level (each bit returns 0/1, rather than each nibble)
         FAPI_TRY(lrdimm::set_training_level(l_dimm, lrdimm::training_level::BIT), "%s failed set_per_lane_level rank%u",
                  mss::c_str(l_dimm), l_rank);
 
-        // 3) set the rank presence
+        // 4) set the rank presence
         FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
                  "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // Buffer into MWD mode
-        // 4) Put the buffer into MWD training mode - host issues BCW commands
+        // 5) Put the buffer into MWD training mode - host issues BCW commands
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::MWD), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
         // Loop across all delays
@@ -896,42 +900,50 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         for(uint8_t l_delay = 0; l_delay < MWD_MAX_DELAY; l_delay++)
         {
             // Set delay (broadcast across rank)
-            // 5) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
+            // 6) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
             FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay),
                      "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
             // Conduct a WR/RD
             // Write sends data from the buffer MPR
-            // 6) Read reads back what was written and does a bitwise compare
+            // 7) Read reads back what was written and does a bitwise compare
             FAPI_TRY(conduct_write_read(l_dimm, l_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm), l_rank);
 
-            // 7) add in NTTM mode read here - >forces the logic to read out the data
+            // 8) add in NTTM mode read here - >forces the logic to read out the data
             FAPI_TRY(execute_nttm_mode_read(i_target));
 
-            // 8) Analyze results
+            // 9) Analyze results
             FAPI_TRY(mwd_fine::analyze_mwd_result(i_target, l_delay, l_recorder), "%s failed analyze_mwd_result rank%u delay%u",
                      mss::c_str(l_dimm), l_rank, l_delay);
         }
 
-        // 9) Takes the buffer out of MWD and sets it into mainline mode
+        // Write sends data from the buffer MPR
+        // 10) odd number of read maybe have issue, workaround for even number of read
+        FAPI_TRY(conduct_write_read(l_dimm, l_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm), l_rank);
+
+        // 11) Takes the buffer out of MWD and sets it into mainline mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // 10) Finds the best delay for each bit
+        // 12) Finds the best delay for each bit
         // Note: also updates the minimum eye size vector here
         FAPI_TRY( find_best_delay_for_each_dq(i_target, l_rank, l_recorder, l_eye_sizes_dq, l_final_nibble_delays_buffer),
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
-        // 11) check errors
+
+        // 13) set minimum eye sizes per rank
+        set_minimum_eye_sizes(l_eye_sizes_dq);
+
+        // 14) check errors
         FAPI_TRY( check_errors(l_dimm, l_dimm_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u",
                   mss::c_str(l_dimm),
                   l_dimm_rank);
 
-        // 12) Set best case results into buffer using PBA
+        // 15) Set best case results into buffer using PBA
         FAPI_TRY( mwd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_dimm_rank);
     }
 
-    // 13) set for two or four rank dimms
+    // 16) set for two or four rank dimms
     for (const auto& l_dimm : l_dimms)
     {
         uint8_t l_rank_num = 0;

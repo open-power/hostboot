@@ -733,20 +733,24 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
             }
         }
 
-        // 9) Buffer out of training mode
+        // 9) Works around a chip bug where odd numbers of reads cause corruption
+        FAPI_TRY(conduct_write_read(l_dimm, l_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
+                 l_dimm_rank);
+
+        // 10) Buffer out of training mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 10) Analyze the results across the whole buffer
+        // 11) Analyze the results across the whole buffer
         FAPI_TRY(find_final_results(l_dimm, l_dimm_rank, l_results), "%s rank%u failed find_final_results", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 11) Write the results into the buffer on a per-buffer basis
+        // 12) Write the results into the buffer on a per-buffer basis
         FAPI_TRY(set_final_delays(l_dimm, l_dimm_rank, l_results), "%s rank%u failed set_final_delays", mss::c_str(l_dimm),
                  l_dimm_rank);
     }
 
-    // 12) set for two or four rank dimms
+    // 13) set for two or four rank dimms
     for (const auto& l_dimm : l_dimms)
     {
         uint8_t l_rank_num = 0;

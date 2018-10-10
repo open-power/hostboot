@@ -69,7 +69,7 @@ class mwd_fine : public step
         static constexpr uint8_t MWD_MAX_DELAY = 31;
         static constexpr uint8_t MAX_DQ_PER_BUFFER = 8;
         static constexpr uint8_t MAX_LONG_BIT_COUNT = 64;
-
+        static constexpr uint8_t NUM_RANKS_IN_PAIR = 4;
 
         ///
         /// @class final_nibble_delay
@@ -306,6 +306,20 @@ class mwd_fine : public step
         ///
         const std::vector<uint16_t>& get_minimum_eye_sizes() const
         {
+            // iv_minimum_eye_sizes.size() must be dq numbers of 1 or 2 or 4 rank
+            if((iv_minimum_eye_sizes.size() % MAX_DQ_BITS) != 0)
+            {
+                FAPI_ERR( "MWD iv_minimum_eye_sizes.size() 0x%02x is not the multiple of MAX_DQ_BITS(0x%02x) ",
+                          iv_minimum_eye_sizes.size(), MAX_DQ_BITS);
+            }
+
+            // the max number of iv_minimum_eye_sizes.size() is 4 rank * MAX_DQ_BITS
+            if(iv_minimum_eye_sizes.size() > (MAX_DQ_BITS * NUM_RANKS_IN_PAIR))
+            {
+                FAPI_ERR( "MWD iv_minimum_eye_sizes.size() 0x%02x is more than 4 * MAX_DQ_BITS(0x%02x) ",
+                          iv_minimum_eye_sizes.size(), MAX_DQ_BITS);
+            }
+
             return iv_minimum_eye_sizes;
         }
 
@@ -317,8 +331,17 @@ class mwd_fine : public step
         void setup_minimum_eye_sizes() const
         {
             iv_minimum_eye_sizes.clear();
-            // Note: we want the minimum values at the end of the run, so set this up to be the maximum value
-            iv_minimum_eye_sizes = std::vector<uint16_t>(MAX_DQ_BITS, ~0);
+        }
+
+        ///
+        /// @brief Sets up the minimum eye sizes for the latest MWD_FINE run
+        /// @param[in] i_eye_sizes_dq all dq eye size
+        /// @note This will be used for the buffer RD VREF calibration
+        /// Not needed for 1D calibration
+        ///
+        void set_minimum_eye_sizes(const std::vector<uint16_t> i_eye_sizes_dq) const
+        {
+            iv_minimum_eye_sizes.insert(iv_minimum_eye_sizes.end(), i_eye_sizes_dq.begin(), i_eye_sizes_dq.end());
         }
 
         ///

@@ -145,6 +145,17 @@ class mrd_fine : public step
         }
 
         ///
+        /// @brief Sets up the minimum eye sizes for the latest MRD_FINE run
+        /// @param[in] i_eye_sizes_dq all dq eye size
+        /// @note This will be used for the buffer RD VREF calibration
+        /// Not needed for 1D calibration
+        ///
+        void set_minimum_eye_sizes(const std::vector<uint16_t> i_eye_sizes_dq) const
+        {
+            iv_minimum_eye_sizes = i_eye_sizes_dq;
+        }
+
+        ///
         /// @brief Sets MRD_FINE Delay value
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank to operate on - drives the function space select

@@ -983,6 +983,254 @@ fapi_try_exit:
 
 namespace workarounds
 {
+static const std::vector<std::vector<std::vector<int8_t>>> OFFSET_RD_DELAY_D_SAM =
+{
+    //P0 MCA0
+    {
+        // RANK_PAIR0
+        {
+            2,  2,  1,  0,  4,  4,  2,  2,  5,  4,  5,  5,  2,  2,  2,  2,  0,  1,  1,  1,  1,  1,  1,  3,
+            2,  2,  0,  1,  -1, 0,  0,  -2, 1,  2,  2,  3,  2,  2,  2,  1,  0,  2,  -1, 2,  0,  0,  -1, 0,
+            2,  2,  2,  5,  2,  1,  1,  1,  2,  4,  4,  4,  2,  1,  4,  2,  2,  3,  1,  1,  -1, -1, 1,  1,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            5,  4,  2,  2,  6,  6,  2,  3,  6,  5,  5,  5,  5,  6,  5,  5,  4,  6,  4,  4,  6,  6,  4,  6,
+            2,  4,  1,  2,  1,  1,  1,  0,  4,  5,  5,  6,  4,  6,  6,  4,  4,  4,  2,  5,  2,  2,  1,  2,
+            6,  6,  4,  7,  6,  5,  4,  5,  6,  7,  6,  6,  6,  5,  6,  5,  1,  3,  1,  2,  1,  1,  4,  4,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+
+    //P0 MCA1
+    {
+        // RANK_PAIR0
+        {
+            3,  4,  3,  0,  4,  4,  1,  3,  0,  0,  0,  0,  2,  3,  1,  4,  4,  3,  4,  6,  3,  4,  6,  5,
+            3,  3,  6,  5,  1,  3,  5,  4,  1,  1,  3,  3,  2,  2,  3,  3,  4,  4,  4,  5,  3,  3,  4,  4,
+            1,  2,  3,  3,  2,  2,  2,  3,  3,  3,  6,  6,  4,  3,  3,  2,  2,  2,  4,  4,  2,  2,  4,  3,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            5,  7,  3,  2,  6,  6,  4,  6,  0,  1,  -2, 0,  2,  5,  1,  4,  8,  7,  8,  10, 7,  8,  9,  7,
+            7,  7,  7,  9,  6,  6,  7,  5,  5,  5,  5,  7,  5,  6,  5,  5,  9,  8,  7,  8,  6,  7,  7,  6,
+            6,  6,  5,  6,  7,  7,  6,  6,  6,  5,  7,  6,  6,  5,  6,  6,  5,  5,  5,  6,  5,  6,  6,  5,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+    //P0 MCA2
+    {
+    },
+    //P0 MCA3
+    {
+    },
+
+    //P0 MCA4
+    {
+        // RANK_PAIR0
+        {
+            7,  4,  5,  5,  6,  4,  4,  3,  4,  4,  5,  4,  4,  3,  4,  4,  1,  2,  0,  1,  1,  0,  0,  1,
+            2,  2,  4,  4,  2,  3,  5,  4,  4,  2,  4,  4,  2,  1,  2,  1,  0,  1,  0,  1,  1,  2,  -2, -2,
+            1,  1,  3,  2,  0,  1,  1,  1,  0,  1,  5,  0,  1,  1,  3,  2,  4,  2,  4,  3,  2,  1,  0,  0,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            10, 8,  8,  8,  10, 10, 8,  8,  6,  6,  6,  7,  6,  4,  7,  6,  6,  5,  3,  4,  4,  2,  3,  3,
+            7,  6,  6,  6,  6,  7,  6,  6,  6,  4,  6,  6,  5,  2,  4,  3,  4,  3,  4,  3,  3,  1,  1,  1,
+            6,  6,  5,  4,  4,  3,  3,  3,  5,  5,  6,  3,  5,  4,  5,  4,  7,  5,  5,  4,  4,  2,  1,  1,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+
+    //P0 MCA5
+    {
+        // RANK_PAIR0
+        {
+            4,  1,  1,  0,  3,  4,  -1, 0,  4,  3,  4,  3,  3,  3,  3,  4,  4,  5,  6,  5,  3,  3,  4,  6,
+            5,  6,  6,  6,  4,  3,  5,  5,  2,  3,  3,  2,  3,  1,  2,  2,  5,  5,  8,  7,  4,  4,  3,  5,
+            3,  2,  3,  2,  2,  2,  2,  1,  4,  4,  7,  6,  4,  2,  3,  3,  3,  2,  4,  4,  3,  3,  4,  5,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            6,  4,  2,  4,  5,  5,  1,  2,  6,  5,  4,  4,  5,  4,  4,  3,  8,  8,  8,  8,  6,  6,  6,  8,
+            7,  7,  7,  7,  7,  7,  7,  7,  4,  5,  4,  4,  5,  3,  4,  3,  6,  7,  7,  7,  7,  7,  6,  7,
+            7,  6,  5,  4,  6,  7,  5,  5,  7,  7,  8,  8,  6,  5,  6,  6,  7,  5,  5,  5,  7,  6,  8,  7,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+    //P0 MCA6
+    {
+    },
+    //P0 MCA7
+    {
+    },
+
+    //P1 MCA0
+    {
+        // RANK_PAIR0
+        {
+            4,  3,  1,  0,  4,  4,  3,  3,  3,  3,  4,  3,  2,  2,  2,  3,  0,  2,  2,  2,  0,  0,  1,  2,
+            2,  2,  0,  0,  -2, -1, -2, -2, 1,  2,  2,  4,  2,  3,  2,  2,  1,  2,  -1, 3,  0,  0,  -1, 0,
+            1,  1,  3,  4,  2,  2,  2,  3,  1,  3,  4,  4,  3,  2,  5,  4,  2,  3,  2,  2,  0,  0,  2,  1,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            6,  4,  2,  2,  6,  6,  2,  3,  6,  6,  5,  6,  5,  6,  5,  5,  4,  6,  3,  3,  5,  5,  3,  5,
+            2,  5,  2,  2,  2,  2,  1,  0,  4,  5,  5,  6,  5,  6,  6,  5,  3,  3,  3,  5,  2,  2,  2,  3,
+            6,  6,  4,  6,  6,  4,  4,  4,  6,  7,  6,  7,  6,  5,  5,  5,  1,  3,  1,  3,  1,  1,  5,  4,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+
+    //P1 MCA1
+    {
+        // RANK_PAIR0
+        {
+            2,  4,  2,  0,  4,  4,  2,  3,  1,  0,  -1, -1, 2,  3,  1,  4,  4,  3,  4,  5,  3,  3,  5,  4,
+            5,  4,  7,  5,  1,  3,  5,  4,  2,  1,  4,  4,  2,  3,  3,  3,  4,  3,  3,  5,  3,  3,  3,  3,
+            2,  3,  4,  4,  2,  2,  2,  4,  3,  3,  6,  6,  4,  2,  4,  3,  2,  2,  4,  4,  1,  2,  3,  3,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            4,  7,  4,  1,  6,  6,  3,  6,  1,  1,  -1, 0,  2,  5,  1,  4,  8,  6,  8,  10, 7,  8,  9,  8,
+            6,  6,  7,  8,  7,  7,  8,  6,  5,  6,  5,  6,  5,  6,  6,  6,  9,  9,  7,  8,  7,  8,  8,  6,
+            6,  7,  6,  7,  6,  6,  5,  6,  6,  6,  8,  8,  5,  4,  5,  5,  5,  5,  5,  6,  5,  6,  6,  6,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+    //P1 MCA2
+    {
+    },
+    //P1 MCA3
+    {
+    },
+
+    //P1 MCA4
+    {
+        // RANK_PAIR0
+        {
+            7,  4,  5,  4,  6,  5,  4,  3,  4,  4,  4,  4,  4,  2,  4,  4,  2,  2,  1,  2,  2,  1,  0,  2,
+            2,  2,  5,  4,  3,  3,  5,  5,  3,  1,  2,  2,  1,  0,  0,  -1, 1,  2,  1,  1,  2,  1,  -1, -1,
+            2,  2,  3,  2,  2,  1,  2,  2,  1,  2,  5,  1,  2,  1,  4,  2,  4,  2,  5,  2,  2,  1,  0,  0,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            10, 7,  8,  8,  9,  8,  7,  6,  6,  6,  5,  7,  7,  4,  7,  6,  5,  4,  4,  4,  5,  2,  3,  3,
+            6,  5,  5,  5,  6,  6,  6,  5,  7,  4,  6,  6,  5,  2,  4,  3,  4,  3,  5,  3,  3,  1,  1,  1,
+            7,  6,  5,  4,  5,  3,  3,  3,  5,  6,  6,  3,  5,  4,  5,  3,  6,  4,  5,  3,  3,  2,  1,  1,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+
+    //P1 MCA5
+    {
+        // RANK_PAIR0
+        {
+            5,  2,  3,  1,  3,  3,  1,  1,  5,  4,  5,  4,  3,  4,  3,  5,  4,  4,  6,  5,  2,  2,  4,  6,
+            5,  6,  7,  6,  4,  4,  5,  5,  2,  3,  3,  2,  3,  2,  2,  2,  4,  4,  7,  6,  4,  4,  4,  5,
+            3,  3,  3,  2,  3,  3,  3,  2,  5,  5,  8,  7,  4,  3,  4,  4,  3,  2,  5,  4,  3,  3,  5,  5,
+
+        },
+        // RANK_PAIR1
+        {
+        },
+        // RANK_PAIR2
+        {
+            6,  4,  3,  3,  5,  5,  1,  2,  7,  6,  4,  4,  5,  5,  3,  3,  6,  8,  7,  7,  7,  6,  5,  7,
+            8,  9,  9,  9,  8,  7,  8,  8,  6,  6,  6,  5,  7,  5,  6,  5,  7,  7,  8,  8,  7,  6,  6,  7,
+            7,  6,  5,  4,  7,  7,  5,  5,  8,  8,  8,  9,  6,  5,  7,  6,  6,  5,  5,  6,  6,  6,  7,  6,
+
+        },
+        // RANK_PAIR3
+        {
+        },
+    },
+    //P1 MCA6
+    {
+    },
+    //P1 MCA7
+    {
+    },
+};
+
+///
+/// @brief Record the offset and the corresponding DQ
+///
+struct shift_offset
+{
+    uint8_t mca_num;
+    uint8_t rp_num;
+    uint8_t dq_reg_num;
+    int8_t offset;
+
+    ///
+    /// @brief constructor
+    ///
+    shift_offset(const uint8_t i_mca_num, const uint8_t i_rp_num, const uint8_t i_dq_reg_num,
+                 const int8_t i_offset) :
+        mca_num(i_mca_num),
+        rp_num(i_rp_num),
+        dq_reg_num(i_dq_reg_num),
+        offset(i_offset)
+    {}
+};
+
+// c1 4 2 0 3 need shift for dubai,  dimm dq is 19, register is 56
+static std::vector<shift_offset> WR_DELAY_OFFSET =
+{
+    {1, 2, 56, -4},
+    {9, 2, 56, -5},
+};
+
 
 ///
 /// @brief Clears error firs
@@ -990,6 +1238,45 @@ namespace workarounds
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode clear_firs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+///
+/// @brief Clears error firs
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode clear_firs_mcbist_out_of_sync(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Check if all mca have dimm populated on mcbist
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+bool all_mca_config(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target);
+
+///
+/// @brief Modify the write delay and read delay using offset table
+/// @param[in] i_target the MCA target
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_offset_rd_delay_d_sam the offset table of read delay
+/// @param[in] i_wr_delay_offset the offset table of write delay
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode timing_workaround_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const std::vector<std::vector<std::vector<int8_t>>>& i_offset_rd_delay_d_sam,
+        const std::vector<shift_offset>& i_wr_delay_offset,
+        const uint8_t i_abort_on_error);
+
+///
+/// @brief Modify the write delay and read delay
+/// @param[in] i_target the MCA target
+/// @param[in] i_rp the rank pair on which to operate
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode timing_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint8_t i_abort_on_error);
 
 } // ns workarounds
 
