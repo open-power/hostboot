@@ -495,21 +495,27 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(0);
             }
 
-            //Set the RISK_LEVEL ATTR based off of master Scratch regs
+            //Set the RISK_LEVEL ATTR based off of master Scratch regs if set
+            //otherwise use default level defined by system MRW
             // Risk Level is a 4 bit value that is treated as an integer, but
             //  there is a legacy mode that we need to maintain support for
-            ATTR_RISK_LEVEL_type l_riskLevel = 0;
+            ATTR_RISK_LEVEL_type l_riskLevel =
+              l_pTopLevel->getAttr<ATTR_MRW_DEFAULT_RISK_LEVEL>();
+
+            INITSERVICE::SPLESS::MboxScratch8_t l_scratch8;
+            l_scratch8.data32 =
+              i_masterScratch[INITSERVICE::SPLESS::SCRATCH_8];
 
             // Scratch5:bit2 is legacy risk level bit for backward compatibility
             INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
             l_scratch5.data32 =
               i_masterScratch[INITSERVICE::SPLESS::SCRATCH_5];
-            if( l_scratch5.oldRiskLevel )
+            if( l_scratch5.oldRiskLevel  && l_scratch8.validHwpControlFlags)
             {
                 l_riskLevel = 1;
             }
-            // Scratch3 has the real risk level
-            else
+            // Scratch3 has the real risk level if the valid bit is on
+            else if (l_scratch8.validFwMode)
             {
                 INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
                 l_scratch3.data32 =
