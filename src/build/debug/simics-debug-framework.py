@@ -583,6 +583,66 @@ def magic_instruction_callback(user_arg, cpu, arg):
         percent_s = "%s"
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
+    if arg == 7022:  # MAGIC_SET_LOG_LEVEL
+        hb_hrmor = cpu.hrmor
+        per_node = 0x200000000000   #32TB
+        per_chip = 0x40000000000    #4TB
+        node_num = hb_hrmor//per_node
+        proc_num = hb_hrmor//per_chip
+        comp_id = cpu.r4
+        log_level = cpu.r5
+        # note the following list of component IDs must be kept in sync
+        # with the const defintions in sync with src/include/arch/ppc.H
+        component = [ ".pib_psu",      # comp_id = 0
+                      ".sbe.int_bo" ]  # comp_id = 1
+
+        comp_str = ""
+        # Right now only 2 components are supported, this if check
+        # needs to be updated if more components are supported
+        if comp_id >= 0 or  comp_id <= 1:
+            #check if D1Proc0 exists
+            D1Proc0String = "D1Proc0"
+            try:
+                if(SIM_get_object(D1Proc0String)) :
+                    print (D1Proc0String+" object found")
+                    comp_str = "D%dProc%d"%((node_num + 1), proc_num )
+            except:
+                print("No "+D1Proc0String+" object found")
+
+            #check if P9Proc0 exists
+            P9Proc0String = "p9Proc0"
+            try:
+                if(SIM_get_object(P9Proc0String)) :
+                    print (P9Proc0String+" object found")
+                    comp_str = "p9Proc%d"%(proc_num )
+            except:
+                print("No "+P9Proc0String+" object found")
+
+            if comp_str != "" :
+                comp_str += component[comp_id]
+
+                printCommand = "shell \" date +' MAGIC_SET_LOG_LEVEL(%d) for %s' \""%(log_level, comp_str)
+                SIM_run_alone(run_command, printCommand )
+
+                setLvlCommand = "%s"%(comp_str)+".log-level %d"%(log_level)
+                SIM_run_alone(run_command, setLvlCommand )
+            else :
+                couldNotFindCommand = "shell \" Unable to find valid object on this system type, neither %s nor %s were found \""%(D1Proc0String, P9Proc0String)
+                SIM_run_alone(run_command, couldNotFindCommand )
+
+    if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
+        enable = cpu.r4
+        zero = 0;
+        if enable > zero :
+            startCommand = "output-file-start hostboot_simics_log.txt -append -timestamp"
+            SIM_run_alone(run_command, startCommand )
+            printCommand = "shell \" date +'>> MAGIC_TOGGLE_OUTPUT(1) starting output' \""
+            SIM_run_alone(run_command, printCommand )
+        else :
+            printCommand = "shell \" date +'<< MAGIC_TOGGLE_OUTPUT(0) stopping output' \""
+            SIM_run_alone(run_command, printCommand )
+            stopCommand = "output-file-stop hostboot_simics_log.txt"
+            SIM_run_alone(run_command, stopCommand )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4

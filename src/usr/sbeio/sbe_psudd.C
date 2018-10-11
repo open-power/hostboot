@@ -283,6 +283,10 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
 
         do
         {
+            MAGIC_INST_TOGGLE_OUTPUT(ENABLE_OUTPUT);
+            MAGIC_INST_SET_LOG_LEVEL(PIB_PSU, LOG_LEVEL_MAX);
+            MAGIC_INST_SET_LOG_LEVEL(SBE_INT_BO, LOG_LEVEL_MAX);
+
             // write PSU Request
             errl = writeRequest(i_target,
                                 i_pPsuRequest,
@@ -307,6 +311,10 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
             }
         }
         while (0);
+
+        MAGIC_INST_SET_LOG_LEVEL(PIB_PSU, LOG_LEVEL_OFF);
+        MAGIC_INST_SET_LOG_LEVEL(SBE_INT_BO, LOG_LEVEL_OFF);
+        MAGIC_INST_TOGGLE_OUTPUT(DISABLE_OUTPUT);
 
         iv_psuResponse = nullptr;
         mutex_unlock(&l_psuOpMux);

@@ -449,12 +449,26 @@ inline void MAGIC_INSTRUCTION(int _n)
         "i" ((((n) >> 0) & 0xf) | 16));       \
 }
 
+// Simics components that we can raise log levels for
+// It is important to keep these lined up with
+// simics-debug-framework.py
+constexpr uint8_t PIB_PSU              = 0;
+constexpr uint8_t SBE_INT_BO           = 1;
+
+constexpr uint8_t ENABLE_OUTPUT  = 1;
+constexpr uint8_t DISABLE_OUTPUT = 0;
+
+constexpr uint8_t LOG_LEVEL_OFF  = 0;
+constexpr uint8_t LOG_LEVEL_LOW  = 1;
+constexpr uint8_t LOG_LEVEL_MED  = 2;
+constexpr uint8_t LOG_LEVEL_HIGH = 3;
+constexpr uint8_t LOG_LEVEL_MAX  = 4;
+
 // Arguments to MAGIC_INSTRUCTION().
 // To ensure they do not conflict with haps from other groups (PHYP
 // for example), assign hap numbers in the range 7000..7999 (decimal).
 // Presently, the hap handler for magic instruction is found in
 // src/build/debug/simics-debug-framework.py
-
 enum
 {
     MAGIC_SIMICS_CORESTATESAVE = 10, // Indicate to the PHYP model of simics
@@ -480,6 +494,8 @@ enum
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces
     MAGIC_PRINT_ISTEP         =  7020, // Print istep to simics console
     MAGIC_PRINT_TWO_REGS      =  7021, // Print 2 numbers passed in
+    MAGIC_SET_LOG_LEVEL       =  7022, // Set log level for given component
+    MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 
@@ -535,6 +551,26 @@ enum
 #define MAGIC_DONE_WAITING_FOR_FSP() \
     asm volatile("mr 4, %0" :: "r" (2) : "4"); \
     MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
+/**
+ * @brief set the log level for a given component
+ * @param[in]  _componentId Enum of simics comp ids
+ * @param[in]  _logLevel desired log level
+ */
+#define MAGIC_INST_SET_LOG_LEVEL(_componentId, _logLevel) \
+    asm volatile("mr 4, %0; mr 5, %1" :: \
+                 "r" (_componentId), "r" (_logLevel) : \
+                 "4", "5"); \
+    MAGIC_INSTRUCTION(MAGIC_SET_LOG_LEVEL); \
 
+/**
+ * @brief Toggle simics log collections on or off, if one
+ *        all simics logs will be collected in <sandbox>/simics/hb_simics_log.txt
+ * @param[in]  1 > will enable log collections, 0 stops collection
+ */
+#define MAGIC_INST_TOGGLE_OUTPUT(_enable) \
+    asm volatile("mr 4, %0" :: \
+                 "r" (_enable) : \
+                 "4"); \
+    MAGIC_INSTRUCTION(MAGIC_TOGGLE_OUTPUT); \
 
 #endif
