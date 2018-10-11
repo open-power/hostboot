@@ -212,6 +212,21 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
     size_t l_len = sizeof(uint8_t);
     do
     {
+        // The BMC may have disabled SIO, in which case we use a default set of
+        // boot flags
+        bool haveSio;
+        l_err = SIO::isAvailable(haveSio);
+        if (l_err)
+        {
+            break;
+        }
+
+        if (!haveSio)
+        {
+            processBootFlagsV1(0);
+            break;
+        }
+
         // read the register holding the agreed upon magic
         // number to indicate registers have been configured
 
