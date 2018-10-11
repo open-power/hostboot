@@ -148,6 +148,30 @@
 </hwpError>
 
 <hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_256MB_MINIMUM_ERROR</rc>
+    <description>
+        Secure memory must be a minimum size of 256MB by design.
+    </description>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_256MB_OFFSET_ERROR</rc>
+    <description>
+        Secure memory must be allocated in offsets of 256MB by design.
+    </description>
+    <ffdc>SMF_BASE_ADDR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
     <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_SMF_BAR</rc>
     <description>
         There is not enough memory available for the requested SMF bar sizes.
