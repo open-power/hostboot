@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,23 +102,23 @@ extern uint64_t g_ModulesCompleted;
 #define _TS_CATCH_ABORT(b)
 
 // TS_TRACE
-#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> " __VA_ARGS__ );     \
-    CxxTest::doTrace( )
+#define  TS_TRACE(...) { TRACDCOMP( g_trac_test, "TS_TRACE> " __VA_ARGS__ );     \
+    CxxTest::doTrace( ); }
 
 
 // TS_INFO
-#define  TS_INFO(...)  TRACFCOMP( g_trac_test, "TS_INFO> " __VA_ARGS__ );     \
-    CxxTest::doTrace( )
+#define  TS_INFO(...) { TRACFCOMP( g_trac_test, "TS_INFO> " __VA_ARGS__ );     \
+    CxxTest::doTrace( ); }
 
 
 // TS_WARN
-#define TS_WARN(...)    TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ );    \
-    CxxTest::doWarn( )
+#define TS_WARN(...)   { TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ );    \
+    CxxTest::doWarn( ); }
 
 
 // TS_FAIL
-#define TS_FAIL(...)    TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
-    CxxTest::doFailTest( __FILE__, __LINE__ )
+#define TS_FAIL(...)   { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
+    CxxTest::doFailTest( __FILE__, __LINE__ ); }
 
 // Statistics structure for passing original pointers to the runtime test suite.
 struct CxxTestStats
