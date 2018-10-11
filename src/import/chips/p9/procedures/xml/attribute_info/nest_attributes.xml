@@ -1241,7 +1241,7 @@
   <id>ATTR_PROC_SMF_BAR_SIZE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> The total amount of memory a user has requested to reserve for
-                secure memory functions.
+                secure memory functions. Minimum requirement of 256MB.
                 Used by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
@@ -1257,10 +1257,6 @@
       1_GB = 0x0000000040000000,
     512_MB = 0x0000000020000000,
     256_MB = 0x0000000010000000,
-    128_MB = 0x0000000008000000,
-     64_MB = 0x0000000004000000,
-     32_MB = 0x0000000002000000,
-     16_MB = 0x0000000001000000,
       ZERO = 0x0000000000000000
   </enum>
   <initToZero/>
