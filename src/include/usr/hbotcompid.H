@@ -374,7 +374,7 @@ const char SBEIO_COMP_NAME[] = "sbeio";
 
 // OCCC id 2A00 matches OCCC id on FSP
 /** @name OCCC
- * OCC Thermal Management Device
+ * On Chip Controller: Power & Thermal Management
  */
 const compId_t OCCC_COMP_ID = 0x2A00;
 const char OCCC_COMP_NAME[] = "occc";
@@ -386,6 +386,22 @@ const char OCCC_COMP_NAME[] = "occc";
 //@{
 const compId_t TRBOOT_COMP_ID = 0x2B00;
 const char TRBOOT_COMP_NAME[] = "trboot";
+//@}
+
+// PGPE id 2E00 matches PGPE id on FSP
+/** @name PGPE
+ * Power Managment HCODE
+ */
+const compId_t PGPE_COMP_ID = 0x2E00;
+const char PGPE_COMP_NAME[] = "pgpe";
+//@}
+
+// XGPE id 2F00 matches XGPE id on FSP
+/** @name XGPE
+ * Power Managment HCODE
+ */
+const compId_t XGPE_COMP_ID = 0x2F00;
+const char XGPE_COMP_NAME[] = "xgpe";
 //@}
 
 /** @name RESERVED
