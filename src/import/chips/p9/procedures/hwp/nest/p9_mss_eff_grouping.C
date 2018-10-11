@@ -1443,6 +1443,15 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setSMFBaseSizeData(
                 "smfSupported 0x%llX, smfConfig 0x%llX, smfEnabled 0x%llX, smfSize 0x%.16llX",
                 l_smfSupported, l_smfConfig, l_smfEnabled, l_smfTotalSize);
 
+    // Ensure that requested secure memory size meets minimum design requirements
+    FAPI_ASSERT((l_smfTotalSize & 0xFFFFFFFFF0000000) != 0,
+                fapi2::MSS_EFF_GROUPING_SMF_256MB_MINIMUM_ERROR()
+                .set_SMF_TOTAL_BAR_SIZE(l_smfTotalSize),
+                "EffGroupingBaseSizeData::setSMFBaseSizeData: Requested size of "
+                "secure memory must meet design minimum requirement of 256MB. "
+                "smfSize 0x%.16llX",
+                l_smfTotalSize);
+
     // Setup mem base and size working array depending on mirror setting
     if (i_sysAttrs.iv_selectiveMode ==
         fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
@@ -1525,6 +1534,17 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setSMFBaseSizeData(
     // Also sets addr(15) to indicate secure memory base address
     iv_smf_bar_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
     iv_smf_bar_base |= ((uint64_t)1 << (63 - 15));
+
+    // Ensure that requested secure memory offset meets design requirements
+    FAPI_ASSERT((iv_smf_bar_base & 0x000000000FFFFFFF) == 0,
+                fapi2::MSS_EFF_GROUPING_SMF_256MB_OFFSET_ERROR()
+                .set_SMF_BASE_ADDR(iv_smf_bar_base),
+                "EffGroupingBaseSizeData::setSMFBaseSizeData: Secure memory regions "
+                "are required by design to be on 256MB offsets. "
+                "smfBaseAddr 0x%.16llX",
+                iv_smf_bar_base);
+
+
 
     // Allocate SMF base address and size for region where SMF starts
     l_smf_bases[l_index] = l_mem_bases[l_index] + l_mem_sizes[l_index];
