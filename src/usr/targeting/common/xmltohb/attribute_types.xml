@@ -7184,6 +7184,21 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 </attribute>
 
 <attribute>
+   <id>MRW_DEFAULT_RISK_LEVEL</id>
+   <description>
+        Attribute indicating the default risk level for the system. Applied if
+        scratch registers are not overriden
+   </description>
+   <persistency>non-volatile</persistency>
+   <readable/>
+   <simpleType>
+     <uint32_t>
+       <default>0x0</default>
+     </uint32_t>
+   </simpleType>
+</attribute>
+
+<attribute>
     <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
     <description>Machine Readable Workbook throttle value for denominator cfg_nm_m</description>
     <simpleType>
