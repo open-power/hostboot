@@ -692,7 +692,7 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
     // Alternate Memory MCFGPA
     for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
     {
-        if ( i_portInfo[0].altMemValid[ii] )
+        if ( o_mcBarData.MCFGP_valid && i_portInfo[0].altMemValid[ii] )
         {
             o_mcBarData.MCFGPA_HOLE_valid[ii] = 1;
             o_mcBarData.MCFGPA_HOLE_LOWER_addr[ii] = i_portInfo[0].altBaseAddr[ii];
@@ -706,7 +706,7 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
             o_mcBarData.MCFGPA_HOLE_UPPER_addr[ii] = 0;
         }
 
-        if ( i_portInfo[1].altMemValid[ii] )
+        if ( o_mcBarData.MCFGPM_valid && i_portInfo[1].altMemValid[ii] )
         {
             o_mcBarData.MCFGPMA_HOLE_valid[ii] = 1;
             o_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] = i_portInfo[1].altBaseAddr[ii];
@@ -723,7 +723,7 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
     }
 
     // SMF Section of MCFGPA and MCFGPMA
-    if ( i_portInfo[0].smfMemValid )
+    if ( o_mcBarData.MCFGP_valid && i_portInfo[0].smfMemValid )
     {
         o_mcBarData.MCFGPA_SMF_valid = 1;
         o_mcBarData.MCFGPA_SMF_LOWER_addr = i_portInfo[0].smfBaseAddr;
@@ -736,7 +736,7 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
         o_mcBarData.MCFGPA_SMF_UPPER_addr = 0;
     }
 
-    if ( i_portInfo[1].smfMemValid )
+    if ( o_mcBarData.MCFGPM_valid && i_portInfo[1].smfMemValid )
     {
         o_mcBarData.MCFGPMA_SMF_valid = 1;
         o_mcBarData.MCFGPMA_SMF_LOWER_addr = i_portInfo[1].smfBaseAddr;
@@ -890,6 +890,12 @@ void displayMCBarData(const uint8_t i_mcPosition,
     FAPI_INF("        MCFGPM_valid %u", i_mcBarData.MCFGPM_valid);
     FAPI_INF("        MCFGPM_group_size %u", i_mcBarData.MCFGPM_group_size);
     FAPI_INF("        MCFGPM_groupBaseAddr 0x%.16llX", i_mcBarData.MCFGPM_groupBaseAddr);
+    FAPI_INF("        MCFGPA_SMF_valid %u", i_mcBarData.MCFGPA_SMF_valid);
+    FAPI_INF("        MCFGPA_SMF_LOWER_addr 0x%.16llX", i_mcBarData.MCFGPA_SMF_LOWER_addr);
+    FAPI_INF("        MCFGPA_SMF_UPPER_addr 0x%.16llX", i_mcBarData.MCFGPA_SMF_UPPER_addr);
+    FAPI_INF("        MCFGPMA_SMF_valid %u", i_mcBarData.MCFGPMA_SMF_valid);
+    FAPI_INF("        MCFGPMA_SMF_LOWER_addr 0x%.16llX", i_mcBarData.MCFGPMA_SMF_LOWER_addr);
+    FAPI_INF("        MCFGPMA_SMF_UPPER_addr 0x%.16llX", i_mcBarData.MCFGPMA_SMF_UPPER_addr);
 
     for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
     {
