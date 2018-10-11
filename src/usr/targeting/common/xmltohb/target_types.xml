@@ -1352,6 +1352,9 @@
       <id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id>
     </attribute>
     <attribute>
+      <id>MRW_DEFAULT_RISK_LEVEL</id>
+    </attribute>
+    <attribute>
       <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
     </attribute>
     <attribute>
