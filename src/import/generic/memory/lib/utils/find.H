@@ -131,6 +131,30 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fa
 }
 
 ///
+/// @brief find the MEM_PORT given a MEM_PORT
+/// @param[in] i_self the fapi2 target MEM_PORT
+/// @return a MEM_PORT target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_self)
+{
+    return i_self;
+}
+
+///
+/// @brief find the OCMB_CHIP given a OCMB_CHIP
+/// @param[in] i_self the fapi2 target OCMB_CHIP
+/// @return a OCMB_CHIP target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> find_target( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_self)
+{
+    return i_self;
+}
+
+///
 /// @brief find the McBIST given a DIMM
 /// @param[in] i_target the fapi2 target DIMM
 /// @return a McBIST target.
@@ -151,6 +175,20 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Tar
 {
     return i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>()
            .getParent<fapi2::TARGET_TYPE_DMI>()
+           .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+}
+
+///
+/// @brief find the PROC_CHIP given a OCMB_CHIP
+/// @param[in] i_target the fapi2 target OCMB_CHIP
+/// @return a PROC_CHIP target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+           .getParent<fapi2::TARGET_TYPE_MC>()
            .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 }
 
@@ -199,6 +237,30 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
               fapi2::TargetState i_state )
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_DMI>(i_state);
+}
+
+///
+/// @brief find all the OCMB_CHIPs connected to a PROC_CHIP
+/// @param[in] i_target a fapi2::Target PROC_CHIP
+/// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+              fapi2::TargetState i_state )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_ocmbs;
+
+    for (const auto& l_mc : i_target.getChildren<fapi2::TARGET_TYPE_MC>(i_state))
+    {
+        for (const auto& l_omi : l_mc.getChildren<fapi2::TARGET_TYPE_OMI>(i_state))
+        {
+            auto l_these_ocmbs( l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state) );
+            l_ocmbs.insert(l_ocmbs.end(), l_these_ocmbs.begin(), l_these_ocmbs.end());
+        }
+    }
+
+    return l_ocmbs;
 }
 
 ///
@@ -324,6 +386,7 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_MCS>(i_state);
 }
+
 ///
 /// @brief find all the MCS connected to an MCBIST
 /// @param[in] i_target a fapi2::Target MCBIST

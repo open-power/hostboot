@@ -1619,9 +1619,9 @@ fapi2::ReturnCode get_spd_decoder_list( const fapi2::Target<T>& i_target,
     for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
         std::vector<uint8_t> l_spd;
-        FAPI_TRY( get_raw_data(l_dimm, l_spd) );
+        FAPI_TRY( get_raw_data(l_dimm, l_spd), "%s Failed get_raw_data", mss::c_str(l_dimm) );
 
-        FAPI_TRY( add_decoder_to_list(l_dimm, l_spd, o_spd_decoder) );
+        FAPI_TRY( add_decoder_to_list(l_dimm, l_spd, o_spd_decoder), "%s Failed add_decoder_to_list", mss::c_str(l_dimm) );
     }// dimms
 
 fapi_try_exit:

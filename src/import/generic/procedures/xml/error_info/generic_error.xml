@@ -292,6 +292,26 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR type.</description>
+    <ffdc>EXPECTED_OPERABLE</ffdc>
+    <ffdc>EXPECTED_ENDURANT</ffdc>
+    <ffdc>ACTUAL_OPERABLE</ffdc>
+    <ffdc>ACTUAL_ENDURANT</ffdc>
+   <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
     <description>
       When considering the frequencies in the MRW and the max supported
