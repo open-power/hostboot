@@ -50,7 +50,6 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9a_mss_freq_system(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target);
-
 }
 
 #endif
