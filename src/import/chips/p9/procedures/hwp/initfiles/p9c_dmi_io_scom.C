@@ -56,7 +56,6 @@ constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b0010111 = 0b0010111;
 constexpr uint64_t literal_0b00010 = 0b00010;
-constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0010 = 0b0010;
 constexpr uint64_t literal_0b0010001 = 0b0010001;
 constexpr uint64_t literal_0b0011000 = 0b0011000;
@@ -4286,7 +4285,7 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
 
             if (l_def_IS_HW)
             {
-                l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b0001 );
+                l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b0010 );
             }
             else if (l_def_IS_SIM)
             {
