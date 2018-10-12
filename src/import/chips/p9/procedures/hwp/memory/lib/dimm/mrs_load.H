@@ -69,6 +69,7 @@ enum mrs_bad_field
     RTT_WR = 12,
     MPR_PAGE = 13,
     MPR_MODE = 14,
+    WR_LVL = 15,
 
     // Following is for MR_NUMBER entry into the BAD_MR_PARAM ffdc
     // Set to random value so it won't be confused with an actual MR number
