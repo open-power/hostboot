@@ -35,6 +35,16 @@
 
 #include <p9a_mss_volt.H>
 
+// std lib
+#include <vector>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/voltage/gen_mss_volt.H>
+
 ///
 /// @brief Calculate and save off rail voltages
 /// @param[in] i_targets vector of ports (e.g., MEM_PORT)
@@ -42,5 +52,14 @@
 ///
 fapi2::ReturnCode p9a_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_targets )
 {
-    return fapi2::FAPI2_RC_SUCCESS;
+    for (const auto& l_port : i_targets)
+    {
+        FAPI_TRY( (mss::setup_voltage_rail_values<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>(l_port)),
+                  "%s Failed setup_voltage_rail_values", mss::c_str(l_port) );
+    } // port
+
+    FAPI_INF("End mss volt");
+
+fapi_try_exit:
+    return fapi2::current_err;
 } // p9_mss_volt
