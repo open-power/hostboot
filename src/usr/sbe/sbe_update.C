@@ -36,6 +36,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/target.H>
 #include <targeting/targplatutil.H>
+#include <targeting/attrrp.H>
 #include <util/align.H>
 #include <util/crc32.H>
 #include <util/misc.H>
@@ -277,7 +278,7 @@ namespace SBE
                 {
                     // Sync all attributes to FSP before we quiesce all the
                     // SBEs.
-                    err = syncAllAttributesToFsp();
+                    err = TARGETING::AttrRP::syncAllAttributesToFsp();
                     if( err )
                     {
                         // Failed to sync all attributes to FSP; this is not
@@ -5535,7 +5536,7 @@ errlHndl_t sbeDoReboot( void )
            && !g_do_hw_keys_hash_transition)
         {
             // Sync all attributes to the FSP before doing the Shutdown
-            err = syncAllAttributesToFsp();
+            err = TARGETING::AttrRP::syncAllAttributesToFsp();
             if( err )
             {
                 // Something failed on the sync.  Commit the error here

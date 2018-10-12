@@ -49,6 +49,7 @@
 #include <initservice/initserviceif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
+#include <targeting/attrrp.H>
 #include <fapi2/plat_attr_override_sync.H>
 #include <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include <mbox/mboxif.H>                 // register mailbox
@@ -1013,7 +1014,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 TRACFCOMP(g_trac_initsvc,
                           INFO_MRK"doIstep: sync attributes to FSP");
 
-                errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
+                errlHndl_t l_errl = TARGETING::AttrRP::syncAllAttributesToFsp();
 
                 if(l_errl)
                 {

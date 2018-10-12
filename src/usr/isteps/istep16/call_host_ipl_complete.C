@@ -303,7 +303,7 @@ void* call_host_ipl_complete (void *io_pArgs)
         }
 
         // Sync attributes to Fsp
-        l_err = syncAllAttributesToFsp();
+        l_err = TARGETING::AttrRP::syncAllAttributesToFsp();
 
         if( l_err )
         {

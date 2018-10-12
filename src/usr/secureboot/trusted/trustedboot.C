@@ -39,6 +39,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/attrsync.H>
+#include <targeting/attrrp.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/commontargeting.H>
@@ -1289,7 +1290,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 // TPM alignment check.
                 if(INITSERVICE::spBaseServicesEnabled())
                 {
-                    err = TARGETING::syncAllAttributesToFsp();
+                    err = TARGETING::AttrRP::syncAllAttributesToFsp();
                     if(err)
                     {
                         TRACFCOMP(g_trac_trustedboot, ERR_MRK"Could not sync"

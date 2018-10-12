@@ -229,9 +229,19 @@ errlHndl_t MailboxSp::_init()
     if(!err)
     {
         // call ErrlManager function - tell him that MBOX is ready!
+        // Note: this API does -not- return an error log, unlike the one below.
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::MBOX);
-        TARGETING::AttrRP::notifyResourceReady(
-            TARGETING::AttrRP::RESOURCE::MAILBOX);
+
+        // Inform attribute resource provider to enable FSP attribute sync
+        // functionality
+        err = TARGETING::AttrRP::notifyResourceReady(
+                  TARGETING::AttrRP::RESOURCE::MAILBOX);
+        if(err)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK
+                      "MailboxSp::_init: Failed in call to "
+                      "TARGETING::AttrRP::notifyResourceReady.");
+        }
     }
 
 #endif

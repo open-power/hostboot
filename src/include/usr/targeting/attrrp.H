@@ -347,10 +347,12 @@ class AttrRP
         {
             // Prepare runtime for secure transition of attributes
             MSG_MM_RP_RUNTIME_PREP        = 0x00000002,
-            // Arm service to synchronize attributes when Hostboot shuts down
-            MSG_PRIME_SHUTDOWN_ATTR_SYNC  = 0x00000003,
-            // Invoke attribute synchronization at shutdown
-            MSG_INVOKE_SHUTDOWN_ATTR_SYNC = 0x00000004,
+            // Arm service to synchronize attributes
+            MSG_PRIME_ATTR_SYNC           = 0x00000003,
+            // Invoke attribute synchronization
+            MSG_INVOKE_ATTR_SYNC          = 0x00000004,
+            // Sentinel value for when message type is not yet known
+            MSG_INVALID                   = 0xFFFFFFFF,
         };
 
         /**
@@ -365,12 +367,18 @@ class AttrRP
         };
 
         /**
-         *  @brief Notifies the attribute resource provider that a specific
-         *      resource of interest is ready/available
+         *  @brief This is a static wrapper around _notifyResourceReady
          *
-         *  @param[in] i_resource Resource that is ready/available
+         *  @see _notifyResourceReady for documentation
          */
-        static void notifyResourceReady(RESOURCE i_resource);
+        static errlHndl_t notifyResourceReady(RESOURCE i_resource);
+
+        /**
+         *  @brief This is a static wrapper around _syncAllAttributesToFsp
+         *
+         *  @see _syncAllAttributesToFsp for documentation
+         */
+        static errlHndl_t syncAllAttributesToFsp();
 
         /**
         *  @brief Modifies the memory R/W permissions on VMM pages for a
@@ -483,7 +491,7 @@ class AttrRP
 #ifndef __HOSTBOOT_RUNTIME
             : iv_msgQ(nullptr), iv_attrSyncMsgQ(msg_q_create()),
               iv_sections(nullptr), iv_sectionCount(0),
-              iv_shutdownAttrSyncPrimed(false),iv_isMpipl(false)
+              iv_attrSyncPrimed(false),iv_isMpipl(false)
 #else
             : iv_isTempInstance(false), iv_isMpipl(false)
 #endif
@@ -621,13 +629,44 @@ class AttrRP
          *      resource of interest is ready/available
          *
          *  @param[in] i_resource Resource that is ready/available
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Resource notification successful
+         *  @retval !nullptr Resource notification failed; handle
+         *      references valid error log
          */
-        void _notifyResourceReady(RESOURCE i_resource) const;
+        errlHndl_t _notifyResourceReady(RESOURCE i_resource) const;
 
         /**
-         *  @brief Synchronizes attributes to FSP during a user space initiated
-         *      shutdown
+         *  @brief Forces attributes to sync down to FSP
          *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Attribute synchronization successful
+         *  @retval !nullptr Attribute synchronization failed; handle
+         *      references valid error log
+         */
+        errlHndl_t _syncAllAttributesToFsp() const;
+
+        /**
+         *  @brief Sends message of the given type to the attribute resource
+         *      provider
+         *
+         *  @param[in] i_msgType Type of message to send
+         *  @param[in] i_sync    true, if the message is synchronous, false
+         *      otherwise
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Message processed successfully
+         *  @retval !nullptr Message processing failed; handle references
+         *      valid error log
+         */
+        errlHndl_t _sendAttrSyncMsg(
+            ATTRRP_MSG_TYPE i_msgType,
+            bool            i_sync) const;
+
+        /**
+         *  @brief Synchronizes attributes to FSP
+         *  *
          *  @par Detailed Description:
          *      During a user space initiated shutdown, the init service calls
          *      the resource provider shutdown handler which attempts to
@@ -635,9 +674,16 @@ class AttrRP
          *      the FSP must be available, the mailbox must be online (and have
          *      earlier called notifyResourceReady API to arm the
          *      synchronization), and SBE must not be quiesced (or mailbox
-         *      traffic going through the SBE FIFO in secure mode will fail)
+         *      traffic going through the SBE FIFO in secure mode will fail).
+         *      Various isteps also invoke attribute synchronization explicitly
+         *      via this API when needed.
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Attribute synchronization successful
+         *  @retval !nullptr Attribute synchronization failed; handle
+         *      references valid error log
          */
-        void invokeShutdownAttrSync() const;
+        errlHndl_t _invokeAttrSync() const;
 
         /**
          *  @brief Processes daemon messages
@@ -764,9 +810,8 @@ class AttrRP
         // Count of attribute sections.
         size_t iv_sectionCount;
 
-        // Whether service is primed to invoke attribute synchronization when
-        // Hostboot shuts down under user space control
-        bool iv_shutdownAttrSyncPrimed;
+        // Whether service is primed to invoke attribute synchronization
+        bool iv_attrSyncPrimed;
 #else
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;

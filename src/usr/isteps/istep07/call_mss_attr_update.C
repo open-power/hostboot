@@ -52,6 +52,7 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/attrrp.H>
 
 // HWAS
 #include    <hwas/common/hwas.H>
@@ -309,7 +310,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
         do
         {
             // Sync all attributes to the FSP
-            l_err = syncAllAttributesToFsp();
+            l_err = TARGETING::AttrRP::syncAllAttributesToFsp();
             if( l_err )
             {
                 // Something failed on the sync.  Commit the error here

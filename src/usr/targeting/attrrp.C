@@ -153,30 +153,46 @@ namespace TARGETING
         io_taskRetErrl = l_errl;
     }
 
-    void AttrRP::notifyResourceReady(const RESOURCE i_resource)
+    errlHndl_t AttrRP::notifyResourceReady(const RESOURCE i_resource)
     {
-        Singleton<AttrRP>::instance()._notifyResourceReady(i_resource);
+        return Singleton<AttrRP>::instance()._notifyResourceReady(i_resource);
     }
 
-    void AttrRP::_notifyResourceReady(const RESOURCE i_resource) const
+    errlHndl_t AttrRP::syncAllAttributesToFsp()
+    {
+        return Singleton<AttrRP>::instance()._syncAllAttributesToFsp();
+    }
+
+    errlHndl_t AttrRP::_syncAllAttributesToFsp() const
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK
-                  "AttrRP::notifyResourceReady: resource type = 0x%02X.",
+                  "AttrRP::_syncAllAttributesToFsp");
+        auto pError = _sendAttrSyncMsg(MSG_INVOKE_ATTR_SYNC,true);
+        TRACFCOMP(g_trac_targeting, EXIT_MRK
+                  "AttrRP::_syncAllAttributesToFsp");
+        return pError;
+    }
+
+    errlHndl_t AttrRP::_notifyResourceReady(const RESOURCE i_resource) const
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK
+                  "AttrRP::_notifyResourceReady: resource type = 0x%02X.",
                   i_resource);
 
-        auto pMsg = msg_allocate();
+        auto msgType = MSG_INVALID;
+        const bool sync=false;
 
         switch (i_resource)
         {
             case MAILBOX:
                 {
-                    pMsg->type = MSG_PRIME_SHUTDOWN_ATTR_SYNC;
+                    msgType = MSG_PRIME_ATTR_SYNC;
                 }
                 break;
             default:
                 {
                     TRACFCOMP(g_trac_targeting, ERR_MRK
-                              "AttrRP::notifyResourceReady: Bug! Unhandled "
+                              "AttrRP::_notifyResourceReady: Bug! Unhandled "
                               "resource type = 0x%02X.",
                               i_resource);
                     assert(0);
@@ -184,50 +200,135 @@ namespace TARGETING
                 break;
         }
 
-        auto rc = msg_send(iv_attrSyncMsgQ,pMsg);
-        if (rc)
+        errlHndl_t pError = _sendAttrSyncMsg(msgType,sync);
+        if(pError)
         {
             TRACFCOMP(g_trac_targeting, ERR_MRK
-                      "AttrRP::notifyResourceReady: Failed in msg_send for "
-                      "resource type = 0x%02X, message type = 0x%08X; rc = %d.",
-                      i_resource,pMsg->type,rc);
-            /*@
-             *  @errortype
-             *  @moduleid   TARG_NOTIFY_RESOURCE_READY
-             *  @reasoncode TARG_RC_ATTR_MSG_FAIL
-             *  @userdata1  Resource type
-             *  @userdata2  Return code
-             *  @devdesc    Failed to alert attribute resource provider that a
-             *      specific resource is available.  Various shutdown
-             *      steps, such as synchronizing attributes to FSP, may not
-             *      trigger as a result.
-             *  @custdesc   Unexpected boot firmware error occurred
-             */
-            errlHndl_t pError = new ErrlEntry(
-                ERRL_SEV_UNRECOVERABLE,
-                TARG_NOTIFY_RESOURCE_READY,
-                TARG_RC_ATTR_MSG_FAIL,
-                i_resource,
-                static_cast<uint64_t>(rc),
-                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-            errlCommit(pError,TARG_COMP_ID);
+                      "AttrRP::_notifyResourceReady: Failed in call to "
+                      "_sendAttrSyncMsg; msgType = 0x%08X, sync = %d.",
+                      msgType,sync);
         }
 
         TRACFCOMP(g_trac_targeting, EXIT_MRK
-                  "AttrRP::notifyResourceReady: rc = %d.",rc);
+                  "AttrRP::_notifyResourceReady");
+
+        return pError;
     }
 
-    void AttrRP::invokeShutdownAttrSync() const
+    errlHndl_t AttrRP::_sendAttrSyncMsg(
+        const ATTRRP_MSG_TYPE i_msgType,
+        const bool            i_sync) const
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK
+                  "AttrRP::_sendAttrSyncMsg: i_msgType = 0x%08X, i_sync = %d.",
+                  i_msgType,
+                  i_sync);
+
+        errlHndl_t pError = nullptr;
+        auto pMsg = msg_allocate();
+        pMsg->type = i_msgType;
+        int rc = 0;
+
+        if(sync)
+        {
+            rc = msg_sendrecv(iv_attrSyncMsgQ,pMsg);
+        }
+        else
+        {
+            rc = msg_send(iv_attrSyncMsgQ,pMsg);
+        }
+
+        bool logError=false;
+        uint32_t plid=0;
+        int msgRc=0;
+
+        if (rc)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK
+                      "AttrRP::_sendAttrSyncMsg: Failed in %s. "
+                      "Message type = 0x%08X, sync = %d, rc = %d.",
+                      sync ? "msg_sendrecv" : "msg_send",
+                      pMsg->type,sync,rc);
+            logError=true;
+        }
+        else if(sync)
+        {
+            if(pMsg->data[1])
+            {
+                msgRc=static_cast<int>(pMsg->data[1]);
+                TRACFCOMP(g_trac_targeting, ERR_MRK
+                          "AttrRP::_sendAttrSyncMsg: Message (type = 0x%08X) "
+                          "returned with rc = %d.",
+                          pMsg->type,msgRc);
+                logError=true;
+            }
+
+            if(pMsg->extra_data)
+            {
+                plid=static_cast<uint32_t>(
+                    reinterpret_cast<uint64_t>(pMsg->extra_data));
+                TRACFCOMP(g_trac_targeting, ERR_MRK
+                          "AttrRP::_sendAttrSyncMsg: Message (type = 0x%08X) "
+                          "returned with failure related to PLID = 0x%08X.",
+                          pMsg->type,plid);
+                logError=true;
+            }
+        }
+
+        if(logError)
+        {
+            /*@
+             *  @errortype
+             *  @moduleid         TARG_SEND_ATTR_SYNC_MSG
+             *  @reasoncode       TARG_RC_ATTR_MSG_FAIL
+             *  @userdata1[00:31] Message type
+             *  @userdata1[32:63] API return code (from msg_send or
+             *      msg_sendrecv; 0=N/A)
+             *  @userdata2[00:31] Message return code (0=N/A)
+             *  @userdata2[32:63] Message error PLID (0=N/A)
+             *  @devdesc          Failed to either send/(receive) the requested
+             *      message to/from the attribute resource provider OR the
+             *      provider failed executing the message request.
+             *  @custdesc         Unexpected boot firmware error occurred
+             */
+            pError = new ErrlEntry(
+                ERRL_SEV_UNRECOVERABLE,
+                TARG_SEND_ATTR_SYNC_MSG,
+                TARG_RC_ATTR_MSG_FAIL,
+                TWO_UINT32_TO_UINT64(pMsg->type,rc),
+                TWO_UINT32_TO_UINT64(msgRc,plid),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            pError->collectTrace(TARG_COMP_NAME);
+            if(plid)
+            {
+                pError->plid(plid);
+            }
+        }
+
+        if(sync)
+        {
+            msg_free(pMsg);
+            pMsg = nullptr;
+        }
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK
+                  "AttrRP::_sendAttrSyncMsg: rc = %d, msgRc = %d, plid = "
+                  "0x%08X.",
+                  rc,msgRc,plid);
+
+        return pError;
+    }
+
+    errlHndl_t AttrRP::_invokeAttrSync() const
     {
         errlHndl_t pError = nullptr;
 
         do {
 
-        if(!iv_shutdownAttrSyncPrimed)
+        if(!iv_attrSyncPrimed)
         {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync: "
-                      "Shutdown attribute sync not primed; suppressing "
+            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                      "Attribute sync not primed; suppressing "
                       "attribute sync.");
             break;
         }
@@ -236,7 +337,7 @@ namespace TARGETING
         // sync request
         if(!INITSERVICE::spBaseServicesEnabled())
         {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync: "
+            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
                       "FSP services not available; suppressing "
                       "attribute sync.");
             break;
@@ -252,7 +353,7 @@ namespace TARGETING
                                                 pMasterProc);
         if(pError)
         {
-            TRACFCOMP(g_trac_targeting, ERR_MRK "invokeShutdownAttrSync: "
+            TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeAttrSync: "
                       "Failed to determine master processor target; "
                       "suppressing attribute sync.");
             break;
@@ -260,31 +361,30 @@ namespace TARGETING
 
         if(pMasterProc->getAttr<TARGETING::ATTR_ASSUME_SBE_QUIESCED>())
         {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync; SBE "
+            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync; SBE "
                       "is quiesced; suppressing attribute sync.");
             break;
         }
 
-        pError = syncAllAttributesToFsp();
+        pError = TARGETING::syncAllAttributesToFsp();
         if(pError)
         {
-            TRACFCOMP(g_trac_targeting, ERR_MRK "invokeShutdownAttrSync: "
+            TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeAttrSync: "
                       "Failed syncing attributes to FSP.");
             break;
         }
 
         } while(0);
 
-        if(pError)
-        {
-            errlCommit(pError,TARG_COMP_ID);
-        }
+        return pError;
     }
 
     void AttrRP::attrSyncTask()
     {
         // Crash Hostboot if this task dies
         (void)task_detach();
+
+        errlHndl_t pError=nullptr;
 
         TRACFCOMP(g_trac_targeting, ENTER_MRK "AttrRP::attrSyncTask.");
 
@@ -295,11 +395,12 @@ namespace TARGETING
         // registration happened already.
         INITSERVICE::registerShutdownEvent(TARG_COMP_ID,
                                            iv_attrSyncMsgQ,
-                                           MSG_INVOKE_SHUTDOWN_ATTR_SYNC,
+                                           MSG_INVOKE_ATTR_SYNC,
                                            INITSERVICE::NO_PRIORITY);
         while(1)
         {
             int rc = 0;
+            uint32_t plid = 0;
 
             auto pMsg = msg_wait(iv_attrSyncMsgQ);
             if (!pMsg)
@@ -316,22 +417,22 @@ namespace TARGETING
 
             switch(pMsg->type)
             {
-                case MSG_PRIME_SHUTDOWN_ATTR_SYNC:
+                case MSG_PRIME_ATTR_SYNC:
                     {
-                        iv_shutdownAttrSyncPrimed=true;
+                        iv_attrSyncPrimed=true;
                         TRACFCOMP(g_trac_targeting, INFO_MRK
                             "AttrRP: attrSyncTask: "
                             "Attribute provider primed to synchronize "
-                            "attributes at shutdown.");
+                            "attributes.");
                     }
                     break;
-                case MSG_INVOKE_SHUTDOWN_ATTR_SYNC:
+                case MSG_INVOKE_ATTR_SYNC:
                     {
                         TRACFCOMP(g_trac_targeting, INFO_MRK
                             "AttrRP: attrSyncTask: "
-                            "Invoking shutdown attribute sync.");
+                            "Invoking attribute sync.");
 
-                        (void)invokeShutdownAttrSync();
+                        pError = _invokeAttrSync();
                     }
                     break;
                default:
@@ -360,13 +461,18 @@ namespace TARGETING
                  *     sync daemon.
                  * @custdesc   Unexpected boot firmware failure
                  */
-                auto pError = new ErrlEntry(
+                pError = new ErrlEntry(
                     ERRL_SEV_UNRECOVERABLE,
                     TARG_ATTR_SYNC_TASK,
                     TARG_RC_UNSUPPORTED_ATTR_SYNC_MSG,
                     TO_UINT64(rc),
                     TO_UINT64(pMsg->type),
                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            }
+
+            if(pError)
+            {
+                plid = pError->plid();
                 errlCommit(pError,TARG_COMP_ID);
             }
 
@@ -381,7 +487,9 @@ namespace TARGETING
             else
             {
                 // Respond to request.
-                pMsg->data[1] = rc;
+                pMsg->data[1] = static_cast<uint64_t>(rc);
+                pMsg->extra_data = reinterpret_cast<void*>(
+                    static_cast<uint64_t>(plid));
                 rc = msg_respond(iv_attrSyncMsgQ, pMsg);
                 if (rc)
                 {
