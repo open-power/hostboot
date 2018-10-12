@@ -59,6 +59,10 @@
 #include <lib/phy/seq.H>
 #include <lib/phy/read_cntrl.H>
 
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_dwl.H>
+#endif
+
 namespace mss
 {
 
@@ -1220,6 +1224,17 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         FAPI_INF("LRDIMM: MREP is enabled");
         l_steps.push_back(std::make_shared<mss::training::lrdimm::mrep>());
     }
+
+#ifdef LRDIMM_CAPABLE
+
+    // DWL
+    if(i_cal_steps.getBit<mss::cal_steps::DWL>())
+    {
+        FAPI_INF("LRDIMM: DWL is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::dwl>());
+    }
+
+#endif
 
     // WR LVL
     if(i_cal_steps.getBit<mss::cal_steps::WR_LEVEL>())

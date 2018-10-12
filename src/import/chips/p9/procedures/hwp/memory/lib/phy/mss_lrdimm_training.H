@@ -51,6 +51,11 @@
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/rosetta_map/rosetta_map.H>
 
+// Disables LRDIMM support for HB
+#ifndef __HOSTBOOT_MODULE
+    #define LRDIMM_CAPABLE 1
+#endif
+
 namespace mss
 {
 
@@ -464,13 +469,6 @@ class mrep : public step
                 mss::ddr4::pba::commands& o_container) const;
 
         ///
-        ///// @brief Does a CCS NTTM mode read
-        ///// @param[in] i_target - the MCA target on which to operate
-        ///// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
-        /////
-        fapi2::ReturnCode execute_nttm_mode_read(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target) const;
-
-        ///
         /// @brief analyze with each nibble
         /// @param[in] i_target the MCA target
         /// @param[in] i_result_nibble the result need to analyze
@@ -607,51 +605,6 @@ class mrep : public step
             return fapi2::current_err;
         }
 
-};
-
-///
-/// @brief DWL training step
-///
-class dwl : public step
-{
-    public:
-        dwl() :
-            step("DWL")
-        {}
-
-        ///
-        /// @brief Default virtual destructor
-        ///
-        ~dwl() = default;
-
-        ///
-        /// @brief Sets up and runs the calibration step
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const uint64_t i_rp,
-                               const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Executes a cal step with workarounds
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const uint64_t i_rp,
-                                   const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Calculates the number of cycles a given calibration step will take
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @return l_cycles - the number of cycles a given calibration step wil take
-        ///
-        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const;
 };
 
 ///
@@ -832,6 +785,13 @@ fapi_try_exit:
 void deconfigure_steps(const uint8_t i_dimm_type,
                        const bool i_sim,
                        fapi2::buffer<uint32_t>& io_cal_steps);
+
+///
+/// @brief Does a CCS NTTM mode read
+/// @param[in] i_target - the MCA target on which to operate
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode execute_nttm_mode_read(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
 
 } // ns training
 
