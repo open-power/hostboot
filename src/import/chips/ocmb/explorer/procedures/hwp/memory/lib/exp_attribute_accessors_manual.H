@@ -40,6 +40,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -128,6 +129,50 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
              "no", o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_half_dimm);
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MEM_EFF_VOLT_VDDR setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
+/// @param[in] i_value value to set
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+//TODO: Remove this once we have auto-generated attr setters
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vddr(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_VOLT_VDDR, l_ocmb, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MEM_EFF_VOLT_VDDR: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MEM_EFF_VOLT_VPP setter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
+/// @param[in] i_value value to set
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+//TODO: Remove this once we have auto-generated attr setters
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode set_volt_vpp(const fapi2::Target<T>& i_target, uint32_t i_value)
+{
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_VOLT_VPP, l_ocmb, i_value) );
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR("failed setting ATTR_MEM_EFF_VOLT_VPP: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
     return fapi2::current_err;
 }
 
