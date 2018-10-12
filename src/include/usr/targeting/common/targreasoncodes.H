@@ -53,6 +53,7 @@ enum TargetingModuleId
     TARG_EDIT_PAGE_PERMISSIONS      = 0x0D,
     TARG_NOTIFY_RESOURCE_READY      = 0x0E,
     TARG_ATTR_SYNC_TASK             = 0x0F,
+    TARG_SEND_ATTR_SYNC_MSG         = 0x10,
 };
 
 enum TargetingReasonCode

@@ -253,19 +253,25 @@ namespace   TARGETING
     };
 
 #ifndef __HOSTBOOT_RUNTIME
+
     /**
-     *  @brief  Handles synchronization of all RW targeting attributes from
-     *          hostboot to the fsp; the following sections are
-     *          synchronized.
+     *  @brief Synchronizes all RW targeting attributes from Hostboot to the
+     *      FSP without providing any safety for concurrent invocations.  It is
+     *      up to the caller to provide that safety.  Callers (other than the
+     *      attribute resource provider itself), should instead use the
+     *      attribute resource provider's "syncAllAttributesToFsp" API to
+     *      safely synchronize attributes to the FSP.
      *
-     *           1). SECTION_TYPE_PNOR_RW
-     *           2). SECTION_TYPE_HEAP_PNOR_INIT
-     *           3). SECTION_TYPE_HEAP_PNOR_ZERO_INIT
+     *      The following sections are synchronized:
      *
+     *          1) SECTION_TYPE_PNOR_RW
+     *          2) SECTION_TYPE_HEAP_PNOR_INIT
+     *          3) SECTION_TYPE_HEAP_PNOR_ZERO_INIT
      *
-     *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *  @return errlHndl_t Error log handle
+     *  @return nullptr    Success
+     *  @return !nullptr   Failed to synchonize attributes to FSP; error log
+     *      handle references valid error log
      */
     errlHndl_t syncAllAttributesToFsp();
 
