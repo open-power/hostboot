@@ -1518,6 +1518,40 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targ
                             std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 ///
+/// @brief Sets WR LVL mode
+/// @param[in] i_target a DIMM target
+/// @param[in] i_mode setting for WR LVL mode
+/// @param[in,out] io_data data we are modifying MPR mode to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+inline fapi2::ReturnCode set_wr_lvl_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mss::states i_mode,
+        mrs01_data& io_data)
+{
+    constexpr uint64_t MAX_WR_LVL_MODE = 0b1;
+
+    FAPI_ASSERT( i_mode <= MAX_WR_LVL_MODE,
+                 fapi2::MSS_BAD_MR_PARAMETER()
+                 .set_MR_NUMBER(MRS_LOAD)
+                 .set_PARAMETER(WR_LVL)
+                 .set_PARAMETER_VALUE(i_mode)
+                 .set_DIMM_IN_ERROR(i_target),
+                 "%s Invalid WR LVL Mode recieved: %d. Max encoding allowed: %d.",
+                 mss::c_str(i_target),
+                 i_mode,
+                 MAX_WR_LVL_MODE);
+
+    // Update field if input check passes
+    io_data.iv_wl_enable = i_mode == mss::states::ON ?
+                           fapi2::ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_ENABLE :
+                           fapi2::ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_DISABLE;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set MPR Mode
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for MPR mode
@@ -1679,6 +1713,40 @@ inline fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYP
     io_data.iv_mpr_page = i_page;
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Makes CCS instruction to set WR LVL Mode
+/// @tparam T TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_mode setting for WR LVL mode
+/// @param[in] i_rank DIMM rank
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                         const mss::states i_mode,
+                         const uint64_t i_rank,
+                         std::vector< ccs::instruction_t<T> >& io_inst )
+{
+    // Spec states we need to use tmod for our delay, so we do
+    const uint64_t l_delay = mss::tmod(i_target);
+
+    mrs01_data l_data(i_target, fapi2::current_err);
+    FAPI_TRY(fapi2::current_err, "%s. Failed to initialize mrs01_data for set_wr_lvl_mode", mss::c_str(i_target) );
+
+    FAPI_TRY( set_wr_lvl_mode(i_target, i_mode, l_data),
+              "%s. Failed set_wr_lvl_mode() with a setting of %d",
+              mss::c_str(i_target), i_mode);
+
+    // Make MRS CCS inst
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, l_delay, io_inst),
+              "Failed to send MRS01 on %s, rank: %d, delay (in cycles): %d",
+              mss::c_str(i_target), i_rank, l_delay);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
