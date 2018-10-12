@@ -1604,11 +1604,19 @@ ReturnCode fapiAttrSetBadDqBitmap(
             // Loop through all DQs
             for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
             {
-                if ( l_tmpData[i][j] != l_prev_data[i][j] )
+                // Loop through all bits
+                for ( uint8_t k = 0; k < mss::BITS_PER_BYTE; k++ )
                 {
-                    badDqSet = true;
-                    break;
+                    uint8_t prevBit = (l_prev_data[i][j] >> k) & 0x01;
+                    uint8_t newBit  = (l_tmpData[i][j]   >> k) & 0x01;
+                    // Check for differences, and the bit was set, not cleared
+                    if ( (prevBit != newBit) && (newBit != 0) )
+                    {
+                        badDqSet = true;
+                        break;
+                    }
                 }
+                if ( badDqSet ) break;
             }
             if ( badDqSet ) break;
         }
