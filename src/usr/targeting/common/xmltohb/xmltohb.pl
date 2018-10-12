@@ -3529,24 +3529,33 @@ sub writeAttrMetadataMapCFile{
             }
             if($finalAttrhash{$key}->{persistency} eq "non-volatile")
             {
-                print $outFile " P3_PERSISTENCY) ),\n";
+                print $outFile " P3_PERSISTENCY,";
             }
             elsif(($finalAttrhash{$key}->{persistency} eq
                     "semi-non-volatile-zeroed") ||
                   ($finalAttrhash{$key}->{persistency} eq "semi-non-volatile"))
             {
-                print $outFile " P1_PERSISTENCY) ),\n";
+                print $outFile " P1_PERSISTENCY,";
             }
             elsif(($finalAttrhash{$key}->{persistency} eq "volatile") ||
                   ($finalAttrhash{$key}->{persistency} eq "volatile-zeroed"))
             {
-                print $outFile " P0_PERSISTENCY) ),\n";
+                print $outFile " P0_PERSISTENCY,";
             }
             else
             {
                 croak("Not a defined" .
                     "Persistency[$finalAttrhash{$key}->{persistency}] for" .
                     "attribute [$key]");
+            }
+
+            if ($finalAttrhash{$key}->{id} ~~ @nonSyncAttributes)
+            {
+                print $outFile " true) ),\n";
+            }
+            else
+            {
+                print $outFile " false) ),\n";
             }
         }
     }
@@ -3653,12 +3662,15 @@ struct attrMetadataStr
     uint32_t size;
     bool readWriteable;
     const char* persistency;
+    bool noSync;
 
     attrMetadataStr() :
-        size(0), readWriteable(false), persistency(NULL) {}
+        size(0), readWriteable(false), persistency(NULL), noSync(false) {}
 
-    attrMetadataStr(uint32_t i_size, bool i_rw, const char* i_persistency) :
-        size(i_size), readWriteable(i_rw), persistency(i_persistency) {}
+    attrMetadataStr(uint32_t i_size, bool i_rw, const char* i_persistency, \
+        bool i_sync) :
+        size(i_size), readWriteable(i_rw), persistency(i_persistency),\
+        noSync(i_sync) {}
 };
 
 /*
