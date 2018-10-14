@@ -308,7 +308,7 @@ fapi2::ReturnCode get_overlays_ring(
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
                l_ringBlockSize);
 
-    if (l_rc == TOR_SUCCESS)
+    if (l_rc == INFRASTRUCT_RC_SUCCESS)
     {
         FAPI_DBG("Successfully found Gptr ringId=0x%x of iv_size=%d bytes", i_ringId,
                  be16toh(((CompressedScanData*)(*io_ringBuf2))->iv_size));
@@ -342,7 +342,7 @@ fapi2::ReturnCode get_overlays_ring(
     }
     else
     {
-        FAPI_ASSERT( l_rc == TOR_RING_IS_EMPTY,
+        FAPI_ASSERT( l_rc == TOR_RING_NOT_FOUND,
                      fapi2::XIPC_GPTR_GET_SINGLE_RING_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
@@ -560,7 +560,8 @@ fapi2::ReturnCode process_gptr_rings(
     RingId_t l_vpdRingId   = (RingId_t)be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId);
     uint32_t l_vpdScanAddr = be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr);
 
-    FAPI_DBG("process_gptr_rings(): Processing ringId=0x%x", l_vpdRingId);
+    FAPI_DBG("Entering process_gptr_rings");
+    FAPI_DBG("Processing GPTR ringId=0x%x", l_vpdRingId);
 
     // Used for getting Gptr ring from overlays section
     void* l_ovlyRs4Ring = io_ringBuf2; //This content will be destroyed later in this function!
@@ -691,6 +692,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err  = fapi2::FAPI2_RC_SUCCESS;
     int        l_rc = 0;
+
+    FAPI_DBG("Entering _fetch_and_insert_vpd_ring");
 
     FAPI_INF("_fetch_and_insert_vpd_ring: (ringId,chipletId) = (0x%02X,0x%02x)",
              i_ring.ringId, i_chipletId);
@@ -918,8 +921,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      set_TOR_RC(l_rc).
                      set_RING_ID(i_ring.ringId).
                      set_OCCURRENCE(1),
-                     "tor_append_ring() failed in sysPhase=%d w/rc=%d for ringId=0x%x",
-                     i_sysPhase, l_rc, i_ring.ringId );
+                     "tor_append_ring() failed in phase %d w/l_rc=%d for ringId=0x%x",
+                     l_ppeType, l_rc, i_ring.ringId );
 
         FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                  i_ring.ringId, i_evenOdd, i_chipletId);
@@ -1876,7 +1879,8 @@ ReturnCode p9_xip_customize (
     MyBool_t     l_bDdSupport = UNDEFINED_BOOLEAN;
 
 
-    FAPI_IMP ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
+
+    FAPI_DBG ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
 
 
     // Make copy of the requested bootCoreMask
@@ -1885,7 +1889,7 @@ ReturnCode p9_xip_customize (
 
     //-------------------------------------------
     // Check some input buffer parameters:
-    // - sysPhase is checked later
+    // - sysPhase, modeBuild are checked later
     // - log the initial image size
     // - more buffer size checks in big switch()
     //-------------------------------------------
@@ -2596,6 +2600,7 @@ ReturnCode p9_xip_customize (
             l_rc = tor_get_block_of_rings( l_hwRingsSection,
                                            attrDdLevel,
                                            l_ppeType,
+                                           UNDEFINED_RING_VARIANT,
                                            &io_ringSectionBuf,
                                            io_ringSectionBufSize );
 
