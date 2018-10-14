@@ -1137,7 +1137,7 @@ namespace SBE
                                  (void*)RING_SEC_VADDR,
                                  l_ringSectionBufSize,
                                  SYSPHASE_HB_SBE,
-                                 0, //Was MODEBUILD_IPL=0 but not used in P9
+                                 MODEBUILD_IPL,
                                  (void*)RING_BUF1_VADDR,
                                  (uint32_t)MAX_RING_BUF_SIZE,
                                  (void*)RING_BUF2_VADDR,
