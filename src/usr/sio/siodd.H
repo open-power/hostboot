@@ -167,10 +167,8 @@ class SioDD
         /**
          * @brief Unlock SIO password register
          * @param[in] i_target: SIO target
-         *
-         * @return Error from operation
          */
-        errlHndl_t unlock_SIO(TARGETING::Target* i_target);
+        void unlock_SIO(TARGETING::Target* i_target);
 
         /**
          * @brief Previous device accessed by SIO

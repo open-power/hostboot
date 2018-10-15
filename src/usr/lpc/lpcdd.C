@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -217,13 +217,15 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     {
         //First check/clear the LPC bus of errors and commit any errors found
         l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
-        if (!l_err)
+        if (l_err)
         {
-            l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
-                                                           l_addr,
-                                                           io_buffer,
-                                                           io_buflen );
+            errlCommit(l_err, LPC_COMP_ID);
         }
+
+        l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
+                                                       l_addr,
+                                                       io_buffer,
+                                                       io_buflen );
     }
     else
     {
@@ -1185,53 +1187,7 @@ errlHndl_t LpcDD::checkForLpcErrors()
             TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForLpcErrors> Error found in LPC Host Controller Status Register: 0x%8X",lpchc_err_union.data32);
             computeLpchcErrSev(lpchc_err_union, l_lpchcResetLevel);
 
-            // Specifically check for a 'Sync AB' error as it is seen for
-            //  security restrictions on BMC systems
-            if(lpchc_err_union.syncab)
-            {
-                TRACFCOMP( g_trac_lpc, ERR_MRK"Possible SIO Lockout issue with BMC");
-                /*@
-                 * @errortype    ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     LPC::MOD_LPCDD_CHECKFORLPCERRORS
-                 * @reasoncode   LPC::RC_LPCHC_SYNCAB_ERROR
-                 * @userdata1    LPCHC Error Status Register
-                 * @userdata2    Reset Level
-                 * @devdesc      LpcDD::checkForLpcErrors> Sync AB error
-                 *               found in LPCHC, possible BMC/HB mismatch
-                 * @custdesc     Possible code mismatch for LPC bus usage
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            LPC::MOD_LPCDD_CHECKFORLPCERRORS,
-                                            LPC::RC_LPCHC_SYNCAB_ERROR,
-                                            lpchc_buffer,
-                                            l_lpchcResetLevel);
-                // NOTE: This RC is being consumed by external code so it
-                //       cannot be changed without taking that into account.
-
-                // Most likely this is a code mismatch between Hostboot
-                //  and the BMC
-                l_err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                            HWAS::SRCI_PRIORITY_HIGH );
-                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                            HWAS::SRCI_PRIORITY_MED );
-                // Could also be a HW failure
-                l_err->addHwCallout( iv_proc,
-                                     HWAS::SRCI_PRIORITY_LOW,
-                                     HWAS::NO_DECONFIG,
-                                     HWAS::GARD_NULL );
-
-                // Gather addtional ffdc data
-                addFFDC(l_err);
-                l_err->collectTrace(LPC_COMP_NAME);
-
-                if(l_lpchcResetLevel != RESET_CLEAR)
-                {
-                    /*   @todo - RTC:179179 Use l_opbmResetLevel **/
-                    hwReset(RESET_OPB_LPCHC_HARD);
-                }
-            }
-            else if(l_lpchcResetLevel != RESET_CLEAR)
+            if(l_lpchcResetLevel != RESET_CLEAR)
             {
                 /*@
                  * @errortype    ERRL_SEV_UNRECOVERABLE
