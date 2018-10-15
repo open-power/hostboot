@@ -37,9 +37,6 @@
 #include <hbotcompid.H>
 #include <stdarg.h>
 #include <targeting/common/target.H>
-#include <lpc/lpc_reasoncodes.H>
-
-#include <console/consoleif.H>
 
 // Trace definition
 trace_desc_t* g_trac_sio = NULL;
@@ -194,52 +191,32 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        TARGETING::TYPE_PROC,
                        ahbSioWriteDD );
 
-errlHndl_t SIO::isAvailable(bool& available)
+//function to unlock superIO password register
+void SioDD::unlock_SIO(TARGETING::Target* i_target)
 {
     uint8_t l_byte = SIO::SIO_PASSWORD_REG;
-    size_t l_len = sizeof(uint8_t);
     errlHndl_t l_err = NULL;
-
-    l_err = deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                        &l_byte, l_len,
+    do
+    {
+        // Unlock the SIO registers
+        //  (write 0xA5 password to offset 0x2E two times)
+    size_t l_len = sizeof(uint8_t);
+    l_err = deviceWrite(i_target,
+                        &l_byte,
+                        l_len,
                         DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO::SIO_ADDR_REG_2E));
+    if(l_err) { break; }
+    l_err = deviceWrite(i_target,
+                        &l_byte,
+                        l_len,
+                        DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO::SIO_ADDR_REG_2E));
+    } while(0);
 
     if (l_err)
     {
-        /* Check if we got the expected error for the SIO being locked out */
-        if( l_err->reasonCode() == LPC::RC_LPCHC_SYNCAB_ERROR )
-        {
-            available = false;
-            /* The error is expected, drop it */
-            delete l_err;
-            l_err = NULL;
-        }
+        TRACFCOMP(g_trac_sio,"Error in unlocking SIO password register\n");
+        errlCommit(l_err, SIO_COMP_ID);
     }
-    else
-    {
-        available = true;
-    }
-
-    return l_err;
-}
-
-//function to unlock superIO password register
-errlHndl_t SioDD::unlock_SIO(TARGETING::Target* i_target)
-{
-    uint8_t l_byte = SIO::SIO_PASSWORD_REG;
-    size_t l_len = sizeof(uint8_t);
-    errlHndl_t l_err = NULL;
-    int again = 1;
-
-    do
-    {
-    // Unlock the SIO registers (write 0xA5 password to offset 0x2E two times)
-    l_err = deviceWrite(i_target, &l_byte, l_len,
-                        DEVICE_LPC_ADDRESS(LPC::TRANS_IO,
-                                           SIO::SIO_ADDR_REG_2E));
-    } while(!l_err && again--);
-
-    return l_err;
 }
 
 //SioDD constructor
@@ -248,16 +225,7 @@ SioDD::SioDD(TARGETING::Target* i_target)
     assert(i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
     mutex_init(&iv_sio_mutex);
     iv_prev_dev = 0x00;
-
-    errlHndl_t err = unlock_SIO(i_target);
-    bool failed = (err != NULL);
-    delete err;
-
-    /* Unlocked very early, so make some noise if we fail */
-    if (failed)
-    {
-        printk("SuperIO unlock failed! Expect future errors\n");
-    }
+    unlock_SIO(i_target);
 }
 
 //SioDD destructor
@@ -311,7 +279,8 @@ errlHndl_t SioDD::_readSIO(TARGETING::Target* i_target,
 //function to change logical device in SIO
 errlHndl_t SioDD::changeDevice(TARGETING::Target* i_target, uint8_t i_dev)
 {
-    return _writeSIO(i_target, SIO::SIO_DEVICE_SELECT_REG, &i_dev);
+    uint8_t l_reg = SIO::SIO_DEVICE_SELECT_REG;
+    return _writeSIO(i_target, l_reg, &i_dev);
 }
 
 //function to read from SIO register

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,7 +55,6 @@ namespace LPC
         RC_CANT_USE_SENTINEL         = LPC_COMP_ID | 0x08,
         RC_BAD_TARGET                = LPC_COMP_ID | 0x09,
         RC_LPCHC_ERROR               = LPC_COMP_ID | 0x0A,
-        RC_LPCHC_SYNCAB_ERROR        = LPC_COMP_ID | 0x0B,
     };
 };
 

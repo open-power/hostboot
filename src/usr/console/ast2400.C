@@ -297,18 +297,6 @@ namespace CONSOLE
 
             do
             {
-                bool haveSio;
-                l_err = SIO::isAvailable(haveSio);
-                if (l_err) { break; }
-
-                if (!haveSio)
-                {
-                    // SIO may have been disabled by the BMC, in which case
-                    // assume the UART is already set up.
-                    Uart::initialize();
-                    break;
-                }
-
                 //  verify the boot flags version from register 0x28
                 l_err = deviceOp( DeviceFW::READ,
                                   TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
@@ -316,7 +304,6 @@ namespace CONSOLE
                                   l_len,
                                   DEVICE_SIO_ADDRESS(SIO::SUART1, 0x28));
                 if (l_err) { break; }
-
                 // is it the version we expected?
                 if( expected_version == this_version )
                 {
