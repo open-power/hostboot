@@ -94,6 +94,11 @@ errlHndl_t SfcAST2500::hwInit( )
     uint32_t l_lpc_addr;
     do
     {
+        // The BMC may have disabled SIO access, but there's not much point in
+        // testing whether it's available as there's no alternative action if
+        // it is not. Instead, just try the SIO accesses and bail out with the
+        // errl if they fail.
+
         /* Enable device 0x0D*/
         uint8_t l_data = SIO::ENABLE_DEVICE;
         size_t l_len = sizeof(l_data);
