@@ -25,6 +25,8 @@
 #ifndef __SIO_SIO_H
 #define __SIO_SIO_H
 
+#include <errl/errlentry.H>
+
 namespace SIO
 {
     /**
@@ -47,5 +49,17 @@ namespace SIO
         SIO_SCRATCH_REG1        = 0x21,     /**< Scratch Reg */
         SIO_SCRATCH_REG2        = 0x22,     /**< Scratch Reg */
     };
+
+    /**
+     * @brief Test if SuperIO is accessible on the LPC bus
+     *
+     * @param[out] o_available Set true if the SuperIO controller is available,
+     *                         false if it explicitly detected as unavailable,
+     *                         and unchanged if an unexpected error occurs.
+     *
+     * @return NULL if the test did not fail unexpectedly, otherwise a pointer
+     *         to an errorlog associated with the error.
+     */
+    errlHndl_t isAvailable(bool& o_available);
 }
 #endif

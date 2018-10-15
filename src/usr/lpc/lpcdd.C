@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -217,15 +217,13 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     {
         //First check/clear the LPC bus of errors and commit any errors found
         l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
-        if (l_err)
+        if (!l_err)
         {
-            errlCommit(l_err, LPC_COMP_ID);
+            l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
+                                                           l_addr,
+                                                           io_buffer,
+                                                           io_buflen );
         }
-
-        l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
-                                                       l_addr,
-                                                       io_buffer,
-                                                       io_buflen );
     }
     else
     {
