@@ -669,6 +669,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(EXIT_MRK "testPredicateHwas" );
     }
 
+
     void testPredicateHwasChanged()
     {
         TARG_TS_TRACE(ENTER_MRK "testPredicateHwasChanged" );
@@ -679,6 +680,72 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         using namespace TARGETING;
         TargetService& l_targetService = targetService();
 
+        PredicateHwasChanged hwasChangedPredicate;
+
+        // Test: Walk every possible bit combo in both polarities
+        //       on every target
+        for (TargetIterator targ_iter = l_targetService.begin();
+             targ_iter != l_targetService.end(); ++targ_iter)
+        {
+            Target* l_pTarget = *targ_iter;
+
+            // Save off flag
+            ATTR_HWAS_STATE_CHANGED_FLAG_type savedChgState =
+                  l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+            // Get all permutations allowed by the hwas subscription mask
+            std::vector<uint64_t> l_subscribed_bit_ranges;
+            ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_mask =
+                l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
+            for (uint64_t i = 1; i <= l_mask; ++i)
+            {
+                // If number is contained within masked bits, then
+                // this number is a valid setting for this mask
+                if ((i & l_mask) == i)
+                {
+                    l_subscribed_bit_ranges.push_back(i);
+                }
+            }
+
+            // Now run each permutation
+            // (note: auto keyword not supported for FSP compile)
+            for(std::vector<uint64_t>::iterator
+                it = l_subscribed_bit_ranges.begin();
+                it != l_subscribed_bit_ranges.end();
+                ++it)
+            {
+                uint64_t l_expected_bits = *it;
+                l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>
+                    (l_expected_bits);
+
+                // Testing polarity 1
+                hwasChangedPredicate.reset().changedBit(
+                    static_cast<HWAS_CHANGED_BIT>(l_expected_bits), true);
+                if(!hwasChangedPredicate(l_pTarget))
+                {
+                    TARG_TS_FAIL("Expected HWAS predicate to match the "
+                        "0x%.8X target's HWAS state, using 0x%.8X",
+                        get_huid(l_pTarget),l_expected_bits);
+                }
+
+                // Testing polarity 0
+                hwasChangedPredicate.reset().changedBit
+                    (static_cast<HWAS_CHANGED_BIT>(l_expected_bits), false);
+                l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>
+                    (~l_expected_bits);
+                if(!hwasChangedPredicate(l_pTarget))
+                {
+                    TARG_TS_FAIL("Expected HWAS predicate to match the 0x%.8X "
+                      "target's HWAS negative polarity state, using 0x%.8X",
+                      get_huid(l_pTarget),~l_expected_bits);
+                }
+            }
+
+            // restore original HWAS_STATE_CHANGED_FLAG
+            l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(savedChgState);
+        }
+
+
         // Get master proc chip to work with
         Target* l_pTarget = NULL;
         (void) l_targetService.masterProcChipTargetHandle(l_pTarget);
@@ -688,25 +755,107 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             break;
         }
 
-        PredicateHwasChanged hwasChangedPredicate;
-
         ATTR_HWAS_STATE_CHANGED_FLAG_type savedHwasChangedState =
-            l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+                l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
 
-        // Test: Given a target with any HWAS state, default HWAS predicate
-        //     should return a match
-        for(size_t i=0; i<32; ++i)
+
+        // Test: Check changing non-subscribed bit.  Should return false
+        ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_hwasSubscriptionMask =
+                l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
+        if (l_hwasSubscriptionMask != 0)
         {
-            ATTR_HWAS_STATE_CHANGED_FLAG_type sweepState
-                = { static_cast<uint8_t>(i&1) };
-            l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(sweepState);
+            // find first unsubscribed bit
+            ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type iBit = 1;
+            while (iBit & l_hwasSubscriptionMask)
+            {
+                iBit = iBit << 1;  // try next bit
+            }
+
+            // setup check for unsubscribed bit
+            hwasChangedPredicate.reset().changedBit(
+                  static_cast<HWAS_CHANGED_BIT>(iBit), true);
+
+            // set the bit
+            l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(iBit);
+            if(hwasChangedPredicate(l_pTarget))
+            {
+                TARG_TS_FAIL("A change to an unsubscribed bit (0x%.8X) in "
+                  "target's mask (0x%.8X) should not cause a predicate change",
+                  iBit, l_hwasSubscriptionMask);
+            }
+        }
+        else
+        {
+            TARG_TS_FAIL("0x%.8X target has no HWAS subscription mask",
+                get_huid(l_pTarget));
+        }
+
+
+
+        // Location of two bits allowed to change for the target
+        ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type chgBit1 = 0;
+        ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type chgBit2 = 0;
+
+        // Test: Subscribe to at least two bits and change only one.
+        //       Expect FALSE (predicate is doing exclusive match)
+        if (l_hwasSubscriptionMask != 0)
+        {
+            // find first subscribed bit
+            chgBit1 = 1;
+            while (!(chgBit1 & l_hwasSubscriptionMask))
+            {
+                chgBit1 = chgBit1 << 1;  // try next bit
+            }
+            if (l_hwasSubscriptionMask & (~chgBit1))
+            {
+                // find second subscribed bit
+                chgBit2 = (chgBit1 << 1);
+                while (!(chgBit2 & l_hwasSubscriptionMask))
+                {
+                    chgBit2 = chgBit2 << 1;
+                }
+
+                // setup check for subscribed bits
+                hwasChangedPredicate.reset().changedBit(
+                      static_cast<HWAS_CHANGED_BIT>(chgBit1 | chgBit2), true);
+
+                // set the bit
+                l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(chgBit1);
+                if(hwasChangedPredicate(l_pTarget))
+                {
+                    TARG_TS_FAIL("A 1-bit HWAS_STATE_CHANGED_FLAG change "
+                      "(0%.8X) while monitoring 2 bits (0x%.8X) caused a "
+                      "changedPredicate", chgBit1, (chgBit1 | chgBit2));
+                }
+            }
+            else
+            {
+                TARG_TS_FAIL("0x%.8X target only has one bit subscribed 0x%.8X",
+                  get_huid(l_pTarget), l_hwasSubscriptionMask);
+            }
+        }
+
+        // Test: Check for a combo of one bit cleared and one bit set,
+        //       expect true
+        if (chgBit1 && chgBit2)
+        {
+            // setup check for set subscribed bit
+            hwasChangedPredicate.reset().changedBit(
+                  static_cast<HWAS_CHANGED_BIT>(chgBit1), true);
+            // setup check for set subscribed bit
+            hwasChangedPredicate.changedBit(
+                  static_cast<HWAS_CHANGED_BIT>(chgBit2), false);
+
+            // set the bit (the second bit is cleared)
+            l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(chgBit1);
 
             if(!hwasChangedPredicate(l_pTarget))
             {
-                TARG_TS_FAIL("Expected default HWAS predicate to match the "
-                    "target's HWAS state, using i = %d",i);
+                TARG_TS_FAIL("Expected this %.8X bit set and this %.8X bit "
+                  "cleared to result in changedPredicate", chgBit1, chgBit2);
             }
         }
+
 
         // Test: Given a target with cleared HWAS GARD bit, predicate
         //    looking for GARD bit should return false
@@ -719,20 +868,19 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                 "target's cleared HWAS GARD bit");
         }
 
-        // Test: Having previously not matched a target, resetting the HWAS
-        //     predicate should match the target again
-        hwasChangedPredicate.reset();
+        // Test: Look to match the negated HWAS_CHANGED_BIT_GARD bit.
+        //       This should match and return true
+        hwasChangedPredicate.reset().changedBit(HWAS_CHANGED_BIT_GARD, false);
         if(!hwasChangedPredicate(l_pTarget))
         {
-            TARG_TS_FAIL("Expected HWAS reset predicate to match the "
-                "target's HWAS state");
+            TARG_TS_FAIL("Expected negative HWAS predicate to match the "
+                "target's cleared HWAS GARD bit");
         }
+
 
         // Test: Given a target with set HWAS GARD bit, predicate
         //    looking for GARD bit should return true
         hwasChangedPredicate.reset().changedBit(HWAS_CHANGED_BIT_GARD, true);
-        //ATTR_HWAS_STATE_CHANGED_FLAG_type functionalHwasChangedState =
-        //HWAS_CHANGED_BIT_GARD;
         l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>(HWAS_CHANGED_BIT_GARD);
         if(!hwasChangedPredicate(l_pTarget))
         {
@@ -771,7 +919,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                 "target's all set HWAS state");
         }
 
-        // Restore state.
+        // Restore state
         l_pTarget->setAttr<ATTR_HWAS_STATE_CHANGED_FLAG>
                 (savedHwasChangedState);
 

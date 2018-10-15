@@ -39,6 +39,8 @@
 // Other Host Boot Components
 
 // Targeting Component
+#include <targeting/adapters/types.H>
+#include <targeting/common/trace.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/target.H>
 #include <targeting/common/predicates/predicates.H>
@@ -47,7 +49,6 @@
 //******************************************************************************
 // Macros
 //******************************************************************************
-
 #undef TARG_NAMESPACE
 #undef TARG_CLASS
 #undef TARG_FN
@@ -58,6 +59,7 @@
 
 namespace TARGETING
 {
+extern TARG_TD_t g_trac_targeting;
 
 #define TARG_NAMESPACE "TARGETING::"
 #define TARG_CLASS "PredicateHwasChanged::"
@@ -78,6 +80,8 @@ PredicateHwasChanged::~PredicateHwasChanged()
 
 PredicateHwasChanged& PredicateHwasChanged::reset()
 {
+    // resets to an invalid cleared state,
+    // user needs to identify a bit to check after this reset
     memset(&iv_valid,0x00,sizeof(iv_valid));
     memset(&iv_desired,0x00,sizeof(iv_desired));
     return *this;
@@ -95,12 +99,25 @@ bool PredicateHwasChanged::operator()(
     hwasStateChangedFlag actual = { rawValue: 0};
     CPPASSERT(sizeof(actual.attribute) <=
                 sizeof(actual.rawValue));
+
     actual.attribute =
             i_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
     ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type subscriptionMask =
             i_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
 
-    return ((subscriptionMask != 0) &&
+    TRACDCOMP(g_trac_targeting,
+       TARG_FUNC "actual: 0x%.8X, subscription: 0x%.8X, iv_valid: 0x%.8X, iv_desired: 0x%.8X",
+       actual.rawValue, subscriptionMask, iv_valid.rawValue, iv_desired.rawValue);
+
+    // Catch a coding error where nothing is being setup to check
+    TARG_ASSERT(iv_valid.rawValue != 0, "PredicateHwasChanged::operator() - "
+        "No valid bits being checked for change");
+
+    // Only check for change on the bits subscribed to.
+    // Skip if not monitoring any of those subscribed bits.
+    // Then verify the bits we want to compare are a match to their
+    // desired changed state
+    return (((iv_valid.rawValue & subscriptionMask) != 0) &&
             (actual.rawValue & (iv_valid.rawValue & subscriptionMask)) ==
             (iv_desired.rawValue & (iv_valid.rawValue & subscriptionMask)));
 
