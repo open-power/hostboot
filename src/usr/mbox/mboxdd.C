@@ -178,8 +178,6 @@ errlHndl_t mboxRead(TARGETING::Target* i_target,void *o_buffer,
         if ((l_IntReg[0] & MBOX_DOORBELL_ERROR) ==
              MBOX_DOORBELL_ERROR)
         {
-            TRACFCOMP(g_trac_mbox, INFO_MRK
-                      "mboxRead> Found interrupt on error status register");
             // Go get the error info
             l_err = mboxGetErrStat(i_target,l_stat);
 
@@ -561,6 +559,8 @@ errlHndl_t mboxGetErrStat(TARGETING::Target* i_target,uint64_t &o_status)
         }
         else
         {
+            TRACFCOMP(g_trac_mbox, INFO_MRK "mboxRead> Found error in pib status register (MBOX_DB_ERR_STAT_PIB): 0x%lx", l_64bitBuf[0]);
+
             //Check for Illegal Op
             if ((l_64bitBuf[0] & MBOX_ILLEGAL_OP) ==
                  MBOX_ILLEGAL_OP)
