@@ -308,6 +308,24 @@ typedef struct callout_ud
 
 #ifndef PARSER
 
+/* BUS callout Structure: This structure contains all the parameters needed for callout
+// in platHandleAddBusCallout, Fields are:
+// TargetPart1: One End point of BUS
+// TargetPart2: Second End point of BUS
+// busType:     BUS Type
+// priority:    priority of this callout
+// flag:        This flag is specific for SMP cable only, for others it will be NONE
+//              if FLAG_LINK_DOWN, CBLV link state will be set as ERROR STATE
+*/
+typedef struct
+{
+    TARGETING::Target* TargetPart1;
+    TARGETING::Target* TargetPart2;
+    HWAS::busTypeEnum  busType;
+    HWAS::callOutPriority priority;
+    HWAS::CalloutFlag_t flag;
+}busCallout_t;
+
 /**
  *  @brief retrieveTarget will convert the EntityPath to a Target
  *
