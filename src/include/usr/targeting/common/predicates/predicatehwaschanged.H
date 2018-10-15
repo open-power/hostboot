@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -81,7 +83,10 @@ class PredicateHwasChanged : public PredicateBase
         virtual ~PredicateHwasChanged();
 
         /**
-         *  @brief Reset the predicate to match everything
+         *  @brief Reset the predicate to the cleared state
+         *       This cleared state is an invalid state.
+         *       User needs to identify a bit to check for
+         *       change after this reset
          *
          *  @return Reference to the predicate, for chaining
          */
@@ -90,6 +95,9 @@ class PredicateHwasChanged : public PredicateBase
         /**
          *  @brief Configure predicate to look for the setting of a particular
          *      bit in the HWAS_CHANGED_STATE_FLAG
+         *      If this is called multiple times with different bits, then
+         *      a change will only be detected if ALL the changedBits match
+         *      their desired setting.
          *
          *  @param[in] i_bit        HWAS_CHANGED_BIT
          *  @param[in] i_changed    Desired changed setting of that bit
@@ -114,16 +122,14 @@ class PredicateHwasChanged : public PredicateBase
          *  @brief Returns whether target matches the desired HWAS state
          *
          *  @par Detailed Description:
-         *      Returns whether target matches the desired HWAS state.  Current
-         *      HWAS sub-fields compared include poweredOn, present, functional,
-         *      changedSinceLastIpl, and dumpFunctional.  On construction, the
-         *      predicate matches any state of those fields.  To make the
-         *      filter more restrictive, call any combination of the state
-         *      configuration functions with the desired values.  The filter
-         *      will make sure all the desired fields have requested values
-         *      before returning a match.  To reset the filter to match all
-         *      targets, call reset().  See PredicateBase class for
-         *      parameter/return description.
+         *      Will assert if no desired state has been setup.
+         *      This only checks for a change on subscribed bits associated
+         *      with the target.
+         *      To make the filter more restrictive, call any combination of
+         *      the state configuration functions with the desired values.
+         *      The filter will make sure ALL (exclusive match) the desired
+         *      fields have requested values before returning a match.
+         *      See PredicateBase class for parameter/return description.
          *
          *  @param[in] i_pTarget
          *      Target handle pointing to the target to compare to
