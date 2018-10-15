@@ -163,7 +163,7 @@ uint32_t VcmEvent<TYPE_MBA>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
             {
                 // If previous repair for same DRAM
                 if ( l_rowRepair.getRowRepairDram() ==
-                     iv_mark.getSymbol().getDram() )
+                     iv_mark.getSymbol().getDramRelCenDqs() )
                 {
                     // Clear previous row repair from VPD
                     o_rc = clearRowRepairData<TYPE_MBA>( l_dimm, iv_rank );
