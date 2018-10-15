@@ -56,29 +56,23 @@ our %memory_maps = (
     MEMSTATE_HALF_CACHE() =>
         # All of the first 4MB can now be read.
         [ MAX_HBB_SIZE,                 ((1 * _MB) - MAX_HBB_SIZE),
-          1 * _MB,                      1 * _MB,
-          2 * _MB,                      1 * _MB,
-          3 * _MB,                      1 * _MB
+          1 * _MB,                      3 * _MB, #1M..4M
         ],
     MEMSTATE_REDUCED_CACHE() =>
         # Initial chips may have 2MB bad cache
-        [ 4 * _MB,                      1 * _MB,
-          5 * _MB,                      1 * _MB,
-          6 * _MB,                      1 * _MB,
-          7 * _MB,                      1 * _MB
+        [ 4 * _MB,                      4 * _MB, #4M..8M
         ],
     MEMSTATE_FULL_CACHE() =>
         # Full cache is 10MB
-        [ 8 * _MB,                      1 * _MB,
-          9 * _MB,                      1 * _MB
+        [ 8 * _MB,                      2 * _MB, #8M..10M
         ],
     MEMSTATE_MS_48MEG() =>
         # Add next 38MB after we expand to memory.
-        [ 10 * _MB,                      38 * _MB
+        [ 10 * _MB,                    38 * _MB, #10M..48M
         ],
     MEMSTATE_MS_64MEG() =>
         # Add next 54MB after we expand to memory.
-        [ 10 * _MB,                      54 * _MB
+        [ 10 * _MB,                    54 * _MB, #10M..64M
         ]
 );
 
@@ -134,6 +128,8 @@ sub main
     open( OUTFH, ">$hbDumpFile" )   or die "can't open $hbDumpFile: $!\n";
     binmode(OUTFH);
 
+    ::userDisplay "Using HRMOR=". ::getHRMOR() . "\n";
+
     # Read memory regions and output to file.
     foreach my $state (@{$memory_states{int $memstate}})
     {
@@ -143,11 +139,27 @@ sub main
         {
             my $start = shift @{$regions};
             my $length = shift @{$regions};
-            ::userDisplay (sprintf "\t%x@%x\n", $length, $start) if $debug;
 
-            my $data = ::readData($start, $length);
-            seek OUTFH, $start, SEEK_SET;
-            print OUTFH $data;
+            my $length_remaining = $length;
+            for( my $curstart = $start;
+                $length_remaining > 0;
+                $curstart += (1 * _MB) )
+            {
+                # Only grab 1 MB at a time
+                my $curlength = (1 * _MB);
+                if( $length_remaining < $curlength )
+                {
+                    $curlength = $length_remaining;
+                }
+
+                ::userDisplay (sprintf "...%x@%x\n", $curlength, $curstart);
+
+                my $data = ::readData($curstart, $curlength);
+                seek OUTFH, $curstart, SEEK_SET;
+                print OUTFH $data;
+
+                $length_remaining -= $curlength;
+            }
         }
     }
 
