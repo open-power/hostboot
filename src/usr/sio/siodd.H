@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,8 +167,10 @@ class SioDD
         /**
          * @brief Unlock SIO password register
          * @param[in] i_target: SIO target
+         *
+         * @return Error from operation
          */
-        void unlock_SIO(TARGETING::Target* i_target);
+        errlHndl_t unlock_SIO(TARGETING::Target* i_target);
 
         /**
          * @brief Previous device accessed by SIO
