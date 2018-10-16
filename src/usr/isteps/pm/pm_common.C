@@ -917,6 +917,26 @@ namespace HBPM
                 break;
             }
 
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "resetPMComplex: p9_pm_init(PM_RESET) succeeded "
+                       "HUID=0x%08X", get_huid(i_target) );
+
+#ifdef __HOSTBOOT_RUNTIME
+
+            // Explicitly call ATTN before exiting to ensure PRD handles
+            // LFIR before TMGT triggers PM Complex Init
+            l_errl = Singleton<ATTN::Service>::instance().
+                        handleAttentions( i_target );
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"resetPmComplex: service::handleAttentions "
+                          "returned error for RtProc: 0x%08X", get_huid(i_target));
+                break;
+            }
+
+#endif
+
         } while(0);
 
         if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
