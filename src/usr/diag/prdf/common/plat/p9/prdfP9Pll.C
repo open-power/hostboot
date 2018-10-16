@@ -267,8 +267,8 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
         if ( i_chpltType == TYPE_PEC )
         {
             // Check bits 25, 27 in TP error reg
-            errReg = chplt->getRegister("TP_ERROR_REG");
-            cfgReg = chplt->getRegister("TP_CONFIG_REG");
+            errReg = i_chip->getRegister("TP_ERROR_REG");
+            cfgReg = i_chip->getRegister("TP_CONFIG_REG");
 
             rc  = errReg->ForceRead();
             rc |= cfgReg->Read();
@@ -276,7 +276,7 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             if (rc != SUCCESS)
             {
                 PRDF_ERR(PRDF_FUNC "TP_ERR_REG read failed for 0x%08x",
-                         chplt->getHuid());
+                         i_chip->getHuid());
                 continue;
             }
 
