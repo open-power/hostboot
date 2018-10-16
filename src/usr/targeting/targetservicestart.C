@@ -491,11 +491,11 @@ static void initializeAttributes(TargetService& i_targetService,
             l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
 
             //Set the SBE Console enablement based on our console enablement
-            ATTR_LPC_CONSOLE_CNFG_type l_consoleOn = LPC_CONSOLE_CNFG_ENABLE;
-#ifdef CONFIG_CONSOLE
-            l_consoleOn = LPC_CONSOLE_CNFG_DISABLE;
+            ATTR_LPC_CONSOLE_CNFG_type l_console = LPC_CONSOLE_CNFG_ENABLE;
+#ifndef CONFIG_CONSOLE
+            l_console = LPC_CONSOLE_CNFG_DISABLE;
 #endif
-            l_pMasterProcChip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_consoleOn);
+            l_pMasterProcChip->setAttr<ATTR_LPC_CONSOLE_CNFG>(l_console);
 
         }
 
