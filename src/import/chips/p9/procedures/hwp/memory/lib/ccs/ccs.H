@@ -640,13 +640,50 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const fapi2::Target<fapi2::
 }
 
 ///
+/// @brief Setup write command (Fixed BL8 or BC4) instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
+/// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
+/// @return the write command CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> wr_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint64_t i_rank,
+                                    const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                    const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                    const fapi2::buffer<uint64_t>& i_column_addr = 0)
+{
+    // WR's and RD's are very similar, so we just use the RD command boiler plate and modify the command to a WR
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate<T>(i_target,
+            i_rank,
+            i_bank_addr,
+            i_bank_group_addr,
+            i_column_addr);
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    // RAS high, CAS low, WE low
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
+///
 /// @brief Setup read command (Fixed BL8 or BC4) instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
-/// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
-/// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
+/// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_column_addr column address bits [A0:A9] = [54:63] (right aligned)
 /// @return the read command CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
