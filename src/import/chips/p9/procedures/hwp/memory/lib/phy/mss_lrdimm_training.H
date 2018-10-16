@@ -48,6 +48,29 @@ namespace training
 
 namespace lrdimm
 {
+
+///
+/// @brief Issues initial pattern write to all ranks in the rank pair
+/// @param[in] i_target the MCA target on which to operate
+/// @parma[in] i_rp the rank pair on which to operate
+/// @parma[in] i_pattern the pattern to program into the MPR
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mpr_pattern_wr_all_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint32_t i_pattern);
+
+///
+/// @brief Issues initial pattern write a specific rank
+/// @param[in] i_target the MCA target on which to operate
+/// @parma[in] i_rank the rank to setup for initial pattern write
+/// @parma[in] i_pattern the pattern to program into the MPR
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                      const uint64_t i_rank,
+                                      const uint32_t i_pattern);
+
 // TK:LRDIMM Do we need separate coarse vs fine steps?
 ///
 /// @brief MREP training step

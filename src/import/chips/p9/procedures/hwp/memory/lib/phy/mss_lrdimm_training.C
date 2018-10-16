@@ -35,7 +35,14 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+
 #include <lib/phy/mss_lrdimm_training.H>
+#include <lib/phy/mss_training.H>
+#include <lib/phy/seq.H>
+#include <lib/dimm/rank.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 
 namespace mss
 {
@@ -45,6 +52,126 @@ namespace training
 
 namespace lrdimm
 {
+
+///
+/// @brief Issues initial pattern write to all ranks in the rank pair
+/// @param[in] i_target the MCA target on which to operate
+/// @parma[in] i_rp the rank pair on which to operate
+/// @parma[in] i_pattern the pattern to program into the MPR
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mpr_pattern_wr_all_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint32_t i_pattern)
+{
+    std::vector<uint64_t> l_ranks;
+
+    FAPI_TRY( mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
+              "Failed get_ranks_in_pair in mrep::run %s",
+              mss::c_str(i_target) );
+
+    // Loops over all ranks within this rank pair
+    for (const auto l_rank : l_ranks)
+    {
+        FAPI_TRY(mpr_pattern_wr_rank(i_target, l_rank, i_pattern));
+    };
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
+
+///
+/// @brief Issues initial pattern write a specific rank
+/// @param[in] i_target the MCA target on which to operate
+/// @parma[in] i_rank the rank to setup for initial pattern write
+/// @parma[in] i_pattern the pattern to program into the MPR
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                      const uint64_t i_rank,
+                                      const uint32_t i_pattern)
+{
+    // Skip over invalid ranks (NO_RANK)
+    if(i_rank == NO_RANK)
+    {
+        FAPI_DBG("%s NO_RANK was passed in %u. Skipping", mss::c_str(i_target), i_rank)
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    constexpr uint64_t NUM_MPR_PATTERNS = 4;
+
+    // The below code expects us to have ranks in terms of the DIMM values, so index 'em
+    const auto l_rank = mss::index(i_rank);
+
+    // Gets the DIMM target
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+    FAPI_TRY(mss::rank::get_dimm_target_from_rank(i_target, i_rank, l_dimm),
+             "%s failed to get DIMM target for rank %u", mss::c_str(i_target), i_rank);
+
+    // Ok, MPR write
+    // We need to
+    // 1) MRS into MPR mode
+    // 2) Write the patterns in according to the bank address
+    // 3) MRS out of MPR mode
+
+    // 1) MRS into MPR mode
+    FAPI_TRY( mss::ddr4::mpr_load(l_dimm,
+                                  fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE,
+                                  i_rank,
+                                  l_program.iv_instructions) );
+
+    // 2) Write the patterns in according to the bank address
+    {
+        constexpr uint64_t MPR_WR_BG = 0;
+        // First, swizzle the pattern
+        fapi2::buffer<uint32_t> l_swizzled_pattern;
+        FAPI_TRY(mss::seq::swizzle_mpr_pattern(i_pattern, l_swizzled_pattern),
+                 "%s rank%u failed to swizzle pattern", mss::c_str(i_target), i_rank);
+
+        // Now add in writes with the appropriate data involved + the good old swizzle that we do based upon the ranks
+        // Swizzle is required as we want the expected data for mirrored and non-mirrored ranks to be the same
+        // For MPR writes the expected data is carried by the addresses, so mirroring matters
+
+        // Loop through all MPR patterns and generate writes for 'em
+        // The MPR number is defined by the bank address
+        for(uint8_t l_ba = 0; l_ba < NUM_MPR_PATTERNS; ++l_ba)
+        {
+            constexpr uint64_t ADDR_START = 54;
+            constexpr uint64_t PATTERN_LEN = 8;
+            constexpr uint64_t MPR_WR_SAFE_DELAY = 0xff;
+            uint64_t l_pattern = 0;
+            FAPI_TRY(l_swizzled_pattern.extract(l_pattern, l_ba * PATTERN_LEN, PATTERN_LEN, ADDR_START), "%s ba%u",
+                     mss::c_str(l_dimm), l_ba);
+            {
+                auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( l_dimm,
+                            l_rank,
+                            l_ba,
+                            MPR_WR_BG,
+                            l_pattern);
+                l_wr.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(MPR_WR_SAFE_DELAY);
+                FAPI_TRY(address_mirror(l_dimm, l_rank, l_wr));
+                l_program.iv_instructions.push_back(l_wr);
+            }
+        }
+    }
+
+
+    // 3) MRS out of MPR mode
+    FAPI_TRY( mss::ddr4::mpr_load(l_dimm,
+                                  fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE,
+                                  i_rank,
+                                  l_program.iv_instructions) );
+
+
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Sets up and runs the calibration step
