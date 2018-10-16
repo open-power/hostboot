@@ -583,11 +583,11 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-            //Continue only with FATAL/UNRECOVERABLE gard errors.
-            //All gard on node deosnt need resource recovery
-            if(((l_gardRecord.iv_errorType != GARD_Fatal)&&
-               (l_gardRecord.iv_errorType != GARD_Unrecoverable))||
-               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE))
+            // Only apply the record if it is Fatal, Unrecoverable,
+            // or for a Node
+            if (!((l_gardRecord.iv_errorType == GARD_Fatal)||
+               (l_gardRecord.iv_errorType == GARD_Unrecoverable)||
+               (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_NODE)))
             {
                 //Skip recoverable gard records
                 continue;
