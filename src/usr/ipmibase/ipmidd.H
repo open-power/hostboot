@@ -61,7 +61,7 @@ enum {
     INT_BMC_HWRST      = (1 << 7),
 
     // How long to sychronously wait for the device to change state (in ns)
-    WAIT_TIME = 100000000,
+    WAIT_TIME = 10000000,
 };
 
 /**
