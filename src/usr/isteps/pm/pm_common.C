@@ -958,11 +958,13 @@ namespace HBPM
                        "resetPMComplex: p9_pm_init(PM_RESET) succeeded "
                        "HUID=0x%08X", get_huid(i_target) );
 
+#ifdef __HOSTBOOT_RUNTIME
+
             // Explicitly call ATTN before exiting to ensure PRD handles
             // LFIR before TMGT triggers PM Complex Init, but only if
             // we aren't already in the middle of handling a core checkstop
             if( HB_INITIATED_PM_RESET_IN_PROGRESS != l_chipResetState )
-            {               
+            {
                 // set ATTR_HB_INITIATED_PM_RESET to IN_PROGRESS to avoid recursion
                 i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
                                 (HB_INITIATED_PM_RESET_IN_PROGRESS);
@@ -982,6 +984,9 @@ namespace HBPM
                     break;
                 }
             }
+
+#endif
+
         } while(0);
 
         if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
