@@ -89,6 +89,12 @@ enum DOMAIN_ID
     MEMBUF_DOMAIN = 0x80,
     MBA_DOMAIN    = 0x81,
 
+    NPU_DOMAIN    = 0x82,
+    MCC_DOMAIN    = 0x83,
+    OMIC_DOMAIN   = 0x84,
+    OMI_DOMAIN    = 0x85,
+    OCMB_DOMAIN   = 0x86,
+
     CLOCK_DOMAIN_FAB          = 0x90,
     CLOCK_DOMAIN_MEMBUF       = 0x91,
     CLOCK_DOMAIN_IO           = 0x92,
