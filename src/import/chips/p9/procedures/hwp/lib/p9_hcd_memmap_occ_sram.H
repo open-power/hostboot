@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ HCD_CONST(OCC_SRAM_TRACE_BUF_IMP_SIZE,          (8 * ONE_KB))
 HCD_CONST(OCC_SRAM_IPC_REGION_SIZE,             (4 * ONE_KB))
 HCD_CONST(OCC_SRAM_GPE0_REGION_SIZE,            (60 * ONE_KB))
 HCD_CONST(OCC_SRAM_GPE1_REGION_SIZE,            (64 * ONE_KB))
-HCD_CONST(OCC_SRAM_PGPE_REGION_SIZE,            (48 * ONE_KB ))
+HCD_CONST(OCC_SRAM_PGPE_REGION_SIZE,            (PGPE_IMAGE_SIZE + PGPE_AUX_TASK_SIZE + PGPE_OCC_SHARED_SRAM_SIZE ))
 HCD_CONST(OCC_SRAM_SGPE_REGION_SIZE,            SGPE_IMAGE_SIZE)
 HCD_CONST(OCC_SRAM_OCC_REGION_SIZE,             (512 * ONE_KB))
 
@@ -186,7 +186,7 @@ HCD_CONST( OCC_SRAM_SGPE_TRACE_START,
            (OCC_SRAM_SGPE_HEADER_ADDR + SGPE_HEADER_SIZE));
 // PGPE
 HCD_CONST(OCC_SRAM_PGPE_DASHBOARD_START,
-          ( OCC_SRAM_PGPE_HEADER_ADDR + PGPE_HEADER_SIZE + SGPE_DEBUG_PTRS_SIZE - 4 ));   // For 8B alignment
+          ( OCC_SRAM_PGPE_HEADER_ADDR + PGPE_HEADER_SIZE + PGPE_DEBUG_PTRS_SIZE - 4 ));   // For 8B alignment
 HCD_CONST( OCC_SRAM_PGPE_DASHBOARD_SIZE, 0xfc );
 HCD_CONST( OCC_SRAM_PGPE_TRACE_START,
            (OCC_SRAM_PGPE_HEADER_ADDR + PGPE_HEADER_SIZE));

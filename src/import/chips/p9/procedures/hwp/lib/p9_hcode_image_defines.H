@@ -105,6 +105,8 @@ HCD_HDR_UINT32( sgpeBootProgCode, 0 );
 HCD_HDR_UINT32( sgpeSramImageSize, 0 );
 HCD_HDR_UINT32( maxQuadScomRestoreEntry, 0 );
 HCD_HDR_UINT32( enable24x7Ima, 0 );
+HCD_HDR_UINT32( sgpeSramRegionStart, 0 );
+HCD_HDR_UINT32( sgpeSramRegionSize, 0 );
 HCD_HDR_PAD(512);
 #ifdef __ASSEMBLER__
 .endm
@@ -205,6 +207,8 @@ HCD_HDR_UINT32(g_ppmr_aux_task_offset,    0 );  // PGPE Aux Task Offset
 HCD_HDR_UINT32(g_ppmr_aux_task_length,    0 );  // PGPE Aux Task Length
 HCD_HDR_UINT32(g_ppmr_doptrace_offset,    0 );  // PGPE Deep Operational Trace Main Memory Buffer Offset
 HCD_HDR_UINT32(g_ppmr_doptrace_length,    0 );  // PGPEDeep Operation Trace Main Memory Buffer Length
+HCD_HDR_UINT32(g_ppmr_pgpe_sram_region_start,    0 );  //
+HCD_HDR_UINT32(g_ppmr_pgpe_sram_region_size,     0 );  //
 
 HCD_HDR_PAD(0x200);
 #ifdef __ASSEMBLER__
@@ -360,7 +364,8 @@ HCD_HDR_UINT32(g_pgpe_core_throttle_deassert_cnt, 0 );      // Core throttle de-
 HCD_HDR_UINT32(g_pgpe_aux_controls,             0 );        // Auxiliary Controls
 HCD_HDR_UINT32(g_pgpe_doptrace_offset,          0 );        // Deep Operational Trace Main Memory Buffer Offset
 HCD_HDR_UINT32(g_pgpe_doptrace_length,          0 );        // Deep Opeartional Trace Main Memory Buffer Length
-
+HCD_HDR_UINT32(g_pgpe_sram_region_start,        0 );        //
+HCD_HDR_UINT32(g_pgpe_sram_region_size,         0 );        //
 #ifdef __ASSEMBLER__
 .endm
 #else

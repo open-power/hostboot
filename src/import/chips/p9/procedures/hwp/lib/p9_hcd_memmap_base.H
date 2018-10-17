@@ -191,7 +191,7 @@ HCD_CONST(SGPE_INSTRUMENTATION_SIZE,            (2 * ONE_KB))
 
 HCD_CONST(SGPE_IMAGE_QPMR_OFFSET,
           (SGPE_BOOT_LOADER_QPMR_OFFSET + SGPE_BOOT_LOADER_SIZE))
-HCD_CONST(SGPE_IMAGE_SIZE,                      (80 * ONE_KB)) //RTC158543
+HCD_CONST(SGPE_IMAGE_SIZE,                      (74 * ONE_KB)) //RTC158543
 HCD_CONST(SGPE_INT_VECTOR_SIZE,                 384)
 HCD_CONST(SGPE_HCODE_RESET_ADDR_VAL,            0x40)
 
@@ -565,20 +565,17 @@ HCD_CONST(PGPE_FLAG_PHANTOM_HALT_ENABLE,        0x0001)
 HCD_CONST(PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE,  (2 * ONE_KB))
 HCD_CONST(PGPE_AUX_TASK_SIZE,                   (2 * ONE_KB))
 
-// @todo RTC: 187758 The following is presently hardcoded in PGPE Hcode as
-// OCC_SHARED_SRAM_ADDR_LENGTH 2*1024.  This should be consolodated
-// between platforms in a future release.
 HCD_CONST(PGPE_OCC_SHARED_SRAM_SIZE,            (2 * ONE_KB))
 
-// @todo RTC: 187760 PGPE_IMAGE_SIZE really should use OCC_SRAM_PGPE_REGION_SIZE from
-// p9_hcd_memmap_occ_sram.H.  However, this creates a circular dependency.
-// where rearrangement is presently prohibitive (OP9010, FIPS910).
-HCD_CONST(PGPE_IMAGE_SIZE,                      ((48 * ONE_KB) -
+HCD_CONST(PGPE_IMAGE_SIZE,                      ((54 * ONE_KB) -
           PGPE_AUX_TASK_SIZE -
           PGPE_OCC_SHARED_SRAM_SIZE))
 
 HCD_CONST(PGPE_HCODE_SIZE,                      (PGPE_IMAGE_SIZE -
           PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE))
+
+HCD_CONST(PGPE_DEBUG_PTRS_OFFSET,               0x200)
+HCD_CONST(PGPE_DEBUG_PTRS_SIZE,                 0x24)
 
 /// Pstate Parameter Block + Pstate Table
 
