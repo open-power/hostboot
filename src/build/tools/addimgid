@@ -52,5 +52,5 @@ if (($imageId =~ m/Unknown-Image/) ||  	# Couldn't find git describe tag.
     $imageId = $imageId."/".$ENV{"USER"};
 }
 
-system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=127 >& /dev/null");
+system("echo -n $imageId | dd of=$img conv=notrunc bs=1 seek=$address count=127");
 exit $?
