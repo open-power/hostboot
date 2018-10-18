@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/secureboot/smf_utils.H $                      */
+/* $Source: src/include/usr/secureboot/smf.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,45 +22,45 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SMF_UTILS_H
-#define __SMF_UTILS_H
+#ifndef __SMF_H
+#define __SMF_H
 
-#include <stdint.h>
 #include <errl/errlentry.H>
+#include <stdint.h>
+
+namespace SMF_TRACE
+{
+    extern trace_desc_t* g_trac_smf;
+}
 
 namespace SECUREBOOT
 {
-
 namespace SMF
 {
 
-// HW limitations dictate that SMF memory needs to be a power-of-two
-// multiple of 256MB starting with 256MB (amount in bytes).
-extern const uint64_t MIN_SMF_MEMORY_AMT;
-
-// The minimum amount of memory, in bytes, required for hostboot to run on
-// master proc.
-extern const uint64_t MIN_MEM_RESERVED_FOR_HB;
-
 /**
- * @brief Checks whether SMF mode is enabled on the system
+ * @brief A function that destributes the requested amount of secure
+ *        memory between the functional procs with memory on the system.
+ *        The memory is distributed in power-of-two chunks of 256MB
+ *        until either all memory is distributed or there are no procs
+ *        remaining with memory available. The function returns predictive
+ *        or informational errors in the following cases: there is no
+ *        available memory behind the procs on the system (predictive error),
+ *        the exact amount of secure mem allocated did not match the requested
+ *        amount (informational error). If 0 is passed in to the function, no
+ *        attempt at distribution occurs and the SMF mode is turned off.
  *
- * @return true: SMF is enabled; false: SMF is disabled.
- */
-bool isSmfEnabled();
-
-/**
- * @brief Checks whether the system has the correct risk level to
- *        support SMF: SMF is supported on Axone by default or on
- *        NIMBUS or CUMULUS with risk level >= 4.
+ * @param[in] i_requestedSmfMemAmtInBytes the amount of secure memory to be
+ *            distributed (in bytes)
+ *            among the procs on the system
  *
- * @return nullptr: the current system supports SMF
- *         non-nullptr: an internal error occurred or the system
- *                      does not support SMF
+ * @return   nullptr: the memory was successfully distributed as requested
+ *           non-nullptr: a distribution error occurred (this error is never
+ *           unrecoverable)
  */
-errlHndl_t checkRiskLevelForSmf();
+errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes);
 
 } // namespace SMF
-
 } // namespace SECUREBOOT
+
 #endif
