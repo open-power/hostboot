@@ -202,7 +202,8 @@ fapi2::ReturnCode pm_occ_fir_reset(
                            i_target, firinit_done_flag),
              "ERROR: Failed to fetch the entry status of FIRINIT");
 
-    if (firinit_done_flag == 1)
+    if (firinit_done_flag
+        == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
     {
         FAPI_TRY(l_occFir.get(p9pmFIR::REG_FIRMASK),
                  "ERROR: Failed to get the OCC FIR MASK value");
