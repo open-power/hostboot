@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,7 +192,8 @@ fapi2::ReturnCode pm_ppm_fir_reset(
     {
         p9pmFIR::PMFir <p9pmFIR::FIRTYPE_PPM_LFIR> l_ppmFir(l_eq_chplt);
 
-        if (l_firinit_done_flag == 1)
+        if (l_firinit_done_flag
+            == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
         {
             FAPI_TRY(l_ppmFir.get(p9pmFIR::REG_ERRMASK),
                      "ERROR: Failed to get the QUAD ERROR MASK value");
@@ -213,7 +214,8 @@ fapi2::ReturnCode pm_ppm_fir_reset(
     {
         p9pmFIR::PMFir <p9pmFIR::FIRTYPE_PPM_LFIR> l_cppmFir(l_c_chplt);
 
-        if (l_firinit_done_flag == 1)
+        if (l_firinit_done_flag
+            == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
         {
             FAPI_TRY(l_cppmFir.get(p9pmFIR::REG_ERRMASK),
                      "ERROR: Failed to get the Core ERROR MASK value");

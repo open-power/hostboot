@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,6 +177,11 @@ fapi2::ReturnCode pm_cme_fir_reset(
     FAPI_IMP("pm_cme_fir_reset start");
     auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
+    uint8_t firinit_done_flag;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
+                           i_target, firinit_done_flag),
+             "ERROR: Failed to fetch the entry status of FIRINIT");
 
     for (auto l_eq_chplt : l_eqChiplets)
     {
@@ -239,9 +244,17 @@ fapi2::ReturnCode pm_cme_fir_reset(
             FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
                      "ERROR: Failed to get the CME FIR MASK value");
 
-            /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
-            FAPI_TRY(l_cmeFir.saveMask(),
-                     "ERROR: Failed to save CME FIR Mask to the attribute");
+            /* Only save off the FIR masks if they have been initialized */
+            if (firinit_done_flag
+                == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
+            {
+                FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
+                         "ERROR: Failed to get the PBA FIR MASK value");
+
+                /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
+                FAPI_TRY(l_cmeFir.saveMask(),
+                         "ERROR: Failed to save CME FIR Mask to the attribute");
+            }
 
             FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
                      "ERROR: Faled to set the CME FIR MASK");

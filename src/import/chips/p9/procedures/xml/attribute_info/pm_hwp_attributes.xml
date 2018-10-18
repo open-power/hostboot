@@ -115,6 +115,7 @@
       <valueType>uint8</valueType>
       <initToZero/>
       <writeable/>
+      <enum>NO_INIT=0, FIRS_INITED=1, FIRS_INITED_IN_RESET=2</enum>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
