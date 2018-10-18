@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,9 +105,9 @@ fapi2::ReturnCode p9_pm_firinit(
     // Set the ATTR_PM_FIRINIT_DONE_ONCE_FLAG attribute
     if (i_mode == p9pm::PM_INIT)
     {
-        if (l_pm_firinit_flag != 1)
+        if (l_pm_firinit_flag != fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
         {
-            l_pm_firinit_flag = 1;
+            l_pm_firinit_flag = fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED;
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
                                    i_target, l_pm_firinit_flag),
                      "ERROR: Failed to set firinit call status after init");
