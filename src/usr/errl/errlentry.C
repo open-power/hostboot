@@ -1000,9 +1000,6 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
 
-    // Add the version info to the error log for OpenPOWER systems
-    addVersionInfo();
-
     // check to see if we should skip info and recoverable errors?
     checkHiddenLogsEnable();
 
@@ -1010,6 +1007,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // serial numbers
     if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
     {
+        // Add the version info to the error log for OpenPOWER systems
+        addVersionInfo();
+
         // If this error was a hardware callout, add the serial and part numbers
         // to the log. FSP provides this data so if there is no FSP, get them here.
         if(!INITSERVICE::spBaseServicesEnabled())
