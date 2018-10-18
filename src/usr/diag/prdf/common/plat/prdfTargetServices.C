@@ -443,16 +443,21 @@ struct conn_t
             case TYPE_NX:           order = 11; break;
             case TYPE_OCC:          order = 12; break;
             case TYPE_PSI:          order = 13; break;
-            case TYPE_MCBIST:       order = 14; break;
-            case TYPE_MCS:          order = 15; break;
-            case TYPE_MCA:          order = 16; break;
-            case TYPE_MC:           order = 17; break;
-            case TYPE_MI:           order = 18; break;
-            case TYPE_DMI:          order = 19; break;
-            case TYPE_MEMBUF:       order = 20; break;
-            case TYPE_L4:           order = 21; break;
-            case TYPE_MBA:          order = 22; break;
-            case TYPE_DIMM:         order = 23; break;
+            case TYPE_NPU:          order = 14; break;
+            case TYPE_MCBIST:       order = 15; break;
+            case TYPE_MCS:          order = 16; break;
+            case TYPE_MCA:          order = 17; break;
+            case TYPE_MC:           order = 18; break;
+            case TYPE_MI:           order = 19; break;
+            case TYPE_OMIC:         order = 20; break;
+            case TYPE_MCC:          order = 21; break;
+            case TYPE_OMI:          order = 22; break;
+            case TYPE_OCMB_CHIP:    order = 23; break;
+            case TYPE_DMI:          order = 24; break;
+            case TYPE_MEMBUF:       order = 25; break;
+            case TYPE_L4:           order = 26; break;
+            case TYPE_MBA:          order = 27; break;
+            case TYPE_DIMM:         order = 28; break;
             default: ;
         }
 
@@ -500,6 +505,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_NX,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_NPU,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCBIST,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
@@ -537,6 +543,8 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_PSI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
+        { TYPE_NPU,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
         { TYPE_MCBIST, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCBIST, TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MCBIST, TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
@@ -554,13 +562,28 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MC,     TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MI,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MI,     TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MI,     TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MI,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MI,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_OMIC,   TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OMIC,   TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_MCC,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCC,    TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_OMI,    TYPE_OMIC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OMI,    TYPE_MCC,        TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OMI,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_OCMB_CHIP, TYPE_OMI,     TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OCMB_CHIP, TYPE_DIMM,    TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
@@ -582,6 +605,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MBA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_DIMM,   TYPE_MCA,        TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_OCMB_CHIP,  TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_MBA,        TargetService::PARENT_BY_AFFINITY },
 
     };
@@ -776,9 +800,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     {
-                        uint32_t mcbPos = getTargetPosition(t);
-                        return (trgtPos   == (mcbPos / MAX_MCS_PER_MCBIST)) &&
-                               (i_connPos == (mcbPos % MAX_MCS_PER_MCBIST));
+                        uint32_t mcsPos = getTargetPosition(t);
+                        return (trgtPos   == (mcsPos / MAX_MCS_PER_MCBIST)) &&
+                               (i_connPos == (mcsPos % MAX_MCS_PER_MCBIST));
                     } );
 
         }
@@ -788,9 +812,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     {
-                        uint32_t mcbPos = getTargetPosition(t);
-                        return (trgtPos   == (mcbPos / MAX_MCA_PER_MCBIST)) &&
-                               (i_connPos == (mcbPos % MAX_MCA_PER_MCBIST));
+                        uint32_t mcaPos = getTargetPosition(t);
+                        return (trgtPos   == (mcaPos / MAX_MCA_PER_MCBIST)) &&
+                               (i_connPos == (mcaPos % MAX_MCA_PER_MCBIST));
                     } );
 
         }
@@ -827,9 +851,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     {
-                        uint32_t mcPos = getTargetPosition(t);
-                        return (trgtPos   == (mcPos / MAX_MI_PER_MC)) &&
-                               (i_connPos == (mcPos % MAX_MI_PER_MC));
+                        uint32_t miPos = getTargetPosition(t);
+                        return (trgtPos   == (miPos / MAX_MI_PER_MC)) &&
+                               (i_connPos == (miPos % MAX_MI_PER_MC));
                     } );
         }
         else if ( TYPE_MC == trgtType && TYPE_DMI == i_connType )
@@ -838,9 +862,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     {
-                        uint32_t mcPos = getTargetPosition(t);
-                        return (trgtPos   == (mcPos / MAX_DMI_PER_MC)) &&
-                               (i_connPos == (mcPos % MAX_DMI_PER_MC));
+                        uint32_t dmiPos = getTargetPosition(t);
+                        return (trgtPos   == (dmiPos / MAX_DMI_PER_MC)) &&
+                               (i_connPos == (dmiPos % MAX_DMI_PER_MC));
                     } );
         }
         else if ( TYPE_MI == trgtType && TYPE_DMI == i_connType )
@@ -849,9 +873,9 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     {
-                        uint32_t miPos = getTargetPosition(t);
-                        return (trgtPos   == (miPos / MAX_DMI_PER_MI)) &&
-                               (i_connPos == (miPos % MAX_DMI_PER_MI));
+                        uint32_t dmiPos = getTargetPosition(t);
+                        return (trgtPos   == (dmiPos / MAX_DMI_PER_MI)) &&
+                               (i_connPos == (dmiPos % MAX_DMI_PER_MI));
                     } );
         }
         else if ( TYPE_PROC == trgtType && TYPE_MEMBUF == i_connType )
@@ -865,11 +889,67 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                                (i_connPos == (mbPos % MAX_MEMBUF_PER_PROC));
                     } );
         }
-        else if ( TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType )
+        else if ( (TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType) ||
+                  (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) )
         {
-            // There is only one MEMBUF per DMI in the list.
+            // There should only be one in the list.
             PRDF_ASSERT( 1 == list.size() ); // just in case
             itr = list.begin();
+        }
+        else if ( TYPE_MI == trgtType && TYPE_MCC == i_connType )
+        {
+            // i_connPos is position relative to MI (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mccPos = getTargetPosition(t);
+                        return (trgtPos   == (mccPos / MAX_MCC_PER_MI)) &&
+                               (i_connPos == (mccPos % MAX_MCC_PER_MI));
+                    } );
+        }
+        else if ( TYPE_MCC == trgtType && TYPE_OMI == i_connType )
+        {
+            // i_connPos is position relative to MCC (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t omiPos = getTargetPosition(t);
+                        return (trgtPos   == (omiPos / MAX_OMI_PER_MCC)) &&
+                               (i_connPos == (omiPos % MAX_OMI_PER_MCC));
+                    } );
+        }
+        else if ( TYPE_MC == trgtType && TYPE_OMIC == i_connType )
+        {
+            // i_connPos is position relative to MC (0-2)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t omicPos = getTargetPosition(t);
+                        return (trgtPos   == (omicPos / MAX_OMIC_PER_MC)) &&
+                               (i_connPos == (omicPos % MAX_OMIC_PER_MC));
+                    } );
+        }
+        else if ( TYPE_OMIC == trgtType && TYPE_OMI == i_connType )
+        {
+            // i_connPos is position relative to OMIC (0-2)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t omiPos = getTargetPosition(t);
+                        return (trgtPos   == (omiPos / MAX_OMI_PER_OMIC)) &&
+                               (i_connPos == (omiPos % MAX_OMI_PER_OMIC));
+                    } );
+        }
+        else if ( TYPE_PROC == trgtType && TYPE_NPU == i_connType )
+        {
+            // i_connPos is position relative to MC (0-2)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t npuPos = getTargetPosition(t);
+                        return (trgtPos   == (npuPos / MAX_NPU_PER_PROC)) &&
+                               (i_connPos == (npuPos % MAX_NPU_PER_PROC));
+                    } );
         }
         else
         {

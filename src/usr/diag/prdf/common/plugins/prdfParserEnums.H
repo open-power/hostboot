@@ -99,6 +99,13 @@ enum PositionBounds
     MAX_DIMM_PER_PORT   = 2,
     MAX_L4_PER_MEMBUF   = 1,
 
+    MAX_MCC_PER_MI      = 2,
+    MAX_OMI_PER_MCC     = 2,
+    MAX_OMIC_PER_MC     = 3,
+    MAX_OMI_PER_OMIC    = 3,
+    MAX_OCMB_PER_OMI    = 1,
+    MAX_NPU_PER_PROC    = 3,
+
     INVALID_POSITION_BOUND = 0xffffffff,
 };
 
