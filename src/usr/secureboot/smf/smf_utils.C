@@ -37,6 +37,7 @@ namespace SMF
 {
 
 const uint64_t MIN_SMF_MEMORY_AMT = 256 * MEGABYTE;
+const uint64_t MIN_MEM_RESERVED_FOR_HB = 8 * GIGABYTE;
 
 bool isSmfEnabled()
 {

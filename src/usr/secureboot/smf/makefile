@@ -27,6 +27,7 @@ ROOTPATH = ../../../..
 MODULE = smf
 
 OBJS += smf_utils.o
+OBJS += smf.o
 
 include ${ROOTPATH}/config.mk
 

@@ -51,6 +51,7 @@ namespace SECUREBOOT
         MOD_LOCK_ABUS_SEC_MAILBOXES         = 0x11,
         MOD_SECURE_LOG_PLAT_SECURITY_CONFIG = 0x12,
         MOD_CHECK_RISK_LEVEL_FOR_SMF        = 0x13,
+        MOD_SMF_SPLIT_SMF_MEM               = 0x14,
 
         // Use 0x20-0x2F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
@@ -91,6 +92,8 @@ namespace SECUREBOOT
         RC_LOCK_MAILBOXES_FAILED           = SECURE_COMP_ID | 0x14,
         RC_SECURE_LOG_PLAT_SECURITY_CONFIG = SECURE_COMP_ID | 0x15,
         RC_RISK_LEVEL_TOO_LOW              = SECURE_COMP_ID | 0x16,
+        RC_COULD_NOT_ALLOCATE_SMF_MEM      = SECURE_COMP_ID | 0x17,
+        RC_ALLOCATED_NE_REQUESTED          = SECURE_COMP_ID | 0x18,
 
         // Use 0x20-0x2F range for Node Communications
         RC_NCDD_HW_ERROR_FOUND             = SECURE_COMP_ID | 0x20,

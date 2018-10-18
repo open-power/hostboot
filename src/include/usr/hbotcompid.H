@@ -459,6 +459,14 @@ const char EXPSCOM_COMP_NAME[] = "expscom";
 //@{
 const compId_t NVRAM_COMP_ID = 0x3900;
 const char NVRAM_COMP_NAME[] = "nvram";
+
+/** @name SMF
+ *  SMF Support component
+ */
+//@{
+const compId_t SMF_COMP_ID = 0x4000;
+const char SMF_COMP_NAME[] = "smf";
+
 //@}
 
 /** @name HDAT

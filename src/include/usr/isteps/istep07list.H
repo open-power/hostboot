@@ -170,6 +170,7 @@ const DepModInfo g_istep07Dependancies = {
 #ifndef CONFIG_FSP_BUILD
         DEP_LIB(libnvram.so),
 #endif
+        DEP_LIB(libsmf.so),
         NULL
     }
 };
