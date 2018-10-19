@@ -370,7 +370,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
     std::vector<TARGETING::AttributeTank::AttributeSerializedChunk> &
         io_attributes)
 {
-    errlHndl_t l_pErr = NULL;
+    errlHndl_t l_pErr = nullptr;
 
 #ifndef __HOSTBOOT_RUNTIME
     std::vector<TARGETING::AttributeTank::AttributeSerializedChunk>::iterator
@@ -395,15 +395,22 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
         if (l_pErr)
         {
             FAPI_ERR("sendAttrsToFsp: Error sending to FSP");
+
+            // If mailbox nullified the extra_data, that indicates it assumed
+            // ownership of (and responsibility to free) the chunk data.
+            if(l_pMsg->extra_data == nullptr)
+            {
+                (*l_itr).iv_pAttributes = nullptr;
+            }
             msg_free(l_pMsg);
-            l_pMsg = NULL;
+            l_pMsg = nullptr;
             break;
         }
 
-        // Mailbox freed the chunk data
-        (*l_itr).iv_pAttributes = NULL;
+        // On success, assume that mailbox freed the chunk data
+        (*l_itr).iv_pAttributes = nullptr;
         msg_free(l_pMsg);
-        l_pMsg = NULL;
+        l_pMsg = nullptr;
     }
 
     // Free any memory (only in error case will there be memory to free) and
@@ -411,7 +418,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
     for (l_itr = io_attributes.begin(); l_itr != io_attributes.end(); ++l_itr)
     {
         free((*l_itr).iv_pAttributes);
-        (*l_itr).iv_pAttributes = NULL;
+        (*l_itr).iv_pAttributes = nullptr;
     }
     io_attributes.clear();
 #endif
