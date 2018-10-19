@@ -580,6 +580,22 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Modifies the supplied CW to be in or out of address inversion mode
+/// @param[in,out] io_rc00 the RCW that contains address inversion
+/// @param[in] i_inversion_enable true if inversion is enabled
+/// @note Passed values should be OFF_N or ON_N
+///
+inline void set_address_inversion(cw_data& io_rc00, const mss::states i_inversion_enable)
+{
+    // Bit 0 is the inversion enable
+    // Note: the bits are actually in JEDEC order, so bit 0 is on the far right
+    constexpr uint64_t INVERSION_BIT = 7;
+
+    // Values should be OFF_N or ON_N
+    io_rc00.iv_data.template writeBit<INVERSION_BIT>(i_inversion_enable);
+}
+
 }// mss
 
 #endif

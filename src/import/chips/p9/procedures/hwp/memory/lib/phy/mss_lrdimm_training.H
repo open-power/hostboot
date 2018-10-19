@@ -39,6 +39,12 @@
 #define MSS_LRDIMM_TRAINING_H
 
 #include <lib/phy/mss_training.H>
+#include <lib/ccs/ccs.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/phy/seq.H>
+#include <generic/memory/lib/utils/buffer_ops.H>
 
 namespace mss
 {
@@ -59,6 +65,126 @@ namespace lrdimm
 fapi2::ReturnCode mpr_pattern_wr_all_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
         const uint32_t i_pattern);
+
+///
+/// @brief Adds all write commands for the passed in pattern
+/// @tparam fapi2::TargetType T target type for the CCS instruction
+/// @param[in] i_target DIMM target on which to operate
+/// @param[in] i_rank the DIMM rank to set the MPR on
+/// @param[in] i_pattern the pattern to write into the MPRS
+/// @param[in,out] io_insts CCS instructions
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+template<fapi2::TargetType T>
+inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_rank,
+        const uint64_t i_pattern,
+        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+{
+
+    constexpr uint64_t NUM_MPR_PATTERNS = 4;
+    constexpr uint64_t MPR_WR_BG = 0;
+    // First, swizzle the pattern
+    fapi2::buffer<uint32_t> l_swizzled_pattern;
+    FAPI_TRY(mss::seq::swizzle_mpr_pattern(i_pattern, l_swizzled_pattern),
+             "%s rank%u failed to swizzle pattern", mss::c_str(i_target), i_rank);
+
+    // Now add in writes with the appropriate data involved + the good old swizzle that we do based upon the ranks
+    // Swizzle is required as we want the expected data for mirrored and non-mirrored ranks to be the same
+    // For MPR writes the expected data is carried by the addresses, so mirroring matters
+
+    // Loop through all MPR patterns and generate writes for 'em
+    // The MPR number is defined by the bank address
+    for(uint8_t l_ba = 0; l_ba < NUM_MPR_PATTERNS; ++l_ba)
+    {
+        constexpr uint64_t ADDR_START = 54;
+        constexpr uint64_t PATTERN_LEN = 8;
+        constexpr uint64_t MPR_WR_SAFE_DELAY = 0xff;
+        uint64_t l_pattern = 0;
+        FAPI_TRY(l_swizzled_pattern.extract(l_pattern, l_ba * PATTERN_LEN, PATTERN_LEN, ADDR_START), "%s ba%u",
+                 mss::c_str(i_target), l_ba);
+        {
+            auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( i_target,
+                        i_rank,
+                        l_ba,
+                        MPR_WR_BG,
+                        l_pattern);
+            // Swaps the bank addresses so they're a true to the BA we tried to pass in above
+            swap<BA0, BA1>(l_wr.arr0);
+
+            l_wr.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(MPR_WR_SAFE_DELAY);
+            FAPI_TRY(address_mirror(i_target, i_rank, l_wr));
+            io_insts.push_back(l_wr);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Helper function to disable address inversion
+/// @tparam fapi2::TargetType T target type for the CCS instruction
+/// @param[in] i_target DIMM target on which to operate
+/// @param[in,out] io_insts CCS instructions
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+template<fapi2::TargetType T>
+inline fapi2::ReturnCode disable_address_inversion(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+{
+    // Declares the default control word that handles address inversion
+    // Data of 0 as we're going to override it below
+    constexpr uint64_t CW_INVERSION = 0;
+    // uint64_t(0) is to avoid compile errors from overloaded functions
+    cw_data l_cw(FUNC_SPACE_0, CW_INVERSION, static_cast<uint64_t>(0), mss::tmrd());
+    constexpr uint64_t CKE_HIGH = mss::ON;
+
+    uint8_t l_sim = 0;
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Gets default values
+    FAPI_TRY(eff_dimm_ddr4_rc00(i_target, l_cw.iv_data));
+
+    // Modifies inversion
+    set_address_inversion(l_cw, mss::states::OFF_N);
+
+    // Creates the CCS instructions
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_cw, l_sim, io_insts, CKE_HIGH),
+              "Failed to generate control words for %s", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to restore default address inversion
+/// @tparam fapi2::TargetType T target type for the CCS instruction
+/// @param[in] i_target DIMM target on which to operate
+/// @param[in,out] io_insts CCS instructions
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+template<fapi2::TargetType T>
+inline fapi2::ReturnCode restore_address_inversion(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+{
+    // Declares the default control word that handles address inversion
+    // Data of 0 as we're going to override it below
+    constexpr uint64_t CW_INVERSION = 0;
+    cw_data l_cw(FUNC_SPACE_0, CW_INVERSION, eff_dimm_ddr4_rc00, mss::tmrd());
+    constexpr uint64_t CKE_HIGH = mss::ON;
+
+    uint8_t l_sim = 0;
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Creates the CCS instructions
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_cw, l_sim, io_insts, CKE_HIGH),
+              "Failed to generate control words for %s", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Issues initial pattern write a specific rank
