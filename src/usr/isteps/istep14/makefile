@@ -27,6 +27,7 @@ MODULE = istep14
 
 PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 CEN_PROC_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
+EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
@@ -47,6 +48,7 @@ EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory
 EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
+EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o

@@ -36,6 +36,8 @@ HWP_PATH_EXP += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 
 HWP_PATH += ${HWP_PATH_P9}/ ${HWP_PATH_CEN}/ ${HWP_PATH_P9A}/ ${HWP_PATH_EXP}/
 
+EXP_COMMON_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/common
+
 #Add all the object files required for istep07 module
 OBJS += call_mss_volt.o
 OBJS += call_mss_freq.o
@@ -70,7 +72,7 @@ EXTRAINCDIR += ${HWP_PATH_CEN}/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_CEN}/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_EXP}/lib/eff_config/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/
-
+EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 
 VPATH += ${HWP_PATH} ${HWP_PATH_P9}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
