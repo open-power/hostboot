@@ -157,6 +157,13 @@ enum mss_ccs_data_pattern
     MSS_CCS_DATA_PATTERN_FF = 4    ///< FF Pattern Enum
 };
 
+enum ffdc_function_codes
+{
+    // These are used in mss_row_repair.C
+    CHECK_FOR_UNCALIBRATED_DRAM = 0,
+    CLEAR_BAD_DQ_FOR_ROW_REPAIR = 1
+};
+
 constexpr bool MSS_CCS_START = 0;
 constexpr bool MSS_CCS_STOP = 1;
 constexpr uint8_t l_ISDIMM_dqmax = 71;

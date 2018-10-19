@@ -30,4 +30,5 @@ lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_rowRepairFuncs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
 $(call BUILD_PROCEDURE)

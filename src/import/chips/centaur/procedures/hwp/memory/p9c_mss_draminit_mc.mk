@@ -33,5 +33,6 @@ lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_rowRepairFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_row_repair
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

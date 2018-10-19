@@ -31,6 +31,7 @@
 #include <p9c_mss_ddr4_funcs.H>
 #include <p9c_mss_rowRepairFuncs.H>
 #include <p9c_dimmBadDqBitmapFuncs.H>
+#include <p9c_mss_access_delay_reg.H>
 #include <map>
 
 using namespace fapi2;
@@ -246,16 +247,17 @@ extern "C"
     fapi2::ReturnCode clear_row_repair_entry(const uint8_t i_rank,
             uint8_t (&io_row_repair_data)[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK])
     {
-        constexpr uint8_t CLEAR_REPAIR_VALID_IN_BYTE = 0xFE;
-
         FAPI_ASSERT(i_rank < MAX_RANKS_PER_DIMM,
                     fapi2::CEN_RANK_OUT_OF_BOUNDS().
                     set_RANK(i_rank),
                     "Rank %d supplied to clear_row_repair_entry is out of bounds",
                     i_rank);
 
-        // Clear the valid bit in the entry for this DIMM/rank and write it back
-        io_row_repair_data[i_rank][ROW_REPAIR_BYTES_PER_RANK - 1] &= CLEAR_REPAIR_VALID_IN_BYTE;
+        // Clear the entire entry for this DIMM/rank and write it back, to be consistent with PRD
+        for (uint8_t l_byte = 0; l_byte < ROW_REPAIR_BYTES_PER_RANK; ++l_byte)
+        {
+            io_row_repair_data[i_rank][l_byte] = 0;
+        }
 
         return fapi2::FAPI2_RC_SUCCESS;
 
@@ -291,13 +293,11 @@ extern "C"
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_row_repair_data array of row repair attribute values for the DIMM
     /// @param[out] o_repairs_per_dimm array of row repair data buffers
-    /// @param[in,out] io_dram_bad_in_ranks array of how many ranks in which each DRAM was found to need a repair
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const uint8_t i_dram_width,
             const uint8_t i_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
-            std::vector<fapi2::buffer<uint32_t>>& o_repairs_per_dimm,
-            uint8_t io_dram_bad_in_ranks[MC_MAX_DRAMS_PER_RANK_X4])
+            std::vector<fapi2::buffer<uint32_t>>& o_repairs_per_dimm)
     {
         const uint8_t l_num_dram = (i_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
                                    MAX_DRAMS_PER_RANK_X8 :
@@ -343,11 +343,69 @@ extern "C"
                             set_ROW(l_row),
                             "%s VPD contained out of bounds row repair entry: DRAM: %d mrank %d srank %d bg %d bank %d row 0x%05x",
                             mss::spd::c_str(i_target), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
-
-                // Add this rank to the total number of ranks this DRAM appears in
-                ++io_dram_bad_in_ranks[l_dram];
             }
         }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    /// @brief Check the bad bits data to see if a DRAM was not calibrated
+    /// @param[in] i_dram_width the DRAM width
+    /// @param[in] i_dram the DRAM index
+    /// @param[in] i_rankpair_table table of rank to rank pairs for this port
+    /// @param[in] i_bad_bits array bad bits data from VPD for all ranks on the port
+    /// @param[out] o_uncalibrated true if DRAM was marked bad in all ranks, false otherwise
+    /// @return FAPI2_RC_SUCCESS iff successful
+    fapi2::ReturnCode check_for_uncalibrated_dram(const uint8_t i_dram_width,
+            const uint8_t i_dram,
+            const uint8_t (&i_rankpair_table)[MAX_RANKS_PER_PORT],
+            const uint8_t (&i_bad_bits)[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE],
+            bool& o_uncalibrated)
+    {
+        constexpr uint8_t NO_RP = 255;
+
+        // The DRAM index in ATTR_ROW_REPAIR_DATA is relative to Centaur perspective.
+        // The bad_bits attribute is as well, so we can just index into the bad bits array
+        // using the DRAM index
+        const uint8_t l_byte = (i_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
+                               i_dram :
+                               i_dram / MAX_NIBBLES_PER_BYTE;
+        uint8_t l_bad_dram = 0xFF;
+
+        if (i_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4)
+        {
+            l_bad_dram = (i_dram % MAX_NIBBLES_PER_BYTE == 0) ? 0xF0 : 0x0F;
+        }
+
+        // Protect our array index
+        FAPI_ASSERT(l_byte < DIMM_DQ_RANK_BITMAP_SIZE,
+                    fapi2::CEN_DRAM_INDEX_OUT_OF_BOUNDS().
+                    set_FUNCTION(CHECK_FOR_UNCALIBRATED_DRAM).
+                    set_DRAM(i_dram),
+                    "DRAM index %d supplied to check_for_uncalibrated_dram is out of bounds",
+                    i_dram);
+
+        o_uncalibrated = true;
+
+        for (uint8_t l_rank = 0; l_rank < MAX_RANKS_PER_PORT; ++l_rank)
+        {
+            // If the bad bits corresponding to the given DRAM aren't all set in every
+            // valid rank, the DRAM must have been calibrated
+            if ((i_rankpair_table[l_rank] != NO_RP) &&
+                ((i_bad_bits[l_rank][l_byte] & l_bad_dram) != l_bad_dram))
+            {
+                FAPI_INF("DRAM index %d was calibrated since it isn't marked bad on rank %d",
+                         i_dram, l_rank);
+                o_uncalibrated = false;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+
+        // If we got here then the DRAM was marked bad in all configured ranks,
+        // so we assume it was not calibrated
+        FAPI_INF("DRAM index %d was marked bad on all configured ranks", i_dram);
+        return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -378,6 +436,7 @@ extern "C"
         // Protect our array index
         FAPI_ASSERT(l_byte < DIMM_DQ_RANK_BITMAP_SIZE,
                     fapi2::CEN_DRAM_INDEX_OUT_OF_BOUNDS().
+                    set_FUNCTION(CLEAR_BAD_DQ_FOR_ROW_REPAIR).
                     set_DRAM(i_dram),
                     "DRAM index %d supplied to clear_bad_dq_for_row_repair is out of bounds",
                     i_dram);
@@ -481,11 +540,11 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode p9c_mss_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
     {
+        constexpr uint8_t NO_RP = 255;
+
         bool l_sppr_supported = true;
         uint64_t l_mnfg_flags = 0;
         uint8_t l_dram_width = 0;
-        uint8_t l_dram_bad_in_ranks[MC_MAX_DRAMS_PER_RANK_X4] = {0};
-        uint8_t l_ranks_configed[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_dram = 0;
         uint8_t l_srank = 0;
         uint8_t l_bg = 0;
@@ -496,7 +555,6 @@ extern "C"
         std::map<fapi2::Target<fapi2::TARGET_TYPE_DIMM>, std::vector<fapi2::buffer<uint32_t>>> l_row_repairs;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mnfg_flags));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RANKS_CONFIGED, i_target_mba, l_ranks_configed));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target_mba, l_dram_width));
 
         // If row repairs are not supported, we're done
@@ -525,7 +583,7 @@ extern "C"
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm, l_row_repair_data));
 
-            FAPI_TRY(build_row_repair_table(l_dimm, l_dram_width, l_row_repair_data, l_repairs_per_dimm, l_dram_bad_in_ranks));
+            FAPI_TRY(build_row_repair_table(l_dimm, l_dram_width, l_row_repair_data, l_repairs_per_dimm));
             l_row_repairs.insert(std::make_pair(l_dimm, l_repairs_per_dimm));
         }
 
@@ -555,27 +613,49 @@ extern "C"
             const auto& l_dimm = l_pair.first;
             const auto& l_repairs = l_pair.second;
             uint8_t l_port = 0;
-            uint8_t l_total_ranks_on_port = 0;
+            uint8_t l_rp = 0;
+            uint8_t l_rankpair_table[MAX_RANKS_PER_PORT] = {0};
             uint8_t l_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK] = {0};
+            uint8_t l_bad_bits[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE] = {0};
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, l_dimm, l_port));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm, l_row_repair_data));
 
-            for (uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; ++l_dimm_index)
+            // Get our rank table for this port
+            FAPI_TRY(mss_getrankpair(i_target_mba, l_port, 0, &l_rp, l_rankpair_table));
+
+            // Get the bad bits array for each valid rank on this port
+            for (uint8_t l_rank = 0; l_rank < MAX_RANKS_PER_PORT; ++l_rank)
             {
-                l_total_ranks_on_port += l_ranks_configed[l_port][l_dimm_index];
+                if (l_rankpair_table[l_rank] != NO_RP)
+                {
+                    uint8_t l_dimm_index = l_rank / MAX_RANKS_PER_DIMM;
+                    uint8_t l_dimm_rank = l_rank % MAX_RANKS_PER_DIMM;
+                    FAPI_TRY(dimmGetBadDqBitmap(i_target_mba, l_port, l_dimm_index, l_dimm_rank, l_bad_bits[l_rank]),
+                             "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target_mba));
+                }
             }
 
             for (uint8_t l_rank = 0; l_rank < MAX_RANKS_PER_DIMM; ++l_rank)
             {
                 if (valid_row_repair_entry(l_repairs[l_rank], l_dram, l_srank, l_bg, l_bank, l_row))
                 {
-                    // If a DRAM position is marked bad in VPD for all ranks, skip row repair and clear row repair entry from VPD
+                    uint8_t l_dimm_index = 0;
+                    uint8_t l_port_rank = 0;
+                    fapi2::buffer<uint64_t> l_dram_bitmap;
+                    bool l_uncalibrated = false;
+
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm, l_dimm_index));
+                    l_port_rank = (l_dimm_index * MAX_RANKS_PER_DIMM) + l_rank;
+
+                    // If a DRAM position is marked bad in VPD for all valid ranks, skip row repair and clear row repair entry from VPD
                     // as this means the DRAM position has not been calibrated during draminit_training (Centaur workaround)
-                    if (l_dram_bad_in_ranks[l_dram] == l_total_ranks_on_port)
+                    FAPI_TRY(check_for_uncalibrated_dram(l_dram_width, l_dram, l_rankpair_table, l_bad_bits, l_uncalibrated));
+
+                    if (l_uncalibrated)
                     {
-                        FAPI_INF("%s DRAM position %d is bad in all ranks. Skipping row repairs for this DRAM.",
-                                 mss::c_str(i_target_mba), l_dram);
+                        FAPI_INF("%s Port %d DRAM position %d is bad in all ranks, so appears to be uncalibrated. Skipping row repairs for this DRAM.",
+                                 mss::c_str(i_target_mba), l_port, l_dram);
 
                         FAPI_TRY(clear_row_repair_entry(l_rank, l_row_repair_data));
 
@@ -583,30 +663,18 @@ extern "C"
                     }
 
                     // Deploy row repair and clear bad DQs
-                    uint8_t l_dimm_index = 0;
-                    uint8_t l_port_rank = 0;
-                    uint8_t l_bad_bits[DIMM_DQ_RANK_BITMAP_SIZE] = {0}; // 10 byte array of bad bits
-                    fapi2::buffer<uint64_t> l_dram_bitmap;
-
-                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm, l_dimm_index));
-                    l_port_rank = (l_dimm_index * MAX_RANKS_PER_DIMM) + l_rank;
-
-                    FAPI_TRY(l_dram_bitmap.setBit(DRAM_START_BIT + l_dram));
-
                     FAPI_INF("%s Deploying row repair on DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
                              mss::spd::c_str(l_dimm), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                    FAPI_TRY(l_dram_bitmap.setBit(DRAM_START_BIT + l_dram));
                     FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
 
                     // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
                     FAPI_INF("%s Updating bad bits on Port %d, DIMM %d, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
                              mss::c_str(i_target_mba), l_port, l_dimm_index, l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
 
-                    FAPI_TRY(dimmGetBadDqBitmap(i_target_mba, l_port, l_dimm_index, l_rank, l_bad_bits),
-                             "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target_mba));
+                    FAPI_TRY(clear_bad_dq_for_row_repair(l_dram_width, l_dram, l_bad_bits[l_port_rank]));
 
-                    FAPI_TRY(clear_bad_dq_for_row_repair(l_dram_width, l_dram, l_bad_bits));
-
-                    FAPI_TRY(dimmSetBadDqBitmap(i_target_mba, l_port, l_dimm_index, l_rank, l_bad_bits),
+                    FAPI_TRY(dimmSetBadDqBitmap(i_target_mba, l_port, l_dimm_index, l_rank, l_bad_bits[l_port_rank]),
                              "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target_mba));
                 }
             }

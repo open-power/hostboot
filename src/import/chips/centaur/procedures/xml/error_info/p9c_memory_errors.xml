@@ -406,6 +406,7 @@
 <hwpError>
   <rc>RC_CEN_DRAM_INDEX_OUT_OF_BOUNDS</rc>
   <description>DRAM index supplied to clear_bad_dq_for_row_repair is out of bounds</description>
+  <ffdc>FUNCTION</ffdc>
   <ffdc>DRAM</ffdc>
   <callout>
     <procedure>CODE</procedure>

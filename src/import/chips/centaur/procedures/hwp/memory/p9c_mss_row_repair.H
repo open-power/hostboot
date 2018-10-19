@@ -84,6 +84,19 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode p9c_mss_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 
+    /// @brief Check the bad bits data to see if a DRAM was not calibrated
+    /// @param[in] i_dram_width the DRAM width
+    /// @param[in] i_dram the DRAM index
+    /// @param[in] i_rankpair_table table of rank to rank pairs for this port
+    /// @param[in] i_bad_bits array bad bits data from VPD for all ranks on the port
+    /// @param[out] o_uncalibrated true if DRAM was marked bad in all ranks, false otherwise
+    /// @return FAPI2_RC_SUCCESS iff successful
+    fapi2::ReturnCode check_for_uncalibrated_dram(const uint8_t i_dram_width,
+            const uint8_t i_dram,
+            const uint8_t (&i_rankpair_table)[MAX_RANKS_PER_PORT],
+            const uint8_t (&i_bad_bits)[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE],
+            bool& o_uncalibrated);
+
     /// @brief Clear the corresponding bad_bits after a row repair operation
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_dram the DRAM index
@@ -120,13 +133,11 @@ extern "C"
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_row_repair_data array of row repair attribute values for the DIMM
     /// @param[out] o_repairs_per_dimm array of row repair data buffers
-    /// @param[in,out] io_dram_bad_in_ranks array of how many ranks in which each DRAM was found to need a repair
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const uint8_t i_dram_width,
             const uint8_t i_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
-            std::vector<fapi2::buffer<uint32_t>>& o_repairs_per_dimm,
-            uint8_t io_dram_bad_in_ranks[MC_MAX_DRAMS_PER_RANK_X4]);
+            std::vector<fapi2::buffer<uint32_t>>& o_repairs_per_dimm);
 }
 
 #endif
