@@ -25,7 +25,8 @@
 
 # Include the macros and things for MSS procedures
 PROCEDURE=p9_mss_setup_bars
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
+OBJS+=p9a_addr_ext.o
 lib$(PROCEDURE)_DEPLIBS+=cen
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)

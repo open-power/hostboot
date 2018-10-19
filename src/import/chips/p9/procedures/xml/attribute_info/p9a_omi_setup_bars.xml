@@ -24,18 +24,6 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
 <!-- ********************************************************************* -->
-<attribute>
-  <id>ATTR_OMI_INBAND_BAR_ENABLE</id>
-  <targetType>TARGET_TYPE_OMI</targetType>
-  <description> DMI inband BAR enable.
-                Set by platform.
-                Used by p9c_set_inband_addr.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-  <platInit/>
-  <persistRuntime/>
-</attribute>
 <!-- ********************************************************************* -->
 <attribute>
   <id>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>

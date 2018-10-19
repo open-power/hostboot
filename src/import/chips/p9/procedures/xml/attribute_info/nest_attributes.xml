@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -995,7 +995,7 @@
                 Set by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -1010,7 +1010,7 @@
                 Set by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -1387,7 +1387,7 @@
                 Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -1402,7 +1402,7 @@
                 Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>

@@ -102,6 +102,9 @@ static const size_t BUFFER_TRANSACTION_SIZE = 8;
 
 static const uint64_t EXPLR_IB_CONFIG_OFFSET = 0x0000000000000000ull;
 static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
+static const uint64_t EXPLR_IB_BAR_SIZE      = 0b01111111;  // 4GB Depends on EXPLR_IB_MMIO_OFFSET
+static const uint64_t EXPLR_IB_BAR_B_BIT     = EXPLR_IB_MMIO_OFFSET >> 1; // 2GB AND with A == 0, AND with B != 0
+static const uint64_t EXPLR_IB_BAR_MASK_ZERO = (EXPLR_IB_BAR_B_BIT - 1); // AND with BAR must == 0
 
 //--------------------------------------------------------------------------------
 // The MSCC RAM Range Register SCOM 0x080108e5  MSCCRNGE

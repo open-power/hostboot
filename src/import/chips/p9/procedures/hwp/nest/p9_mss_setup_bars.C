@@ -44,9 +44,13 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <p9n2_mc_scom_addresses.H>
 #include <p9n2_mc_scom_addresses_fld.H>
+#include <p9a_misc_scom_addresses.H>
+#include <p9a_misc_scom_addresses_fld.H>
+#include <p9a_addr_ext.H>
 #include <map>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
+#include <chips/ocmb/explorer/procedures/hwp/memory/exp_inband.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions
@@ -100,17 +104,22 @@ static const struct groupSizeTable_t
 } GROUP_SIZE_TABLE[] =
 {
     // GroupSize  Encoded GroupSize
-    {    4,        0b00000000000    },      //    4 GB
-    {    8,        0b00000000001    },      //    8 GB
-    {   16,        0b00000000011    },      //   16 GB
-    {   32,        0b00000000111    },      //   32 GB
-    {   64,        0b00000001111    },      //   64 GB
-    {  128,        0b00000011111    },      //  128 GB
-    {  256,        0b00000111111    },      //  256 GB
-    {  512,        0b00001111111    },      //  512 GB
-    { 1024,        0b00011111111    },      //    1 TB
-    { 2048,        0b00111111111    },      //    2 TB
-    { 4096,        0b01111111111    },      //    4 TB
+    {      4,        0b00000000000    },      //    4 GB
+    {      8,        0b00000000001    },      //    8 GB
+    {     16,        0b00000000011    },      //   16 GB
+    {     32,        0b00000000111    },      //   32 GB
+    {     64,        0b00000001111    },      //   64 GB
+    {    128,        0b00000011111    },      //  128 GB
+    {    256,        0b00000111111    },      //  256 GB
+    {    512,        0b00001111111    },      //  512 GB
+    {   1024,        0b00011111111    },      //    1 TB
+    {   2048,        0b00111111111    },      //    2 TB
+    {   4096,        0b01111111111    },      //    4 TB
+    {   8192,    0b000011111111111    },      //    8 TB
+    {  16384,    0b000111111111111    },      //   16 TB
+    {  32768,    0b001111111111111    },      //   32 TB
+    {  65536,    0b011111111111111    },      //   64 TB
+    { 131072,    0b111111111111111    }       //  128 TB
 };
 
 /**
@@ -318,7 +327,7 @@ fapi2::ReturnCode getMcMemSize(
     // Figure out the amount of memory behind this MI
     // by adding up all memory from its DMI ports
     auto l_dmiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
-    uint64_t l_dmiSize = 0;
+    uint64_t l_chSize = 0;
 
     for (auto l_dmi : l_dmiChiplets)
     {
@@ -328,13 +337,71 @@ fapi2::ReturnCode getMcMemSize(
                  (uint64_t)fapi2::current_err);
 
         // Get the amount of memory behind this DMI target
-        FAPI_TRY(mss::eff_memory_size<mss::mc_type::CENTAUR>(l_dmi, l_dmiSize),
+        FAPI_TRY(mss::eff_memory_size<mss::mc_type::CENTAUR>(l_dmi, l_chSize),
                  "Error returned from eff_memory_size - DMI, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
-        FAPI_INF("DMI %u: Total DIMM size %lu GB", l_dmiPos, l_dmiSize);
-        o_mcSize += l_dmiSize;
+        FAPI_INF("DMI %u: Total DIMM size %lu GB", l_dmiPos, l_chSize);
+        o_mcSize += l_chSize;
     }
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+/// MC = MCC (Axone)
+template<>
+fapi2::ReturnCode getMcMemSize(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+    uint64_t& o_mcSize)
+{
+    FAPI_DBG("Entering");
+
+    // Figure out the amount of memory behind this MI
+    // by adding up all memory from its OMI ports
+    uint64_t l_chSize = 0;
+    uint64_t l_sub_size[SUBCHANNEL_PER_CHANNEL];
+    uint64_t l_sub_minsize = 0;
+    uint64_t l_num_sub = 0;
+
+    auto l_omiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+    memset(l_sub_size, 0, sizeof(l_sub_size));
+
+    for (auto l_omi : l_omiChiplets)
+    {
+        const auto& l_ocmb_chiplets = l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+
+        if (!l_ocmb_chiplets.empty())
+        {
+            uint8_t l_omiPos = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omi, l_omiPos),
+                     "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            // Get the amount of memory behind this OMI
+            FAPI_TRY(mss::eff_memory_size<mss::mc_type::EXPLORER>(l_ocmb_chiplets[0], l_chSize),
+                     "Error returned from eff_memory_size - ocmb, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            FAPI_INF("OMI %u: Total DIMM size %lu GB", l_omiPos, l_chSize);
+
+            l_sub_size[l_omiPos % SUBCHANNEL_PER_CHANNEL] = l_chSize;
+
+            if (l_chSize > 0)
+            {
+                l_num_sub++;
+
+                if (l_sub_minsize == 0 || l_sub_minsize > l_chSize)
+                {
+                    l_sub_minsize = l_chSize;
+                }
+            }
+        }
+    }
+
+    l_chSize = (l_num_sub * l_sub_minsize);
+    o_mcSize += l_chSize;
 
 fapi_try_exit:
     FAPI_DBG("Exit");
@@ -348,6 +415,7 @@ fapi_try_exit:
 ///        from group data.
 ///
 /// @param[in]  i_mcPos         MC position
+/// @param[in]  i_omi           Chip uses OMI?
 /// @param[in]  i_groupData     Array of Group data info
 /// @param[out] o_portFound     Mark how many time a port is found.
 /// @param[out] o_mcSize        The total mem size calculated
@@ -356,6 +424,7 @@ fapi_try_exit:
 ///
 void getGroupDataMcMemSize(
     uint8_t i_mcPos,
+    const bool i_omi,
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
     uint8_t o_portFound[NUM_MC_PORTS_PER_PROC],
     uint64_t& o_mcSize)
@@ -381,7 +450,8 @@ void getGroupDataMcMemSize(
             uint8_t l_mcId = getMCPosition(i_groupData[l_group][MEMBER_IDX(0) +
                                            l_memberIdx]);
 
-            if (l_mcId == i_mcPos)
+            if ((!i_omi && l_mcId == i_mcPos) ||
+                (i_omi && i_mcPos == i_groupData[l_group][MEMBER_IDX(0) + l_memberIdx]))
             {
                 o_mcSize += i_groupData[l_group][PORT_SIZE];
                 FAPI_INF("getGroupDataMcMemSize - Port %u, DIMM size %lu GB",
@@ -409,6 +479,7 @@ void getGroupDataMcMemSize(
 ///   - An MCA/DMMI port can only appear once in any group.
 ///
 /// @param[in]  i_mcTargets     Vector of reference of MC targets (MCS or MI)
+/// @param[in]  i_omi           Chip uses OMI?
 /// @param[in]  i_groupData     Array of Group data info
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
@@ -416,6 +487,7 @@ void getGroupDataMcMemSize(
 template<fapi2::TargetType T>
 fapi2::ReturnCode validateGroupData(
     const std::vector< fapi2::Target<T> >& i_mcTargets,
+    const bool i_omi,
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS])
 {
     FAPI_DBG("Entering");
@@ -444,7 +516,7 @@ fapi2::ReturnCode validateGroupData(
                  (uint64_t)fapi2::current_err);
 
         // Get this MC memsize reported in Group data
-        getGroupDataMcMemSize(l_mcPos, i_groupData, l_portFound,
+        getGroupDataMcMemSize(l_mcPos, i_omi, i_groupData, l_portFound,
                               l_mcSizeGroupData);
 
         FAPI_DBG("validateGroupData: MemSize %.16lld, Group Memsize %.16lld",
@@ -655,6 +727,28 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
         }
     }
 
+    FAPI_TRY(getNonMirrorBarIdSize(i_mcTarget, i_portInfo, o_mcBarData));
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate the BAR data for each MC (MCS/MI) based on group info
+///        of port0/1
+///
+/// @param[in]  i_mcTarget     MC target (MCS/MI)
+/// @param[in]  i_portInfo     The port group info
+/// @param[in]  o_mcBarData    MC BAR data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode getNonMirrorBarIdSize(const fapi2::Target<T>& i_mcTarget,
+                                        const mcPortGroupInfo_t i_portInfo[],
+                                        mcBarData_t& o_mcBarData)
+{
     // MCFGP Channel_0 Group member ID (bits 5:7)
     o_mcBarData.MCFGP_chan0_group_member_id = i_portInfo[0].channelId;
     // MCFGP Channel_1 Group member ID (bits 8:10)
@@ -756,6 +850,154 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Calculate the BAR data for each MC (MCS/MI) based on group info
+///        of port0/1
+///
+/// @param[in]  i_mcTarget     MC target (MCS/MI)
+/// @param[in]  i_portInfo     The port group info
+/// @param[in]  o_mcBarData    MC BAR data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode getNonMirrorBarIdSize(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_mcTarget,
+                                        const mcPortGroupInfo_t& i_portInfo,
+                                        mcBarData_t& o_mcBarData)
+{
+    // MCFGP Channel_0 Group member ID (bits 5:7)
+    o_mcBarData.MCFGP_chan0_group_member_id = i_portInfo.channelId;
+
+    // If MCFGP is valid, set other fields
+    if (o_mcBarData.MCFGP_valid == true)
+    {
+        // MCFGP Group size
+        FAPI_TRY(getGroupSizeEncodedValue(i_mcTarget, i_portInfo.groupSize,
+                                          o_mcBarData.MCFGP_group_size),
+                 "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Group base address
+        o_mcBarData.MCFGP_groupBaseAddr = i_portInfo.groupBaseAddr;
+    }
+
+    // If MCFGPM is valid, set other fields
+    if (o_mcBarData.MCFGPM_valid == true)
+    {
+        // MCFGPM Group size
+        FAPI_TRY(getGroupSizeEncodedValue(i_mcTarget, i_portInfo.groupSize,
+                                          o_mcBarData.MCFGPM_group_size),
+                 "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Group base address
+        o_mcBarData.MCFGPM_groupBaseAddr = i_portInfo.groupBaseAddr;
+    }
+
+    // ----------------------------------------------------
+    // Determine data for MCFGPA and MCFGPMA registers
+    // ----------------------------------------------------
+
+    // Alternate Memory MCFGPA
+    for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
+    {
+        if ( i_portInfo.altMemValid[ii] )
+        {
+            o_mcBarData.MCFGPA_HOLE_valid[ii] = 1;
+            o_mcBarData.MCFGPA_HOLE_LOWER_addr[ii] = i_portInfo.altBaseAddr[ii];
+            o_mcBarData.MCFGPA_HOLE_UPPER_addr[ii] =
+                i_portInfo.altBaseAddr[ii] + i_portInfo.altMemSize[ii];
+        }
+        else
+        {
+            o_mcBarData.MCFGPA_HOLE_valid[ii] = 0;
+            o_mcBarData.MCFGPA_HOLE_LOWER_addr[ii] = 0;
+            o_mcBarData.MCFGPA_HOLE_UPPER_addr[ii] = 0;
+        }
+
+    }
+
+    // SMF Section of MCFGPA and MCFGPMA
+    if ( i_portInfo.smfMemValid )
+    {
+        o_mcBarData.MCFGPA_SMF_valid = 1;
+        o_mcBarData.MCFGPA_SMF_LOWER_addr = i_portInfo.smfBaseAddr;
+        o_mcBarData.MCFGPA_SMF_UPPER_addr = i_portInfo.smfBaseAddr + i_portInfo.smfMemSize;
+    }
+    else
+    {
+        o_mcBarData.MCFGPA_SMF_valid = 0;
+        o_mcBarData.MCFGPA_SMF_LOWER_addr = 0;
+        o_mcBarData.MCFGPA_SMF_UPPER_addr = 0;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate the BAR data for each MCC based on group info
+///        of port0/1 - OMI specific
+///
+/// @param[in]  i_mcTarget     MC target (MCC)
+/// @param[in]  i_portInfo     The port group info
+/// @param[in]  o_mcBarData    MC BAR data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_mcTarget,
+                                      const mcPortGroupInfo_t& i_portInfo,
+                                      mcBarData_t& o_mcBarData)
+{
+    FAPI_DBG("Entering");
+
+    // Initialize
+    o_mcBarData.MCFGP_chan_per_group = NO_CHANNEL_PER_GROUP;
+    o_mcBarData.MCFGP_valid = false;
+    o_mcBarData.MCFGPM_valid = false;
+
+    // MCFGP valid (MCFGP bit 0)
+    if ( i_portInfo.numPortsInGroup > 0)
+    {
+        o_mcBarData.MCFGP_valid = true;
+        o_mcBarData.MCFGPM_valid = false;
+
+        // ----------------------------------------------------
+        // Determine data for MCFGP and MCFGPM registers
+        // ----------------------------------------------------
+        if (i_portInfo.numPortsInGroup == 8)
+        {
+            o_mcBarData.MCFGP_chan_per_group = 0;
+        }
+        else if (i_portInfo.numPortsInGroup == 1 ||
+                 i_portInfo.numPortsInGroup == 2 ||
+                 i_portInfo.numPortsInGroup == 3 ||
+                 i_portInfo.numPortsInGroup == 4 ||
+                 i_portInfo.numPortsInGroup == 6 )
+        {
+            o_mcBarData.MCFGP_chan_per_group = i_portInfo.numPortsInGroup;
+        }
+
+        // Assert if ports 0/1 don't match any entry in table
+        FAPI_ASSERT(o_mcBarData.MCFGP_chan_per_group != NO_CHANNEL_PER_GROUP,
+                    fapi2::MSS_SETUP_BARS_INVALID_PORTS_CONFIG()
+                    .set_MC_TARGET(i_mcTarget)
+                    .set_PORT_0_PORTS_IN_GROUP(i_portInfo.numPortsInGroup)
+                    .set_PORT_0_GROUP(i_portInfo.myGroup)
+                    .set_PORT_1_PORTS_IN_GROUP(0)
+                    .set_PORT_1_GROUP(0),
+                    "Error: Invalid number of ports per group"
+                    "group %u, ports in group %u",
+                    i_portInfo.myGroup, i_portInfo.numPortsInGroup);
+    }
+
+    FAPI_TRY(getNonMirrorBarIdSize(i_mcTarget, i_portInfo, o_mcBarData));
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Calculate the mirror BAR data for each MC based on group info
 ///        of port0/1
 ///
@@ -779,8 +1021,8 @@ fapi2::ReturnCode getMirrorBarData(const fapi2::Target<T>& i_mcTarget,
     // Check MCFGP value to see if mirror is possible
     // (See Table 1 of P9 Cumulus Memory Controller Workbook)
     //
-    if ( (io_mcBarData.MCFGP_chan_per_group < 0b0101) ||
-         (io_mcBarData.MCFGP_chan_per_group > 0b1000) )
+    if ( ((io_mcBarData.MCFGP_chan_per_group < 0b0101) ||
+          (io_mcBarData.MCFGP_chan_per_group > 0b1000)))
     {
         FAPI_IMP("Mirror is not possible with MCFGP = 0x%.8X, NO MIRROR is "
                  "programmed. ", io_mcBarData.MCFGP_chan_per_group);
@@ -832,6 +1074,106 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Calculate the mirror BAR data for each MC based on group info
+///        of port0/1
+///
+/// @param[in]  i_mcTarget     MCC target
+/// @param[in]  i_portInfo     The port group info
+/// @param[in]  io_mcBarData   MC BAR data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode getMirrorBarData(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_mcTarget,
+                                   const mcPortGroupInfo_t& i_portInfo,
+                                   mcBarData_t& io_mcBarData)
+{
+    FAPI_DBG("Entering");
+
+    // ---------------------------------------------------
+    // Build MC register values for mirror groups
+    // ---------------------------------------------------
+
+    // Set MCFGPM_VALID
+    if (i_portInfo.groupSize > 0)
+    {
+        io_mcBarData.MCFGPM_valid = true;
+
+        // ----------------------------------------------------
+        // Determine data for MCFGPM register
+        // ----------------------------------------------------
+
+        // MCFGPM Group size
+        FAPI_TRY(getGroupSizeEncodedValue(i_mcTarget, i_portInfo.groupSize,
+                                          io_mcBarData.MCFGPM_group_size),
+                 "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Group base address
+        io_mcBarData.MCFGPM_groupBaseAddr = i_portInfo.groupBaseAddr;
+
+        // ----------------------------------------------------
+        // Determine data for MCFGPMA registers
+        // ----------------------------------------------------
+        // Alternate Memory MCFGPMA
+        for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
+        {
+            if ( i_portInfo.altMemValid[ii] )
+            {
+                io_mcBarData.MCFGPMA_HOLE_valid[ii] = 1;
+                io_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] =
+                    i_portInfo.altBaseAddr[ii];
+                io_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] =
+                    i_portInfo.altBaseAddr[ii] + i_portInfo.altMemSize[ii];
+            }
+            else
+            {
+                io_mcBarData.MCFGPMA_HOLE_valid[ii] = 0;
+                io_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] = 0;
+                io_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] = 0;
+            }
+
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Display the Memory controller BAR data resulted from the BAR
+///        data calculations.
+///
+/// @param[in]  i_portInfo      Port data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+void displayMCPortInfoData(const mcPortGroupInfo_t i_portInfo)
+{
+    if (i_portInfo.numPortsInGroup > 0)
+    {
+        FAPI_INF("        myGroup %u", i_portInfo.myGroup);
+        FAPI_INF("        numPortsInGroup %u", i_portInfo.numPortsInGroup);
+        FAPI_INF("        groupSize %u", i_portInfo.groupSize);
+        FAPI_INF("        groupBaseAddr 0x%.16llX", i_portInfo.groupBaseAddr);
+        FAPI_INF("        channelId %u", i_portInfo.channelId);
+
+        for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+        {
+            FAPI_INF("        altMemValid[%u] %u", jj, i_portInfo.altMemValid[jj]);
+            FAPI_INF("        altMemSize[%u]  %u", jj, i_portInfo.altMemSize[jj]);
+            FAPI_INF("        altBaseAddr[%u] 0x%.16llX", jj, i_portInfo.altBaseAddr[jj]);
+        }
+    }
+    else
+    {
+        FAPI_INF("        Not configured");
+    }
+
+    return;
+}
+
+///
 /// @brief Display the Memory controller BAR data resulted from the BAR
 ///        data calculations.
 ///
@@ -845,25 +1187,7 @@ void displayMCPortInfoData(const mcPortGroupInfo_t i_portInfo[])
     {
         FAPI_INF("    Port %u:", ii);
 
-        if (i_portInfo[ii].numPortsInGroup > 0)
-        {
-            FAPI_INF("        myGroup %u", i_portInfo[ii].myGroup);
-            FAPI_INF("        numPortsInGroup %u", i_portInfo[ii].numPortsInGroup);
-            FAPI_INF("        groupSize %u", i_portInfo[ii].groupSize);
-            FAPI_INF("        groupBaseAddr 0x%.16llX", i_portInfo[ii].groupBaseAddr);
-            FAPI_INF("        channelId %u", i_portInfo[ii].channelId);
-
-            for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
-            {
-                FAPI_INF("        altMemValid[%u] %u", jj, i_portInfo[ii].altMemValid[jj]);
-                FAPI_INF("        altMemSize[%u]  %u", jj, i_portInfo[ii].altMemSize[jj]);
-                FAPI_INF("        altBaseAddr[%u] 0x%.16llX", jj, i_portInfo[ii].altBaseAddr[jj]);
-            }
-        }
-        else
-        {
-            FAPI_INF("        Not configured");
-        }
+        displayMCPortInfoData(i_portInfo[ii]);
     }
 
     return;
@@ -949,6 +1273,7 @@ void getPortData(const bool i_nonMirror,
         // Skip empty groups
         if (i_groupData[l_group][GROUP_SIZE] == 0)
         {
+            FAPI_DBG("Skipping zero group %d (nonMirror: %d)", l_group, i_nonMirror);
             continue;
         }
 
@@ -1015,6 +1340,95 @@ void getPortData(const bool i_nonMirror,
     // Display MC port info data
     FAPI_INF("getPortData from %s group - Results for MCS/MI pos %d",
              i_nonMirror ? "NON-MIRROR" : "MIRROR", i_mcPos);
+    displayMCPortInfoData(o_portInfo);
+
+    FAPI_DBG("Exit");
+    return;
+}
+
+///
+/// @brief Load the mcPortGroupInfo_t data for the input MC based on
+///        MC position, input group data, and mirror/non-mirror setting.
+///
+/// @param[in]  i_nonMirror     Type of group data:
+///                              true = non-mirror; false = mirrored
+/// @param[in]  i_mcPos         MCC position
+/// @param[in]  i_groupData     Array of Group data info
+/// @param[out] o_portInfo      Output mcPortGroupInfo_t
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+void getPortData(const bool i_nonMirror,
+                 const uint8_t i_mccPos,
+                 const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
+                 mcPortGroupInfo_t& o_portInfo)
+{
+    FAPI_DBG("Entering");
+
+    // Non-mirrored groups: 0->7
+    // Mirrored groups: 8->11
+    uint8_t l_startGroup = 0;
+    uint8_t l_endGroup =  (DATA_GROUPS / 2);
+
+    if (i_nonMirror == false)
+    {
+        l_startGroup = MIRR_OFFSET;
+        l_endGroup = (MIRR_OFFSET + NUM_MIRROR_REGIONS);
+    }
+
+    // Loop thru specified groups
+    for (uint8_t l_group = l_startGroup; l_group < l_endGroup; l_group++)
+    {
+        // Skip empty groups
+        if (i_groupData[l_group][GROUP_SIZE] == 0)
+        {
+            continue;
+        }
+
+        // Loop thru the ports (MCA/DMI) and determine if they belong
+        // to this MC (MCS/MI)
+        for (uint8_t l_memberIdx = 0;
+             l_memberIdx < i_groupData[l_group][PORTS_IN_GROUP]; l_memberIdx++)
+        {
+            uint8_t l_mccPos = i_groupData[l_group][MEMBER_IDX(0) + l_memberIdx];
+
+            // If the PORT_ID belongs to this MC
+            if (l_mccPos == i_mccPos)
+            {
+                // Set the port group info for this port
+                o_portInfo.myGroup = l_group;
+                o_portInfo.numPortsInGroup = i_groupData[l_group][PORTS_IN_GROUP];
+                o_portInfo.groupSize = i_groupData[l_group][GROUP_SIZE];
+                o_portInfo.groupBaseAddr = i_groupData[l_group][BASE_ADDR];
+                o_portInfo.channelId = l_memberIdx;
+
+                // ALT memory regions
+                for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
+                {
+                    if (i_groupData[l_group][ALT_VALID(ii)])
+                    {
+                        o_portInfo.altMemValid[ii] = 1;
+                        o_portInfo.altMemSize[ii] = i_groupData[l_group][ALT_SIZE(ii)];
+                        o_portInfo.altBaseAddr[ii] = i_groupData[l_group][ALT_BASE_ADDR(ii)];
+                    }
+                }
+
+                // SMF memory regions
+                if (i_groupData[l_group][SMF_VALID])
+                {
+                    o_portInfo.smfMemValid = 1;
+                    o_portInfo.smfMemSize = i_groupData[l_group][SMF_SIZE];
+                    o_portInfo.smfBaseAddr = i_groupData[l_group][SMF_BASE_ADDR];
+                }
+            }
+
+        } // Port loop
+
+    } // Group loop
+
+    // Display MC port info data
+    FAPI_INF("getPortData from %s group - Results for MCC pos %d",
+             i_nonMirror ? "NON-MIRROR" : "MIRROR", i_mccPos);
     displayMCPortInfoData(o_portInfo);
 
     FAPI_DBG("Exit");
@@ -1123,6 +1537,101 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Use Group data obtained from p9_mss_eff_grouping to build
+///        data to be programmed into each Memory controller target MCC
+///        for OMI based memory
+///
+/// @param[in]  i_mcTargets     Vector of reference of MCC
+/// @param[in]  i_groupData     Array of Group data info
+/// @param[out] o_mcDataPair    Output data pair MCC<->Data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<>
+fapi2::ReturnCode buildMCBarData(
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCC> >& i_mccTargets,
+    const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& o_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_mirror_ctl;
+
+    // Get mirror policy
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE,
+                           FAPI_SYSTEM, l_mirror_ctl),
+             "Error getting ATTR_MRW_HW_MIRRORING_ENABLE, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    for (auto l_mcc : i_mccTargets)
+    {
+        mcBarData_t l_mcBarData;
+        mcPortGroupInfo_t l_portInfo;
+
+        // Get this MC unit position
+        uint8_t l_unitPos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mcc, l_unitPos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        fapi2::toString(l_mcc, l_targetStr, sizeof(l_targetStr));
+        FAPI_INF("Build BAR data for MC target: %s", l_targetStr);
+
+        // -----------------------------------------------
+        // Build MC register values for non-mirror groups
+        // -----------------------------------------------
+
+        // Get port data from non-mirrored groups (true = non-mirrored)
+        getPortData(true, l_unitPos, i_groupData, l_portInfo);
+
+        // If one of MC port is configured in a group, proceed with
+        // getting BAR data
+        if ( (l_portInfo.numPortsInGroup > 0) )
+        {
+            // ---- Build MCFGP/MCFGM data based on port group info ----
+            FAPI_TRY(getNonMirrorBarData(l_mcc, l_portInfo, l_mcBarData),
+                     "getNonMirrorBarData() returns error, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            // ---------------------------------------------------------------
+            // Set MC register values for mirror groups
+            //   - Nimbus:  No mirror
+            //   - Cumulus: If ATTR_MRW_HW_MIRRORING_ENABLE != false
+            // ---------------------------------------------------------------
+            if (l_mirror_ctl != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
+            {
+                FAPI_INF("ATTR_MRW_HW_MIRRORING_ENABLE is enabled: checking mirrored groups");
+                mcPortGroupInfo_t l_portInfoMirrored;
+                // Get port data from mirrored groups (false = mirrored)
+                getPortData(false, l_unitPos, i_groupData, l_portInfoMirrored);
+
+                // ---- Build MCFGM data based on port group info ----
+                FAPI_TRY(getMirrorBarData(l_mcc, l_portInfoMirrored, l_mcBarData),
+                         "getMirrorBarData() returns error, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+            }
+
+            // Add to output pair
+            o_mcBarDataPair.push_back(std::make_pair(l_mcc, l_mcBarData));
+
+            // Display data
+            displayMCBarData(l_unitPos, l_mcBarData);
+        }
+        else
+        {
+            FAPI_INF("MC pos %u is not configured in a memory group.", l_unitPos);
+        }
+
+    } // MC loop
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set MCFGPA MEMORY HOLE UPPER_ADDRESS_AT_END_OF_RANGE bit
 ///
 /// @param[in]      i_target        MC target (MCS or MI)
@@ -1195,6 +1704,7 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.insertFromRight<MCS_MCFGP_GROUP_SIZE,
                                        MCS_MCFGP_GROUP_SIZE_LEN>(
                                            l_data.MCFGP_group_size);
+
 
             // Group base address (bits 24:47) 0b000000000000000000000001 = 4GB
             // 000000001 (base addr of 4GB)
@@ -1443,15 +1953,378 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Unmask FIR before opening BARs
+/// @brief Write BAR data to a memory controller
 ///
 /// @param[in] i_mcBarDataPair Target pair <target, data>
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
+fapi2::ReturnCode writeMCCInterleaveGranularity(
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+
+    std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, bool> l_granule_supported;
+
+    fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_interleave_granule_size),
+             "Error getting ATTR_MSS_INTERLEAVE_GRANULARITY, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    for (auto l_pair : i_mcBarDataPair)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MCC> l_target = l_pair.first;
+        mcBarData_t l_data = l_pair.second;
+
+        // MCFGP valid (bit 0)
+        if (l_data.MCFGP_valid == true)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = l_target.getParent<fapi2::TARGET_TYPE_MI>();
+
+            // configure interleave granularity if 1/2/4/8 MC per group only
+            if ((l_data.MCFGP_chan_per_group == 0) || // 8 MC/group
+                (l_data.MCFGP_chan_per_group == 1) || // 1 MC/group
+                (l_data.MCFGP_chan_per_group == 2) || // 2 MC/group
+                (l_data.MCFGP_chan_per_group == 4))   // 4 MC/group
+            {
+                //Only set to true if the value for the target is not set yet
+                if (l_granule_supported.find(l_mi_target) == l_granule_supported.end())
+                {
+                    l_granule_supported[l_mi_target] = true;
+                }
+            }
+            else
+            {
+                //Always set to false if we find one channel that cannot support it.
+                l_granule_supported[l_mi_target] = false;
+            }
+        }
+    }
+
+    for ( auto l_it = l_granule_supported.begin(); l_it != l_granule_supported.end(); l_it++ )
+    {
+        if (l_it->second)
+        {
+            auto l_mi_target = l_it->first;
+
+            fapi2::buffer<uint64_t> l_mcmode0_scom_data;
+            FAPI_TRY(fapi2::getScom(l_mi_target, P9A_MI_MCMODE0, l_mcmode0_scom_data),
+                     "Error reading from MCS_MCMODE0 reg");
+            l_mcmode0_scom_data.insertFromRight<P9A_MI_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY,
+                                                P9A_MI_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY_LEN>(l_interleave_granule_size);
+            FAPI_TRY(fapi2::putScom(l_mi_target, P9A_MI_MCMODE0, l_mcmode0_scom_data),
+                     "Error writing to MCS_MCMODE0 reg");
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Translate a bar value in GB to a 32 bit extended value
+///
+/// @param[in] i_ext_mask The extension mask
+/// @param[in] i_bar The bar in GB
+/// @param[out] o_extBar is the upper 32 bits of the extended address
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode extBar(const uint64_t& i_ext_mask, const uint32_t& i_bar, fapi2::buffer<uint64_t>& o_extBar)
+{
+    FAPI_DBG("Entering");
+    fapi2::buffer<uint64_t> l_norAddr(0);
+
+    FAPI_DBG("i_bar: %016llx", i_bar);
+    o_extBar = 0;
+    l_norAddr.insert<0, 32>(i_bar >> 2); //i_bar is in GB
+    FAPI_DBG("l_norAddr: %016llx", l_norAddr);
+    FAPI_TRY(extendBarAddress(i_ext_mask, l_norAddr, o_extBar));
+    FAPI_DBG("o_extBar: %016llx", o_extBar);
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write BAR data to a memory controller
+///
+/// @param[in] i_mcBarDataPair Target pair <target, data>
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode writeMCBarData(
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+
+    uint8_t l_pos;
+
+    fapi2::buffer<uint64_t> l_scomData(0);
+    fapi2::buffer<uint64_t> l_extAddr(0);
+    fapi2::buffer<uint64_t> l_norAddr;
+    uint64_t l_ext_mask;
+
+    FAPI_TRY(p9a_get_ext_mask(l_ext_mask));
+
+    FAPI_TRY(writeMCCInterleaveGranularity(i_mcBarDataPair));
+
+    for (auto l_pair : i_mcBarDataPair)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MCC> l_target = l_pair.first;
+        mcBarData_t l_data = l_pair.second;
+
+        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_target, l_targetStr, sizeof(l_targetStr));
+        FAPI_INF("Program MC target: %s", l_targetStr);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target, l_pos),
+                 "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // 1. ---- Set MCFGP reg -----
+        l_scomData = 0;
+
+        // MCFGP valid (bit 0)
+        if (l_data.MCFGP_valid == true)
+        {
+            l_scomData.setBit<P9A_MI_MCFGP0_VALID>();
+
+            // Group size (bits 13:23)
+            l_scomData.insertFromRight<P9A_MI_MCFGP0_GROUP_SIZE,
+                                       P9A_MI_MCFGP0_GROUP_SIZE_LEN>(
+                                           l_data.MCFGP_group_size);
+
+            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGP_groupBaseAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGP0_GROUP_BASE_ADDRESS,
+                              P9A_MI_MCFGP0_GROUP_BASE_ADDRESS_LEN>(
+                                  (l_extAddr));
+        }
+
+        // Channel per group (bits 1:4)
+        l_scomData.insertFromRight<P9A_MI_MCFGP0_MC_CHANNELS_PER_GROUP,
+                                   P9A_MI_MCFGP0_MC_CHANNELS_PER_GROUP_LEN>(
+                                       l_data.MCFGP_chan_per_group);
+
+        // Channel 0 group id (bits 5:7)
+        l_scomData.insertFromRight<P9A_MI_MCFGP0_GROUP_MEMBER_IDENTIFICATION,
+                                   P9A_MI_MCFGP0_GROUP_MEMBER_IDENTIFICATION_LEN>(
+                                       l_data.MCFGP_chan0_group_member_id);
+
+        // 2GB cfg and MMIO
+        l_scomData.insertFromRight<P9A_MI_MCFGP0_MCFGPR0_CONFIGURATION_GROUP_SIZE,
+                                   P9A_MI_MCFGP0_MCFGPR0_CONFIGURATION_GROUP_SIZE_LEN>(mss::exp::ib::EXPLR_IB_BAR_SIZE);
+        l_scomData.insertFromRight<P9A_MI_MCFGP0_MCFGPR0_MMIO_GROUP_SIZE,
+                                   P9A_MI_MCFGP0_MCFGPR0_MMIO_GROUP_SIZE_LEN>(mss::exp::ib::EXPLR_IB_BAR_SIZE);
+
+        // Write to reg
+        if (l_pos % 2 == 0)
+        {
+            FAPI_INF("Write MCFGP0 reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGP0, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP0, l_scomData),
+                     "Error writing to MCS_MCFGP reg");
+        }
+        else
+        {
+            FAPI_INF("Write MCFGP1 reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGP1, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP1, l_scomData),
+                     "Error writing to MCS_MCFGP reg");
+        }
+
+        // 2. ---- Set MCFGPM reg -----
+        l_scomData = 0;
+
+        if (l_data.MCFGPM_valid == true)
+        {
+            // MCFGP valid (bit 0)
+            l_scomData.setBit<P9A_MI_MCFGPM0_VALID>();
+
+            // Group size (bits 13:23)
+            l_scomData.insertFromRight<P9A_MI_MCFGPM0_GROUP_SIZE,
+                                       P9A_MI_MCFGPM0_GROUP_SIZE_LEN>(
+                                           l_data.MCFGPM_group_size);
+
+            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPM_groupBaseAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGPM0_GROUP_BASE_ADDRESS,
+                              P9A_MI_MCFGPM0_GROUP_BASE_ADDRESS_LEN>(
+                                  (l_extAddr));
+
+        }
+
+        if (l_pos % 2 == 0)
+        {
+            // Write to reg
+            FAPI_INF("Write MCFGPM0 reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM0, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM0, l_scomData),
+                     "Error writing to P9A_MI_MCFGPM0 reg");
+        }
+        else
+        {
+            // Write to reg
+            FAPI_INF("Write MCFGPM1 reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM1, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM1, l_scomData),
+                     "Error writing to P9A_MI_MCFGPM1 reg");
+        }
+
+        // 3. ---- Set MCFGPA reg -----
+        l_scomData = 0;
+
+        // Assert if both HOLE1 and SMF are valid, settings will overlap
+        FAPI_ASSERT((l_data.MCFGPA_HOLE_valid[1] && l_data.MCFGPA_SMF_valid) == 0,
+                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
+                    .set_TARGET(l_target)
+                    .set_HOLE1_VALID(l_data.MCFGPA_HOLE_valid[1])
+                    .set_SMF_VALID(l_data.MCFGPA_SMF_valid),
+                    "Error: MCFGPA HOLE1 and SMF are both valid, settings will overlap");
+
+        // Hole 0
+        if (l_data.MCFGPA_HOLE_valid[0] == true)
+        {
+            // MCFGPA HOLE0 valid (bit 0)
+            l_scomData.setBit<P9A_MI_MCFGP0A_HOLE_VALID>();
+
+            // Hole 0 lower addr
+            // Hole 0 always extends to end of range
+            FAPI_DBG("l_data.MCFGPA_HOLE_LOWER_addr[0]: %016llx", l_data.MCFGPA_HOLE_LOWER_addr[0]);
+            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPA_HOLE_LOWER_addr[0], l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS,
+                              P9A_MI_MCFGP0A_HOLE_LOWER_ADDRESS_LEN>(
+                                  (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17-8) = 9
+        }
+
+        // SMF
+        if (l_data.MCFGPA_SMF_valid == true)
+        {
+            // MCFGPA SMF valid (bit 0)
+            l_scomData.setBit<P9A_MI_MCFGP0A_SMF_VALID>();
+
+            // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+            l_scomData.setBit<P9A_MI_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE>();
+
+            // SMF lower addr
+            l_norAddr = 0;
+            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPA_SMF_LOWER_addr);
+            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS,
+                              P9A_MI_MCFGP0A_SMF_LOWER_ADDRESS_LEN>(
+                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+            // SMF upper addr
+            l_norAddr = 0;
+            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPA_SMF_UPPER_addr);
+            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS,
+                              P9A_MI_MCFGP0A_SMF_UPPER_ADDRESS_LEN>(
+                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+        }
+
+        // Write to reg
+        if (l_pos % 2 == 0)
+        {
+            FAPI_INF("Write MCFGP0A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGP0A, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP0A, l_scomData),
+                     "Error writing to P9A_MI_MCFGP0A reg");
+        }
+        else
+        {
+            FAPI_INF("Write MCFGP1A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGP1A, l_scomData);
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGP1A, l_scomData),
+                     "Error writing to P9A_MI_MCFGP1A reg");
+        }
+
+        // 4. ---- Set MCFGPMA reg -----
+        l_scomData = 0;
+
+        // Assert if both HOLE1 and SMF are valid, settings will overlap
+        FAPI_ASSERT((l_data.MCFGPMA_HOLE_valid[1] && l_data.MCFGPMA_SMF_valid) == 0,
+                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
+                    .set_TARGET(l_target)
+                    .set_HOLE1_VALID(l_data.MCFGPMA_HOLE_valid[1])
+                    .set_SMF_VALID(l_data.MCFGPMA_SMF_valid),
+                    "Error: MCFGPMA HOLE1 and SMF are both valid, settings will overlap");
+
+        // Hole 0
+        if (l_data.MCFGPMA_HOLE_valid[0] == true)
+        {
+            // MCFGPMA HOLE0 valid (bit 0)
+            l_scomData.setBit<P9A_MI_MCFGPM0A_HOLE_VALID>();
+
+            // Hole 0 lower addr
+            // 0b0000000001 = 4GB
+            FAPI_TRY(extBar(l_ext_mask, l_data.MCFGPMA_HOLE_LOWER_addr[0], l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS,
+                              P9A_MI_MCFGPM0A_HOLE_LOWER_ADDRESS_LEN>(
+                                  (l_extAddr << 9)); //matches 17:31 extendedBarAddress shifts left 8 (17-8) = 9
+        }
+
+        // SMF
+        if (l_data.MCFGPMA_SMF_valid == true)
+        {
+            // MCFGPMA SMF valid (bit 0)
+            l_scomData.setBit<P9A_MI_MCFGPM0A_SMF_VALID>();
+
+            // MCFGPMA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+            l_scomData.setBit<P9A_MI_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE>();
+
+            // SMF lower addr
+            l_norAddr = 0;
+            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPMA_SMF_LOWER_addr);
+            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS,
+                              P9A_MI_MCFGPM0A_SMF_LOWER_ADDRESS_LEN>(
+                                  (l_extAddr << 14 )); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+            // SMF upper addr
+            l_norAddr = 0;
+            l_norAddr.insertFromRight<22, 14>(l_data.MCFGPMA_SMF_UPPER_addr);
+            FAPI_TRY(extendBarAddress(l_ext_mask, l_norAddr, l_extAddr));
+            l_scomData.insert<P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS,
+                              P9A_MI_MCFGPM0A_SMF_UPPER_ADDRESS_LEN>(
+                                  (l_extAddr << 14)); //matches 22:35 extendBarAddress shifts left 8 (22-8) = 14
+        }
+
+        // Write to reg
+        if (l_pos % 2 == 0)
+        {
+            FAPI_INF("Write P9A_MI_MCFGPM0A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM0A, l_scomData);
+
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM0A, l_scomData),
+                     "Error writing to P9A_MI_MCFGPM0A reg");
+        }
+        else
+        {
+            FAPI_INF("Write P9A_MI_MCFGPM1A reg 0x%.16llX, Value 0x%.16llX",
+                     P9A_MI_MCFGPM1A, l_scomData);
+
+            FAPI_TRY(fapi2::putScom(l_target.getParent<fapi2::TARGET_TYPE_MI>(), P9A_MI_MCFGPM1A, l_scomData),
+                     "Error writing to P9A_MI_MCFGPM1A reg");
+        }
+
+    } // Data pair loop
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask FIR before opening BARs
+///
+/// @param[in] i_target target to set actions/mask
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
 template<fapi2::TargetType T>
-fapi2::ReturnCode unmaskMCFIR(
-    const std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& i_mcBarDataPair)
+fapi2::ReturnCode unmaskMCFIR(const fapi2::Target<T> i_target)
 {
     FAPI_DBG("Entering");
 
@@ -1495,20 +2368,40 @@ fapi2::ReturnCode unmaskMCFIR(
     // Defect HW451708, HW451711
     // Leave MCS_MCFIR_INVALID_SMF_ACCESS masked if MCD cl_probes are enabled
 
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString(i_target, l_targetStr, sizeof(l_targetStr));
+    FAPI_INF("Unmask FIR for MC target: %s", l_targetStr);
+
+    // Write MC FIR action1
+    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRACT1, l_mcfiraction),
+             "Error from putScom (MCS_MCFIRACT1)");
+
+    // Write mask
+    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_AND, l_mcfirmask_and),
+             "Error from putScom (MCS_MCFIRMASK_AND)");
+
+fapi_try_exit:
+    FAPI_DBG("Exit");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask FIR before opening BARs
+///
+/// @param[in] i_mcBarDataPair Target pair <target, data>
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode unmaskMCFIR(
+    const std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& i_mcBarDataPair)
+{
+    FAPI_DBG("Entering");
+
     for (auto l_pair : i_mcBarDataPair)
     {
         fapi2::Target<T> l_target = l_pair.first;
-        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
-        fapi2::toString(l_target, l_targetStr, sizeof(l_targetStr));
-        FAPI_INF("Unmask FIR for MC target: %s", l_targetStr);
-
-        // Write MC FIR action1
-        FAPI_TRY(fapi2::putScom(l_target, MCS_MCFIRACT1, l_mcfiraction),
-                 "Error from putScom (MCS_MCFIRACT1)");
-
-        // Write mask
-        FAPI_TRY(fapi2::putScom(l_target, MCS_MCFIRMASK_AND, l_mcfirmask_and),
-                 "Error from putScom (MCS_MCFIRMASK_AND)");
+        FAPI_TRY(unmaskMCFIR(l_target));
 
     } // Data pair loop
 
@@ -1534,13 +2427,24 @@ fapi2::ReturnCode p9_mss_setup_bars(
     std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcBarData_t>> l_mcsBarDataPair;
     // std_pair<MI target, MI data>
     std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcBarData_t>> l_miBarDataPair;
+    // std_pair<MCC target, MCC data>
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>> l_mccBarDataPair;
+
+    fapi2::ATTR_CHIP_EC_FEATURE_OMI_Type l_omi;
 
     // Get functional MCS chiplets, should be none for Cumulus
     auto l_mcsChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
     // Get functional MI chiplets, should be none for Nimbus
     auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
+    // Get MCC chiplets for Axone
+    auto l_mccChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCC>();
 
     FAPI_INF("Num of MCS %u; Num of MIs %u", l_mcsChiplets.size(), l_miChiplets.size());
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI,
+                           i_target,
+                           l_omi),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_OMI)");
 
     if ( (l_mcsChiplets.size() > 0) && (l_miChiplets.size() > 0) )
     {
@@ -1564,7 +2468,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
     if (l_mcsChiplets.size() > 0)
     {
         // Validate group data from attributes
-        FAPI_TRY(validateGroupData(l_mcsChiplets, l_groupData),
+        FAPI_TRY(validateGroupData(l_mcsChiplets, false, l_groupData),
                  "validateGroupData() returns error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
@@ -1584,11 +2488,38 @@ fapi2::ReturnCode p9_mss_setup_bars(
                  (uint64_t)fapi2::current_err);
     }
 
+    // Setup BAR for Axone
+    else if (l_mccChiplets.size() > 0)
+    {
+        // Validate group data from attributes
+        FAPI_TRY(validateGroupData(l_mccChiplets, true, l_groupData),
+                 "validateGroupData() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Build MC BAR data based on Group data info
+        FAPI_TRY(buildMCBarData(l_mccChiplets, l_groupData, l_mccBarDataPair),
+                 "buildMCBarData() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        // Unmask MC FIRs
+        for (auto l_target : l_miChiplets)
+        {
+            FAPI_TRY(unmaskMCFIR(l_target),
+                     "unmaskMCFIR() returns error, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+        }
+
+        // Write data to MI
+        FAPI_TRY(writeMCBarData(l_mccBarDataPair),
+                 "writeMCBarData() returns error, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+    }
     // Setup BAR for Cumulus
     else if (l_miChiplets.size() > 0)
     {
         // Validate group data from attributes
-        FAPI_TRY(validateGroupData(l_miChiplets, l_groupData),
+        FAPI_TRY(validateGroupData(l_miChiplets, false, l_groupData),
                  "validateGroupData() returns error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 

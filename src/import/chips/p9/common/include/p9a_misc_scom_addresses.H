@@ -18136,4 +18136,10 @@ static const uint64_t P9A_PU_NPU2_NTL1_XTS_PMU_CNT                            = 
 
 static const uint64_t P9A__NTL1_XTS_PMU_CNT                                   = 0x050116F8ull;
 
+//Manual additions
+static const uint64_t P9A_MI_MCFGPM0                                          = 0x05010820ull;
+static const uint64_t P9A_MI_MCFGPM1                                          = 0x05010830ull;
+static const uint64_t P9A_MI_MCFGPM0A                                         = 0x05010821ull;
+static const uint64_t P9A_MI_MCFGPM1A                                         = 0x05010831ull;
+
 #endif

@@ -64,8 +64,8 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
     //vars for attrs
     uint64_t sizes[8];
     uint64_t bases[8];
-    uint64_t mirror_sizes[4] = {0, 0, 0, 0};
-    uint64_t mirror_bases[4];
+    uint64_t mirror_sizes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint64_t mirror_bases[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     uint32_t groupID[MBA_GROUP_SIZE][MBA_GROUP_DATA];
     uint64_t nhtm_base;
     uint64_t nhtm_size;
@@ -83,6 +83,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
 
     const int ONE_GIG = 30;
 
+    FAPI_DBG("i_vect_pu_targets.size(): %d", i_vect_pu_targets.size());
 
     //loop over all elements in the vector
     for(uint32_t i = 0; i < i_vect_pu_targets.size(); i++)
@@ -257,7 +258,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
             for(int j = 0; j < 8; j++)
             {
                 if ((sizes[j] != 0) ||
-                    ((j < 4) && (mirror_sizes[j] != 0)))
+                    ((mirror_sizes[j] != 0)))
                 {
                     printf("Group:%d (", j);
 
@@ -284,7 +285,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
                 }
 
 
-                if ((j < 4) && (mirror_sizes[j] != 0))
+                if ((mirror_sizes[j] != 0))
                 {
                     if (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
                     {

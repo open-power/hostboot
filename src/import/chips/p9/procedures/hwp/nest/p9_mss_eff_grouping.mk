@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,7 @@
 PROCEDURE=p9_mss_eff_grouping
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
 lib$(PROCEDURE)_DEPLIBS+=cen
+lib$(PROCEDURE)_DEPLIBS+=mss_p9a
 OBJS+=p9_fbc_utils.o
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)

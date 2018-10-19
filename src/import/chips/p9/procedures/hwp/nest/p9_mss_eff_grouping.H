@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 const uint8_t DATA_GROUPS   = 16;   // 8 regular groups, 8 mirrored groups
 const uint8_t MIRR_OFFSET   = 8;    // Start of mirrored offset in DATA_GROUPS
 const uint8_t DATA_ELEMENTS = 21;   // 21 items of data for each group
+const uint8_t SUBCHANNEL_PER_CHANNEL = 2; // Number of OMI's per MCC
 
 // Indexes used for EffGroupingData::iv_data DATA ELEMENTS
 const uint8_t PORT_SIZE = 0;         // Memory size of each port in group (GB)
@@ -73,6 +74,8 @@ const uint8_t SMF_BASE_ADDR = 20;    // SMF Base Address
 // Number of memory regions
 const uint8_t NUM_NON_MIRROR_REGIONS = 8;
 const uint8_t NUM_MIRROR_REGIONS = 4;
+const uint8_t NUM_MIRROR_REGIONS_OMI = 8; // Each port does its own mirroring
+const uint8_t NUM_MIRROR_REGIONS_MAX = NUM_MIRROR_REGIONS_OMI; // Max mirror regions
 const uint8_t NUM_OF_CHTM_REGIONS = 24;   // 24 CHTM memory regions
 const uint8_t NUM_OF_ALT_MEM_REGIONS = 2; // 2 memory holes
 

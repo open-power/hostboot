@@ -195,6 +195,9 @@ MSS_EXPLORER_SOURCE := $(filter-out memdiags.C,$(MSS_EXPLORER_SOURCE))
 MSS_EXPLORER_SOURCE := $(filter-out mcbist.C,$(MSS_EXPLORER_SOURCE))
 MSS_EXPLORER_SOURCE := $(filter-out memory_size.C,$(MSS_EXPLORER_SOURCE))
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE))
+else
+#must bring this in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
+MSS_MODULE_OBJS += explorer_memory_size.o
 endif
 MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)
