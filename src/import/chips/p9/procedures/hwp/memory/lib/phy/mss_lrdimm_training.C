@@ -40,9 +40,11 @@
 
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_training.H>
-#include <lib/phy/seq.H>
 #include <lib/dimm/rank.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/dimm/ddr4/data_buffer_ddr4.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 namespace mss
 {
@@ -100,7 +102,6 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
 
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    constexpr uint64_t NUM_MPR_PATTERNS = 4;
 
     // The below code expects us to have ranks in terms of the DIMM values, so index 'em
     const auto l_rank = mss::index(i_rank);
@@ -113,8 +114,11 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
     // Ok, MPR write
     // We need to
     // 1) MRS into MPR mode
-    // 2) Write the patterns in according to the bank address
-    // 3) MRS out of MPR mode
+    // 2) Disable address inversion, so we set our values correctly
+    //    We need to disable address inversion so both A-side and B-side get the same pattern written into the MPR registers
+    // 3) Write the patterns in according to the bank address
+    // 4) Restore the default address inversion
+    // 5) MRS out of MPR mode
 
     // 1) MRS into MPR mode
     FAPI_TRY( mss::ddr4::mpr_load(l_dimm,
@@ -122,48 +126,27 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
                                   i_rank,
                                   l_program.iv_instructions) );
 
-    // 2) Write the patterns in according to the bank address
-    {
-        constexpr uint64_t MPR_WR_BG = 0;
-        // First, swizzle the pattern
-        fapi2::buffer<uint32_t> l_swizzled_pattern;
-        FAPI_TRY(mss::seq::swizzle_mpr_pattern(i_pattern, l_swizzled_pattern),
-                 "%s rank%u failed to swizzle pattern", mss::c_str(i_target), i_rank);
+    // 2) Disable address inversion
+    // We need to disable address inversion so both A-side and B-side get the same pattern written into the MPR registers
+    FAPI_TRY(disable_address_inversion(l_dimm, l_program.iv_instructions));
 
-        // Now add in writes with the appropriate data involved + the good old swizzle that we do based upon the ranks
-        // Swizzle is required as we want the expected data for mirrored and non-mirrored ranks to be the same
-        // For MPR writes the expected data is carried by the addresses, so mirroring matters
+    // 3) Write the patterns in according to the bank address
+    FAPI_TRY(add_mpr_pattern_writes(l_dimm,
+                                    l_rank,
+                                    i_pattern,
+                                    l_program.iv_instructions));
 
-        // Loop through all MPR patterns and generate writes for 'em
-        // The MPR number is defined by the bank address
-        for(uint8_t l_ba = 0; l_ba < NUM_MPR_PATTERNS; ++l_ba)
-        {
-            constexpr uint64_t ADDR_START = 54;
-            constexpr uint64_t PATTERN_LEN = 8;
-            constexpr uint64_t MPR_WR_SAFE_DELAY = 0xff;
-            uint64_t l_pattern = 0;
-            FAPI_TRY(l_swizzled_pattern.extract(l_pattern, l_ba * PATTERN_LEN, PATTERN_LEN, ADDR_START), "%s ba%u",
-                     mss::c_str(l_dimm), l_ba);
-            {
-                auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( l_dimm,
-                            l_rank,
-                            l_ba,
-                            MPR_WR_BG,
-                            l_pattern);
-                l_wr.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(MPR_WR_SAFE_DELAY);
-                FAPI_TRY(address_mirror(l_dimm, l_rank, l_wr));
-                l_program.iv_instructions.push_back(l_wr);
-            }
-        }
-    }
+    // 4) Restore the default address inversion
+    FAPI_TRY(restore_address_inversion(l_dimm, l_program.iv_instructions));
 
-
-    // 3) MRS out of MPR mode
+    // 5) MRS out of MPR mode
     FAPI_TRY( mss::ddr4::mpr_load(l_dimm,
                                   fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE,
                                   i_rank,
                                   l_program.iv_instructions) );
 
+    // Make sure we leave everything powered on
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
 
     FAPI_TRY( ccs::execute(l_mcbist,
                            l_program,
