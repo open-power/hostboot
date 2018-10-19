@@ -8225,7 +8225,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Defines chip HW support for extended addressing mode
     </description>
@@ -8239,6 +8239,13 @@
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -8825,11 +8832,10 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_MEMORY_OMI_ATTACHED</id>
+    <id>ATTR_CHIP_EC_FEATURE_OMI</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-     The processor supports memory attached via OCMB memory buffer chip.
-     OMI connection links processor and OCMB chips.
+     Chip uses OpenCAPI Memory Interface
     </description>
     <chipEcFeature>
       <chip>
