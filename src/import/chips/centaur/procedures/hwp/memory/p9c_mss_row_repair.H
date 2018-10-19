@@ -97,6 +97,11 @@ extern "C"
             const uint8_t (&i_bad_bits)[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE],
             bool& o_uncalibrated);
 
+    /// @brief Deploy enough PPR row repairs to test all spare rows
+    /// @param[in] i_target_mba mba target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    fapi2::ReturnCode p9c_mss_activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
+
     /// @brief Clear the corresponding bad_bits after a row repair operation
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_dram the DRAM index

@@ -60,8 +60,7 @@ extern "C"
         constexpr uint64_t REFRESH_BIT = CEN_MBA_MBAREF0Q_CFG_REFRESH_ENABLE;
         constexpr uint32_t NUM_POLL = 10;
         constexpr uint32_t WAIT_TIMER = 1500;
-        constexpr uint32_t ENABLE_PPR = 0x0020;
-        constexpr uint32_t DISABLE_PPR = 0;
+        constexpr uint32_t PPR_ENABLE = 5;
         constexpr uint8_t TMOD = 24;
 
         const std::vector<uint64_t> MR0_SHADOW_REGS =
@@ -78,11 +77,8 @@ extern "C"
 
         // MRS address sequence for sPPR setup
         // Note that we need to set a valid column address for these, so we use '0'
-        const std::vector<access_address> l_mrs_addrs =
+        const std::vector<access_address> l_guard_key_sequence =
         {
-            // Puts the DRAM into PPR mode
-            {ENABLE_PPR, 0, i_mrank, i_srank, MRS4_BA, i_port},
-            // Writes the guard key sequence to MR0 (4 commands)
             {0x0CFF, 0, i_mrank, i_srank, MRS0_BA, i_port},
             {0x07FF, 0, i_mrank, i_srank, MRS0_BA, i_port},
             {0x0BFF, 0, i_mrank, i_srank, MRS0_BA, i_port},
@@ -90,12 +86,18 @@ extern "C"
         };
 
         const uint8_t l_bg_bank = (i_bank << 2) | i_bg;
+        const uint8_t l_dimm = i_mrank / MAX_RANKS_PER_DIMM;
+        const uint8_t l_dimm_rank = i_mrank % MAX_RANKS_PER_DIMM;
         access_address l_addr = {i_row, 0, i_mrank, i_srank, l_bg_bank, i_port};
+        access_address l_enable_sppr = l_addr;
+        fapi2::variable_buffer l_data_16(16);
+        fapi2::variable_buffer l_bank_3(3);
         fapi2::buffer<uint64_t> l_row;
         fapi2::buffer<uint64_t> l_bank;
         fapi2::buffer<uint64_t> l_saved_mr0;
         fapi2::buffer<uint64_t> l_reg_buffer;
         fapi2::buffer<uint64_t> l_dram_scratch;
+        fapi2::buffer<uint16_t> l_mr_value_16;
         uint64_t l_write_pattern = 0;
         uint32_t l_instruction_number = 0;
         uint8_t l_refresh = 0;
@@ -150,7 +152,16 @@ extern "C"
         FAPI_TRY(add_precharge_all_to_ccs(i_target_mba, l_addr, l_trcd, l_odt, l_stack_type_u8array, l_instruction_number));
 
         // Put the DRAM into sPPR mode
-        for (auto l_mrs_addr : l_mrs_addrs)
+        FAPI_TRY(mss_ddr4_load_nominal_mrs_pda(i_target_mba, l_bank_3, l_data_16, MRS4_BA, i_port, l_dimm, l_dimm_rank));
+        FAPI_TRY(l_data_16.setBit(PPR_ENABLE));
+        l_data_16.extractToRight(l_mr_value_16, 0, 16);
+        l_mr_value_16.reverse();
+        l_mr_value_16.extractToRight(l_enable_sppr.row_addr, 0, 16);
+        l_enable_sppr.bank = MRS4_BA;
+        FAPI_TRY(add_mrs_to_ccs_ddr4(i_target_mba, l_enable_sppr, TMOD, l_instruction_number));
+
+        // Enter the guard key sequence
+        for (auto l_mrs_addr : l_guard_key_sequence)
         {
             FAPI_TRY(add_mrs_to_ccs_ddr4(i_target_mba, l_mrs_addr, TMOD, l_instruction_number));
         }
@@ -159,9 +170,13 @@ extern "C"
         FAPI_DBG("%s Enabling CCS", mss::c_str(i_target_mba));
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
         FAPI_TRY(l_reg_buffer.setBit(29));    //Enable CCS
+        FAPI_TRY(l_reg_buffer.setBit(51));    //ACT high
         FAPI_TRY(l_reg_buffer.setBit(52));    //RAS high
         FAPI_TRY(l_reg_buffer.setBit(53));    //CAS high
         FAPI_TRY(l_reg_buffer.setBit(54));    //WE high
+        // Enables manual calculation of CCS parity
+        // Manual calculation is needed to workaround a hardware bug calculating parity for DDR4 in CCS
+        FAPI_TRY(l_reg_buffer.setBit(61));
         FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
 
         // Subtract one from the instruction count because set_end_bit increments it
@@ -193,27 +208,36 @@ extern "C"
         // Issue precharge all command
         FAPI_TRY(add_precharge_all_to_ccs(i_target_mba, l_addr, l_trcd, l_odt, l_stack_type_u8array, l_instruction_number));
 
-        // Issue DES command for tPGM_exit (12 clks)
-        FAPI_TRY(add_des_with_repeat_to_ccs(i_target_mba, l_addr, 0, 12, l_instruction_number));
+        // Issue DES command for tPGM_exit (18 clks)
+        FAPI_TRY(add_des_with_repeat_to_ccs(i_target_mba, l_addr, 0, 18, l_instruction_number));
 
-        // Take the DRAM out of PPR mode (MR4 command)
-        l_addr.row_addr = DISABLE_PPR;
+        // Take the DRAM out of PPR mode (MR4 command) and restore original value
+        FAPI_TRY(mss_ddr4_load_nominal_mrs_pda(i_target_mba, l_bank_3, l_data_16, MRS4_BA, i_port, l_dimm, l_dimm_rank));
+        l_data_16.extractToRight(l_mr_value_16, 0, 16);
+        l_mr_value_16.reverse();
+        l_mr_value_16.extractToRight(l_addr.row_addr, 0, 16);
         l_addr.bank = MRS4_BA;
         FAPI_TRY(add_mrs_to_ccs_ddr4(i_target_mba, l_addr, TMOD, l_instruction_number));
 
-        // Put the DRAM into the original MR0 mode
+        // Restore MR0 to nominal value
+        FAPI_TRY(mss_ddr4_load_nominal_mrs_pda(i_target_mba, l_bank_3, l_data_16, MRS0_BA, i_port, l_dimm, l_dimm_rank));
+        l_data_16.extractToRight(l_mr_value_16, 0, 16);
+        l_mr_value_16.reverse();
+        l_mr_value_16.extractToRight(l_addr.row_addr, 0, 16);
         l_addr.bank = MRS0_BA;
-        FAPI_TRY(l_saved_mr0.clearBit(55));    //clear the dll reset.
-        l_saved_mr0.extractToRight(l_addr.row_addr, 46, 18);
         FAPI_TRY(add_mrs_to_ccs_ddr4(i_target_mba, l_addr, TMOD, l_instruction_number));
 
         // Enable CCS and set RAS/CAS/WE high during idles
         FAPI_DBG("%s Enabling CCS", mss::c_str(i_target_mba));
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
         FAPI_TRY(l_reg_buffer.setBit(29));    //Enable CCS
+        FAPI_TRY(l_reg_buffer.setBit(51));    //ACT high
         FAPI_TRY(l_reg_buffer.setBit(52));    //RAS high
         FAPI_TRY(l_reg_buffer.setBit(53));    //CAS high
         FAPI_TRY(l_reg_buffer.setBit(54));    //WE high
+        // Enables manual calculation of CCS parity
+        // Manual calculation is needed to workaround a hardware bug calculating parity for DDR4 in CCS
+        FAPI_TRY(l_reg_buffer.setBit(61));
         FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
 
         // Subtract one from the instruction count because set_end_bit increments it
@@ -485,6 +509,8 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode p9c_mss_activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
     {
+        constexpr uint8_t NUM_BG = 4;
+
         uint8_t l_ranks_configed[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t num_mranks[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t num_ranks[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
@@ -519,13 +545,16 @@ extern "C"
                         uint8_t l_port_rank = 0;
                         // Note: setting row = rank so we don't use row0 for every repair
                         uint32_t l_row = l_mrank;
-                        // Note: DIMM can only support one repair per BG, so we use BG=0 and BA=0
-                        uint8_t l_bg = 0;
-                        uint8_t l_bank = 0;
 
-                        l_port_rank = (l_dimm_index * MAX_RANKS_PER_DIMM) + l_mrank;
+                        // Note: DIMM can only support one repair per BG, so we loop on BG and use BA=0
+                        for (uint8_t l_bg = 0; l_bg < NUM_BG; ++l_bg)
+                        {
+                            uint8_t l_bank = 0;
 
-                        FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
+                            l_port_rank = (l_dimm_index * MAX_RANKS_PER_DIMM) + l_mrank;
+
+                            FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
+                        }
                     }
                 }
             }

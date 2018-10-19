@@ -2522,7 +2522,8 @@ uint8_t convert_rtt_wr_to_rtt_nom(uint8_t i_rtt_wr, uint8_t& i_rtt_nom)
 /// @brief Setup CCS for B-side writes
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
-/// @param[in] i_rank rank being calibrated
+/// @param[in] i_mrank mrank being calibrated
+/// @param[in] i_srank srank being calibrated
 /// @param[in] i_address_16 A-side DRAM address
 /// @param[in] i_bank_3 A-side bank address
 /// @param[in] i_activate_1 activate bit
@@ -2544,7 +2545,8 @@ uint8_t convert_rtt_wr_to_rtt_nom(uint8_t i_rtt_wr, uint8_t& i_rtt_nom)
 ///
 fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                    const uint8_t i_port,
-                                   const uint32_t i_rank,
+                                   const uint8_t i_mrank,
+                                   const uint8_t i_srank,
                                    const fapi2::variable_buffer& i_address_16,
                                    const fapi2::variable_buffer& i_bank_3,
                                    const fapi2::variable_buffer& i_activate_1,
@@ -2572,8 +2574,8 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
     uint8_t l_is_sim = 0;
     uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
     uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
-    const uint8_t l_dimm = (i_rank) / MAX_RANKS_PER_DIMM;
-    const uint8_t l_dimm_rank = i_rank - MAX_RANKS_PER_DIMM * l_dimm;
+    const uint8_t l_dimm = (i_mrank) / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_mrank - MAX_RANKS_PER_DIMM * l_dimm;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
@@ -2607,8 +2609,8 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         }
 
         // Only corresponding CS to rank
-        FAPI_TRY(l_csn_8.setBit(0, 8));
-        FAPI_TRY(l_csn_8.clearBit(i_rank));
+        access_address l_addr = {0, 0, i_mrank, i_srank, 0, 0};
+        FAPI_TRY(cs_decode(i_target, l_addr, l_dram_stack[i_port][l_dimm], l_csn_8));
 
         FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
@@ -2655,7 +2657,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                         const uint8_t i_port,
-                                        const uint32_t i_rank,
+                                        const uint8_t i_rank,
                                         const uint8_t i_state,
                                         uint32_t& io_ccs_inst_cnt)
 {
@@ -2764,7 +2766,7 @@ fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_M
     io_ccs_inst_cnt++;
 
     // Do a B side MRS write
-    FAPI_TRY( setup_b_side_ccs(i_target, i_port, i_rank, l_data_buffer_16_backup,
+    FAPI_TRY( setup_b_side_ccs(i_target, i_port, i_rank, 0, l_data_buffer_16_backup,
                                l_bank_3_backup, l_activate_1, l_rasn_1, l_casn_1, l_wen_1,
                                l_cke_4, l_odt_4, l_ddr_cal_type_4, l_num_idles_16, l_num_repeat_16,
                                l_data_20, l_read_compare_1, l_rank_cal_4, l_ddr_cal_enable_1,
@@ -3004,7 +3006,7 @@ fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(
     io_ccs_inst_cnt++;
 
     //do a B side MRS write if needed
-    FAPI_TRY( setup_b_side_ccs(i_target, i_port_number, i_rank, l_address_16_backup,
+    FAPI_TRY( setup_b_side_ccs(i_target, i_port_number, i_rank, 0, l_address_16_backup,
                                l_bank_3_backup, l_activate_1, l_rasn_1, l_casn_1, l_wen_1,
                                l_cke_4, l_odt_4, l_ddr_cal_type_4, l_num_idles_16, l_num_repeat_16,
                                l_data_20, l_read_compare_1, l_rank_cal_4, l_ddr_cal_enable_1,
@@ -4802,6 +4804,7 @@ fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
 
     // CCS Array 0 buffers
     fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer addr_16_pre_swizzle(16);
     fapi2::variable_buffer bank_3(3);
     fapi2::variable_buffer ddr4_activate_1(1);
     fapi2::variable_buffer rasn_1(1);
@@ -4835,6 +4838,7 @@ fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
     FAPI_TRY(addr_16.extract(l_data_16));
     l_data_16.reverse();
     FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+    FAPI_TRY(addr_16_pre_swizzle.insert((uint16_t)l_data_16));
     FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
     FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
     l_data_8.reverse();
@@ -4842,9 +4846,10 @@ fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
     FAPI_INF("%s add_MRS_to_ccs ADDR : 0x%04X  MR : 0x%X", mss::c_str(i_target_mba), i_addr.row_addr, i_addr.bank);
 
     FAPI_TRY(cs_decode(i_target_mba, i_addr, l_stack_type_u8array[0][0], csn_8));
+    cke_4.flush<1>();
+    FAPI_TRY(mss_disable_cid(i_target_mba, csn_8, cke_4));
 
     // Command structure setup
-    cke_4.flush<1>();
     FAPI_TRY(rasn_1.clearBit(0));
     FAPI_TRY(casn_1.clearBit(0));
     FAPI_TRY(wen_1.clearBit(0));
@@ -4896,7 +4901,7 @@ fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
     ++io_instruction_number;
 
     // Do a B side MRS write
-    FAPI_TRY( setup_b_side_ccs(i_target_mba, l_port, i_addr.mrank, addr_16,
+    FAPI_TRY( setup_b_side_ccs(i_target_mba, l_port, i_addr.mrank, i_addr.srank, addr_16_pre_swizzle,
                                bank_3, ddr4_activate_1, rasn_1, casn_1, wen_1,
                                cke_4, odt_4, cal_type_4, idles_16, repeat_16,
                                pattern_20, read_compare_1, rank_cal_4, cal_enable_1,

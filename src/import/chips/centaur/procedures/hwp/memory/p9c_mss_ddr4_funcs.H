@@ -164,7 +164,7 @@ fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(const fapi2::Target<fapi2::TARGET
 ///
 fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                         const uint8_t i_port,
-                                        const uint32_t i_rank,
+                                        const uint8_t i_rank,
                                         const uint8_t i_state,
                                         uint32_t& io_ccs_inst_cnt);
 
@@ -172,7 +172,8 @@ fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_M
 /// @brief Setup CCS for B-side writes
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
-/// @param[in] i_rank rank being calibrated
+/// @param[in] i_mrank mrank being calibrated
+/// @param[in] i_srank srank being calibrated
 /// @param[in] i_address_16 A-side DRAM address
 /// @param[in] i_bank_3 A-side bank address
 /// @param[in] i_activate_1 activate bit
@@ -194,7 +195,8 @@ fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_M
 ///
 fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                    const uint8_t i_port,
-                                   const uint32_t i_rank,
+                                   const uint8_t i_mrank,
+                                   const uint8_t i_srank,
                                    const fapi2::variable_buffer& i_address_16,
                                    const fapi2::variable_buffer& i_bank_3,
                                    const fapi2::variable_buffer& i_activate_1,

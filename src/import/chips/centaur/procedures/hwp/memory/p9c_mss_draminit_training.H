@@ -218,7 +218,7 @@ extern "C"
 ///
     fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                       const uint8_t i_port,
-                                      const uint32_t i_rank,
+                                      const uint8_t i_rank,
                                       const uint8_t i_state,
                                       uint32_t& io_ccs_inst_cnt);
 

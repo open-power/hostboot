@@ -445,23 +445,9 @@ fapi2::ReturnCode mss_ccs_inst_arry_0(
     uint32_t l_num_retry = 0;
     uint32_t l_timer = 0;
     uint8_t l_cs_start = 0;
-    uint8_t l_cke_start = 0;
-    uint8_t l_odt_start = 0;
-    uint8_t l_csn_4 = 0b00000000;
-    uint8_t l_csn_8 = 0;
-    uint8_t l_csn_mask = 0b11110000;
+    uint8_t l_csn_dimm0 = 0;
     uint8_t l_parity_bit = 0;
-    constexpr uint64_t l_data_buffer_mask_0_15 = 0xFFFF000000000000;
-    constexpr uint64_t l_data_buffer_mask_17_23 = 0x00007F0000000000;
-    constexpr uint64_t l_data_buffer_mask_34_35 = 0x0000000030000000;
-    constexpr uint64_t l_data_buffer_mask_38_39 = 0x0000000003000000;
-    constexpr uint64_t l_data_buffer_mask_46_47 = 0x0000000000300000;
     uint8_t l_parity_bit_even = 0;
-    uint64_t l_data_buffer_0_15 = 0;
-    uint64_t l_data_buffer_17_23 = 0;
-    uint64_t l_data_buffer_34_35 = 0;
-    uint64_t l_data_buffer_38_39 = 0;
-    uint64_t l_data_buffer_46_47 = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
 
@@ -533,65 +519,42 @@ fapi2::ReturnCode mss_ccs_inst_arry_0(
     if((l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM
         || l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM) )
     {
-        FAPI_DBG("CCS: RDIMM/LRDIMM\n");
-        //Port A control signals - Port A chip select set
-        FAPI_TRY(i_csn.extract(l_csn_8));
+        FAPI_TRY(i_csn.extractToRight(l_csn_dimm0, 0, 2));
 
-        if(mss::bit_count(l_csn_8) < 8)
+        if (i_port == 0)
         {
-            //DIMM0 - DIMM0 CS set
-            l_csn_4 = l_csn_8 & l_csn_mask;
-
-            if(mss::bit_count(l_csn_4) < 4)
+            // If any DIMM0 CS bits are cleared, we're selecting DIMM0
+            if (l_csn_dimm0 != 3)
             {
-                l_cke_start = 24;
                 l_cs_start  = 32;
-                l_odt_start = 48;
             }
-            //DIMM1
+            // If not, we're selecting DIMM1
             else
             {
-                l_cke_start = 26;
                 l_cs_start  = 36;
-                l_odt_start = 50;
             }
         }
-        //Port B control signals
         else
         {
-            l_cke_start = 30;
-            l_cs_start  = 44;
-            l_odt_start = 54;
+            // If any DIMM0 CS bits are cleared, we're selecting DIMM0
+            if (l_csn_dimm0 != 3)
+            {
+                l_cs_start  = 40;
+            }
+            // If not, we're selecting DIMM1
+            else
+            {
+                l_cs_start  = 44;
+            }
         }
 
-        FAPI_TRY(l_data_buffer.extract(l_data_64));
-
-        //adds CIDs + 1 extra bit for CID2
-        l_data_buffer_0_15 = l_data_64 & l_data_buffer_mask_0_15;
-        l_data_buffer_17_23 = l_data_64 & l_data_buffer_mask_17_23;
-        l_data_buffer_34_35 = l_data_64 & l_data_buffer_mask_34_35;
-        l_data_buffer_38_39 = l_data_64 & l_data_buffer_mask_38_39;
-        l_data_buffer_46_47 = l_data_64 & l_data_buffer_mask_46_47;
-
-        switch(l_cs_start)
-        {
-            case 32:
-                l_parity_bit = mss::bit_count(l_data_buffer_0_15) + mss::bit_count(l_data_buffer_17_23) + mss::bit_count(
-                                   l_data_buffer_34_35)  ;
-
-            case 36:
-                l_parity_bit = mss::bit_count(l_data_buffer_0_15) + mss::bit_count(l_data_buffer_17_23) + mss::bit_count(
-                                   l_data_buffer_38_39)  ;
-
-            case 44:
-                l_parity_bit = mss::bit_count(l_data_buffer_0_15) + mss::bit_count(l_data_buffer_17_23) + mss::bit_count(
-                                   l_data_buffer_46_47)  ;
-        }
+        // CKE, CS, and ODT fields don't get counted for parity
+        // CID is the exception, if we're talking to a TSV part
+        l_parity_bit = l_data_buffer.getNumBitsSet(0, 16) + l_data_buffer.getNumBitsSet(17,
+                       7) + l_data_buffer.getNumBitsSet(l_cs_start + 2, 2);
 
         l_parity_bit_even = l_parity_bit % 2;
-        FAPI_DBG("Address %d BA/BG/CMD %d parity %d O/E %d - cke,cs,odt starts - %d,%d,%d \n",
-                 mss::bit_count(l_data_buffer_0_15),
-                 mss::bit_count(l_data_buffer_17_23), l_parity_bit, l_parity_bit_even, l_cke_start, l_cs_start, l_odt_start);
+
         FAPI_TRY(l_data_buffer.insertFromRight(l_parity_bit_even, 60, 1));
     }
 
