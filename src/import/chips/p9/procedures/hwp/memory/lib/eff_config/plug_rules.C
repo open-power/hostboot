@@ -76,24 +76,18 @@ fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds )
         // We don't want to exit with an error as we are in development, but want to know we have LRDIMM
         if( l_kind.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
         {
-            FAPI_ERR("%s has an LRDIMM plugged into it!", mss::c_str(l_kind.iv_target));
+            FAPI_INF("%s has a LRDIMM plugged into it!", mss::c_str(l_kind.iv_target));
+            FAPI_ASSERT(l_kind.iv_rcd_mfgid == fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_IDT,
+                        fapi2::MSS_PLUG_RULES_LRDIMM_RCD_DB_MANUFACTURER_ID_UNSUPPORTED()
+                        .set_RCD_MFGID(l_kind.iv_rcd_mfgid)
+                        .set_DIMM_TARGET(l_kind.iv_target),
+                        "%s has a LRDIMM with an unsupported register and buffer manufacturer, rcd_mfgid=%x",
+                        mss::c_str(l_kind.iv_target), l_kind.iv_rcd_mfgid);
         }
-
-#if 0
-
-        FAPI_ASSERT( l_kind.iv_dimm_type != fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
-                     fapi2::MSS_PLUG_RULES_LRDIMM_UNSUPPORTED()
-                     .set_DIMM_TARGET(l_kind.iv_target),
-                     "%s has an LRDIMM plugged and is currently unsupported",
-                     mss::c_str(l_kind.iv_target) );
-#endif
     }
 
-#if 0
 fapi_try_exit:
     return fapi2::current_err;
-#endif
-    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///

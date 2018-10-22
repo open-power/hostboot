@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,7 @@ class kind
             iv_stack_type = i_rhs.iv_stack_type;
             iv_hybrid = i_rhs.iv_hybrid;
             iv_hybrid_memory_type = i_rhs.iv_hybrid_memory_type;
+            iv_rcd_mfgid = i_rhs.iv_rcd_mfgid;
             return *this;
         }
 
@@ -114,7 +115,8 @@ class kind
                     (iv_size == i_rhs.iv_size) &&
                     (iv_stack_type == i_rhs.iv_stack_type) &&
                     (iv_hybrid == i_rhs.iv_hybrid) &&
-                    (iv_hybrid_memory_type == i_rhs.iv_hybrid_memory_type));
+                    (iv_hybrid_memory_type == i_rhs.iv_hybrid_memory_type) &&
+                    (iv_rcd_mfgid == i_rhs.iv_rcd_mfgid));
         }
 
         ///
@@ -147,6 +149,7 @@ class kind
             FAPI_TRY( mss::eff_prim_stack_type( i_target, iv_stack_type) );
             FAPI_TRY( mss::eff_hybrid( i_target, iv_hybrid ));
             FAPI_TRY( mss::eff_hybrid_memory_type( i_target, iv_hybrid_memory_type ));
+            FAPI_TRY( mss::eff_rcd_mfg_id(i_target, iv_rcd_mfgid) );
             return;
 
         fapi_try_exit:
@@ -167,6 +170,9 @@ class kind
         /// @param[in] i_size the overal size of the DIMM in GB
         /// @param[in] i_mfgid the dram manufacturer id of the dimm, defaulted to 0
         /// @param[in] i_stack_type dram die type, single die package or 3DS
+        /// @param[in] i_hybrid, default not hybrid
+        /// @param[in] i_hybrid_memory_type, defult none
+        /// @param[in] i_rcd_mfgid dimm register and data buffer manufacturer id, default 0
         /// @note can't be constexpr as fapi2::Target doesn't have a constexpr ctor.
         ///
         kind( const uint8_t i_master_ranks,
@@ -180,7 +186,8 @@ class kind
               const uint16_t i_mfgid = 0,
               const uint8_t i_stack_type = fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP,
               const uint8_t i_hybrid = fapi2::ENUM_ATTR_EFF_HYBRID_NOT_HYBRID,
-              const uint8_t i_hybrid_memory_type = fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NONE):
+              const uint8_t i_hybrid_memory_type = fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NONE,
+              const uint16_t i_rcd_mfgid = 0):
             iv_target(0),
             iv_master_ranks(i_master_ranks),
             iv_total_ranks(i_total_ranks),
@@ -194,7 +201,8 @@ class kind
             iv_mfgid(i_mfgid),
             iv_stack_type(i_stack_type),
             iv_hybrid(i_hybrid),
-            iv_hybrid_memory_type(i_hybrid_memory_type)
+            iv_hybrid_memory_type(i_hybrid_memory_type),
+            iv_rcd_mfgid(i_rcd_mfgid)
         {
             // Bit of an idiot-check to be sure a hand-crafted dimm::kind make sense wrt slaves, masters, packages, etc.
             // Both of these are checked in eff_config. If they are messed up, they should be caught there
@@ -228,6 +236,7 @@ class kind
         uint8_t iv_stack_type;
         uint8_t iv_hybrid;
         uint8_t iv_hybrid_memory_type;
+        uint16_t iv_rcd_mfgid;
 
         ///
         /// @brief equal_config
