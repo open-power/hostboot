@@ -174,7 +174,7 @@ template< TargetType K, typename V >
 inline ReturnCode getRing(const Target<K, V>& i_target,
                           const scanRingId_t i_address,
                           variable_buffer& o_data,
-                          const RingMode i_ringMode = 0);
+                          const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 /// @brief Read-modify-write a ring on a chip.
 /// @tparam K template parameter, passed in target.
@@ -190,7 +190,7 @@ inline ReturnCode modifyRing(const Target<K, V>& i_target,
                              const scanRingId_t i_address,
                              const variable_buffer& i_data,
                              const ChipOpModifyMode i_modifyMode,
-                             const RingMode i_ringMode = 0);
+                             const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 #endif
 
 // --------------------------------------------------------------------------
