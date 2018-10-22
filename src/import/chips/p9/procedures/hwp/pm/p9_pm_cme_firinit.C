@@ -241,12 +241,8 @@ fapi2::ReturnCode pm_cme_fir_reset(
 
             p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
 
-            FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
-                     "ERROR: Failed to get the CME FIR MASK value");
-
             /* Only save off the FIR masks if they have been initialized */
-            if (firinit_done_flag
-                == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_INITED)
+            if ( firinit_done_flag != fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_RESET_IN_HB )
             {
                 FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
                          "ERROR: Failed to get the PBA FIR MASK value");
@@ -254,15 +250,21 @@ fapi2::ReturnCode pm_cme_fir_reset(
                 /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
                 FAPI_TRY(l_cmeFir.saveMask(),
                          "ERROR: Failed to save CME FIR Mask to the attribute");
+
+                FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
+                         "ERROR: Faled to set the CME FIR MASK");
+
+                FAPI_TRY(l_cmeFir.put(),
+                         "ERROR:Failed to write to the CME FIR MASK");
             }
-
-            FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
-                     "ERROR: Faled to set the CME FIR MASK");
-
-            FAPI_TRY(l_cmeFir.put(),
-                     "ERROR:Failed to write to the CME FIR MASK");
         }
+    }
 
+    if (firinit_done_flag == fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_NO_INIT)
+    {
+        firinit_done_flag   =   fapi2::ENUM_ATTR_PM_FIRINIT_DONE_ONCE_FLAG_FIRS_RESET_IN_HB;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG, i_target, firinit_done_flag ),
+                 "ERROR: Failed to set attribute PM_FIRINIT_DONE_ONCE_FLAG to RESET_IN_HB in pm_cme_fir_reset");
     }
 
 fapi_try_exit:
