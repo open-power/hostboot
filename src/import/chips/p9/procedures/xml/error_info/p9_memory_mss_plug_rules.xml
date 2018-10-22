@@ -262,6 +262,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_LRDIMM_RCD_DB_MANUFACTURER_ID_UNSUPPORTED</rc>
+    <description>
+      The manufacturer of the LRDIMM need to be IDT currently, others do not supported
+    </description>
+    <ffdc>RCD_MFGID</ffdc>
+   <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_DEAD_LOAD_ON_PORT</rc>
     <description>
         A DIMM is deconfigured on a dual-drop port that has two DIMMS installed
