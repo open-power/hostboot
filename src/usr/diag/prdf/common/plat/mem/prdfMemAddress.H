@@ -196,6 +196,25 @@ uint32_t getMemReadAddr( ExtensibleChip * i_chip, MemAddr::ReadReg i_reg,
 template<TARGETING::TYPE T>
 uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
 
+/**
+ * @brief  Writes the maintenance address from hardware.
+ * @param  i_chip An MBA chip.
+ * @param  i_addr The address to write to hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t setMemMaintAddr( ExtensibleChip * i_chip, const MemAddr & i_addr );
+
+/**
+ * @brief  Reads the maintenance command end address from hardware.
+ *
+ * @param  i_chip An MBA chip.
+ * @param  o_addr The returned end address from hardware.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemMaintEndAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
+
 #ifdef __HOSTBOOT_MODULE
 
 /**

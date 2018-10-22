@@ -329,6 +329,7 @@ class VcmEvent : public TdEntry
 
     const MemMark iv_mark; ///< The chip mark from hardware.
     const bool iv_rowRepairEnabled; ///< True if Row Repair is enabled.
+    bool iv_resumeNextRow = false; ///< True if scrub is resuming on next row.
     uint8_t iv_mceCount = 0; ///< MCEs hit count, currently for Row Repair only.
     MemAddr iv_rowRepairFailAddr; ///< Address stored to apply Row Repair on.
 };

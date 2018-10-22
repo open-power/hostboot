@@ -220,7 +220,8 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
     {
         // Resume the command from the next address to the end of this master
         // rank.
-        o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, MASTER_RANK, stopCond );
+        o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, MASTER_RANK, stopCond,
+                                        iv_resumeNextRow );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",

@@ -100,11 +100,13 @@ uint32_t resumeBgScrub( ExtensibleChip * i_chip );
  * @param  i_chip      MBA chip.
  * @param  i_rangeType See enum AddrRangeType.
  * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @param  i_incRow    True if we need to increment to the next row instead of
+ *                     the next address.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T, typename SCT>
 uint32_t resumeTdScrub( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
-                        SCT i_stopCond );
+                        SCT i_stopCond, bool i_incRow = false );
 
 //##############################################################################
 //##                       Line delete functions

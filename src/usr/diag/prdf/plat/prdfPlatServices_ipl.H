@@ -149,11 +149,13 @@ uint32_t startTdSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  i_chip      MBA chip.
  * @param  i_rangeType See enum AddrRangeType.
  * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @param  i_incRow    True if we need the command to start on the next row
+ *                     instead of the next address.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T, typename SCT>
 uint32_t resumeTdSfRead( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
-                         SCT i_stopCond );
+                         SCT i_stopCond, bool i_incRow = false );
 
 /**
  * @brief  Starts a steer cleanup scrub command on the target rank.

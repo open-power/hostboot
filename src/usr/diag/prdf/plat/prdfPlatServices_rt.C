@@ -246,13 +246,14 @@ uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
 template<TARGETING::TYPE T>
 uint32_t __resumeScrub( ExtensibleChip * i_chip,
                         AddrRangeType i_rangeType, uint32_t i_stopCond,
-                        mss_MaintCmd::TimeBaseSpeed i_cmdSpeed );
+                        mss_MaintCmd::TimeBaseSpeed i_cmdSpeed, bool i_incRow );
 
 template<>
 uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
                                   AddrRangeType i_rangeType,
                                   uint32_t i_stopCond,
-                                  mss_MaintCmd::TimeBaseSpeed i_cmdSpeed )
+                                  mss_MaintCmd::TimeBaseSpeed i_cmdSpeed,
+                                  bool i_incRow )
 {
     #define PRDF_FUNC "[PlatServices::__resumeScrub<TYPE_MBA>] "
 
@@ -293,7 +294,7 @@ uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
         // counters will be conditionally cleared. Also, all of the appropriate
         // attentions will be cleared as well.
         MemAddr memSaddr;
-        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr );
+        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr, i_incRow );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "incMaintAddr(0x%08x) failed",
@@ -359,7 +360,8 @@ uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
     // a command has been resumed on a rank. Therefore, we must always resume
     // the command to the end of the current slave rank.
 
-    return __resumeScrub<TYPE_MBA>( i_chip, SLAVE_RANK, stopCond, cmdSpeed );
+    return __resumeScrub<TYPE_MBA>( i_chip, SLAVE_RANK, stopCond, cmdSpeed,
+                                    false );
 }
 
 //------------------------------------------------------------------------------
@@ -367,7 +369,7 @@ uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
 template<>
 uint32_t resumeTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
                                   AddrRangeType i_rangeType,
-                                  uint32_t i_stopCond )
+                                  uint32_t i_stopCond, bool i_incRow )
 {
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
@@ -376,7 +378,8 @@ uint32_t resumeTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
                                             ? mss_MaintCmd::FAST_MAX_BW_IMPACT
                                             : mss_MaintCmd::FAST_MIN_BW_IMPACT;
 
-    return __resumeScrub<TYPE_MBA>( i_chip, i_rangeType, i_stopCond, cmdSpeed );
+    return __resumeScrub<TYPE_MBA>( i_chip, i_rangeType, i_stopCond, cmdSpeed,
+                                    i_incRow );
 }
 
 //##############################################################################

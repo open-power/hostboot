@@ -587,7 +587,8 @@ uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
 template<>
 uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
                                          AddrRangeType i_rangeType,
-                                         bool & o_stoppedOnLastAddr )
+                                         bool & o_stoppedOnLastAddr,
+                                         bool i_rowRepair )
 {
     #define PRDF_FUNC "[didCmdStopOnLastAddr] "
 
@@ -616,6 +617,13 @@ uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
                       i_chip->getHuid(), curAddr.getRank().getKey() );
             break;
+        }
+
+        // For row repair, compare just the rank and row.
+        if ( i_rowRepair )
+        {
+            curAddr = MemAddr( curAddr.getRank(), 0, curAddr.getRow(), 0 );
+            endAddr = MemAddr( endAddr.getRank(), 0, endAddr.getRow(), 0 );
         }
 
         // Compare the addresses.

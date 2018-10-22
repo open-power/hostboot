@@ -985,14 +985,13 @@ uint32_t startTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
-                                 MemAddr & o_addr )
-{
-    #define PRDF_FUNC "[PlatServices::incMaintAddr<TYPE_MBA>] "
+template<TARGETING::TYPE>
+uint32_t __incMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
 
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+template<>
+uint32_t __incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
+{
+    #define PRDF_FUNC "[PlatServices::__incMaintAddr<TYPE_MBA>] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -1001,34 +1000,6 @@ uint32_t incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
 
     do
     {
-        // Manually clear the CE counters based on the error type and clear the
-        // maintenance FIRs. Note that we only want to clear counters that are
-        // at attention to allow the other CE types the opportunity to reach
-        // threshold, if possible.
-        o_rc = conditionallyClearEccCounters<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "conditionallyClearEccCounters(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
         // Increment the current maintenance address.
         mss_IncrementAddress incCmd { fapiTrgt };
         FAPI_INVOKE_HWP( errl, incCmd.setupAndExecuteCmd );
@@ -1072,6 +1043,147 @@ uint32_t incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
                       i_chip->getHuid() );
             break;
         }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE>
+uint32_t __incMaintRowAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
+
+template<>
+uint32_t __incMaintRowAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                      MemAddr & o_addr )
+{
+    #define PRDF_FUNC "[PlatServices::__incMaintRowAddr<TYPE_MBA>] "
+
+    // This is a special case for row repair where we want to increment to the
+    // next row instead of the next address.
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the current address.
+        MemAddr saddr;
+        o_rc = getMemMaintAddr<TYPE_MBA>( i_chip, saddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Get the end address.
+        MemAddr eaddr;
+        o_rc = getMemMaintEndAddr<TYPE_MBA>( i_chip, eaddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start building the new address.
+        uint32_t smaster = saddr.getRank().getMaster();
+        uint32_t sslave  = saddr.getRank().getSlave();
+        uint32_t srow    = saddr.getRow();
+
+        // First, check if we are on the last row on a slave rank.
+        if ( srow == eaddr.getRow() )
+        {
+            // If the slave ranks are the same, this would be a bug because we
+            // should have already checked if we were on the last row of this
+            // master rank before calling this procedure.
+            PRDF_ASSERT( sslave < eaddr.getRank().getSlave() );
+
+            // We've reached the last row on a slave rank. So we need to
+            // increment the slave rank and zero out row.
+            sslave++;
+            srow = 0;
+        }
+        else
+        {
+            // We have not reached the end of a slave rank. So just increment
+            // the row.
+            srow++;
+        }
+
+        // Get the new start address with the new rank and row. Also, zero out
+        // the bank and column.
+        saddr = MemAddr( MemRank(smaster, sslave), 0, srow, 0 );
+
+        // Write the address to hardware.
+        o_rc = setMemMaintAddr<TYPE_MBA>( i_chip, saddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setMemMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Return the new address.
+        o_addr = saddr;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                 MemAddr & o_addr, bool i_incRow )
+{
+
+    #define PRDF_FUNC "[PlatServices::incMaintAddr<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Manually clear the CE counters based on the error type and clear the
+        // maintenance FIRs. Note that we only want to clear counters that are
+        // at attention to allow the other CE types the opportunity to reach
+        // threshold, if possible.
+        o_rc = conditionallyClearEccCounters<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "conditionallyClearEccCounters(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Increment the address as needed.
+        o_rc = ( i_incRow ) ? __incMaintRowAddr<TYPE_MBA>( i_chip, o_addr )
+                            : __incMaintAddr   <TYPE_MBA>( i_chip, o_addr );
 
     } while (0);
 
