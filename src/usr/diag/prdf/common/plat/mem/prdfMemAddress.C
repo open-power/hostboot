@@ -106,12 +106,14 @@ MemAddr MemAddr::fromMaintAddr<TYPE_MBA>( uint64_t i_addr )
 template<>
 uint64_t MemAddr::toMaintAddr<TYPE_MBA>() const
 {
-    return ( ((uint64_t) iv_rnk.getMaster() << 60) |  //  1: 3
-             ((uint64_t) iv_rnk.getSlave()  << 57) |  //  4: 6
-             ((uint64_t) iv_bnk             << 53) |  //  7:10
-             ((uint64_t)(iv_row & 0x1ffff)  << 36) |  // 11:27
-             ((uint64_t) iv_col             << 27) |  // 28:36 (37:39 tied to 0)
-             ((uint64_t)(iv_row & 0x20000)  >> 13) ); // 59
+    return (
+        ((uint64_t)(iv_rnk.getMaster() &     0x7)<< 60) |  //  1: 3
+        ((uint64_t)(iv_rnk.getSlave()  &     0x7)<< 57) |  //  4: 6
+        ((uint64_t)(iv_bnk             &     0xf)<< 53) |  //  7:10
+        ((uint64_t)(iv_row             & 0x1ffff)<< 36) |  // 11:27
+        ((uint64_t)(iv_col             &   0x1ff)<< 27) |  // 28:36
+                                                           // 37:39 tied to 0
+        ((uint64_t)(iv_row             & 0x20000)>> 13) ); // 59
 }
 
 //------------------------------------------------------------------------------
@@ -310,6 +312,65 @@ uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "Read() failed on MBMACA: i_chip=0x%08x",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        // Get the address object.
+        uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
+        o_addr = MemAddr::fromMaintAddr<TYPE_MBA>( addr );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t setMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemAddr & i_addr )
+{
+    #define PRDF_FUNC "[setMemMaintAddr<TYPE_MBA>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // Write the address register
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
+    reg->SetBitFieldJustified( 0, 64, i_addr.toMaintAddr<TYPE_MBA>() );
+    uint32_t o_rc = reg->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on MBMACA: i_chip=0x%08x",
+                  i_chip->getHuid() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemMaintEndAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                       MemAddr & o_addr )
+{
+    #define PRDF_FUNC "[getMemMaintEndAddr<TYPE_MBA>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    // Read the address register
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMEA" );
+    uint32_t o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on MBMEA: i_chip=0x%08x",
                   i_chip->getHuid() );
     }
     else

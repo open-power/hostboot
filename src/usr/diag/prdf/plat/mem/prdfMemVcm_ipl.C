@@ -195,7 +195,7 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
         case TD_PHASE_2:
             o_rc = ( iv_canResumeScrub )
                      ? resumeTdSfRead<TYPE_MBA>( iv_chip, MASTER_RANK,
-                                                 stopCond )
+                                                 stopCond, iv_resumeNextRow )
                      : startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
                                                 stopCond );
             if ( SUCCESS != o_rc )

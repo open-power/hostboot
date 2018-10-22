@@ -560,7 +560,7 @@ uint32_t startTdSfRead<TYPE_MBA>( ExtensibleChip * i_chip,
 template<>
 uint32_t resumeTdSfRead<TYPE_MBA>( ExtensibleChip * i_chip,
                                    AddrRangeType i_rangeType,
-                                   uint32_t i_stopCond )
+                                   uint32_t i_stopCond, bool i_incRow )
 {
     #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_MBA>] "
 
@@ -586,7 +586,7 @@ uint32_t resumeTdSfRead<TYPE_MBA>( ExtensibleChip * i_chip,
         // counters will be conditionally cleared. Also, all of the appropriate
         // attentions will be cleared as well.
         MemAddr memSaddr;
-        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr );
+        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr, i_incRow );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "incMaintAddr(0x%08x) failed",

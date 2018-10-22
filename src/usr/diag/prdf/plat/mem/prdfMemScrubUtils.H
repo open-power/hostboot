@@ -179,12 +179,18 @@ uint32_t setBgScrubThresholds( ExtensibleChip * i_chip,
  * @param  o_stoppedOnLastAddr True, if the current maintenance command stopped
  *                             on the last address of the given rank range.
  *                             False, otherwise.
+ * @param  i_rowRepair         This is a special case during VCM procedures when
+ *                             row repair is enabled. It is intended to be used
+ *                             to determine if the MCE happened on the last
+ *                             row of the address range. When true, only the
+ *                             rank and the row addresses are compared.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
                                AddrRangeType i_rangeType,
-                               bool & o_stoppedOnLastAddr );
+                               bool & o_stoppedOnLastAddr,
+                               bool i_rowRepair = false );
 
 } //end namespace PRDF
 

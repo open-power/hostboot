@@ -199,10 +199,13 @@ uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @brief  Increment the current maintenance address.
  * @param  i_chip      MBA chip.
  * @param  o_newAddr   The new address from the maintenance address register.
+ * @param  i_incRow    True if we need to increment to the next row instead of
+ *                     the next address.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
-uint32_t incMaintAddr( ExtensibleChip * i_chip, MemAddr & o_newAddr );
+uint32_t incMaintAddr( ExtensibleChip * i_chip, MemAddr & o_newAddr,
+                       bool i_incRow = false );
 
 //##############################################################################
 //##                  Core/cache trace array functions

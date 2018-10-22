@@ -380,6 +380,29 @@ uint32_t VcmEvent<TYPE_MBA>::handlePhaseComplete( const uint32_t & i_eccAttns,
                         break;
                     }
                     if ( o_done ) break;
+
+                    // Row repair is enabled, we found an MCE, and we did not
+                    // need to exit the procedure. This means we will resume the
+                    // command on the next row, but first we need to make sure
+                    // the command did not stop on the last row of the address
+                    // range. So reinitialize iv_canResumeScrub if necessary.
+
+                    o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, MASTER_RANK,
+                                                           lastAddr, true );
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) "
+                                  "failed", iv_chip->getHuid() );
+                        break;
+                    }
+                    iv_canResumeScrub = !lastAddr;
+
+                    if ( iv_canResumeScrub )
+                    {
+                        // Indicate that we need to resume the command on the
+                        // next row instead of the next address.
+                        iv_resumeNextRow = true;
+                    }
                 }
                 else
                 {
