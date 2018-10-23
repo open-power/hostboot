@@ -1255,7 +1255,7 @@ fapi2::ReturnCode reset_odt_rd_config( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     const uint64_t l_dimm_count = count_dimm(i_target);
 
-    FAPI_TRY( mss::vpd_mt_odt_rd(i_target, &(l_odt_rd[0][0])) );
+    FAPI_TRY( mss::eff_odt_rd(i_target, &(l_odt_rd[0][0])) );
 
     return reset_odt_rd_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
                i_target, l_dimm_count, l_odt_rd);
@@ -1276,7 +1276,7 @@ fapi2::ReturnCode reset_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     const uint64_t l_dimm_count = count_dimm(i_target);
 
-    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
+    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
     return reset_odt_wr_config_helper<fapi2::TARGET_TYPE_MCA, MAX_DIMM_PER_PORT, MAX_RANK_PER_DIMM>(
                i_target, l_dimm_count, l_odt_wr);
@@ -1310,7 +1310,7 @@ fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE
                  i_rank );
 
     // read the attributes
-    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
+    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
     // set the ODTs for the rank selected
     // The ODT encoding is (for mranks only)
