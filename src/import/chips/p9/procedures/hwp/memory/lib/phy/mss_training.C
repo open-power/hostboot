@@ -58,6 +58,7 @@
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_dwl.H>
+    #include <lib/phy/mss_mrd_coarse.H>
     #include <lib/phy/mss_mrd_fine.H>
     #include <lib/phy/mss_mwd_coarse.H>
     #include <lib/phy/mss_mwd_fine.H>
@@ -1226,6 +1227,13 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     }
 
 #ifdef LRDIMM_CAPABLE
+
+    // MRD_COARSE
+    if(i_cal_steps.getBit<mss::cal_steps::MRD_COARSE>())
+    {
+        FAPI_INF("LRDIMM: MRD_COARSE is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::mrd_coarse>());
+    }
 
     // MRD_FINE
     if(i_cal_steps.getBit<mss::cal_steps::MRD_FINE>())
