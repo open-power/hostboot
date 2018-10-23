@@ -278,7 +278,7 @@ fapi_try_exit:
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
 /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode mrep::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                         const uint64_t i_rp,
