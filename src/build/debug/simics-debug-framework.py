@@ -584,6 +584,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
+        if( os.environ.has_key('DISABLE_HB_SIMICS_LOGS') ):
+            print("Skipping Hostboot Simics Logging because DISABLE_HB_SIMICS_LOGS")
+            return
+
         hb_hrmor = cpu.hrmor
         per_node = 0x200000000000   #32TB
         per_chip = 0x40000000000    #4TB
@@ -629,8 +633,11 @@ def magic_instruction_callback(user_arg, cpu, arg):
             else :
                 couldNotFindCommand = "shell \" Unable to find valid object on this system type, neither %s nor %s were found \""%(D1Proc0String, P9Proc0String)
                 SIM_run_alone(run_command, couldNotFindCommand )
-
     if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
+        if( os.environ.has_key('DISABLE_HB_SIMICS_LOGS') ):
+            print("Skipping Hostboot Simics Logging because DISABLE_HB_SIMICS_LOGS")
+            return
+
         enable = cpu.r4
         zero = 0;
         if enable > zero :
