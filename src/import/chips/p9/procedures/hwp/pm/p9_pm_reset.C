@@ -91,6 +91,7 @@ enum PPM_MASK
     QUAD_ERRMASK = 0xFFFFFFFF
 };
 
+
 // -----------------------------------------------------------------------------
 // Function definitions
 // -----------------------------------------------------------------------------
@@ -482,7 +483,7 @@ fapi2::ReturnCode
 p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     uint32_t l_safe_mode_freq_dpll = 0;
-    bool l_external_voltage_update = false;
+    bool l_external_voltage_update = true;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::Target<fapi2::TARGET_TYPE_EQ> l_firstEqChiplet;
     fapi2::buffer<uint64_t> l_dpll_data64;
@@ -564,67 +565,49 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
                      l_chipNum, l_dpll_mhz, l_attr_safe_mode_freq_mhz);
             FAPI_INF ("l_vdd_voltage_mv %08x, l_attr_safe_mode_mv %08x", l_vdd_voltage_mv, l_attr_safe_mode_mv);
 
-            //Case 1: The voltage is below the safe value with the frequency
-            //above safe value. This is fatal and something is very wrong.
-            FAPI_ASSERT(!((l_vdd_voltage_mv < l_attr_safe_mode_mv) && (l_dpll_mhz > l_attr_safe_mode_freq_mhz)),
-                        fapi2::PM_RESET_PSAFE_EXT_VDD_VOLT_FAIL()
-                        .set_CHIP_TARGET(i_target)
-                        .set_DPLL_FREQ(l_dpll_mhz)
-                        .set_SAFE_MODE_FREQ(l_attr_safe_mode_freq_mhz)
-                        .set_SAFE_MODE_VOLTAGE(l_attr_safe_mode_mv)
-                        .set_EXT_VDD_VOLTAGE(l_vdd_voltage_mv),
-                        "present external VDD value %08x is less than safe mode voltage %08x",
-                        l_vdd_voltage_mv, l_attr_safe_mode_mv);
-
-            FAPI_ASSERT(!((l_vdd_voltage_mv > l_attr_safe_mode_mv) && (l_dpll_mhz < l_attr_safe_mode_freq_mhz)),
-                        fapi2::PM_RESET_PSAFE_DPLL_FREQ_FAIL()
-                        .set_CHIP_TARGET(i_target)
-                        .set_DPLL_FREQ(l_dpll_mhz)
-                        .set_SAFE_MODE_FREQ(l_attr_safe_mode_freq_mhz)
-                        .set_SAFE_MODE_VOLTAGE(l_attr_safe_mode_mv)
-                        .set_EXT_VDD_VOLTAGE(l_vdd_voltage_mv),
-                        "present dpll frequency value %08x is less than safe mode frequency %08x",
-                        l_dpll_mhz, l_attr_safe_mode_freq_mhz);
-
-            FAPI_ASSERT(!((l_vdd_voltage_mv < l_attr_safe_mode_mv) && (l_dpll_mhz < l_attr_safe_mode_freq_mhz)),
-                        fapi2::PM_RESET_PSAFE_BOTH_VOLT_FREQ_FAIL()
-                        .set_CHIP_TARGET(i_target)
-                        .set_DPLL_FREQ(l_dpll_mhz)
-                        .set_SAFE_MODE_FREQ(l_attr_safe_mode_freq_mhz)
-                        .set_SAFE_MODE_VOLTAGE(l_attr_safe_mode_mv)
-                        .set_EXT_VDD_VOLTAGE(l_vdd_voltage_mv),
-                        "present external VDD value %08x is less than safe mode voltage %08x and \
-                         DPLL frequency %08x is less than safe mode frequency %08x.",
-                        l_vdd_voltage_mv, l_attr_safe_mode_mv, l_dpll_mhz, l_attr_safe_mode_freq_mhz);
-
-
-            //Case 2 If both VDD voltage and DPLL freq are greater than safe
-            //mode values..then apply safe mode values to hw
-            if ((l_dpll_mhz > l_attr_safe_mode_freq_mhz) && (l_vdd_voltage_mv >= l_attr_safe_mode_mv))
+            // if DPLL freq is less than safe mode freq.. we need to first update
+            // vdd voltage and then freq. And if DPLL is greater .. then need to
+            // update freq first and then VDD.
+            if (l_dpll_mhz < l_attr_safe_mode_freq_mhz)
             {
-                l_external_voltage_update = true;
-                //FMax
-                l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMAX,
-                                              EQ_QPPM_DPLL_FREQ_FMAX_LEN>(l_safe_mode_freq_dpll);
-                //FMin
-                l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMIN,
-                                              EQ_QPPM_DPLL_FREQ_FMIN_LEN>(l_safe_mode_freq_dpll);
-                //FMult
-                l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMULT,
-                                              EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_safe_mode_freq_dpll);
-
-                FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_DPLL_FREQ, l_dpll_data64),
-                         "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
+                //Here we need to update VDD only once.. because we are in EQ
+                //target loop.VDD is updated for the whole proc once.
+                if (l_external_voltage_update)
+                {
+                    FAPI_TRY(p9_setup_evid_voltageWrite(i_target,
+                                                        l_vdd_bus_num,
+                                                        l_vdd_bus_rail,
+                                                        l_attr_safe_mode_mv,
+                                                        l_ext_vrm_step_size_mv,
+                                                        VDD_SETUP),
+                             "Error from VDD setup function");
+                    l_external_voltage_update = false;
+                }
             }
+
+            //FMax
+            l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMAX,
+                                          EQ_QPPM_DPLL_FREQ_FMAX_LEN>(l_safe_mode_freq_dpll);
+            //FMin
+            l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMIN,
+                                          EQ_QPPM_DPLL_FREQ_FMIN_LEN>(l_safe_mode_freq_dpll);
+            //FMult
+            l_dpll_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMULT,
+                                          EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_safe_mode_freq_dpll);
+
+            FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_DPLL_FREQ, l_dpll_data64),
+                     "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
         } //end of eq list
 
         //Update Avs Bus voltage
+        //Here this condition will be true, when DPLL is greater than safe mode
+        //freq.
         if (l_external_voltage_update)
         {
             FAPI_TRY(p9_setup_evid_voltageWrite(i_target,
                                                 l_vdd_bus_num,
                                                 l_vdd_bus_rail,
-                                                l_vdd_voltage_mv,
+                                                l_attr_safe_mode_mv,
                                                 l_ext_vrm_step_size_mv,
                                                 VDD_SETUP),
                      "Error from VDD setup function");
