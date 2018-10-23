@@ -100,6 +100,7 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
             { FUNC_SPACE_0,  DQ_DRIVER_CW,          eff_dimm_ddr4_bc03,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_0,  MDQ_RTT_CW,            eff_dimm_ddr4_bc04,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_0,  MDQ_DRIVER_CW,         eff_dimm_ddr4_bc05,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_0,  CMD_SPACE_CW,          eff_dimm_ddr4_bc06,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_0,  RANK_PRESENCE_CW,      eff_dimm_ddr4_bc07,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_0,  RANK_SELECTION_CW,     eff_dimm_ddr4_bc08,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_0,  POWER_SAVING_CW,       eff_dimm_ddr4_bc09,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
@@ -111,13 +112,22 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
             { FUNC_SPACE_0,  ERROR_STATUS_CW,       eff_dimm_ddr4_bc0f,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
 
             // 8-bit BCW's now
-            // Function space 6
-            { FUNC_SPACE_6,  FUNC_SPACE_SELECT_CW,  FUNC_SPACE_6,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
-            { FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW,   eff_dimm_ddr4_f6bc4x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+            // Function space 0 - we're already there, so that's nice
+            { FUNC_SPACE_0,  BUFF_CONFIG_CW,        eff_dimm_ddr4_f0bc1x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_0, LRDIMM_OPERATING_SPEED, eff_dimm_ddr4_f0bc6x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+
+            // Function space 2
+            { FUNC_SPACE_2,  FUNC_SPACE_SELECT_CW,  FUNC_SPACE_2,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_2, HOST_DFE,               eff_dimm_ddr4_f2bcex, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
 
             // Function space 5
             { FUNC_SPACE_5, FUNC_SPACE_SELECT_CW,   FUNC_SPACE_5,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_5, HOST_VREF_CW,           eff_dimm_ddr4_f5bc5x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
             { FUNC_SPACE_5, DRAM_VREF_CW,           eff_dimm_ddr4_f5bc6x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+
+            // Function space 6
+            { FUNC_SPACE_6,  FUNC_SPACE_SELECT_CW,  FUNC_SPACE_6,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW,   eff_dimm_ddr4_f6bc4x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
 
 
             // So, we always want to know what function space we're in
