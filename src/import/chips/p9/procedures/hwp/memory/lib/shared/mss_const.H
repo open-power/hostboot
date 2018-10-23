@@ -156,6 +156,7 @@ enum ffdc_function_codes
     DRAM_BANK_BITS = 25,
     DRAM_ROW_BITS = 26,
     SOFT_POST_PACKAGE_REPAIR = 27,
+    EFF_BC07 = 28,
 
     // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
     FWMS_READ = 30,
