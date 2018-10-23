@@ -607,10 +607,6 @@ class mrep : public step
 
 };
 
-// TK:LRDIMM Identify if Host Interface Write Leveling (HWL) Mode needs to be updated or if the PHY can handle it
-// TK:LRDIMM Identify if Host Interface Read Training is any different
-// TK:LRDIMM Identify if Host Interface Write training Training is any different
-
 ///
 /// @brief Sets data buffer training mode control word
 /// @param[in] i_target the DIMM target
@@ -685,6 +681,7 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 ///
 /// @brief Deconfigures calibration steps depending upon LRDIMM type
 /// @param[in] i_dimm_type - DIMM type
