@@ -291,6 +291,12 @@ class eff_dimm
         fapi2::ReturnCode dram_dqs_time();
 
         ///
+        /// @brief Determines & sets effective config for DRAM output driver impedance control
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dram_odic() = 0;
+
+        ///
         /// @brief Determines & sets effective config for tCCD_L
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
@@ -528,7 +534,7 @@ class eff_dimm
         /// @brief Determines & sets effective config for Vref DQ Train Value and Range
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode vref_dq_train_value_and_range();
+        virtual fapi2::ReturnCode vref_dq_train_value_and_range();
 
         ///
         /// @brief Determines & sets effective config for Vref DQ Train Enable
@@ -565,6 +571,18 @@ class eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode odt_input_buffer();
+
+        ///
+        /// @brief Determines & sets effective ODT write values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_wr() = 0;
+
+        ///
+        /// @brief Determines & sets effective ODT read values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_rd() = 0;
         ///
         /// @brief Determines & sets effective config for data_mask
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -891,6 +909,12 @@ class eff_dimm
         virtual fapi2::ReturnCode dimm_bc05() = 0;
 
         ///
+        /// @brief Determines and sets DIMM BC06
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_bc06() = 0;
+
+        ///
         /// @brief Determines and sets DIMM BC07
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
@@ -944,6 +968,43 @@ class eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode dimm_bc0f() = 0;
+
+        ///
+        /// @brief Determines and sets DIMM F0BC1x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc1x() = 0;
+
+        ///
+        /// @brief Determines and sets DIMM F0BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc6x() = 0;
+
+        ///
+        /// @brief Determines and sets DIMM F2BCEx
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f2bcex() = 0;
+
+        ///
+        /// @brief Determines and sets DIMM F5BC5x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc5x() = 0;
+
+        ///
+        /// @brief Determines and sets DIMM F5BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc6x() = 0;
+
+
+        ///
+        /// @brief Determines and sets DIMM F6BC4x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f6bc4x() = 0;
 
     private:
 
@@ -1015,6 +1076,25 @@ class eff_lrdimm : public eff_dimm
         ///
         virtual ~eff_lrdimm() = default;
 
+
+        ///
+        /// @brief Determines & sets effective config for Vref DQ Train Value and Range
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode vref_dq_train_value_and_range() final;
+
+        ///
+        /// @brief Determines & sets effective ODT write values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_wr() final;
+
+        ///
+        /// @brief Determines & sets effective ODT read values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_rd() final;
+
         ///
         /// @brief Sets the RTT_NOM value from SPD
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -1035,6 +1115,12 @@ class eff_lrdimm : public eff_dimm
         /// @note used for MRS05
         ///
         virtual fapi2::ReturnCode dram_rtt_park() final;
+
+        ///
+        /// @brief Determines & sets effective config for DRAM output driver impedance control
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dram_odic() final;
 
         ///
         /// @brief Determines and sets DIMM BC00
@@ -1071,6 +1157,12 @@ class eff_lrdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode dimm_bc05() final;
+
+        ///
+        /// @brief Determines and sets DIMM BC09
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_bc06() final;
 
         ///
         /// @brief Determines and sets DIMM BC07
@@ -1125,6 +1217,42 @@ class eff_lrdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode dimm_bc0f() final;
+
+        ///
+        /// @brief Determines and sets DIMM F0BC1x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc1x() final;
+
+        ///
+        /// @brief Determines and sets DIMM F0BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc6x() final;
+
+        ///
+        /// @brief Determines and sets DIMM F2BCex
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f2bcex() final;
+
+        ///
+        /// @brief Determines and sets DIMM F5BC5x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc5x() final;
+
+        ///
+        /// @brief Determines and sets DIMM F5BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc6x() final;
+
+        ///
+        /// @brief Determines and sets DIMM F6BC4x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f6bc4x() final;
 };
 
 ///
@@ -1270,6 +1398,18 @@ class eff_rdimm : public eff_dimm
         ~eff_rdimm() = default;
 
         ///
+        /// @brief Determines & sets effective ODT write values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_wr() final;
+
+        ///
+        /// @brief Determines & sets effective ODT read values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode odt_rd() final;
+
+        ///
         /// @brief Sets the RTT_NOM value from SPD
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         /// @note used for MRS01
@@ -1289,6 +1429,12 @@ class eff_rdimm : public eff_dimm
         /// @note used for MRS05
         ///
         fapi2::ReturnCode dram_rtt_park() final;
+
+        ///
+        /// @brief Determines & sets effective config for DRAM output driver impedance control
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dram_odic() final;
 
         ///
         /// @brief Determines and sets DIMM BC00
@@ -1340,6 +1486,15 @@ class eff_rdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dimm_bc05() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM BC06
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dimm_bc06() final
         {
             return fapi2::FAPI2_RC_SUCCESS;
         }
@@ -1421,6 +1576,61 @@ class eff_rdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dimm_bc0f() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM F0BC1x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc1x() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM F0BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f0bc6x() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM F2BCEx
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f2bcex() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM F5BC5x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc5x() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Determines and sets DIMM F5BC6x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f5bc6x() final
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+
+        ///
+        /// @brief Determines and sets DIMM F6BC4x
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_f6bc4x() final
         {
             return fapi2::FAPI2_RC_SUCCESS;
         }

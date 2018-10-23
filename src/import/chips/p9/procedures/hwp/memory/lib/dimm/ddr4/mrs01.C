@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_qoff(0)
 {
     FAPI_TRY( mss::eff_dram_dll_enable(i_target, iv_dll_enable), "Error in mrs01_data()" );
-    FAPI_TRY( mss::vpd_mt_dram_drv_imp_dq_dqs(i_target, &(iv_odic[0])), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_odic(i_target, &(iv_odic[0])), "Error in mrs01_data()" );
     FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency), "Error in mrs01_data()" );
     FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable), "Error in mrs01_data()" );
     FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(iv_rtt_nom[0])), "Error in mrs01_data()" );

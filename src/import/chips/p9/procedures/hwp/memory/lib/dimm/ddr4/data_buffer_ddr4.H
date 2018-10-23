@@ -91,9 +91,12 @@ enum db02_def : size_t
     FUNC_SPACE_SELECT_CW = 0x7,
 
     // 8 bit BCWs
-    BUFF_CONFIG_CW = 0x1,
-    DRAM_VREF_CW = 0x6,
-    BUFF_TRAIN_CONFIG_CW = 0x4,
+    BUFF_CONFIG_CW = 0x1, // Func space 0
+    LRDIMM_OPERATING_SPEED = 0x6, // Func space 0
+    HOST_DFE = 0xE, // Func space 2
+    HOST_VREF_CW = 0x5, // Func space 5
+    DRAM_VREF_CW = 0x6, // Func space 5
+    BUFF_TRAIN_CONFIG_CW = 0x4, // Func space 6
 };
 
 namespace ddr4

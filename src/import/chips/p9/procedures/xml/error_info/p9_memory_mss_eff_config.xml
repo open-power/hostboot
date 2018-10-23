@@ -486,6 +486,24 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_RTT_PARK_CALCULATIONS</rc>
+    <description>
+        Calculated the rtt_park_index into the VPD attribute incorrectly
+    </description>
+    <ffdc>RANK</ffdc>
+    <ffdc>RTT_PARK_INDEX</ffdc>
+    <ffdc>RTT_PARK_FROM_VPD</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_RTT_NOM_CALCULATIONS</rc>
     <description>
         Calculated the rtt_nom_index into the VPD attribute incorrectly
