@@ -172,6 +172,21 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                         TARGETING::TYPE_CAPP,
                         startScomProcess);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_MCC,
+                      startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_OMIC,
+                      startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_OMI,
+                      startScomProcess);
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
@@ -1037,6 +1052,25 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
                     TRACFCOMP( g_trac_scom,
                                "Unsupported Cumulus EC 0x%X", l_ec );
                     assert(false,"Unsupported Cumulus EC");
+            }
+            break;
+        case(TARGETING::MODEL_AXONE):
+            switch(l_ec)
+            {
+                case(0x10):
+                    l_chipLevel = P9A_DD1_SI_MODE;
+                    break;
+                case(0x20):
+                    l_chipLevel = P9A_DD2_SI_MODE;
+                    break;
+                case(0x00):
+                    // before ATTR_EC is set, default to newest level that exists
+                    l_chipLevel = P9A_DD1_SI_MODE;
+                    break;
+                default:
+                    TRACFCOMP( g_trac_scom,
+                               "Unsupported Axone EC 0x%X", l_ec );
+                    assert(false,"Unsupported Axone EC");
             }
             break;
         default:
