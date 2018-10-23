@@ -2409,6 +2409,7 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
+        <mssAccessorName>eff_dimm_ddr4_bc06</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2518,6 +2519,7 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
+        <mssAccessorName>eff_dimm_ddr4_f0bc1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2568,6 +2570,7 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
+        <mssAccessorName>eff_dimm_ddr4_f0bc6x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2698,6 +2701,17 @@
         </attribute>
 
     <attribute>
+        <id>ATTR_EFF_DIMM_DDR4_F2BCEx</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>F2BCWEx Host Interface DFE Programming Control Word</description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable />
+        <array> 2 2 </array>
+        <mssAccessorName>eff_dimm_ddr4_f2bcex</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_EFF_DIMM_DDR4_F4BC0x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW0x MRS0 snooped settings</description>
@@ -2815,6 +2829,7 @@
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
+        <mssAccessorName>eff_dimm_ddr4_f5bc5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3001,6 +3016,51 @@
         <writeable/>
         <array> 2 </array>
         <mssAccessorName>eff_dram_tdqs</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_ODIC</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DRAM output driver impedance control (ODIC)
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>OHM34 = 34, OHM48 = 48</enum>
+        <writeable/>
+        <array> 2 2 4 </array>
+        <mssAccessorName>eff_dram_odic</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_ODT_RD</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+	    Attribute is derived from VPD for RDIMM or from termination settings for LRDIMM
+        </description>
+        <initToZero></initToZero>
+        <writeable/>
+        <valueType>uint8</valueType>
+        <mssAccessorName>eff_odt_rd</mssAccessorName>
+        <array>2 2 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_ODT_WR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
+            The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+	    Attribute is derived from VPD for RDIMM or from termination settings for LRDIMM
+        </description>
+        <initToZero></initToZero>
+        <writeable/>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_odt_wr</mssAccessorName>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
