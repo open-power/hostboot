@@ -98,6 +98,12 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         FAPI_INF("Running eff_config on %s", mss::c_str(l_dimm) );
 
+        FAPI_TRY(  l_eff_dimm->dram_odic(),
+                   "Failed dram_odic for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->odt_wr(),
+                   "Failed odt_wr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->odt_rd(),
+                   "Failed odt_rd for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->rcd_mfg_id(),
                   "Failed rcd_mfg_id for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->register_type(),
@@ -300,6 +306,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Failed dimm_bc04 for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->dimm_bc05(),
                   "Failed dimm_bc05 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc06(),
+                  "Failed dimm_bc06 for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->dimm_bc07(),
                   "Failed dimm_bc07 for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->dimm_bc08(),
@@ -332,6 +340,18 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                    "Failed nibble_map for %s", mss::c_str(l_dimm) );
         FAPI_TRY(  l_eff_dimm->wr_crc(),
                    "Failed wr_crc for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f0bc1x(),
+                   "Failed dimm_f0bc1x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f0bc6x(),
+                   "Failed dimm_f0bc6x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f2bcex(),
+                   "Failed dimm_f2bcex for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f5bc5x(),
+                   "Failed dimm_f5bc5x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f5bc6x(),
+                   "Failed dimm_f5bc6x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->dimm_f6bc4x(),
+                   "Failed dimm_f6bc4x for %s", mss::c_str(l_dimm) );
 
         // Sets up the calibration steps
         FAPI_TRY( l_eff_dimm->cal_step_enable(),
