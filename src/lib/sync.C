@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -116,9 +118,32 @@ void barrier_wait (barrier_t * i_barrier)
 
 //-----------------------------------------------------------------------------
 
-void mutex_init(mutex_t * o_mutex)
+/**
+ * @fn mutex_init
+ * @brief Initialize a mutex object.
+ * @param[out] o_mutex the mutex
+ * @param[in]  i_recursive indicate whether a mutex is recursive or not.
+ * @pre an uninitialized mutex object
+ * @post a valid mutex object
+ */
+void mutex_init(mutex_t * o_mutex, bool i_recursive)
 {
     o_mutex->iv_val = 0;
+    o_mutex->iv_owner = 0;
+    o_mutex->iv_ownerLockCount = 0;
+    o_mutex->iv_recursive = i_recursive;
+    return;
+}
+
+void mutex_init(mutex_t * o_mutex)
+{
+    mutex_init(o_mutex, false);
+    return;
+}
+
+void recursive_mutex_init(mutex_t * o_mutex)
+{
+    mutex_init(o_mutex, true);
     return;
 }
 
@@ -126,7 +151,21 @@ void mutex_init(mutex_t * o_mutex)
 
 void mutex_destroy(mutex_t * i_mutex)
 {
+    crit_assert(!i_mutex->iv_recursive);
+
     i_mutex->iv_val = ~0;
+    i_mutex->iv_owner = 0;
+    i_mutex->iv_ownerLockCount = 0;
+    return;
+}
+
+void recursive_mutex_destroy(mutex_t * i_mutex)
+{
+    crit_assert(i_mutex->iv_recursive);
+
+    i_mutex->iv_val = ~0;
+    i_mutex->iv_owner = 0;
+    i_mutex->iv_ownerLockCount = 0;
     return;
 }
 
@@ -141,19 +180,21 @@ void mutex_lock(mutex_t * i_mutex)
     //     leaving (isync).  Both __sync_val_compare_and_swap and
     //     __sync_lock_test_and_set have an implied isync.
 
-    uint64_t l_count = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
+    crit_assert(!i_mutex->iv_recursive);
 
-    if(unlikely(l_count != 0))
+    uint64_t l_lockStatus = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
+
+    if(unlikely(l_lockStatus != 0))
     {
-        if (likely(l_count != 2))
+        if(likely(l_lockStatus != 2))
         {
-            l_count = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
+            l_lockStatus = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
         }
 
-        while( l_count != 0 )
+        while(l_lockStatus != 0)
         {
-            futex_wait( &(i_mutex->iv_val), 2);
-            l_count = __sync_lock_test_and_set(&(i_mutex->iv_val),2);
+            futex_wait(&(i_mutex->iv_val), 2);
+            l_lockStatus = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
             // if more than one task gets out - one continues while
             // the rest get blocked again.
         }
@@ -174,11 +215,76 @@ void mutex_unlock(mutex_t * i_mutex)
     //     and futex_wake pair will appear globally ordered due to the
     //     context synchronizing nature of the 'sc' instruction.
 
-    uint64_t l_count = __sync_fetch_and_sub(&(i_mutex->iv_val),1);
-    if(unlikely(2 <= l_count))
+    crit_assert(!i_mutex->iv_recursive);
+
+    uint64_t l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val), 1);
+
+    if(unlikely(2 <= l_lockStatus))
     {
         i_mutex->iv_val = 0;
         futex_wake(&(i_mutex->iv_val), 1); // wake one task
+    }
+
+    return;
+}
+
+void recursive_mutex_lock(mutex_t * i_mutex)
+{
+    crit_assert(i_mutex->iv_recursive);
+
+    uint64_t l_lockStatus = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
+    do
+    {
+        if(unlikely(l_lockStatus != 0))
+        {
+            if (task_gettid() == i_mutex->iv_owner)
+            {
+                ++i_mutex->iv_ownerLockCount;
+                break;
+            }
+
+            if (likely(l_lockStatus != 2))
+            {
+                l_lockStatus = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
+            }
+
+            while( l_lockStatus != 0 )
+            {
+                futex_wait( &(i_mutex->iv_val), 2);
+                l_lockStatus = __sync_lock_test_and_set(&(i_mutex->iv_val),2);
+                // if more than one task gets out - one continues while
+                // the rest get blocked again.
+            }
+        }
+
+        i_mutex->iv_owner = task_gettid();
+        ++i_mutex->iv_ownerLockCount;
+
+    } while(0);
+
+    return;
+}
+
+void recursive_mutex_unlock(mutex_t * i_mutex)
+{
+    crit_assert(i_mutex->iv_recursive);
+
+    uint64_t l_lockStatus = 0;
+    if (i_mutex->iv_ownerLockCount <= 1)
+    {
+        i_mutex->iv_ownerLockCount = 0;
+        i_mutex->iv_owner = 0;
+        l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val),1);
+
+        if(unlikely(2 <= l_lockStatus))
+        {
+            i_mutex->iv_val = 0;
+            futex_wake(&(i_mutex->iv_val), 1); // wake one task
+        }
+    }
+    else
+    {
+        --i_mutex->iv_ownerLockCount;
     }
 
     return;

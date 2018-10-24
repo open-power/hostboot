@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,6 +43,49 @@ class SyncTest: public CxxTest::TestSuite
 {
     public:
 
+        void testRecursiveMutex(void)
+        {
+            int l_status = TASK_STATUS_EXITED_CLEAN;
+            // Note: These test cases are considered to have passed if no
+            //       deadlocks occur.
+            // Case 1: Single thread locks recursive mutex three times in a row.
+            {
+                recursive_mutex_init(&mutex);
+
+                l_status = TASK_STATUS_EXITED_CLEAN;
+                tid_t l_task1 = task_create(entry_func, this);
+
+                if ((l_task1 != task_wait_tid(l_task1, &l_status, nullptr)) ||
+                    (l_status == TASK_STATUS_EXITED_CLEAN))
+                {
+                    TS_INFO("Thread ended.");
+                }
+            }
+
+            // Case 2: One thread grabs recursive mutex and another attempts to
+            //         grab it (hangs) and then the first thread grabs it again
+            //         without issue.
+            {
+                recursive_mutex_init(&mutex);
+
+                l_status = TASK_STATUS_EXITED_CLEAN;
+                tid_t l_task1 = task_create(entry_func, this);
+                tid_t l_task2 = task_create(entry_func, this);
+
+                if ((l_task2 != task_wait_tid(l_task2, &l_status, nullptr)) ||
+                    (l_status == TASK_STATUS_EXITED_CLEAN))
+                {
+                    TS_INFO("Thread ended.");
+                }
+
+                if ((l_task1 != task_wait_tid(l_task1, &l_status, nullptr)) ||
+                    (l_status == TASK_STATUS_EXITED_CLEAN))
+                {
+                    TS_INFO("Thread ended.");
+                }
+
+            }
+        }
 
         void testMutex()
         {
@@ -142,10 +187,6 @@ class SyncTest: public CxxTest::TestSuite
             // test is success if it completes w/o hang
         }
 
-
-
-
-
     private:
 
         enum
@@ -162,6 +203,33 @@ class SyncTest: public CxxTest::TestSuite
 
         size_t counter;
 
+        static void* entry_func(void* i_p)
+        {
+            SyncTest* my = (SyncTest*) i_p;
+            mutex_t* myMutex = &(my->mutex);
+
+            // Call the recursive function.
+            recursive_func(myMutex, 2);
+
+            return nullptr;
+        }
+
+        static void recursive_func(mutex_t* mutex, int val)
+        {
+            TS_INFO("Attempting to enter Critical Section.");
+            recursive_mutex_lock(mutex);
+
+            TS_INFO("Accessing Critical Section.");
+            nanosleep(0, TEN_CTX_SWITCHES_NS);
+
+            if (val > 0)
+            {
+                recursive_func(mutex, val-1);
+            }
+
+            TS_INFO("Exiting Critical Section.");
+            recursive_mutex_unlock(mutex);
+        }
 
         static void* func1(void * i_p)
         {

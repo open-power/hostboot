@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,7 @@ MODULE = testsyslib
 #@TODO-RTC:151185-Turn enable all test cases
 #TESTS = *.H
 TESTS = stltest.H
-
+TESTS += synctest.H
 
 SUBDIRS += runtime.d
 

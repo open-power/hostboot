@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #define __SYS_SYNC_H
 
 #include <stdint.h>
+#include <sys/task.h>
 
 /**
  * Mutex object type
@@ -34,6 +35,12 @@
 struct _futex_imp_t
 {
     uint64_t iv_val;
+    uint64_t iv_ownerLockCount;
+    tid_t iv_owner;
+    bool iv_recursive;
+
+    _futex_imp_t () : iv_val(0), iv_ownerLockCount(0),
+                      iv_owner(0), iv_recursive(false) {}
 };
 
 typedef _futex_imp_t mutex_t;
@@ -51,7 +58,7 @@ struct _barrier_imp_t
 
 typedef _barrier_imp_t barrier_t;
 
-#define MUTEX_INITIALIZER {0}
+#define MUTEX_INITIALIZER mutex_t()
 
 /**
  * Conditional variable types
@@ -103,25 +110,47 @@ void barrier_wait (barrier_t * i_barrier);
 
 /**
  * @fn mutex_init
- * @brief Initialize a mutex object
+ * @brief Initialize a non-recursive mutex object
  * @param[out] o_mutex the mutex
  * @pre an uninitialized mutex object
- * @post a valid mutex object
+ * @post a valid non-recursive mutex object
  */
 void mutex_init(mutex_t * o_mutex);
 
 /**
+ * @fn recursive_mutex_init
+ * @brief Initialize a recursive mutex object
+ * @param[out] o_mutex the mutex
+ * @pre an uninitialized mutex object
+ * @post a valid recursive mutex object
+ */
+void recursive_mutex_init(mutex_t * o_mutex);
+
+
+/**
  * @fn mutex_destroy
- * @brief Destroy / uninitialize a mutex object.
- * @param[in] i_mutex - the mutex
+ * @brief Destroy / uninitialize a non-recursive mutex object. Code will assert
+ *        if a recursive mutex is passed in.
+ * @param[in] i_mutex - the non-recursive mutex
  * @note This does not free the memory associated with the object if the mutex
  *       was allocated off the heap.
  */
 void mutex_destroy(mutex_t * i_mutex);
 
 /**
+ * @fn recursive_mutex_destroy
+ * @brief Destroy / uninitialize a recursive mutex object. Code will assert if a
+ *        non-recursive mutex is passed in.
+ * @param[in] i_mutex - the mutex
+ * @note This does not free the memory associated with the object if the mutex
+ *       was allocated off the heap.
+ */
+void recursive_mutex_destroy(mutex_t * i_mutex);
+
+/**
  * @fn mutex_lock
- * @brief Obtain a lock on a mutex
+ * @brief Obtain a lock on a mutex. If a recursive mutex is passed as the
+ *        parameter the code will assert.
  * @param[in] i_mutex - The mutex
  * @post returns when this task has the lock
  */
@@ -129,11 +158,30 @@ void mutex_lock(mutex_t * i_mutex);
 
 /**
  * @fn mutex_unlock
- * @brief Release a lock on a mutex
+ * @brief Release a lock on a mutex. If a recursive mutex is passed as the
+ *        parameter the code will assert.
  * @param[in] i_mutex - the mutex
  * @post mutex lock released
  */
 void mutex_unlock(mutex_t * i_mutex);
+
+/**
+ * @fn recursive_mutex_lock
+ * @brief Obtain a lock on a recursive mutex. If a non-recursive mutex is passed
+ *        as the parameter the code will assert.
+ * @param[in] i_mutex - The mutex
+ * @post returns when this task has the lock
+ */
+void recursive_mutex_lock(mutex_t * i_mutex);
+
+/**
+ * @fn recursive_mutex_unlock
+ * @brief Release a lock on a recursive mutex. If a non-recursive mutex is
+ *        passed as the parameter the code will assert.
+ * @param[in] i_mutex - A recursive mutex
+ * @post mutex lock released or mutex iv_ownerLockCount decremented.
+ */
+void recursive_mutex_unlock(mutex_t * i_mutex);
 
 /**
  * @fn sync_cond_init
