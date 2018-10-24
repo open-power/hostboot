@@ -1085,6 +1085,7 @@ sub processProcessor
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useInbandScom",
         "0");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
+    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useI2cScom","0");
 
     ## default effective fabric ids to match regular fabric ids
     ##  the value will be adjusted based on presence detection later

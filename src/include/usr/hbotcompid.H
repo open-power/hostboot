@@ -445,6 +445,14 @@ const compId_t NVDIMM_COMP_ID = 0x3500;
 const char NVDIMM_COMP_NAME[] = "nvdimm";
 //@}
 
+/** @name EXPSCOM
+ *  Explorer OCMB Scom DDs (MMIO and I2C explorer scom drivers)
+ */
+//@{
+const compId_t EXPSCOM_COMP_ID = 0x3600;
+const char EXPSCOM_COMP_NAME[] = "expscom";
+//@}
+
 /** @name NVRAM
  *  NVRAM Support component
  */
@@ -461,7 +469,7 @@ const char NVRAM_COMP_NAME[] = "nvram";
 //@{
 const compId_t HDAT_COMP_ID = 0x9000;
 const char HDAT_COMP_NAME[] = "hdat";
-
+//@}
 
 /** @name PRDF
  *  PRDF component

@@ -6741,7 +6741,17 @@
         <type>uint8_t</type>
       </field>
       <field>
-        <bits>4</bits>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+          0b0: Do not use I2C SCOM at this time.
+          0b1: Use I2C SCOM at this time
+        </description>
+        <name>useI2cScom</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>3</bits>
         <default>0</default>
         <description>Reserved for future expansion</description>
         <name>reserved</name>

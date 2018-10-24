@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ namespace DeviceFW
         HOSTI2C,
         FSI_I2C,
         SBEFIFOSCOM,
-
+        I2CSCOM,
         LAST_DRIVER_ACCESS_TYPE
     };
 
@@ -108,6 +108,13 @@ namespace DeviceFW
      */
     #define DEVICE_IBSCOM_ADDRESS(i_address) \
         DeviceFW::IBSCOM, static_cast<uint64_t>((i_address))
+
+    /** Construct the device addressing parameters for I2CSCOM (i2c scom)
+     *  device ops.
+     *  @param[in] i_address - I2CSCOM address to operate on.
+     */
+    #define DEVICE_I2CSCOM_ADDRESS(i_address) \
+        DeviceFW::I2CSCOM, static_cast<uint64_t>((i_address))
 
     /**
      * @brief Macro that handles the I2C parameters

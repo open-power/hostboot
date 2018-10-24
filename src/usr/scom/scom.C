@@ -133,6 +133,10 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_MEMBUF,
                       scomMemBufPerformOp);
 
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SCOM,
+                      TARGETING::TYPE_OCMB_CHIP,
+                      scomPerformOp);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -879,14 +883,18 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
         do{
             TARGETING::ScomSwitches scomSetting;
+            // We start by assuming target = MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+            // so following that assumption default l_targetType to PROC_CHIP
+            TARGETING::ATTR_TYPE_type l_targetType = TARGETING::TYPE_PROC;
             scomSetting.useXscom = true;  //Default to Xscom supported.
             if(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL != i_target)
             {
                 scomSetting =
                   i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
 
-                if( TARGETING::TYPE_PROC
-                    == i_target->getAttr<TARGETING::ATTR_TYPE>() )
+                l_targetType = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+                if( l_targetType == TARGETING::TYPE_PROC )
                 {
                     l_multicastBugError = true;
                 }
@@ -925,6 +933,17 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                     l_remainingAttempts = 0;
                 }
                 break;
+            }
+            else if(scomSetting.useI2cScom)
+            {
+                //do I2CSCOM
+                l_err = deviceOp(i_opType,
+                                i_target,
+                                io_buffer,
+                                io_buflen,
+                                DEVICE_I2CSCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
+
             }
             else if(scomSetting.useSbeScom)
             {   //do SBESCOM

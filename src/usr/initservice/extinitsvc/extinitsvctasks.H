@@ -380,6 +380,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
         /**
+         * @brief  Explorer Scom library
+         */
+        {
+            "libexpscom.so" ,                   // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+
+        /**
          * @brief   Common istep functions
          *
          *

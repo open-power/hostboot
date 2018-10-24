@@ -1509,6 +1509,7 @@ sub processMc
                         # It's okay to hard code these here because the code fixes it as needed
                         # This is hardcoded for proc target as well.
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "useSbeScom","0");
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useI2cScom","0");
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "useFsiScom","1");
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "reserved",   "0");
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "useInbandScom", "0");
