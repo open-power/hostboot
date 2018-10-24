@@ -330,6 +330,18 @@
   </attribute>
 
   <attribute>
+    <id>HB_RECURSIVE_MUTEX_TEST_LOCK</id>
+    <description>Host boot recursive mutex for testing</description>
+    <simpleType>
+      <hbrecursivemutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>HB_RSV_MEM_NEXT_SECTION</id>
     <description>
         The next HB reserved memory section available to assign

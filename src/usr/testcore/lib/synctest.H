@@ -50,10 +50,11 @@ class SyncTest: public CxxTest::TestSuite
             //       deadlocks occur.
             // Case 1: Single thread locks recursive mutex three times in a row.
             {
-                recursive_mutex_init(&mutex);
+                mutex_t recursive_mutex;
+                recursive_mutex_init(&recursive_mutex);
 
                 l_status = TASK_STATUS_EXITED_CLEAN;
-                tid_t l_task1 = task_create(entry_func, this);
+                tid_t l_task1 = task_create(entry_func, &recursive_mutex);
 
                 if ((l_task1 != task_wait_tid(l_task1, &l_status, nullptr)) ||
                     (l_status == TASK_STATUS_EXITED_CLEAN))
@@ -66,11 +67,12 @@ class SyncTest: public CxxTest::TestSuite
             //         grab it (hangs) and then the first thread grabs it again
             //         without issue.
             {
-                recursive_mutex_init(&mutex);
+                mutex_t recursive_mutex;
+                recursive_mutex_init(&recursive_mutex);
 
                 l_status = TASK_STATUS_EXITED_CLEAN;
-                tid_t l_task1 = task_create(entry_func, this);
-                tid_t l_task2 = task_create(entry_func, this);
+                tid_t l_task1 = task_create(entry_func, &recursive_mutex);
+                tid_t l_task2 = task_create(entry_func, &recursive_mutex);
 
                 if ((l_task2 != task_wait_tid(l_task2, &l_status, nullptr)) ||
                     (l_status == TASK_STATUS_EXITED_CLEAN))
@@ -205,8 +207,7 @@ class SyncTest: public CxxTest::TestSuite
 
         static void* entry_func(void* i_p)
         {
-            SyncTest* my = (SyncTest*) i_p;
-            mutex_t* myMutex = &(my->mutex);
+            mutex_t* myMutex = (mutex_t*) i_p;
 
             // Call the recursive function.
             recursive_func(myMutex, 2);

@@ -28,7 +28,7 @@ MODULE = testsyslib
 #@TODO-RTC:151185-Turn enable all test cases
 #TESTS = *.H
 TESTS = stltest.H
-#TESTS += synctest.H
+TESTS += synctest.H
 
 SUBDIRS += runtime.d
 
