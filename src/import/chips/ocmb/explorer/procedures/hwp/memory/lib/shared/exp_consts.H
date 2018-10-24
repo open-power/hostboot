@@ -41,6 +41,8 @@ namespace mss
 namespace exp
 {
 
+constexpr uint32_t OCMB_ADDR_SHIFT = 3;
+
 ///
 /// @brief explorer ffdc codes
 ///
@@ -77,6 +79,10 @@ enum sizes
     // 32-bit commands
     FW_BOOT_CONFIG_BYTE_LEN = 4,
     FW_STATUS_BYTE_LEN      = 4,
+
+    FW_WRITE_REG_DATA_SIZE  = 0x08,
+    FW_REG_ADDR_LATCH_SIZE  = 0x04,
+    FW_I2C_SCOM_READ_SIZE   = 0x05,
 
     // Largest R/W length for bytes of data
     MIN_DATA_BYTES_LEN = 1,
@@ -122,6 +128,44 @@ enum boot_stages
     FW_UPGRADE_MODE = 0x02,
     RUNTIME_FW      = 0x03,
 };
+
+///
+/// @brief Useful constants for i2c scom functionality
+///
+/// @note FIRST_BYTE_MASK = allows us to mask off first by of
+///       an address to check if its an IBM SCOM
+///       LAST_THREE_BYTES_MASK = used as part of formula to translate
+///       a given address to an IBM scom address
+///       OCBM_UNCACHED_OFFSET = Also used as part of formula for translating
+///       a given address to the correct IBM or microchip form
+///       IBM_SCOM_OFFSET_LHS and IBM_SCOM_OFFSET_RHS are used in formula
+///       for calculating IBM scom address for left and right side of addr
+///       IBM_SCOM_INDICATOR is the indicator bit in the first byte of an
+///       address that tells us if it is a IBM scom or not
+///
+enum i2c_scom_consts : uint32_t
+{
+    FIRST_BYTE_MASK       = 0xFF000000,
+    LAST_THREE_BYTES_MASK = 0x00FFFFFF,
+    OCMB_UNCACHED_OFFSET  = 0xA0000000,
+    IBM_SCOM_OFFSET_LHS   = 0x08000000,
+    IBM_SCOM_OFFSET_RHS   = 0x08000004,
+    IBM_SCOM_INDICATOR    = IBM_SCOM_OFFSET_LHS,
+};
+
+///
+/// @brief Simple enum allows code to pick between left and right
+///
+/// This is used when deciding if we are writing/reading from left
+/// side of IBM address or right side. This is needed because IBM
+/// scoms are 64 bits while the OCMB only has 32 bit regs.
+enum addrSide
+{
+    LHS = 0x00,
+    RHS = 0x01
+};
+
+
 }// i2c
 }// exp
 }// mss
