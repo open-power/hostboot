@@ -648,7 +648,7 @@ extern "C"
 
 
     uint32_t p9_scominfo_xlate_mi(bool& o_chipUnitRelated, std::vector<p9_chipUnitPairing_t>& o_chipUnitPairing,
-                                  p9_scom_addr& i_scom, const p9ChipUnits_t mcc_dmi, const uint32_t i_mode)
+                                  p9_scom_addr& i_scom, const p9ChipUnits_t mcc_dmi, const int i_low0, const int i_low1, const uint32_t i_mode)
     {
         uint8_t l_chiplet_id = i_scom.get_chiplet_id();
         uint8_t l_port = i_scom.get_port();
@@ -675,8 +675,8 @@ extern "C"
             //DMI5           03     02       0   0x3X (X <= 0xB)
             //DMI6           03     02       2   0x2X (X <= 0xB)
             //DMI7           03     02       2   0x3X (X <= 0xB)
-            if ((0x20 <= l_sat_offset && l_sat_offset <= 0x2B) ||
-                (0x30 <= l_sat_offset && l_sat_offset <= 0x3B))
+            if ((i_low0 <= l_sat_offset && l_sat_offset <= 0x2B) ||
+                (i_low1 <= l_sat_offset && l_sat_offset <= 0x3B))
             {
                 uint8_t l_off_nib0 = (l_sat_offset >> 4);
                 o_chipUnitRelated = true;
@@ -901,7 +901,7 @@ extern "C"
             else if (i_mode == P9C_DD1_SI_MODE || i_mode == P9C_DD2_SI_MODE)
             {
                 //==== CUMULUS MC/MI/DMI==================================================================================
-                rc = p9_scominfo_xlate_mi(o_chipUnitRelated, o_chipUnitPairing, l_scom, PU_DMI_CHIPUNIT, i_mode);
+                rc = p9_scominfo_xlate_mi(o_chipUnitRelated, o_chipUnitPairing, l_scom, PU_DMI_CHIPUNIT, 0x20, 0x30, i_mode);
 
                 if (rc)
                 {
@@ -1086,7 +1086,7 @@ extern "C"
             else
             {
                 //==== AXONE MC/MI/OMIC/OMI  ============================================================================
-                rc = p9_scominfo_xlate_mi(o_chipUnitRelated, o_chipUnitPairing, l_scom, PU_MCC_CHIPUNIT, i_mode);
+                rc = p9_scominfo_xlate_mi(o_chipUnitRelated, o_chipUnitPairing, l_scom, PU_MCC_CHIPUNIT, 0x23, 0x33, i_mode);
 
                 if (rc)
                 {
