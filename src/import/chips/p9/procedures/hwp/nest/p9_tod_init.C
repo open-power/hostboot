@@ -171,8 +171,8 @@ fapi2::ReturnCode sync_spread(
                             l_tod_value_data),
              "Error reading TOD_VALUE_REG");
 
-    l_tod_timer_data = (l_tod_value_data + (C_SSCG_START_DELAY << 4)) &
-                       0xFFFFFFFFFFFFFFF0ULL;
+    l_tod_timer_data = ((l_tod_value_data + (C_SSCG_START_DELAY << 4)) &
+                        0xFFFFFFFFFFFFFFF0ULL) | 0xC;
 
     // Write value > tod_value to TOD Timer Register
     for (auto l_chip : l_targets)
