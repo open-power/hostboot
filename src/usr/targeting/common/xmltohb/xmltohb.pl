@@ -4450,6 +4450,17 @@ sub unhexify {
 }
 
 ################################################################################
+# Pack mutex
+################################################################################
+
+sub packMutex {
+    my $length = 24;
+    my $binaryData .= pack ("C".$length);
+
+    return $binaryData;
+}
+
+################################################################################
 # Pack 8 byte value into a buffer using configured endianness
 ################################################################################
 
@@ -4868,7 +4879,7 @@ sub simpleTypeProperties {
     $typesHoH{"uint32_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint32_t"                   , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack4byte};
     $typesHoH{"uint64_t"}    = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "uint64_t"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack8byte};
     $typesHoH{"enumeration"} = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "XMLTOHB_USE_PARENT_ATTR_ID" , bytes => 0, bits => 0 , default => \&defaultEnum  , alignment => 1, specialPolicies =>\&null,           packfmt => "packEnumeration"};
-    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&pack8byte};
+    $typesHoH{"hbmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "mutex_t*"                   , bytes => 24, bits => 192, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceHbMutex, packfmt =>\&packMutex};
     $typesHoH{"Target_t"}    = { supportsArray => 0, canBeHex => 1, complexTypeSupport => 0, typeName => "TARGETING::Target*"         , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&null,           packfmt =>\&pack8byte};
     $typesHoH{"fspmutex"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 0, typeName => "util::Mutex*"              , bytes => 8, bits => 64, default => \&defaultZero  , alignment => 8, specialPolicies =>\&enforceFspMutex, packfmt =>\&pack8byte};
 
@@ -6367,7 +6378,8 @@ sub generateTargetingImage {
             #skip the present target
             next;
         }
-#         print Dumper($allAttributes);
+
+        #print Dumper($allAttributes);
 
         # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
