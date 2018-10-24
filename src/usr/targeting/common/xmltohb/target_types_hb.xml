@@ -260,6 +260,9 @@
       <id>HB_MUTEX_TEST_LOCK</id>
     </attribute>
     <attribute>
+      <id>HB_RECURSIVE_MUTEX_TEST_LOCK</id>
+    </attribute>
+    <attribute>
       <id>HB_RSV_MEM_NEXT_SECTION</id>
     </attribute>
     <attribute>

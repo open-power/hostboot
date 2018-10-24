@@ -31,6 +31,10 @@
 
 using namespace Systemcalls;
 
+// The size of mutexes are hardcoded in xmltohb.pl script and must be that
+// size.
+const int MUTEX_SIZE = 24;
+
 //-----------------------------------------------------------------------------
 
 int futex_wait(uint64_t * i_addr, uint64_t i_val)
@@ -181,6 +185,16 @@ void mutex_lock(mutex_t * i_mutex)
     //     __sync_lock_test_and_set have an implied isync.
 
     crit_assert(!i_mutex->iv_recursive);
+    static_assert(sizeof(mutex_t) == MUTEX_SIZE,
+                    "mutex_t must be size of 24 bytes");
+
+    // The mutex is only allowed to take on three values: 0, 1, or 2.
+    // 0: Lock is not held.
+    // 1: Lock is held by a task with no contention.
+    // 2: Lock is held by a task and there is contention.
+    // Any other values indicates that outside influences have messed with the
+    // mutex and we shouldn't continue.
+    crit_assert(i_mutex->iv_val <= 2);
 
     uint64_t l_lockStatus = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
 
@@ -216,11 +230,22 @@ void mutex_unlock(mutex_t * i_mutex)
     //     context synchronizing nature of the 'sc' instruction.
 
     crit_assert(!i_mutex->iv_recursive);
+    static_assert(sizeof(mutex_t) == MUTEX_SIZE,
+                    "mutex_t must be size of 24 bytes");
+
+    // The mutex is only allowed to take on three values: 0, 1, or 2.
+    // 0: Lock is not held.
+    // 1: Lock is held by a task with no contention.
+    // 2: Lock is held by a task and there is contention.
+    // Any other values indicates that outside influences have messed with the
+    // mutex and we shouldn't continue.
+    crit_assert(i_mutex->iv_val <= 2);
 
     uint64_t l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val), 1);
 
-    if(unlikely(2 <= l_lockStatus))
+    if(unlikely(l_lockStatus == 2))
     {
+        // Fully release the lock and let another task grab it.
         i_mutex->iv_val = 0;
         futex_wake(&(i_mutex->iv_val), 1); // wake one task
     }
@@ -231,23 +256,57 @@ void mutex_unlock(mutex_t * i_mutex)
 void recursive_mutex_lock(mutex_t * i_mutex)
 {
     crit_assert(i_mutex->iv_recursive);
+    static_assert(sizeof(mutex_t) == MUTEX_SIZE,
+                    "mutex_t must be size of 24 bytes");
 
+    // The mutex is only allowed to take on three values: 0, 1, or 2.
+    // 0: Lock is not held.
+    // 1: Lock is held by a task with no contention.
+    // 2: Lock is held by a task and there is contention.
+    // Any other values indicates that outside influences have messed with the
+    // mutex and we shouldn't continue.
+    crit_assert(i_mutex->iv_val <= 2);
+
+    // Check the contents of the mutex's iv_val and if it's equal to 0, then
+    // assign it the value of 1. l_lockStatus is initialized with the value of
+    // iv_val prior to the assignment.
     uint64_t l_lockStatus = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
+
     do
     {
         if(unlikely(l_lockStatus != 0))
         {
+            // There may be contention for the lock. Since this is a recursive
+            // mutex we first need to check if the owner has called for the lock
+            // again.
             if (task_gettid() == i_mutex->iv_owner)
             {
+                // The owner called for the lock. There isn't contention at this
+                // point and so subsequent calls to this function will still
+                // initialize l_lockStatus to 1.
+                //
+                // Increment the owner's lock count to keep track of how much
+                // unwinding will be necessary but the lock can be safely
+                // released.
                 ++i_mutex->iv_ownerLockCount;
+
+                // Return now so that the owner doesn't set the lock to be
+                // contended and enter the waiting queue, thus causing a
+                // deadlock.
                 break;
             }
 
+            // By reaching this point there is certainly contention for the
+            // lock. Ensure that the lock status reflects this if it doesn't
+            // already.
             if (likely(l_lockStatus != 2))
             {
+                // mutex's iv_val will be set to 2 and the previous value will
+                // be assigned to l_lockStatus.
                 l_lockStatus = __sync_lock_test_and_set(&(i_mutex->iv_val), 2);
             }
 
+            // Send caller to the wait queue.
             while( l_lockStatus != 0 )
             {
                 futex_wait( &(i_mutex->iv_val), 2);
@@ -257,6 +316,7 @@ void recursive_mutex_lock(mutex_t * i_mutex)
             }
         }
 
+        // Set the new owner of the lock and increment the lock count.
         i_mutex->iv_owner = task_gettid();
         ++i_mutex->iv_ownerLockCount;
 
@@ -268,22 +328,39 @@ void recursive_mutex_lock(mutex_t * i_mutex)
 void recursive_mutex_unlock(mutex_t * i_mutex)
 {
     crit_assert(i_mutex->iv_recursive);
+    static_assert(sizeof(mutex_t) == MUTEX_SIZE,
+                    "mutex_t must be size of 24 bytes");
+
+    // The mutex is only allowed to take on three values: 0, 1, or 2.
+    // 0: Lock is not held.
+    // 1: Lock is held by a task with no contention.
+    // 2: Lock is held by a task and there is contention.
+    // Any other values indicates that outside influences have messed with the
+    // mutex and we shouldn't continue.
+    crit_assert(i_mutex->iv_val <= 2);
 
     uint64_t l_lockStatus = 0;
+
     if (i_mutex->iv_ownerLockCount <= 1)
     {
+        // Owner is finished with the lock. So reset owner variables of mutex.
         i_mutex->iv_ownerLockCount = 0;
         i_mutex->iv_owner = 0;
+
+        // Decrements iv_val by 1 and assigns the value prior to the operation
+        // to l_lockStatus.
         l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val),1);
 
-        if(unlikely(2 <= l_lockStatus))
+        if(unlikely(l_lockStatus == 2))
         {
+            // Fully release the lock to allow the next task to grab it.
             i_mutex->iv_val = 0;
             futex_wake(&(i_mutex->iv_val), 1); // wake one task
         }
     }
     else
     {
+        // Unwind the recursive lock one step.
         --i_mutex->iv_ownerLockCount;
     }
 

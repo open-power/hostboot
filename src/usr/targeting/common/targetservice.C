@@ -1793,14 +1793,23 @@ uint32_t TargetService::resetMutexAttributes(const Target* i_pTarget)
     for ( uint32_t l_attrIndex = 0; l_attrIndex < l_attrCount; l_attrIndex++)
     {
         const ATTRIBUTE_ID l_attrId = l_pAttrIds[l_attrIndex];
-        for( const auto mutexId : hbMutexAttrIds)
+        for( const auto mutex : hbMutexAttrIds)
         {
-            if(l_attrId == mutexId)
+            if(l_attrId == mutex.id)
             {
                 mutex_t* l_mutex;
                 if(i_pTarget->_tryGetHbMutexAttr(l_attrId, l_mutex))
                 {
-                    mutex_init(l_mutex);
+#ifdef __HOSTBOOT_MODULE
+                    if (mutex.isRecursive)
+                    {
+                        recursive_mutex_init(l_mutex);
+                    }
+                    else
+#endif
+                    {
+                        mutex_init(l_mutex);
+                    }
                     l_numberMutexAttrsReset++;
                 }
                 else

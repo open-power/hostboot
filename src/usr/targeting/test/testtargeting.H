@@ -90,9 +90,182 @@ void* funcTestMutex(void* i_pData)
     return NULL;
 }
 
+/**
+ *  @brief Function which attempts to recursively access a critical section with
+ *         a recursive mutex.
+ *
+ *  @param[in] i_pData Pointer to mutex pointer/value pointer structure
+ *
+ *  @return nullptr
+ */
+void* funcTestRecursiveMutex(void* i_pData)
+{
+    MutexTestData_t* l_pData = static_cast<MutexTestData_t*>(i_pData);
+
+    // The parent thread holds the lock initially. So the child thread will be
+    // blocked when it attempts to access the critical section.
+    TS_INFO("Child Thread: Attempting to access the Critical Section");
+    recursive_mutex_lock(l_pData->pMutex);
+
+    TS_INFO("Child Thread: Entering the Critical Section");
+    if (*(l_pData->pVar) > 0)
+    {
+        *(l_pData->pVar) = 0;
+        funcTestRecursiveMutex(l_pData);
+    }
+
+    TS_INFO("Child Thread: Leaving the Critical Section");
+    recursive_mutex_unlock(l_pData->pMutex);
+    return nullptr;
+}
+
+/**
+ *  @brief Function that serves as an entry point to the recursive function
+ *         it calls. This is so that the barrier_wait calls work without the
+ *         recursion causing a deadlock.
+ *
+ *  @param[in] i_pData Pointer to mutex pointer/value pointer structure
+ *
+ *  @return nullptr
+ */
+void* funcTestRecursiveMutexEntry(void* i_pData)
+{
+    MutexTestData_t* l_pData = static_cast<MutexTestData_t*>(i_pData);
+
+    // Signal to the parent thread that the child thread is about to access the
+    // lock which is held by it. That way the main thread can verify that
+    // this thread hasn't started recursion yet.
+    barrier_wait(l_pData->pBarrier);
+
+    funcTestRecursiveMutex(l_pData);
+
+    // Wake the parent thread so that it can verify that this thread accessed
+    // the protected value which proves that the child thread got
+    // the lock recursively without a deadlock occuring.
+    barrier_wait(l_pData->pBarrier);
+
+    return nullptr;
+}
+
 class TargetingTestSuite : public CxxTest::TestSuite
 {
   public:
+
+    /**
+     *  @brief Test Hostboot specific mutex attribute support
+     */
+    void testHbRecursiveMutexAttr()
+    {
+        TS_TRACE(ENTER_MRK "testHbRecursiveMutexAttr" );
+
+        using namespace TARGETING;
+
+        do {
+
+        // Get a reference to the target service
+        TargetService& l_targetService = targetService();
+
+        // Get the system target containing the test mutex
+        TARGETING::Target* l_pTarget = nullptr;
+        (void) l_targetService.getTopLevelTarget(l_pTarget);
+        if (l_pTarget == nullptr)
+        {
+            TS_FAIL("Top level target handle is NULL");
+            break;
+        }
+
+        // Get the mutex attribute (actually a mutex_t* which points to
+        // a mutex)
+        HB_RECURSIVE_MUTEX_TEST_LOCK_ATTR l_pLock =
+            l_pTarget->getHbMutexAttr
+                <TARGETING::ATTR_HB_RECURSIVE_MUTEX_TEST_LOCK>();
+
+        // Verify the recursive mutex was initialized correctly
+        mutex_t* l_recursiveMutex = reinterpret_cast<mutex_t*>(l_pLock);
+
+        if ((l_recursiveMutex->iv_val != 0)
+           || (l_recursiveMutex->iv_ownerLockCount != 0)
+           || (l_recursiveMutex->iv_owner != 0)
+           || (l_recursiveMutex->iv_recursive != true))
+        {
+            TS_FAIL("Mutex attribute must be initialized as recursive.");
+            break;
+        }
+
+        // Try to get the attribute, and ensure it's the same
+        HB_RECURSIVE_MUTEX_TEST_LOCK_ATTR l_pLockTry = nullptr;
+        if(l_pTarget->tryGetHbMutexAttr
+                <TARGETING::ATTR_HB_RECURSIVE_MUTEX_TEST_LOCK>(l_pLockTry))
+        {
+            if(l_pLockTry != l_pLock)
+            {
+                TS_FAIL("Mutex attributes should match, but dont.  "
+                        "l_pLockTry = %p, l_pLock = %p",l_pLockTry,
+                        l_pLock);
+                break;
+            }
+        }
+        else
+        {
+            TS_FAIL("Mutex attribute tryGet failed, even though it exists");
+            break;
+        }
+
+        // Create a structure holding pointers to
+        // the mutex and a protected value
+        volatile uint32_t l_var = 1;
+        TS_INFO("Parent Thread: Acquiring recursive lock");
+        (void)recursive_mutex_lock(l_pLock);
+        barrier_t l_barrier;
+        (void)barrier_init(&l_barrier, 2);
+        MutexTestData_t l_mutexTestData = { l_pLock, &l_barrier, &l_var };
+
+        // Spawn off a function which tries to write the protected value to
+        // something unexpected. If the mutex is working, the for loop will
+        // always poll the expected value.
+        TS_INFO("Parent Thread: Creating Child thread");
+        task_create(funcTestRecursiveMutexEntry,
+                    static_cast<void*>(&l_mutexTestData));
+
+        // Guarantee the child process runs and blocks on the mutex prior to
+        // modifying the protected value.  isync to ensure the processor doesn't
+        // speculatively perform the comparison prior to the sleep completing
+        TS_INFO("Parent Thread: Waiting for Child to attempt to grab the lock");
+        barrier_wait(&l_barrier);
+        nanosleep(0,TEN_CTX_SWITCHES_NS); isync();
+
+        if(l_var != 1)
+        {
+            TS_FAIL("Protected value must be 1, was %d instead",l_var);
+            break;
+        }
+
+        // Now unlock the mutex, allowing the other thread to overwrite the
+        // protected value; which should happen within 100,000 reads of the
+        // var.  This will confirm the other thread was actively trying to
+        // write the controlled value
+        TS_INFO(
+            "Parent Thread: Releasing lock to Child to test recursive mutex.");
+        (void)recursive_mutex_unlock(l_pLock);
+
+        // Guarantee the child process acquires the mutex and modifies the
+        // protected value.
+        TS_INFO("Parent Thread: Waiting for Child to modify the value");
+        barrier_wait(&l_barrier);
+
+        if(l_var != 0)
+        {
+             TS_FAIL("Protected value must now be 0, was %d instead",l_var);
+             break;
+        }
+
+        TS_INFO("Parent Thread: Child completed successfully.");
+        barrier_destroy(&l_barrier);
+
+        } while(0);
+
+        TS_TRACE(EXIT_MRK "testHbRecursiveMutexAttr");
+    }
 
     /**
      *  @brief Test Hostboot specific mutex attribute support
@@ -149,7 +322,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
             break;
         }
 
-        // Create a structue holding pointers to the mutex and a protected value
+        // Create a structure holding pointers to
+        // the mutex and a protected value
         volatile uint32_t l_var = 0;
         (void)mutex_lock(l_pLock);
         barrier_t l_barrier;
