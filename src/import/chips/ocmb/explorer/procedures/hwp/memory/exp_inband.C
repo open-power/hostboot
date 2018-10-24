@@ -38,6 +38,7 @@
 
 #include <mmio_access.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/endian_utils.H>
 
 namespace mss
 {
@@ -107,7 +108,7 @@ fapi2::ReturnCode putScom(
     const fapi2::buffer<uint64_t>& i_data)
 {
     // Converts from the scom address to the MMIO address by shifting left by 3 bits
-    uint64_t l_scomAddr = i_scomAddr << 3;
+    uint64_t l_scomAddr = i_scomAddr << OCMB_ADDR_SHIFT;
     return putMMIO64(i_target, l_scomAddr, i_data);
 }
 
@@ -350,7 +351,7 @@ fapi2::ReturnCode getScom(
     fapi2::buffer<uint64_t>& o_data)
 {
     // Converts from the scom address to the MMIO address by shifting left by 3 bits
-    uint64_t l_scomAddr = i_scomAddr << 3;
+    uint64_t l_scomAddr = i_scomAddr << OCMB_ADDR_SHIFT;
     return getMMIO64(i_target, l_scomAddr, o_data);
 }
 
