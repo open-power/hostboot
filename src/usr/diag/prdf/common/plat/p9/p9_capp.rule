@@ -80,7 +80,7 @@ chip p9_capp
     };
 
 # Include registers not defined by the xml
-.include "p9_capp_regs.rule";
+.include "p9_common_capp_regs.rule";
 
 };
 
@@ -409,5 +409,5 @@ group gCXAFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_capp_actions.rule";
+.include "p9_common_capp_actions.rule";
 

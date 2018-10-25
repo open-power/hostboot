@@ -119,7 +119,7 @@ chip p9_xbus
     };
 
 # Include registers not defined by the xml
-.include "p9_xbus_regs.rule";
+.include "p9_common_xbus_regs.rule";
 
 };
 
@@ -585,5 +585,5 @@ group gIOELFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_xbus_actions.rule";
+.include "p9_common_xbus_actions.rule";
 

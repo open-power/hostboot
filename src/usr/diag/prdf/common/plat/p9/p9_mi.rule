@@ -80,7 +80,7 @@ chip p9_mi
     };
 
 # Include registers not defined by the xml
-.include "p9_mi_regs.rule";
+.include "cumulus_mi_regs.rule";
 
 };
 
@@ -259,5 +259,5 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mi_actions.rule";
+.include "cumulus_mi_actions.rule";
 

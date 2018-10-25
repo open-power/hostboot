@@ -105,7 +105,7 @@ chip p9_eq
     };
 
 # Include registers not defined by the xml
-.include "p9_eq_regs.rule";
+.include "p9_common_eq_regs.rule";
 
 };
 
@@ -361,7 +361,7 @@ group gEQ_LFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_eq_actions.rule";
+.include "p9_common_eq_actions.rule";
 
 actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
 actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };

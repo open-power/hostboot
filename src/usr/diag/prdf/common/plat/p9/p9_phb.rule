@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -152,7 +152,7 @@ chip p9_phb
     };
 
 # Include registers not defined by the xml
-.include "p9_phb_regs.rule";
+.include "p9_common_phb_regs.rule";
 
 };
 
@@ -754,5 +754,5 @@ group gETUFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_phb_actions.rule";
+.include "p9_common_phb_actions.rule";
 

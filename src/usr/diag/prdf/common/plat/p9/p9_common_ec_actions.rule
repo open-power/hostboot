@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_phb_regs.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_ec_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+actionclass self_level2_th_5perHour
+{
+    calloutSelfMed;
+    callout2ndLvlMed;
+    threshold5phour;
+};
 
-    ############################################################################
-    # P9 PHB target CERR Report Hold Reg
-    ############################################################################
-
-    register PBAIB_CERR
-    {
-        name        "P9 PHB target PBAIB CERR Report Reg";
-        scomaddr    0x0d01084b;
-        capture     group default;
-    };
-
+###############################################################################
+# Core checkstop action classes
+###############################################################################
+actionclass analyzeCOREFIR
+{
+    funccall("CheckCoreCheckstop");
+    analyze(gCOREFIR);
+};

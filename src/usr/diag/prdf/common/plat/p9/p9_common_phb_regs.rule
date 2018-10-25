@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_dmi_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_phb_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,32 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass analyzeConnectedMembuf
-{
-    analyze(connected(TYPE_MEMBUF, 0));
-};
+    ############################################################################
+    # P9 PHB target CERR Report Hold Reg
+    ############################################################################
 
-actionclass analyzeConnectedMembuf_UERE
-{
-    SueSource;
-    analyzeConnectedMembuf;
-};
+    register PBAIB_CERR
+    {
+        name        "P9 PHB target PBAIB CERR Report Reg";
+        scomaddr    0x0d01084b;
+        capture     group default;
+    };
 
-actionclass dmi_bus_th_1
-{
-    funccall("calloutBusInterfacePlugin");
-    threshold1;
-};
-
-actionclass dmi_bus_th_1_UERE
-{
-    SueSource;
-    dmi_bus_th_1;
-};
-
-actionclass dsffChannelTimeout_UERE
-{
-    SueSource;
-    threshold1;
-    funccall("dsffChannelTimeoutCheck");
-};
