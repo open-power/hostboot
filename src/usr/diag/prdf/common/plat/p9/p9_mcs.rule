@@ -84,7 +84,7 @@ chip p9_mcs
     };
 
 # Include registers not defined by the xml
-.include "p9_mcs_regs.rule";
+.include "nimbus_mcs_regs.rule";
 
 };
 
@@ -263,5 +263,5 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 6, 8, 9 )
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mcs_actions.rule";
+.include "nimbus_mcs_actions.rule";
 

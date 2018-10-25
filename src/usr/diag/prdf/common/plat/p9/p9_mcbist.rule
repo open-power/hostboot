@@ -180,7 +180,7 @@ chip p9_mcbist
     };
 
 # Include registers not defined by the xml
-.include "p9_mcbist_regs.rule";
+.include "nimbus_mcbist_regs.rule";
 
 };
 
@@ -639,7 +639,7 @@ group gMCBISTFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mcbist_actions.rule";
+.include "nimbus_mcbist_actions.rule";
 
 actionclass analyzeConnectedMCA0 { analyze(connected(TYPE_MCA, 0)); };
 actionclass analyzeConnectedMCA1 { analyze(connected(TYPE_MCA, 1)); };

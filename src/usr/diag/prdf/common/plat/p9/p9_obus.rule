@@ -340,7 +340,7 @@ chip p9_obus
     };
 
 # Include registers not defined by the xml
-.include "p9_obus_regs.rule";
+.include "p9_common_obus_regs.rule";
 
 };
 
@@ -977,5 +977,5 @@ group gOBPPEFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_obus_actions.rule";
+.include "p9_common_obus_actions.rule";
 

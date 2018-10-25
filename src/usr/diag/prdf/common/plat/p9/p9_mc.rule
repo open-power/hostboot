@@ -251,7 +251,7 @@ chip p9_mc
     };
 
 # Include registers not defined by the xml
-.include "p9_mc_regs.rule";
+.include "cumulus_mc_regs.rule";
 
 };
 
@@ -842,7 +842,7 @@ group gMCBISTFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mc_actions.rule";
+.include "cumulus_mc_actions.rule";
 
 actionclass analyzeConnectedDMI0 { analyze(connected(TYPE_DMI, 0)); };
 actionclass analyzeConnectedDMI1 { analyze(connected(TYPE_DMI, 1)); };

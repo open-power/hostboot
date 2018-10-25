@@ -1520,7 +1520,7 @@ chip p9_nimbus
     };
 
 # Include registers common to all P9 proc chips, not defined by the XML
-.include "p9_proc_common_regs.rule";
+.include "p9_common_proc_regs.rule";
 
 };
 
@@ -7858,7 +7858,7 @@ group gPCI2_CHIPLET_FIR filter singlebit
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_proc_common_actions.rule";
+.include "p9_common_proc_actions.rule";
 
 actionclass analyzeConnectedEQ0     { analyze(connected(TYPE_EQ,      0)); };
 actionclass analyzeConnectedEQ1     { analyze(connected(TYPE_EQ,      1)); };

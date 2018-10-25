@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_mi_regs.rule $
+# $Source: src/usr/diag/prdf/common/plat/cumulus/cumulus_mc_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,41 +23,30 @@
 #
 # IBM_PROLOG_END_TAG
 
+################################################################################
+# Additional registers for MC target, not defined in XML
+################################################################################
+
     ############################################################################
-    # Additional regs for P9 MI target MCFIR
+    # P9 MC target IOMCFIR
     ############################################################################
 
-    register MCERPT0
+    register IOMCFIR_MASK_OR
     {
-        name        "MCERPT0";
-        scomaddr    0x0501081E;
+        name        "P9 MC target IOMCFIR MASK atomic OR";
+        scomaddr    0x07011005;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # Config registers for channel failure attentions
+    ############################################################################
+
+    register SCOM_MODE_PB
+    {
+        name        "IOMP.BUSCTL.SCOM.SCOM_MODE_PB";
+        scomaddr    0x07011020;
         capture     group default;
     };
 
-    register MCERPT1
-    {
-        name        "MCERPT1";
-        scomaddr    0x0501081F;
-        capture     group default;
-    };
-
-    register MCERPT2
-    {
-        name        "MCERPT2";
-        scomaddr    0x0501081A;
-        capture     group default;
-    };
-
-    register MCFGP
-    {
-        name        "MCFGP";
-        scomaddr    0x501080A;
-        capture     group default;
-    };
-
-    register MCFGPM
-    {
-        name        "MCFGPM";
-        scomaddr    0x501080C;
-        capture     group default;
-    };

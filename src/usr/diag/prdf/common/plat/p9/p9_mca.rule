@@ -168,7 +168,7 @@ chip p9_mca
     };
 
 # Include registers not defined by the xml
-.include "p9_mca_regs.rule";
+.include "nimbus_mca_regs.rule";
 
 };
 
@@ -702,5 +702,5 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mca_actions.rule";
+.include "nimbus_mca_actions.rule";
 

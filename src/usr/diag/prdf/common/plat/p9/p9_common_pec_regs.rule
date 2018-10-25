@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_mcbist_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_pec_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,30 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+    register PCI_ERROR_REG
+    {
+        name        "PCI PCB Slave error reg";
+        scomaddr    0x0D0F001F;
+        capture     group PllFIRs;
+    };
 
-/** MCBIST capture MCA registers when isolating to MCBIST */
-actionclass analyzeMcbistfir
-{
-    funccall("CaptureMcaRegisters");
-    analyze(gMCBISTFIR);
-};
-
-/** MCBIST program complete */
-actionclass mcbist_program_complete
-{
-    funccall("McbistCmdComplete");
-};
-
-/** MCBIST program complete workaround */
-actionclass mcbist_program_complete_workaround
-{
-    funccall("CmdCompleteDd1Workaround");
-};
-
-/** MCBIST Command Address Timeout */
-actionclass command_addr_timeout
-{
-    threshold1;
-    funccall("commandAddrTimeout");
-};
+    register PCI_CONFIG_REG
+    {
+        name        "PCI PCB Slave config reg";
+        scomaddr    0x0D0F001E;
+        capture     group PllFIRs;
+    };
 

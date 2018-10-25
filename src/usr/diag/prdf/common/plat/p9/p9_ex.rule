@@ -190,7 +190,7 @@ chip p9_ex
     };
 
 # Include registers not defined by the xml
-.include "p9_ex_regs.rule";
+.include "p9_common_ex_regs.rule";
 
 };
 
@@ -891,5 +891,5 @@ group gCMEFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_ex_actions.rule";
+.include "p9_common_ex_actions.rule";
 

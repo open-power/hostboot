@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_ec_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_eq_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,18 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-actionclass self_level2_th_5perHour
-{
-    calloutSelfMed;
-    callout2ndLvlMed;
-    threshold5phour;
-};
+    register EQ_ERROR_REG
+    {
+        name        "EQ PCB Slave error reg";
+        scomaddr    0x100F001F;
+        capture     group PllFIRs;
+    };
 
-###############################################################################
-# Core checkstop action classes
-###############################################################################
-actionclass analyzeCOREFIR
-{
-    funccall("CheckCoreCheckstop");
-    analyze(gCOREFIR);
-};
+    register EQ_CONFIG_REG
+    {
+        name        "EQ PCB Slave config reg";
+        scomaddr    0x100F001E;
+        capture     group PllFIRs;
+    };
+

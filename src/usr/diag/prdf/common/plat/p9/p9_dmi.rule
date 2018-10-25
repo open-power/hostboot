@@ -84,7 +84,7 @@ chip p9_dmi
     };
 
 # Include registers not defined by the xml
-.include "p9_dmi_regs.rule";
+.include "cumulus_dmi_regs.rule";
 
 };
 
@@ -424,5 +424,5 @@ group gCHIFIR filter priority( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_dmi_actions.rule";
+.include "cumulus_dmi_actions.rule";
 
