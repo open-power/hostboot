@@ -39,6 +39,7 @@
 #include "errlud_hdat.H"
 #include <errl/errlmanager.H>
 #include <targeting/attrrp.H>
+#include <dump/dumpif.H>
 
 //#define REAL_HDAT_TEST
 
@@ -912,6 +913,21 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             if( errhdl ) { break; }
 
         }
+        // Processor Dump Area table
+        else if( RUNTIME::PROC_DUMP_AREA_TBL == i_section )
+        {
+            // Find the right tuple and verify it makes sense
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl ) { break; }
+            TRACUCOMP( g_trac_runtime, "PROCESSOR_DUMP_AREA_TBL tuple=%p", tuple );
+
+            //Note - there is no header for the Processor dump area table
+            //return the total allocated size since it is empty at first
+            o_dataSize = tuple->hdatAllocSize * tuple->hdatAllocCnt;
+            record_size = tuple->hdatAllocSize;
+            errhdl = getSpiraTupleVA(tuple, o_dataAddr);
+            if( errhdl ) { break; }
+        }
         else if( RUNTIME::HRMOR_STASH == i_section )
         {
             //Look up the tuple that this section is located in
@@ -1236,6 +1252,42 @@ errlHndl_t hdatService::findSpira( void )
     return errhdl;
 }
 
+errlHndl_t hdatService::updateHostProcDumpActual( SectionId i_section,
+                                                  uint32_t threadRegSize,
+                                                  uint8_t threadRegVersion,
+                                                  uint64_t capArrayAddr,
+                                                  uint32_t capArraySize)
+{
+    errlHndl_t errhdl = nullptr;
+    TRACFCOMP( g_trac_runtime,
+               "RUNTIME::updateHostProcDumpActual ( i_section=%d )", i_section);
+
+    do
+    {
+        uint64_t l_hostDataAddr = 0;
+        uint64_t l_hostDataSize = 0;
+        DUMP::procDumpAreaEntry *procDumpTable = nullptr;
+
+        // Get proc dump area ntuple address
+        errhdl = getHostDataSection(i_section, 0,
+                                    l_hostDataAddr, l_hostDataSize);
+        if (errhdl)
+        {
+            TRACFCOMP( g_trac_runtime, "updateHostProcDumpActual> Failed to "
+                       "get host data section (i_section=%d )", i_section);
+            break;
+        }
+
+        procDumpTable = reinterpret_cast<DUMP::procDumpAreaEntry *>(l_hostDataAddr);
+        procDumpTable->threadRegSize    = threadRegSize;
+        procDumpTable->threadRegVersion = threadRegVersion;
+        procDumpTable->capArrayAddr     = capArrayAddr;
+        procDumpTable->capArraySize     = capArraySize;
+    } while(0);
+
+    return errhdl;
+}
+
 errlHndl_t hdatService::updateHostDataSectionActual( SectionId i_section,
                                                      uint16_t i_count )
 {
@@ -1550,6 +1602,10 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
             l_spiraH = SPIRAH_MS_DUMP_RSLT_TBL;
             l_spiraL = SPIRAL_MS_DUMP_RSLT_TBL;
             break;
+        case RUNTIME::PROC_DUMP_AREA_TBL:
+            l_spiraH = SPIRAH_PROC_DUMP_TBL;
+            l_spiraL = SPIRAL_INVALID;
+            break;
         case RUNTIME::HSVC_SYSTEM_DATA:
         case RUNTIME::HSVC_NODE_DATA:
             l_spiraS = SPIRAS_HSVC_DATA;
@@ -1771,6 +1827,17 @@ void saveActualCount( SectionId i_id,
 errlHndl_t writeActualCount( SectionId i_id )
 {
     return Singleton<hdatService>::instance().writeActualCount(i_id);
+}
+
+errlHndl_t updateHostProcDumpActual( SectionId i_section,
+                                     uint32_t threadRegSize,
+                                     uint8_t threadRegVersion,
+                                     uint64_t capArrayAddr,
+                                     uint32_t capArraySize)
+{
+    return Singleton<hdatService>::instance().updateHostProcDumpActual(i_section,
+                                                   threadRegSize, threadRegVersion,
+                                                   capArrayAddr, capArraySize);
 }
 
 void useRelocatedPayloadAddr(bool val)

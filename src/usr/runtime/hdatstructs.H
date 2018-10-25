@@ -121,7 +121,8 @@ enum hdatSpiraHDataAreas
     SPIRAH_MS_DUMP_SRC_TBL  = 3,    // mainstore dump source table
     SPIRAH_MS_DUMP_DST_TBL  = 4,    // mainstore dump destination table
     SPIRAH_MS_DUMP_RSLT_TBL = 5,    // mainstore dump results table
-    SPIRAH_LAST             = 5
+    SPIRAH_PROC_DUMP_TBL    = 6,    // Proc reg dump area table
+    SPIRAH_LAST             = 6
 };
 
 /** @enum hdatSpiraSDataAreas

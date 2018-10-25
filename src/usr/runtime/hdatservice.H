@@ -129,6 +129,23 @@ namespace RUNTIME
                                                 uint16_t i_count );
 
         /**
+         * @brief  Update Processor Dump area section.
+         *
+         * @param[in] i_section        Chunk of data to find
+         * @param[in] threadRegSize    Size of each thread register data
+         * @param[in] threadRegVersion Register data format version
+         * @param[in] capArrayAddr     Destination memory address
+         * @param[in] capArraySize     Destination memory size
+         *
+         * @return errlHndl_t          NULL on success
+         */
+        errlHndl_t updateHostProcDumpActual( SectionId i_section,
+                                             uint32_t threadRegSize,
+                                             uint8_t threadRegVersion,
+                                             uint64_t capArrayAddr,
+                                             uint32_t capArraySize);
+
+        /**
          * @brief  Retrieve and log FFDC data relevant to a given section of
          *         host data memory
          *

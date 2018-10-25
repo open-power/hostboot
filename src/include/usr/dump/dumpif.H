@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,8 @@
 #ifndef __DUMPIF_H
 #define __DUMPIF_H
 
+#include <hdat/hdat.H>
+
 /** @file  dumpif.H
  *  @brief Provides the external interfaces for dump.
  *            - copy dump data from src to destination
@@ -33,7 +35,6 @@
 
 namespace DUMP
 {
-
 
     /**
      * @brief DUMP Message Types 
@@ -85,7 +86,7 @@ namespace DUMP
     #define DUMP_TEST_TABLE_SIZE (DUMP_TEST_SRC_MEM_SIZE +   \
     DUMP_TEST_DST_MEM_SIZE + DUMP_TEST_RESULTS_MEM_SIZE)
 
-       
+
     #define DUMP_TEST_TABLE_END (DUMP_TEST_TABLE_START + DUMP_TEST_TABLE_SIZE)
 
     // In addition to the dump table locations we have scratch data area that is
@@ -117,6 +118,112 @@ namespace DUMP
         uint64_t reserved;
     } PACKED;
 
+
+    // Processor Dump Area table format
+    struct procDumpAreaEntry
+    {
+        uint32_t threadRegSize;        // Architected reg data size per thread
+        uint8_t  threadRegVersion;     // Data format version
+        uint8_t  reserved1[11];        // Reserved
+        uint64_t dstArrayAddr;         // Hypervisor passed destination addresss
+        uint8_t  reserved2[4];         // Reserved
+        uint32_t dstArraySize;         // Hypervisor passed destination size
+        uint64_t capArrayAddr;         // Actual destination address (filled by HB)
+        uint8_t  reserved3[4];         // Reserved
+        uint32_t capArraySize;         // Actual destination size (filled by HB)
+    } PACKED;
+
+    // Host formatted architected register data content (as per HDAT spec)
+    struct hostArchRegDataHdr
+    {
+        uint32_t pir;
+        uint8_t  coreState;
+        uint8_t  reserved[3];
+        HDAT::hdatHDIFDataArray_t iv_regArrayHdr;
+    } PACKED;
+
+    #define DUMP_ARCH_REG_TYPE_GPR	0x01
+    #define DUMP_ARCH_REG_TYPE_SPR	0x02
+
+    // Architected register data content entries
+    struct hostArchRegDataEntry
+    {
+        uint32_t regType;
+        uint32_t regNum;
+        uint64_t regVal;
+    } PACKED;
+
+    // Structure version used to share SPR/GPR register data between
+    // SBE and HB
+    #define REG_DUMP_SBE_HB_STRUCT_VER 0x1
+
+    // Structure version used to share SPR/GPR register data between
+    // HB and OPAL
+    #define REG_DUMP_HDAT_STRUCT_VER 0x1
+
+    /* Processor architected dump header. This header is per processor*/
+    struct sbeArchRegDumpProcHdr_t
+    {
+        uint8_t  ownerId;        /* FSP or SBE */
+        uint8_t  version;        /* Interface version number*/
+        uint16_t core_cnt;       /* Actual number of core whose register  data will be obtained */
+        uint16_t thread_cnt;     /* Total number of thread whose register data will be obtained */
+        uint16_t reg_cnt;        /* Max number of registers per thread */
+    } PACKED;   //8Bytes
+
+    // SBE formatted architected registers data
+    // (Common structure between SBE and Hostboot)
+    struct sbeArchRegDumpThreadHdr_t
+    {
+        uint32_t  pir;         // PIR value of thread corresponding to register
+        uint32_t  coreState:8; // State of core in which this thread is present
+        uint32_t  reserved:24;
+    } PACKED;
+
+    /**
+     *  @brief Defines the structure for storing the SPR/GPR register data
+     *
+     *  @var isRegDataValid   :'1'- Variable regVal will contain valid register 
+     *                         '0'- Variable regVal will contain fapiRC value
+     *
+     *  @var isLastReg        :'1' - Data is collected for the last SPR/GPR register
+     *                         '0' - otherwise.
+     *
+     *  @var isFfdcPresent    :'1' - Failing FAPI FFDC is shared
+     *                         '0' - Failing FFDC is not present
+     *
+     *  @var reserved0        :Reserved for future use and padding
+     *
+     *  @var regType          :Indicates type of register(SPR/GPR)
+     *
+     *  @var reserved1        :Reserved for future use and padding
+     *
+     *  @var regNum           :Address of the SPR/GPR register
+     *
+     *  @var regVal           :if isRegDataValid is '0'  - Valid Register value
+     *                            isRegDataValid is '!=0'- fapiRC value.
+     */
+    struct sbeArchRegDumpEntries_t
+    {
+        uint64_t isRegDataValid:1;
+        uint64_t isLastReg:1;
+        uint64_t isFfdcPresent:1;
+        uint64_t reseverd0:5;
+        uint64_t regType:8;
+        uint64_t reserved1:16;
+        uint64_t regNum:32;
+        uint64_t regVal;
+    } PACKED;
+
+    /**
+    * @brief This function copies the architected register data content
+    * from SBE reserved memory to hypervisor allocated memory
+    *
+    * @param[in]   void
+    *
+    * @return  errlHndl_t
+    */
+    errlHndl_t copyArchitectedRegs(void);
 
     /**
      * @brief This function is a wrapper function that calls

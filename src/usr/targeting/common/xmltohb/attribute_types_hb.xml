@@ -985,6 +985,68 @@
   </attribute>
 
   <attribute>
+    <id>PDA_CAPTURED_THREAD_REG_ARRAY_ADDR</id>
+    <description>Processor Dump Area Table's captured thread
+        register state array address.
+    </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>PDA_CAPTURED_THREAD_REG_ARRAY_SIZE</id>
+    <description>Processor Dump Area Table's captured thread
+        register state array size.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>PDA_THREAD_REG_ENTRY_SIZE</id>
+    <description>Processor Dump Area Table's thread register entry size.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
+    <description>Processor Dump Area Table's thread entry format.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_COMM_ADDR</id>
     <description>
         Virtual address where SBE Communications are placed in mainstore.

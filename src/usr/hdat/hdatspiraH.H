@@ -74,8 +74,9 @@ enum hdatSpiraHDataAreas
     HDAT_SEC_MS_DUMP_SRC_TBL   = 3,   // mainstore dump source table (can change at run time)
     HDAT_SEC_MS_DUMP_DST_TBL   = 4,   // mainstore dump destination table (can change at run time)
     HDAT_SEC_MS_DUMP_RSLT_TBL  = 5,   // mainstore dump results table
+    HDAT_SEC_PROC_DUMP_TBL     = 6,   // Processor dump area table
 
-    HDAT_SPIRAH_DA_LAST        = 6
+    HDAT_SPIRAH_DA_LAST        = 7
 };
 
 /*-----------------------------------------------------------------------------*/

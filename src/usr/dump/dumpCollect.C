@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,20 +34,23 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 #include <runtime/runtime.H>
 #include <util/align.H>
 #include <sys/mm.h>
 #include <dump/dumpif.H>
 #include <util/utiltce.H>
+#include <isteps/mem_utils.H>
 
-#include    <sys/msg.h>                     //  message Q's
-#include    <mbox/mbox_queues.H>            //
+#include <sys/msg.h>                     //  message Q's
+#include <mbox/mbox_queues.H>            //
 #include <kernel/vmmmgr.H>
 
 // Trace definition
 trace_desc_t* g_trac_dump = NULL;
 TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
+#define SBE_FFDC_SIZE 128
 
 namespace DUMP
 {
@@ -129,6 +132,315 @@ void* getPhysAddr( uint64_t i_phypAddr )
     }
 
     return reinterpret_cast<void*>(ALIGN_PAGE_DOWN(phys_addr));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t copyArchitectedRegs(void)
+{
+    TRACFCOMP(g_trac_dump, "copyArchitectedRegs - start ");
+    errlHndl_t l_err = nullptr;
+    int rc;
+    // Processor dump area address and size from HDAT
+    uint64_t procTableAddr = 0;
+    uint64_t procTableSize = 0;
+    // Pointer to architected register reserved memory
+    void *pSrcAddrBase = nullptr;
+    void *vMapSrcAddrBase = nullptr;
+    // Pointers to Hypervisor allocated memory for register data content
+    void *pDstAddrBase = nullptr;
+    void *vMapDstAddrBase = nullptr;
+    // Architected Reg Dump table struct pointers
+    procDumpAreaEntry *procTableEntry = nullptr;
+
+    do
+    {
+        // Get the PROC_DUMP_AREA_TBL address from SPIRAH
+        l_err = RUNTIME::get_host_data_section(RUNTIME::PROC_DUMP_AREA_TBL,
+                                               0,
+                                               procTableAddr,
+                                               procTableSize);
+        if (l_err)
+        {
+            // Got an errorlog back from get_host_data_sections
+            TRACFCOMP(g_trac_dump, "copyArchitectedRegs get_host_data_sections "
+                                   "for PDAT failed");
+            break;
+        }
+
+        // If the address or size is zero - error out
+        if ((procTableAddr == 0) || (procTableSize == 0))
+        {
+            // Invalid address or size
+            TRACFCOMP(g_trac_dump, "copyArchitectedRegs address or size invalid"
+                                   " for PDAT: addr =0x%X, size =0x%X,",
+                                   procTableAddr, procTableSize);
+            /*@
+             * @errortype
+             * @moduleid     DUMP::DUMP_ARCH_REGS
+             * @reasoncode   DUMP::DUMP_PDAT_INVALID_ADDR
+             * @userdata1    Table address returned
+             * @userdata2    Table size returned
+             * @devdesc      Invalid address and size returned from HDAT
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            DUMP_ARCH_REGS,
+                                            DUMP_PDAT_INVALID_ADDR,
+                                            procTableAddr,
+                                            procTableSize,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Map processor dump area destination address to VA addresses
+        procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr); 
+        pDstAddrBase = getPhysAddr(procTableEntry->dstArrayAddr);
+        vMapDstAddrBase = mm_block_map(pDstAddrBase,
+                                       procTableEntry->dstArraySize);
+
+        // Map architected register reserved memory to VA addresses
+        uint64_t srcAddr = ISTEP::get_top_mem_addr() -
+                           VMM_ARCH_REG_DATA_SIZE_ALL_PROC -
+                     			   VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+        pSrcAddrBase = reinterpret_cast<void * const>(srcAddr);
+        vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
+                                       VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
+
+        // Get list of functional processor chips, in MPIPL path we
+        // don't expect any deconfiguration
+        TARGETING::TargetHandleList procChips;
+        TARGETING::getAllChips( procChips, TARGETING::TYPE_PROC, true);
+
+
+        uint64_t dstTempAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
+        procTableEntry->capArraySize = 0;
+        for (const auto & procChip: procChips)
+        {
+            uint8_t procNum = procChip->getAttr<TARGETING::ATTR_POSITION>(); 
+            // Base addresses w.r.t PROC positions. This is static here
+            // and used for reference below to calculate all other addresses
+            uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
+                                    procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+
+            sbeArchRegDumpProcHdr_t *sbeProcHdr =
+                       reinterpret_cast<sbeArchRegDumpProcHdr_t *>(procSrcAddr);
+            uint16_t threadCount = sbeProcHdr->thread_cnt;
+            uint16_t regCount = sbeProcHdr->reg_cnt;
+
+            //Validate the structure versions used by SBE and HB for sharing the
+            //data 
+            if( sbeProcHdr->version != REG_DUMP_SBE_HB_STRUCT_VER )
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     DUMP::DUMP_ARCH_REGS
+                 * @reasoncode   DUMP::DUMP_PDAT_VERSION_MISMATCH
+                 * @userdata1    Structure version obtained from SBE
+                 * @userdata2    Structure version supported by HB
+                 * @devdesc      Mismatch between the version of structure
+                 *               supported by both SBE and HB.
+                 *               
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        DUMP_ARCH_REGS,
+                        DUMP_PDAT_VERSION_MISMATCH,
+                        sbeProcHdr->version,
+                        REG_DUMP_SBE_HB_STRUCT_VER,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errlCommit(l_err, DUMP_COMP_ID);
+                break;
+            }
+
+            //Update the data source address to point to the thread specific
+            //header data obtained by SBE
+            procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
+                                               sizeof(sbeArchRegDumpProcHdr_t));
+
+            procTableEntry->threadRegSize = sizeof(hostArchRegDataHdr)+
+                                      (regCount * sizeof(hostArchRegDataEntry));
+            procTableEntry->capArraySize = procTableEntry->capArraySize + 
+                                          (procTableEntry->threadRegSize
+                                           * threadCount);
+            if (procTableEntry->dstArraySize < procTableEntry->capArraySize)
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     DUMP::DUMP_ARCH_REGS
+                 * @reasoncode   DUMP::DUMP_PDAT_INSUFFICIENT_SPACE
+                 * @userdata1    Hypervisor reserved memory size
+                 * @userdata2    Memory needed to copy architected 
+                 *               register data
+                 * @devdesc      Insufficient space to copy architected 
+                 *               registers
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        DUMP_ARCH_REGS,
+                        DUMP_PDAT_INSUFFICIENT_SPACE,
+                        procTableEntry->dstArraySize,
+                        procTableEntry->capArraySize,
+                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errlCommit(l_err, DUMP_COMP_ID);
+                break;
+            }
+
+            // Total Number of Threads possible in one Proc
+            for(uint32_t idx = 0; idx < threadCount; idx++)
+            {
+                sbeArchRegDumpThreadHdr_t *sbeTdHdr = 
+                     reinterpret_cast<sbeArchRegDumpThreadHdr_t *>(procSrcAddr);
+
+                hostArchRegDataHdr *hostHdr = 
+                     reinterpret_cast<hostArchRegDataHdr *>(dstTempAddr);
+
+                // Fill thread header info
+                hostHdr->pir = sbeTdHdr->pir;
+                hostHdr->coreState = sbeTdHdr->coreState;
+                hostHdr->iv_regArrayHdr.hdatOffset =
+                                              sizeof(HDAT::hdatHDIFDataArray_t);
+                hostHdr->iv_regArrayHdr.hdatArrayCnt = regCount;
+                hostHdr->iv_regArrayHdr.hdatAllocSize = 
+                                              sizeof(hostArchRegDataEntry);
+                hostHdr->iv_regArrayHdr.hdatActSize = 
+                                              sizeof(hostArchRegDataEntry);
+
+                dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr + 
+                                                    sizeof(hostArchRegDataHdr));
+                //Update SBE data source address to point to the register data
+                //related to the current thread.
+                procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr + 
+                                             sizeof(sbeArchRegDumpThreadHdr_t));
+
+                //Validate the CoreState to find if the buffer has register data
+                if (sbeTdHdr->coreState != 0)
+                {
+                    //Bump up the destination address to skip the memory
+                    //required to store the register details.
+                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
+                                     (regCount * sizeof(hostArchRegDataEntry)));
+                    continue;
+                }
+
+    
+                // Fill register data
+                for(uint8_t cnt = 0; cnt < regCount; cnt++)
+                {
+                    sbeArchRegDumpEntries_t *sbeRegData =
+                       reinterpret_cast<sbeArchRegDumpEntries_t *>(procSrcAddr);
+                    hostArchRegDataEntry *hostRegData =
+                         reinterpret_cast<hostArchRegDataEntry *>(dstTempAddr);
+
+                    hostRegData->regType = sbeRegData->regType;
+                    hostRegData->regNum  = sbeRegData->regNum;
+                    hostRegData->regVal  = sbeRegData->regVal;
+
+                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr + 
+                                                  sizeof(hostArchRegDataEntry));
+                    //Update the SBE data source address to point to the
+                    //next register data related to the same thread.
+                    procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr + 
+                                               sizeof(sbeArchRegDumpEntries_t));
+                    if( sbeRegData->isLastReg )
+                    {
+                        //Skip the FFDC for now  
+                        if(sbeRegData->isFfdcPresent)
+                        {
+                            //Move the source address to skip theFFDC
+                            procSrcAddr = procSrcAddr + (sizeof(uint32_t)*SBE_FFDC_SIZE);
+                            //Adjust the destination address accordingly to skip
+                            //the mememory required for remaining registers
+                            uint32_t remaingRegCount = regCount - (cnt+1);
+                            if(remaingRegCount)
+                            {
+                                dstTempAddr = reinterpret_cast<uint64_t>(
+                                               dstTempAddr + (remaingRegCount * 
+                                               sizeof(hostArchRegDataEntry)));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        // Update Process Dump Area tuple
+        procTableEntry->threadRegVersion = REG_DUMP_HDAT_STRUCT_VER;
+        procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
+ 
+        // Update the PDA Table Entries to Attribute to be fetched in istep 21
+        TARGETING::TargetService& targetService = TARGETING::targetService();
+        TARGETING::Target* l_sys = NULL;
+        targetService.getTopLevelTarget(l_sys);
+        l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>(
+                                              procTableEntry->threadRegVersion);
+        l_sys->setAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>(
+                                                 procTableEntry->threadRegSize);
+        l_sys->setAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>(
+                                                  procTableEntry->capArrayAddr);
+        l_sys->setAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>(
+                                                  procTableEntry->capArraySize);
+
+    } while (0);
+
+    // Unmap destination memory
+    if (vMapDstAddrBase)
+    {
+        rc = mm_block_unmap(vMapDstAddrBase);
+        if (rc != 0)
+        {
+            /*@
+             * @errortype
+             * @moduleid     DUMP::DUMP_ARCH_REGS
+             * @reasoncode   DUMP::DUMP_PDAT_CANNOT_UNMAP_DST_ADDR
+             * @userdata1    VA of Destination Array Address for PDAT
+             * @userdata2    rc value from unmap
+             * @devdesc      Cannot unmap the PDAT Destinatin Array Addr
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  DUMP_ARCH_REGS,
+                                  DUMP_PDAT_CANNOT_UNMAP_DST_ADDR,
+                                  (uint64_t)vMapDstAddrBase,
+                                  rc,
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            // Commit the error and continue.
+            // Leave the devices unmapped?
+            errlCommit(l_err, DUMP_COMP_ID);
+            l_err = NULL;
+        }
+    }
+
+    // Unmap source memory
+    if(vMapSrcAddrBase)
+    {
+        rc = mm_block_unmap(vMapSrcAddrBase);
+        if (rc != 0)
+        {
+            /*@
+             * @errortype
+             * @moduleid     DUMP::DUMP_ARCH_REGS
+             * @reasoncode   DUMP::DUMP_PDAT_CANNOT_UNMAP_SRC_ADDR
+             * @userdata1    VA address of Source Array Address for PDAT
+             * @userdata2    rc value from unmap
+             * @devdesc      Cannot unmap the PDAT Source Array Address
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  DUMP_ARCH_REGS,
+                                  DUMP_PDAT_CANNOT_UNMAP_SRC_ADDR,
+                                  (uint64_t)vMapSrcAddrBase,
+                                  rc,
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            // Commit the error and continue.
+            // Leave the devices unmapped?
+            errlCommit(l_err, DUMP_COMP_ID);
+            l_err = NULL;
+        }
+    }
+    TRACFCOMP(g_trac_dump, "copyArchitectedRegs - end ");
+    return (l_err);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,22 +34,28 @@ namespace DUMP
         DUMP_COLLECT_INVALID         = 0x00,
         DUMP_COLLECT                 = 0x01,
         DUMP_SEND_MBOX_MSG           = 0x02,
+        DUMP_ARCH_REGS               = 0x03,
     };
 
     enum dumpReasonCode
     {
-        DUMP_INVALID_ADDR              = DUMP_COMP_ID | 0x01,
-        DUMP_NO_HDAT_ADDR              = DUMP_COMP_ID | 0x02,
-        DUMP_CANNOT_MAP                = DUMP_COMP_ID | 0x03,
-        DUMP_CANNOT_UNMAP_SRC          = DUMP_COMP_ID | 0x04,
-        DUMP_CANNOT_UNMAP_DEST         = DUMP_COMP_ID | 0x05,
-        DUMP_CANNOT_UNMAP_RESULTS      = DUMP_COMP_ID | 0x06,
-        DUMP_MDRT_INSUFFICIENT_SPACE   = DUMP_COMP_ID | 0x07,
-        DUMP_MDST_INSUFFICIENT_SPACE   = DUMP_COMP_ID | 0x08,
-        DUMP_MDDT_INSUFFICIENT_SPACE   = DUMP_COMP_ID | 0x09,
-        DUMP_MDDT_INSUFFICIENT_ENTRIES = DUMP_COMP_ID | 0x0A,
-        DUMP_MDST_INVALID_TABLE_SIZE   = DUMP_COMP_ID | 0x0B,
-        DUMP_MDDT_INVALID_TABLE_SIZE   = DUMP_COMP_ID | 0x0C,
+        DUMP_INVALID_ADDR               = DUMP_COMP_ID | 0x01,
+        DUMP_NO_HDAT_ADDR               = DUMP_COMP_ID | 0x02,
+        DUMP_CANNOT_MAP                 = DUMP_COMP_ID | 0x03,
+        DUMP_CANNOT_UNMAP_SRC           = DUMP_COMP_ID | 0x04,
+        DUMP_CANNOT_UNMAP_DEST          = DUMP_COMP_ID | 0x05,
+        DUMP_CANNOT_UNMAP_RESULTS       = DUMP_COMP_ID | 0x06,
+        DUMP_MDRT_INSUFFICIENT_SPACE    = DUMP_COMP_ID | 0x07,
+        DUMP_MDST_INSUFFICIENT_SPACE    = DUMP_COMP_ID | 0x08,
+        DUMP_MDDT_INSUFFICIENT_SPACE    = DUMP_COMP_ID | 0x09,
+        DUMP_MDDT_INSUFFICIENT_ENTRIES  = DUMP_COMP_ID | 0x0A,
+        DUMP_MDST_INVALID_TABLE_SIZE    = DUMP_COMP_ID | 0x0B,
+        DUMP_MDDT_INVALID_TABLE_SIZE    = DUMP_COMP_ID | 0x0C,
+        DUMP_PDAT_INVALID_ADDR          = DUMP_COMP_ID | 0x0D,
+        DUMP_PDAT_CANNOT_UNMAP_SRC_ADDR = DUMP_COMP_ID | 0x0E,
+        DUMP_PDAT_CANNOT_UNMAP_DST_ADDR = DUMP_COMP_ID | 0x0F,
+        DUMP_PDAT_INSUFFICIENT_SPACE    = DUMP_COMP_ID | 0x10,
+        DUMP_PDAT_VERSION_MISMATCH      = DUMP_COMP_ID | 0x11,
     };
 };
 

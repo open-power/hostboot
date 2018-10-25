@@ -28,6 +28,7 @@
 
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -157,6 +158,20 @@ void* call_host_mpipl_service (void *io_pArgs)
 
             do
             {
+                // In non-FSP based system SBE collects architected register
+                // data. Copy architected register data from Reserved Memory
+                // to hypervisor memory.
+                if ( !INITSERVICE::spBaseServicesEnabled() )
+                {
+                    l_err = DUMP::copyArchitectedRegs();
+                    if (l_err)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR : returned from DUMP::copyArchitectedRegs()");
+                        break;
+                    }
+                }
+
                 // send the start message
                 l_errMsg = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
 

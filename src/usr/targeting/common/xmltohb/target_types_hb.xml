@@ -311,6 +311,18 @@
     </attribute>
     <attribute>
       <id>OVERRIDES_ATTEMPTED_FLAG</id>
+    </attribute>  
+    <attribute>
+      <id>PDA_CAPTURED_THREAD_REG_ARRAY_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>PDA_CAPTURED_THREAD_REG_ARRAY_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>PDA_THREAD_REG_ENTRY_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>PDA_THREAD_REG_STATE_ENTRY_FORMAT</id>
     </attribute>
   </targetTypeExtension>
 
