@@ -628,6 +628,7 @@ public:
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
                 TargetService::CHILD, TargetService::ALL);
+
             for (TargetHandleList::const_iterator pDesc_it = pDescList.begin();
                     pDesc_it != pDescList.end();
                     ++pDesc_it)
@@ -639,10 +640,11 @@ public:
                 char l_type_str[9];
                 char l_pgData[] = "";
                 uint8_t core_idx;
+                pgState_map targetStates;
 
                 TS_INFO("testHWASisDescFunctional: descendant functional - "
                         "attr type 0x%04X, chip unit %d", l_type, l_chipUnit);
-                if (!isDescFunctional(pDesc, pgData))
+                if (!isDescFunctional(pDesc, pgData, targetStates))
                 {
                     switch(l_type)
                     {
@@ -732,11 +734,13 @@ public:
 
                     TS_FAIL("testHWASisDescFunctional>"
                             "functional = 0x%x, should be true, "
-                            "type = %s, chip unit = %d%s.",
-                            isDescFunctional(pDesc, pgData),
+                            "type = %s, chip unit = %d%s. "
+                            "pDesc HUID 0x%.8x",
+                            isDescFunctional(pDesc, pgData, targetStates),
                             l_type_str,
                             l_chipUnit,
-                            l_pgData);
+                            l_pgData,
+                            pDesc->getAttr<ATTR_HUID>());
                 }
                 else
                 if(MODEL_NIMBUS == l_model)
@@ -781,13 +785,18 @@ public:
                     {
                         TS_FAIL("testHWASisDescFunctional>"
                             "functional = 0x%x, should be false, "
-                            "type = %s, chip unit = %d%s.",
-                            isDescFunctional(pDesc, pgData),
+                            "type = %s, chip unit = %d%s. "
+                            "pDesc HUID 0x%.8x",
+                            isDescFunctional(pDesc, pgData, targetStates),
                             l_type_str,
                             l_chipUnit,
-                            l_pgData);
+                            l_pgData,
+                            pDesc->getAttr<ATTR_HUID>());
                     }
                 }
+
+                // Make sure the targetStates are cleared before moving on.
+                targetStates.clear();
 
                 switch(l_type)
                 {
@@ -797,14 +806,17 @@ public:
                         pgData[VPD_CP00_PG_XBUS_INDEX] |=
                             (uint16_t)VPD_CP00_PG_XBUS_IOX[l_chipUnit];
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "XBUS%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "XBUS%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
-                                    pgData[VPD_CP00_PG_XBUS_INDEX]);
+                                    pgData[VPD_CP00_PG_XBUS_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
@@ -816,14 +828,17 @@ public:
                         pgData[VPD_CP00_PG_N1_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N1_PBIOO0;
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "N1 for OBUS%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "N1 for OBUS%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
-                                    pgData[VPD_CP00_PG_N1_INDEX]);
+                                    pgData[VPD_CP00_PG_N1_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         if ((1 == l_chipUnit) || (2 == l_chipUnit))
@@ -832,14 +847,17 @@ public:
                                 (uint16_t)VPD_CP00_PG_N1_GOOD |
                                 (uint16_t)VPD_CP00_PG_N1_PBIOO1;
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
-                                        "N1 for OBUS%d = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "N1 for OBUS%d = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit,
-                                        pgData[VPD_CP00_PG_N1_INDEX]);
+                                        pgData[VPD_CP00_PG_N1_INDEX],
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
                         }
 
@@ -864,16 +882,19 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
-                                        "OBUS%d = 0x%04x, mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "OBUS%d = 0x%04x, mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_OB0_INDEX
                                                + l_chipUnit],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
@@ -905,16 +926,19 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
-                                        "PCI%d = 0x%04x, mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "PCI%d = 0x%04x, mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_PCI0_INDEX
                                                + l_chipUnit],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
@@ -922,57 +946,1278 @@ public:
                                 (uint16_t)VPD_CP00_PG_PCIx_GOOD[l_chipUnit];
                         }
                         break;
-                    case TYPE_PHB:
-                      {
+                    case TYPE_MI:
+                    {
+                        // This test serves two purposes. The first is to make
+                        // sure that this target is checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
                         TS_INFO( "testHWASisDescFunctional: "
-                                  "PCI%d is not functional for PHB target",
-                                  l_chipUnit);
-                        //First get Parent PEC target as there are no PG bits
-                        //  for PHB
-                        TargetHandleList pParentPECList;
-                        getParentAffinityTargetsByState(pParentPECList, pDesc,
-                                     CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
-                        HWAS_ASSERT((pParentPECList.size() == 1),
-                            "testHWASisDescFunctional(): pParentPECList != 1");
-                        Target *l_parentPEC = pParentPECList[0];
+                                  "MI%d is not functional", l_chipUnit);
 
-                        //Check if parent PEC's PG Data marks it good
-                        ATTR_CHIP_UNIT_type l_indexPCI =
-                                l_parentPEC->getAttr<ATTR_CHIP_UNIT>();
+                        // First get parent target since there are no PG
+                        // bits for this one
+                        TargetHandleList pParentMCList;
+                        getParentAffinityTargetsByState(pParentMCList, pDesc,
+                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentMCList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentMCList != 1");
+
+                        TargetHandle_t l_parentMC = pParentMCList[0];
+
+                        auto l_indexMC =
+                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentMC->getAttr<ATTR_CHIP_UNIT>();
+                        size_t l_unitValue = l_chipUnit / 2;
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        // Since isDescFunctional propagates non-functional
+                        // parent state down to child state and it doesn't
+                        // consider parent state when checking a given
+                        // target, if we check this target directly it will
+                        // return true since there are no pg rules for this
+                        // target.
+                        if (isDescFunctional(pDesc, pgData, targetStates))
+                        {
+                            // Now check the parent. Since the PG bits
+                            // are wrong it should return false.
+                            if(!isDescFunctional(l_parentMC, pgData,
+                                                targetStates))
+                            {
+                                // Finally, check this target again and see that
+                                // the function updated the state of this target
+                                // to false, as it should be.
+                                // Note: calling the function again at this
+                                //       point is equivalent to calling
+                                //       find() on targetStates since this
+                                //       target was already checked.
+                                if (isDescFunctional(pDesc, pgData,
+                                                    targetStates))
+                                {
+
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "N1/N3 for MI%d = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            l_chipUnit,
+                                            l_unitValue
+                                                ? pgData[VPD_CP00_PG_N1_INDEX]
+                                                : pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Should have been false. Something
+                                // unexpected happened.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                "functional = 0x%x, should be false, "
+                                "N1/N3 for MC%d = 0x%04x. "
+                                "l_parentMC HUID 0x%.8x",
+                                isDescFunctional(l_parentMC, pgData,
+                                    targetStates),
+                                l_parentChipUnit,
+                                l_parentChipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                           : pgData[VPD_CP00_PG_N3_INDEX],
+                                l_parentMC->getAttr<ATTR_HUID>());
+                            }
+                        }
+                        else
+                        {
+                            // Although isDescFunctional returning false is
+                            // the correct result, it's not supposed to be
+                            // false at this time. That means that either
+                            // targetStates held onto a previous result or
+                            // additional rules were added to this target.
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, "
+                                    "should be true at this time, "
+                                    "N1/N3 for MI%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    l_chipUnit,
+                                    l_unitValue ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
+                        }
+
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
 
                         for (l_mask = 0x8000;
                              l_mask > 0;
                              l_mask >>= 1)
                         {
-                            if (pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] &
-                                l_mask)
+                            if (pgData[l_indexMC] & l_mask)
                             {
                                 // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] &=
-                                    ~l_mask;
+                                pgData[l_indexMC] &= ~l_mask;
                             }
                             else
                             {
                                 // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] |=
-                                    l_mask;
+                                pgData[l_indexMC] |= l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check this target directly it will
+                            // return true since there are no pg rules for this
+                            // target.
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "PCI%d = 0x%04x, mask = 0x%04x",
-                                        isDescFunctional(pDesc, pgData),
-                                        l_indexPCI,
-                                        pgData[VPD_CP00_PG_PCI0_INDEX
-                                               + l_indexPCI],
-                                        l_mask);
+                                // Now check the parent. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentMC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check this target again and see
+                                    // that the function updated the state of
+                                    // this target to false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since this
+                                    //       target was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional>"
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "MC%s for MI%d = 0x%04x, "
+                                                "mask = 0x%04x. "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_unitValue ? "01" : "23",
+                                                l_chipUnit,
+                                                pgData[l_indexMC],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "MC%s for MC%d = 0x%04x, "
+                                            "mask = 0x%04x. "
+                                            "l_parentMC HUID 0x%.8x",
+                                            isDescFunctional(l_parentMC, pgData,
+                                                targetStates),
+                                            l_parentChipUnit ? "01" : "23",
+                                            l_parentChipUnit,
+                                            pgData[l_indexMC],
+                                            l_mask,
+                                            l_parentMC->getAttr<ATTR_HUID>());
+                                }
                             }
-                           // Restore the "all good" data
-                           pgData[VPD_CP00_PG_PCI0_INDEX + l_indexPCI] =
-                                (uint16_t)VPD_CP00_PG_PCIx_GOOD[l_indexPCI];
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to this target.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "MC%s for MI%d = 0x%04x, "
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_unitValue ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[l_indexMC],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
                         }
+                        break;
+                    }
+                    case TYPE_DMI:
+                    {
+                        // This test serves two purposes. The first is to make
+                        // sure that this target is checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "DMI%d is not functional", l_chipUnit);
+
+                        // First get parent target since there are no PG
+                        // bits for this one
+                        TargetHandleList pParentMCList;
+                        getParentAffinityTargetsByState(pParentMCList, pDesc,
+                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentMCList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentMCList != 1");
+                        TargetHandle_t l_parentMC = pParentMCList[0];
+
+                        auto l_indexMC =
+                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentMC->getAttr<ATTR_CHIP_UNIT>();
+                        size_t l_unitValue = l_chipUnit / 4;
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        // Since isDescFunctional propagates non-functional
+                        // parent state down to child state and it doesn't
+                        // consider parent state when checking a given
+                        // target, if we check this target directly it will
+                        // return true since there are no pg rules for this
+                        // target.
+                        if (isDescFunctional(pDesc, pgData, targetStates))
+                        {
+                            // Now check the parent. Since the PG bits
+                            // are wrong it should return false.
+                            if(!isDescFunctional(l_parentMC, pgData,
+                                                targetStates))
+                            {
+                                // Finally, check this target again and see that
+                                // the function updated the state of this target
+                                // to false, as it should be.
+                                // Note: calling the function again at this
+                                //       point is equivalent to calling
+                                //       find() on targetStates since this
+                                //       target was already checked.
+                                if (isDescFunctional(pDesc, pgData,
+                                                    targetStates))
+                                {
+
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "N1/N3 for DMI%d = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            l_chipUnit,
+                                            l_unitValue
+                                                ? pgData[VPD_CP00_PG_N1_INDEX]
+                                                : pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Should have been false. Something
+                                // unexpected happened.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                "functional = 0x%x, should be false, "
+                                "N1/N3 for MC%d = 0x%04x. "
+                                "l_parentMC HUID 0x%.8x",
+                                isDescFunctional(l_parentMC, pgData,
+                                    targetStates),
+                                l_parentChipUnit,
+                                l_parentChipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                           : pgData[VPD_CP00_PG_N3_INDEX],
+                                l_parentMC->getAttr<ATTR_HUID>());
+                            }
+                        }
+                        else
+                        {
+                            // Although isDescFunctional returning false is
+                            // the correct result, it's not supposed to be
+                            // false at this time. That means that either
+                            // targetStates held onto a previous result or
+                            // additional rules were added to this target.
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, "
+                                    "should be true at this time, "
+                                    "N1/N3 for DMI%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    l_chipUnit,
+                                    l_unitValue ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
+                        }
+
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[l_indexMC] & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[l_indexMC] &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[l_indexMC] |= l_mask;
+                            }
+
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check this target directly it will
+                            // return true since there are no pg rules for this
+                            // target.
+                            if (isDescFunctional(pDesc, pgData, targetStates))
+                            {
+                                // Now check the parent. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentMC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check this target again and see
+                                    // that the function updated the state of
+                                    // this target to false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since this
+                                    //       target was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional>"
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "MC%s for DMI%d = 0x%04x, "
+                                                "mask = 0x%04x. "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_unitValue ? "01" : "23",
+                                                l_chipUnit,
+                                                pgData[l_indexMC],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "MC%s for MC%d = 0x%04x, "
+                                            "mask = 0x%04x. "
+                                            "l_parentMC HUID 0x%.8x",
+                                            isDescFunctional(l_parentMC, pgData,
+                                                targetStates),
+                                            l_parentChipUnit ? "01" : "23",
+                                            l_parentChipUnit,
+                                            pgData[l_indexMC],
+                                            l_mask,
+                                            l_parentMC->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to this target.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "MC%s for DMI%d = 0x%04x, "
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_unitValue ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[l_indexMC],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
+                        }
+                        break;
+                    }
+                    case TYPE_OMI:
+                    {
+                        // This test serves two purposes. The first is to make
+                        // sure that this target is checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "OMI%d is not functional", l_chipUnit);
+
+                        // First get parent target since there are no PG
+                        // bits for this one
+                        TargetHandleList pParentMCList;
+                        getParentAffinityTargetsByState(pParentMCList, pDesc,
+                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentMCList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentMCList != 1");
+                        TargetHandle_t l_parentMC = pParentMCList[0];
+
+                        auto l_indexMC =
+                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentMC->getAttr<ATTR_CHIP_UNIT>();
+                        size_t l_unitValue = l_chipUnit / 8;
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        // Since isDescFunctional propagates non-functional
+                        // parent state down to child state and it doesn't
+                        // consider parent state when checking a given
+                        // target, if we check this target directly it will
+                        // return true since there are no pg rules for this
+                        // target.
+                        if (isDescFunctional(pDesc, pgData, targetStates))
+                        {
+                            // Now check the parent. Since the PG bits
+                            // are wrong it should return false.
+                            if(!isDescFunctional(l_parentMC, pgData,
+                                                targetStates))
+                            {
+                                // Finally, check this target again and see that
+                                // the function updated the state of this target
+                                // to false, as it should be.
+                                // Note: calling the function again at this
+                                //       point is equivalent to calling
+                                //       find() on targetStates since this
+                                //       target was already checked.
+                                if (isDescFunctional(pDesc, pgData,
+                                                    targetStates))
+                                {
+
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "N1/N3 for OMI%d = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            l_chipUnit,
+                                            l_unitValue
+                                                ? pgData[VPD_CP00_PG_N1_INDEX]
+                                                : pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Should have been false. Something
+                                // unexpected happened.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                "functional = 0x%x, should be false, "
+                                "N1/N3 for MC%d = 0x%04x. "
+                                "l_parentMC HUID 0x%.8x",
+                                isDescFunctional(l_parentMC, pgData,
+                                    targetStates),
+                                l_parentChipUnit,
+                                l_parentChipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                           : pgData[VPD_CP00_PG_N3_INDEX],
+                                l_parentMC->getAttr<ATTR_HUID>());
+                            }
+                        }
+                        else
+                        {
+                            // Although isDescFunctional returning false is
+                            // the correct result, it's not supposed to be
+                            // false at this time. That means that either
+                            // targetStates held onto a previous result or
+                            // additional rules were added to this target.
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, "
+                                    "should be true at this time, "
+                                    "N1/N3 for OMI%d = 0x%04x."
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    l_chipUnit,
+                                    l_unitValue ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
+                        }
+
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[l_indexMC] & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[l_indexMC] &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[l_indexMC] |= l_mask;
+                            }
+
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check this target directly it will
+                            // return true since there are no pg rules for this
+                            // target.
+                            if (isDescFunctional(pDesc, pgData, targetStates))
+                            {
+                                // Now check the parent. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentMC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check this target again and see
+                                    // that the function updated the state of
+                                    // this target to false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since this
+                                    //       target was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional>"
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "MC%s for OMI%d = 0x%04x, "
+                                                "mask = 0x%04x. "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_unitValue ? "01" : "23",
+                                                l_chipUnit,
+                                                pgData[l_indexMC],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "MC%s for MC%d = 0x%04x, "
+                                            "mask = 0x%04x. "
+                                            "l_parentMC HUID 0x%.8x",
+                                            isDescFunctional(l_parentMC, pgData,
+                                                targetStates),
+                                            l_parentChipUnit ? "01" : "23",
+                                            l_parentChipUnit,
+                                            pgData[l_indexMC],
+                                            l_mask,
+                                            l_parentMC->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to this target.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "MC%s for OMI%d = 0x%04x, "
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_unitValue ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[l_indexMC],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
+                        }
+                        break;
+                    }
+                    case TYPE_OMIC:
+                    {
+                        // This test serves two purposes. The first is to make
+                        // sure that this target is checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "OMIC%d is not functional", l_chipUnit);
+
+                        // First get parent target since there are no PG
+                        // bits for this one
+                        TargetHandleList pParentMCList;
+                        getParentAffinityTargetsByState(pParentMCList, pDesc,
+                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentMCList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentMCList != 1");
+                        TargetHandle_t l_parentMC = pParentMCList[0];
+
+                        auto l_indexMC =
+                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentMC->getAttr<ATTR_CHIP_UNIT>();
+                        size_t l_unitValue = l_chipUnit / 3;
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        // Since isDescFunctional propagates non-functional
+                        // parent state down to child state and it doesn't
+                        // consider parent state when checking a given
+                        // target, if we check this target directly it will
+                        // return true since there are no pg rules for this
+                        // target.
+                        if (isDescFunctional(pDesc, pgData, targetStates))
+                        {
+                            // Now check the parent. Since the PG bits
+                            // are wrong it should return false.
+                            if(!isDescFunctional(l_parentMC, pgData,
+                                                targetStates))
+                            {
+                                // Finally, check this target again and see that
+                                // the function updated the state of this target
+                                // to false, as it should be.
+                                // Note: calling the function again at this
+                                //       point is equivalent to calling
+                                //       find() on targetStates since this
+                                //       target was already checked.
+                                if (isDescFunctional(pDesc, pgData,
+                                                    targetStates))
+                                {
+
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "N1/N3 for OMIC%d = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            l_chipUnit,
+                                            l_unitValue
+                                                ? pgData[VPD_CP00_PG_N1_INDEX]
+                                                : pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Should have been false. Something
+                                // unexpected happened.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                "functional = 0x%x, should be false, "
+                                "N1/N3 for MC%d = 0x%04x. "
+                                "l_parentMC HUID 0x%.8x",
+                                isDescFunctional(l_parentMC, pgData,
+                                    targetStates),
+                                l_parentChipUnit,
+                                l_parentChipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                           : pgData[VPD_CP00_PG_N3_INDEX],
+                                l_parentMC->getAttr<ATTR_HUID>());
+                            }
+                        }
+                        else
+                        {
+                            // Although isDescFunctional returning false is
+                            // the correct result, it's not supposed to be
+                            // false at this time. That means that either
+                            // targetStates held onto a previous result or
+                            // additional rules were added to this target.
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, "
+                                    "should be true at this time, "
+                                    "N1/N3 for OMIC%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    l_chipUnit,
+                                    l_unitValue ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
+                        }
+
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[l_indexMC] & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[l_indexMC] &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[l_indexMC] |= l_mask;
+                            }
+
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check this target directly it will
+                            // return
+                            // true since there are no pg rules for this target
+                            if (isDescFunctional(pDesc, pgData, targetStates))
+                            {
+                                // Now check the parent. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentMC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check this target again and see
+                                    // that the function updated the state of
+                                    // this target to false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since this
+                                    //       target was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional>"
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "MC%s for OMIC%d = 0x%04x, "
+                                                "mask = 0x%04x. "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_unitValue ? "01" : "23",
+                                                l_chipUnit,
+                                                pgData[l_indexMC],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "MC%s for MC%d = 0x%04x, "
+                                            "mask = 0x%04x. "
+                                            "l_parentMC HUID 0x%.8x",
+                                            isDescFunctional(l_parentMC, pgData,
+                                                targetStates),
+                                            l_parentChipUnit ? "01" : "23",
+                                            l_parentChipUnit,
+                                            pgData[l_indexMC],
+                                            l_mask,
+                                            l_parentMC->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to this target.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "MC%s for OMIC%d = 0x%04x, "
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_unitValue ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[l_indexMC],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
+                        }
+                        break;
+                    }
+                    case TYPE_MCC:
+                    {
+                        // This test serves two purposes. The first is to make
+                        // sure that this target is checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "MCC%d is not functional", l_chipUnit);
+
+                        // First get parent target since there are no PG
+                        // bits for this one
+                        TargetHandleList pParentMCList;
+                        getParentAffinityTargetsByState(pParentMCList, pDesc,
+                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentMCList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentMCList != 1");
+                        TargetHandle_t l_parentMC = pParentMCList[0];
+
+                        auto l_indexMC =
+                            l_parentMC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentMC->getAttr<ATTR_CHIP_UNIT>();
+                        size_t l_unitValue = l_chipUnit / 4;
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        // Since isDescFunctional propagates non-functional
+                        // parent state down to child state and it doesn't
+                        // consider parent state when checking a given
+                        // target, if we check this target directly it will
+                        // return true since there are no pg rules for this
+                        // target.
+                        if (isDescFunctional(pDesc, pgData, targetStates))
+                        {
+                            // Now check the parent. Since the PG bits
+                            // are wrong it should return false.
+                            if(!isDescFunctional(l_parentMC, pgData,
+                                                targetStates))
+                            {
+                                // Finally, check this target again and see that
+                                // the function updated the state of this target
+                                // to false, as it should be.
+                                // Note: calling the function again at this
+                                //       point is equivalent to calling
+                                //       find() on targetStates since this
+                                //       target was already checked.
+                                if (isDescFunctional(pDesc, pgData,
+                                                    targetStates))
+                                {
+
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "N1/N3 for MCC%d = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            l_chipUnit,
+                                            l_unitValue
+                                                ? pgData[VPD_CP00_PG_N1_INDEX]
+                                                : pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Should have been false. Something
+                                // unexpected happened.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                "functional = 0x%x, should be false, "
+                                "N1/N3 for MC%d = 0x%04x. "
+                                "l_parentMC HUID 0x%.8x ",
+                                isDescFunctional(l_parentMC, pgData,
+                                    targetStates),
+                                l_parentChipUnit,
+                                l_parentChipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                           : pgData[VPD_CP00_PG_N3_INDEX],
+                                l_parentMC->getAttr<ATTR_HUID>());
+                            }
+                        }
+                        else
+                        {
+                            // Although isDescFunctional returning false is
+                            // the correct result, it's not supposed to be
+                            // false at this time. That means that either
+                            // targetStates held onto a previous result or
+                            // additional rules were added to this target.
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, "
+                                    "should be true at this time, "
+                                    "N1/N3 for MCC%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    l_chipUnit,
+                                    l_unitValue ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
+                        }
+
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
+
+                        if (l_unitValue)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[l_indexMC] & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[l_indexMC] &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[l_indexMC] |= l_mask;
+                            }
+
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check this target directly it will
+                            // return true since there are no pg rules for this
+                            // target.
+                            if (isDescFunctional(pDesc, pgData, targetStates))
+                            {
+                                // Now check the parent. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentMC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check this target again and see
+                                    // that the function updated the state of
+                                    // this target to false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since this
+                                    //       target was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional>"
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "MC%s for MCC%d = 0x%04x, "
+                                                "mask = 0x%04x. "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_unitValue ? "01" : "23",
+                                                l_chipUnit,
+                                                pgData[l_indexMC],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional>"
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "MC%s for MC%d = 0x%04x, "
+                                            "mask = 0x%04x. "
+                                            "l_parentMC HUID 0x%.8x",
+                                            isDescFunctional(l_parentMC, pgData,
+                                                targetStates),
+                                            l_parentChipUnit ? "01" : "23",
+                                            l_parentChipUnit,
+                                            pgData[l_indexMC],
+                                            l_mask,
+                                            l_parentMC->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to this target.
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "MC%s for MCC%d = 0x%04x, "
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_unitValue ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[l_indexMC],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
+                        }
+                        break;
+                    }
+                    case TYPE_PHB:
+                      {
+                        // This test serves two purposes. The first is to make
+                        // sure that PHB targets are checked correctly, and the
+                        // second is to ensure that non-functional parent state
+                        // is propagated down to a "functional" child.
+                        TS_INFO("testHWASisDescFunctional: "
+                                "PCI%d is not functional for PHB target",
+                                l_chipUnit);
+
+                        // First get Parent PEC target since there are no PG
+                        // bits for PHB
+                        TargetHandleList pParentPECList;
+                        getParentAffinityTargetsByState(pParentPECList, pDesc,
+                                CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
+                        HWAS_ASSERT((pParentPECList.size() == 1),
+                                "testHWASisDescFunctional(): "
+                                "pParentPECList != 1");
+                        TargetHandle_t l_parentPEC = pParentPECList[0];
+
+                        auto l_indexPCI =
+                            l_parentPEC->getAttr<ATTR_CHIPLET_ID>();
+                        auto l_parentChipUnit =
+                            l_parentPEC->getAttr<ATTR_CHIP_UNIT>();
+
+                        for (l_mask = 0x8000; l_mask > 0; l_mask >>= 1)
+                        {
+                            if(pgData[l_indexPCI] & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[l_indexPCI] &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[l_indexPCI] |= l_mask;
+                            }
+
+                            // Since isDescFunctional propagates non-functional
+                            // parent state down to child state and it doesn't
+                            // consider parent state when checking a given
+                            // target, if we check PHB directly it will return
+                            // true since there are no pg rules for PHB
+                            if (isDescFunctional(pDesc, pgData, targetStates))
+                            {
+                                // Now check the parent PEC. Since the PG bits
+                                // are wrong it should return false.
+                                if(!isDescFunctional(l_parentPEC, pgData,
+                                                    targetStates))
+                                {
+                                    // Finally, check the PHB again and see that
+                                    // the function updated the state of PHB to
+                                    // false, as it should be.
+                                    // Note: calling the function again at this
+                                    //       point is equivalent to calling
+                                    //       find() on targetStates since PHB
+                                    //       was already checked.
+                                    if (isDescFunctional(pDesc, pgData,
+                                                        targetStates))
+                                    {
+
+                                        TS_FAIL("testHWASisDescFunctional> "
+                                                "functional = 0x%x, "
+                                                "should be false, "
+                                                "PCI%d = 0x%04x, mask = 0x%04x "
+                                                "pDesc HUID 0x%.8x",
+                                                isDescFunctional(pDesc, pgData,
+                                                    targetStates),
+                                                l_parentChipUnit,
+                                                pgData[l_indexPCI],
+                                                l_mask,
+                                                pDesc->getAttr<ATTR_HUID>());
+                                    }
+                                }
+                                else
+                                {
+                                    // Should have been false. Something
+                                    // unexpected happened.
+                                    TS_FAIL("testHWASisDescFunctional> "
+                                            "functional = 0x%x, "
+                                            "should be false, "
+                                            "PCI%d = 0x%04x, mask = 0x%04x "
+                                            "l_parentPEC HUID 0x%.8x",
+                                            isDescFunctional(l_parentPEC,
+                                                pgData,
+                                                targetStates),
+                                            l_parentChipUnit,
+                                            pgData[l_indexPCI],
+                                            l_mask,
+                                            l_parentPEC->getAttr<ATTR_HUID>());
+                                }
+                            }
+                            else
+                            {
+                                // Although isDescFunctional returning false is
+                                // the correct result, it's not supposed to be
+                                // false at this time. That means that either
+                                // targetStates held onto a previous result or
+                                // additional rules were added to PHB.
+                                TS_FAIL("testHWASisDescFunctional> "
+                                        "functional = 0x%x, "
+                                        "should be true at this time, "
+                                        "PCI%d = 0x%04x, mask = 0x%04x "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
+                                        l_parentChipUnit,
+                                        pgData[l_indexPCI],
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
+                            }
+
+                            // Restore the "all good" data
+                            pgData[l_indexPCI] =
+                                VPD_CP00_PG_PCIx_GOOD[l_parentChipUnit];
+
+                            // Clear target states for the next test. Otherwise,
+                            // isDescFunctional won't re-check the same targets.
+                            targetStates.clear();
+                        }
+
                         break;
                       }
                     case TYPE_EQ:
@@ -1000,21 +2245,25 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
-                                        "EQ/EP%d = 0x%04x, mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "EQ/EP%d = 0x%04x, mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_EP0_INDEX
                                                + l_chipUnit],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
                             pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
                                 (uint16_t)VPD_CP00_PG_EPx_GOOD;
+                            targetStates.clear();
                         }
 
                         //////////////////////////////////////
@@ -1038,22 +2287,30 @@ public:
                         pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] |=
                             0x0040;
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false. "
                                     "EQ/EP%d = 0x%04x (expected 0x%04X), "
-                                    "EX children were marked bad ",
-                                    isDescFunctional(pDesc, pgData),
+                                    "EX children were marked bad "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
                                     pgData[VPD_CP00_PG_EP0_INDEX
                                            + l_chipUnit],
-                                    VPD_CP00_PG_EPx_GOOD);
+                                    VPD_CP00_PG_EPx_GOOD,
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         // Restore the "all good" data
                         pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit] =
                                 (uint16_t)VPD_CP00_PG_EPx_GOOD;
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         // now try bad CORE rollup
                         core_idx = (uint8_t)l_chipUnit * 4;
@@ -1065,13 +2322,15 @@ public:
                             pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
                                 ~VPD_CP00_PG_ECxx_GOOD;
                         }
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                 "EQ/EP%d functional = 0x%x, should be false. "
-                                "All 4 EC children were marked bad",
+                                "All 4 EC children were marked bad "
+                                "pDesc HUID 0x%.8x",
                                 l_chipUnit,
-                                isDescFunctional(pDesc, pgData));
+                                isDescFunctional(pDesc, pgData, targetStates),
+                                pDesc->getAttr<ATTR_HUID>());
                         }
                         // Restore the "all good" core data
                         for (int i = 0; i < 4; i++)
@@ -1079,7 +2338,6 @@ public:
                             pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] =
                                 VPD_CP00_PG_ECxx_GOOD;
                         }
-
                         break;
 
                     case TYPE_EX:
@@ -1088,37 +2346,53 @@ public:
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] |=
                             (uint16_t)VPD_CP00_PG_EPx_L3L2REFR[l_chipUnit % 2];
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "EX%d / EP%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "EX%d / EP%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit, (l_chipUnit / 2),
                                     pgData[VPD_CP00_PG_EP0_INDEX
-                                           + (l_chipUnit / 2)]);
+                                           + (l_chipUnit / 2)],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] =
                             (uint16_t)VPD_CP00_PG_EPx_GOOD;
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         // Now mark its 2 EC cores as bad and check for rollup
                         core_idx = (uint8_t)l_chipUnit * 2;
                         TS_INFO("testHWASisDescFunctional>"
                             "Now try marking EX%d cores EC%d and EC%d bad",
                             l_chipUnit, core_idx, core_idx+1);
+
+
+
                         for (int i = 0; i < 2; i++)
                         {
                             pgData[VPD_CP00_PG_EC00_INDEX + core_idx + i] |=
                                 ~VPD_CP00_PG_ECxx_GOOD;
                         }
-                        if (isDescFunctional(pDesc, pgData))
+
+
+
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                 "EX%d functional = 0x%x, should be false. "
-                                "All 2 EC children were marked bad",
+                                "All 2 EC children were marked bad "
+                                "pDesc HUID 0x%.8x",
                                 l_chipUnit,
-                                isDescFunctional(pDesc, pgData));
+                                isDescFunctional(pDesc, pgData, targetStates),
+                                pDesc->getAttr<ATTR_HUID>());
                         }
                         // Restore the "all good" core data
                         for (int i = 0; i < 2; i++)
@@ -1150,16 +2424,19 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
-                                        "CORE%d = 0x%04x, mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "CORE%d = 0x%04x, mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_EC00_INDEX
                                                + l_chipUnit],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
@@ -1182,16 +2459,24 @@ public:
                                 (uint16_t)VPD_CP00_PG_N3_MCS01;
                         }
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "N1/N3 for MCBIST%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "N1/N3 for MCBIST%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
                                     l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
-                                               : pgData[VPD_CP00_PG_N3_INDEX]);
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         if (l_chipUnit)
                         {
@@ -1228,23 +2513,30 @@ public:
                                     |= l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
                                         "MC%s for MCBIST%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit ? "01" : "23",
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_MCxx_INDEX
                                                    [l_chipUnit * 2]],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
                             (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+
+                            // Needs to be cleared after each iteration since it
+                            // holds onto child pg status.
+                            targetStates.clear();
                         }
 
                         // TEST WITH BAD MAGIC PORT
@@ -1252,18 +2544,21 @@ public:
                             VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
 
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
                                     "MC%s for MCBIST%d = 0x%04x, "
-                                    "mask = 0x%04x - BAD MAGIC PORT.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "mask = 0x%04x - BAD MAGIC PORT. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit ? "01" : "23",
                                     l_chipUnit,
                                     pgData[VPD_CP00_PG_MCxx_INDEX
                                                [l_chipUnit * 2]],
-                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] &=
@@ -1285,17 +2580,25 @@ public:
                                 (uint16_t)VPD_CP00_PG_N3_MCS01;
                         }
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "N1/N3 for MCS%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "N1/N3 for MCS%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
                                     (l_chipUnit >= 2)
                                         ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
+                                        : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         if (l_chipUnit >= 2)
                         {
@@ -1333,40 +2636,50 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
                                         "MC%s for MCS%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         (l_chipUnit < 2) ? "01" : "23",
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_MCxx_INDEX
                                                    [l_chipUnit]],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
                                 (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+
+                            // Clear the map since it is holding all good states
+                            // for children that need to be re-checked.
+                            targetStates.clear();
                         }
 
                         // TEST WITH BAD MAGIC PORT (MCA0 or MCA4)
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] |=
                             VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
                                     "MC%s for MCS%d = 0x%04x, "
-                                    "mask = 0x%04x - BAD MAGIC PORT.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "mask = 0x%04x - BAD MAGIC PORT. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit ? "01" : "23",
                                     l_chipUnit,
                                     pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]],
-                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                                    VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] &=
@@ -1380,20 +2693,28 @@ public:
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
                             (uint16_t)VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2];
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "MC%s for MCA%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "MC%s for MCA%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     (l_chipUnit < 4) ? "01" : "23",
                                     l_chipUnit,
                                     pgData[VPD_CP00_PG_MCxx_INDEX
-                                               [l_chipUnit / 2]]);
+                                               [l_chipUnit / 2]],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
                             (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         // Try bad MCA Port setting for MCA2/3 & MCA6/7
                         if ( VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2] !=
@@ -1402,18 +2723,21 @@ public:
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
                                 VPD_CP00_PG_MCA_MAGIC_PORT_MASK;
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
                                         "MC%s for MCA%d = 0x%04x "
-                                        "mask = 0x%04x - BAD MAGIC PORT.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "mask = 0x%04x - BAD MAGIC PORT. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         (l_chipUnit < 4) ? "01" : "23",
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_MCxx_INDEX
                                                    [l_chipUnit / 2]],
-                                        VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
+                                        VPD_CP00_PG_MCA_MAGIC_PORT_MASK,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] &=
@@ -1436,16 +2760,24 @@ public:
                                 (uint16_t)VPD_CP00_PG_N3_MCS01;
                         }
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "N1/N3 for MC%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "N1/N3 for MC%d = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
                                     l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
-                                               : pgData[VPD_CP00_PG_N3_INDEX]);
+                                               : pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
+
+                        // Clear the map since it is holding all good states for
+                        // what is about to be tested and isDescFunctional will
+                        // therefore not re-check them as it should.
+                        targetStates.clear();
 
                         if (l_chipUnit)
                         {
@@ -1476,410 +2808,33 @@ public:
                                     |= l_mask;
                             }
 
-                            if (isDescFunctional(pDesc, pgData))
+                            if (isDescFunctional(pDesc, pgData, targetStates))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
                                         "functional = 0x%x, should be false, "
                                         "MC%s for MC%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
+                                        "mask = 0x%04x. "
+                                        "pDesc HUID 0x%.8x",
+                                        isDescFunctional(pDesc, pgData,
+                                            targetStates),
                                         l_chipUnit ? "01" : "23",
                                         l_chipUnit,
                                         pgData[VPD_CP00_PG_MCxx_INDEX
                                                    [l_chipUnit * 2]],
-                                        l_mask);
+                                        l_mask,
+                                        pDesc->getAttr<ATTR_HUID>());
                             }
 
                             // Restore the "all good" data
                             pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
                             (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+
+                            targetStates.clear();
+
                         }
 
                         break;
-
-                    case TYPE_MI:
-                        TS_INFO( "testHWASisDescFunctional: "
-                                  "MI%d is not functional", l_chipUnit);
-                        if (l_chipUnit / 2)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (isDescFunctional(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for MI%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    l_chipUnit,
-                                    (l_chipUnit / 2)
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
-                        }
-
-                        if (l_chipUnit / 2)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
-                                & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
-                                    &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
-                                    |= l_mask;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MI%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        (l_chipUnit / 2) ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit]],
-                                        l_mask);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-
-                        break;
-
-                    case TYPE_DMI:
-                        TS_INFO( "testHWASisDescFunctional: "
-                                  "DMI%d is not functional", l_chipUnit);
-                        if (l_chipUnit / 4)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (isDescFunctional(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for DMI%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    l_chipUnit,
-                                    (l_chipUnit / 4)
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
-                        }
-
-                        if (l_chipUnit / 4)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
-                                & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
-                                    &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
-                                    |= l_mask;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for DMI%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        (l_chipUnit / 4) ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[VPD_CP00_PG_MCxx_INDEX
-                                                   [l_chipUnit / 2]],
-                                        l_mask);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-
-                        break;
-                    case TYPE_OMI:
-                    {
-                        TS_INFO( "testHWASisDescFunctional: "
-                                  "OMI%d is not functional", l_chipUnit);
-
-                        size_t indexMC = l_chipUnit / 8;
-                        size_t mcPgIndex = indexMC ? VPD_CP00_PG_MC23_INDEX : VPD_CP00_PG_MC01_INDEX;
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (isDescFunctional(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for OMI%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    l_chipUnit,
-                                    indexMC
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
-                        }
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[mcPgIndex] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[mcPgIndex] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[mcPgIndex] |= l_mask;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for OMI%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        indexMC ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[mcPgIndex],
-                                        l_mask);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[mcPgIndex] = (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-
-                        break;
-                    }
-
-                    case TYPE_OMIC:
-                    {
-                        TS_INFO( "testHWASisDescFunctional: "
-                                  "OMIC%d is not functional", l_chipUnit);
-
-                        size_t indexMC = l_chipUnit / 3;
-                        size_t mcPgIndex = indexMC ? VPD_CP00_PG_MC23_INDEX : VPD_CP00_PG_MC01_INDEX;
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (isDescFunctional(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for OMIC%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    l_chipUnit,
-                                    indexMC
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
-                        }
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[mcPgIndex] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[mcPgIndex] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[mcPgIndex] |= l_mask;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for OMIC%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        indexMC ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[mcPgIndex],
-                                        l_mask);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[mcPgIndex] = (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-
-                        break;
-                    }
-
-                    case TYPE_MCC:
-                    {
-                        TS_INFO( "testHWASisDescFunctional: "
-                                  "MCC%d is not functional", l_chipUnit);
-
-                        size_t indexMC = l_chipUnit / 4;
-                        size_t mcPgIndex = indexMC ? VPD_CP00_PG_MC23_INDEX : VPD_CP00_PG_MC01_INDEX;
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_MCS23;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N3_MCS01;
-                        }
-
-                        if (isDescFunctional(pDesc, pgData))
-                        {
-                            TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false, "
-                                    "N1/N3 for MCC%d = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    l_chipUnit,
-                                    indexMC
-                                        ? pgData[VPD_CP00_PG_N1_INDEX]
-                                        : pgData[VPD_CP00_PG_N3_INDEX]);
-                        }
-
-                        if (indexMC)
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N1_GOOD;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N3_INDEX] =
-                                (uint16_t)VPD_CP00_PG_N3_GOOD;
-                        }
-
-                        for (l_mask = 0x8000;
-                             l_mask > 0;
-                             l_mask >>= 1)
-                        {
-                            if (pgData[mcPgIndex] & l_mask)
-                            {
-                                // Turn off a bit that should be on
-                                pgData[mcPgIndex] &= ~l_mask;
-                            }
-                            else
-                            {
-                                // Turn on a bit that should be off
-                                pgData[mcPgIndex] |= l_mask;
-                            }
-
-                            if (isDescFunctional(pDesc, pgData))
-                            {
-                                TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false, "
-                                        "MC%s for MCC%d = 0x%04x, "
-                                        "mask = 0x%04x.",
-                                        isDescFunctional(pDesc, pgData),
-                                        indexMC ? "01" : "23",
-                                        l_chipUnit,
-                                        pgData[mcPgIndex],
-                                        l_mask);
-                            }
-
-                            // Restore the "all good" data
-                            pgData[mcPgIndex] = (uint16_t)VPD_CP00_PG_MCxx_GOOD;
-                        }
-                        break;
-                    }
-
-
-                     case TYPE_OBUS_BRICK:
+                    case TYPE_OBUS_BRICK:
                         {
                             //Two cases here:
                             //OBUS==SMP --> Target should be present regardless of PG
@@ -1901,13 +2856,17 @@ public:
                                           "OBUS_BRICK PG is bad and target is SMP");
 
                                 //Since SMP, should always be true, but fail test if false
-                                if (!isDescFunctional(pDesc, pgData))
+                                if (!isDescFunctional(pDesc, pgData,
+                                            targetStates))
                                 {
                                     TS_FAIL("testHWASisDescFunctional>"
                                             "functional = 0x%x, should be true because"
-                                            "OBUS_BRICK is SMP: PG = 0x%04x.",
-                                            isDescFunctional(pDesc, pgData),
-                                            pgData[VPD_CP00_PG_N3_INDEX]);
+                                            "OBUS_BRICK is SMP: PG = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
                                 }
                             }
                             else
@@ -1916,13 +2875,17 @@ public:
                                           "OBUS_BRICK PG is bad and target is NVLINK");
 
                                 //Since non-SMP, should return false, but fail test if true
-                                if (isDescFunctional(pDesc, pgData))
+                                if (isDescFunctional(pDesc, pgData,
+                                            targetStates))
                                 {
                                     TS_FAIL("testHWASisDescFunctional>"
                                             "functional = 0x%x, should be false because"
-                                            "OBUS_BRICK is NVLINK: PG = 0x%04x.",
-                                            isDescFunctional(pDesc, pgData),
-                                            pgData[VPD_CP00_PG_N3_INDEX]);
+                                            "OBUS_BRICK is NVLINK: PG = 0x%04x. "
+                                            "pDesc HUID 0x%.8x",
+                                            isDescFunctional(pDesc, pgData,
+                                                targetStates),
+                                            pgData[VPD_CP00_PG_N3_INDEX],
+                                            pDesc->getAttr<ATTR_HUID>());
                                 }
                             }
 
@@ -1939,13 +2902,16 @@ public:
                         pgData[VPD_CP00_PG_N3_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N3_NPU;
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "NPU = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
-                                    pgData[VPD_CP00_PG_N3_INDEX]);
+                                    "NPU = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
+                                    pgData[VPD_CP00_PG_N3_INDEX],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         pgData[VPD_CP00_PG_N3_INDEX] =
@@ -1970,14 +2936,17 @@ public:
                                 (uint16_t)VPD_CP00_PG_xxx_VITAL;
                         }
 
-                        if (isDescFunctional(pDesc, pgData))
+                        if (isDescFunctional(pDesc, pgData, targetStates))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "PERV(%d) = 0x%04x.",
-                                    isDescFunctional(pDesc, pgData),
+                                    "PERV(%d) = 0x%04x. "
+                                    "pDesc HUID 0x%.8x",
+                                    isDescFunctional(pDesc, pgData,
+                                        targetStates),
                                     l_chipUnit,
-                                    pgData[l_chipUnit]);
+                                    pgData[l_chipUnit],
+                                    pDesc->getAttr<ATTR_HUID>());
                         }
 
                         // Restore the "all good" data

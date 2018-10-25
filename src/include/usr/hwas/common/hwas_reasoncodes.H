@@ -37,6 +37,7 @@ namespace HWAS
         MOD_RUNTIME_DECONFIG              = 0x06,
         MOD_DISABLE_OBUS                  = 0x07,
         MOD_UPDATE_PROC_MEM_TO_USE        = 0x08,
+        MOD_IS_DESCENDANT_FUNCTIONAL      = 0x09
     };
 
     enum HwasReasonCode
@@ -66,6 +67,7 @@ namespace HWAS
         RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
         RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED   = HWAS_COMP_ID | 0x14,
         RC_NO_UPDATE_WHEN_MEM_MISSING           = HWAS_COMP_ID | 0x15,
+        RC_NO_PG_LOGIC                          = HWAS_COMP_ID | 0x16
     };
 };
 

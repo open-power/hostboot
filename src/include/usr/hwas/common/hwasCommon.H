@@ -32,6 +32,8 @@
 #ifndef HWASCOMMON_H_
 #define HWASCOMMON_H_
 
+#include<map>
+
 // 'system' headers
 #include <stdint.h>
 #include <targeting/common/target.H>
@@ -244,22 +246,37 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
                       const uint16_t i_pgData[VPD_CP00_PG_DATA_LENGTH]);
 
 
+// This map is used to track the state of previously checked targets in the
+// isDescFunctional method. This is used instead of directly looking at
+// hwasState to keep the isDescFunctional logic self-contained and work around
+// a limitation with the unit testing. Since hwasState can't be changed during
+// testing the only other way to verify the algorithm works is by modifing this
+// to match the test conditions.
+typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
+
 /**
- * @brief Checks the PG keyword data to determine if the descendant chiplet is
- *  functional. The caller is responsible for allocating and de-allocating the
- *  PG keyword space.
+ * @brief                         Checks the PG keyword data to determine if the
+ *                                descendant chiplet is functional. The caller
+ *                                is responsible for allocating and
+ *                                de-allocating the PG keyword space.
  *
- * @param[in]  i_desc      pointer to descendant of target we're looking at
- * @param[in]  i_pgData    pointer to area holding the PG keyword read from
- *                          VPD; must be malloc'ed by the caller, and must be
- *                          VPD_CP00_PG_DATA_LENGTH in size.
+ * @param[in]  i_desc             Pointer to descendant of target we're looking
+ *                                at. Must not be nullptr.
  *
- * @return bool Return true if the descendant is functional; false if not.
+ * @param[in]  i_pgData           Reference to area holding the PG keyword read
+ *                                from VPD; must be malloc'ed by the caller, and
+ *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
+ *
+ * @param[in]  io_targetStates    Reference to the target state map to prevent
+ *                                re-checking targets.
+ *
+ * @return bool                   Returns true if the descendant is functional;
+ *                                False if not.
  *
  */
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
-                      const uint16_t i_pgData[VPD_CP00_PG_DATA_LENGTH]);
-
+                      const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                      pgState_map &io_targetStates);
 
 /**
  * @deprecated
