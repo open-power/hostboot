@@ -37,6 +37,7 @@
 /******************************************************************************/
 #include <stdint.h>
 #include <algorithm>
+#include <map>
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
 #include <initservice/initserviceif.H>
@@ -48,6 +49,7 @@
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwasError.H>
+#include <hwas/common/pgLogic.H>
 
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
@@ -70,6 +72,7 @@ TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   KILOBYTE );
 TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
+
 
 // SORT functions that we'll use for PR keyword processing
 bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
@@ -153,82 +156,70 @@ void enableHwasState(Target *i_target,
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
 }
 
-
-
 /**
- * @brief simple helper fn to check L3/L2/REFR triplets in PG EPx data
+ * @brief                         This is a helper function for
+ *                                isDescFunctional. The name for it is slightly
+ *                                misleading because this function will only
+ *                                mark children non-functional if the passed-in
+ *                                parent is non-functional. Therefore, if a
+ *                                parent is passed in that is functional this
+ *                                function behaves as a NOOP. This function will
+ *                                propagate a parent's non-functional status
+ *                                down to all children since children cannot be
+ *                                considered functional if they have
+ *                                non-functional parents.
  *
- * @param[in] i_pgData EPx data from PG keyword VPD
+ * @param[in]  i_desc             Pointer to the parent target we're looking
+ *                                at. Must not be nullptr.
  *
- * @return bool triplets are valid
+ * @param[in]  i_pgData           Reference to area holding the PG keyword read
+ *                                from VPD; must be malloc'ed by the caller, and
+ *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
+ *
+ * @param[in]  io_targetStates    Reference to the pgState_map that will to
+ *                                be updated by this function.
  *
  */
-bool areL3L2REFRtripletsValid(uint16_t i_pgData)
+void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
+                               const uint16_t (&i_pgData)
+                                              [VPD_CP00_PG_DATA_ENTRIES],
+                               pgState_map &io_targetStates)
 {
-    bool l_valid = true;
 
-    // Check that triplets are valid, that is, all good or all bad
-    for (uint8_t l_triplet = 0;
-         l_triplet <= 1;
-         l_triplet++)
+    // Get the state for the parent.
+    auto parentState_it = io_targetStates.find(i_parent);
+
+    if (!parentState_it->second)
     {
-        // Check if all are good in the triplet
-        if ((i_pgData & VPD_CP00_PG_EPx_L3L2REFR[l_triplet]) == 0)
-        {
-            continue;
-        }
+        // Parent is non-functional. So get the list of all children
+        // and mark them non-functional as well.
+        TargetHandleList l_pDescChildren;
+        targetService().getAssociated(l_pDescChildren, i_parent,
+                                      TargetService::CHILD,
+                                      TargetService::ALL);
 
-        // Check if all are bad in the triplet
-        if ((i_pgData & VPD_CP00_PG_EPx_L3L2REFR[l_triplet]) ==
-            VPD_CP00_PG_EPx_L3L2REFR[l_triplet])
+        for(TargetHandleList::const_iterator child_it =
+                l_pDescChildren.begin();
+            child_it != l_pDescChildren.end(); ++child_it)
         {
-            continue;
-        }
+            TargetHandle_t child = *child_it;
 
-        l_valid = false;
-        break;
+            auto childState_it = io_targetStates.find(child);
+
+            if(childState_it != io_targetStates.end())
+            {
+                childState_it->second = false;
+            }
+            else
+            {
+                // Child is missing from the targetStates map. Insert it and
+                // mark it non-functional.
+                io_targetStates[child] = false;
+            }
+        }
     }
-
-    return l_valid;
 }
 
-/**
- * @brief simple helper fn to check core data for rollup
- *
- * @param[in] i_firstCore First core to look at
- * @param[in] i_numCoresToCheck number of cores to check from first one
- * @param[in] i_pgData PG keyword VPD
- *
- * @return bool All ECxx domains were marked bad
- *
- */
-bool allCoresBad(const uint8_t & i_firstCore,
-                 const uint8_t & i_numCoresToCheck,
-                 const uint16_t i_pgData[])
-{
-    bool coresBad = true;
-    uint8_t coreNum = 0;
-    do
-    {
-        // don't look outside of EC core entries
-        if ((i_firstCore + coreNum) >= VPD_CP00_PG_ECxx_MAX_ENTRIES)
-        {
-            HWAS_INF("allCoresBad: requested %d cores beginning at %d, "
-                    "but only able to check %d cores",
-                    i_numCoresToCheck, i_firstCore, coreNum);
-            break;
-        }
-        if (i_pgData[VPD_CP00_PG_EC00_INDEX + i_firstCore + coreNum] ==
-            VPD_CP00_PG_ECxx_GOOD)
-        {
-            coresBad = false;
-        }
-        coreNum++;
-    }
-    while (coresBad && (coreNum < i_numCoresToCheck));
-
-    return coresBad;
-}
 
 /**
  * @brief disable obuses in wrap config.
@@ -704,7 +695,7 @@ errlHndl_t discoverTargets()
             bool chipPresent = true;
             bool chipFunctional = true;
             uint32_t errlEid = 0;
-            uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
+            uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
             bzero(pgData, sizeof(pgData));
 
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
@@ -770,25 +761,57 @@ errlHndl_t discoverTargets()
                 pTarget->getAttr<ATTR_HUID>(),
                 chipFunctional ? "" : "NOT ");
 
-            // now need to mark all of this target's
-            //  physical descendants as present and functional as appropriate
+            // now need to mark all of this target's physical descendants as
+            // present and functional as appropriate
             TargetHandleList pDescList;
             targetService().getAssociated( pDescList, pTarget,
                 TargetService::CHILD, TargetService::ALL);
+
+            // A map that will keep track of what has already been checked to
+            // eliminate re-checking targets. It also holds functional state.
+            pgState_map targetStates;
+
+            // by default, the descendant's functionality is 'inherited'
+            bool descFunctional = chipFunctional;
+
+            if (chipFunctional)
+            {
+                // Check all of the descendants before moving onto setting
+                // hwasState. They must be checked before the next loop since a
+                // descendant's state can be changed multiple times before
+                // arriving at the final state. The reason for that is that a
+                // descendant could be marked functional until its parent is
+                // checked and then later be updated if the parent is determined
+                // to be non-functional.
+                for (TargetHandleList::const_iterator pDesc_it =
+                        pDescList.begin();
+                     pDesc_it != pDescList.end();
+                     ++pDesc_it)
+                {
+                    isDescFunctional(*pDesc_it, pgData, targetStates);
+                }
+            }
+
+
             for (TargetHandleList::const_iterator pDesc_it = pDescList.begin();
                     pDesc_it != pDescList.end();
                     ++pDesc_it)
             {
+
                 TargetHandle_t pDesc = *pDesc_it;
-                // by default, the descendant's functionality is 'inherited'
-                bool descFunctional = chipFunctional;
 
                 if (chipFunctional)
-                {   // if the chip is functional, then look through the
-                    //  partialGood vector to see if its chiplets
-                    //  are functional
+                {
+                    // if the chip is functional, then look through the
+                    // partialGood vector to see if its chiplets
+                    // are functional.
+                    //
+                    // The descendant has been checked already, it will
+                    // not be checked again here. The result will be returned
+                    // instead.
                     descFunctional = isDescFunctional(pDesc,
-                                                      pgData);
+                                                      pgData,
+                                                      targetStates);
                 }
 
                 if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
@@ -813,6 +836,7 @@ errlHndl_t discoverTargets()
                         descFunctional ? "" : "NOT ");
                 }
             }
+
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
@@ -1015,586 +1039,181 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     return l_chipFunctional;
 } // isChipFunctional
 
-// Checks the passed in target for functionality. This function assumes
-// that the passed in target is of TYPE_OBUS. Returns true if the target
-// is functional; false otherwise.
-bool isObusFunctional(const TARGETING::TargetHandle_t &i_desc,
-                      const uint16_t i_pgData[])
-{
-    bool l_isFunctional = true;
-
-    ATTR_CHIP_UNIT_type indexOB = i_desc->getAttr<ATTR_CHIP_UNIT>();
-    // Check all bits in OBUSx entry
-    if (i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB] != VPD_CP00_PG_OBUS_GOOD)
-    {
-        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                "actual 0x%04X, expected 0x%04X - bad",
-                i_desc->getAttr<ATTR_HUID>(), indexOB,
-                VPD_CP00_PG_OB0_INDEX + indexOB,
-                i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB],
-                VPD_CP00_PG_OBUS_GOOD);
-        l_isFunctional = false;
-    }
-    else
-    // Check PBIOO0 bit in N1 entry
-    // Rule 3 / Rule 4  PBIOO0 to be good with Nimbus and Cumulus except
-    //                  Nimbus Sforza (without optics and NVLINK), so is
-    //                  associated with all OBUS entries
-    if ((i_pgData[VPD_CP00_PG_N1_INDEX] & VPD_CP00_PG_N1_PBIOO0) != 0)
-    {
-        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                "actual 0x%04X, expected 0x%04X - bad",
-                i_desc->getAttr<ATTR_HUID>(), indexOB,
-                VPD_CP00_PG_N1_INDEX,
-                i_pgData[VPD_CP00_PG_N1_INDEX],
-                (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                ~VPD_CP00_PG_N1_PBIOO0));
-        l_isFunctional = false;
-    }
-    else
-    // Check PBIOO1 bit in N1 entry if second or third OBUS
-    // Rule 4  PBIOO1 to be associated with OBUS1 and OBUS2 which only are
-    //         valid on a Cumulus
-    if (((1 == indexOB) || (2 == indexOB)) && ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-        VPD_CP00_PG_N1_PBIOO1) != 0))
-    {
-        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                "actual 0x%04X, expected 0x%04X - bad",
-                i_desc->getAttr<ATTR_HUID>(), indexOB,
-                VPD_CP00_PG_N1_INDEX,
-                i_pgData[VPD_CP00_PG_N1_INDEX],
-                (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                ~VPD_CP00_PG_N1_PBIOO1));
-        l_isFunctional = false;
-    }
-
-    return l_isFunctional;
-}
-
 
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
-                      const uint16_t i_pgData[])
+                      const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                      pgState_map &io_targetStates)
 {
-    bool l_descFunctional = true;
+    bool l_functional = false;
+    TargetHandleList l_pDescChildren;
+    targetService().getAssociated(l_pDescChildren, i_desc,
+                                  TargetService::CHILD,
+                                  TargetService::IMMEDIATE);
 
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_XBUS)
-    {
-        ATTR_CHIP_UNIT_type indexXB =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check bits in XBUS entry
-        if ((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-             VPD_CP00_PG_XBUS_IOX[indexXB]) != 0)
-        {
-            HWAS_INF("pDesc %.8X - XBUS%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexXB,
-                     VPD_CP00_PG_XBUS_INDEX,
-                     i_pgData[VPD_CP00_PG_XBUS_INDEX],
-                     (i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-                      ~VPD_CP00_PG_XBUS_IOX[indexXB]));
-            l_descFunctional = false;
-        }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS)
-    {
-        l_descFunctional = isObusFunctional(i_desc, i_pgData);
-    }
-    else
-    if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_PEC)
-         || (i_desc->getAttr<ATTR_TYPE>() == TYPE_PHB))
-    {
-        Target * l_targ = NULL;
+    do {
 
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PHB)
+        // There is a chance that this target has been checked already. Since
+        // descendant list isn't ordered.
+        auto selfState_it = io_targetStates.find(i_desc);
+        if (selfState_it != io_targetStates.end())
         {
-            //First get Parent PEC target as there are no PG bits for PHB
-            TargetHandleList pParentPECList;
-            getParentAffinityTargetsByState(pParentPECList, i_desc,
-                        CLASS_UNIT, TYPE_PEC, UTIL_FILTER_ALL);
-            HWAS_ASSERT((pParentPECList.size() == 1),
-                        "isDescFunctional(): pParentPECList != 1");
-            l_targ = pParentPECList[0];
-        }
-        else
-        {
-            l_targ = const_cast<TARGETING::Target*>(i_desc);
+            // This target has been seen, return.
+            l_functional = selfState_it->second;
+            break;
         }
 
-        ATTR_CHIP_UNIT_type indexPCI =
-            l_targ->getAttr<ATTR_CHIP_UNIT>();
-        // Check all bits in PCIx entry
-        if (i_pgData[VPD_CP00_PG_PCI0_INDEX + indexPCI] !=
-            VPD_CP00_PG_PCIx_GOOD[indexPCI])
+        // First, if a target has children at least one must be functional for
+        // this target to be considered functional.
+        if (l_pDescChildren.size() == 0)
         {
-            HWAS_INF("pDesc %.8X - PCI%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexPCI,
-                     VPD_CP00_PG_PCI0_INDEX + indexPCI,
-                     i_pgData[VPD_CP00_PG_PCI0_INDEX + indexPCI],
-                     VPD_CP00_PG_PCIx_GOOD[indexPCI]);
-            l_descFunctional = false;
+            // Target has no children. So, set l_functional to true so that the
+            // check after the loop won't cause the function to exit with a
+            // potentially incorrect result.
+            l_functional = true;
         }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_EQ)
-    {
-        ATTR_CHIP_UNIT_type indexEP =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check bits in EPx entry, validating triplets in partial good region
-        if (((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP]
-              & ~VPD_CP00_PG_EPx_PG_MASK) !=
-              VPD_CP00_PG_EPx_GOOD) ||
-            (!areL3L2REFRtripletsValid(i_pgData[VPD_CP00_PG_EP0_INDEX +
-                                       indexEP])))
+
+        // Iterate through the list of children and look them up in the
+        // io_targetStates map. If at least one is functional then the algorithm
+        // will move onto the next set of checks to determine functionality for
+        // this target.
+        for(TargetHandleList::const_iterator child_it = l_pDescChildren.begin();
+            child_it != l_pDescChildren.end(); ++child_it)
         {
-            HWAS_INF("pDesc %.8X - EQ%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexEP,
-                     VPD_CP00_PG_EP0_INDEX + indexEP,
-                     i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP],
-                     VPD_CP00_PG_EPx_GOOD);
-            l_descFunctional = false;
-        }
-        else
-        {
-            // Look for a rollup bad status
-            // Either both EXs are bad or all 4 EC's are bad
+            TargetHandle_t child = *child_it;
 
-            // index of first EX of 2 EXs under this EQ
-            uint8_t indexEX = (uint8_t)indexEP * 2;
+            auto childState = io_targetStates.find(child);
 
-            // index of first EC of 4 ECs under this EQ
-            uint8_t indexEC = indexEX * 2;
-            uint8_t coresToCheck = 4;
-
-            // check if both EX's are bad
-            if (((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
-                VPD_CP00_PG_EPx_L3L2REFR[0]) != 0) &&
-                ((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
-                VPD_CP00_PG_EPx_L3L2REFR[1]) != 0))
+            if (childState == io_targetStates.end())
             {
-                HWAS_INF("pDesc %.8X - EQ%d marked bad because its EXs "
-                         "(%d and %d) are both bad",
-                        i_desc->getAttr<ATTR_HUID>(),
-                        indexEP,
-                        indexEX, indexEX+1);
-
-                l_descFunctional = false;
+                // The child was not added to the map. This means that it hasn't
+                // been checked yet. So, check it before continuing with this
+                // target.
+                isDescFunctional(child, i_pgData, io_targetStates);
+                childState = io_targetStates.find(child);
             }
-            else
-            // check if child cores are bad
-            if (allCoresBad(indexEC, coresToCheck, i_pgData))
+
+            if (childState->second)
             {
-                HWAS_INF("pDesc %.8X - EQ%d marked bad because its %d CORES "
-                         "(EC%d - EC%d) are all bad",
-                        i_desc->getAttr<ATTR_HUID>(),
-                        indexEP,
-                        coresToCheck, indexEC, indexEC+3);
-                l_descFunctional = false;
+                // One child of this target is functional. So far, that
+                // indicates that this target is functional.
+                l_functional = true;
+                break;
             }
         }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_EX)
+
+        if (!l_functional)
+        {
+            // No functional children of this target were found. Target is
+            // considered not functional.
+            HWAS_INF("pDesc 0x%.8X - marked bad because all of "
+                     "its children were bad.",
+                     i_desc->getAttr<ATTR_HUID>());
+            break;
+        }
+
+        // Since the target has at least one functional child (or no children),
+        // next we must apply the correct partial good rules to determine
+        // functionality.
+        //
+        // Lookup the correct partial good logic for the given target. To avoid
+        // errors of omission, the lookup must return at least one pg logic
+        // struct. If a target has no associated rules then an NA rule will be
+        // returned that was created by the default constructor which will cause
+        // the next for loop to succeed.
+        PARTIAL_GOOD::pgLogic_t descPgLogic = PARTIAL_GOOD::pgTable
+            .findRulesForTarget(i_desc);
+
+        if (descPgLogic.size() == 0)
+        {
+            // If descPgLogic is empty then the PgTable was not updated when a
+            // new target was added. This is not allowed. So create an error.
+            HWAS_ERR("isDescFunctional: No rules for target type 0x%X were"
+                     " found in the PG rules table. At least one must exist."
+                     " HUID 0x%X",
+                     i_desc->getAttr<ATTR_TYPE>(), get_huid(i_desc));
+
+            /*@
+             * @errortype
+             * @severity        ERRL_SEV_UNRECOVERABLE
+             * @moduleid        MOD_IS_DESCENDANT_FUNCTIONAL
+             * @reasoncode      RC_NO_PG_LOGIC
+             * @devdesc         To enforce all target types have partial good
+             *                  rules and logic, all targets must be included in
+             *                  the PartialGoodRulesTable. A combination of
+             *                  target type, chip type, and chip unit produced
+             *                  an empty set of logic for the target.
+             * @custdesc        A problem occured during IPL of the system:
+             *                  Internal Firmware Error
+             * @userdata1       target type attribute
+             * @userdata2       HUID of the target
+             */
+            errlHndl_t l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                          MOD_IS_DESCENDANT_FUNCTIONAL,
+                                          RC_NO_PG_LOGIC,
+                                          i_desc->getAttr<ATTR_TYPE>(),
+                                          get_huid(i_desc));
+
+            errlCommit(l_errl, HWAS_COMP_ID);
+
+        }
+
+        // Iterate through the list of partial good logic for this target. If
+        // any of them fail then the target is non-functional.
+        for(PARTIAL_GOOD::pgLogic_t::const_iterator pgLogic_it =
+                descPgLogic.begin();
+            pgLogic_it != descPgLogic.end(); ++pgLogic_it)
+        {
+            PARTIAL_GOOD::PartialGoodLogic pgLogic = *pgLogic_it;
+
+            if ((i_pgData[pgLogic.iv_pgIndex]
+                & pgLogic.iv_pgMask) != pgLogic.iv_agMask)
+            {
+                HWAS_INF("pDesc 0x%.8X - pgData[%d]: "
+                         "actual 0x%04X, expected 0x%04X - bad",
+                         i_desc->getAttr<ATTR_HUID>(),
+                         pgLogic.iv_pgIndex,
+                         i_pgData[pgLogic.iv_pgIndex] & pgLogic.iv_pgMask,
+                         pgLogic.iv_agMask);
+                l_functional = false;
+                break;
+            }
+
+            // The final check is to see if there is any additional logic
+            // that cannot be generically included in this loop. If there is
+            // special logic it will be included in a function that is
+            // hard-coded for that particular target and a function pointer will
+            // point to it.
+            //
+            // Any of the structs in the vector could have a pointer to a
+            // special rule so this check is included in the iteration.
+            if (pgLogic.iv_specialRule != nullptr)
+            {
+                // This pgLogic struct has a special rule. Call it to determine
+                // functionality.
+                l_functional = pgLogic.iv_specialRule(i_desc, i_pgData);
+
+                if (!l_functional)
+                {
+                    break;
+                }
+            }
+        }
+
+    } while(0);
+
+    // Record the result in the targetStates map for later use.
+    io_targetStates[i_desc] = l_functional;
+
+    if ((!l_functional) && (l_pDescChildren.size() != 0))
     {
-        ATTR_CHIP_UNIT_type indexEX =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // 2 EX chiplets per EP/EQ chiplet
-        size_t indexEP = indexEX / 2;
-        // 2 L3/L2/REFR triplets per EX chiplet
-        size_t indexL3L2REFR = indexEX % 2;
-        // 2 EC children per EX
-        uint8_t indexEC = indexEX * 2;
-        uint8_t allCoresToCheck = 2; // 2 CORES per EX
-
-        // Check triplet of bits in EPx entry
-        if ((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
-             VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]) != 0)
-        {
-            HWAS_INF("pDesc %.8X - EX%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexEX,
-                     VPD_CP00_PG_EP0_INDEX + indexEP,
-                     i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP],
-                     (i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
-                      ~VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]));
-            l_descFunctional = false;
-        }
-        else
-        // Check that EX does not have 2 bad CORE children
-        if (allCoresBad(indexEC, allCoresToCheck, i_pgData))
-        {
-            HWAS_INF("pDesc %.8X - EX%d marked bad since it has no good cores",
-                    i_desc->getAttr<ATTR_HUID>(), indexEX);
-            HWAS_INF("(core %d: actual 0x%04X, expected 0x%04X) "
-                     "(core %d: actual 0x%04X, expected 0x%04X)",
-                     indexEC, i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC],
-                     VPD_CP00_PG_ECxx_GOOD,
-                     indexEC+1, i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC+1],
-                     VPD_CP00_PG_ECxx_GOOD);
-            l_descFunctional = false;
-        }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_CORE)
-    {
-        ATTR_CHIP_UNIT_type indexEC =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check all bits in ECxx entry
-        if (i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC] !=
-            VPD_CP00_PG_ECxx_GOOD)
-        {
-            HWAS_INF("pDesc %.8X - CORE/EC%2.2d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexEC,
-                     VPD_CP00_PG_EC00_INDEX + indexEC,
-                     i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC],
-                     VPD_CP00_PG_ECxx_GOOD);
-            l_descFunctional = false;
-        }
-    }
-    else // MCBIST is found on Nimbus chips
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCBIST)
-    {
-        ATTR_CHIP_UNIT_type indexMCBIST =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // 2 MCS chiplets per MCBIST / MCU
-        size_t indexMCS = indexMCBIST * 2;
-
-        // Check MCS01 bit in N3 entry if first MCBIST / MCU
-        if ((0 == indexMCBIST) &&
-            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
-              VPD_CP00_PG_N3_MCS01) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
-                     VPD_CP00_PG_N3_INDEX,
-                     i_pgData[VPD_CP00_PG_N3_INDEX],
-                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                      ~VPD_CP00_PG_N3_MCS01));
-            l_descFunctional = false;
-        }
-        else
-        // Check MCS23 bit in N1 entry if second MCBIST / MCU
-        if ((1 == indexMCBIST) &&
-            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-              VPD_CP00_PG_N1_MCS23) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
-                     VPD_CP00_PG_N1_INDEX,
-                     i_pgData[VPD_CP00_PG_N1_INDEX],
-                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                      ~VPD_CP00_PG_N1_MCS23));
-            l_descFunctional = false;
-        }
-        else
-        // Check bits in MCxx entry except those in partial good region
-        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
-             & ~VPD_CP00_PG_MCxx_PG_MASK) !=
-             VPD_CP00_PG_MCxx_GOOD)
-        {
-            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     VPD_CP00_PG_MCxx_GOOD);
-            l_descFunctional = false;
-        }
-        else
-        // One MCA (the first one = mca0 or mca4) on each MC must be functional
-        // for zqcal to work on any of the MCAs on that side
-        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
-                VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
-        {
-            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
-                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
-            l_descFunctional = false;
-        }
-
-    }
-    else // MCS is found on Nimbus chips
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCS)
-    {
-        ATTR_CHIP_UNIT_type indexMCS =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check MCS01 bit in N3 entry if first or second MCS
-        if (((0 == indexMCS) || (1 == indexMCS)) &&
-            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
-              VPD_CP00_PG_N3_MCS01) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
-                     VPD_CP00_PG_N3_INDEX,
-                     i_pgData[VPD_CP00_PG_N3_INDEX],
-                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                      ~VPD_CP00_PG_N3_MCS01));
-            l_descFunctional = false;
-        }
-        else
-        // Check MCS23 bit in N1 entry if third or fourth MCS
-        if (((2 == indexMCS) || (3 == indexMCS)) &&
-            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-              VPD_CP00_PG_N1_MCS23) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
-                     VPD_CP00_PG_N1_INDEX,
-                     i_pgData[VPD_CP00_PG_N1_INDEX],
-                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                      ~VPD_CP00_PG_N1_MCS23));
-            l_descFunctional = false;
-        }
-        else
-        // Check bits in MCxx entry including specific IOM bit,
-        // but not other bits in partial good region
-        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
-             & ~(VPD_CP00_PG_MCxx_PG_MASK
-                 & ~VPD_CP00_PG_MCxx_IOMyy[indexMCS])) !=
-             VPD_CP00_PG_MCxx_GOOD)
-        {
-            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
-                      ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
-            l_descFunctional = false;
-        }
-        else
-        // One MCA (the first one = mca0 or mca4) on each MC must be functional
-        // for zqcal to work on any of the MCAs on that side
-        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
-              VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
-        {
-            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
-                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
-            l_descFunctional = false;
-        }
-    }
-    else // MCA is found on Nimbus chips
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCA)
-    {
-        ATTR_CHIP_UNIT_type indexMCA =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // 2 MCA chiplets per MCS
-        size_t indexMCS = indexMCA / 2;
-        // Check IOM bit in MCxx entry
-        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
-             & VPD_CP00_PG_MCxx_IOMyy[indexMCS]) != 0)
-        {
-            HWAS_INF("pDesc %.8X - MCA%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCA,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
-                      ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
-            l_descFunctional = false;
-        }
-        else
-        // One MCA (the first one = mca0 or mca4) on each MC must be functional
-        // for zqcal to work on any of the MCAs on that side
-        if ( (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
-              VPD_CP00_PG_MCA_MAGIC_PORT_MASK) != 0 )
-        {
-            HWAS_INF("pDesc %.8X - MCA%d pgData[%d]: "
-                     "0x%04X marked bad because of bad magic MCA port (0x%04X)",
-                     i_desc->getAttr<ATTR_HUID>(), indexMCA,
-                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
-                     VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
-            l_descFunctional = false;
-        }
-    }
-          // MC/MI/DMI is found on Cumulus chips
-    else  // MC/MI/MCC/OMI/OMIC is found on Axone chips
-    if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_MC) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCC) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMIC) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMI))
-    {
-        ATTR_CHIP_UNIT_type index =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-
-        // ** Cumulus **
-        // 2 MCs/chip, 2 MIs/MC, 2 DMIs/MI
-        // ** Axone **
-        // 2 MCs/chip, 2 MIs/MC, 2 MCCs/MI, 2 OMIs/MCC
-        // 3 OMICs/MC
-        size_t indexMC = 0;
-
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MC)
-        {
-            indexMC  = index;
-        }
-        else
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI)
-        {
-            indexMC  = index / 2;
-        }
-        else
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI)
-        {
-            indexMC = index / 4;
-        }
-        else
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCC)
-        {
-            indexMC  = index / 4;
-        }
-        else
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMIC)
-        {
-            indexMC  = index / 3;
-        }
-        else
-        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMI)
-        {
-            indexMC  = index / 8;
-        }
-
-        // if indexMC == 1 , then use MC23 PG Index
-        // if indexMC == 0 , then use MC01 PG Index
-        size_t mcPgIndex = indexMC ? VPD_CP00_PG_MC23_INDEX : VPD_CP00_PG_MC01_INDEX;
-
-        // Check MCS01 bit in N3 entry if first MC
-        if ((0 == indexMC) &&
-            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
-              VPD_CP00_PG_N3_MCS01) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMC,
-                     VPD_CP00_PG_N3_INDEX,
-                     i_pgData[VPD_CP00_PG_N3_INDEX],
-                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                      ~VPD_CP00_PG_N3_MCS01));
-            l_descFunctional = false;
-        }
-        else
-        // Check MCS23 bit in N1 entry if second MC
-        if ((1 == indexMC) &&
-            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-              VPD_CP00_PG_N1_MCS23) != 0))
-        {
-            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMC,
-                     VPD_CP00_PG_N1_INDEX,
-                     i_pgData[VPD_CP00_PG_N1_INDEX],
-                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                      ~VPD_CP00_PG_N1_MCS23));
-            l_descFunctional = false;
-        }
-        else
-        // Check bits in MCxx entry except those in partial good region
-        if (i_pgData[mcPgIndex] !=
-             VPD_CP00_PG_MCxx_GOOD)
-        {
-            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexMC,
-                     mcPgIndex,
-                     i_pgData[mcPgIndex],
-                     VPD_CP00_PG_MCxx_GOOD);
-            l_descFunctional = false;
-        }
-
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS_BRICK)
-    {
-        auto obusType = TARGETING::TYPE_OBUS;
-        TARGETING::Target* l_obus_ptr = getParent(i_desc, obusType);
-
-        //If NPU is bad and OBUS is non-SMP, then mark them bad
-        // Bit does not matter unless not in SMP mode
-        if ((l_obus_ptr->getAttr<ATTR_OPTICS_CONFIG_MODE>()
-                    != OPTICS_CONFIG_MODE_SMP) &&
-            ((i_pgData[VPD_CP00_PG_N3_INDEX] & VPD_CP00_PG_N3_NPU) != 0))
-        {
-            HWAS_INF("pDesc %.8X - OBUS_BRICK pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_desc->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N3_INDEX,
-                 i_pgData[VPD_CP00_PG_N3_INDEX],
-                 (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                  ~VPD_CP00_PG_N3_NPU));
-            l_descFunctional = false;
-        }
-
-        // If the target is functional at this point, check its parent
-        // to make sure it is also functional. Then mark the target
-        // not functional if its parent is not functional.
-        if(l_descFunctional)
-        {
-            l_descFunctional = isObusFunctional(l_obus_ptr, i_pgData);
-        }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_NPU)
-    {
-        // Check NPU bit in N3 entry
-        if ((i_pgData[VPD_CP00_PG_N3_INDEX] &
-             VPD_CP00_PG_N3_NPU) != 0)
-        {
-            HWAS_INF("pDesc %.8X - NPU pgData[%d]: "
-                 "actual 0x%04X, expected 0x%04X - bad",
-                 i_desc->getAttr<ATTR_HUID>(),
-                 VPD_CP00_PG_N3_INDEX,
-                 i_pgData[VPD_CP00_PG_N3_INDEX],
-                 (i_pgData[VPD_CP00_PG_N3_INDEX] &
-                  ~VPD_CP00_PG_N3_NPU));
-            l_descFunctional = false;
-        }
-    }
-    else
-    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PERV)
-    {
-        // The chip unit number of the perv target
-        // is the index into the PG data
-        ATTR_CHIP_UNIT_type indexPERV =
-          i_desc->getAttr<ATTR_CHIP_UNIT>();
-
-        // Check VITAL bit in the entry
-        if ((i_pgData[indexPERV]
-             & VPD_CP00_PG_xxx_VITAL) != 0)
-        {
-            HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(),
-                     indexPERV,
-                     i_pgData[indexPERV],
-                     (i_pgData[indexPERV] &
-                      ~VPD_CP00_PG_xxx_VITAL));
-            l_descFunctional = false;
-        }
-
-        // Set the local attribute copy of this data
-        ATTR_PG_type l_pg = i_pgData[indexPERV];
-        i_desc->setAttr<ATTR_PG>(l_pg);
+        // Since this target isn't functional and it's a parent,
+        // mark the children as non-functional.
+        markChildrenNonFunctional(i_desc, i_pgData, io_targetStates);
     }
 
-    return l_descFunctional;
+    return l_functional;
 } // isDescFunctional
+
 
 void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
                          const bool i_present,

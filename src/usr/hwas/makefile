@@ -47,6 +47,7 @@ MODULE = hwas
 OBJS += hwas.o
 OBJS += hwasCallout.o
 OBJS += deconfigGard.o
+OBJS += pgLogic.o
 
 # files in this directory
 OBJS += hwasPlat.o
