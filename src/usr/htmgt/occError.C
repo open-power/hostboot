@@ -31,8 +31,11 @@
 
 #include <isteps/pm/occAccess.H>
 #include <console/consoleif.H>
-#include <targeting/targplatutil.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 #include <variable_buffer.H>
+#include "ipmi/ipmisensor.H"
+
 
 namespace HTMGT
 {
@@ -87,7 +90,8 @@ namespace HTMGT
     // Process elog entry from OCC poll response
     void Occ::occProcessElog(const uint8_t  i_id,
                              const uint32_t i_address,
-                             const uint16_t i_length)
+                             const uint16_t i_length,
+                             const uint8_t  i_source)
     {
         errlHndl_t  l_errlHndl = nullptr;
 
@@ -103,18 +107,26 @@ namespace HTMGT
 #endif
         if (nullptr == l_errlHndl)
         {
+            compId_t l_comp_id = OCCC_COMP_ID;
+            if (i_source == OCC_ERRSRC_PGPE)
+            {
+                l_comp_id = PGPE_COMP_ID;
+            }
+            else if (i_source == OCC_ERRSRC_XGPE)
+            {
+                l_comp_id = XGPE_COMP_ID;
+            }
 
             const occErrlEntry_t * l_occElog= reinterpret_cast<occErrlEntry_t*>
                                                     (l_buffer.pointer());
 
             TMGT_BIN("OCC ELOG", l_occElog, 256);
 
-
             // Get user details section
             const occErrlUsrDtls_t *l_usrDtls_ptr = (occErrlUsrDtls_t *)
                 ((uint8_t*)l_occElog + sizeof(occErrlEntry_t));
 
-            const uint32_t l_occSrc = OCCC_COMP_ID | l_occElog->reasonCode;
+            const uint32_t l_occSrc = l_comp_id | l_occElog->reasonCode;
             ERRORLOG::errlSeverity_t severity =
                 ERRORLOG::ERRL_SEV_INFORMATIONAL;
 
@@ -134,8 +146,6 @@ namespace HTMGT
             // Process Actions
             bool l_occReset = false;
             elogProcessActions(l_occElog->actions, l_occReset, severity);
-
-
 
             // Need to add WOF reason code to OCC object regardless of
             // whether WOF resets are disabled.
@@ -266,24 +276,39 @@ namespace HTMGT
             if ((numCallouts == 0) &&
                 (severity != ERRORLOG::ERRL_SEV_INFORMATIONAL))
             {
-                TMGT_ERR("occProcessElog: No FRU callouts found for OCC%d"
-                         " elog_id:0x%02X, severity:0x%0X",
-                         iv_instance, i_id, severity);
-                /*@
-                 * @errortype
-                 * @refcode LIC_REFCODE
-                 * @subsys EPUB_FIRMWARE_SP
-                 * @reasoncode HTMGT_RC_OCC_ERROR_LOG
-                 * @moduleid HTMGT_MOD_MISMATCHING_SEVERITY
-                 * @userdata1[0-15]  OCC elog id
-                 * @userdata1[16-31] OCC severity
-                 * @devdesc No FRU callouts found for non-info OCC Error Log
-                 */
-                bldErrLog(err2, HTMGT_MOD_MISMATCHING_SEVERITY,
-                          HTMGT_RC_OCC_ERROR_LOG,
-                          i_id, severity, 0, 0,
-                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                if (i_source == OCC_ERRSRC_405)
+                {
+                    TMGT_ERR("occProcessElog: No FRU callouts found for OCC%d"
+                             " elog_id:0x%02X, severity:0x%0X",
+                             iv_instance, i_id, severity);
+                    /*@
+                     * @errortype
+                     * @refcode LIC_REFCODE
+                     * @subsys EPUB_FIRMWARE_SP
+                     * @reasoncode HTMGT_RC_OCC_ERROR_LOG
+                     * @moduleid HTMGT_MOD_MISMATCHING_SEVERITY
+                     * @userdata1[0-15]  OCC elog id
+                     * @userdata1[16-31] OCC severity
+                     * @devdesc No FRU callouts found for non-info OCC Error Log
+                     */
+                    bldErrLog(err2, HTMGT_MOD_MISMATCHING_SEVERITY,
+                              HTMGT_RC_OCC_ERROR_LOG,
+                              i_id, severity, 0, 0,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                }
+                else
+                {
+                    // Add Processor callout for PGPE/SGPE/XGPE
+                    TMGT_ERR("occProcessElog: Adding processor callout for"
+                             " OCC%d", iv_instance);
+                    TARGETING::ConstTargetHandle_t l_proc_target =
+                        TARGETING::getParentChip(iv_target);
+                    l_errlHndl->addHwCallout(l_proc_target,
+                                             HWAS::SRCI_PRIORITY_MED,
+                                             HWAS::NO_DECONFIG,
+                                             HWAS::GARD_NULL);
+                }
             }
 
             if (int_flags_set(FLAG_HALT_ON_OCC_SRC))
@@ -313,33 +338,37 @@ namespace HTMGT
 #endif
 
             // Add full OCC error log data as a User Details section
-            l_errlHndl->addFFDC(OCCC_COMP_ID,
+            l_errlHndl->addFFDC(l_comp_id,
                                 l_occElog,
                                 i_length,
                                 1,  // version
                                 0); // subsection
             ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
-
-            // Clear elog
-            const uint8_t l_cmdData[1] = {i_id};
-            OccCmd l_cmd(this, OCC_CMD_CLEAR_ERROR_LOG,
-                         sizeof(l_cmdData), l_cmdData);
-            l_errlHndl = l_cmd.sendOccCmd();
-            if (l_errlHndl != nullptr)
-            {
-                TMGT_ERR("occProcessElog: Failed to clear elog id %d to"
-                         " OCC%d (rc=0x%04X)",
-                         i_id, iv_instance, l_errlHndl->reasonCode());
-                ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
-            }
         }
         else
         {
-            TMGT_ERR("occProcessElog: Unable to read elog %d from SRAM"
-                     " address (0x%08X) length (0x%04X), rc=0x%04X",
-                     i_id, i_address, i_length, l_errlHndl->reasonCode());
+            TMGT_ERR("occProcessElog: Unable to read elog %d from source "
+                     "0x%02X on OCC%d, SRAM address (0x%08X) length (0x%04X), "
+                     "rc=0x%04X",
+                     i_id, i_source, iv_instance, i_address, i_length,
+                     l_errlHndl->reasonCode());
             ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
         }
+
+        // Clear elog
+        const uint8_t l_cmdData[] = {
+            0x01/* version*/, i_id, i_source, 0x00/*reserved*/};
+        OccCmd l_cmd(this, OCC_CMD_CLEAR_ERROR_LOG,
+                     sizeof(l_cmdData), l_cmdData);
+        l_errlHndl = l_cmd.sendOccCmd();
+        if (l_errlHndl != nullptr)
+        {
+            TMGT_ERR("occProcessElog: Failed to clear elog id 0x%02X from"
+                     " source 0x%02X on OCC%d (rc=0x%04X)",
+                     i_id, i_source, iv_instance, l_errlHndl->reasonCode());
+            ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
+        }
+
     } // end  Occ::occProcessElog()
 
 

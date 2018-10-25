@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,21 +208,23 @@ namespace HTMGT
                     OCC_POLL_DATA_MIN_SIZE) != 0))
         {
             TMGT_INF("OCC%d Poll change: Status:%04X Occs:%02X Cfg:%02X "
-                     "State:%02X Error:%06X/%08X",
+                     "State:%02X Error:%08X/%08X",
                      iv_instance,
                      (pollRsp->status << 8) | pollRsp->extStatus,
                      pollRsp->occsPresent,
                      pollRsp->requestedCfg, pollRsp->state,
-                     (pollRsp->errorId<<16) | pollRsp->errorLength,
+                     ((pollRsp->errorId<<24) | (pollRsp->errorLength<<8) |
+                      pollRsp->errorSource),
                      pollRsp->errorAddress);
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
             TMGT_CONSOLE("OCC%d Poll change: Status:%04X Occs:%02X Cfg:%02X "
-                         "State:%02X Error:%06X/%08X",
+                         "State:%02X Error:%08X/%08X",
                          iv_instance,
                          (pollRsp->status << 8) | pollRsp->extStatus,
                          pollRsp->occsPresent,
                          pollRsp->requestedCfg, pollRsp->state,
-                         (pollRsp->errorId<<16) | pollRsp->errorLength,
+                         ((pollRsp->errorId<<24) | (pollRsp->errorLength<<8) |
+                          pollRsp->errorSource),
                          pollRsp->errorAddress);
 #endif
         }
@@ -241,16 +243,19 @@ namespace HTMGT
             if (pollRsp->errorId != 0)
             {
                 if ((pollRsp->errorId != lastPollRsp->errorId) ||
+                    (pollRsp->errorSource != lastPollRsp->errorSource) ||
                     (L_elog_retry_count < 3))
 
                 {
-                    if (pollRsp->errorId == lastPollRsp->errorId)
+                    if ((pollRsp->errorId == lastPollRsp->errorId) &&
+                        (pollRsp->errorSource == lastPollRsp->errorSource))
                     {
                         // Only retry same errorId a few times...
                         L_elog_retry_count++;
                         TMGT_ERR("pollRspHandler: Requesting elog 0x%02X"
-                                 " (retry %d)",
-                                 pollRsp->errorId, L_elog_retry_count);
+                                 " from source 0x%02X on OCC%d (retry %d)",
+                                 pollRsp->errorId, pollRsp->errorSource,
+                                 iv_instance, L_elog_retry_count);
                     }
                     else
                     {
@@ -260,7 +265,8 @@ namespace HTMGT
                     // Handle a new error log from the OCC
                     occProcessElog(pollRsp->errorId,
                                    pollRsp->errorAddress,
-                                   pollRsp->errorLength);
+                                   pollRsp->errorLength,
+                                   pollRsp->errorSource);
                     if (iv_needsReset)
                     {
                         // Update state if changed...
