@@ -846,8 +846,8 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
-
-        // Update the MDRT Count from Attribute
+        
+        // Update the MDRT Count and PDA Table Entries from Attribute
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;
         l_targetService.getTopLevelTarget(l_sys);
@@ -861,6 +861,24 @@ void* call_host_runtime_setup (void *io_pArgs)
                 RUNTIME::saveActualCount( RUNTIME::MS_DUMP_RESULTS_TBL,
                                           l_mdrtCount);
             }
+
+            // Update PDA Table entries
+            if ( !INITSERVICE::spBaseServicesEnabled() )
+            {
+                uint32_t threadRegSize =
+                    l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_ENTRY_SIZE>();
+                uint8_t threadRegFormat =
+                    l_sys->getAttr<TARGETING::ATTR_PDA_THREAD_REG_STATE_ENTRY_FORMAT>();
+                uint64_t capThreadArrayAddr =
+                    l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_ADDR>();
+                uint64_t capThreadArraySize =
+                    l_sys->getAttr<TARGETING::ATTR_PDA_CAPTURED_THREAD_REG_ARRAY_SIZE>();
+
+                // Ignore return value
+                RUNTIME::updateHostProcDumpActual( RUNTIME::PROC_DUMP_AREA_TBL,
+                                                   threadRegSize, threadRegFormat,
+                                                   capThreadArrayAddr, capThreadArraySize);
+           }
         }
 
         //Update the MDRT value (for MS Dump)

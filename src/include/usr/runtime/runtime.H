@@ -229,7 +229,8 @@ enum SectionId
     HRMOR_STASH,          //< Pointer to address in reserved memory
                           //  where PHYP can write HRMOR
     CPU_CTRL,             // Spira-H CPU controls area
-    LAST_SECTION = CPU_CTRL   //< Placeholder for arrays
+    PROC_DUMP_AREA_TBL,   //< Processor dump area table
+    LAST_SECTION = PROC_DUMP_AREA_TBL   //< Placeholder for arrays
 };
 
 /**
@@ -304,6 +305,23 @@ void saveActualCount( SectionId i_id,
  * @return errlHndl_t  NULL on success
  */
 errlHndl_t writeActualCount( SectionId i_id );
+
+/**
+ * @brief  Write actual architected register detail to HDAT/SPIRAH
+ *
+ * @param[in] i_section        Chunk of data to update
+ * @param[in] threadRegSize    Architected reg data size per thread
+ * @param[in] threadRegVersion Data format version
+ * @param[in] capArrayAddr     Actual destination address
+ * @param[in] capArraySize     Actual destiantion size
+ *
+ * @return errlHndl_t  NULL on success
+ */
+errlHndl_t updateHostProcDumpActual( SectionId i_section,
+                                     uint32_t threadRegSize,
+                                     uint8_t threadRegVersion,
+                                     uint64_t capArrayAddr,
+                                     uint32_t capArraySize);
 
 /**
  * @brief  Use relocated payload base address

@@ -177,7 +177,11 @@ enum BlockPriority
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
  (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
-/** Memory for Architected state (max 4 procs - 256KB Each) **/
+/**
+ * Memory for Architected state (max 4 procs - 256KB Each)
+ * XXX MPIPL depends on memory reservation layout. Any change in the
+ *     reservation order impact MPIPL (see copyArchitectedRegs()).
+ */
 #define VMM_ARCH_REG_DATA_START_OFFSET VMM_OCC_COMMON_END_OFFSET
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 256
 #define VMM_ARCH_REG_DATA_PER_PROC_SIZE \
