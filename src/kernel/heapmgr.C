@@ -31,6 +31,7 @@
 #include <util/align.H>
 #include <arch/ppc.H>
 #include <usr/debugpointers.H>
+#include <config.h>
 
 #ifdef HOSTBOOT_DEBUG
 #define SMALL_HEAP_PAGES_TRACKED 64
@@ -81,14 +82,206 @@ void HeapManager::addDebugPointers()
     Singleton<HeapManager>::instance()._addDebugPointers();
 }
 
+#ifdef CONFIG_MALLOC_FENCING
+
+/**
+ *  @brief Types of check bytes used by small malloc fencing
+ */
+enum CHECK : uint32_t
+{
+    BEGIN = 0xBBBBBBBB,
+    END   = 0xEEEEEEEE,
+};
+
+/**
+ *  @brief Small alloc fencing structure.  For every small malloc, this
+ *     structure is placed at the beginning of the allocation and written with
+ *     check bytes and size information.  Check bytes are also placed at the
+ *     end. On a free, if the check bytes are invalid, Hostboot raises a
+ *     critical assert.
+ */
+struct fence_t
+{
+    CHECK begin;   // Beginning check byte
+    uint32_t size; // Size of user's original allocation
+    uint64_t pad;  // Unused pad bytes
+    char data[];   // Offset of start of actual user data
+
+} PACKED;
+
+/**
+ *  @brief Applies fencing check bytes to an allocation
+ *
+ *  @param[in] i_pAddr Address of the allocation returned by the heap manager
+ *  @param[in] i_size  Size of the allocation as requested by the user
+ *
+ *  @retval void* Pointer giving the effective address for the user's allocation
+ *     request (after the fencing)
+ */
+void* _applySmallFence(void* const i_pAddr,const size_t i_size)
+{
+    fence_t* const pFence=reinterpret_cast<fence_t*>(i_pAddr);
+    pFence->begin=CHECK::BEGIN;
+    pFence->size=static_cast<decltype(pFence->size)>(i_size);
+    char* const end=(reinterpret_cast<char*>(&pFence->data[0])+i_size);
+    const auto endVal=CHECK::END;
+    memcpy(end,&endVal,sizeof(CHECK::END));
+    return &pFence->data[0];
+}
+
+/**
+ *  @brief Add/subtract value from a void*
+ *
+ *  @param[in] i_pAddr Original address
+ *  @param[in] i_size  Amount to increment the address by
+ *
+ *  @return void* The original pointer, adjusted by the requested amount
+ */
+inline void* addToVoid(void* const i_pAddr,const ssize_t i_size)
+{
+    return
+        reinterpret_cast<void*>(
+            reinterpret_cast<char*>(i_pAddr) + i_size);
+}
+
+/**
+ *  @brief Enforces fencing on an allocation.  On fence violation, the routine
+ *      invokes a critical assert
+ *
+ *  @param[in] i_pAddr Effective user address (not original allocation from heap
+ *      manager)
+ *  @param[out] o_userSize Size of caller's original requested allocation
+ *
+ *  @return void* Indicating the start of the original heap manager allocation
+ *
+ */
+void* _enforceSmallFence(
+    void*   const i_pAddr,
+    size_t&       o_userSize)
+{
+    void* pOrigAddr = addToVoid(i_pAddr,-offsetof(fence_t,data));
+    auto * const pFence=reinterpret_cast<fence_t*>(pOrigAddr);
+    crit_assert(pFence->begin == CHECK::BEGIN);
+    uint32_t endVal=0;
+    memcpy(&endVal,&pFence->data[0]+pFence->size,sizeof(endVal));
+    crit_assert(endVal==CHECK::END);
+    o_userSize=pFence->size;
+    return pOrigAddr;
+}
+
+/**
+ *  @brief Returned whether the allocation at the given address is considered a
+ *      small allocation or not.  All non-small allocations are page aligned.
+ *
+ *  @param[in] i_pAddr Requested address to check for allocation size
+ *
+ *  @return bool indicating whether the allocation was small or not
+ */
+inline bool isSmallAlloc(const void* const i_pAddr)
+{
+    return (ALIGN_PAGE(reinterpret_cast<uint64_t>(i_pAddr)) !=
+       reinterpret_cast<uint64_t>(i_pAddr));
+}
+
+// For every big malloc, which always results in an integral number of pages
+// allocated, create a fence page before and after the effective memory range
+// given back to the user.
+const size_t  BIG_MALLOC_EXTRA_PAGES=2;
+
+// Sentinel value used to fill up the fence page preceding the effective memory
+// range given back to the user.
+const uint8_t BEGIN_CHECK_BYTE=0xBB;
+
+// Sentinel value used to fill up the memory from the end of the effective
+// memory range given back to the user, through the end of the final fence page.
+const uint8_t END_CHECK_BYTE=0xEE;
+
+/**
+ *  @brief Applies fencing bytes before and after a big memory allocation
+ *
+ *  @param[in] i_pAddr Starting address of the allocation, as given by
+ *      _allocateBig
+ *
+ *  @param[in] i_size Size of caller's actual requested allocation (smaller than
+ *      what _allocateBig allocated)
+ *
+ *  @return void* Pointer to effective memory address for caller to use
+ */
+void* _applyBigFence(void* const i_pAddr, const size_t i_size)
+{
+    auto pCursor=reinterpret_cast<char*>(i_pAddr);
+    const auto beginCheckBytes=PAGESIZE-sizeof(i_size);
+    memset(pCursor,BEGIN_CHECK_BYTE,beginCheckBytes);
+    pCursor+=beginCheckBytes;
+    memcpy(pCursor,&i_size,sizeof(i_size));
+    pCursor+=sizeof(i_size);
+    void* pEffAddr=pCursor;
+    pCursor+=i_size;
+    const auto endCheckBytes=
+        ALIGN_PAGE(i_size)-i_size+PAGESIZE;
+    memset(pCursor,END_CHECK_BYTE,endCheckBytes);
+    return pEffAddr;
+}
+
+/**
+ *  @brief Enforce that fence bytes from prior mallocs have not been disturbed
+ *
+ *  @param[in] i_pAddr Effective address of the original user allocation (one
+ *      page after the actual allocation from _allocateBig or _reallocBig)
+ *
+ *  @return void* Pointer to actual memory address of the original allocation
+ *      from _allocateBig or _reallocBig
+ */
+void* _enforceBigFence(void* const i_pAddr)
+{
+    auto pCursor=reinterpret_cast<char*>(i_pAddr);
+    pCursor-=PAGESIZE;
+    void* const pActAddr = pCursor;
+    size_t origSize=0;
+    const auto beginCheckBytes=PAGESIZE-sizeof(origSize);
+    for(size_t i=0;i<beginCheckBytes;++i)
+    {
+        if(*(pCursor++) != BEGIN_CHECK_BYTE)
+        {
+            crit_assert(0);
+        }
+    }
+    memcpy(&origSize,pCursor,sizeof(origSize));
+    pCursor+=sizeof(origSize)+origSize;
+    const size_t endCheckBytes=ALIGN_PAGE(origSize)-origSize+PAGESIZE;
+    for(size_t i=0;i<endCheckBytes;++i)
+    {
+        if(*(pCursor++) != END_CHECK_BYTE)
+        {
+            crit_assert(0);
+        }
+    }
+    return pActAddr;
+}
+
+#endif // End CONFIG_MALLOC_FENCING
+
 void * HeapManager::allocate(size_t i_sz)
 {
     HeapManager& hmgr = Singleton<HeapManager>::instance();
-    if(i_sz > MAX_SMALL_ALLOC_SIZE)
+    size_t overhead = 0;
+
+#ifdef CONFIG_MALLOC_FENCING
+    overhead = offsetof(fence_t,data) + sizeof(CHECK::END);
+#endif
+
+    if(i_sz + overhead > MAX_SMALL_ALLOC_SIZE)
     {
         return hmgr._allocateBig(i_sz);
     }
-    return hmgr._allocate(i_sz);
+
+    void* result = hmgr._allocate(i_sz + overhead);
+
+#ifdef CONFIG_MALLOC_FENCING
+    result = _applySmallFence(result,i_sz);
+#endif
+
+    return result;
 }
 
 void HeapManager::free(void * i_ptr)
@@ -116,8 +309,8 @@ void* HeapManager::_allocate(size_t i_sz)
     chunk = pop_bucket(which_bucket);
     if (NULL == chunk)
     {
-	newPage();
-	return _allocate(i_sz);
+        newPage();
+        return _allocate(i_sz);
     }
     else
     {
@@ -151,19 +344,48 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     void* new_ptr = _reallocBig(i_ptr,i_sz);
     if(new_ptr) return new_ptr;
 
+    size_t overhead = 0;
     new_ptr = i_ptr;
-    chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)i_ptr)-1);
+
+#ifdef CONFIG_MALLOC_FENCING
+    overhead = offsetof(fence_t,data) + sizeof(CHECK::END);
+    size_t userSize=0;
+    new_ptr = _enforceSmallFence(i_ptr,userSize);
+#endif
+
+    chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)new_ptr)-1);
 
     // take into account the 8 byte header and valid byte
     size_t asize = bucketByteSize(chunk->bucket) - CHUNK_HEADER_PLUS_RESERVED;
-    if(asize < i_sz)
+    if(asize < i_sz + overhead)
     {
         // fyi.. MAX_SMALL_ALLOCATION_SIZE = BUCKET11 - 9 bytes
-        new_ptr = (i_sz > MAX_SMALL_ALLOC_SIZE) ?
-            _allocateBig(i_sz) : _allocate(i_sz);
+        new_ptr = (i_sz + overhead > MAX_SMALL_ALLOC_SIZE) ?
+            _allocateBig(i_sz) : _allocate(i_sz + overhead);
+
+#ifdef CONFIG_MALLOC_FENCING
+        if(!isSmallAlloc(new_ptr))
+        {
+            memcpy(new_ptr,i_ptr,userSize);
+        }
+        else
+        {
+            memcpy(addToVoid(new_ptr,offsetof(fence_t,data)),
+                i_ptr,userSize);
+        }
+#else
         memcpy(new_ptr, i_ptr, asize);
+#endif
         _free(i_ptr);
     }
+
+#ifdef CONFIG_MALLOC_FENCING
+    if(isSmallAlloc(new_ptr))
+    {
+        new_ptr = _applySmallFence(new_ptr,i_sz);
+    }
+#endif
+
     return new_ptr;
 }
 
@@ -177,6 +399,10 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
         return NULL;
     }
 
+#ifdef CONFIG_MALLOC_FENCING
+    i_ptr=_enforceBigFence(i_ptr);
+#endif
+
     void* new_ptr = NULL;
     big_chunk_t * bc = big_chunk_stack.first();
     while(bc)
@@ -184,6 +410,11 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
        if(bc->addr == i_ptr)
        {
            size_t new_size = ALIGN_PAGE(i_sz)/PAGESIZE;
+
+#ifdef CONFIG_MALLOC_FENCING
+           new_size+=BIG_MALLOC_EXTRA_PAGES;
+#endif
+
            if(new_size > bc->page_count)
            {
                __sync_add_and_fetch(&cv_largeheap_page_count,new_size-bc->page_count);
@@ -207,6 +438,11 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
        }
        bc = (big_chunk_t*) (((uint64_t)bc->next) & 0x00000000FFFFFFFF);
    }
+
+#ifdef CONFIG_MALLOC_FENCING
+    new_ptr=_applyBigFence(new_ptr,i_sz);
+#endif
+
    return new_ptr;
 }
 
@@ -216,6 +452,12 @@ void HeapManager::_free(void * i_ptr)
 
     if(!_freeBig(i_ptr))
     {
+
+#ifdef CONFIG_MALLOC_FENCING
+        size_t userSize=0;
+        i_ptr = _enforceSmallFence(i_ptr,userSize);
+#endif
+
         chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)i_ptr)-1);
 
 #ifdef HOSTBOOT_DEBUG
@@ -557,6 +799,11 @@ void HeapManager::test_pages()
 void* HeapManager::_allocateBig(size_t i_sz)
 {
     size_t pages = ALIGN_PAGE(i_sz)/PAGESIZE;
+
+#ifdef CONFIG_MALLOC_FENCING
+    pages+=BIG_MALLOC_EXTRA_PAGES;
+#endif
+
     void* v = PageManager::allocatePage(pages);
 
     __sync_add_and_fetch(&cv_largeheap_page_count,pages);
@@ -584,6 +831,10 @@ void* HeapManager::_allocateBig(size_t i_sz)
         big_chunk_stack.push(bc);
     }
 
+#ifdef CONFIG_MALLOC_FENCING
+    v=_applyBigFence(v,i_sz);
+#endif
+
     return v;
 }
 
@@ -594,6 +845,10 @@ bool HeapManager::_freeBig(void* i_ptr)
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
         return false;
+
+#ifdef CONFIG_MALLOC_FENCING
+    i_ptr=_enforceBigFence(i_ptr);
+#endif
 
     bool result = false;
     big_chunk_t * bc = big_chunk_stack.first();

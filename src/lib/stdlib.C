@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <kernel/heapmgr.H>
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
+#include <config.h>
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
 #include <arch/ppc.H>
@@ -114,10 +115,12 @@ void* malloc(size_t s)
     return result;
 }
 
-
 void free(void* p)
 {
-    if (NULL == p) return;
+    if (nullptr == p)
+    {
+        return;
+    }
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
     memoryleak_magic_instruction(MEMORYLEAK_FREE, 0, p, NULL);
@@ -126,10 +129,12 @@ void free(void* p)
     HeapManager::free(p);
 }
 
-
 void* realloc(void* p, size_t s)
 {
-    if (NULL == p) return malloc(s);
+    if (nullptr == p)
+    {
+        return malloc(s);
+    }
 
     void* result = HeapManager::realloc(p,s);
 

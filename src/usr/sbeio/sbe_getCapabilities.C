@@ -100,11 +100,16 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
     // Cache the SBE Capabilities' size for future uses
     size_t l_sbeCapabilitiesSize = sizeof(sbeCapabilities_t);
 
-    // Set up the buffer which the SBE will copy the capabilities info to
+    // The buffer must be a multiple of 128 bytes in size, and it must
+    // be aligned to a 128 byte boundary.
+    const size_t totalAlignedSize = ALIGN_X(l_sbeCapabilitiesSize,
+          SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES)
+        + (SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES - 1);
+
+    // Set up the buffer which the SBE will copy the capabilities info to.
     // Create buffer with enough size to be properly aligned
     uint8_t * l_sbeCapabilitiesReadBuffer = static_cast<uint8_t*>(
-               malloc(l_sbeCapabilitiesSize +
-                      (SbePsu::SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES - 1)) );
+        malloc(totalAlignedSize));
 
     // Align the buffer
     uint64_t l_sbeCapabilitiesReadBufferAligned =

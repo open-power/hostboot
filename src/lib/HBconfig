@@ -1,0 +1,5 @@
+config MALLOC_FENCING
+    default n
+    help
+        Enable generating check bytes around each malloc and
+        enforcing that those bytes are undisturbed on every matching free
