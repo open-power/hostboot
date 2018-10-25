@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,18 @@
       Clock Control Register does not match the expected value!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>EXPECTED_CC_STATUS</ffdc>
+    <ffdc>ACTUAL_CC_STATUS</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

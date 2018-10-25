@@ -33,6 +33,10 @@
     <ffdc>TARGET</ffdc>
     <ffdc>NEST_FREQ</ffdc>
     <ffdc>MEM_FREQ</ffdc>
+    <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

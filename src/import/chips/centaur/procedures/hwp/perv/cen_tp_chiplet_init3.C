@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,9 @@ cen_tp_chiplet_init3(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     l_tp_clk_status_data ^= EXPECTED_CC_STATUS_START_all;
 
     FAPI_ASSERT((l_tp_clk_status_data == 0),
-                fapi2::CEN_TP_CHIPLET_INIT3_ERR_CLK_STATUS().set_TARGET(i_target),
+                fapi2::CEN_TP_CHIPLET_INIT3_ERR_CLK_STATUS()
+                .set_TARGET(i_target)
+                .set_TP_CLOCK_STATUS(l_tp_clk_status_data),
                 "ERROR: Clock Status Register: 0x%016llX "
                 "does not match the expected value: 0x000007FFFFFFFFFF ",
                 l_tp_clk_status_data());
@@ -121,7 +123,9 @@ cen_tp_chiplet_init3(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_STATUS_ROX, l_fsi_status_data));
 
     FAPI_ASSERT(!l_fsi_status_data.getBit<31>(),
-                fapi2::CEN_TP_CHIPLET_INIT3_NOT_ALL_CLK_RUNNING().set_TARGET(i_target),
+                fapi2::CEN_TP_CHIPLET_INIT3_NOT_ALL_CLK_RUNNING()
+                .set_TARGET(i_target)
+                .set_CEN_STATUS_ROX_reg(l_fsi_status_data),
                 "FSI Status register bit(31) indicates, not all clocks are running");
 
     FAPI_DBG("Setup automatic PCB network, reset on a hang");

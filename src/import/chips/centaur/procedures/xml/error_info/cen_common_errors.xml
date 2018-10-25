@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,16 @@
       ARRAYINIT OPCG DONE timeout!
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -40,6 +50,16 @@
       SCAN0 OPCG DONE timeout!
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -49,6 +69,16 @@
       Repair loader timeout!
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -58,6 +88,17 @@
       ECC trap register error!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>REPAIR_ECC_TRAP</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -67,6 +108,18 @@
       Mismatch in expected repair loader status!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>REPAIR_STATUS_EXP</ffdc>
+    <ffdc>REPAIR_STATUS_ACT</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -76,6 +129,17 @@
       Repair loader busy!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>REPAIR_STATUS</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -87,6 +151,16 @@
     <ffdc>TARGET</ffdc>
     <ffdc>CHIPLET</ffdc>
     <ffdc>ACTUAL</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

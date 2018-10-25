@@ -171,7 +171,9 @@ cen_initf(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 
     // check header
     FAPI_ASSERT((l_nest_clk_scandata0_data == 0xA5A55A5A00000000),
-                fapi2::CEN_INITF_HEADER_MISMATCH().set_TARGET(i_target),
+                fapi2::CEN_INITF_HEADER_MISMATCH()
+                .set_TARGET(i_target)
+                .set_NEST_CLK_SCANDATA0(l_nest_clk_scandata0_data),
                 "Error rotating tcn_mbs_func ring -- header mismatch!");
 
 fapi_try_exit:

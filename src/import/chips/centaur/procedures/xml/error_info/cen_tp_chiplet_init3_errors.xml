@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,17 @@
       Clock status register error!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>TP_CLOCK_STATUS</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -40,5 +51,16 @@
       Not all clocks are running!
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>CEN_STATUS_ROX_reg</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
 </hwpErrors>

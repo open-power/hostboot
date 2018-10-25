@@ -506,6 +506,23 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CEN_CENTAUR_EC_FEATURE_SUPPORTED</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Set by platform.  If true, Centaur level is supported.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ********************************************************************* -->
 
 </attributes>

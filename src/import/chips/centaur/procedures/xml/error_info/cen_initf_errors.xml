@@ -32,6 +32,17 @@
       Error rotating tcn_mbs_func ring -- header mismatch
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>NEST_CLK_SCANDATA0</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

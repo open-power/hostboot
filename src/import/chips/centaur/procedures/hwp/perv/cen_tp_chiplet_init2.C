@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,10 @@ cen_tp_chiplet_init2(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
              "Error from l_pcb_clk_status extraction");
 
     FAPI_ASSERT(temp_data_64 == EXPECTED_CC_STATUS_START_PIBNET,
-                fapi2::CEN_TP_CHIPLET_INIT2_ERR_CLK_CNTL().set_TARGET(i_target),
+                fapi2::CEN_TP_CHIPLET_INIT2_ERR_CLK_CNTL()
+                .set_TARGET(i_target)
+                .set_EXPECTED_CC_STATUS(EXPECTED_CC_STATUS_START_PIBNET)
+                .set_ACTUAL_CC_STATUS(temp_data_64),
                 "ERROR: Clock Control Register: 0x%016llX "
                 "does not match the expected value: 0xE07FFFFF",
                 temp_data_64);

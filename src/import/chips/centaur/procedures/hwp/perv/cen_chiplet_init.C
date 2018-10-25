@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,7 +165,9 @@ cen_chiplet_init(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
         FAPI_TRY(fapi2::getScom(i_target, l_nest_clk_scandata0_addr + 0x25, l_nest_clk_scandata0_data));
 
         FAPI_ASSERT((l_nest_clk_scandata0_data == 0xA5A55A5A00000000),
-                    fapi2::CEN_CHIPLET_INIT_HEADER_MISMATCH().set_TARGET(i_target),
+                    fapi2::CEN_CHIPLET_INIT_HEADER_MISMATCH()
+                    .set_TARGET(i_target)
+                    .set_NEST_CLK_SCANDATA0(l_nest_clk_scandata0_data),
                     "Error rotating tcn_refr_time ring -- header mismatch!"
                    );
     }

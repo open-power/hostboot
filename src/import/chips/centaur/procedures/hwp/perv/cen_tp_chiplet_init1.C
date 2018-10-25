@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,15 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_CEN_DMI_REFCLOCK_RCVR_TERM_Type l_dmi_refclock_term;
     fapi2::ATTR_CEN_DDR_REFCLOCK_RCVR_TERM_Type l_ddr_refclock_term;
+    uint8_t l_centaurLevelIsSupported = 0;
+
+    // Verify that this Centaur level is supported
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_SUPPORTED, i_target,
+                           l_centaurLevelIsSupported));
+    FAPI_ASSERT(l_centaurLevelIsSupported,
+                fapi2::CEN_CHIP_LEVEL_NOT_SUPPORTED_ERR()
+                .set_TARGET(i_target),
+                "Centaur EC level is not supported ( < 2.0 )!");
 
     FAPI_DBG("Fix PIBABORT during warmstart via MAILBOX");
     FAPI_TRY(fapi2::putCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
@@ -114,8 +123,9 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
     FAPI_TRY(fapi2::getCfamRegister(i_target, CEN_STATUS_ROX, l_cfam_status_data),
              "Error from getCfamRegister (CEN_STATUS_ROX)");
     FAPI_ASSERT(l_cfam_status_data.getBit<16>(),
-                fapi2::CEN_TP_CHIPLET_INIT1_VDD_SENSE_ERR().
-                set_TARGET(i_target),
+                fapi2::CEN_TP_CHIPLET_INIT1_VDD_SENSE_ERR()
+                .set_TARGET(i_target)
+                .set_CEN_STATUS_ROX_reg(l_cfam_status_data),
                 "FSI Status indicates VDD power is OFF!");
 
     FAPI_DBG("Set PLL output enable");

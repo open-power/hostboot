@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,36 @@
       FSI2PIB Status Register check for VDD sense failed
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>CEN_STATUS_ROX_reg</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
   </hwpError>
+  <hwpError>
+    <rc>RC_CEN_CHIP_LEVEL_NOT_SUPPORTED_ERR</rc>
+    <description>
+      Procedure: cen_tp_chiplet_init1
+      Centaur level is not supported (EC level must be >= 2.0)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+         <target>TARGET</target>
+         <priority>HIGH</priority>
+     </callout>
+    <deconfigure>
+         <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+
   <!-- ******************************************************************** -->
 </hwpErrors>

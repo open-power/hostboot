@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -279,8 +279,9 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
         FAPI_TRY(l_repair_status.extract(temp_data_64, 0, 64));
 
         FAPI_ASSERT(temp_data_64 != 0,
-                    fapi2::CEN_COMMON_REPAIR_LOADER_BUSY().
-                    set_TARGET(i_target),
+                    fapi2::CEN_COMMON_REPAIR_LOADER_BUSY()
+                    .set_TARGET(i_target)
+                    .set_REPAIR_STATUS(l_repair_status),
                     "ERROR: Repair loader reports busy, but engine should be idle!");
 
         FAPI_DBG("Writing Command Validation Register");
@@ -319,8 +320,10 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
 
         temp_data_64 = l_repair_status & REPAIR_STATUS_CHECK_MASK;
         FAPI_ASSERT(temp_data_64 == REPAIR_STATUS_CHECK_EXP,
-                    fapi2::CEN_COMMON_MISMATCH_IN_EXPECTED_REPAIR_LOADER_STATUS().
-                    set_TARGET(i_target),
+                    fapi2::CEN_COMMON_MISMATCH_IN_EXPECTED_REPAIR_LOADER_STATUS()
+                    .set_TARGET(i_target)
+                    .set_REPAIR_STATUS_EXP(REPAIR_STATUS_CHECK_EXP)
+                    .set_REPAIR_STATUS_ACT(temp_data_64),
                     "Mismatch in expected repair loader status!"
                     " Expected: 0x%016llX, actual: 0x%016llX",
                     REPAIR_STATUS_CHECK_EXP, temp_data_64);
@@ -338,8 +341,9 @@ cen_repair_loader(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
 
         temp_data_64 &= REPAIR_ECC_TRAP_MASK;
         FAPI_ASSERT(temp_data_64 == REPAIR_ECC_TRAP_EXP,
-                    fapi2::CEN_COMMON_ECC_TRAP_REG_ERROR().
-                    set_TARGET(i_target),
+                    fapi2::CEN_COMMON_ECC_TRAP_REG_ERROR()
+                    .set_TARGET(i_target)
+                    .set_REPAIR_ECC_TRAP(temp_data_64),
                     "ECC trap register reported error!"
                     " Expected: 0x%016llX, actual: 0x%016llX",
                     REPAIR_ECC_TRAP_EXP, temp_data_64);
