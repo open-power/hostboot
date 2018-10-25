@@ -332,15 +332,18 @@ namespace HTMGT
 
 
             /**
-             * @brief Collect, Commit and Clear error log from the OCC
+             * @brief Process elog entry from OCC poll response.
+             *        Collect, Commit and Clear error log from the OCC.
              *
              * @param[in] i_id       OCC elog id to retrieve
              * @param[in] i_address  SRAM address for elog entry
              * @param[in] i_length   size of the elog entry
+             * @param[in] i_source   OCC Error Log Source (405, PGPE, etc)
              */
             void occProcessElog(const uint8_t  i_id,
                                 const uint32_t i_address,
-                                const uint16_t i_length);
+                                const uint16_t i_length,
+                                const uint8_t  i_source);
 
 
             /**

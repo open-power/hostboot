@@ -199,28 +199,20 @@ namespace HTMGT
     };
 
 
-
-    /**
-     * @brief Process elog entry from OCC poll response
-     *
-     * @param[in] i_occ  OCC instance number reporting error
-     * @param[in] i_id   OCC Error Log ID to retrieve (from the poll response)
-     * @param[in] i_address  OCC Error Log Address to read
-     * @param[in] i_length   OCC Error Log Length
-     */
-    void occProcessElog(Occ * i_occ,
-                        const uint8_t  i_id,
-                        const uint32_t i_address,
-                        const uint16_t i_length);
-
-
-
-
     struct tmgtSafeModeReasonCode_t
     {
         uint32_t    returnCode;
         uint32_t    huid;
         bool        infoOnly;
+    };
+
+
+    // OCC Error Source
+    enum occErrorSource_e
+    {
+        OCC_ERRSRC_405  = 0x00,
+        OCC_ERRSRC_PGPE = 0x10,
+        OCC_ERRSRC_XGPE = 0x20
     };
 
 
