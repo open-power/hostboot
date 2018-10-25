@@ -1076,7 +1076,6 @@ extern "C"
                         for(l_bit = 0; l_bit < MAX_BITS; l_bit++)
                         {
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
-                            FAPI_INF("Before access call");
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, i_rnk, l_input_type_e, l_dq, 0, val));
                             SHMOO.MBA.P[l_p].S[i_rnk].K.nom_val[l_dq] = val;
                             SHMOO.MBA.P[l_p].S[i_rnk].K.rb_regval[l_dq] = val;
@@ -1088,7 +1087,7 @@ extern "C"
             }
         }
 
-        FAPI_INF("get all noms done");
+        FAPI_DBG("get all noms done");
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -1429,7 +1428,7 @@ extern "C"
         uint8_t l_i = 0;
         uint8_t l_flag_p0 = 0;
         uint8_t l_flag_p1 = 0;
-        FAPI_INF("Inside - Binary Schmoo FW - %d", scenario);
+        FAPI_DBG("Inside - Binary Schmoo FW - %d", scenario);
         uint8_t l_p = 0;
         uint8_t rank = 0;
         uint8_t l_rank = 0;

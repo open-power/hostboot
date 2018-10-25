@@ -994,7 +994,6 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
-        FAPI_INF("mss_ddr4_setup_pda: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
         io_ccs_inst_cnt = 0;
 
@@ -1525,7 +1524,6 @@ extern "C" {
 
                     //Execute the CCS array
                     FAPI_INF("Executing the CCS array\n");
-                    FAPI_INF("mss_ddr4_run_pda_by_dimm_rank: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
                     FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
                     io_ccs_inst_cnt = 0;
 
@@ -1791,7 +1789,6 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
-        FAPI_INF("mss_ddr4_run_pda_by_dimm_rank: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
 
         //loops through and clears out the storage class
@@ -2224,7 +2221,6 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
-        FAPI_INF("mss_ddr4_disable_pda: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
 
         //Disable CCS

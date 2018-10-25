@@ -927,7 +927,7 @@ fapi2::ReturnCode mss_execute_ccs_inst_array(
         fapi2::delay(i_wait_timer, i_wait_timer);
     }
 
-    FAPI_INF("CCS Executed Polling %d times.", l_count);
+    FAPI_DBG("CCS Executed Polling %d times.", l_count);
 
     if (l_status == MSS_STAT_QUERY_FAIL)
     {

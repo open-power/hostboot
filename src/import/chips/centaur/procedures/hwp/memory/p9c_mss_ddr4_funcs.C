@@ -2935,8 +2935,8 @@ fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(
                                          l_dram_rtt_nom[i_port_number][l_dimm][l_dimm_rank]));
 
         FAPI_TRY(l_address_16.extract(l_addr16_print2, 0, 16));
-        FAPI_INF("Modified MR1 to have RTT_WR's value in RTT_NOM");
-        FAPI_INF("Printing before 0x%04x and after 0x%04x", l_addr16_print1, l_addr16_print2);
+        FAPI_DBG("Modified MR1 to have RTT_WR's value in RTT_NOM");
+        FAPI_DBG("Printing before 0x%04x and after 0x%04x", l_addr16_print1, l_addr16_print2);
     }
     else
     {

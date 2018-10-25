@@ -863,7 +863,6 @@ extern "C"
 
         }
 
-        FAPI_INF("Inside strcmp sl0");
         l_sbit = 24;
         l_value = i;
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MCBAMR0A0Q, l_data_buffer_64));
@@ -885,7 +884,7 @@ extern "C"
         }
 
         //------ Setting Start and end addr counters
-        FAPI_INF("Debug - --------------- Setting Start and End Counters -----------\n");
+        FAPI_DBG("--------------- Setting Start and End Counters -----------\n");
         l_data_buffer_rd64.flush<0>();
         FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MCBSSARA0Q, l_data_buffer_rd64));
         l_value = i + 1;
