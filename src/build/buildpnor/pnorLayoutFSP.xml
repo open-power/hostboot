@@ -259,4 +259,14 @@ Layout Description - Used when building an FSP driver
         <ecc/>
         <preserved/>
     </section>
+    <section>
+        <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
+        <eyeCatch>OCMBFW</eyeCatch>
+        <physicalOffset>0x260D000</physicalOffset>
+        <physicalRegionSize>0x4B000</physicalRegionSize>
+        <side>sideless</side>
+        <sha512Version/>
+        <readOnly/>
+        <ecc/>
+    </section>
 </pnor>
