@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <pnortargeting.H>
 #include <pnor/pnorif.H>
 #include <sys/mm.h>
+#include <util/misc.H>
 #include <errno.h>
 #include <string.h>
 #include <algorithm>
@@ -278,6 +279,39 @@ namespace TARGETING
                 break;
             }
 
+            // Locate attribute Read-Write section in PNOR.
+            bool l_HBD_RW_exists = false;
+            PNOR::SectionInfo_t l_pnorSectionInfo_RW;
+            l_errl = PNOR::getSectionInfo(PNOR::HB_DATA_RW,
+                                          l_pnorSectionInfo_RW);
+            if(l_errl)
+            {
+                // For standalone simics HBD contains the R/W
+                // attributes and HBD_RW is not used. Delete the error and
+                // continue
+                if (Util::isSimicsRunning())
+                {
+                    TRACFCOMP(g_trac_targeting,INFO_MRK
+                             "Expected fail of getSectionInfo(HBD_DATA_RW) in "
+                             "simics so ignoring error and continuing");
+                    delete l_errl;
+                    l_errl = NULL;
+                }
+                else
+                {
+                    // For HW we need HBD_RW to be present so break here
+                    TRACFCOMP(g_trac_targeting,ERR_MRK
+                              "getSectionInfo(HBD_DATA_RW) returned an error");
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_targeting,INFO_MRK
+                              "Found and using HBD_RW PNOR Section");
+                l_HBD_RW_exists = true;
+            }
+
             // Find attribute section header.
             TargetingHeader* l_header =
                 reinterpret_cast<TargetingHeader*>(l_pnorSectionInfo.vaddr);
@@ -337,8 +371,21 @@ namespace TARGETING
                         static_cast<uint64_t>(
                             TARG_TO_PLAT_PTR(l_header->vmmBaseAddress)) +
                         l_header->vmmSectionOffset*i;
-                iv_sections[i].pnorAddress = l_pnorSectionInfo.vaddr +
-                                             l_section->sectionOffset;
+
+                if ((iv_sections[i].type == SECTION_TYPE_PNOR_RW) &&
+                    (l_HBD_RW_exists == true))
+                {
+                    // For master-p8, the SECTION_TYPE_PNOR_RW was moved
+                    // to its own HBD_RW (aka "HB_DATA_RW") PNOR partition,
+                    // so use its values here
+                    iv_sections[i].pnorAddress =
+                        l_pnorSectionInfo_RW.vaddr;
+                }
+                else
+                {
+                   iv_sections[i].pnorAddress =
+                       l_pnorSectionInfo.vaddr + l_section->sectionOffset;
+                }
                 iv_sections[i].size = l_section->sectionSize;
 
                 TRACFCOMP(g_trac_targeting,

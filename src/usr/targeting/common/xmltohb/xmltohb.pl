@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -82,6 +82,9 @@ my $cfgBiosXmlFile = undef;
 my $cfgBiosSchemaFile = undef;
 my $cfgBiosOutputFile = undef;
 my $secureboot = 0;
+# This unconfigurable variable allows for the protected and unprotected binaries
+# to be exported in all scenarios, regardless of $secureboot setting.
+my $exportAllTargetingBinaries = 1;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -360,6 +363,7 @@ use constant TARGET => 4;
 use constant ATTRNAME => 5;
 my @attrDataforSM = ();
 
+
 #Flag which indicates if the script needs to add the 4096 bytes of version
 #checksum as first page in the binary file generated.
 my $addRO_Section_VerPage = 0;
@@ -391,7 +395,7 @@ if( !($cfgImgOutputDir =~ "none") )
     print PNOR_TARGETING_FILE "$combinedData";
     close(PNOR_TARGETING_FILE);
 
-    if($secureboot)
+    if($secureboot || $exportAllTargetingBinaries)
     {
         # Generate protected payload file
         open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.protected")
@@ -6062,7 +6066,7 @@ sub generateTargetingImage {
         - $heapPnorInitOffset));
 
     # Handle read-only data
-    if ($secureboot)
+    if ($secureboot || $exportAllTargetingBinaries)
     {
         ${$protectedDataRef} = $outFile;
     }
@@ -6103,7 +6107,7 @@ sub generateTargetingImage {
     }
 
     # Handle read-write data
-    if ($secureboot)
+    if ($secureboot || $exportAllTargetingBinaries)
     {
         ${$unprotectedDataRef} = $outFile;
     }

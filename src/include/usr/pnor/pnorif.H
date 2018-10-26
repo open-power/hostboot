@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,6 +51,7 @@ enum SectionId
     PAYLOAD,        /**< HAL/OPAL */
     HB_RUNTIME,     /**< Hostboot Runtime (for Sapphire) */
     HB_DATA,        /**< Hostboot Data */
+    HB_DATA_RW,     /**< Hostboot Data : Read-Write (optional) */
     GUARD_DATA,     /**< Guard Data */
     HB_ERRLOGS,     /**< Hostboot Error log Repository */
     DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */

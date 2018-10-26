@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -459,6 +459,20 @@ sub manipulateImages
         HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
     );
 
+    # Check if HBD_RW partition exists because its presence (or non-presence)
+    # alters how we process HBD
+    my $does_HBD_RW_exist = 0;
+    foreach my $section (keys %sectionHash)
+    {
+        my $eyeCatch = $sectionHash{$section}{eyeCatch};
+        if($eyeCatch eq "HBD_RW")
+        {
+            $does_HBD_RW_exist = 1;
+            last;
+        }
+    }
+
+
     foreach my $key (sort partitionDepSort  keys %{$i_binFilesRef})
     {
         my %callerHwHdrFields = (
@@ -505,8 +519,17 @@ sub manipulateImages
                              || ($eyeCatch eq "BOOTKERNEL");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
-                              || ($eyeCatch eq "HBI")
-                              || ($eyeCatch eq "HBD");
+                              || ($eyeCatch eq "HBI");
+
+        # Process HBD based on whether or not HBD_RW section exists
+        if ($does_HBD_RW_exist)
+        {
+            $isNormalSecure ||= ($eyeCatch eq "HBD");
+        }
+        else
+        {
+            $isSpecialSecure ||= ($eyeCatch eq "HBD");
+        }
 
         my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
         my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};

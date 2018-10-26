@@ -59,6 +59,7 @@ const char* cv_EYECATCHER[] = {
     "PAYLOAD",   /**< PNOR::PAYLOAD        : HAL/OPAL */
     "HBRT",      /**< PNOR::HB_RUNTIME     : Hostboot Runtime (for Sapphire) */
     "HBD",       /**< PNOR::HB_DATA        : Hostboot Data */
+    "HBD_RW",    /**< PNOR::HB_DATA_RW     : Hostboot Data : Read-Write */
     "GUARD",     /**< PNOR::GUARD_DATA     : Hostboot Data */
     "HBEL",      /**< PNOR::HB_ERRLOGS     : Hostboot Error log Repository */
     "DJVPD",     /**< PNOR::DIMM_JEDEC_VPD : Dimm JEDEC VPD */
