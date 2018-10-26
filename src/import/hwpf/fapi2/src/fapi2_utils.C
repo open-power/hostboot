@@ -154,6 +154,42 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
                     break;
                 }
 
+            case  TARGET_TYPE_OBUS:
+                {
+                    max_targets = MAX_OBUS_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PEC:
+                {
+                    max_targets = MAX_PEC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_OMI:
+                {
+                    max_targets = MAX_OMI_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_OMIC:
+                {
+                    max_targets = MAX_OMIC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MCC:
+                {
+                    max_targets = MAX_MCC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_OCMB_CHIP:
+                {
+                    max_targets = MAX_OCMB_CHIP_PER_PROC;
+                    break;
+                }
+
             default:
                 max_targets = INVALID_TARGET_COUNT;
                 break;

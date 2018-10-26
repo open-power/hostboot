@@ -163,16 +163,23 @@ enum ErrorInfoType
 // @brief used when translating the SBE targets instance into a fapi pos.
 enum maxTargetsPerProc : uint16_t
 {
-    MAX_MCBIST_PER_PROC  =  2,
-    MAX_MC_PER_PROC      =  2,
-    MAX_MI_PER_PROC      =  4,
-    MAX_MCS_PER_PROC     =  4,
-    MAX_EQ_PER_PROC      =  6,
-    MAX_MCA_PER_PROC     =  8,
-    MAX_PHB_PER_PROC     =  6,
-    MAX_EX_PER_PROC      = 12,
-    MAX_CORE_PER_PROC    = 24,
-    MAX_PERV_PER_PROC    = 56,
+    MAX_MCBIST_PER_PROC  =  2,  //Nimbus
+    MAX_MC_PER_PROC      =  2,  //Cumulus,Axone
+    MAX_MI_PER_PROC      =  4,  //Cumulus,Axone
+    MAX_MCS_PER_PROC     =  4,  //Nimbus
+    MAX_EQ_PER_PROC      =  6,  //Nimbus,Cumulus,Axone
+    MAX_MCA_PER_PROC     =  8,  //Nimbus
+    MAX_PHB_PER_PROC     =  6,  //Nimbus,Cumulus,Axone
+    MAX_EX_PER_PROC      = 12,  //Nimbus,Cumulus,Axone
+    MAX_CORE_PER_PROC    = 24,  //Nimbus,Cumulus,Axone
+    MAX_PERV_PER_PROC    = 56,  //Nimbus,Cumulus,Axone
+    MAX_OBUS_PER_PROC    =  4,  //Nimbus,Cumulus,Axone
+    MAX_PEC_PER_PROC     =  3,  //Nimbus,Cumulus,Axone
+    MAX_OMI_PER_PROC     = 16,  //Axone
+    MAX_OMIC_PER_PROC    =  6,  //Axone
+    MAX_MCC_PER_PROC     =  8,  //Axone
+    MAX_OCMB_CHIP_PER_PROC = MAX_OMI_PER_PROC,  //Axone
+
     INVALID_TARGET_COUNT = 0xFFFF,
     INVALID_FAPI_POS     = INVALID_TARGET_COUNT,
 };
