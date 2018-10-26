@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -616,8 +616,6 @@ class PnorRpTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag Start" );
         PNOR::SectionInfo_t l_info;
         errlHndl_t l_errhdl = NULL;
-        uint64_t chip_select = 0xF;
-        bool needs_ecc = false;
 
         l_errhdl = PNOR::getSectionInfo(PNOR::TESTRO, l_info);
         if( l_errhdl )
@@ -628,58 +626,18 @@ class PnorRpTest : public CxxTest::TestSuite
             TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : could not read pnor section %d", PNOR::TESTRO);
         }
 
-        // Write some data
-        const uint64_t l_writeData = 0x1122334455667788;
-        uint64_t* l_dataptr = reinterpret_cast<uint64_t*> (l_info.vaddr);
-        l_dataptr[0] = l_writeData;
 
-        // Flush the page to make sure it gets out to the device
-        // Due to ReadOnly permissions set on TESTRO should be a no-op
-        int rc = mm_remove_pages( RELEASE, l_dataptr, PAGESIZE );
-        if( rc )
+        // Write some data via a new Task since we expect this task to crash
+        int status = 0;
+        tid_t child = task_create(writeToTESTRO,
+                                  reinterpret_cast<void*>(l_info.vaddr));
+        if ((child != task_wait_tid(child, &status, NULL)) ||
+            (status != TASK_STATUS_CRASHED))
         {
-            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE : rc=%X", rc );
-            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE" );
+            TS_FAIL("ERROR! Write to PNOR::TESTRO not caught.");
         }
 
-        // Get physical address of pnor section
-        uint64_t l_address = 0;
-        l_errhdl = PnorRP::getInstance().computeDeviceAddr((void*)l_info.vaddr,
-                                                        l_address,
-                                                        chip_select,
-                                                        needs_ecc);
-        if(l_errhdl)
-        {
-            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
-            errlCommit(l_errhdl,PNOR_COMP_ID);
-            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
-        }
-
-        // Read pnor section and check if write did not occur
-        uint64_t l_readData = 0;
-        size_t l_size = sizeof(uint64_t);
-        l_errhdl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                              &l_readData,
-                              l_size,
-                              DEVICE_PNOR_ADDRESS(0, l_address));
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> Read Data = 0x%X",l_readData);
-        if(l_errhdl)
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() failed! Error committed.");
-            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
-        }
-        if(l_readData == l_writeData)
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: Data was written to readOnly section = %s",
-                     l_info.name);
-        }
-        if(l_size != sizeof(uint64_t))
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d",
-                    l_address, sizeof(uint64_t), l_size);
-        }
-
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag End");
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag End" );
     }
 
 
@@ -835,6 +793,17 @@ class PnorRpTest : public CxxTest::TestSuite
         } while (0);
 #endif
     }
+
+    private:
+        static void* writeToTESTRO(void* i_TESTRO_vaddr)
+        {
+            uint64_t* l_dataptr = reinterpret_cast<uint64_t*> (i_TESTRO_vaddr);
+            printk( "PnorRpTest::writeToTESTRO: Expect to see Data Storage exception: vaddr=%p: ", i_TESTRO_vaddr);
+            l_dataptr[0] = 0x1122334455667788;
+            sync();
+            return NULL;
+        }
+
 };
 
 
