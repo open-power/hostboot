@@ -293,6 +293,13 @@ namespace HBOCC
                 break;
             }
 
+            // Need to clear out some state variables that get messed up
+            //  during the PM Reset, e.g. the FIR Init flags
+            l_errl = HBPM::resetPMAll(HBPM::CLEAR_ATTRIBUTES);
+            if( l_errl )
+            {
+                break;
+            }
 
         } while(0);
 

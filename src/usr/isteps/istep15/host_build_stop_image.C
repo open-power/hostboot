@@ -459,7 +459,7 @@ void* host_build_stop_image (void *io_pArgs)
 
         if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
-            l_errl = HBPM::resetPMAll();
+            l_errl = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES);
             if(l_errl)
             {
                 //Break out of the do-while loop..
