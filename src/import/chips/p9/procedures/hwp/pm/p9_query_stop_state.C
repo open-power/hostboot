@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,6 +152,7 @@ query_stop_state(
     uint32_t l_exPos = 0;
     uint32_t l_coreStopLevel[2] = {0, 0};
     uint8_t  l_data8 = 0;
+    fapi2::ReturnCode l_tempRc  = fapi2::FAPI2_RC_SUCCESS;
 
     hw_state_t l_clk_pfet = {0, 0, {0, 0}, {0, 0}, 0, 0, {0, 0}}; // Initialize all fields to 0
 
@@ -361,8 +362,22 @@ query_stop_state(
 
         l_exPos = l_chpltNumber % 2;
 
-        FAPI_TRY(fapi2::getScom(l_eq_target, EQ_CLOCK_STAT_SL,  l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
+        l_tempRc = fapi2::getScom(l_eq_target, EQ_CLOCK_STAT_SL,  l_data64);
 
+        if( l_tempRc )
+        {
+            FAPI_INF( "Failed to read EQ_CLOCK_STAT_SL" );
+            //We can't determine L2 and L3 clock state. So, let us prevent
+            //read from ex in question to prevent any further error.
+            l_clk_pfet.l2_hasclocks         =    0;
+            l_clk_pfet.l3_hasclocks         =    0;
+            l_clk_pfet.c_exec_hasclocks[0]  =    0;
+            l_clk_pfet.c_exec_hasclocks[1]  =    0;
+            l_clk_pfet.c_pc_hasclocks[0]    =    0;
+            l_clk_pfet.c_pc_hasclocks[1]    =    0;
+            fapi2::current_err              =    fapi2::RC_QUAD_CLOCK_STATUS_READ_FAIL;
+            goto fapi_try_exit;
+        }
 
         l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l2_pos[l_exPos], 1);
         l_clk_pfet.l2_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
@@ -386,10 +401,18 @@ query_stop_state(
 
         if (l_clk_pfet.vdd_pfet_disable_core[l_pos] == 0)
         {
-            FAPI_DBG("   Read Core EPS clock status for core %d", l_chpltNumber);
+            FAPI_INF("   Read Core EPS clock status for core %d", l_chpltNumber);
 
+            l_tempRc = fapi2::getScom(l_core_chplt, C_CLOCK_STAT_SL,  l_data64);
 
-            FAPI_TRY(fapi2::getScom(l_core_chplt, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
+            if( l_tempRc )
+            {
+                FAPI_INF( "Error reading data from C_CLOCK_STAT_SL" );
+                l_clk_pfet.c_exec_hasclocks[l_pos]  =    0;
+                l_clk_pfet.c_pc_hasclocks[l_pos]    =    0;
+                fapi2::current_err                  =    fapi2::RC_CORE_CLOCK_STATUS_READ_FAIL;
+                goto fapi_try_exit;
+            }
 
             l_data64.extractToRight<uint8_t>(l_data8, 6, 1);
             l_clk_pfet.c_exec_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
@@ -444,10 +467,23 @@ p9_query_stop_state(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target)
 {
 
-
+    fapi2::ReturnCode l_tempRc  =  fapi2::FAPI2_RC_SUCCESS;
     stop_attrs_t  l_stop_attrs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Initialize all fields to 1
 
-    FAPI_TRY(query_stop_state(i_ex_target, l_stop_attrs));
+    l_tempRc            =   query_stop_state(i_ex_target, l_stop_attrs);
+    fapi2::current_err  =   l_tempRc;
+
+    if( l_tempRc )
+    {
+        if(( l_tempRc != (uint32_t)fapi2::RC_CORE_CLOCK_STATUS_READ_FAIL ) &&
+           ( l_tempRc != (uint32_t)fapi2::RC_QUAD_CLOCK_STATUS_READ_FAIL ))
+        {
+            //for any other SCOM error, let us be defensive and RECOMMEND
+            //NO ACCESS. Let us return a non-success RC to distinguish it
+            //from genuine STOP11 State.
+            memset( &l_stop_attrs, 0x00, sizeof(stop_attrs_t) );
+        }
+    }
 
     //----------------------------------------------------------------------------------
     // Set the Attributes
