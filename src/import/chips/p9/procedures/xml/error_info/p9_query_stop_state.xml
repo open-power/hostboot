@@ -46,4 +46,20 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_CORE_CLOCK_STATUS_READ_FAIL</rc>
+    <description>Failed to read core clock status.
+    Note: This return code basically identifies a specific SCOM failure in HWP. There
+    are no callouts associated with this return code. Based on the context, caller of
+    HWP is expected to do the callout</description>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_QUAD_CLOCK_STATUS_READ_FAIL</rc>
+    <description> Failed to read quad clock status
+    Note: This return code basically identifies a specific SCOM failure in HWP. There
+    are no callouts associated with this return code. Based on the context, caller of
+    HWP is expected to do the callout</description>
+  </hwpError>
 </hwpErrors>
