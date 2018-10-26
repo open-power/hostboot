@@ -1062,7 +1062,11 @@ namespace HBPM
 
             if( CLEAR_ATTRIBUTES & i_opt )
             {
+                // Zero out the HOMER vars
                 (void) convertHomerPhysToVirt( l_procChip, 0 );
+
+                // Zero out the FIR save/restore
+                l_procChip->setAttr<ATTR_PM_FIRINIT_DONE_ONCE_FLAG>(0);
             }
         }
 
