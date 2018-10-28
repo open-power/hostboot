@@ -851,6 +851,18 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_OMI_REFCLOCK_SWIZZLE</id>
+  <targetType>TARGET_TYPE_OMI</targetType>
+  <description>
+      Define OMI Ref clock/Swizzle for OCMB/Explorer..
+      Mapper from OMI unit id -> ROOT CNTL 7 refclk drive enable bit
+      consumer: p9a_ocmb_enable
+      </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_SYSTEM_IPL_PHASE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Define context for current phase of system IPL.
