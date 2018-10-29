@@ -60,7 +60,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_eq,      Eq, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( nimbus_eq,  Eq, PostAnalysis );
 PRDF_PLUGIN_DEFINE_NS( cumulus_eq, Eq, PostAnalysis );
 
 }

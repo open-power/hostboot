@@ -362,7 +362,7 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, CheckErrorType );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckErrorType );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckErrorType );
 
 /**
@@ -390,7 +390,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, clearParityError );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, clearParityError );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, clearParityError );
 
 /**
@@ -426,7 +426,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, QueryPll );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, QueryPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, QueryPll );
 
 /**
@@ -469,7 +469,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, ClearPll );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearPll );
 
 int32_t ClearMfPll( ExtensibleChip * i_chip,
@@ -502,7 +502,7 @@ int32_t ClearMfPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, ClearMfPll );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearMfPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearMfPll );
 
 /**
@@ -562,7 +562,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, MaskPll );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, MaskPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, MaskPll );
 
 /**
@@ -597,7 +597,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, capturePllFfdc );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, capturePllFfdc );
 
 } // end namespace Proc

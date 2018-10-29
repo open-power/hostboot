@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@ namespace PRDF
 using namespace PlatServices;
 using namespace TARGETING;
 
-namespace p9_mcbist
+namespace nimbus_mcbist
 {
 
 //##############################################################################
@@ -59,7 +59,7 @@ namespace p9_mcbist
 int32_t CaptureMcaRegisters( ExtensibleChip * i_mcbChip,
                              STEP_CODE_DATA_STRUCT & io_sc  )
 {
-    #define PRDF_FUNC "[p9_mcbist::CaptureMcaRegisters] "
+    #define PRDF_FUNC "[nimbus_mcbist::CaptureMcaRegisters] "
 
     CaptureData & cd = io_sc.service_data->GetCaptureData();
 
@@ -77,8 +77,8 @@ int32_t CaptureMcaRegisters( ExtensibleChip * i_mcbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, CaptureMcaRegisters );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, CaptureMcaRegisters );
 
-} // end namespace p9_mcbist
+} // end namespace nimbus_mcbist
 
 } // end namespace PRDF

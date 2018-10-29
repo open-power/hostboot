@@ -967,7 +967,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, todStepCheckFault );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, todStepCheckFault );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, todStepCheckFault );
 
 /**
@@ -1030,7 +1030,7 @@ int32_t todNewTopologyIfBackupMDMT( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, todNewTopologyIfBackupMDMT );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, todNewTopologyIfBackupMDMT );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, todNewTopologyIfBackupMDMT );
 
 
@@ -1054,7 +1054,7 @@ int32_t requestTopologySwitch( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, requestTopologySwitch );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, requestTopologySwitch );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, requestTopologySwitch );
 
 /**
@@ -1090,7 +1090,7 @@ int32_t isTodDisabled( ExtensibleChip * i_chip,
 
     return o_rc;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, isTodDisabled );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, isTodDisabled );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isTodDisabled );
 
 } //namespace Proc ends
