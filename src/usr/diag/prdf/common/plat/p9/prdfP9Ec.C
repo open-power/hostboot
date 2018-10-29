@@ -40,7 +40,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_ec
+namespace Ec
 {
 #ifdef __HOSTBOOT_RUNTIME
 void maskIfCoreCs( ExtensibleChip * i_chip )
@@ -132,7 +132,9 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
     }
 #endif
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE(p9_ec, PostAnalysis);
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ec,      Ec, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PostAnalysis );
 
 /**
  * @brief Checks if this core has checkstopped as a side effect of its
@@ -247,8 +249,9 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
     }
 
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE(p9_ec, PreAnalysis);
-
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ec,      Ec, PreAnalysis );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PreAnalysis );
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
@@ -303,7 +306,7 @@ void checkCoreRePresent( ExtensibleChip * i_chip,
 int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_ec::CheckCoreCheckstop] "
+    #define PRDF_FUNC "[Ec::CheckCoreCheckstop] "
     int32_t l_rc = SUCCESS;
     static const uint32_t CORECS_SECONDS_TO_SLEEP = 10;
 
@@ -395,7 +398,9 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     } while(0);
     return SUCCESS;
     #undef PRDF_FUNC
-} PRDF_PLUGIN_DEFINE(p9_ec, CheckCoreCheckstop);
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ec,      Ec, CheckCoreCheckstop );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, CheckCoreCheckstop );
 
-} // end namespace p9_ec
+} // end namespace Ec
 } // end namespace PRDF

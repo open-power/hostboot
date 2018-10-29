@@ -40,7 +40,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_mc
+namespace cumulus_mc
 {
 
 //##############################################################################
@@ -64,7 +64,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_mc, PreAnalysis );
+PRDF_PLUGIN_DEFINE( cumulus_mc, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -85,11 +85,11 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_mc, PostAnalysis );
+PRDF_PLUGIN_DEFINE( cumulus_mc, PostAnalysis );
 
 //------------------------------------------------------------------------------
 
-} // end namespace p9_mc
+} // end namespace cumulus_mc
 
 } // end namespace PRDF
 

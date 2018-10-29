@@ -218,131 +218,114 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                                              RuleChipDomain * io_domain,
                                              PllDomainMapList & io_pllDmnLst )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t errl = nullptr;
+
+    std::map<TARGETING::MODEL, std::map<TARGETING::TYPE, const char *>> fnMap =
+    {
+        { MODEL_NIMBUS,  { { TYPE_PROC,   p9_nimbus      },
+                           { TYPE_EQ,     p9_eq          },
+                           { TYPE_EX,     p9_ex          },
+                           { TYPE_CORE,   p9_ec          },
+                           { TYPE_CAPP,   p9_capp        },
+                           { TYPE_PEC,    p9_pec         },
+                           { TYPE_PHB,    p9_phb         },
+                           { TYPE_XBUS,   p9_xbus        },
+                           { TYPE_OBUS,   p9_obus        },
+                           { TYPE_MCBIST, p9_mcbist      },
+                           { TYPE_MCS,    p9_mcs         },
+                           { TYPE_MCA,    p9_mca         }, } },
+        { MODEL_CUMULUS, { { TYPE_PROC,   cumulus_proc   },
+                           { TYPE_EQ,     cumulus_eq     },
+                           { TYPE_EX,     cumulus_ex     },
+                           { TYPE_CORE,   cumulus_ec     },
+                           { TYPE_CAPP,   cumulus_capp   },
+                           { TYPE_PEC,    cumulus_pec    },
+                           { TYPE_PHB,    cumulus_phb    },
+                           { TYPE_XBUS,   cumulus_xbus   },
+                           { TYPE_OBUS,   cumulus_obus   },
+                           { TYPE_MC,     cumulus_mc     },
+                           { TYPE_MI,     cumulus_mi     },
+                           { TYPE_DMI,    cumulus_dmi    }, } },
+        { MODEL_CENTAUR, { { TYPE_MEMBUF, cen_centaur    },
+                           { TYPE_MBA,    cen_mba        }, } },
+    };
 
     // Get references to factory objects.
     ScanFacility      & scanFac = ScanFacility::Access();
     ResolutionFactory & resFac  = ResolutionFactory::Access();
 
-    // Get all targets of specified type and add to given domain.
-    TargetHandleList trgtList = getFunctionalTargetList( i_type );
+    // Generic empty PLL domain map
+    PllDomainMap sysRefPllDmnMap;
+    PllDomainMap mfRefPllDmnMap;
 
-    if ( 0 == trgtList.size() )
+    // Iterate all the targets for this type and add to given domain.
+    for ( const auto & trgt : getFunctionalTargetList(i_type) )
     {
-        PRDF_ERR( "[addDomainChips] getFunctionalTargetList() "
-                  "returned empty list for i_type=%d", i_type );
-    }
-    else
-    {
-        // Get rule filename based on type.
-        const char * fileName = "";
+        TARGETING::MODEL model = getChipModel( trgt );
+
+        // Ensure this model is supported.
+        if ( fnMap.end() == fnMap.find(model) )
+        {
+            PRDF_ERR( "[addDomainChips] Unsupported chip model %d for type %d",
+                      model, i_type );
+            PRDF_ASSERT( false );
+        }
+
+        // Ensure this type is supported for this model.
+        if ( (fnMap[model]).end() == (fnMap[model]).find(i_type) )
+        {
+            PRDF_ERR( "[addDomainChips] Unsupported type %d for chip model %d",
+                      i_type, model );
+            PRDF_ASSERT( false );
+        }
+
+        // Get the file name for this model/type.
+        const char * fileName = fnMap[model][i_type];
+
+        // Get the rule chip.
+        RuleChip * chip = new RuleChip( fileName, trgt, scanFac, resFac, errl );
+        if ( nullptr != errl )
+        {
+            delete chip;
+            break; // Return the error log.
+        }
+
+        // Add it to the chip list and domain.
+        sysChipLst.push_back( chip );
+        io_domain->AddChip(   chip );
+
+        // Add to the PLL domains, if needed.
         switch ( i_type )
         {
             case TYPE_PROC:
-            {
-                // Get the PROC model. We don't support mixed PROC models so
-                // should be able to use the first PROC in the list.
-                TARGETING::MODEL model = getChipModel( trgtList[0] );
-
-                if (      MODEL_NIMBUS  == model ) fileName = p9_nimbus;
-                else if ( MODEL_CUMULUS == model ) fileName = p9_cumulus;
-                else
-                    // Print a trace statement, but do not fail the build.
-                    PRDF_ERR( "[addDomainChips] Unsupported PROC model: %d",
-                              model );
+                addChipToPllDomain( CLOCK_DOMAIN_FAB, sysRefPllDmnMap,
+                                    chip, trgt, TYPE_PROC,
+                                    scanFac, resFac );
+                addChipToPllDomain( CLOCK_DOMAIN_IO, mfRefPllDmnMap,
+                                    chip, trgt, TYPE_PEC,
+                                    scanFac, resFac );
                 break;
-            }
-
-            case TYPE_EQ:     fileName = p9_eq;     break;
-            case TYPE_EX:     fileName = p9_ex;     break;
-            case TYPE_CORE:   fileName = p9_ec;     break;
-            case TYPE_CAPP:   fileName = p9_capp;   break;
-            case TYPE_PEC:    fileName = p9_pec;    break;
-            case TYPE_PHB:    fileName = p9_phb;    break;
-            case TYPE_XBUS:   fileName = p9_xbus;   break;
-            case TYPE_OBUS:   fileName = p9_obus;   break;
-            case TYPE_MCBIST: fileName = p9_mcbist; break;
-            case TYPE_MCS:    fileName = p9_mcs;    break;
-            case TYPE_MCA:    fileName = p9_mca;    break;
-            case TYPE_MC:     fileName = p9_mc;     break;
-            case TYPE_MI:     fileName = p9_mi;     break;
-            case TYPE_DMI:    fileName = p9_dmi;    break;
 
             case TYPE_MEMBUF:
-            {
-                // Get the MEMBUF model. We don't support mixed MEMBUF models so
-                // should be able to use the first MEMBUF in the list.
-                TARGETING::MODEL model = getChipModel( trgtList[0] );
-
-                if ( MODEL_CENTAUR == model ) fileName = cen_centaur;
-                else
-                    // Print a trace statement, but do not fail the build.
-                    PRDF_ERR( "[addDomainChips] Unsupported MEMBUF model: %d",
-                              model );
+                addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, sysRefPllDmnMap,
+                                    chip, trgt, TYPE_MEMBUF,
+                                    scanFac, resFac );
                 break;
-            }
 
-            case TYPE_MBA:    fileName = cen_mba;   break;
-
-            default:
-                // Print a trace statement, but do not fail the build.
-                PRDF_ERR( "[addDomainChips] Unsupported target type: %d",
-                          i_type );
+            default: ;
         }
-
-        // Generic empty PLL domain map
-        PllDomainMap sysRefPllDmnMap;
-        PllDomainMap mfRefPllDmnMap;
-
-        // Add each chip to the chip domain.
-        for ( const auto & trgt : trgtList )
-        {
-            if ( NULL == trgt ) continue;
-
-            RuleChip * chip = new RuleChip( fileName, trgt,
-                                            scanFac, resFac, l_errl );
-            if ( NULL != l_errl )
-            {
-                delete chip;
-                break;
-            }
-
-            sysChipLst.push_back( chip );
-            io_domain->AddChip(   chip );
-
-            // PLL domains
-            switch ( i_type )
-            {
-                case TYPE_PROC:
-                    addChipToPllDomain( CLOCK_DOMAIN_FAB, sysRefPllDmnMap,
-                                        chip, trgt, TYPE_PROC,
-                                        scanFac, resFac );
-                    addChipToPllDomain( CLOCK_DOMAIN_IO, mfRefPllDmnMap,
-                                        chip, trgt, TYPE_PEC,
-                                        scanFac, resFac );
-                    break;
-
-                case TYPE_MEMBUF:
-                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, sysRefPllDmnMap,
-                                        chip, trgt, TYPE_MEMBUF,
-                                        scanFac, resFac );
-                    break;
-
-                default: ;
-            }
-        }
-
-        // Add the PLL domain maps to the PLL domain map list.
-        if ( !sysRefPllDmnMap.empty() )
-            io_pllDmnLst.push_back( sysRefPllDmnMap );
-        if ( !mfRefPllDmnMap.empty() )
-            io_pllDmnLst.push_back( mfRefPllDmnMap );
-
-        // Flush rule table cache since objects are all built.
-        Prdr::LoadChipCache::flushCache();
     }
 
-    return l_errl;
+    // Add the PLL domain maps to the PLL domain map list.
+    if ( !sysRefPllDmnMap.empty() )
+        io_pllDmnLst.push_back( sysRefPllDmnMap );
+    if ( !mfRefPllDmnMap.empty() )
+        io_pllDmnLst.push_back( mfRefPllDmnMap );
+
+    // Flush rule table cache since objects are all built.
+    Prdr::LoadChipCache::flushCache();
+
+    return errl;
 }
 
 //------------------------------------------------------------------------------

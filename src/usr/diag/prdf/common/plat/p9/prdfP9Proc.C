@@ -93,8 +93,8 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForRecovered );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
 /**
@@ -174,8 +174,8 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForRecoveredSev );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
  *  To be called from the fabric domain to gather Checkstop information.  This
@@ -271,8 +271,8 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, GetCheckstopInfo );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, GetCheckstopInfo );
 
 //------------------------------------------------------------------------------
 
@@ -323,8 +323,8 @@ int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, isHostAttnFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isHostAttnFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -361,8 +361,8 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, isUcsFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -379,8 +379,8 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleDeadmanTimer );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
 
@@ -420,8 +420,8 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleSbeVital );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
 
@@ -454,8 +454,8 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForUnitCs );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForUnitCs );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, CheckForUnitCs );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
 
@@ -488,8 +488,8 @@ int32_t PmRecovery( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, PmRecovery );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, PmRecovery );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, PmRecovery );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 
@@ -563,8 +563,8 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
 
     return l_rc;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleIntCqFirPcRecovError );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleIntCqFirPcRecovError );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,    Proc, handleIntCqFirPcRecovError );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,14 +44,17 @@
 
 class ExLFIR:public CxxTest::TestSuite
 {
-    public:
+  public:
 
-        void TestRecoverable(void)
+    void TestRecoverable(void)
+    {
+        if ( TARGETING::MODEL_CUMULUS == PRDF::PlatServices::getChipModel(
+                                         PRDF::PlatServices::getMasterProc() ) )
         {
             PRDS_BEGIN("ECLFIR recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
             PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
-                                     0x33e70007);
+                                     0x35e70007);
             // GLOBAL_RE_FIR set bit 32
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000000080000000);
             // EC_CHIPLET_RE_FIR[1] Attention from ECLFIR
@@ -70,13 +73,16 @@ class ExLFIR:public CxxTest::TestSuite
                 TS_FAIL("Expected Signature Failed ECLFIR recoverable attention");
             }
         }
+    }
 
-        void TestL3CE(void)
+    void TestL3CE(void)
+    {
+        if ( TARGETING::MODEL_CUMULUS == PRDF::PlatServices::getChipModel(
+                                         PRDF::PlatServices::getMasterProc() ) )
         {
-
             PRDS_BEGIN("L3CE Test");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}", 0xf08d0004);
+            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}", 0xf28d0004);
             // GLOBAL_RE_FIR bit 16
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000800000000000);
             // EX_CHIPLET_RE_FIR[4] - Analyze L3FIR
@@ -94,13 +100,17 @@ class ExLFIR:public CxxTest::TestSuite
                 TS_FAIL("L3CE Test failed");
             }
         }
+    }
 
-        void TestCoreRecoverable(void)
+    void TestCoreRecoverable(void)
+    {
+        if ( TARGETING::MODEL_CUMULUS == PRDF::PlatServices::getChipModel(
+                                         PRDF::PlatServices::getMasterProc() ) )
         {
             PRDS_BEGIN("COREFIR recoverable attention");
             PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
             PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}:EQ{0}:EX{0}:CORE{0}",
-                                     0xdd3f003c);
+                                     0xdf3f003c);
 
             // GLOBAL_RE_FIR
             PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x0000000080000000);
@@ -137,6 +147,7 @@ class ExLFIR:public CxxTest::TestSuite
                 TS_FAIL("COREFIR recoverable attention test failed");
             }
         }
+    }
 
 };
 #endif

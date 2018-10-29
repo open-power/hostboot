@@ -76,10 +76,18 @@ PRDF_PLUGIN_DEFINE_NS( p9_mca,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_capp,    CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_phb,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_mcs,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_mc,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_mi,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_dmi,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_capp,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ec,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_eq,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_mc,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_mi,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_pec,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_phb,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cen_centaur,CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cen_mba,    CommonPlugins, ClearServiceCallFlag );
 
@@ -101,7 +109,7 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS(p9_nimbus,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
-PRDF_PLUGIN_DEFINE_NS(p9_cumulus, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(cumulus_proc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 } // namespace CommonPlugins ends
 
