@@ -184,7 +184,7 @@ inline bool spBaseServicesEnabled()
  *
  * If true then we are running in wrap config
  *
- * @return bool - true if wrap config, else false 
+ * @return bool - true if wrap config, else false
  */
 inline bool isSMPWrapConfig()
 {
@@ -215,6 +215,24 @@ void ShadowIstepData( uint8_t i_step,
  */
 void GetIstepData( uint8_t & o_step,
                    uint8_t & o_subStep );
+
+/**
+ * @brief This function is to be used by external code to tell
+ *      istepdispatcher to stop executing isteps
+ *
+ *  Note:
+ *  Located here so external code can call before
+ *  istepdispatcher code is loaded
+ *
+ * @return Nothing
+ */
+void stopIpl( void );
+
+/**
+ * @brief Return if istepdispatcher needs to stop executing isteps
+ * @return true if IPL stopped
+ */
+bool isIplStopped();
 
 }
 

@@ -94,13 +94,6 @@ errlHndl_t sendAttnMonitorChipIdMsg(
  */
 bool isShutdownRequested ( void );
 
-/**
- * @brief This function is to be used by external code to tell
- *      this instance of istepdispatcher to stop executing steps
- *
- * @return Nothing
- */
-void stopIpl( void );
 
 #ifdef CONFIG_BMC_IPMI
 /**

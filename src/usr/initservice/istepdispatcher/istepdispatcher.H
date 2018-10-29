@@ -214,12 +214,6 @@ public:
     void setNewGardRecord();
 
     /**
-     * @brief This function will set a boolean true which tells the istep
-     * dispacher to stop executing steps
-     */
-    void setStopIpl();
-
-    /**
      * @brief This function will stop the istep dispacher from continuing to
      * execute steps
      */
@@ -491,10 +485,6 @@ private:
 
     // Instance variable to state if a new gard record was committed
     bool iv_newGardRecord;
-
-    // Instance variable to state if a power off is in progress and
-    // the istep dispatcher should stop executing steps
-    bool iv_stopIpl;
 
     // Instance variable to state if the PHB Perst libraries are loaded
     bool iv_p9_phbPerstLibLoaded;

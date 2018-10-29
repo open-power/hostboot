@@ -626,6 +626,7 @@ InitService& InitService::getTheInstance( )
 
 InitService::InitService( ) :
     iv_shutdownInProgress(false),
+    iv_stopIPL(false),
     iv_worst_status(false),
     iv_iStep( 0 ),
     iv_iSubStep( 0 )
@@ -716,6 +717,29 @@ bool InitService::_setShutdownStatus(
     mutex_unlock(&iv_registryMutex);
 
     return first;
+}
+
+// External call to stop the IPL
+void stopIpl()
+{
+    // Set the flag to disable istep dispatcher
+    Singleton<InitService>::instance().stopIpl();
+}
+
+void InitService::stopIpl()
+{
+    iv_stopIPL = true;
+}
+
+// External call to grab the stopIpl status
+bool isIplStopped()
+{
+    return Singleton<InitService>::instance().isIplStopped();
+}
+
+bool InitService::isIplStopped()
+{
+    return iv_stopIPL;
 }
 
 void doShutdown(uint64_t i_status,
