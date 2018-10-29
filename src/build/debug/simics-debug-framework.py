@@ -584,14 +584,15 @@ def magic_instruction_callback(user_arg, cpu, arg):
         dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
         SIM_run_alone(run_command, dateCommand )
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
-        if( os.environ.has_key('DISABLE_HB_SIMICS_LOGS') ):
-            print("Skipping Hostboot Simics Logging because DISABLE_HB_SIMICS_LOGS")
+        if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
+            #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
             return
 
         hb_hrmor = cpu.hrmor
         per_node = 0x200000000000   #32TB
         per_chip = 0x40000000000    #4TB
         node_num = hb_hrmor//per_node
+        # TODO RTC:200729 right now for 3 node systems the chip is getting calculated wrong
         proc_num = hb_hrmor//per_chip
         comp_id = cpu.r4
         log_level = cpu.r5
@@ -604,6 +605,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Right now only 2 components are supported, this if check
         # needs to be updated if more components are supported
         if comp_id >= 0 or  comp_id <= 1:
+            #TODO RTC:200729 Simics team is coming up with a better way to lookup object
             #check if D1Proc0 exists
             D1Proc0String = "D1Proc0"
             try:
@@ -634,8 +636,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 couldNotFindCommand = "shell \" Unable to find valid object on this system type, neither %s nor %s were found \""%(D1Proc0String, P9Proc0String)
                 SIM_run_alone(run_command, couldNotFindCommand )
     if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
-        if( os.environ.has_key('DISABLE_HB_SIMICS_LOGS') ):
-            print("Skipping Hostboot Simics Logging because DISABLE_HB_SIMICS_LOGS")
+        if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
+            #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
             return
 
         enable = cpu.r4
