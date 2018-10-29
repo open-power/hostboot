@@ -44,7 +44,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_mca
+namespace nimbus_mca
 {
 
 //##############################################################################
@@ -64,7 +64,7 @@ namespace p9_mca
  */
 int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::PostAnalysis] "
+    #define PRDF_FUNC "[nimbus_mca::PostAnalysis] "
 
     #ifdef __HOSTBOOT_RUNTIME
 
@@ -88,7 +88,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
+PRDF_PLUGIN_DEFINE( nimbus_mca, PostAnalysis );
 
 
 //##############################################################################
@@ -106,7 +106,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, PostAnalysis );
 int32_t RcdParityError( ExtensibleChip * i_mcaChip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::RcdParityError] "
+    #define PRDF_FUNC "[nimbus_mca::RcdParityError] "
 
     // The callouts have already been made in the rule code. All other actions
     // documented below.
@@ -257,7 +257,7 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, RcdParityError );
+PRDF_PLUGIN_DEFINE( nimbus_mca, RcdParityError );
 
 //------------------------------------------------------------------------------
 
@@ -270,7 +270,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, RcdParityError );
 int32_t MemPortFailure( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::MemPortFailure] "
+    #define PRDF_FUNC "[nimbus_mca::MemPortFailure] "
 
     if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
     {
@@ -287,9 +287,9 @@ int32_t MemPortFailure( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, MemPortFailure );
+PRDF_PLUGIN_DEFINE( nimbus_mca, MemPortFailure );
 
-} // end namespace p9_mca
+} // end namespace nimbus_mca
 
 } // end namespace PRDF
 

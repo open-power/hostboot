@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_obus.rule $
+# $Source: src/usr/diag/prdf/common/plat/nimbus/nimbus_obus.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_obus
+chip nimbus_obus
 {
     name        "P9 OBUS chiplet";
     targettype  TYPE_OBUS;

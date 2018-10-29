@@ -34,18 +34,18 @@
 namespace PRDF
 {
     // P9 Nimbus Chip
-    const char * p9_nimbus  = "p9_nimbus";
-    const char * p9_eq      = "p9_eq";
-    const char * p9_ex      = "p9_ex";
-    const char * p9_ec      = "p9_ec";
-    const char * p9_capp    = "p9_capp";
-    const char * p9_pec     = "p9_pec";
-    const char * p9_phb     = "p9_phb";
-    const char * p9_xbus    = "p9_xbus";
-    const char * p9_obus    = "p9_obus";
-    const char * p9_mcbist  = "p9_mcbist";
-    const char * p9_mcs     = "p9_mcs";
-    const char * p9_mca     = "p9_mca";
+    const char * nimbus_proc    = "nimbus_proc";
+    const char * nimbus_eq      = "nimbus_eq";
+    const char * nimbus_ex      = "nimbus_ex";
+    const char * nimbus_ec      = "nimbus_ec";
+    const char * nimbus_capp    = "nimbus_capp";
+    const char * nimbus_pec     = "nimbus_pec";
+    const char * nimbus_phb     = "nimbus_phb";
+    const char * nimbus_xbus    = "nimbus_xbus";
+    const char * nimbus_obus    = "nimbus_obus";
+    const char * nimbus_mcbist  = "nimbus_mcbist";
+    const char * nimbus_mcs     = "nimbus_mcs";
+    const char * nimbus_mca     = "nimbus_mca";
 
     // P9 Cumulus Chip
     const char * cumulus_proc = "cumulus_proc";

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_mcbist
+namespace nimbus_mcbist
 {
 
 //##############################################################################
@@ -66,7 +66,7 @@ int32_t Initialize( ExtensibleChip * i_mcbChip )
     i_mcbChip->getDataBundle() = new McbistDataBundle( i_mcbChip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, Initialize );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, Initialize );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -80,7 +80,7 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, Initialize );
 int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mcbist::PostAnalysis] "
+    #define PRDF_FUNC "[nimbus_mcbist::PostAnalysis] "
 
 
     #ifdef __HOSTBOOT_RUNTIME
@@ -128,7 +128,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, PostAnalysis );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, PostAnalysis );
 
 //##############################################################################
 //
@@ -145,7 +145,7 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, PostAnalysis );
 int32_t McbistCmdComplete( ExtensibleChip * i_mcbChip,
                            STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mcbist::McbistCmdComplete] "
+    #define PRDF_FUNC "[nimbus_mcbist::McbistCmdComplete] "
 
     // Tell the TD controller there was a command complete attention.
     McbistDataBundle * db = getMcbistDataBundle( i_mcbChip );
@@ -165,7 +165,7 @@ int32_t McbistCmdComplete( ExtensibleChip * i_mcbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, McbistCmdComplete );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, McbistCmdComplete );
 
 /**
  * @brief  MCBIST[12] - MCBIST Command Complete Nimbus DD1.0 workaround.
@@ -176,7 +176,7 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, McbistCmdComplete );
 int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
                                   STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mcbist::CmdCompleteDd1Workaround] "
+    #define PRDF_FUNC "[nimbus_mcbist::CmdCompleteDd1Workaround] "
 
     int32_t o_rc = SUCCESS; // Returned to rule code.
 
@@ -281,7 +281,7 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, CmdCompleteDd1Workaround );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, CmdCompleteDd1Workaround );
 
 //------------------------------------------------------------------------------
 
@@ -294,7 +294,7 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, CmdCompleteDd1Workaround );
 int32_t commandAddrTimeout( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mcbist::commandAddrTimeout] "
+    #define PRDF_FUNC "[nimbus_mcbist::commandAddrTimeout] "
 
     // The current MCBIST command is hung and will not complete. All conditions
     // that would cause this are contained within the MCAs in which the command
@@ -320,11 +320,11 @@ int32_t commandAddrTimeout( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mcbist, commandAddrTimeout );
+PRDF_PLUGIN_DEFINE( nimbus_mcbist, commandAddrTimeout );
 
 //------------------------------------------------------------------------------
 
-} // end namespace p9_mcbist
+} // end namespace nimbus_mcbist
 
 } // end namespace PRDF
 

@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_capp.rule $
+# $Source: src/usr/diag/prdf/common/plat/nimbus/nimbus_capp.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_capp
+chip nimbus_capp
 {
     name        "P9 CAPP chiplet";
     targettype  TYPE_CAPP;

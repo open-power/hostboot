@@ -24,18 +24,18 @@
 # IBM_PROLOG_END_TAG
 
 # P9 Nimbus Chip
-PRDR_RULE_TABLES += p9_nimbus.prf
-PRDR_RULE_TABLES += p9_eq.prf
-PRDR_RULE_TABLES += p9_ex.prf
-PRDR_RULE_TABLES += p9_ec.prf
-PRDR_RULE_TABLES += p9_capp.prf
-PRDR_RULE_TABLES += p9_pec.prf
-PRDR_RULE_TABLES += p9_phb.prf
-PRDR_RULE_TABLES += p9_obus.prf
-PRDR_RULE_TABLES += p9_xbus.prf
-PRDR_RULE_TABLES += p9_mcbist.prf
-PRDR_RULE_TABLES += p9_mcs.prf
-PRDR_RULE_TABLES += p9_mca.prf
+PRDR_RULE_TABLES += nimbus_proc.prf
+PRDR_RULE_TABLES += nimbus_eq.prf
+PRDR_RULE_TABLES += nimbus_ex.prf
+PRDR_RULE_TABLES += nimbus_ec.prf
+PRDR_RULE_TABLES += nimbus_capp.prf
+PRDR_RULE_TABLES += nimbus_pec.prf
+PRDR_RULE_TABLES += nimbus_phb.prf
+PRDR_RULE_TABLES += nimbus_obus.prf
+PRDR_RULE_TABLES += nimbus_xbus.prf
+PRDR_RULE_TABLES += nimbus_mcbist.prf
+PRDR_RULE_TABLES += nimbus_mcs.prf
+PRDR_RULE_TABLES += nimbus_mca.prf
 
 # P9 Cumulus Chip
 PRDR_RULE_TABLES += cumulus_proc.prf

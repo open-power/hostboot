@@ -40,7 +40,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_mca
+namespace nimbus_mca
 {
 
 //##############################################################################
@@ -59,7 +59,7 @@ int32_t Initialize( ExtensibleChip * i_chip )
     i_chip->getDataBundle() = new McaDataBundle( i_chip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_mca, Initialize );
+PRDF_PLUGIN_DEFINE( nimbus_mca, Initialize );
 
 //##############################################################################
 //
@@ -81,7 +81,7 @@ int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
 
     return SUCCESS; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, CalloutAttachedDimmsHigh );
+PRDF_PLUGIN_DEFINE( nimbus_mca, CalloutAttachedDimmsHigh );
 
 //##############################################################################
 //
@@ -98,7 +98,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, CalloutAttachedDimmsHigh );
 int32_t mcaUeAlgorithm( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::mcaUeAlgorithm] "
+    #define PRDF_FUNC "[nimbus_mca::mcaUeAlgorithm] "
 
     SCAN_COMM_REGISTER_CLASS * fir = nullptr;
     SCAN_COMM_REGISTER_CLASS * msk = nullptr;
@@ -165,7 +165,7 @@ int32_t mcaUeAlgorithm( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, mcaUeAlgorithm );
+PRDF_PLUGIN_DEFINE( nimbus_mca, mcaUeAlgorithm );
 
 //##############################################################################
 //
@@ -187,7 +187,7 @@ int32_t AnalyzeFetchMpe_##RANK( ExtensibleChip * i_chip, \
     MemEcc::analyzeFetchMpe<TYPE_MCA>( i_chip, rank, io_sc ); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchMpe_##RANK );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeFetchMpe_##RANK );
 
 PLUGIN_FETCH_MPE_ERROR( 0 )
 PLUGIN_FETCH_MPE_ERROR( 1 )
@@ -214,7 +214,7 @@ int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
     MemEcc::analyzeFetchNceTce<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchNceTce );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeFetchNceTce );
 
 //------------------------------------------------------------------------------
 
@@ -230,7 +230,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
     MemEcc::analyzeFetchUe<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeFetchUe );
 
 //------------------------------------------------------------------------------
 
@@ -255,7 +255,7 @@ int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
 
     return rc; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMainlineIue );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeMainlineIue );
 
 //------------------------------------------------------------------------------
 
@@ -280,7 +280,7 @@ int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
 
     return rc; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintIue );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeMaintIue );
 
 //------------------------------------------------------------------------------
 
@@ -295,7 +295,7 @@ int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     MemEcc::analyzeImpe<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeImpe );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeImpe );
 
 //------------------------------------------------------------------------------
 
@@ -308,7 +308,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeImpe );
 int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::AnalyzeFetchAueIaue] "
+    #define PRDF_FUNC "[nimbus_mca::AnalyzeFetchAueIaue] "
 
     MemAddr addr;
     if ( SUCCESS != getMemReadAddr<TYPE_MCA>(i_chip, MemAddr::READ_AUE_ADDR,
@@ -328,7 +328,7 @@ int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchAueIaue );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeFetchAueIaue );
 
 /**
  * @brief  MCAECCFIR[33] - Maintenance AUE
@@ -339,7 +339,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchAueIaue );
 int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_mca::AnalyzeMaintAue] "
+    #define PRDF_FUNC "[nimbus_mca::AnalyzeMaintAue] "
 
     MemAddr addr;
     if ( SUCCESS != getMemMaintAddr<TYPE_MCA>(i_chip, addr) )
@@ -358,11 +358,11 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintAue );
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeMaintAue );
 
 //------------------------------------------------------------------------------
 
-} // end namespace p9_mca
+} // end namespace nimbus_mca
 
 } // end namespace PRDF
 

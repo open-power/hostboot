@@ -54,7 +54,7 @@ int32_t Initialize( ExtensibleChip * i_exChip )
     i_exChip->getDataBundle() = new P9ExDataBundle( i_exChip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, Initialize );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, Initialize );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, Initialize );
 
 /**
@@ -169,7 +169,7 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, PostAnalysis );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, PostAnalysis );
 
 /**
@@ -195,7 +195,7 @@ int32_t cacheCeWorkaround( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, cacheCeWorkaround );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, cacheCeWorkaround );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, cacheCeWorkaround );
 
 /**
@@ -319,7 +319,7 @@ int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L2UE );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2UE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2UE );
 
 /**
@@ -367,7 +367,7 @@ int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L3UE );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3UE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3UE );
 
 /**
@@ -482,7 +482,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L2CE );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2CE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2CE );
 
 /**
@@ -638,7 +638,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L3CE );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3CE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3CE );
 
 }

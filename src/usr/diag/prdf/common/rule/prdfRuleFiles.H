@@ -35,18 +35,18 @@ namespace PRDF
 {
 
     // P9 Nimbus Chip
-    extern const char * p9_nimbus;
-    extern const char * p9_eq;
-    extern const char * p9_ex;
-    extern const char * p9_ec;
-    extern const char * p9_capp;
-    extern const char * p9_pec;
-    extern const char * p9_phb;
-    extern const char * p9_xbus;
-    extern const char * p9_obus;
-    extern const char * p9_mcbist;
-    extern const char * p9_mcs;
-    extern const char * p9_mca;
+    extern const char * nimbus_proc;
+    extern const char * nimbus_eq;
+    extern const char * nimbus_ex;
+    extern const char * nimbus_ec;
+    extern const char * nimbus_capp;
+    extern const char * nimbus_pec;
+    extern const char * nimbus_phb;
+    extern const char * nimbus_xbus;
+    extern const char * nimbus_obus;
+    extern const char * nimbus_mcbist;
+    extern const char * nimbus_mcs;
+    extern const char * nimbus_mca;
 
     // P9 Cumulus Chip
     extern const char * cumulus_proc;

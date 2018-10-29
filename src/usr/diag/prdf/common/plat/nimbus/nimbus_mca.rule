@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_mca.rule $
+# $Source: src/usr/diag/prdf/common/plat/nimbus/nimbus_mca.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_mca
+chip nimbus_mca
 {
     name        "P9 MCA chiplet";
     targettype  TYPE_MCA;
