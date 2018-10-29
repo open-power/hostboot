@@ -41,7 +41,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_dmi
+namespace cumulus_dmi
 {
 
 //##############################################################################
@@ -67,7 +67,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_dmi, PreAnalysis );
+PRDF_PLUGIN_DEFINE( cumulus_dmi, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -86,7 +86,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_dmi, PostAnalysis );
+PRDF_PLUGIN_DEFINE( cumulus_dmi, PostAnalysis );
 
 //##############################################################################
 //
@@ -143,11 +143,11 @@ int32_t dsffChannelTimeoutCheck( ExtensibleChip * i_dmiChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_dmi, dsffChannelTimeoutCheck );
+PRDF_PLUGIN_DEFINE( cumulus_dmi, dsffChannelTimeoutCheck );
 
 //------------------------------------------------------------------------------
 
-} // end namespace p9_dmi
+} // end namespace cumulus_dmi
 
 } // end namespace PRDF
 

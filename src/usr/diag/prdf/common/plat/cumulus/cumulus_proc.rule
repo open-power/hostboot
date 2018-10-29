@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_cumulus.rule $
+# $Source: src/usr/diag/prdf/common/plat/cumulus/cumulus_proc.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_cumulus
+chip cumulus_proc
 {
     name        "P9 Cumulus chip";
     targettype  TYPE_PROC;

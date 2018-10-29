@@ -35,7 +35,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_eq
+namespace Eq
 {
 
 /**
@@ -59,7 +59,9 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
     }
 #endif
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE(p9_eq, PostAnalysis);
+}
+PRDF_PLUGIN_DEFINE_NS( p9_eq,      Eq, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( cumulus_eq, Eq, PostAnalysis );
 
 }
 }

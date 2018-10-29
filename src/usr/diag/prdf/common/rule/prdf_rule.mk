@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,9 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-# Add Rule tables here:
+# P9 Nimbus Chip
 PRDR_RULE_TABLES += p9_nimbus.prf
-PRDR_RULE_TABLES += p9_cumulus.prf
 PRDR_RULE_TABLES += p9_eq.prf
 PRDR_RULE_TABLES += p9_ex.prf
 PRDR_RULE_TABLES += p9_ec.prf
@@ -37,9 +36,22 @@ PRDR_RULE_TABLES += p9_xbus.prf
 PRDR_RULE_TABLES += p9_mcbist.prf
 PRDR_RULE_TABLES += p9_mcs.prf
 PRDR_RULE_TABLES += p9_mca.prf
-PRDR_RULE_TABLES += p9_mc.prf
-PRDR_RULE_TABLES += p9_mi.prf
-PRDR_RULE_TABLES += p9_dmi.prf
+
+# P9 Cumulus Chip
+PRDR_RULE_TABLES += cumulus_proc.prf
+PRDR_RULE_TABLES += cumulus_eq.prf
+PRDR_RULE_TABLES += cumulus_ex.prf
+PRDR_RULE_TABLES += cumulus_ec.prf
+PRDR_RULE_TABLES += cumulus_capp.prf
+PRDR_RULE_TABLES += cumulus_pec.prf
+PRDR_RULE_TABLES += cumulus_phb.prf
+PRDR_RULE_TABLES += cumulus_xbus.prf
+PRDR_RULE_TABLES += cumulus_obus.prf
+PRDR_RULE_TABLES += cumulus_mc.prf
+PRDR_RULE_TABLES += cumulus_mi.prf
+PRDR_RULE_TABLES += cumulus_dmi.prf
+
+# Centaur Chip
 PRDR_RULE_TABLES += cen_centaur.prf
 PRDR_RULE_TABLES += cen_mba.prf
 

@@ -41,7 +41,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace p9_ex
+namespace Ex
 {
 
 /**
@@ -54,7 +54,8 @@ int32_t Initialize( ExtensibleChip * i_exChip )
     i_exChip->getDataBundle() = new P9ExDataBundle( i_exChip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( p9_ex, Initialize );
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, Initialize );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, Initialize );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -68,7 +69,7 @@ PRDF_PLUGIN_DEFINE( p9_ex, Initialize );
 int32_t PostAnalysis( ExtensibleChip * i_exChip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[p9_ex::PostAnalysis] "
+    #define PRDF_FUNC "[Ex::PostAnalysis] "
 
     int32_t l_rc = SUCCESS;
 
@@ -168,7 +169,8 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( p9_ex, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, PostAnalysis );
 
 /**
  * @brief  For L2/L3 Cache CEs, L3 Directory CEs, and L3 LRU Parity Errors.
@@ -192,7 +194,9 @@ int32_t cacheCeWorkaround( ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( p9_ex, cacheCeWorkaround );
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, cacheCeWorkaround );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, cacheCeWorkaround );
 
 /**
  * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
@@ -314,7 +318,9 @@ int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
 #endif
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE( p9_ex, L2UE );
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L2UE );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2UE );
 
 /**
  * @brief  Handle an L3 UE
@@ -360,7 +366,9 @@ int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
 #endif
     return SUCCESS;
-} PRDF_PLUGIN_DEFINE( p9_ex, L3UE );
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L3UE );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3UE );
 
 /**
  * @brief  Handle an L2 CE
@@ -473,7 +481,9 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( p9_ex, L2CE );
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L2CE );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2CE );
 
 /**
  * @brief Handle an L3 CE
@@ -627,7 +637,9 @@ int32_t L3CE( ExtensibleChip * i_chip,
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE(p9_ex, L3CE);
+}
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      Ex, L3CE );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3CE );
 
 }
 }
