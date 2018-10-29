@@ -92,6 +92,7 @@ extern "C"
         access_address l_enable_sppr = l_addr;
         fapi2::variable_buffer l_data_16(16);
         fapi2::variable_buffer l_bank_3(3);
+        fapi2::buffer<uint64_t> l_modeq_orig;
         fapi2::buffer<uint64_t> l_row;
         fapi2::buffer<uint64_t> l_bank;
         fapi2::buffer<uint64_t> l_saved_mr0;
@@ -169,6 +170,7 @@ extern "C"
         // Enable CCS and set RAS/CAS/WE high during idles
         FAPI_DBG("%s Enabling CCS", mss::c_str(i_target_mba));
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
+        l_modeq_orig = l_reg_buffer;
         FAPI_TRY(l_reg_buffer.setBit(29));    //Enable CCS
         FAPI_TRY(l_reg_buffer.setBit(51));    //ACT high
         FAPI_TRY(l_reg_buffer.setBit(52));    //RAS high
@@ -251,9 +253,7 @@ extern "C"
 
         // Disable CCS
         FAPI_DBG("%s Disabling CCS", mss::c_str(i_target_mba));
-        FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
-        FAPI_TRY(l_reg_buffer.clearBit(29));
-        FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_reg_buffer));
+        FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_CCS_MODEQ, l_modeq_orig));
 
         // Turn on refresh
         FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_reg_buffer));
@@ -553,6 +553,8 @@ extern "C"
 
                             l_port_rank = (l_dimm_index * MAX_RANKS_PER_DIMM) + l_mrank;
 
+                            FAPI_INF("%s Deploying row repair on all DRAMs on mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                                     mss::spd::c_str(l_dimm), l_mrank, l_srank, l_bg, l_bank, l_row);
                             FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
                         }
                     }
@@ -692,8 +694,8 @@ extern "C"
                     }
 
                     // Deploy row repair and clear bad DQs
-                    FAPI_INF("%s Deploying row repair on DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                             mss::spd::c_str(l_dimm), l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
+                    FAPI_INF("%s Deploying row repair on port %d, DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                             mss::spd::c_str(l_dimm), l_port, l_dram, l_rank, l_srank, l_bg, l_bank, l_row);
                     FAPI_TRY(l_dram_bitmap.setBit(DRAM_START_BIT + l_dram));
                     FAPI_TRY(p9c_mss_row_repair(i_target_mba, l_port, l_port_rank, l_srank, l_bg, l_bank, l_row, l_dram_bitmap));
 

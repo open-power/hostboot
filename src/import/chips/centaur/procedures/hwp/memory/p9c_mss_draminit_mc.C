@@ -89,13 +89,13 @@ extern "C" {
             FAPI_INF( "%s +++ Check RCD protect time on RDIMM and LRDIMM +++", mss::c_str(i_target));
             FAPI_TRY(mss_check_RCD_protect_time(l_mba), "---Error During Check RCD protect time");
 
-            //Step Two.2: Enable address inversion on each MBA for ALL CARDS
-            FAPI_INF( "%s +++ Setting up adr inversion for port 1 +++", mss::c_str(i_target));
-            FAPI_TRY(mss_enable_addr_inversion(l_mba), "---Error During ADR Inversion");
-
-            //Step Two.3: Apply row repairs on each MBA's DIMM
+            //Step Two.2: Apply row repairs on each MBA's DIMM
             FAPI_INF( "%s +++ Applying sPPR row repairs +++", mss::c_str(i_target));
             FAPI_TRY(p9c_mss_deploy_row_repairs(l_mba), "---Error During Row Reapirs");
+
+            //Step Two.3: Enable address inversion on each MBA for ALL CARDS
+            FAPI_INF( "%s +++ Setting up adr inversion for port 1 +++", mss::c_str(i_target));
+            FAPI_TRY(mss_enable_addr_inversion(l_mba), "---Error During ADR Inversion");
 
             // Step Three: Enable Refresh
             FAPI_INF( "%s +++ Enabling Refresh +++", mss::c_str(i_target));

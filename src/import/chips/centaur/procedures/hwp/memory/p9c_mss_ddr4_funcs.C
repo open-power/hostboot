@@ -2609,7 +2609,7 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         }
 
         // Only corresponding CS to rank
-        access_address l_addr = {0, 0, i_mrank, i_srank, 0, 0};
+        access_address l_addr = {0, 0, i_mrank, i_srank, 0, i_port};
         FAPI_TRY(cs_decode(i_target, l_addr, l_dram_stack[i_port][l_dimm], l_csn_8));
 
         FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
