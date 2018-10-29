@@ -252,6 +252,23 @@ public:
                      uint64_t i_masterHBInstance = THIS_NODE_NO_PAYLOAD,
                      uint32_t i_error_info = 0);
 
+    /**
+     *  @brief Set flag to stop the execution of IPL isteps
+     *
+     *  @note: See the API documentation @
+     *      src/include/usr/initservice/initserviceif.H
+     */
+    void stopIpl();
+
+    /**
+     *  @brief Check if the execution of isteps should stop
+     *  @return true = IPL's istep execution is stopped
+     *
+     *  @note: See the API documentation @
+     *      src/include/usr/initservice/initserviceif.H
+     */
+    bool isIplStopped();
+
 protected:
 
     /**
@@ -323,6 +340,7 @@ private:
                       uint64_t i_masterHBInstance = 0xffffffffffffffffull,
                       uint32_t i_error_info = 0);
 
+
     /**
      * Check and load module associated with this task or function
      *  if necessary.
@@ -367,6 +385,7 @@ private:
 
     mutex_t iv_registryMutex;
     bool iv_shutdownInProgress;
+    bool iv_stopIPL; // flag states if istep execution is stopped
 
     // Worst shutdown status accumulated during shutdown processing
     uint64_t iv_worst_status;

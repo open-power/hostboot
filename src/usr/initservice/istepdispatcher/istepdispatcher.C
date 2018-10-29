@@ -139,7 +139,6 @@ IStepDispatcher::IStepDispatcher() :
     iv_substepToCompleteBeforeShutdown(0),
     iv_acceptIstepMessages(true),
     iv_newGardRecord(false),
-    iv_stopIpl(false),
     iv_p9_phbPerstLibLoaded(false)
 
 {
@@ -497,7 +496,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         substep = 0;
         while (substep < g_isteps[istep].numitems)
         {
-            if( iv_stopIpl == true )
+            if( INITSERVICE::isIplStopped() == true )
             {
 #ifdef CONFIG_BMC_IPMI
                 // if we came in here and we are connected to a BMC, then
@@ -761,7 +760,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 ERRORLOG::ErrlManager::callFlushErrorLogs();
 
                 // Quiesce new isteps, including external requests
-                (void)setStopIpl();
+                INITSERVICE::stopIpl();
 
 #ifdef CONFIG_HANG_ON_MFG_SRC_TERM
                 // Stop the IPL
@@ -1787,7 +1786,7 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 void IStepDispatcher::requestReboot()
 {
     // Always stop dispatching isteps before calling for the reboot
-    (void)setStopIpl();
+    INITSERVICE::stopIpl();
 
     // Send a reboot message to the BMC
     (void)IPMI::initiateReboot();
@@ -1796,7 +1795,7 @@ void IStepDispatcher::requestReboot()
 void IStepDispatcher::requestPowerOff()
 {
     // Always stop dispatching isteps before calling for the power off
-    (void)setStopIpl();
+    INITSERVICE::stopIpl();
 
     // Send a power off message to the BMC
     (void)IPMI::initiatePowerOff();
@@ -1855,20 +1854,7 @@ void IStepDispatcher::shutdownDuringIpl()
     }
 
 }
-// -----------------------------------------------------------------------------
-// IStepDispatcher::setStopIpl()
-// -----------------------------------------------------------------------------
-void IStepDispatcher::setStopIpl()
-{
-    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::setStopIpl");
 
-    mutex_lock(&iv_mutex);
-    iv_stopIpl = true;
-    mutex_unlock(&iv_mutex);
-
-    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::setStopIpl");
-    return;
-}
 
 // ----------------------------------------------------------------------------
 // IStepDispatcher::iStepBreakPoint()
@@ -2035,7 +2021,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     mutex_unlock(&iv_mutex);
 
     // If istep dispatching has ceased, prevent new isteps from executing
-    if(iv_stopIpl == true)
+    if(INITSERVICE::isIplStopped() == true)
     {
         /*@
          * @errortype
@@ -2718,11 +2704,7 @@ void requestPowerOff()
     IStepDispatcher::getTheInstance().requestPowerOff();
 }
 #endif
-void stopIpl()
-{
-    // Disable the istep dispatcher
-    return IStepDispatcher::getTheInstance().setStopIpl();
-}
+
 
 // ----------------------------------------------------------------------------
 // IStepDispatcher::getIstepInfo()

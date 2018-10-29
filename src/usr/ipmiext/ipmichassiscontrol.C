@@ -36,7 +36,7 @@
 #include <errl/errlentry.H>
 #include <ipmi/ipmichassiscontrol.H>
 #include <ipmi/ipmiif.H>
-#include <initservice/istepdispatcherif.H>
+#include <initservice/initserviceif.H>
 
 /******************************************************************************/
 // Globals/Constants
