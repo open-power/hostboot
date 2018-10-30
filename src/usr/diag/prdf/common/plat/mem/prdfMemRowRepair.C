@@ -281,6 +281,16 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
         // validity - 1 bit
         l_tmp = ( l_tmp << 1 ) | 0x1;
 
+        // Adjust for mba port 1 address inversion if necessary
+        if ( (1 == getDimmPort<T>(i_dimm) % 2) && (T == TYPE_MBA) )
+        {
+            // Bits flipped in port 1 inversion: (10:12, 16:22, 24, 26:28)
+            // mask:
+            // 0000 0000 0011 1000 1111 1110 1011 1000
+            uint32_t mask = 0x0038FEB8;
+            l_tmp ^= mask;
+        }
+
         // ROW_REPAIR_SIZE = 4
         uint8_t l_data[ROW_REPAIR::ROW_REPAIR_SIZE] = {0};
         memcpy( l_data, &l_tmp, sizeof(l_data) );
