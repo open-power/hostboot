@@ -239,11 +239,96 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             }
         }
 
+       // Clear out any interrupt related FIRs that might have popped during the MPIPL seqeuence
+       err =  clearAllIntFirs();
+
     }while(0);
 
     return err;
 }
 
+
+errlHndl_t IntrRp::clearAllIntFirs()
+{
+    // Per scom definition all of these register will be cleared on any read
+    const uint64_t l_fir_reg_addrs_to_read_to_clear[] =
+    {
+        PU_INT_PC_ERR0_WOF, PU_INT_PC_ERR0_FATAL,
+        PU_INT_PC_ERR0_RECOV, PU_INT_PC_ERR0_INFO,
+        PU_INT_PC_ERR1_WOF, PU_INT_PC_ERR1_FATAL,
+        PU_INT_PC_ERR1_RECOV, PU_INT_PC_ERR1_INFO,
+        PU_INT_PC_VPC_WOF_ERR, PU_INT_PC_VPC_FATAL_ERR,
+        PU_INT_PC_VPC_RECOV_ERR, PU_INT_PC_VPC_INFO_ERR,
+        PU_INT_VC_WOF_ERR_G0, PU_INT_VC_WOF_ERR_G1,
+        PU_INT_VC_FATAL_ERR_G1, PU_INT_VC_FATAL_ERR_G0,
+        PU_INT_VC_RECOV_ERR_G0, PU_INT_VC_RECOV_ERR_G1,
+        PU_INT_VC_INFO_ERR_G0, PU_INT_VC_INFO_ERR_G1
+    };
+
+    // tmp var used to perform reads/writes
+    uint64_t l_tmp64;
+    errlHndl_t l_err = nullptr;
+    size_t l_opSize = sizeof(l_tmp64);
+
+    // Need a list of all of the functional processors for this node
+    TARGETING::TargetHandleList l_funcProcs;
+    getAllChips(l_funcProcs, TYPE_PROC);
+
+    do{
+        // Clear out all of the INT related firs on all functional processor
+        for(const auto & l_procChip : l_funcProcs)
+        {
+            // Loop through and read all of the "read to clear" regs to clear them all
+            for (uint8_t i = 0; i < (sizeof(l_fir_reg_addrs_to_read_to_clear) / sizeof(uint64_t)); i++)
+            {
+                l_err = deviceRead(l_procChip,
+                                  &l_tmp64,
+                                  l_opSize,
+                                  DEVICE_SCOM_ADDRESS(l_fir_reg_addrs_to_read_to_clear[i]) );
+
+                // If get a scom error it is likely no other scoms will work so bail out
+                if(l_err)
+                {
+                    break;
+                }
+            }
+
+            // If get a scom error it is likely no other scoms will work so bail out
+            if(l_err)
+            {
+                break;
+            }
+
+            // In addition to the "read to clear" register we must also clear INT_CQ_WOF
+            // and INT_CQ_FIR which need to be written to with 0x0 to clear.
+            l_tmp64 = 0x0;
+            l_err = deviceWrite(l_procChip,
+                                  &l_tmp64,
+                                  l_opSize,
+                                  DEVICE_SCOM_ADDRESS(PU_INT_CQ_WOF) );
+
+            // If get a scom error it is likely no other scoms will work so bail out
+            if(l_err)
+            {
+                break;
+            }
+
+            l_err = deviceWrite(l_procChip,
+                                  &l_tmp64,
+                                  l_opSize,
+                                  DEVICE_SCOM_ADDRESS(PU_INT_CQ_FIR) );
+
+            // If get a scom error it is likely no other scoms will work so bail out
+            if(l_err)
+            {
+                break;
+            }
+        }
+    } while(0);
+
+    return l_err;
+
+}
 
 errlHndl_t setHbModeOnP3PCReg()
 {
