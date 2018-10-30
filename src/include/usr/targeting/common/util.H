@@ -172,6 +172,15 @@ bool orderByNodeAndPosition(  Target* i_firstProc,
  */
 uint8_t  is_fused_mode( );
 
-} // TARGETING
+/**
+ * @brief Determine if the given dimm target is an NVDIMM
+ *
+ * @param[in] i_target : dimm target to check
+ *
+ * @return bool - True if the given target is an NVDIMM
+ */
+bool isNVDIMM( TARGETING::Target * i_target );
+
+}
 
 #endif // __TARGETING_COMMON_UTIL_H

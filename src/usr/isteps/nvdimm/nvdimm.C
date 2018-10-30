@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,12 +32,12 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
-#include <kernel/timemgr.H>
 #include <sys/time.h>
 #include <usr/devicefw/userif.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
+#include <lib/mc/port.H>
 #include <isteps/nvdimm/nvdimm.H>
 
 using namespace TARGETING;
@@ -45,7 +45,7 @@ using namespace DeviceFW;
 using namespace EEPROM;
 
 trace_desc_t* g_trac_nvdimm = NULL;
-TRAC_INIT(&g_trac_nvdimm, "NVDIMM", 2*KILOBYTE);
+TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 
 // Easy macro replace for unit testing
 // #define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -61,19 +61,6 @@ namespace NVDIMM
 #define NVDIMM_SET_USER_DATA_2_TIMEOUT(left_32_polled, right_32_timeout) \
             NVDIMM_SET_USER_DATA_1(left_32_polled, right_32_timeout)
 
-enum
-{
-    NSTD_VAL_NOPRSV      = 0x08, // memory valid, contents not preserved (genesis)
-    NSTD_VAL_NOPRSV_MASK = 0xF7,
-    NSTD_VAL_PRSV        = 0x04, // memory contents preserved
-    NSTD_VAL_PRSV_MASK   = 0xFB,
-    NSTD_ERR_NOPRSV      = 0x02, // memory failed to preserve contents
-    NSTD_ERR_NOPRSV_MASK = 0xFD,
-    NSTD_ERR_NOBKUP      = 0x01, // memory unable to preserve future content
-    NSTD_ERR_NOBKUP_MASK = 0xFE,
-    NSTD_ERR             = 0x03, // NSTD_ERR_NOPRSV+NSTD_ERR_NOBKUP
-};
-
 typedef struct ops_timeoutInfo{
     const char * desc;
     uint8_t page;
@@ -83,7 +70,10 @@ typedef struct ops_timeoutInfo{
     uint8_t status_progress;
 } ops_timeoutInfo_t;
 
-static bool init = true;
+#ifndef __HOSTBOOT_RUNTIME
+// Init flag to be used upon initial entry to initialize NV_OPS_TIMEOUT_MSEC
+static bool init_nv_timeout = true;
+#endif
 
 // Table containing register info on the timeout registers for different ops
 constexpr ops_timeoutInfo_t timeoutInfoTable[] =
@@ -686,7 +676,10 @@ errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm)
 
 /**
  * @brief This function arms the trigger to enable backup in the event
- *        of power loss (DDR Reset_n goes low)
+ *        of power loss (DDR Reset_n goes low) in conjunction with
+ *        ATOMIC_SAVE_AND_ERASE. A separate erase command is not required
+ *        as the image will get erased immediately before backup on the
+ *        next catastrophic event.
  *
  * @param[in] i_nvdimm - nvdimm target with NV controller
  *
@@ -700,7 +693,10 @@ errlHndl_t nvdimmArmResetN(Target *i_nvdimm)
 
     errlHndl_t l_err = nullptr;
 
-    l_err = nvdimmWriteReg(i_nvdimm, ARM_CMD, ARM_DIMM);
+    // Setting ATOMIC_SAVE_AND_ERASE in conjunction with ARM_RESETN. With this,
+    // the content of the persistent data is not erased until immediately after
+    // the next catastrophic event has occurred.
+    l_err = nvdimmWriteReg(i_nvdimm, ARM_CMD, ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE);
 
     if (l_err)
     {
@@ -760,6 +756,7 @@ errlHndl_t nvdimmValidImage(Target *i_nvdimm, bool &o_imgValid)
     return l_err;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief This function handles all the restore related operations.
  *        SRE -> restore -> SRX/RCD/MRS
@@ -775,6 +772,8 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
     bool l_imgValid;
     uint8_t l_rstrValid;
     uint32_t l_poll = 0;
+    TARGETING::Target* l_sys = NULL;
+    targetService().getTopLevelTarget(l_sys);
 
     do
     {
@@ -864,9 +863,9 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
                 //@TODO RTC 199645 - add HW callout on dimm target
                 //Restore is taking longer than the allotted time here.
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
-                errlCommit(l_err, NVDIMM_COMP_ID);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X], error restoring!",
                           TARGETING::get_huid(l_nvdimm));
+                errlCommit(l_err, NVDIMM_COMP_ID);
                 break;
             }
         }
@@ -963,6 +962,7 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
 
     return l_err;
 }
+#endif
 
 /**
  * @brief This function checks the erase status register to make sure
@@ -1249,6 +1249,7 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
     return l_err;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief Entry function to NVDIMM management
  *        - Restore image from NVDIMM NAND flash to DRAM
@@ -1261,7 +1262,7 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
  */
 void nvdimm_restore(TargetHandleList &i_nvdimmList)
 {
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_restore()");
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_restore()");
     errlHndl_t l_err = nullptr;
 
     do
@@ -1283,13 +1284,12 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
         if (l_err)
         {
-            errlCommit( l_err, NVDIMM_COMP_ID );
-
             // @TODO-RTC:200275-Make logic generic for all system configs
             // Because of interleaving, if one is garded the other one
             // in the pair should be garded by association. So, let's
             // move on since there is nothing else to do.
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing open page");
+            errlCommit( l_err, NVDIMM_COMP_ID );
             break;
         }
 
@@ -1310,9 +1310,8 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
             // If this failing right off the bat,
             // something isn't quite right with
             // the module
-            errlCommit(l_err, NVDIMM_COMP_ID);
-
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmReady()");
+            errlCommit(l_err, NVDIMM_COMP_ID);
             break;
         }
 
@@ -1328,13 +1327,13 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
                 // This will prevent future backup, but let's continue
                 // since we can still restore the data if there is any
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
-                errlCommit( l_err, NVDIMM_COMP_ID );
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmSetESPolicy()");
+                errlCommit( l_err, NVDIMM_COMP_ID );
             }
         }
 
         // Get the timeout values for the major ops at init
-        if (init){
+        if (init_nv_timeout){
             for (const auto & l_nvdimm : i_nvdimmList){
                 l_err = nvdimmGetTimeoutVal(l_nvdimm);
                 if (l_err)
@@ -1343,13 +1342,13 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
                     break;
                 }
             }
-            init = false;
+            init_nv_timeout = false;
         }
 
         if (l_err)
         {
-            errlCommit( l_err, NVDIMM_COMP_ID );
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmGetTimeoutVal()");
+            errlCommit( l_err, NVDIMM_COMP_ID );
             break;
         }
 
@@ -1368,8 +1367,8 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
         if (l_err)
         {
-            errlCommit( l_err, NVDIMM_COMP_ID );
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing open page");
+            errlCommit( l_err, NVDIMM_COMP_ID );
             break;
         }
 
@@ -1378,8 +1377,8 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
         if (l_err)
         {
-            errlCommit( l_err, NVDIMM_COMP_ID );
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmRestore()");
+            errlCommit( l_err, NVDIMM_COMP_ID );
             break;
         }
 
@@ -1397,39 +1396,10 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
             }
         }
 
-        // @TODO move arm and erase to pm_common.C, after occ has started
-
-        // From this point forward, we only want to set up the trigger on the
-        // nvdimm that is not in error state. Any nvdimm in error state will
-        // get to preserve the data previously saved and recover if needed.
-
-        // Arm the nvdimm to trigger save on RESET_n
-        // and erase the image
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
-            // skip if the nvdimm is in error state
-            if (nvdimmInErrorState(l_nvdimm))
-            {
-                continue;
-            }
-
-            l_err = nvdimmArmResetN(l_nvdimm);
-            if (l_err)
-            {
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                continue;
-            }
-
-            l_err = nvdimmEraseNF(l_nvdimm);
-            if (l_err){
-                errlCommit( l_err, NVDIMM_COMP_ID );
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
-            }
-        }
     }while(0);
 
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
 }
+#endif
 
 } // end NVDIMM namespace

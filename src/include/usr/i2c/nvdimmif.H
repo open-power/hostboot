@@ -30,15 +30,6 @@
 
 namespace NVDIMM
 {
-//TODO: move isNVDIMM() to targeting/common/util.C
-/**
- * @brief Determine if the given dimm target is an NVDIMM
- *
- * @param[in] i_target : dimm target to check
- *
- * @return bool - True if the given target is an NVDIMM
- */
-bool isNVDIMM( TARGETING::Target * i_target );
 
 /**
  * @brief Return a set of information related to every unique
