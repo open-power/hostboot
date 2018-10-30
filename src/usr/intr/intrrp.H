@@ -929,6 +929,17 @@ namespace INTR
             */
             void printLSIInfo() const;
 
+             /**
+             * Clear all interrupt related firs
+             * This is needed because in multi-node systems nodes
+             * are not inconcert during the MPIPL steps so outstanding
+             * traffic from one node might cause FIRs to pop on another
+             * because they were at different points of the MPIPL. This function
+             * clears any firs that might have occured to allow us to start fresh
+             *
+             * @return error log handle
+             */
+            errlHndl_t clearAllIntFirs();
     };
 }; // INTR namespace
 
