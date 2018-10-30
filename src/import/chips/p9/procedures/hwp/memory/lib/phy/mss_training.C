@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1219,14 +1219,14 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     FAPI_INF("Running factory for cal_steps:0x%08x %s mode", i_cal_steps, i_sim ? "simulation" : "hardware");
     std::vector<std::shared_ptr<step>> l_steps;
 
+#ifdef LRDIMM_CAPABLE
+
     // MREP
     if(i_cal_steps.getBit<mss::cal_steps::MREP>())
     {
         FAPI_INF("LRDIMM: MREP is enabled");
         l_steps.push_back(std::make_shared<mss::training::lrdimm::mrep>());
     }
-
-#ifdef LRDIMM_CAPABLE
 
     // MRD_COARSE
     if(i_cal_steps.getBit<mss::cal_steps::MRD_COARSE>())

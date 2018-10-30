@@ -279,6 +279,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifdef LRDIMM_CAPABLE
 ///
 /// @brief Executes the pre-cal step workaround
 /// @param[in] i_target - the MCA target on which to operate
@@ -316,11 +317,9 @@ fapi2::ReturnCode mrep::post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY( mss::dp16::write_force_dq_capture(i_target, mss::states::OFF),
               "%s failed to write exit dq capture", mss::c_str(i_target) );
 
-#ifdef LRDIMM_CAPABLE
     // Clears the FIR's that can get set by training
     // They're not real, so we want to clear them and move on
     FAPI_TRY(mss::training::lrdimm::workarounds::clear_firs(i_target), "%s failed to clear FIRs", mss::c_str(i_target));
-#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -337,7 +336,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrep::write_result_to_buffers_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_mrep_result,
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_mrep_result,
         mss::ddr4::pba::commands& o_container) const
 {
     uint8_t l_buffer = 0;
@@ -355,14 +354,14 @@ fapi2::ReturnCode mrep::write_result_to_buffers_helper( const fapi2::Target<fapi
 
         {
             const auto l_result_nibble0 = l_are_nibbles_swapped ?
-                                          l_recorder.second.iv_final_delay :
-                                          l_recorder.first.iv_final_delay;
+                                          l_recorder.second.iv_delay :
+                                          l_recorder.first.iv_delay;
             const auto l_result_nibble1 = l_are_nibbles_swapped ?
-                                          l_recorder.first.iv_final_delay :
-                                          l_recorder.second.iv_final_delay;
+                                          l_recorder.first.iv_delay :
+                                          l_recorder.second.iv_delay;
 
             FAPI_DBG("%s MREP rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped BC2x:0x%02x BC3x:0x%02x",
-                     mss::c_str(l_mca), i_rank, l_buffer, l_recorder.first.iv_final_delay, l_recorder.second.iv_final_delay,
+                     mss::c_str(l_mca), i_rank, l_buffer, l_recorder.first.iv_delay, l_recorder.second.iv_delay,
                      l_are_nibbles_swapped ? "are" : "not", l_result_nibble0, l_result_nibble1);
 
             // Function space is derived from the rank
@@ -409,7 +408,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrep::write_result_to_buffers( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_mrep_result) const
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_mrep_result) const
 {
     mss::ddr4::pba::commands l_container;
 
@@ -423,122 +422,6 @@ fapi2::ReturnCode mrep::write_result_to_buffers( const fapi2::Target<fapi2::TARG
 
     // Issue the PBA to set the final MREP results
     FAPI_TRY(mss::ddr4::pba::execute_commands(l_container));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief analyze with each nibble
-/// @param[in] i_target the MCA target
-/// @param[in] i_result_nibble the result need to analyze
-/// @param[in] i_buffer the buffer number
-/// @param[in] i_delay the delay we set
-/// @param[in] i_nibble the nibble number
-/// @param[in, out] io_recorder we need to get and record
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode mrep::analyze_result_for_each_nibble( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint8_t i_result_nibble,
-        const uint8_t i_buffer,
-        const uint8_t i_delay,
-        const uint8_t i_nibble,
-        recorder& io_recorder ) const
-{
-    switch(i_result_nibble)
-    {
-        case 0x00:
-            io_recorder.iv_seen0 = true;
-            break;
-
-        case 0xF0:
-
-            // We need to see a 0 prior to a 1 for a 0 to 1 transition
-            if(io_recorder.iv_seen0)
-            {
-                io_recorder.iv_seen1 = true;
-            }
-
-            break;
-
-        default:
-            FAPI_ERR( "%s Get DQS value 0x%02x not 0 or 0xF from buffer %x nibble %x for delay 0x%02x",
-                      mss::c_str(i_target), i_result_nibble, i_buffer, i_nibble, i_delay);
-            break;
-    }
-
-    // Record the 0->1 transition only if:
-    // 1) we've seen a 0
-    // 2) we've seen a 1
-    // 3) we have not recorded a value prior (don't want to overwrite our good values) (not 0)
-    if( (io_recorder.iv_seen0 == true) &&
-        (io_recorder.iv_seen1 == true) &&
-        (io_recorder.iv_final_delay == 0) )
-    {
-        io_recorder.iv_final_delay = i_delay;
-        FAPI_DBG( "MREP %s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x",
-                  mss::c_str(i_target), i_buffer, i_nibble, i_delay );
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief analyze the result of MREP
-/// @param[in] i_target the MCA target
-/// @param[in] i_delay the delay number we current set
-/// @param[in, out] io_recorders a vector of the MREP results
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode mrep::analyze_mrep_result( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint8_t i_delay,
-        std::vector<std::pair<recorder, recorder>>& io_recorders) const
-{
-    constexpr uint8_t NIBBLE0 = 0;
-    constexpr uint8_t NIBBLE1 = 1;
-    constexpr uint8_t MASK_NIBBLE0 = 0xf0;
-    constexpr uint8_t MASK_NIBBLE1 = 0x0f;
-    data_response l_data;
-    uint8_t l_buffer = 0;
-
-    FAPI_TRY( l_data.read(i_target),
-              "%s failed to read MREP data response delay:0x%02x",
-              mss::c_str(i_target),
-              i_delay );
-
-    // Note: we want to update the value of the results recorder, so no const
-    for(auto& l_recorder : io_recorders)
-    {
-        // All beats should be the same, until proven otherwise, just use beat 0
-        constexpr uint64_t DEFAULT_BEAT = 0;
-        const uint8_t l_buffer_result = l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT];
-        const auto l_result_nibble0 = l_buffer_result & MASK_NIBBLE0;
-        const auto l_result_nibble1 = (l_buffer_result & MASK_NIBBLE1) << BITS_PER_NIBBLE;
-
-        FAPI_DBG( "%s delay:0x%02x MREP result buffer:%u data:0x%02x N0:0x%02x N1:0x%02x",
-                  mss::c_str(i_target), i_delay,
-                  l_buffer, l_buffer_result,
-                  l_result_nibble0, l_result_nibble1);
-
-        // Temporary variables for some beautification below
-        auto& l_recorder_nibble0 = l_recorder.first;
-        auto& l_recorder_nibble1 = l_recorder.second;
-
-        FAPI_TRY(analyze_result_for_each_nibble( i_target,
-                 l_result_nibble0,
-                 l_buffer,
-                 i_delay,
-                 NIBBLE0,
-                 l_recorder_nibble0) );
-        FAPI_TRY(analyze_result_for_each_nibble( i_target,
-                 l_result_nibble1,
-                 l_buffer,
-                 i_delay,
-                 NIBBLE1,
-                 l_recorder_nibble1) );
-
-        l_buffer++;
-    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -594,6 +477,162 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Creates the nibble flags for the invalid data callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @param[out] o_invalid_count number of invalid data occurances seen
+/// @return invalid data nibble flags
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+uint32_t mrep::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint8_t i_rank,
+                                  const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
+                                  uint64_t& o_invalid_count) const
+{
+    o_invalid_count = 0;
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        // Updates the bitmap
+        o_invalid_count += l_recorder.first.iv_invalid_data_count + l_recorder.second.iv_invalid_data_count;
+        append_nibble_flags(l_recorder.first.iv_invalid_data_count != mrep_dwl_recorder::CLEAN,
+                            l_recorder.second.iv_invalid_data_count != mrep_dwl_recorder::CLEAN,
+                            l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if invalid data is seen during this calibration step
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+fapi2::ReturnCode mrep::callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
+{
+    // Per nibble invalid data - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    // We also count the number of occurances of invalid data across the port/rank
+    // This count gives more insight into the fails
+    // Low counts mean one off data glitches
+    // High counts indicate that one or more nibbles are having issues
+    uint64_t l_invalid_data_count = 0;
+    const auto l_per_nibble_flags = flag_invalid_data( i_target, i_rank, i_recorders, l_invalid_data_count);
+
+    FAPI_TRY(callout::invalid_data( i_target,
+                                    i_rank,
+                                    l_per_nibble_flags,
+                                    l_invalid_data_count,
+                                    mss::cal_steps::MREP,
+                                    "MREP"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates the nibble flags for the no transition callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return no transition nibble flags
+///
+uint32_t mrep::flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const uint8_t i_rank,
+                                   const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
+{
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        const bool l_nibble0_no_transition = !l_recorder.first.iv_seen0 || !l_recorder.first.iv_seen1;
+        const bool l_nibble1_no_transition = !l_recorder.second.iv_seen0 || !l_recorder.second.iv_seen1;
+
+        // Updates the bitmap
+        append_nibble_flags(l_nibble0_no_transition, l_nibble1_no_transition, l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if a rank does not see a 0->1 transition
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mrep::callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
+{
+    // Per nibble weird data and no transition flags - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    uint32_t l_per_nibble_flags = flag_no_transition( i_target, i_rank, i_recorders);
+
+    // Error checking here
+    FAPI_ASSERT(l_per_nibble_flags == CLEAN_BITMAP,
+                fapi2::MSS_LRDIMM_CAL_NO_TRANSITION()
+                .set_TARGET(i_target)
+                .set_RANK(i_rank)
+                .set_CALIBRATION_STEP(mss::cal_steps::MREP)
+                .set_NIBBLE_FLAGS(l_per_nibble_flags),
+                "%s rank%u has seen invalid data on nibbles 0x%x in MREP",
+                mss::c_str(i_target), i_rank, l_per_nibble_flags);
+
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    // Log the error as recovered
+    // We "recover" by setting a default value and continuing with calibration
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
+}
+
+///
 /// @brief Sets up and runs the calibration step
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
@@ -641,7 +680,9 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
 
         // Vector represents the number of LRDIMM buffers
         // The pair represents the two nibbles that we need to calibrate within the buffer
-        std::vector<std::pair<recorder, recorder>> l_results_recorder(MAX_LRDIMM_BUFFERS);
+        std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>> l_results_recorder(MAX_LRDIMM_BUFFERS);
+        //Loop through all of our delays multiple times to reduce noise issues
+        std::vector<mrep_dwl_result> l_loop_results(MREP_DWL_LOOP_TIMES);
 
         // 1) Put the buffer in MREP mode -> host issues BCW's
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::MREP), "%s failed set_buffer_training", mss::c_str(l_dimm));
@@ -651,22 +692,28 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
                   mss::c_str(l_dimm), l_rank);
 
         // Loop through all of our delays
-        for(uint8_t l_delay = 0; l_delay < MREP_MAX_DELAY; ++l_delay)
+        for(auto& l_loop_result : l_loop_results)
         {
-            // 3) Set the MREP l_delay -> host issues BCW's
-            FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
+            for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
+            {
+                // 3) Set the MREP l_delay -> host issues BCW's
+                FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
-            // 4) Do an MPR read -> host issues RD command to the DRAM
-            FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u", mss::c_str(l_dimm),
-                      l_rank, l_delay);
+                // 4) Do an MPR read -> host issues RD command to the DRAM
+                FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u", mss::c_str(l_dimm),
+                          l_rank, l_delay);
 
-            // 4.1) Do an NTTM mode read -> forces the logic to read out the data
-            FAPI_TRY(execute_nttm_mode_read(i_target));
+                // 4.1) Do an NTTM mode read -> forces the logic to read out the data
+                FAPI_TRY(execute_nttm_mode_read(i_target));
 
-            // 5) Analyze the results -> host/FW read from CCS results and go
-            FAPI_TRY( analyze_mrep_result(i_target, l_delay, l_results_recorder), "%s failed analyze_mrep_result rank%u delay%u",
-                      mss::c_str(l_dimm), l_rank, l_delay);
-        } //l_delay loop
+                FAPI_TRY(get_result(l_dimm, mss::cal_steps::MREP, l_delay, l_loop_result, l_results_recorder));
+            } //l_delay loop
+        }
+
+        // 5) Analyze the results -> host/FW read from CCS results and go
+        FAPI_TRY( analyze_result(l_dimm, mss::cal_steps::MREP, l_loop_results, l_results_recorder),
+                  "%s failed analyze_mrep_result rank%u",
+                  mss::c_str(l_dimm), l_rank);
 
         // 6) Error check -> if we had stuck 1 or stuck 0 (never saw a 0 to 1 or a 1 to 0 transition) exit out with an error
         FAPI_TRY(error_check(l_dimm, l_rank, l_results_recorder), "%s failed error_check rank:%u", mss::c_str(l_dimm), l_rank);
@@ -702,6 +749,7 @@ uint64_t mrep::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 {
     return 0;
 }
+#endif
 
 ///
 /// @brief Deconfigures calibration steps depending upon LRDIMM type

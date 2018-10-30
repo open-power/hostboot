@@ -61,6 +61,10 @@
     #define LRDIMM_CAPABLE 1
 #endif
 
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_lrdimm_training_helper.H>
+#endif
+
 namespace mss
 {
 
@@ -365,6 +369,7 @@ struct data_response
 #endif
 };
 
+#ifdef LRDIMM_CAPABLE
 // TK:LRDIMM Do we need separate coarse vs fine steps?
 ///
 /// @brief MREP training step
@@ -373,27 +378,8 @@ class mrep : public step
 {
     public:
         // Per the LRDIMM spec, the MREP training values have one cycle per 64 ticks
-        static constexpr uint8_t MREP_MAX_DELAY = 64;
         static constexpr uint8_t NIBBLE0_BCW_NUMBER = 0x02;
         static constexpr uint8_t NIBBLE1_BCW_NUMBER = 0x03;
-
-        ///
-        /// @class mrep_decoder
-        /// @brief A structure that stores the record of DQS value
-        ///
-        struct recorder
-        {
-            // With MREP, we need to see a 0 to 1 transition on each nibble
-            // This indicates that the MDQS and the clock are aligned
-            // Our error cases, therefore, need to check for not seeing a 0 or not seeing a 1
-            // We want to keep track of if we've seen a 0 and if we've seen a 1
-            // We also want to note where our 0 to 1 transition occurs
-            // We can set the value in at the end of the training algorithm
-            bool iv_seen0;
-            bool iv_seen1;
-            uint8_t iv_final_delay;
-        };
-
 
         mrep() :
             step("MREP")
@@ -402,7 +388,7 @@ class mrep : public step
         ///
         /// @brief Default virtual destructor
         ///
-        ~mrep() = default;
+        virtual ~mrep() = default;
 
         ///
         /// @brief Executes the pre-cal step workaround
@@ -455,7 +441,7 @@ class mrep : public step
         ///
         fapi2::ReturnCode write_result_to_buffers( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_mrep_result) const;
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_mrep_result) const;
 
         ///
         /// @brief Write the results to buffer generate PBA commands
@@ -468,37 +454,9 @@ class mrep : public step
         ///
         fapi2::ReturnCode write_result_to_buffers_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<mss::training::lrdimm::mrep::recorder, mss::training::lrdimm::mrep::recorder>>&
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>&
                 i_mrep_result,
                 mss::ddr4::pba::commands& o_container) const;
-
-        ///
-        /// @brief analyze with each nibble
-        /// @param[in] i_target the MCA target
-        /// @param[in] i_result_nibble the result need to analyze
-        /// @param[in] i_buffer the buffer number
-        /// @param[in] i_delay the delay we set
-        /// @param[in] i_nibble the nibble number
-        /// @param[in, out] io_recorder we need to get and record
-        /// @return FAPI2_RC_SUCCESS if and only if ok
-        ///
-        fapi2::ReturnCode analyze_result_for_each_nibble( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                const uint8_t i_result_nibble,
-                const uint8_t i_buffer,
-                const uint8_t i_delay,
-                const uint8_t i_nibble,
-                recorder& io_recorder ) const;
-
-        ///
-        /// @brief analyze the result of MREP
-        /// @param[in] i_target the MCA target
-        /// @param[in] i_delay the delay number we current set
-        /// @param[in, out] io_recorders a vector of the MREP results
-        /// @return FAPI2_RC_SUCCESS if and only if ok
-        ///
-        fapi2::ReturnCode analyze_mrep_result( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                               const uint8_t i_delay,
-                                               std::vector<std::pair<recorder, recorder>>& io_recorders) const;
 
         ///
         /// @brief Sets MREP Delay value
@@ -512,33 +470,58 @@ class mrep : public step
                                     const uint8_t i_rank,
                                     const uint8_t i_delay ) const;
 
-        ///
-        /// @brief error check helper during the MREP training
-        /// @param[in] i_target the DIMM target
-        /// @param[in] i_rank the rank to operate on
-        /// @param[in] i_buffer the buffer to operate on
-        /// @param[in] i_nibble the nibble to operate on
-        /// @param[in] i_recorder the recorders for error check
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note Check each nibble to ensure seen0/seen1 are true
-        ///
-        inline fapi2::ReturnCode error_check_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t i_rank,
-                const uint8_t i_buffer,
-                const uint8_t i_nibble,
-                const recorder& i_recorder) const
-        {
-            if( (true != i_recorder.iv_seen0)
-                || (true != i_recorder.iv_seen1))
-            {
-                FAPI_ERR("%s rank%u buffer%u nibble%u had an error %s a 0 %s a 1",
-                         mss::c_str(i_target), i_rank, i_buffer, i_nibble,
-                         i_recorder.iv_seen0 ? "saw" : "did not see",
-                         i_recorder.iv_seen1 ? "saw" : "did not see");
-            }
 
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
+        ///
+        /// @brief Creates the nibble flags for the invalid data callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @param[out] o_invalid_count number of invalid data occurances seen
+        /// @return invalid data nibble flags
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint8_t i_rank,
+                                    const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
+                                    uint64_t& o_invalid_count) const;
+
+
+
+
+
+        ///
+        /// @brief Calls out if invalid data is seen during this calibration step
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                const uint8_t i_rank,
+                                                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Creates the nibble flags for the no transition callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return no transition nibble flags
+        ///
+        uint32_t flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_rank,
+                                     const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Calls out if a rank does not see a 0->1 transition
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
         ///
         /// @brief error check during the MREP training
@@ -550,24 +533,10 @@ class mrep : public step
         ///
         inline fapi2::ReturnCode error_check(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              const uint8_t i_rank,
-                                             const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+                                             const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
         {
-            uint8_t l_buffer = 0;
-            constexpr uint8_t NIBBLE0 = 0;
-            constexpr uint8_t NIBBLE1 = 1;
-
-            // Loop for all buffer results, check the results to ensure seen0/seen1 are true
-            for(auto& l_recorder : i_recorders)
-            {
-                // Temporary variables
-                auto& l_recorder_nibble0 = l_recorder.first;
-                auto& l_recorder_nibble1 = l_recorder.second;
-
-                FAPI_TRY(error_check_helper(i_target, i_rank, l_buffer, NIBBLE0, l_recorder_nibble0));
-                FAPI_TRY(error_check_helper(i_target, i_rank, l_buffer, NIBBLE1, l_recorder_nibble1));
-
-                l_buffer++;
-            }
+            FAPI_TRY(callout_no_transition(i_target, i_rank, i_recorders));
+            FAPI_TRY(callout_invalid_data(i_target, i_rank, i_recorders));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -581,7 +550,7 @@ class mrep : public step
         /// @note Check each nibble to ensure seen0/seen1 are true
         ///
         inline fapi2::ReturnCode apply_final_offset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                std::vector<std::pair<recorder, recorder>>& io_results) const
+                std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& io_results) const
         {
             // Per the LRDIMM spec, we need to add an offset of 32 for 1 tCK and 64 for 2 tCK
             constexpr uint8_t OFFSET_1TCK = 32;
@@ -598,18 +567,18 @@ class mrep : public step
                 const auto OFFSET = l_tck == fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_1NCLK ? OFFSET_1TCK : OFFSET_2TCK;
 
                 // Could make this math into a function - that way we can test it
-                l_result.first.iv_final_delay = (l_result.first.iv_final_delay + OFFSET) % MREP_MAX_DELAY;
-                l_result.second.iv_final_delay = (l_result.second.iv_final_delay + OFFSET) % MREP_MAX_DELAY;
+                l_result.first.iv_delay = (l_result.first.iv_delay + OFFSET) % MREP_DWL_MAX_DELAY;
+                l_result.second.iv_delay = (l_result.second.iv_delay + OFFSET) % MREP_DWL_MAX_DELAY;
                 FAPI_DBG("%s buffer:%u final values for nibble0:0x%02x nibble1:0x%02x",
-                         mss::c_str(i_target), l_buffer, l_result.first.iv_final_delay, l_result.second.iv_final_delay);
+                         mss::c_str(i_target), l_buffer, l_result.first.iv_delay, l_result.second.iv_delay);
                 l_buffer++;
             }
 
         fapi_try_exit:
             return fapi2::current_err;
         }
-
 };
+#endif
 
 ///
 /// @brief Sets data buffer training mode control word
