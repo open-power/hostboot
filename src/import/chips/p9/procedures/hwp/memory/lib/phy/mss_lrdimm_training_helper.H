@@ -62,7 +62,7 @@ namespace lrdimm
 
 static constexpr uint8_t MREP_DWL_MAX_DELAY = 64;
 static constexpr uint8_t MREP_DWL_LOOP_TIMES = 0x05;
-static constexpr uint8_t MREP_DWL_THRESHOLD = 0x5;
+static constexpr uint8_t MREP_DWL_THRESHOLD = 0x05;
 ///
 /// @brief Records the results for a given nibble
 ///
