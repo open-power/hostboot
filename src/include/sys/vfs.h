@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 // make VFS_MODULE_MAX equal to the actual number of modules in the base image (+ 2?)
 #define VFS_MODULE_MAX 16
 #else
-#define VFS_MODULE_MAX 64
+#define VFS_MODULE_MAX 128
 #endif
 
 // Extended use 4 4k pages
