@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,13 +75,13 @@ enum page : uint8_t
 // Enums for inputs/expected output to/from the i2c registers
 enum i2c_in_values : uint8_t
 {
-    ARM_DIMM                    = 0x04, //0x04 to trigger on RESET_n
-    ES_DEV_MANAGE               = 0x01, //0x01 for device manage
-    ERASE_IMAGE                 = 0x08,
-    RESTORE_IMAGE               = 0x04,
-    RESET_CTRLR                 = 0x01,
-    VALID_IMAGE                 = 0x01,
-    PAGE_SWITCH_POLL_TIME_NS    = 100,
+    ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE        = 0x84, 
+    ARM_RESETN                                  = 0x04,
+    ES_DEV_MANAGE                               = 0x01, //0x01 for device manage
+    ERASE_IMAGE                                 = 0x08,
+    RESTORE_IMAGE                               = 0x04,
+    RESET_CTRLR                                 = 0x01,
+    VALID_IMAGE                                 = 0x01,
 };
 
 enum i2c_out_values : uint8_t
@@ -104,6 +104,7 @@ enum i2c_out_values : uint8_t
 enum timeout : uint32_t
 {
     OPS_POLL_TIME_MS = 5000,
+    PAGE_SWITCH_POLL_TIME_NS    = 100,
 };
 
 // Assign an id to each of the 6 major ops

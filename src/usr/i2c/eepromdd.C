@@ -43,6 +43,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/util.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <i2c/eepromif.H>
@@ -2100,7 +2101,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     {
     #ifdef CONFIG_NVDIMM
         // Skip if this is an NVDIMM as this will get added later
-        if (NVDIMM::isNVDIMM( *dimm_itr ))
+        if (TARGETING::isNVDIMM( *dimm_itr ))
             continue;
     #endif
         add_to_list( o_info, *dimm_itr );

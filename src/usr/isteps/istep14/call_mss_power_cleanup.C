@@ -116,40 +116,9 @@ void* call_mss_power_cleanup (void *io_pArgs)
         // Walk the dimm list and collect all the nvdimm targets
         for (auto const l_dimm : l_dimmTargetList)
         {
-            //@TODO replace this with isNVDIMM()
-            // Not the most elegant way of doing it but the hybrid attributes
-            // are at the MCS level. Need to find my way up to MCS and check
-            // if the dimm is hybrid
-            TARGETING::TargetHandleList l_mcaList;
-            getParentAffinityTargets(l_mcaList, l_dimm, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
-
-            if (l_mcaList.size())
+            if (TARGETING::isNVDIMM(l_dimm))
             {
-                TARGETING::TargetHandleList l_mcsList;
-                getParentAffinityTargets(l_mcsList, l_mcaList[0], TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS);
-
-                if(l_mcsList.size())
-                {
-                    // 2-D array. [MCA][DIMM]
-                    TARGETING::ATTR_EFF_HYBRID_type l_hybrid;
-                    TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE_type l_hybrid_type;
-
-                    if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
-                        l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
-                    {
-                        //Using huid to lookup the hybrid attribute for the current dimm
-                        const auto l_dimm_huid = TARGETING::get_huid(l_dimm);
-                        const auto l_mca_huid = TARGETING::get_huid(l_mcaList[0]);
-                        const uint8_t MCA_PER_MCS = 2;
-                        const uint8_t DIMM_PER_MCA = 2;
-
-                        if (l_hybrid[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_IS_HYBRID &&
-                            l_hybrid_type[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM )
-                        {
-                            l_nvdimmTargetList.push_back(l_dimm);
-                        }
-                    }
-                }
+                l_nvdimmTargetList.push_back(l_dimm);
             }
         }
 

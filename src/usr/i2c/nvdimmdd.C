@@ -43,6 +43,7 @@
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/util.H>
 #include <devicefw/driverif.H>
 #include <i2c/nvdimmddreasoncodes.H>
 #include <i2c/nvdimmif.H>
@@ -75,8 +76,6 @@ TRAC_INIT( & g_trac_nvdimmr, "NVDIMMR", KILOBYTE );
 // ----------------------------------------------
 #define MAX_BYTE_ADDR 2
 #define NVDIMM_MAX_RETRIES 2
-#define MCA_PER_MCS 2
-#define DIMM_PER_MCA 2
 // ----------------------------------------------
 
 
@@ -498,10 +497,10 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
                               i_byteAddressSize);
 
                     // Printing mux info separately, if combined, nothing is displayed
-                    char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+                    char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
                     TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
                               "muxSelector=0x%X, muxPath=%s",
-                              i2cInfo.i2cMuxBusSelector,
+                              i_i2cInfo.i2cMuxBusSelector,
                               l_muxPath);
                     free(l_muxPath);
                     l_muxPath = nullptr;
@@ -535,10 +534,10 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
                               i_i2cInfo.devAddr );
 
                     // Printing mux info separately, if combined, nothing is displayed
-                    char* l_muxPath = i2cInfo.i2cMuxPath.toString();
+                    char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
                     TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
                               "muxSelector=0x%X, muxPath=%s",
-                              i2cInfo.i2cMuxBusSelector,
+                              i_i2cInfo.i2cMuxBusSelector,
                               l_muxPath);
                     free(l_muxPath);
                     l_muxPath = nullptr;
@@ -1459,49 +1458,6 @@ void add_to_list( std::list<EEPROM::EepromInfo_t>& i_list,
 }
 
 /**
- * @brief Determine if the given dimm target is an NVDIMM
- *
- * @param[in] i_target : dimm target to check
- *
- * @return bool - True if the given target is an NVDIMM
- */
-bool isNVDIMM( TARGETING::Target * i_target )
-{
-    // Not the most elegant way of doing it but the hybrid attributes
-    // are at the MCS level. Need to find my way up to MCS and check
-    // if the dimm is hybrid
-
-    TARGETING::TargetHandleList l_mcaList;
-    getParentAffinityTargets(l_mcaList, i_target, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
-
-    if (l_mcaList.size())
-    {
-        TARGETING::TargetHandleList l_mcsList;
-        getParentAffinityTargets(l_mcsList, l_mcaList[0], TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS);
-
-        if(l_mcsList.size())
-        {
-            // 2-D array. [MCA][DIMM]
-            TARGETING::ATTR_EFF_HYBRID_type l_hybrid;
-            TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE_type l_hybrid_type;
-
-            if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
-                l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
-            {
-                //Using huid to lookup the hybrid attribute for the current dimm
-                const auto l_dimm_huid = TARGETING::get_huid(i_target);
-                const auto l_mca_huid = TARGETING::get_huid(l_mcaList[0]);
-
-                return (l_hybrid[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_IS_HYBRID &&
-                        l_hybrid_type[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM);
-            }
-        }
-    }
-
-    return false;
-}
-
-/**
  * @brief Return a set of information related to every unique
  *        NVDIMM in the system
  */
@@ -1517,7 +1473,7 @@ void getNVDIMMs( std::list<EEPROM::EepromInfo_t>& o_info )
 
     for (auto const l_dimm : l_dimmList)
     {
-        if (isNVDIMM(l_dimm))
+        if (TARGETING::isNVDIMM(l_dimm))
             add_to_list( o_info, l_dimm );
     }
 

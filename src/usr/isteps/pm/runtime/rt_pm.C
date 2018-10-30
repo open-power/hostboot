@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,11 @@
 #include <initservice/isteps_trace.H>
 
 //  targeting support
+#include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
+
+#include <isteps/nvdimm/nvdimm.H>
 
 #include <scom/scomif.H>
 #include <scom/wakeup.H>
@@ -256,7 +259,47 @@ namespace RTPM
                 l_err->collectTrace(ISTEP_COMP_NAME,1024);
                 errlCommit( l_err, RUNTIME_COMP_ID );
                 l_err = nullptr;
+                break;
             }
+
+#ifdef CONFIG_NVDIMM
+            //@TODO RTC 199645 - additional delay needed to ensure OCC is
+            // full functional
+
+            // Only run this if PM complex started successfully
+            // as EPOW save trigger is done by the OCC
+            TARGETING::TargetHandleList l_dimmTargetList;
+            getChildAffinityTargets( l_dimmTargetList, proc_target, CLASS_NA, TYPE_DIMM );
+
+            for (auto const l_dimm : l_dimmTargetList)
+            {
+                if (TARGETING::isNVDIMM(l_dimm))
+                {
+                    // skip if the nvdimm is in error state
+                    if (NVDIMM::nvdimmInErrorState(l_dimm))
+                    {
+                        continue;
+                    }
+
+                    l_err = NVDIMM::nvdimmArmResetN(l_dimm);
+                    // If we run into any error here we will just
+                    // commit the error log and move on. Let the
+                    // system continue to boot  and let the user
+                    // salvage the data
+                    if (l_err)
+                    {
+                        NVDIMM::nvdimmSetStatusFlag(l_dimm, NVDIMM::NSTD_ERR_NOBKUP);
+                        // Committing the error as we don't want the this to interrupt
+                        // the boot. This will notifiy the user that action is needed
+                        // on this module
+                        l_err->setSev(ERRL_SEV_INFORMATIONAL);
+                        l_err->collectTrace(NVDIMM_COMP_NAME,1024);
+                        errlCommit( l_err, NVDIMM_COMP_ID );
+                        continue;
+                    }
+                }
+            }
+#endif
         } while(0);
 
         if ( l_err )

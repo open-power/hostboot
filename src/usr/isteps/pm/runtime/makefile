@@ -31,12 +31,17 @@ VPATH += ../
 
 MODULE = pm_rt
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/nvdimm
+
 ## Objects unique to HBRT
 OBJS += rt_pm.o
+
+## Dependencies for nvdimm.mk
+VPATH += ${ROOTPATH}/src/usr/isteps/nvdimm
 
 SUBDIRS += test.d
 
 ## Objects common to HBRT and HB IPL
 include ../pm.mk
-
+include ${ROOTPATH}/src/usr/isteps/nvdimm/nvdimm.mk
 include ${ROOTPATH}/config.mk
