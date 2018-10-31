@@ -64,32 +64,32 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_capp,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_ec,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_eq,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_ex,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_mca,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_mcbist, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_mcs,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_pec,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_phb,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_proc,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_capp,  CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ec,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_eq,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_ex,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_mc,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_mi,    CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus,  CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_pec,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_phb,   CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_proc,  CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,  CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cen_centaur,CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( cen_mba,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_capp,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ec,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_eq,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_ex,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_mca,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_mcbist,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_mcs,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_pec,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_phb,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_proc,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_capp,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ec,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_eq,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_ex,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_mc,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_mi,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_pec,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_phb,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_proc,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( centaur_membuf, CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( centaur_mba,    CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding

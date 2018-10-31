@@ -246,8 +246,8 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                            { TYPE_MC,     cumulus_mc     },
                            { TYPE_MI,     cumulus_mi     },
                            { TYPE_DMI,    cumulus_dmi    }, } },
-        { MODEL_CENTAUR, { { TYPE_MEMBUF, cen_centaur    },
-                           { TYPE_MBA,    cen_mba        }, } },
+        { MODEL_CENTAUR, { { TYPE_MEMBUF, centaur_membuf },
+                           { TYPE_MBA,    centaur_mba    }, } },
     };
 
     // Get references to factory objects.
