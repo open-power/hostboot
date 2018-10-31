@@ -39,7 +39,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace cen_centaur
+namespace centaur_membuf
 {
 
 //##############################################################################
@@ -103,7 +103,7 @@ int32_t CaptureL4CacheErr( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, CaptureL4CacheErr );
+PRDF_PLUGIN_DEFINE( centaur_membuf, CaptureL4CacheErr );
 
 //------------------------------------------------------------------------------
 
@@ -180,7 +180,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, ClearMbsSecondaryBits );
+PRDF_PLUGIN_DEFINE( centaur_membuf, ClearMbsSecondaryBits );
 
 //------------------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ int32_t MaskMbsSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, MaskMbsSecondaryBits );
+PRDF_PLUGIN_DEFINE( centaur_membuf, MaskMbsSecondaryBits );
 
 //------------------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, ClearMbaCalSecondaryBits );
+PRDF_PLUGIN_DEFINE( centaur_membuf, ClearMbaCalSecondaryBits );
 
 //------------------------------------------------------------------------------
 
@@ -330,11 +330,11 @@ int32_t MaskMbaCalSecondaryBits( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, MaskMbaCalSecondaryBits );
+PRDF_PLUGIN_DEFINE( centaur_membuf, MaskMbaCalSecondaryBits );
 
 //------------------------------------------------------------------------------
 
-} // end namespace cen_centaur
+} // end namespace centaur_membuf
 
 } // end namespace PRDF
 

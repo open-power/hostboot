@@ -41,7 +41,7 @@ namespace PRDF
 using namespace PLL;
 using namespace PlatServices;
 
-namespace cen_centaur
+namespace centaur_membuf
 {
 
 enum
@@ -60,7 +60,7 @@ enum
 int32_t QueryPll( ExtensibleChip * i_chip,
                         bool & o_result)
 {
-    #define PRDF_FUNC "[cen_centaur::QueryPll] "
+    #define PRDF_FUNC "[centaur_membuf::QueryPll] "
 
     int32_t rc = SUCCESS;
     o_result = false;
@@ -101,7 +101,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, QueryPll );
+PRDF_PLUGIN_DEFINE( centaur_membuf, QueryPll );
 
 /**
  *  @brief Examine chiplets to determine which type of PLL error has ocurred.
@@ -125,7 +125,7 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, CheckErrorType );
+PRDF_PLUGIN_DEFINE( centaur_membuf, CheckErrorType );
 
 /**
   * @brief Clear the PLL error for Centaur Plugin
@@ -137,7 +137,7 @@ PRDF_PLUGIN_DEFINE( cen_centaur, CheckErrorType );
 int32_t ClearPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
 {
-    #define PRDF_FUNC "[cen_centaur::ClearPll] "
+    #define PRDF_FUNC "[centaur_membuf::ClearPll] "
     int32_t rc = SUCCESS;
 
     if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
@@ -158,7 +158,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, ClearPll );
+PRDF_PLUGIN_DEFINE( centaur_membuf, ClearPll );
 
 /**
   * @brief Mask the PLL error for Centaur Plugin
@@ -169,7 +169,7 @@ PRDF_PLUGIN_DEFINE( cen_centaur, ClearPll );
   */
 int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 {
-    #define PRDF_FUNC "[cen_centaur::MaskPll] "
+    #define PRDF_FUNC "[centaur_membuf::MaskPll] "
     int32_t rc = SUCCESS;
 
     SCAN_COMM_REGISTER_CLASS * TP_LFIR_maskOr =
@@ -191,7 +191,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, MaskPll );
+PRDF_PLUGIN_DEFINE( centaur_membuf, MaskPll );
 
 /**
  * @brief   capture additional PLL FFDC
@@ -202,7 +202,7 @@ PRDF_PLUGIN_DEFINE( cen_centaur, MaskPll );
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[cen_centaur::capturePllFfdc] "
+    #define PRDF_FUNC "[centaur_membuf::capturePllFfdc] "
 
     // Add FSI status reg
     captureFsiStatusReg<TYPE_MEMBUF>( i_chip, io_sc );
@@ -211,9 +211,9 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, capturePllFfdc );
+PRDF_PLUGIN_DEFINE( centaur_membuf, capturePllFfdc );
 
 
-} // end namespace cen_centaur
+} // end namespace centaur_membuf
 
 } // end namespace PRDF

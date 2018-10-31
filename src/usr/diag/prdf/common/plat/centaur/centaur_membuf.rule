@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/cen/cen_centaur.rule $
+# $Source: src/usr/diag/prdf/common/plat/centaur/centaur_membuf.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip cen_centaur
+chip centaur_membuf
 {
     name        "Centaur chip";
     targettype  TYPE_MEMBUF;
@@ -588,7 +588,7 @@ chip cen_centaur
     };
 
 # Include registers not defined by the xml
-.include "cen_centaur_regs.rule";
+.include "centaur_membuf_regs.rule";
 
 };
 
@@ -2230,9 +2230,9 @@ group gMEM_LFIR filter singlebit, cs_root_cause
  ##############################################################################
 
 # Include the common action set.
-.include "cen_common_actions.rule";
+.include "centaur_common_actions.rule";
 # Include the chip-specific action set.
-.include "cen_centaur_actions.rule";
+.include "centaur_membuf_actions.rule";
 
 actionclass analyzeConnectedMBA0 { analyze(connected(TYPE_MBA, 0)); };
 actionclass analyzeConnectedMBA1 { analyze(connected(TYPE_MBA, 1)); };

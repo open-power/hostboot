@@ -39,7 +39,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace cen_mba
+namespace centaur_mba
 {
 
 //##############################################################################
@@ -58,7 +58,7 @@ int32_t Initialize( ExtensibleChip * i_mbaChip )
     i_mbaChip->getDataBundle() = new MbaDataBundle( i_mbaChip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_mba, Initialize );
+PRDF_PLUGIN_DEFINE( centaur_mba, Initialize );
 
 //##############################################################################
 //
@@ -88,7 +88,7 @@ int32_t CalloutDimmsOnPort0( ExtensibleChip * i_chip,
     __calloutDimmsOnPort( i_chip, 0, io_sc );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_mba, CalloutDimmsOnPort0 );
+PRDF_PLUGIN_DEFINE( centaur_mba, CalloutDimmsOnPort0 );
 
 /**
  * @brief  Adds all DIMMs connected to MBA port 1 to the callout list.
@@ -102,7 +102,7 @@ int32_t CalloutDimmsOnPort1( ExtensibleChip * i_chip,
     __calloutDimmsOnPort( i_chip, 1, io_sc );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_mba, CalloutDimmsOnPort1 );
+PRDF_PLUGIN_DEFINE( centaur_mba, CalloutDimmsOnPort1 );
 
 /**
  * @brief  Masks the all side effect attentions of an RCD parity error.
@@ -113,7 +113,7 @@ PRDF_PLUGIN_DEFINE( cen_mba, CalloutDimmsOnPort1 );
 int32_t MaskRcdParitySideEffects( ExtensibleChip * i_mbaChip,
                                   STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[cen_mba::MaskRcdParitySideEffects] "
+    #define PRDF_FUNC "[centaur_mba::MaskRcdParitySideEffects] "
 
     uint32_t l_rc = SUCCESS;
 
@@ -187,11 +187,11 @@ int32_t MaskRcdParitySideEffects( ExtensibleChip * i_mbaChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_mba, MaskRcdParitySideEffects );
+PRDF_PLUGIN_DEFINE( centaur_mba, MaskRcdParitySideEffects );
 
 //------------------------------------------------------------------------------
 
-} // end namespace cen_mba
+} // end namespace centaur_mba
 
 } // end namespace PRDF
 

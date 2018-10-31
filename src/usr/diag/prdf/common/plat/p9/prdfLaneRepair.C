@@ -990,11 +990,11 @@ int32_t spareDeployed( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,  LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus, LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, spareDeployed );
-PRDF_PLUGIN_DEFINE_NS( cen_centaur, LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, spareDeployed );
 
 /**
  * @brief  Handles Max Spares Exceeded Event
@@ -1010,11 +1010,11 @@ int32_t maxSparesExceeded( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,  LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus, LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, maxSparesExceeded );
-PRDF_PLUGIN_DEFINE_NS( cen_centaur, LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, maxSparesExceeded );
 
 /**
  * @brief  Handles Too Many Bus Errors Event
@@ -1030,11 +1030,11 @@ int32_t tooManyBusErrors( ExtensibleChip * i_chip,
     else
         return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,  LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus, LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, tooManyBusErrors );
-PRDF_PLUGIN_DEFINE_NS( cen_centaur, LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, tooManyBusErrors );
 
 /**
  * @brief Add callouts for a BUS interface
@@ -1048,12 +1048,12 @@ int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
     calloutBusInterface(i_chip, io_sc, MRU_LOW);
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,  LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cumulus_xbus, LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cumulus_obus, LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,  LaneRepair, calloutBusInterfacePlugin );
-PRDF_PLUGIN_DEFINE_NS( cen_centaur, LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( nimbus_xbus,    LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus,   LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( cumulus_dmi,    LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( centaur_membuf, LaneRepair, calloutBusInterfacePlugin );
 
 
 //------------------------------------------------------------------------------

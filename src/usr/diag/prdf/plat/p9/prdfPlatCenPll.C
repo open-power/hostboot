@@ -41,7 +41,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace cen_centaur
+namespace centaur_membuf
 {
 
 /**
@@ -93,8 +93,8 @@ int32_t PllPostAnalysis( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, PllPostAnalysis );
+PRDF_PLUGIN_DEFINE( centaur_membuf, PllPostAnalysis );
 
-} // end namespace cen_centaur
+} // end namespace centaur_membuf
 
 } // end namespace PRDF

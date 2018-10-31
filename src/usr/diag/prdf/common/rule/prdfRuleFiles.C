@@ -62,8 +62,8 @@ namespace PRDF
     const char * cumulus_dmi  = "cumulus_dmi";
 
     // Centaur Chip
-    const char * cen_centaur = "cen_centaur";
-    const char * cen_mba     = "cen_mba";
+    const char * centaur_membuf = "centaur_membuf";
+    const char * centaur_mba    = "centaur_mba";
 
 } // end namespace PRDF
 

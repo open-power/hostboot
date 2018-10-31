@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/cen/cen_mba.rule $
+# $Source: src/usr/diag/prdf/common/plat/centaur/centaur_mba.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip cen_mba
+chip centaur_mba
 {
     name        "Centaur MBA chiplet";
     targettype  TYPE_MBA;
@@ -191,7 +191,7 @@ chip cen_mba
     };
 
 # Include registers not defined by the xml
-.include "cen_mba_regs.rule";
+.include "centaur_mba_regs.rule";
 
 };
 
@@ -665,7 +665,7 @@ group gMBADDRPHYFIR filter singlebit, cs_root_cause( 48, 49, 51, 52, 56, 57, 59,
  ##############################################################################
 
 # Include the common action set.
-.include "cen_common_actions.rule";
+.include "centaur_common_actions.rule";
 # Include the chip-specific action set.
-.include "cen_mba_actions.rule";
+.include "centaur_mba_actions.rule";
 

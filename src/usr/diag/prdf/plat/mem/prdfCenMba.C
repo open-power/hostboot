@@ -39,7 +39,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace cen_mba
+namespace centaur_mba
 {
 
 //##############################################################################
@@ -57,7 +57,7 @@ namespace cen_mba
 int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[cen_mba::MaintCmdComplete] "
+    #define PRDF_FUNC "[centaur_mba::MaintCmdComplete] "
 
     // Tell the TD controller there was a command complete attention.
     MbaDataBundle * db = getMbaDataBundle( i_mbaChip );
@@ -77,11 +77,11 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_mba, MaintCmdComplete );
+PRDF_PLUGIN_DEFINE( centaur_mba, MaintCmdComplete );
 
 //------------------------------------------------------------------------------
 
-} // end namespace cen_mba
+} // end namespace centaur_mba
 
 } // end namespace PRDF
 

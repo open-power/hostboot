@@ -43,7 +43,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace cen_centaur
+namespace centaur_membuf
 {
 
 //##############################################################################
@@ -62,7 +62,7 @@ int32_t Initialize( ExtensibleChip * i_chip )
     i_chip->getDataBundle() = new MembufDataBundle( i_chip );
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, Initialize );
+PRDF_PLUGIN_DEFINE( centaur_membuf, Initialize );
 
 /**
  * @brief  Analysis code that is called before the main analyze() function.
@@ -85,7 +85,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, PreAnalysis );
+PRDF_PLUGIN_DEFINE( centaur_membuf, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -107,7 +107,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, PostAnalysis );
+PRDF_PLUGIN_DEFINE( centaur_membuf, PostAnalysis );
 
 /**
  * @brief  During system or unit checkstop analysis, this is used to determine
@@ -133,7 +133,7 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip, bool & o_hasAttns )
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( cen_centaur, CheckForRecovered );
+} PRDF_PLUGIN_DEFINE( centaur_membuf, CheckForRecovered );
 
 /**
  * @brief  During system checkstop analysis, this is used to determine if a chip
@@ -162,7 +162,7 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip, bool & o_hasAttns )
 
     return SUCCESS;
 
-} PRDF_PLUGIN_DEFINE( cen_centaur, CheckForUnitCs );
+} PRDF_PLUGIN_DEFINE( centaur_membuf, CheckForUnitCs );
 
 //##############################################################################
 //
@@ -224,7 +224,7 @@ int32_t analyzeMbaRcdParityError( ExtensibleChip * i_mbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, analyzeMbaRcdParityError );
+PRDF_PLUGIN_DEFINE( centaur_membuf, analyzeMbaRcdParityError );
 
 // Define the plugins for RCD parity error memory UE side-effects
 #define PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( MBA ) \
@@ -233,7 +233,7 @@ int32_t analyzeMbaRcdParityError##MBA( ExtensibleChip * i_mbChip, \
 { \
     return analyzeMbaRcdParityError( i_mbChip, io_sc, MBA ); \
 } \
-PRDF_PLUGIN_DEFINE( cen_centaur, analyzeMbaRcdParityError##MBA );
+PRDF_PLUGIN_DEFINE( centaur_membuf, analyzeMbaRcdParityError##MBA );
 
 PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( 0 )
 PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( 1 )
@@ -340,7 +340,7 @@ int32_t mbsInternalTimeoutPrecheck( ExtensibleChip * i_mbChip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( cen_centaur, mbsInternalTimeoutPrecheck );
+PRDF_PLUGIN_DEFINE( centaur_membuf, mbsInternalTimeoutPrecheck );
 
 //##############################################################################
 //
@@ -364,7 +364,7 @@ int32_t AnalyzeFetchMpe##POS##_##RANK( ExtensibleChip * i_chip, \
     MemEcc::analyzeFetchMpe<TYPE_MBA>( mbaChip, rank, io_sc );\
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchMpe##POS##_##RANK );
+PRDF_PLUGIN_DEFINE( centaur_membuf, AnalyzeFetchMpe##POS##_##RANK );
 
 PLUGIN_FETCH_MPE_ERROR( 0, 0 )
 PLUGIN_FETCH_MPE_ERROR( 0, 1 )
@@ -403,7 +403,7 @@ int32_t AnalyzeFetchNce##POS( ExtensibleChip * i_chip, \
     MemEcc::analyzeFetchNceTce<TYPE_MBA>( mbaChip, io_sc ); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchNce##POS );
+PRDF_PLUGIN_DEFINE( centaur_membuf, AnalyzeFetchNce##POS );
 
 PLUGIN_FETCH_NCE_ERROR( 0 )
 PLUGIN_FETCH_NCE_ERROR( 1 )
@@ -427,7 +427,7 @@ int32_t AnalyzeFetchUe##POS( ExtensibleChip * i_chip, \
     MemEcc::analyzeFetchUe<TYPE_MBA>( mbaChip, io_sc ); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchUe##POS );
+PRDF_PLUGIN_DEFINE( centaur_membuf, AnalyzeFetchUe##POS );
 
 PLUGIN_FETCH_UE_ERROR( 0 )
 PLUGIN_FETCH_UE_ERROR( 1 )
@@ -451,7 +451,7 @@ int32_t AnalyzeFetchRcePue##POS( ExtensibleChip * i_chip, \
     MemEcc::analyzeFetchRcePue<TYPE_MBA>( mbaChip, io_sc ); \
     return SUCCESS; \
 } \
-PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchRcePue##POS );
+PRDF_PLUGIN_DEFINE( centaur_membuf, AnalyzeFetchRcePue##POS );
 
 PLUGIN_FETCH_RCE_PUE_ERROR( 0 )
 PLUGIN_FETCH_RCE_PUE_ERROR( 1 )
@@ -460,7 +460,7 @@ PLUGIN_FETCH_RCE_PUE_ERROR( 1 )
 
 //------------------------------------------------------------------------------
 
-} // end namespace cen_centaur
+} // end namespace centaur_membuf
 
 } // end namespace PRDF
 
