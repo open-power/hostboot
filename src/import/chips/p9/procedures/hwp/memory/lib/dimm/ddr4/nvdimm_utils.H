@@ -43,6 +43,15 @@ namespace nvdimm
 {
 
 ///
+/// @brief Disable maintenance address mode
+/// @tparam T the target type associated with this subroutine
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode maint_addr_mode_off( const fapi2::Target<T>& i_target );
+
+///
 /// @brief Helper for self_refresh_exit().
 /// @tparam T the target type associated with this subroutine
 /// @param[in] i_target the target associated with this subroutine
