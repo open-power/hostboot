@@ -67,6 +67,27 @@ namespace nvdimm
 {
 
 ///
+/// @brief Disable maintenance address mode
+/// Specialization for TARGET_TYPE_MCBIST
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode maint_addr_mode_off( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, TT::MCBAGRAQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
+    l_data.clearBit<TT::MAINT_ADDR_MODE_EN>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAGRAQ_REG, l_data), "%s Failed putScom", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Helper for self_refresh_exit(). Uses memdiag to read the port to force
 /// CKE back to high. Stolen from mss_lab_memdiags.C
 /// Specialization for TARGET_TYPE_MCA
@@ -172,6 +193,7 @@ template< >
 fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Step 1 - In MBARPC0Q, disable power domain control
     FAPI_TRY(mss::mc::read_mbarpc0(i_target, l_mbarpc0_data));
@@ -185,6 +207,10 @@ fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 
     // Step 3 - Run memdiags to read the port to force CKE back to high
     FAPI_TRY(self_refresh_exit_helper(i_target));
+
+    // maint_addr_mode could be enabled by the helper. Disable it before exiting
+    // otherwise it will introduce problem to other DIMMs on the same MCBIST
+    FAPI_TRY(maint_addr_mode_off(l_mcbist));
 
 fapi_try_exit:
     return fapi2::current_err;
