@@ -34,8 +34,6 @@ constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0b00000 = 0b00000;
-constexpr uint64_t literal_0x1 = 0x1;
-constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b010010 = 0b010010;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b00000000000000000000 = 0b00000000000000000000;
@@ -66,6 +64,7 @@ constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_12 = 12;
@@ -125,13 +124,6 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT4, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT4, l_chip_ec));
-        fapi2::ATTR_RISK_LEVEL_Type l_TGT3_ATTR_RISK_LEVEL;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT3, l_TGT3_ATTR_RISK_LEVEL));
-        fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13_Type l_TGT4_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13, TGT4,
-                               l_TGT4_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13));
-        uint64_t l_def_hw439321_wa = ((( ! l_TGT4_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13)
-                                       || (l_TGT3_ATTR_RISK_LEVEL == literal_0x0)) || (l_TGT3_ATTR_RISK_LEVEL == literal_0x1));
         fapi2::ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT_Type l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT, TGT0,
                                l_TGT0_ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT));
@@ -792,13 +784,9 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<21, 5, 59, uint64_t>(literal_0b00000 );
             }
 
-            if ((l_def_hw439321_wa == literal_1))
+            if (literal_1)
             {
                 l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b1 );
             }
 
             if (literal_1)

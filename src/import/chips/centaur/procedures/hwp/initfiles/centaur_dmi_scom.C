@@ -42,10 +42,7 @@ constexpr uint64_t literal_0b0011000 = 0b0011000;
 constexpr uint64_t literal_0b0010001 = 0b0010001;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b11 = 0b11;
-constexpr uint64_t literal_0x1 = 0x1;
-constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0b1000000 = 0b1000000;
-constexpr uint64_t literal_0b0001111 = 0b0001111;
 constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b0111 = 0b0111;
 constexpr uint64_t literal_0b0011 = 0b0011;
@@ -78,11 +75,6 @@ fapi2::ReturnCode centaur_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT1, l_TGT1_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         uint64_t l_def_IS_SIM = (l_TGT1_ATTR_IS_SIMULATION == literal_1);
-        fapi2::ATTR_RISK_LEVEL_Type l_TGT1_ATTR_RISK_LEVEL;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT1, l_TGT1_ATTR_RISK_LEVEL));
-        fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13, TGT2,
-                               l_TGT2_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13));
         fapi2::ATTR_EI_BUS_TX_MSBSWAP_Type l_TGT0_ATTR_EI_BUS_TX_MSBSWAP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EI_BUS_TX_MSBSWAP, TGT0, l_TGT0_ATTR_EI_BUS_TX_MSBSWAP));
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -596,26 +588,15 @@ fapi2::ReturnCode centaur_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8009d8000201043full, l_scom_buffer ));
 
-            if (((( ! l_TGT2_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13) || (l_TGT1_ATTR_RISK_LEVEL == literal_0x0))
-                 || (l_TGT1_ATTR_RISK_LEVEL == literal_0x1)))
+            if (( true ))
             {
                 l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b1000000 );
             }
-            else if (( true ))
-            {
-                l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0001111 );
-            }
 
-            if (((( ! l_TGT2_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13) || (l_TGT1_ATTR_RISK_LEVEL == literal_0x0))
-                 || (l_TGT1_ATTR_RISK_LEVEL == literal_0x1)))
+            if (( true ))
             {
                 constexpr auto l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP2 = 0x2;
                 l_scom_buffer.insert<55, 4, 60, uint64_t>(l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP2 );
-            }
-            else if (( true ))
-            {
-                constexpr auto l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP7 = 0x7;
-                l_scom_buffer.insert<55, 4, 60, uint64_t>(l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP7 );
             }
 
             l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b101 );
