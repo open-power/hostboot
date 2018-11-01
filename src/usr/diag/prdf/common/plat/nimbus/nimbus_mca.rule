@@ -25,12 +25,13 @@
 
 chip nimbus_mca
 {
-    name        "P9 MCA chiplet";
+    name        "NIMBUS MCA target";
     targettype  TYPE_MCA;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
 .include "prdfMemExtraSig.H";
 .include "prdfP9McaExtraSig.H";
 
@@ -699,8 +700,7 @@ group gDDRPHYFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "nimbus_mca_actions.rule";
 

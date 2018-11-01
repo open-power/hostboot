@@ -25,7 +25,7 @@
 
 chip cumulus_dmi
 {
-    name        "P9 MCA chiplet";
+    name        "CUMULUS DMI target";
     targettype  TYPE_DMI;
     sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
@@ -54,7 +54,6 @@ chip cumulus_dmi
         reset       (&, 0x07010901);
         mask        (|, 0x07010905);
         capture     group default;
-        capture     group chnlFail;
     };
 
     register CHIFIR_MASK
@@ -62,7 +61,6 @@ chip cumulus_dmi
         name        "P9 DMI target CHIFIR MASK";
         scomaddr    0x07010903;
         capture     group default;
-        capture     group chnlFail;
     };
 
     register CHIFIR_ACT0
@@ -71,7 +69,6 @@ chip cumulus_dmi
         scomaddr    0x07010906;
         capture     group default;
         capture     req nonzero("CHIFIR");
-        capture     group chnlFail;
     };
 
     register CHIFIR_ACT1
@@ -80,7 +77,6 @@ chip cumulus_dmi
         scomaddr    0x07010907;
         capture     group default;
         capture     req nonzero("CHIFIR");
-        capture     group chnlFail;
     };
 
 # Include registers not defined by the xml
@@ -421,8 +417,7 @@ group gCHIFIR filter priority( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "cumulus_dmi_actions.rule";
 

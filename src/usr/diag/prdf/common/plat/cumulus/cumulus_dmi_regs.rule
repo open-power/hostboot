@@ -56,7 +56,6 @@
         name        "MCI Configuration Register 0";
         scomaddr    0x0701090A;
         capture     group default;
-        capture     group chnlFail;
     };
 
     register MCISTAT
@@ -85,7 +84,6 @@
         name        "MCI Configuration Register 1";
         scomaddr    0x0701090E;
         capture     group default;
-        capture     group chnlFail;
     };
 
     register RECR

@@ -397,6 +397,9 @@ actionclass sbe_vital_attn
     funccall("handleSbeVital");
 };
 
+actionclass sys_osc_switch_error { defaultMaskedError; }; # Handled in PLL code
+actionclass pci_osc_switch_error { defaultMaskedError; }; # Handled in PLL code
+
 actionclass pmRecovery
 {
     funccall("PmRecovery");

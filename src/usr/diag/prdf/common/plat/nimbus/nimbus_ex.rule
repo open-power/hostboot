@@ -25,12 +25,13 @@
 
 chip nimbus_ex
 {
-    name        "P9 EX chiplet";
+    name        "NIMBUS EX target";
     targettype  TYPE_EX;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
 .include "prdfP9ExExtraSig.H";
 
  #############################################################################
@@ -888,8 +889,7 @@ group gCMEFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_ex_actions.rule";
 
