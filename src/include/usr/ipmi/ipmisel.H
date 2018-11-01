@@ -368,6 +368,12 @@ class IpmiSEL
       ~IpmiSEL(void);
 
       /**
+       * Enable ipmi errl
+       * @param[in] o_errl, NULL if OK
+       */
+      static void errlEnable(errlHndl_t& o_errl);
+
+      /**
        * @brief Get the message queue associated with this FRU
        * @param[in] void
        * @return, a msg_q_t which is the message queue
