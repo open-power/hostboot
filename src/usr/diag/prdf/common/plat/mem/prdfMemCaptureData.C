@@ -388,7 +388,7 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
                     // Add the rank, port, then the entry data.
                     capData[idx] = rank.getMaster();
                     idx += sz_rank;
-                    capData[idx] = getDimmPort<T>( dimm );
+                    capData[idx] = getDimmPort( dimm );
                     idx += sz_port;
                     memcpy(&capData[idx], rowRepair.getData(), sz_entry);
                     idx += sz_entry;

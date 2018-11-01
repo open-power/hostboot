@@ -1099,7 +1099,7 @@ int32_t __getDimmRange( TargetHandle_t i_dimm,
         }
 
         // Get the DIMM select.
-        uint8_t dimmSlct = getDimmSlct<T>( i_dimm );
+        uint8_t dimmSlct = getDimmSlct( i_dimm );
 
         // Get the address range of i_dimm.
         MemAddr startAddr, endAddr;
@@ -1172,8 +1172,8 @@ bool isDimmPair( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
     bool isDimmPair = false;
     do
     {
-        uint8_t dimm1Slct = getDimmSlct<T>( i_dimm1 );
-        uint8_t dimm2Slct = getDimmSlct<T>( i_dimm2 );
+        uint8_t dimm1Slct = getDimmSlct( i_dimm1 );
+        uint8_t dimm2Slct = getDimmSlct( i_dimm2 );
 
         isDimmPair = ( ( dimm1Slct == dimm2Slct ) &&
                        ( getConnectedParent( i_dimm1, T ) ==
@@ -1191,8 +1191,8 @@ bool compareDimms( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
     bool isSmall = false;
     do
     {
-        uint8_t dimm1Slct = getDimmSlct<T>( i_dimm1 );
-        uint8_t dimm2Slct = getDimmSlct<T>( i_dimm2 );
+        uint8_t dimm1Slct = getDimmSlct( i_dimm1 );
+        uint8_t dimm2Slct = getDimmSlct( i_dimm2 );
 
         TargetHandle_t tgt1 = getConnectedParent( i_dimm1, T );
         TargetHandle_t tgt2 = getConnectedParent( i_dimm2, T );
