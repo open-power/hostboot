@@ -496,12 +496,12 @@ actionclass calloutBusInterface_obus3_th_1
  */
 actionclass TodReportByRegister
 {
+    capture(TODReg);
     try(analyze(gTodErrors),TodRegisterAnalyzeFail);
 };
 
 actionclass TodRegisterAnalyzeFail
 {
-    capture(TODReg);
     self_H_th_1;
 };
 
@@ -528,7 +528,6 @@ actionclass analyzeStepCheckErr
 actionclass selfCaptThr32
 {
     calloutSelfHigh;
-    capture(TODReg);
     threshold32pday;
 };
 
@@ -541,7 +540,6 @@ actionclass selfCaptThr32
 actionclass maskTodError
 {
     self_H_th_1;
-    capture(TODReg);
     funccall("ClearServiceCallFlag");
     funccall("todNewTopologyIfBackupMDMT");
 };
