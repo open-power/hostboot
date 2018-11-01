@@ -49,26 +49,10 @@ extern "C"
     ///
     fapi2::ReturnCode exp_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        // TODO:RTC197867 Update these constants to read out actual values from attributes
-        constexpr uint8_t MANUFACTURING_MODE_OFF = 0x00;
-        constexpr uint8_t NO_LOOPBACK_TESTING = 0x00;
-        constexpr uint8_t OPENCAPI_TRANSPORT_LAYER = 0x00;
-        constexpr uint8_t IMMEDIATE_DL_LAYER_BOOT = 0x00;
-        constexpr uint8_t FULL_BOOT_MODE = 0x00;
-        constexpr uint8_t LANE_MODE_8 = 0x01;
-        constexpr uint8_t SERDES_25600MBPS = 0x03;
         std::vector<uint8_t> l_data;
 
         // Gets the data setup
-        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target,
-                 MANUFACTURING_MODE_OFF,
-                 NO_LOOPBACK_TESTING,
-                 OPENCAPI_TRANSPORT_LAYER,
-                 IMMEDIATE_DL_LAYER_BOOT,
-                 FULL_BOOT_MODE,
-                 LANE_MODE_8,
-                 SERDES_25600MBPS,
-                 l_data));
+        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
 
         // Issues the command and checks for completion
         // Note: the status check also checks for the OMI training completion, so after we run this command, we're good to go
