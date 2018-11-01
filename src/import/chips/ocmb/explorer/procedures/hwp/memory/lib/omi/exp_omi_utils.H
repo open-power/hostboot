@@ -184,24 +184,10 @@ namespace train
 ///
 /// @brief Sets up the OMI training
 /// @param[in] i_target target on which the code is operating
-/// @param[in] i_manufacturing_mode manufacturing mode control
-/// @param[in] i_loopback_testing loopback testing control
-/// @param[in] i_transport_layer transport layer configuration
-/// @param[in] i_dl_layer DL layer boot mode
-/// @param[in] i_boot_mode true if step-by-step mode
-/// @param[in] i_lane_mode lane mode configuration
-/// @param[in] i_serdes serdes frequency
 /// @param[out] o_data data for the FW_BOOT_CONFIG
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
 fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                        const uint8_t i_manufacturing_mode,
-                                        const uint8_t i_loopback_testing,
-                                        const uint8_t i_transport_layer,
-                                        const uint8_t i_dl_layer,
-                                        const uint8_t i_boot_mode,
-                                        const uint8_t i_lane_mode,
-                                        const uint8_t i_serdes,
                                         std::vector<uint8_t>& o_data );
 
 } // ns train
