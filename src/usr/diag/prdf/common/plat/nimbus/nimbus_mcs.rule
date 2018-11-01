@@ -25,7 +25,7 @@
 
 chip nimbus_mcs
 {
-    name        "P9 MCS chiplet";
+    name        "NIMBUS MCS target";
     targettype  TYPE_MCS;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
@@ -260,8 +260,7 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 6, 8, 9 )
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "nimbus_mcs_actions.rule";
 

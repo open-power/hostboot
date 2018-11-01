@@ -25,12 +25,13 @@
 
 chip cumulus_mc
 {
-    name        "P9 MC chiplet";
+    name        "CUMULUS MC target";
     targettype  TYPE_MC;
     sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
 .include "prdfLaneRepairExtraSig.H";
 
  #############################################################################
@@ -839,9 +840,8 @@ group gMCBISTFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "cumulus_mc_actions.rule";
 
 actionclass analyzeConnectedDMI0 { analyze(connected(TYPE_DMI, 0)); };

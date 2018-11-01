@@ -25,13 +25,13 @@
 
 chip nimbus_obus
 {
-    name        "P9 OBUS chiplet";
+    name        "NIMBUS OBUS target";
     targettype  TYPE_OBUS;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
-#Import signatures
+# Import signatures
 .include "prdfLaneRepairExtraSig.H";
 
  #############################################################################
@@ -974,8 +974,7 @@ group gOBPPEFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_obus_actions.rule";
 

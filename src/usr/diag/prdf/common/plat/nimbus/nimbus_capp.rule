@@ -25,7 +25,7 @@
 
 chip nimbus_capp
 {
-    name        "P9 CAPP chiplet";
+    name        "NIMBUS CAPP target";
     targettype  TYPE_CAPP;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
@@ -406,8 +406,7 @@ group gCXAFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_capp_actions.rule";
 

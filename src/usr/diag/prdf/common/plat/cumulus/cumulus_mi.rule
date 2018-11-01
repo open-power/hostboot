@@ -25,7 +25,7 @@
 
 chip cumulus_mi
 {
-    name        "P9 MI chiplet";
+    name        "CUMULUS MI target";
     targettype  TYPE_MI;
     sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
@@ -256,8 +256,7 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "cumulus_mi_actions.rule";
 

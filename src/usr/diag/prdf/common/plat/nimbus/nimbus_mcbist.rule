@@ -25,12 +25,13 @@
 
 chip nimbus_mcbist
 {
-    name        "P9 MCBIST chiplet";
+    name        "NIMBUS MCBIST target";
     targettype  TYPE_MCBIST;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
 .include "prdfP9McbistExtraSig.H";
 
  #############################################################################
@@ -584,14 +585,9 @@ group gMCBISTFIR filter singlebit, cs_root_cause
     (rMCBISTFIR, bit(11)) ? defaultMaskedError;
 
     /** MCBISTFIR[12]
-     *  MCBIST program complete - WAT workaround
+     *  WAT_DEBUG_ATTN
      */
-    (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround; # NIMBUS_10
-
-    /** MCBISTFIR[10,12]
-     *  MCBIST Command Complete
-     */
-    (rMCBISTFIR, bit(10,12)) ? mcbist_program_complete;
+    (rMCBISTFIR, bit(12)) ? defaultMaskedError;
 
     /** MCBISTFIR[13]
      *  SCOM_RECOVERABLE_REG_PE
@@ -636,9 +632,8 @@ group gMCBISTFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "nimbus_mcbist_actions.rule";
 
 actionclass analyzeConnectedMCA0 { analyze(connected(TYPE_MCA, 0)); };

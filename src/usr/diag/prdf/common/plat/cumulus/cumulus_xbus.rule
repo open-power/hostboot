@@ -25,13 +25,13 @@
 
 chip cumulus_xbus
 {
-    name        "P9 XBUS chiplet";
+    name        "CUMULUS XBUS target";
     targettype  TYPE_XBUS;
     sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
-#Import signatures
+# Import signatures
 .include "prdfLaneRepairExtraSig.H";
 
  #############################################################################
@@ -582,8 +582,7 @@ group gIOELFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_xbus_actions.rule";
 

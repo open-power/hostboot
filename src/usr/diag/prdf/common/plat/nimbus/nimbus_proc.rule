@@ -25,13 +25,13 @@
 
 chip nimbus_proc
 {
-    name        "P9 Nimbus chip";
+    name        "NIMBUS PROC target";
     targettype  TYPE_PROC;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
-#Import signatures
+# Import signatures
 .include "prdfP9ProcMbCommonExtraSig.H";
 
  #############################################################################
@@ -1519,7 +1519,7 @@ chip nimbus_proc
         capture     group PciChipletFir2;
     };
 
-# Include registers common to all P9 proc chips, not defined by the XML
+# Include registers not defined by the xml
 .include "p9_common_proc_regs.rule";
 
 };
@@ -2202,12 +2202,12 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[36]
      *  system ref osc switch to backup
      */
-    (rTP_LFIR, bit(36)) ? defaultMaskedError;
+    (rTP_LFIR, bit(36)) ? sys_osc_switch_error;
 
     /** TP_LFIR[37]
      *  PCI osc switch to backup
      */
-    (rTP_LFIR, bit(37)) ? defaultMaskedError;
+    (rTP_LFIR, bit(37)) ? pci_osc_switch_error;
 
     /** TP_LFIR[38]
      *  PIB MEM: Summarized err - PIB access ops
@@ -2271,22 +2271,22 @@ group gOCCFIR filter singlebit, cs_root_cause
     (rOCCFIR, bit(4)) ? defaultMaskedError;
 
     /** OCCFIR[5]
-     *  GPE0_WATCHDOG_TIMEOUT
+     *  GPE0 watchdog timeout condition
      */
     (rOCCFIR, bit(5)) ? defaultMaskedError;
 
     /** OCCFIR[6]
-     *  GPE0 watchdog timeout condition
+     *  GPE1 watchdog timeout condition
      */
     (rOCCFIR, bit(6)) ? defaultMaskedError;
 
     /** OCCFIR[7]
-     *  GPE1  watchdog timeout condition
+     *  GPE2  watchdog timeout condition
      */
     (rOCCFIR, bit(7)) ? defaultMaskedError;
 
     /** OCCFIR[8]
-     *  GPE2 watchdog timeout condition
+     *  GPE3 watchdog timeout condition
      */
     (rOCCFIR, bit(8)) ? defaultMaskedError;
 
@@ -2875,7 +2875,7 @@ group gNXCQFIR filter singlebit, cs_root_cause
     (rNXCQFIR, bit(22)) ? nx_th_1;
 
     /** NXCQFIR[23]
-     *  UEon the Powerbus data for xlate
+     *  UE on the Powerbus data for xlate
      */
     (rNXCQFIR, bit(23)) ? nx_th_1;
 
@@ -3650,7 +3650,7 @@ group gVASFIR filter singlebit, cs_root_cause
     /** VASFIR[15]
      *  PB Master State Machine Hang
      */
-    (rVASFIR, bit(15)) ? self_th_1;
+    (rVASFIR, bit(15)) ? defaultMaskedError;
 
     /** VASFIR[16]
      *  EG Uncorrectable ECC Error
@@ -4797,7 +4797,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[1]
      *  PBA CRESP Addr Error for Read
      */
-    (rPBAFIR, bit(1)) ? self_M_level2_L_th_1;
+    (rPBAFIR, bit(1)) ? defaultMaskedError;
 
     /** PBAFIR[2]
      *  PBA Read Data Timeout
@@ -4822,7 +4822,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[6]
      *  PBA OCI Slave Initialization Error
      */
-    (rPBAFIR, bit(6)) ? level2_th_1;
+    (rPBAFIR, bit(6)) ? level2_dump_SW;
 
     /** PBAFIR[7]
      *  OCI Write Data Parity Error
@@ -4852,12 +4852,12 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[12]
      *  PBA CRESP Addr Error for Write
      */
-    (rPBAFIR, bit(12)) ? self_M_level2_L_th_1;
+    (rPBAFIR, bit(12)) ? level2_th_1;
 
     /** PBAFIR[13]
      *  PBA Invalid CRESP
      */
-    (rPBAFIR, bit(13)) ? self_th_1;
+    (rPBAFIR, bit(13)) ? level2_th_1;
 
     /** PBAFIR[14]
      *  PBA CRESP ACK Dead response r
@@ -4867,12 +4867,12 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[15]
      *  PBA OPERATIONAL Timeout detected
      */
-    (rPBAFIR, bit(15)) ? self_th_1;
+    (rPBAFIR, bit(15)) ? level2_th_1;
 
     /** PBAFIR[16]
      *  BCUE Setup Error
      */
-    (rPBAFIR, bit(16)) ? level2_th_1;
+    (rPBAFIR, bit(16)) ? defaultMaskedError;
 
     /** PBAFIR[17]
      *  BCUE PowerBus Link
@@ -4882,17 +4882,17 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[18]
      *  PBA CRESP Addr Error for BC Write
      */
-    (rPBAFIR, bit(18)) ? self_M_level2_L_th_1;
+    (rPBAFIR, bit(18)) ? defaultMaskedError;
 
     /** PBAFIR[19]
      *  BCUE Read Data Parity Error OR MRDERR
      */
-    (rPBAFIR, bit(19)) ? self_th_1;
+    (rPBAFIR, bit(19)) ? defaultMaskedError;
 
     /** PBAFIR[20]
      *  BCDE Setup Error Block Copy Error
      */
-    (rPBAFIR, bit(20)) ? self_th_1;
+    (rPBAFIR, bit(20)) ? defaultMaskedError;
 
     /** PBAFIR[21]
      *  BCDE PowerBus Link error
@@ -4902,12 +4902,12 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[22]
      *  PBA CRESP Addr Error for BC Read
      */
-    (rPBAFIR, bit(22)) ? self_M_level2_L_th_1;
+    (rPBAFIR, bit(22)) ? defaultMaskedError;
 
     /** PBAFIR[23]
      *  PBA Read Data Timeout
      */
-    (rPBAFIR, bit(23)) ? self_th_1;
+    (rPBAFIR, bit(23)) ? defaultMaskedError;
 
     /** PBAFIR[24]
      *  PBA Read Data SUE Error
@@ -4917,17 +4917,17 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[25]
      *  PBA Read Data UE Error
      */
-    (rPBAFIR, bit(25)) ? self_th_1;
+    (rPBAFIR, bit(25)) ? defaultMaskedError;
 
     /** PBAFIR[26]
      *  PBA Read Data CE Error
      */
-    (rPBAFIR, bit(26)) ? self_th_32perDay;
+    (rPBAFIR, bit(26)) ? defaultMaskedError;
 
     /** PBAFIR[27]
      *  BCDE Write Data error
      */
-    (rPBAFIR, bit(27)) ? self_th_1;
+    (rPBAFIR, bit(27)) ? defaultMaskedError;
 
     /** PBAFIR[28]
      *  Internal Logic Error.
@@ -4937,17 +4937,17 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[29]
      *  Byte count is less than full cache line
      */
-    (rPBAFIR, bit(29)) ? self_th_1;
+    (rPBAFIR, bit(29)) ? level2_dump_SW;
 
     /** PBAFIR[30]
      *  Illegal access to OCI Register.
      */
-    (rPBAFIR, bit(30)) ? self_th_1;
+    (rPBAFIR, bit(30)) ? level2_dump_SW;
 
     /** PBAFIR[31]
      *  Push Write Error.
      */
-    (rPBAFIR, bit(31)) ? self_th_1;
+    (rPBAFIR, bit(31)) ? defaultMaskedError;
 
     /** PBAFIR[32]
      *  PBAXRCV Low data before High Data
@@ -4972,12 +4972,12 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[36]
      *  PBA engine retry threshold reached
      */
-    (rPBAFIR, bit(36)) ? self_th_1;
+    (rPBAFIR, bit(36)) ? defaultMaskedError;
 
     /** PBAFIR[37]
      *  PBA engine retry threshold reached
      */
-    (rPBAFIR, bit(37)) ? self_th_1;
+    (rPBAFIR, bit(37)) ? defaultMaskedError;
 
     /** PBAFIR[38]
      *  PBAXSND Reservation Timeout
@@ -4987,7 +4987,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[39]
      *  PBAXSND Reservation Error.
      */
-    (rPBAFIR, bit(39)) ? self_th_1;
+    (rPBAFIR, bit(39)) ? defaultMaskedError;
 
     /** PBAFIR[40]
      *  PBA CRESP ACK Dead response
@@ -5393,7 +5393,7 @@ group gNMMUCQFIR filter singlebit, cs_root_cause
     /** NMMUCQFIR[1]
      *  PowerBus command hang error
      */
-    (rNMMUCQFIR, bit(1)) ? level2_th_1;
+    (rNMMUCQFIR, bit(1)) ? defaultMaskedError;
 
     /** NMMUCQFIR[2]
      *  PowerBus read address error
@@ -5438,7 +5438,7 @@ group gNMMUCQFIR filter singlebit, cs_root_cause
     /** NMMUCQFIR[10]
      *  PowerBus SUE error
      */
-    (rNMMUCQFIR, bit(10)) ? self_th_1; # NIMBUS_10
+    (rNMMUCQFIR, bit(10)) ? defaultMaskedError;
 
     /** NMMUCQFIR[11]
      *  Inbound LCO_ARRAY CE error
@@ -5541,7 +5541,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[5]
      *  Fabric mst rd array SUE error detected.
      */
-    (rNMMUFIR, bit(5)) ? self_th_1; # NIMBUS_10
+    (rNMMUFIR, bit(5)) ? defaultMaskedError;
 
     /** NMMUFIR[6]
      *  Fabric xlat protocol error detected.
@@ -5551,7 +5551,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[7]
      *  Fabric xlat op timeout detected.
      */
-    (rNMMUFIR, bit(7)) ? self_th_1;
+    (rNMMUFIR, bit(7)) ? defaultMaskedError;
 
     /** NMMUFIR[8]
      *  SLB directory parity error detected.
@@ -5661,7 +5661,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[29]
      *  Prefetch abort/fail detected .
      */
-    (rNMMUFIR, bit(29)) ? level2_th_1; # NIMBUS_10
+    (rNMMUFIR, bit(29)) ? defaultMaskedError;
 
     /** NMMUFIR[30]
      *  Context cache array parity er
@@ -5696,22 +5696,22 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[36]
      *  Tablewalk sm timeout error detected .
      */
-    (rNMMUFIR, bit(36)) ? self_th_1;
+    (rNMMUFIR, bit(36)) ? defaultMaskedError;
 
     /** NMMUFIR[37]
      *  Castout sm timeout error detected .
      */
-    (rNMMUFIR, bit(37)) ? self_th_1;
+    (rNMMUFIR, bit(37)) ? defaultMaskedError;
 
     /** NMMUFIR[38]
      *  Check-in sm timeout error detected .
      */
-    (rNMMUFIR, bit(38)) ? self_th_1;
+    (rNMMUFIR, bit(38)) ? defaultMaskedError;
 
     /** NMMUFIR[39]
      *  Invalidate sm timeout error detected .
      */
-    (rNMMUFIR, bit(39)) ? self_th_1;
+    (rNMMUFIR, bit(39)) ? defaultMaskedError;
 
     /** NMMUFIR[40]
      *  NX local checkstop error detected .
@@ -5907,17 +5907,17 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[27]
      *  INT_CQ_FIR_WRQ_OP_HANG:
      */
-    (rINTCQFIR, bit(27)) ? threshold_and_mask_self;
+    (rINTCQFIR, bit(27)) ? defaultMaskedError;
 
     /** INTCQFIR[28]
      *  INT_CQ_FIR_RDQ_OP_HANG:
      */
-    (rINTCQFIR, bit(28)) ? threshold_and_mask_self;
+    (rINTCQFIR, bit(28)) ? defaultMaskedError;
 
     /** INTCQFIR[29]
      *  INT_CQ_FIR_INTQ_OP_HANG:
      */
-    (rINTCQFIR, bit(29)) ? threshold_and_mask_self;
+    (rINTCQFIR, bit(29)) ? defaultMaskedError;
 
     /** INTCQFIR[30]
      *  INT_CQ_FIR_RDQ_DATA_HANG:
@@ -6027,7 +6027,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[55:57]
      *  INT_CQ_FIR_PC_INFO_ERROR_0_2:
      */
-    (rINTCQFIR, bit(55|56|57)) ? level2_M_self_L_th_32perDay; # NIMBUS_10
+    (rINTCQFIR, bit(55|56|57)) ? defaultMaskedError;
 
     /** INTCQFIR[58:59]
      *  INT_CQ_FIR_VC_FATAL_ERROR_0_1:
@@ -6042,7 +6042,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[62:63]
      *  INT_CQ_FIR_VC_INFO_ERROR_0_1:
      */
-    (rINTCQFIR, bit(62|63)) ? level2_M_self_L_th_32perDay; # NIMBUS_10
+    (rINTCQFIR, bit(62|63)) ? defaultMaskedError;
 
 };
 
@@ -6499,42 +6499,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[28]
      *  parser00 attn
      */
-    (rPBIOOFIR, bit(28)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(28)) ? obus0SmpFailure_L0;
 
     /** PBIOOFIR[29]
      *  parser01 attn
      */
-    (rPBIOOFIR, bit(29)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(29)) ? obus0SmpFailure_L1;
 
     /** PBIOOFIR[30]
      *  parser02 attn
      */
-    (rPBIOOFIR, bit(30)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(30)) ? obus1SmpFailure_L0;
 
     /** PBIOOFIR[31]
      *  parser03 attn
      */
-    (rPBIOOFIR, bit(31)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(31)) ? obus1SmpFailure_L1;
 
     /** PBIOOFIR[32]
      *  parser04 attn
      */
-    (rPBIOOFIR, bit(32)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(32)) ? obus2SmpFailure_L0;
 
     /** PBIOOFIR[33]
      *  parser05 attn
      */
-    (rPBIOOFIR, bit(33)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(33)) ? obus2SmpFailure_L1;
 
     /** PBIOOFIR[34]
      *  parser06 attn
      */
-    (rPBIOOFIR, bit(34)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(34)) ? obus3SmpFailure_L0;
 
     /** PBIOOFIR[35]
      *  parser07 attn
      */
-    (rPBIOOFIR, bit(35)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(35)) ? obus3SmpFailure_L1;
 
     /** PBIOOFIR[36]
      *  mailbox 00 special attention
@@ -6619,42 +6619,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[52]
      *  data outbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(52)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(52)) ? obus0SmpFailure_LALL;
 
     /** PBIOOFIR[53]
      *  data outbound switch internal - links 23
      */
-    (rPBIOOFIR, bit(53)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(53)) ? obus1SmpFailure_LALL;
 
     /** PBIOOFIR[54]
      *  data outbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(54)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(54)) ? obus2SmpFailure_LALL;
 
     /** PBIOOFIR[55]
      *  data outbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(55)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(55)) ? obus3SmpFailure_LALL;
 
     /** PBIOOFIR[56]
      *  data inbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(56)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(56)) ? obus0SmpFailure_LALL;
 
     /** PBIOOFIR[57]
      *  data inbound switch internal-links 23
      */
-    (rPBIOOFIR, bit(57)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(57)) ? obus1SmpFailure_LALL;
 
     /** PBIOOFIR[58]
      *  data inbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(58)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(58)) ? obus2SmpFailure_LALL;
 
     /** PBIOOFIR[59]
      *  data inbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(59)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(59)) ? obus3SmpFailure_LALL;
 
     /** PBIOOFIR[60:61]
      *  spare
@@ -7855,9 +7855,8 @@ group gPCI2_CHIPLET_FIR filter singlebit
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_proc_actions.rule";
 
 actionclass analyzeConnectedEQ0     { analyze(connected(TYPE_EQ,      0)); };

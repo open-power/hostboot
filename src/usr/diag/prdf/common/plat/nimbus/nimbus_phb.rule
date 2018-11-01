@@ -25,7 +25,7 @@
 
 chip nimbus_phb
 {
-    name        "P9 PHB chiplet";
+    name        "NIMBUS PHB target";
     targettype  TYPE_PHB;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
@@ -449,12 +449,12 @@ group gETUFIR filter singlebit, cs_root_cause
     (rETUFIR, bit(4)) ? defaultMaskedError;
 
     /** ETUFIR[5]
-     *  spare
+     *  AIB_INF_CLASS_ERROR
      */
     (rETUFIR, bit(5)) ? defaultMaskedError;
 
     /** ETUFIR[6]
-     *  AIB_INF_CLASS_ERROR
+     *  spare
      */
     (rETUFIR, bit(6)) ? defaultMaskedError;
 
@@ -751,8 +751,7 @@ group gETUFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_phb_actions.rule";
 

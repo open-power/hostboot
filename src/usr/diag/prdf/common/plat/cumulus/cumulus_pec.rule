@@ -25,7 +25,7 @@
 
 chip cumulus_pec
 {
-    name        "P9 PEC chiplet";
+    name        "CUMULUS PEC target";
     targettype  TYPE_PEC;
     sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
@@ -461,8 +461,7 @@ group gIOPCIFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "p9_common_actions.rule";
-# Include the chip-specific action set.
 .include "p9_common_pec_actions.rule";
 

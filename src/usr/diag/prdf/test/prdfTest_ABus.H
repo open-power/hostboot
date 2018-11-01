@@ -68,32 +68,5 @@ class PBESFIR:public CxxTest::TestSuite
                 }
             }
         }
-
-        void TestCheckstop(void)
-        {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
-                    PRDF::PlatServices::getMasterProc() ) )
-            {
-                PRDS_BEGIN("PBESFIR Checkstop attention");
-                PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x720c001c);
-                // GLOBAL_RE_FIR set bit 8
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x0400000000000000);
-                // NEST Chiplet (chkstop error)  set bit 16
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05040000,  0x0000800000000000);
-
-
-                // set bit 28  (PSR  A0 even link down error)
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013800, 0x0000000800000000);
-                // ACT1
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x05013807, 0x0000000000000000);
-                PRDS_START_SIM();
-                if(!(PRDS_END()))
-                {
-                    TS_FAIL("Expected Signature Failed PBESFIR Checkstop attention");
-                }
-            }
-        }
 };
 #endif
