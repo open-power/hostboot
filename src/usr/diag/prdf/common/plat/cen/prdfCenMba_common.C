@@ -71,7 +71,7 @@ void __calloutDimmsOnPort( ExtensibleChip * i_chip, uint32_t i_port,
 {
     for ( auto & dimm : getConnected(i_chip->getTrgt(), TYPE_DIMM) )
     {
-        if ( getDimmPort<TYPE_MBA>(dimm) == i_port )
+        if ( getDimmPort(dimm) == i_port )
             io_sc.service_data->SetCallout( dimm, MRU_MEDA );
     }
 }

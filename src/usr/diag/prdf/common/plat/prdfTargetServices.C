@@ -1120,43 +1120,22 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint8_t getDimmPort<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTrgt )
+uint8_t getDimmPort( TARGETING::TargetHandle_t i_dimmTrgt )
 {
     PRDF_ASSERT( nullptr != i_dimmTrgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
 
-    return i_dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
-}
-
-template<>
-uint8_t getDimmPort<TYPE_MCA>( TARGETING::TargetHandle_t i_dimmTrgt )
-{
-    PRDF_ASSERT( nullptr != i_dimmTrgt );
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
-
-    // Only one port on MCA
-    return 0;
+    return i_dimmTrgt->getAttr<ATTR_MEM_PORT>();
 }
 
 //------------------------------------------------------------------------------
 
-template<>
-uint8_t getDimmSlct<TYPE_MBA>( TargetHandle_t i_trgt )
+uint8_t getDimmSlct( TargetHandle_t i_trgt )
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
 
-    return i_trgt->getAttr<ATTR_CEN_MBA_DIMM>();
-}
-
-template<>
-uint8_t getDimmSlct<TYPE_MCA>( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
-
-    return getTargetPosition(i_trgt) % MAX_DIMM_PER_PORT;
+    return i_trgt->getAttr<ATTR_POS_ON_MEM_PORT>();
 }
 
 //------------------------------------------------------------------------------
@@ -1167,29 +1146,15 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
     #define PRDF_FUNC "[PlatServices::getConnectedDimms] "
 
     TargetHandleList o_list;
-    TYPE l_trgtType = getTargetType( i_trgt );
 
-    if ( TYPE_MCA == l_trgtType )
+    TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
+    for ( auto & dimm : l_dimmList )
     {
-        o_list.push_back(
-            getConnectedChild(i_trgt, TYPE_DIMM, i_rank.getDimmSlct()) );
-    }
-    else if ( TYPE_MBA == l_trgtType )
-    {
-        TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
-        for ( auto & dimm : l_dimmList )
+        uint8_t l_dimmSlct = getDimmSlct( dimm );
+        if ( l_dimmSlct == i_rank.getDimmSlct() )
         {
-            uint8_t l_dimmSlct = getDimmSlct<TYPE_MBA>( dimm );
-            if ( l_dimmSlct == i_rank.getDimmSlct() )
-            {
-                o_list.push_back( dimm );
-            }
+            o_list.push_back( dimm );
         }
-    }
-    else
-    {
-        PRDF_ERR(PRDF_FUNC "Invalid target type: HUID=0x%08x", getHuid(i_trgt));
-        PRDF_ASSERT( false );
     }
 
     return o_list;
@@ -1204,29 +1169,16 @@ TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
     #define PRDF_FUNC "[PlatServices::getConnectedDimm] "
 
     TargetHandle_t o_dimm = nullptr;
-    TYPE l_trgtType = getTargetType( i_trgt );
 
-    if ( TYPE_MCA == l_trgtType )
+    TargetHandleList l_dimmList = getConnectedDimms( i_trgt, i_rank );
+    for ( auto & dimm : l_dimmList )
     {
-        o_dimm = getConnectedChild( i_trgt, TYPE_DIMM, i_rank.getDimmSlct() );
-    }
-    else if ( TYPE_MBA == l_trgtType )
-    {
-        TargetHandleList l_dimmList = getConnectedDimms( i_trgt, i_rank );
-        for ( auto & dimm : l_dimmList )
+        uint8_t l_portSlct = getDimmPort( dimm );
+        if ( l_portSlct == i_port )
         {
-            uint8_t l_portSlct = getDimmPort<TYPE_MBA>( dimm );
-            if ( l_portSlct == i_port )
-            {
-                o_dimm = dimm;
-                break;
-            }
+            o_dimm = dimm;
+            break;
         }
-    }
-    else
-    {
-        PRDF_ERR(PRDF_FUNC "Invalid target type: HUID=0x%08x", getHuid(i_trgt));
-        PRDF_ASSERT( false );
     }
 
     return o_dimm;

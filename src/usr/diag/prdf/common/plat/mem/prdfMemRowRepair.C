@@ -82,7 +82,7 @@ uint32_t __getRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
     errlHndl_t l_errl = nullptr;
 
     // get port select
-    uint8_t l_ps = getDimmPort<T>( i_dimm );
+    uint8_t l_ps = getDimmPort( i_dimm );
 
     // get mba
     TargetHandle_t l_mba = getConnectedParent( i_dimm, T );
@@ -146,7 +146,7 @@ uint32_t __setRowRepairData( TargetHandle_t i_dimm, const MemRank & i_rank,
         errlHndl_t l_errl = nullptr;
 
         // get port select
-        uint8_t l_ps = getDimmPort<T>( i_dimm );
+        uint8_t l_ps = getDimmPort( i_dimm );
 
         // get mba
         TargetHandle_t l_mba = getConnectedParent(i_dimm, T);
@@ -282,7 +282,7 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
         l_tmp = ( l_tmp << 1 ) | 0x1;
 
         // Adjust for mba port 1 address inversion if necessary
-        if ( (1 == getDimmPort<T>(i_dimm) % 2) && (T == TYPE_MBA) )
+        if ( (1 == getDimmPort(i_dimm) % 2) && (T == TYPE_MBA) )
         {
             // Bits flipped in port 1 inversion: (10:12, 16:22, 24, 26:28)
             // mask:

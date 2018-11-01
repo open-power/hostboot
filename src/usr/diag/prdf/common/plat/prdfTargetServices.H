@@ -394,7 +394,6 @@ bool isMembufOnDimm( TARGETING::TargetHandle_t i_trgt );
  * @param   i_dimmTrgt Dimm.
  * @return  port select
  */
-template<TARGETING::TYPE T>
 uint8_t getDimmPort( TARGETING::TargetHandle_t i_dimmTrgt );
 
 /**
@@ -402,7 +401,6 @@ uint8_t getDimmPort( TARGETING::TargetHandle_t i_dimmTrgt );
  * @param   i_trgt Dimm.
  * @return  The DIMM select
  */
-template<TARGETING::TYPE T>
 uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 
 /**

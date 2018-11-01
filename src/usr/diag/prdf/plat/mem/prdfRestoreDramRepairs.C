@@ -121,7 +121,7 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     // the repairs will need to be rediscovered.
 
     std::vector<MemRank> ranks;
-    getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct<T>(i_dimmTrgt) );
+    getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
 
     uint8_t data[D][DQ_BITMAP::BITMAP_SIZE];
     memset( data, 0x00, sizeof(data) );
@@ -422,7 +422,7 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         // DIMM had more bad bits than could be repaired. Note: the value is
         // actually a 4-bit field for use with Centaur, but we only use the
         // first 2 bits of that field here.
-        uint8_t mask = 0x80 >> getDimmSlct<TYPE_MCA>(dimm);
+        uint8_t mask = 0x80 >> getDimmSlct(dimm);
 
         if ( 0 != (i_badDimmMask & mask) )
         {
@@ -470,8 +470,8 @@ bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
     TargetHandleList dimms = getConnected( i_trgt, TYPE_DIMM );
     for ( auto & dimm : dimms )
     {
-        uint8_t portSlct = getDimmPort<TYPE_MBA>( dimm );
-        uint8_t dimmSlct = getDimmSlct<TYPE_MBA>( dimm );
+        uint8_t portSlct = getDimmPort( dimm );
+        uint8_t dimmSlct = getDimmSlct( dimm );
 
         // The 4 bits of i_badDimmMask is defined as p0d0, p0d1, p1d0, and p1d1.
         uint8_t mask = 0x8 >> (portSlct * MBA_DIMMS_PER_RANK + dimmSlct);
