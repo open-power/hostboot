@@ -47,39 +47,71 @@ namespace train
 {
 
 ///
-/// @brief Sets up the OMI training
+/// @brief Get the FW_BOOT_CONFIG from attributes
 /// @param[in] i_target target on which the code is operating
-/// @param[in] i_manufacturing_mode manufacturing mode control
-/// @param[in] i_loopback_testing loopback testing control
-/// @param[in] i_transport_layer transport layer configuration
-/// @param[in] i_dl_layer DL layer boot mode
-/// @param[in] i_boot_mode true if step-by-step mode
-/// @param[in] i_lane_mode lane mode configuration
-/// @param[in] i_serdes serdes frequency
 /// @param[out] o_data data for the FW_BOOT_CONFIG
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
 fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                        const uint8_t i_manufacturing_mode,
-                                        const uint8_t i_loopback_testing,
-                                        const uint8_t i_transport_layer,
-                                        const uint8_t i_dl_layer,
-                                        const uint8_t i_boot_mode,
-                                        const uint8_t i_lane_mode,
-                                        const uint8_t i_serdes,
                                         std::vector<uint8_t>& o_data )
 {
+    // Variables
+    uint8_t l_fw_mode = 0;
+    uint8_t l_loopback_test = 0;
+    uint8_t l_transport_layer = 0;
+    uint8_t l_dl_layer_boot_mode = 0;
+    uint8_t l_boot_mode = 0;
+    uint8_t l_lane_mode = 0;
+    uint8_t l_serdes_freq = 0;
+
+    // Read the EXP_FW_BOOT_CONFIG from the attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE,
+                           i_target,
+                           l_fw_mode),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST,
+                           i_target,
+                           l_loopback_test),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER,
+                           i_target,
+                           l_transport_layer),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE,
+                           i_target,
+                           l_dl_layer_boot_mode),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE,
+                           i_target,
+                           l_boot_mode),
+             "%s Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE,
+                           i_target,
+                           l_lane_mode),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE) on %s", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY,
+                           i_target,
+                           l_serdes_freq),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY) on %s", mss::c_str(i_target));
+
+
     // Clears o_data, just in case
     o_data.clear();
     o_data.assign(mss::exp::i2c::FW_BOOT_CONFIG_BYTE_LEN, 0);
 
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_serdes_freq( i_target, o_data, i_serdes ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_lane_mode( i_target, o_data, i_lane_mode ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_boot_mode( i_target, o_data, i_boot_mode ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, o_data, i_dl_layer ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_transport_layer( i_target, o_data, i_transport_layer ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_loopback_test( i_target, o_data, i_loopback_testing ));
-    FAPI_TRY(mss::exp::i2c::boot_cfg::set_fw_mode( i_target, o_data, i_manufacturing_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_serdes_freq( i_target, o_data, l_serdes_freq ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_lane_mode( i_target, o_data, l_lane_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_boot_mode( i_target, o_data, l_boot_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, o_data, l_dl_layer_boot_mode ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_transport_layer( i_target, o_data, l_transport_layer ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_loopback_test( i_target, o_data, l_loopback_test ));
+    FAPI_TRY(mss::exp::i2c::boot_cfg::set_fw_mode( i_target, o_data, l_fw_mode ));
 
 fapi_try_exit:
     return fapi2::current_err;
