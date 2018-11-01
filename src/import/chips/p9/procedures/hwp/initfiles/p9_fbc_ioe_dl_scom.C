@@ -30,7 +30,7 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0x0B = 0x0B;
+constexpr uint64_t literal_0x0F = 0x0F;
 constexpr uint64_t literal_0xF = 0xF;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_0x6 = 0x6;
@@ -69,12 +69,12 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
                         && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0x0B );
+                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0x0F );
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0x0B );
+                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0x0F );
             }
 
             l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0xF );
