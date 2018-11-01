@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -546,5 +547,19 @@ void IpmiSEL::execute(void)
     IPMI_TRAC(EXIT_MRK "message loop");
     return;
 } // execute
+
+
+/*
+ * @brief enable IPMI errl
+ */
+void IpmiSEL::errlEnable(errlHndl_t& o_errl)
+{
+    // call ErrlManager function - tell him that IPMI is ready!
+    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::IPMI);
+}
+
+TASK_ENTRY_MACRO( IpmiSEL::errlEnable );
+
+
 #endif
 

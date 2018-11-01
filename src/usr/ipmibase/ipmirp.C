@@ -573,9 +573,6 @@ void IpmiRP::execute(void)
     // Wait for an event message read it and handle it if no one else does
     task_create( &IpmiRP::last_chance_event_handler, NULL);
 
-    // call ErrlManager function - tell him that IPMI is ready!
-    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::IPMI);
-
     while (true)
     {
 

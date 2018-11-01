@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -334,6 +334,12 @@ class IpmiSEL
        * Destructor
        */
       ~IpmiSEL(void);
+
+      /**
+       * Enable ipmi errl
+       * @param[in] o_errl, NULL if OK
+       */
+      static void errlEnable(errlHndl_t& o_errl);
 
       /**
        * @brief Get the message queue associated with this FRU
