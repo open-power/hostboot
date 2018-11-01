@@ -47,6 +47,7 @@
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/ccs/ccs.H>
 #include <lib/mc/port.H>
+#include <lib/rosetta_map/rosetta_map.H>
 
 namespace mss
 {
@@ -56,6 +57,87 @@ namespace training
 
 namespace lrdimm
 {
+
+///
+/// @brief Swizzles a DQ from the MC perspective to the DIMM perspective
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_mc_dq the DQ on the MC perspective to swizzle to the buffer's perspective
+/// @param[out] o_buffer_dq the DQ number from the buffer's perspective
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mc_to_dimm_dq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const uint64_t i_mc_dq,
+                                uint64_t& o_buffer_dq)
+{
+    uint64_t l_c4_dq = 0;
+    uint8_t* l_dimm_dq_ptr = nullptr;
+    uint8_t l_dimm_to_c4[MAX_DQ_BITS] = {};
+
+    // First get the c4 DQ
+    FAPI_TRY(rosetta_map::mc_to_c4<rosetta_type::DQ>( i_target, i_mc_dq, l_c4_dq ));
+
+    // Now get the DIMM DQ
+    FAPI_TRY(vpd_dq_map(i_target, &l_dimm_to_c4[0]));
+    l_dimm_dq_ptr = std::find(l_dimm_to_c4, l_dimm_to_c4 + MAX_DQ_BITS, l_c4_dq);
+
+    // Check that we got a good value
+    FAPI_ASSERT(l_dimm_dq_ptr != l_dimm_to_c4 + MAX_DQ_BITS,
+                fapi2::MSS_LOOKUP_FAILED()
+                .set_KEY(l_c4_dq)
+                .set_DATA(i_mc_dq)
+                .set_TARGET(i_target));
+
+    // Now return that value
+    o_buffer_dq = *l_dimm_dq_ptr;
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
+
+///
+/// @brief Swizzles a DQ from the DRAM perspective to the buffer's perspective
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_mc_dq the DQ on the MC perspective to swizzle to the buffer's perspective
+/// @param[out] o_buffer_dq the DQ number from the buffer's perspective
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mc_to_buffer(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_mc_dq,
+                               uint64_t& o_buffer_dq)
+{
+    FAPI_TRY(mc_to_dimm_dq(i_target, i_mc_dq, o_buffer_dq));
+
+    // Each buffer is a byte and we want the bit from the buffer's perspective
+    o_buffer_dq = o_buffer_dq % BITS_PER_BYTE;
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if a buffer's nibbles are swizzled
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_buffer the buffer on which to see if the nibbles are swizzled
+/// @param[out] o_are_swizzled true if the buffer's nibbles are swizzled
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode are_buffers_nibbles_swizzled(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_buffer,
+        bool& o_are_swizzled)
+{
+    const auto l_mc_dq = i_buffer * BITS_PER_BYTE;
+    uint64_t l_buffer_dq = 0;
+    FAPI_TRY(mc_to_buffer(i_target, l_mc_dq, l_buffer_dq));
+
+    // Now, checks if the nibble is swizzled
+    // We're swizzled if the 0'th DQ from the MC perspective is on buffer's nibble 1
+    o_are_swizzled = (1 == (l_buffer_dq / BITS_PER_NIBBLE));
+    FAPI_DBG("%s buffer:%u %s swizzled mc_dq:%u buffer_dq:%u",
+             mss::c_str(i_target), i_buffer, o_are_swizzled ? "are" : "not", l_mc_dq, l_buffer_dq);
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Issues initial pattern write to all ranks in the rank pair
@@ -246,38 +328,54 @@ fapi2::ReturnCode mrep::write_result_to_buffers_helper( const fapi2::Target<fapi
     // Clears out the PBA container to ensure we don't issue undesired commands
     o_container.clear();
 
+    // Get's the MCA
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
     // Looops through and generates the PBA commands
     for(const auto& l_recorder : i_mrep_result)
     {
-        const auto l_result_nibble0 = l_recorder.first.iv_final_delay;
-        const auto l_result_nibble1 = l_recorder.second.iv_final_delay;
+        bool l_are_nibbles_swapped = false;
+        FAPI_TRY(are_buffers_nibbles_swizzled(l_mca, l_buffer, l_are_nibbles_swapped));
 
-        // Function space is derived from the rank
-        // 2 is for Nibble 0, 3 is for Nibble 1
-        // Data corresponds to the final setting we have
-        // Delay is for PBA, bumping it way out so we don't have issues
-        constexpr uint64_t PBA_DELAY = 255;
-        constexpr uint64_t BCW_NIBBLE0 = 0x02;
-        constexpr uint64_t BCW_NIBBLE1 = 0x03;
+        {
+            const auto l_result_nibble0 = l_are_nibbles_swapped ?
+                                          l_recorder.second.iv_final_delay :
+                                          l_recorder.first.iv_final_delay;
+            const auto l_result_nibble1 = l_are_nibbles_swapped ?
+                                          l_recorder.first.iv_final_delay :
+                                          l_recorder.second.iv_final_delay;
 
-        const mss::cw_info MREP_FINAL_SET_BCW_N0( i_rank,
-                BCW_NIBBLE0,
-                l_result_nibble0,
-                PBA_DELAY,
-                mss::CW8_DATA_LEN,
-                mss::cw_info::BCW);
-        const mss::cw_info MREP_FINAL_SET_BCW_N1( i_rank,
-                BCW_NIBBLE1,
-                l_result_nibble1,
-                PBA_DELAY,
-                mss::CW8_DATA_LEN,
-                mss::cw_info::BCW);
+            FAPI_DBG("%s MREP rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped BC2x:0x%02x BC3x:0x%02x",
+                     mss::c_str(l_mca), i_rank, l_buffer, l_recorder.first.iv_final_delay, l_recorder.second.iv_final_delay,
+                     l_are_nibbles_swapped ? "are" : "not", l_result_nibble0, l_result_nibble1);
 
-        // Each buffer contains two nibbles
-        // Each nibble corresponds to one BCW
-        // Add in the buffer control words
-        FAPI_TRY(o_container.add_command(i_target, l_buffer, MREP_FINAL_SET_BCW_N0));
-        FAPI_TRY(o_container.add_command(i_target, l_buffer, MREP_FINAL_SET_BCW_N1));
+            // Function space is derived from the rank
+            // 2 is for Nibble 0, 3 is for Nibble 1
+            // Data corresponds to the final setting we have
+            // Delay is for PBA, bumping it way out so we don't have issues
+            constexpr uint64_t PBA_DELAY = 255;
+            constexpr uint64_t BCW_NIBBLE0 = 0x02;
+            constexpr uint64_t BCW_NIBBLE1 = 0x03;
+
+            const mss::cw_info MREP_FINAL_SET_BCW_N0( i_rank,
+                    BCW_NIBBLE0,
+                    l_result_nibble0,
+                    PBA_DELAY,
+                    mss::CW8_DATA_LEN,
+                    mss::cw_info::BCW);
+            const mss::cw_info MREP_FINAL_SET_BCW_N1( i_rank,
+                    BCW_NIBBLE1,
+                    l_result_nibble1,
+                    PBA_DELAY,
+                    mss::CW8_DATA_LEN,
+                    mss::cw_info::BCW);
+
+            // Each buffer contains two nibbles
+            // Each nibble corresponds to one BCW
+            // Add in the buffer control words
+            FAPI_TRY(o_container.add_command(i_target, l_buffer, MREP_FINAL_SET_BCW_N0));
+            FAPI_TRY(o_container.add_command(i_target, l_buffer, MREP_FINAL_SET_BCW_N1));
+        }
 
         ++l_buffer;
     }
@@ -516,6 +614,14 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
 
         FAPI_DBG("%s RP%u rank index number %u has rank %u", mss::c_str(i_target), i_rp, l_rank_index, l_rank);
         const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
+
+        // Added in for cronus debug - not needed for hostboot
+#ifndef __HOSTBOOT_MODULE
+        // Prints the header
+        FAPI_DBG("%s CARD  AAAAAAAAAA RCD BBBBBBBB", mss::c_str(i_target));
+        FAPI_DBG("%s CARD  0000000000 RCD 11111111", mss::c_str(i_target));
+        FAPI_DBG("%s CARD  0516273849 RCD 04152637", mss::c_str(i_target));
+#endif
 
         // Vector represents the number of LRDIMM buffers
         // The pair represents the two nibbles that we need to calibrate within the buffer

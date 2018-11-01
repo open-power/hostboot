@@ -49,6 +49,7 @@
 #include <lib/mcbist/mcbist.H>
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/workarounds/ccs_workarounds.H>
+#include <lib/rosetta_map/rosetta_map.H>
 
 namespace mss
 {
@@ -201,6 +202,40 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
                                       const uint64_t i_rank,
                                       const uint32_t i_pattern);
 
+///
+/// @brief Swizzles a DQ from the MC perspective to the DIMM perspective
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_mc_dq the DQ on the MC perspective to swizzle to the buffer's perspective
+/// @param[out] o_buffer_dq the DQ number from the buffer's perspective
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mc_to_dimm_dq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const uint64_t i_mc_dq,
+                                uint64_t& o_buffer_dq);
+
+///
+/// @brief Swizzles a DQ from the MC perspective to the buffer's perspective
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_mc_dq the DQ on the MC perspective to swizzle to the buffer's perspective
+/// @param[out] o_buffer_dq the DQ number from the buffer's perspective
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mc_to_buffer(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_mc_dq,
+                               uint64_t& o_buffer_dq);
+
+///
+/// @brief Checks if a buffer's nibbles are swizzled
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_buffer the buffer on which to see if the nibbles are swizzled
+/// @param[out] o_are_swizzled true if the buffer's nibbles are swizzled
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode are_buffers_nibbles_swizzled(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_buffer,
+        bool& o_are_swizzled);
+
+///
 /// @class data_response
 /// @brief A structure that stores the results from the CCS on a per-buffer per-beat level
 ///
@@ -246,9 +281,79 @@ struct data_response
             l_data.extractToRight<0, BITS_PER_BYTE>(iv_buffer_beat[8][l_beat]);
         }
 
+        // Added in for cronus debug - not needed for hostboot
+#ifndef __HOSTBOOT_MODULE
+        FAPI_TRY(buffer_print(i_target));
+#endif
+
     fapi_try_exit:
         return fapi2::current_err;
     }
+
+    // Added in for cronus debug - not needed for hostboot
+#ifndef __HOSTBOOT_MODULE
+    ///
+    /// @brief Prints out the response data for LRDIMM's in terms of the DRAM position
+    /// @param[in] i_target MCA target on which to operate
+    /// @return fapi2::ReturnCode SUCCESS iff code exectutes successfully
+    /// @note Should be for an RC B2 - swizzle might not be good for non-RC B2
+    ///
+    fapi2::ReturnCode buffer_print(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+    {
+        // The below list is taken from rawcard B's JEDEC specification
+        // Assuming it remains the same for other raw card's, but this is just for debug prints for cronus anways
+        static constexpr uint8_t NIBBLE_TO_DRAM[MAX_DRAMS_X4] =
+        {
+            0,
+            5,
+            1,
+            6,
+            7,
+            2,
+            8,
+            3,
+            10,
+            14,
+            11,
+            15,
+            12,
+            16,
+            17,
+            13,
+            9,
+            4,
+        };
+        uint8_t l_results[MAX_DRAMS_X4] = {};
+
+        // Loops through all buffers
+        for(uint8_t l_buffer = 0; l_buffer < MAX_LRDIMM_BUFFERS; ++l_buffer)
+        {
+            uint64_t l_buffer_nibble0_dq = 0;
+            uint64_t l_buffer_nibble1_dq = 0;
+            uint64_t l_dram_0 = 0;
+            uint64_t l_dram_1 = 0;
+            FAPI_TRY(mc_to_dimm_dq(i_target, l_buffer * BITS_PER_BYTE, l_buffer_nibble0_dq));
+            FAPI_TRY(mc_to_dimm_dq(i_target, l_buffer * BITS_PER_BYTE + BITS_PER_NIBBLE, l_buffer_nibble1_dq));
+
+            l_dram_0 = NIBBLE_TO_DRAM[l_buffer_nibble0_dq / BITS_PER_NIBBLE];
+            l_dram_1 = NIBBLE_TO_DRAM[l_buffer_nibble1_dq / BITS_PER_NIBBLE];
+
+            l_results[l_dram_0] = iv_buffer_beat[l_buffer][0] & 0x0f;
+            l_results[l_dram_1] = (iv_buffer_beat[l_buffer][0] & 0xf0) >> BITS_PER_NIBBLE;
+        }
+
+        FAPI_DBG("%s CARDU %x%x%x%x%x RCD %x%x%x%x", mss::c_str(i_target),
+                 l_results[0], l_results[1], l_results[2], l_results[3], l_results[4], l_results[10], l_results[11], l_results[12],
+                 l_results[13]);
+
+        FAPI_DBG("%s CARDL %x%x%x%x%x RCD %x%x%x%x", mss::c_str(i_target),
+                 l_results[5], l_results[6], l_results[7], l_results[8], l_results[9], l_results[14], l_results[15], l_results[16],
+                 l_results[17]);
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+#endif
 };
 
 // TK:LRDIMM Do we need separate coarse vs fine steps?
