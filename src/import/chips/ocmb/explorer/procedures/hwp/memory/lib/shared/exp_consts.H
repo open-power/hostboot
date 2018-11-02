@@ -167,6 +167,39 @@ enum addrSide
 
 
 }// i2c
+
+namespace omi
+{
+
+///
+/// @brief HOST-FW Commands and Responses
+///
+enum cmd_and_response_id
+{
+    FW_DDR_INTERFACE_INIT = 0x01,
+    FW_TEMP_SENSOR_INIT = 0x02,
+    FW_ERR_LOGGING_INTERFACE_INIT = 0x03,
+    FW_GO_COMMAND = 0x04,
+    FW_ADAPTER_PROPERTIES_GET = 0x05,
+    FW_STATUS_GET = 0x06,
+    FW_TEMPERATURE_GET = 0x07,
+    FW_ERROR_LOG_GET = 0x08,
+    FW_SPD_DATA_SET = 0x09,
+    FW_BINARY_UPGRADE = 0x0A,
+    FW_FLASH_LOADER_VERSION_INFO = 0x0B,
+};
+
+///
+/// @brief Response argument parameters
+///
+enum response_arg
+{
+    SUCCESS = 0,
+    ERROR_CODE = 1,
+};
+
+}// omi
+
 }// exp
 }// mss
 
