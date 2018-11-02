@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2018
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -256,6 +256,7 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_FSP_BUILD),,testnvram)
+TESTCASE_MODULES += testsmf
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
