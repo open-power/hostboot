@@ -50,7 +50,8 @@ enum exp_struct_sizes
     // training settings of a different frequency.
     // It was deemed the PSTATE feature was not useful to Explorer so we only have 1
     MSDG_MAX_PSTATE = 1,
-    PADDING_SIZE = 4,
+    CMD_PADDING_SIZE = 3,
+    RSP_PADDING_SIZE = 4,
     ARGUMENT_SIZE = 28,
     SENSOR_CACHE_PADDING_SIZE_0 = 3,
     SENSOR_CACHE_PADDING_SIZE_1 = 15,
@@ -71,7 +72,7 @@ typedef struct
     uint32_t cmd_crc;                         // CRC of command data buffer, if used
     uint32_t host_work_area;                  // Scratchpad area for Host, FW returns this value as a reponse
     uint32_t cmd_work_area;                   // Scratchpad area for Firmware, can be used for tracking command progress etc.
-    uint32_t padding[PADDING_SIZE];        // Fill up to the size of one cache line
+    uint32_t padding[CMD_PADDING_SIZE];        // Fill up to the size of one cache line
     uint8_t  command_argument[ARGUMENT_SIZE]; // Additional parameters associated with the command
     uint32_t cmd_header_crc;                  // CRC of 64 bytes of command header
 } host_fw_command_struct;
@@ -90,7 +91,7 @@ typedef struct
     uint32_t response_length;                  // Number of bytes following the response header
     uint32_t response_crc;                     // CRC of response data buffer, if used
     uint32_t host_work_area;                   // Scratchpad area for Host, FW returns this value as a reponse
-    uint32_t padding[PADDING_SIZE];         // Fill up to the size of one cache line
+    uint32_t padding[RSP_PADDING_SIZE];         // Fill up to the size of one cache line
     uint8_t  response_argument[ARGUMENT_SIZE]; // Additional parameters associated with the response
     uint32_t response_header_crc;              // CRC of 64 bytes of reponse header
 } host_fw_response_struct;
@@ -103,7 +104,8 @@ typedef struct
 ///
 typedef struct user_input_msdg
 {
-    // Choose the Dimm type from one of below: // 0 = UDIMM
+    // Choose the Dimm type from one of below:
+    // 0 = UDIMM
     // 1 = RDIMM
     // 2 = LRDIMM
     uint16_t DimmType;
@@ -223,7 +225,8 @@ typedef struct user_input_msdg
     uint16_t PhyOdtImpedance[MSDG_MAX_PSTATE];
 
     // Tx Pull-up Drive Impedance for DQ/DQS in ohm for each pstates
-    // Valid values = 480,240,160,120, 96,80,68, 60,53,48,43,40, // 36,34,32,30,28
+    // Valid values = 480,240,160,120, 96,80,68, 60,53,48,43,40,
+    // 36,34,32,30,28
     // [0] - Impedance in Ohm for P0
     // [1] - Impedance in Ohm for P1
     // [2] - Impedance in Ohm for P2
@@ -231,7 +234,8 @@ typedef struct user_input_msdg
     uint16_t PhyDrvImpedancePU[MSDG_MAX_PSTATE];
 
     // Tx Pull-up Drive Impedance for DQ/DQS in ohm for each pstates
-    // Valid values = 480,240,160,120, 96,80,68, 60,53,48,43,40, // 36,34,32,30,28
+    // Valid values = 480,240,160,120, 96,80,68, 60,53,48,43,40,
+    // 36,34,32,30,28
     // [0] - Impedance in Ohm for P0
     // [1] - Impedance in Ohm for P1
     // [2] - Impedance in Ohm for P2
@@ -458,7 +462,8 @@ typedef struct user_input_msdg
     uint16_t Geardown[MSDG_MAX_PSTATE];
 
 
-    // Value of RCD parity checking & Command Latency Adder // (F0RC0E, FORC0F)
+    // Value of RCD parity checking & Command Latency Adder
+    // (F0RC0E, FORC0F)
     // 0 = 0nCK latency adder, parity disabled;
     // 1 = 1nCK latency adder;
     // 2 = 2nCK latency adder;
@@ -471,9 +476,11 @@ typedef struct user_input_msdg
     uint16_t CALatencyAdder[MSDG_MAX_PSTATE];
 
 
-    // Value of CS to CMD/ADDR Latency mode (MR4.CAL) for dfi_bist // (training runs with CALMode = 0)
+    // Value of CS to CMD/ADDR Latency mode (MR4.CAL) for dfi_bist
+    // (training runs with CALMode = 0)
     // Valid value: 0,3,4,5,6,8
-    // [0] - BistCALMode value for P0// [1] - BistCALMode value for P1
+    // [0] - BistCALMode value for P0
+    // [1] - BistCALMode value for P1
     // [2] - BistCALMode value for P2
     // [3] - BistCALMode value for P3
     uint16_t BistCALMode[MSDG_MAX_PSTATE];

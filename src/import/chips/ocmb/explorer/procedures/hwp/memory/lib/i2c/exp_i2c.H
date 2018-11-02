@@ -70,7 +70,7 @@ inline fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCM
     // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
     // If it's anything else we can just look up the status code
     FAPI_ASSERT( l_status == status_codes::SUCCESS,
-                 fapi2::MSS_EXP_STATUS_CODE_UNSUCCESSFUL().
+                 fapi2::MSS_EXP_I2C_FW_STATUS_CODE_FAILED().
                  set_TARGET(i_target).
                  set_STATUS_CODE(l_status).
                  set_CMD_ID(i_cmd_id),

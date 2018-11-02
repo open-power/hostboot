@@ -47,7 +47,8 @@ namespace mss
 ///
 enum common_consts
 {
-    DEFAULT_POLL_LIMIT = 50,       ///< the number of poll attempts in the event we can't calculate another
+    DEFAULT_POLL_LIMIT = 50,  ///< the number of poll attempts in the event we can't calculate another
+    MEMCMP_EQUAL = 0,         ///< Equal comparison value for memcmp
 };
 
 ///

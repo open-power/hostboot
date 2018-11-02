@@ -239,7 +239,7 @@ std::vector<uint8_t> host_fw_command_struct_to_little_endian(const host_fw_comma
     forceLE(i_input.cmd_crc, l_data);
     forceLE(i_input.host_work_area, l_data);
     forceLE(i_input.cmd_work_area, l_data);
-    forceLEArray(i_input.padding, PADDING_SIZE, l_data);
+    forceLEArray(i_input.padding, CMD_PADDING_SIZE, l_data);
     forceLEArray(i_input.command_argument, ARGUMENT_SIZE, l_data);
 
     // Generates and adds on the CRC
@@ -403,7 +403,7 @@ bool host_fw_response_struct_from_little_endian(const std::vector<uint8_t>& i_da
     l_rc &= readLE(i_data, l_idx, o_response.response_crc);
     l_rc &= readLE(i_data, l_idx, o_response.host_work_area);
 
-    l_rc &= readLEArray(i_data, PADDING_SIZE, l_idx, o_response.padding);
+    l_rc &= readLEArray(i_data, RSP_PADDING_SIZE, l_idx, o_response.padding);
     l_rc &= readLEArray(i_data, ARGUMENT_SIZE, l_idx, o_response.response_argument);
 
     o_crc = crc32_gen(i_data, l_idx);
