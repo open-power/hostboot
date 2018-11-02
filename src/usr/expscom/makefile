@@ -26,17 +26,23 @@ ROOTPATH = ../../..
 MODULE = expscom
 
 EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
+# Need to build exp_indband to use EKB's getMMIO/putMMIO
+OBJS += exp_inband.o
 
-OBJS += expscomtrace.o
+OBJS += expscom_trace.o
+OBJS += expscom_utils.o
 OBJS += i2cscomdd.o
-# OBJS += mmioscom.o
+OBJS += mmioscomdd.o
 # TODO RTC:196806 ADD TESTs
 #SUBDIRS += test.d
+
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 include ${ROOTPATH}/config.mk

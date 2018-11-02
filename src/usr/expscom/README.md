@@ -139,3 +139,119 @@ the device op route for I2C address on the OCMB's master I2c device (which will 
                                         l_myOCMBTargeti2cInfo->devAddr,
                                         sizeof(l_cmd_vector),
                                         l_cmd_vector) );
+
+### Explorer MMIO SCOM
+
+When the useIbScom field is set in SCOM_SWITCHES this is how the fapi2::putScom API for OCMB
+targets will be processed (lets say for now this is IBM scom address):
+
+* Generic FAPI2 getScom API
+
+
+    fapi2::getScom(myOcmbTarget, scomAddr, io_buffer);
+
+* Platform Specifc FAPI2 getScom API
+
+
+    fapi2::platGetScom(myOcmbTarget, scomAddr, io_buffer);
+
+* Platform Specifc FAPI2 getScom API resolves to calling into our device framework to whatever
+function is registered to read OCMB target for DeviceFW::SCOM operations
+
+
+    DeviceFW::deviceRead(myOcmbTarget, io_buffer,
+                         sizeof(uint64_t), DeviceFW::SCOM,
+                         scomAddr, READ)
+
+* scomPeformOp is what is defined to handle DeviceFW::SCOM operations to the OCMB chip targets
+
+
+    SCOM::scomPerformOp(READ, myOCMBTarget, io_buffer,
+                        sizeof(uint64_t), DeviceFW::SCOM,
+                        scomAddr)
+
+* scomPeformOp is basically a wrapper for checkIndirectAndDoScom. There are no indirect scoms
+for OCMB target scoms so we will end up calling doScomOp
+
+
+    checkIndirectAndDoScom(READ, myOCMBTarget, io_buffer,
+                           sizeof(uint64_t), DeviceFW::SCOM,
+                           scomAddr)
+
+* doScomOp looks at the SCOM_SWITCHES attribute and decides which type of scom to do for the given target.
+
+
+    doScomOp(READ, myOCMBTarget, io_buffer,
+             sizeof(uint64_t), DeviceFW::SCOM,
+             scomAddr)
+
+* If the useIbScom field is set to 1 then we will call the function that is registered to inband scoms for OCMB targets
+
+
+    deviceOp(READ, myOCMBTarget, io_buffer,
+             sizeof(uint64_t), DeviceFW::IBSCOM,
+             scomAddr)
+
+* mmioScomPerformOp is the function that is registered to IBSCOM operations to OCMB chips
+
+
+    mmioScomPerformOp(READ, myOCMBTarget, io_buffer,
+                      sizeof(uint64_t), DeviceFW::IBSCOM,
+                      scomAddr)
+
+* mmioScomPerformOp will call the hwp mss::exp::ib::getScom which is a in-band scom driver for the OCMB explorer chip
+
+
+    FAPI_EXEC_HWP(l_rc , mss::exp::ib::getScom, myOCMBTarget, scomAddr, io_buffer);
+
+* mss::exp::ib::getScom will translate the scomAddress into a mmio address and perform a getMMIO64 operation
+
+
+    getMMIO64(myOCMBTarget, (scomAddr << 3), io_buffer);
+
+* getMMIO64 will add the IB_MMIO offset and perform a 64 bit mmio read using the fapi2::getMMIO interface
+
+
+    fapi2::getMMIO(myOCMBTarget, EXPLR_IB_MMIO_OFFSET | scomAddr, 8, io_buffer)
+
+* fapi2::getMMIO is defined by the platform
+
+
+    ReturnCode platGetMMIO( myOCMBTarget,
+                            EXPLR_IB_MMIO_OFFSET | (scomAddr << 3),
+                            8,  // bytes
+                            io_buffer )
+
+* platGetMMIO will use the device framework to look up the correct routine for MMIO addresses on OCMB targets
+
+
+    DeviceFW::deviceRead(myOCMBTarget,
+                         io_buffer,
+                         8,  // bytes
+                         DEVICE_MMIO_ADDRESS(EXPLR_IB_MMIO_OFFSET | (scomAddr << 3), 8));
+
+
+* the device framework will route the deviceRead call to mmioPerformOp
+
+
+    mmioPerformOp(READ,
+                  myOCMBTarget,
+                  io_buffer,
+                  8, // bytes
+                  DeviceFW::MMIO,
+                  address, readLimit);
+
+* mmioPerformOp resolves to doing a memcpy on the address requested
+
+
+    if (i_opType == DeviceFW::READ)
+    {
+        memcpy(io_ptr + i, mm_ptr + i, l_accessLimit);
+    }
+    else if (i_opType == DeviceFW::WRITE)
+    {
+        memcpy(mm_ptr + i, io_ptr + i, l_accessLimit);
+
+        // XXX Need to check a processor SCOM here to determine if the
+        // write succeeded or failed.
+    }

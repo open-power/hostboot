@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/expscom/expscomtrace.C $                              */
+/* $Source: src/usr/expscom/expscom_utils.H $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,17 +22,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file expscomtrace.C
-///
-/// @brief Initialized trace descriptor for expscom
-///
+#ifndef __EXPSCOM_UTILS_H
+#define __EXPSCOM_UTILS_H
+
+/** @file expscom_utils.H
+ *  @brief Provides the common utility functions for i2c and mmio
+ *         Explorer OCMB scom drivers
+ */
+#include <stdint.h>
 
 
-#include "expscomtrace.H"
-#include <limits.h>
-#include <hbotcompid.H>
+namespace EXPSCOM
+{
 
-// Trace definition
-trace_desc_t* g_trac_expscom = nullptr;
-TRAC_INIT(&g_trac_expscom, EXPSCOM_COMP_NAME, 2*KILOBYTE);
+/**
+* @brief Performs validation of params passed to i2cScomPerformOp and
+*  mmioScomPerformOp functions. This function checks that the target
+* model, the buffer lengt, addr format, and the op type are all valid.
+* A unique error will be created for each violation. If multiple error
+* are found the last error will be returned and all previous errors found
+* will be committed as new errors are found (see function).
+*
+* @param[in]   i_opType      Operation type, see DeviceFW::OperationType
+*                            in driverif.H
+* @param[in]   i_target      TARGETING::Target passed to mmioscomPerformOp
+* @param[in]   i_buflen      size of buffer passed to mmioscomPerformOp
+* @param[in]   i_scomAddr    Scom address operation will be performed on
+
+* @return  errlHndl_t
+*/
+errlHndl_t validateInputs(DeviceFW::OperationType i_opType,
+                          const TARGETING::Target* i_target,
+                          size_t i_buflen,
+                          uint64_t i_scomAddr);
+
+}
+
+#endif

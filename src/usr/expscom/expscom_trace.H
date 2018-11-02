@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expscom/expscom_reasoncodes.H $               */
+/* $Source: src/usr/expscom/expscom_trace.H $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,27 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPSCOM_REASONCODES_H
-#define __EXPSCOM_REASONCODES_H
+///
+/// @file expscom_trace.H
+/// @brief Defines the extern expscom trace
+///
 
-#include <hbotcompid.H>
+#ifndef EXPSCOM_TRACE_H_
+#define EXPSCOM_TRACE_H_
 
-namespace EXPSCOM
-{
-    enum EXPSCOMModuleId
-    {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
-    };
+#include <trace/interface.H>
+//******************************************************************************
+// Trace descriptors that are defined in matching C file
+//******************************************************************************
+extern trace_desc_t* g_trac_expscom;
 
-    enum EXPSCOMReasonCode
-    {
-        RC_INVALID                   = EXPSCOM_COMP_ID | 0x00,
-        RC_INVALID_LENGTH            = EXPSCOM_COMP_ID | 0x01,
-        RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
-        RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
-        RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
-    };
-};
-
-#endif
+#endif // expscom_TRACE_H_
