@@ -22,3 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Include the macros and things for MSS EXP procedures
+-include 00exp_common.mk
+
+PROCEDURE=exp_draminit
+$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)
