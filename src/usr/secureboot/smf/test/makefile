@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/secureboot/smf/makefile $
+# $Source: src/usr/secureboot/smf/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,14 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
+ROOTPATH = ../../../../..
 
-MODULE = smf
+MODULE = testsmf
 
-OBJS += smf_utils.o
-OBJS += smf.o
-
-SUBDIRS += test.d
+TESTS = testsmfutils.H
+TESTS += testmemutils.H
 
 include ${ROOTPATH}/config.mk
 
