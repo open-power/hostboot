@@ -77,6 +77,9 @@ namespace PRDF
     const char * axone_mcc  = "axone_mcc";
     const char * axone_omic = "axone_omic";
 
+    // P9 Explorer Chip
+    const char * explorer_ocmb = "explorer_ocmb";
+
     // Centaur Chip
     const char * centaur_membuf = "centaur_membuf";
     const char * centaur_mba    = "centaur_mba";
