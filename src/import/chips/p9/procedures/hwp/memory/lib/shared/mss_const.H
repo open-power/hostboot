@@ -112,9 +112,6 @@ enum sizes
     // You can't get greater than ~0, so you'd never timeout
     // TODO RTC:166340 - Clean up MCBIST polling
     OVERLY_LARGE_NUMBER_OF_POLLS = 5000000000000,
-
-    // Equal comparison value for memcmp
-    MEMCMP_EQUAL = 0,
 };
 
 enum times
