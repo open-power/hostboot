@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/expscom/expscomtrace.H $                              */
+/* $Source: src/usr/expscom/expscom_trace.C $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,17 +23,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file expscomtrace.H
-/// @brief Defines the extern expscom trace
+/// @file expscom_trace.C
+///
+/// @brief Initialized trace descriptor for expscom
 ///
 
-#ifndef expscom_TRACE_H_
-#define expscom_TRACE_H_
 
-#include <trace/interface.H>
-//******************************************************************************
-// Trace descriptors that are defined in matching C file
-//******************************************************************************
-extern trace_desc_t* g_trac_expscom;
+#include "expscom_trace.H"
+#include <limits.h>
+#include <hbotcompid.H>
 
-#endif // expscom_TRACE_H_
+// Trace definition
+trace_desc_t* g_trac_expscom = nullptr;
+TRAC_INIT(&g_trac_expscom, EXPSCOM_COMP_NAME, 2*KILOBYTE);

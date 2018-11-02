@@ -26,7 +26,7 @@
 #define __I2CSCOMDD_H
 
 /** @file i2cscomdd.H
- *  @brief Provides the interfaces to perform I2cscom
+ *  @brief Provides the interfaces to perform I2Cscom
  */
 #include <stdint.h>
 
@@ -55,7 +55,7 @@ namespace I2CSCOMDD
  *                              which is the IBM scom address
  * @return  errlHndl_t          nullptr on success, non-null ptr on error
  */
-errlHndl_t i2cscomPerformOp(DeviceFW::OperationType i_opType,
+errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                             TARGETING::Target* i_target,
                             void* io_buffer,
                             size_t& io_buflen,

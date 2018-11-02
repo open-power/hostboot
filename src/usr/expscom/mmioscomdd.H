@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expscom/expscom_reasoncodes.H $               */
+/* $Source: src/usr/expscom/mmioscomdd.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,27 +22,46 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPSCOM_REASONCODES_H
-#define __EXPSCOM_REASONCODES_H
+#ifndef __MMIOSCOMDD_H
+#define __MMIOSCOMDD_H
 
-#include <hbotcompid.H>
+/** @file mmioscomdd.H
+ *  @brief Provides the interfaces to perform mmioscom to OCMB chip
+ */
+#include <stdint.h>
 
-namespace EXPSCOM
+
+namespace MMIOSCOMDD
 {
-    enum EXPSCOMModuleId
-    {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
-    };
 
-    enum EXPSCOMReasonCode
-    {
-        RC_INVALID                   = EXPSCOM_COMP_ID | 0x00,
-        RC_INVALID_LENGTH            = EXPSCOM_COMP_ID | 0x01,
-        RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
-        RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
-        RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
-    };
-};
+/**
+ * @brief Performs an MMIOSCOM access operation
+ * This function performs an MMIOSCOM access operation. It follows a pre-defined
+ * prototype functions in order to be registered with the device-driver
+ * framework.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        MMIOSCOM Explorer Chip target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output:
+ *                                  Read: Size of output data
+ *                                  Write: Size of data written
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (usrif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there's only one argument,
+ *                              which is the IBM scom address
+ * @return  errlHndl_t
+ */
+errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
+                            TARGETING::Target* i_target,
+                            void* io_buffer,
+                            size_t& io_buflen,
+                            int64_t i_accessType,
+                            va_list i_args);
 
-#endif
+}
+
+#endif //  __MMIOSCOMDD_H
