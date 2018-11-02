@@ -47,9 +47,13 @@
 #include <prdfP9McDomain.H>
 #include <prdfP9McaDomain.H>
 #include <prdfP9McbistDomain.H>
+#include <prdfP9MccDomain.H>
 #include <prdfP9McsDomain.H>
 #include <prdfP9MiDomain.H>
+#include <prdfP9NpuDomain.H>
 #include <prdfP9ObusDomain.H>
+#include <prdfP9OcmbChipDomain.H>
+#include <prdfP9OmicDomain.H>
 #include <prdfP9PecDomain.H>
 #include <prdfP9PhbDomain.H>
 #include <prdfP9ProcDomain.H>
@@ -82,8 +86,9 @@ errlHndl_t PlatConfigurator::build()
     systemPtr = new System(cv_noAttnResolution);
 
     // Create domains.
-    ProcDomain   * procDomain   = new ProcDomain(   PROC_DOMAIN   );
-    MembufDomain * membufDomain = nullptr;
+    ProcDomain     * procDomain     = new ProcDomain(   PROC_DOMAIN   );
+    MembufDomain   * membufDomain   = nullptr;
+    OcmbChipDomain * ocmbChipDomain = nullptr;
 
     std::map<TARGETING::TYPE, RuleChipDomain *> unitMap;
     unitMap[TYPE_EQ  ] = new EqDomain(   EQ_DOMAIN   );
@@ -114,6 +119,16 @@ errlHndl_t PlatConfigurator::build()
 
             break;
 
+        case MODEL_AXONE:
+            unitMap[TYPE_NPU ] = new NpuDomain(      NPU_DOMAIN  );
+            unitMap[TYPE_MC ]  = new McDomain(       MC_DOMAIN   );
+            unitMap[TYPE_MI ]  = new MiDomain(       MI_DOMAIN   );
+            unitMap[TYPE_MCC ] = new MccDomain(      MCC_DOMAIN  );
+            unitMap[TYPE_OMIC] = new OmicDomain(     OMIC_DOMAIN );
+            ocmbChipDomain     = new OcmbChipDomain( OCMB_DOMAIN );
+
+            break;
+
         default:
             PRDF_ERR( "[PlatConfigurator::build] Unsupported master proc "
                       "type %d", getChipModel(getMasterProc()) );
@@ -136,6 +151,13 @@ errlHndl_t PlatConfigurator::build()
         if ( nullptr != membufDomain )
         {
             errl = addDomainChips( TYPE_MEMBUF, membufDomain, pllDmnMapLst );
+            if ( nullptr != errl ) break;
+        }
+
+        if ( nullptr != ocmbChipDomain )
+        {
+            errl = addDomainChips( TYPE_OCMB_CHIP, ocmbChipDomain,
+                                   pllDmnMapLst );
             if ( nullptr != errl ) break;
         }
 
@@ -222,32 +244,47 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
 
     std::map<TARGETING::MODEL, std::map<TARGETING::TYPE, const char *>> fnMap =
     {
-        { MODEL_NIMBUS,  { { TYPE_PROC,   nimbus_proc    },
-                           { TYPE_EQ,     nimbus_eq      },
-                           { TYPE_EX,     nimbus_ex      },
-                           { TYPE_CORE,   nimbus_ec      },
-                           { TYPE_CAPP,   nimbus_capp    },
-                           { TYPE_PEC,    nimbus_pec     },
-                           { TYPE_PHB,    nimbus_phb     },
-                           { TYPE_XBUS,   nimbus_xbus    },
-                           { TYPE_OBUS,   nimbus_obus    },
-                           { TYPE_MCBIST, nimbus_mcbist  },
-                           { TYPE_MCS,    nimbus_mcs     },
-                           { TYPE_MCA,    nimbus_mca     }, } },
-        { MODEL_CUMULUS, { { TYPE_PROC,   cumulus_proc   },
-                           { TYPE_EQ,     cumulus_eq     },
-                           { TYPE_EX,     cumulus_ex     },
-                           { TYPE_CORE,   cumulus_ec     },
-                           { TYPE_CAPP,   cumulus_capp   },
-                           { TYPE_PEC,    cumulus_pec    },
-                           { TYPE_PHB,    cumulus_phb    },
-                           { TYPE_XBUS,   cumulus_xbus   },
-                           { TYPE_OBUS,   cumulus_obus   },
-                           { TYPE_MC,     cumulus_mc     },
-                           { TYPE_MI,     cumulus_mi     },
-                           { TYPE_DMI,    cumulus_dmi    }, } },
-        { MODEL_CENTAUR, { { TYPE_MEMBUF, centaur_membuf },
-                           { TYPE_MBA,    centaur_mba    }, } },
+        { MODEL_NIMBUS,   { { TYPE_PROC,   nimbus_proc    },
+                            { TYPE_EQ,     nimbus_eq      },
+                            { TYPE_EX,     nimbus_ex      },
+                            { TYPE_CORE,   nimbus_ec      },
+                            { TYPE_CAPP,   nimbus_capp    },
+                            { TYPE_PEC,    nimbus_pec     },
+                            { TYPE_PHB,    nimbus_phb     },
+                            { TYPE_XBUS,   nimbus_xbus    },
+                            { TYPE_OBUS,   nimbus_obus    },
+                            { TYPE_MCBIST, nimbus_mcbist  },
+                            { TYPE_MCS,    nimbus_mcs     },
+                            { TYPE_MCA,    nimbus_mca     }, } },
+        { MODEL_CUMULUS,  { { TYPE_PROC,   cumulus_proc   },
+                            { TYPE_EQ,     cumulus_eq     },
+                            { TYPE_EX,     cumulus_ex     },
+                            { TYPE_CORE,   cumulus_ec     },
+                            { TYPE_CAPP,   cumulus_capp   },
+                            { TYPE_PEC,    cumulus_pec    },
+                            { TYPE_PHB,    cumulus_phb    },
+                            { TYPE_XBUS,   cumulus_xbus   },
+                            { TYPE_OBUS,   cumulus_obus   },
+                            { TYPE_MC,     cumulus_mc     },
+                            { TYPE_MI,     cumulus_mi     },
+                            { TYPE_DMI,    cumulus_dmi    }, } },
+        { MODEL_CENTAUR,  { { TYPE_MEMBUF, centaur_membuf },
+                            { TYPE_MBA,    centaur_mba    }, } },
+        { MODEL_AXONE,    { { TYPE_PROC,   axone_proc     },
+                            { TYPE_EQ,     axone_eq       },
+                            { TYPE_EX,     axone_ex       },
+                            { TYPE_CORE,   axone_ec       },
+                            { TYPE_CAPP,   axone_capp     },
+                            { TYPE_PEC,    axone_pec      },
+                            { TYPE_PHB,    axone_phb      },
+                            { TYPE_XBUS,   axone_xbus     },
+                            { TYPE_OBUS,   axone_obus     },
+                            { TYPE_NPU,    axone_npu      },
+                            { TYPE_MC,     axone_mc       },
+                            { TYPE_MI,     axone_mi       },
+                            { TYPE_MCC,    axone_mcc      },
+                            { TYPE_OMIC,   axone_omic     }, } },
+        { MODEL_EXPLORER, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
     };
 
     // Get references to factory objects.
@@ -311,6 +348,8 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                                     chip, trgt, TYPE_MEMBUF,
                                     scanFac, resFac );
                 break;
+
+            // TODO RTC 199020 - add the pll domains for axone
 
             default: ;
         }
