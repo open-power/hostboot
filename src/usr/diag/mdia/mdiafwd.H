@@ -96,6 +96,20 @@ enum
     MCBIST_FIR_ACT0         = 0x07012306,
     MCBIST_FIR_ACT1         = 0x07012307,
 
+    // ocmb mcbist unit regs
+    OCMB_MCBIST_FIR         = 0x08011800,
+    OCMB_MCBIST_FIR_AND     = 0x08011801,
+    OCMB_MCBIST_FIR_MASK    = 0x08011803,
+    OCMB_MCBIST_FIR_ACT0    = 0x08011806,
+    OCMB_MCBIST_FIR_ACT1    = 0x08011807,
+
+    // ocmb omidlfir unit regs
+    OMIDLFIR                = 0x07013340,
+    OMIDLFIR_AND            = 0x07013341,
+    OMIDLFIR_MASK           = 0x07013343,
+    OMIDLFIR_ACT0           = 0x07013346,
+    OMIDLFIR_ACT1           = 0x07013347,
+
     // mcs unit regs
     CHI_FIR                 = 0x07010900,
     CHI_FIR_MASK            = 0x07010903,
