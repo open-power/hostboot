@@ -342,17 +342,42 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
             o_list.push_back(centaur);
 
-            // get connected mcs target
-            targetList.clear();
-
-            getParentAffinityTargets(targetList,
+            // get connected dmi target
+            TargetHandleList dmiList;
+            getParentAffinityTargets(dmiList,
                                      centaur,
                                      CLASS_UNIT,
-                                     TYPE_MCS);
+                                     TYPE_DMI);
 
-            if( !targetList.empty() )
+            if( !dmiList.empty() )
             {
-                o_list.push_back(targetList[0]);
+                o_list.push_back(dmiList[0]);
+            }
+
+            // add associated MI
+            TargetHandleList miList;
+            getParentAffinityTargets( miList, dmiList[0], CLASS_UNIT, TYPE_MI );
+            if ( miList.size() == 1 )
+            {
+                o_list.push_back( miList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent MI." );
+                break;
+            }
+
+            // add associated MC
+            TargetHandleList mcList;
+            getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
+            if ( mcList.size() == 1 )
+            {
+                o_list.push_back( mcList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent MC." );
+                break;
             }
 
             // add associated MBAs
@@ -364,6 +389,80 @@ TargetHandleList getMemTargetsForQueryOrClear(
             {
                 o_list.insert( o_list.end(), targetList.begin(),
                                targetList.end() );
+            }
+
+        }
+        // OCMB target
+        else if ( TYPE_OCMB_CHIP == trgtType )
+        {
+            // add associated OCMB
+            o_list.push_back( i_trgt );
+
+            // add associated OMI
+            TargetHandleList omiList;
+            getParentAffinityTargets( omiList, i_trgt, CLASS_UNIT, TYPE_OMI );
+            if ( omiList.size() == 1 )
+            {
+                o_list.push_back( omiList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent OMI." );
+                break;
+            }
+
+            // add associated OMIC
+            TargetHandleList omicList;
+            getParentAffinityTargets( omicList, omiList[0], CLASS_UNIT,
+                                      TYPE_OMIC );
+            if ( omicList.size() == 1 )
+            {
+                o_list.push_back( omicList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent OMIC." );
+                break;
+            }
+
+            // add associated MCC
+            TargetHandleList mccList;
+            getParentAffinityTargets( mccList, omiList[0], CLASS_UNIT,
+                                      TYPE_MCC );
+            if ( mccList.size() == 1 )
+            {
+                o_list.push_back( mccList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent MCC." );
+                break;
+            }
+
+            // add associated MI
+            TargetHandleList miList;
+            getParentAffinityTargets( miList, mccList[0], CLASS_UNIT, TYPE_MI );
+            if ( miList.size() == 1 )
+            {
+                o_list.push_back( miList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent MI." );
+                break;
+            }
+
+            // add associated MC
+            TargetHandleList mcList;
+            getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
+            if ( mcList.size() == 1 )
+            {
+                o_list.push_back( mcList[0] );
+            }
+            else
+            {
+                MDIA_FAST( FUNC "Could not find parent MC." );
+                break;
             }
 
         }

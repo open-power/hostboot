@@ -130,6 +130,19 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MCBIST_FIR_ACT1,
     };
 
+    const uint64_t ocmbRegs[] = {
+        OCMB_MCBIST_FIR,
+        OCMB_MCBIST_FIR_AND,
+        OCMB_MCBIST_FIR_MASK,
+        OCMB_MCBIST_FIR_ACT0,
+        OCMB_MCBIST_FIR_ACT1,
+        OMIDLFIR,
+        OMIDLFIR_AND,
+        OMIDLFIR_MASK,
+        OMIDLFIR_ACT0,
+        OMIDLFIR_ACT1,
+    };
+
     const uint64_t procRegs[] = {
         IPOLL_MASK,
         IPOLL_STATUS,
@@ -240,6 +253,41 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
             }
         }
     }
+    else if ( TYPE_OCMB_CHIP == i_target->getAttr<ATTR_TYPE>() )
+    {
+        // get the parent proc
+        ConstTargetHandle_t proc = getParentChip(i_target);
+
+        const struct Entry
+        {
+            TARGETING::ConstTargetHandle_t target;
+            const uint64_t * begin;
+            const uint64_t * end;
+        } tables[] = {
+            {i_target, ocmbRegs, ocmbRegs + sizeof(ocmbRegs)/sizeof(*ocmbRegs)},
+            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+        };
+
+        for(const Entry * tableIt = tables;
+                tableIt != tables + sizeof(tables)/sizeof(*tables);
+                ++tableIt)
+        {
+            if(!tableIt->target)
+            {
+                continue;
+            }
+
+            for(const uint64_t * regIt = tableIt->begin;
+                    regIt != tableIt->end;
+                    ++regIt)
+            {
+                ErrlUserDetailsLogRegister udLogRegister(
+                        tableIt->target,
+                        DEVICE_SCOM_ADDRESS(*regIt));
+                udLogRegister.addToLog(io_log);
+            }
+        }
+    }
     else
     {
         assert( false, "addTimeoutFFDC: Invalid target type from i_target: %x",
@@ -273,6 +321,11 @@ fapi2::TargetType getMdiaTargetType()
               masterProc->getAttr<TARGETING::ATTR_MODEL>() )
     {
         targetType = fapi2::TARGET_TYPE_MCBIST;
+    }
+    else if ( TARGETING::MODEL_AXONE ==
+              masterProc->getAttr<TARGETING::ATTR_MODEL>() )
+    {
+        targetType = fapi2::TARGET_TYPE_OCMB_CHIP;
     }
     else
     {
@@ -387,56 +440,6 @@ errlHndl_t ceErrorSetup<TYPE_MBA>( TargetHandle_t i_mba )
     return err;
 }
 
-uint64_t getMemSize(TargetHandle_t i_target)
-{
-    uint64_t memsize = 0;
-    AttributeTraits<TARGETING::ATTR_EFF_DIMM_SIZE>::Type effDimmSizeAttr;
-    TargetHandleList targetList;
-
-    // if target is MBA
-    if( TYPE_MBA == i_target->getAttr<ATTR_TYPE>() )
-    {
-        targetList.push_back(i_target);
-    }
-    // if target is MCBIST we have to get the connected MCSs
-    else if( TYPE_MCBIST == i_target->getAttr<ATTR_TYPE>() )
-    {
-        PredicateCTM predType( CLASS_NA, TYPE_MCS );
-        PredicateIsFunctional predFunc;
-        PredicatePostfixExpr predAnd;
-        predAnd.push(&predType).push(&predFunc).And();
-
-        targetService().getAssociated( targetList, i_target,
-                                       TargetService::CHILD_BY_AFFINITY,
-                                       TargetService::ALL, &predAnd );
-    }
-    else
-    {
-        assert( false, "getMemSize: Invalid target type from i_target: %x",
-                get_huid(i_target) );
-    }
-
-    for (auto trgt : targetList)
-    {
-        if(trgt->tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(effDimmSizeAttr))
-        {
-            for(uint64_t port = 0;
-                    port < sizeof(effDimmSizeAttr)/sizeof(*effDimmSizeAttr);
-                    ++port)
-            {
-                for(uint64_t dimm = 0; dimm <
-                        sizeof(effDimmSizeAttr[0])/sizeof(*effDimmSizeAttr[0]);
-                        ++dimm)
-                {
-                    memsize += effDimmSizeAttr[port][dimm];
-                }
-            }
-        }
-    }
-
-    return memsize;
-}
-
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
     MDIA_FAST("sm: processCommandTimeout");
@@ -482,6 +485,14 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                     firAddr = MBA01_SPA;
                     mskAddr = MBA01_SPA_MASK;
                     bitMask = 0x8080000000000000; // bits 0 or 8
+                }
+                // Change if target type is OCMB_CHIP
+                else if ( TYPE_OCMB_CHIP == trgtType )
+                {
+                    firAddr    = OCMB_MCBIST_FIR;
+                    firAndAddr = OCMB_MCBIST_FIR_AND;
+                    mskAddr    = OCMB_MCBIST_FIR_MASK;
+                    bitMask    = 0x0020000000000000; // bit 10
                 }
                 // Assert if unsupported type
                 else
@@ -643,6 +654,35 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         errlCommit(err, MDIA_COMP_ID);
                     }
                 }
+                // target type is OCMB_CHIP
+                else if ( TYPE_OCMB_CHIP == trgtType )
+                {
+                    /* TODO RTC 201293 uncomment once we have hwp support
+                    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+                        fapiOcmb(target);
+                    FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiOcmb );
+
+                    if ( nullptr != err )
+                    {
+                        MDIA_ERR("sm: mss::memdiags::stop failed");
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
+
+                    // mss::memdiags::stop will set the command complete
+                    // attention so we need to clear those
+                    bitMask = ~bitMask;
+
+                    err = deviceWrite( target, &bitMask, sz_uint64,
+                                       DEVICE_SCOM_ADDRESS(firAndAddr) );
+
+                    if ( nullptr != err )
+                    {
+                        MDIA_FAST( "sm: deviceWrite on 0x%08X failed, HUID: "
+                                   "0x%08X", firAddr, get_huid(target) );
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
+                    */
+                }
                 // Assert if unsupported type
                 else
                 {
@@ -739,9 +779,6 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->log = 0;
         p->timer = 0;
         p->timeoutCnt = 0;
-
-        // get the memsize
-        p->memSize = getMemSize(it->first);
 
         p->data = NULL;
         p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
@@ -847,14 +884,8 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
         // 3 - schedule it
 
         // determine the priority for the work item to be scheduled
-        // the priority is the number of iterations
-        // through the memory multiplied by the memory size
-
-        // multiply by memory size
-        // assume 1 GB DIMMS if figuring out the memory
-        // size failed
-        uint64_t priority = getRemainingWorkItems(i_wfp)
-            * (i_wfp.memSize ? i_wfp.memSize : 1);
+        // the priority is the number of iterations through the memory
+        uint64_t priority = getRemainingWorkItems(i_wfp);
 
         if(!iv_tp)
         {
@@ -956,6 +987,13 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                                    get_huid(mca) );
                         rc |= PRDF::restoreDramRepairs<TYPE_MCA>( mca );
                     }
+                }
+                // OCMB target
+                else if ( TYPE_OCMB_CHIP == trgtType )
+                {
+                    /* TODO RTC 199034 - uncomment for restoreDramRepairs
+                    rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
+                    */
                 }
                 else
                 {
@@ -1260,6 +1298,71 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 i_wfp.data = nullptr;
             }
         }
+        // target type is OCMB_CHIP
+        else if ( TYPE_OCMB_CHIP == trgtType )
+        {
+            /* TODO RTC 201293 - uncomment with hwp support
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
+            mss::mcbist::stop_conditions stopCond;
+
+            switch(workItem)
+            {
+                case START_RANDOM_PATTERN:
+
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiOcmb,
+                                     mss::mcbist::PATTERN_RANDOM );
+                    MDIA_FAST("sm: random init %p on: %x", fapiOcmb,
+                            get_huid(target));
+                    break;
+
+                case START_SCRUB:
+
+                    //set stop conditions
+                    stopCond.set_pause_on_mpe(mss::ON);
+                    stopCond.set_pause_on_ue( mss::ON);
+                    stopCond.set_pause_on_aue(mss::ON);
+                    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                    if ( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
+                            & iv_globals.mfgPolicy )
+                    {
+                        stopCond.set_pause_on_nce_hard(mss::ON);
+                    }
+
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_read, fapiOcmb,
+                                     stopCond );
+                    MDIA_FAST( "sm: scrub %p on: %x", fapiOcmb,
+                               get_huid(target) );
+                    break;
+
+                case START_PATTERN_0:
+                case START_PATTERN_1:
+                case START_PATTERN_2:
+                case START_PATTERN_3:
+                case START_PATTERN_4:
+                case START_PATTERN_5:
+                case START_PATTERN_6:
+                case START_PATTERN_7:
+
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiOcmb,
+                                     workItem );
+                    MDIA_FAST( "sm: init %p on: %x", fapiOcmb,
+                               get_huid(target) );
+                    break;
+
+                default:
+                    MDIA_ERR("unrecognized work item type %d on: %x",
+                             workItem, get_huid(target));
+                    break;
+            }
+            if( nullptr != err )
+            {
+                MDIA_FAST("sm: Running Maint Cmd failed");
+                i_wfp.data = nullptr;
+            }
+            */
+        }
         else
         {
             assert( false, "doMaintCommand: Invalid target type from "
@@ -1476,6 +1579,24 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                     MDIA_ERR("sm: mss::memdiags::stop failed");
                     errlCommit(err, MDIA_COMP_ID);
                 }
+            }
+        }
+        // target type is OCMB_CHIP
+        else if ( TYPE_OCMB_CHIP == trgtType )
+        {
+            if(flags & STOP_CMD)
+            {
+                MDIA_FAST("sm: stopping command: %p", target);
+                /* TODO RTC 201293 - reenable with hwp support
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
+                FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiOcmb );
+
+                if(nullptr != err)
+                {
+                    MDIA_ERR("sm: mss::memdiags::stop failed");
+                    errlCommit(err, MDIA_COMP_ID);
+                }
+                */
             }
         }
         else

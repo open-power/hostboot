@@ -58,9 +58,13 @@ class MdiaSmTest : public CxxTest::TestSuite
             {
                 TARGETING::getAllChiplets(tmp, TYPE_MBA);
             }
-            else
+            else if (fapi2::TARGET_TYPE_MCBIST == type)
             {
                 TARGETING::getAllChiplets(tmp, TYPE_MCBIST);
+            }
+            else if (fapi2::TARGET_TYPE_OCMB_CHIP == type)
+            {
+                TARGETING::getAllChiplets(tmp, TYPE_OCMB_CHIP);
             }
 
             TargetHandleList::iterator it = tmp.end();
