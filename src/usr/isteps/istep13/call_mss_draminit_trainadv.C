@@ -27,6 +27,7 @@
 #include <errl/errludtarget.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/istepdispatcherif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -110,6 +111,9 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
              l_membuf_iter != l_membufTargetList.end();
              ++l_membuf_iter)
         {
+            // reset watchdog for each memb as this function can be very slow
+            INITSERVICE::sendProgressCode();
+
             //  make a local copy of the target for ease of use
             TARGETING::Target* l_pCentaur = *l_membuf_iter;
 

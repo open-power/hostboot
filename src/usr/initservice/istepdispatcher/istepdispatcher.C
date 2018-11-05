@@ -2424,6 +2424,7 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
 errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 {
     static uint8_t lastIstep = 0, lastSubstep = 0;
+    static uint8_t internalStep = 0;
     errlHndl_t err = NULL;
 
     if (i_needsLock)
@@ -2439,12 +2440,16 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 
         //--- Display istep in Simics console
         MAGIC_INST_PRINT_ISTEP( iv_curIStep, iv_curSubStep );
+
+        // Reset internalStep counter since we are on a new istep
+        internalStep = 0;
     }
 
     //--- Save step to a scratch reg
     SPLESS::MboxScratch5_HB_t l_scratch5;
     l_scratch5.magic = SPLESS::ISTEP_PROGRESS_MAGIC;
     l_scratch5.stepStart = 1;
+    l_scratch5.internalStep = internalStep++; //increment on each call
     l_scratch5.majorStep = iv_curIStep;
     l_scratch5.minorStep = iv_curSubStep;
     Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
