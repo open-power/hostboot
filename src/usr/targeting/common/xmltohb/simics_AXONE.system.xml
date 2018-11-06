@@ -6503,7 +6503,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -6692,7 +6692,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -6754,7 +6754,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
