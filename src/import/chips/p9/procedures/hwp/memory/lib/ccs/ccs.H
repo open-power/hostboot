@@ -426,10 +426,10 @@ inline instruction_t<T> act_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     // Just leaving the row addresses to all 0 for now
     // row, bg, ba set to 0
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_17>();
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_ADDRESS_0_13, TT::ARR0_DDR_ADDRESS_0_13_LEN>(0);
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_0_13, TT::ARR0_DDR_ADDRESS_0_13_LEN>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_0>();
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0);
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_2>();
 
     return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
