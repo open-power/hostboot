@@ -37,7 +37,6 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
@@ -48,8 +47,8 @@
 #include <lib/ccs/ccs.H>
 #include <lib/mc/port.H>
 #include <lib/rosetta_map/rosetta_map.H>
-#include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/ddr4/pba.H>
+#include <lib/eff_config/timing.H>
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_lrdimm_training_helper.H>
@@ -688,44 +687,6 @@ fapi_try_exit:
 /// @return l_cycles - the number of cycles a given calibration step wil take
 ///
 uint64_t mrep::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
-{
-    return 0;
-}
-
-///
-/// @brief Sets up and runs the calibration step
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair
-/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mwd::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                            const uint64_t i_rp,
-                            const uint8_t i_abort_on_error ) const
-{
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Executes a cal step with workarounds
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair
-/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode mwd::execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                const uint64_t i_rp,
-                                const uint8_t i_abort_on_error ) const
-{
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Calculates the number of cycles a given calibration step will take
-/// @param[in] i_target - the MCA target on which to operate
-/// @return l_cycles - the number of cycles a given calibration step wil take
-///
-uint64_t mwd::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
     return 0;
 }
