@@ -399,6 +399,43 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 }
 
 ///
+/// @brief Setup activate command instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> act_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint64_t i_rank)
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    // Set all CKE to high
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+
+    // ACT is high
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ACTN>();
+
+    // RAS low, CAS low, WE low
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_16>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
+    .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    // Just leaving the row addresses to all 0 for now
+    // row, bg, ba set to 0
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_17>();
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_ADDRESS_0_13, TT::ARR0_DDR_ADDRESS_0_13_LEN>(0);
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_0>();
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0);
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_2>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
+///
 /// @brief Create, initialize an RCD (RCW - JEDEC) CCS command
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
