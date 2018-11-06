@@ -359,6 +359,14 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
         {
             o_name = ENUM_ATTR_NAME_CENTAUR;
         }
+        else if (l_model == TARGETING::MODEL_AXONE)
+        {
+            o_name = ENUM_ATTR_NAME_AXONE;
+        }
+        else if (l_model == TARGETING::MODEL_EXPLORER)
+        {
+            o_name = ENUM_ATTR_NAME_EXPLORER;
+        }
         else
         {
             FAPI_ERR("platGetTargetName. Unknown name 0x%x", l_model);
