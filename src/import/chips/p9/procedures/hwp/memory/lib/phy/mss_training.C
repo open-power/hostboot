@@ -59,6 +59,7 @@
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_dwl.H>
     #include <lib/phy/mss_mrd_fine.H>
+    #include <lib/phy/mss_mwd_coarse.H>
 #endif
 
 namespace mss
@@ -1247,6 +1248,17 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         FAPI_INF("Write leveling is enabled");
         l_steps.push_back(std::make_shared<wr_lvl>(i_sim));
     }
+
+#ifdef LRDIMM_CAPABLE
+
+    //MWD COARSE
+    if(i_cal_steps.getBit<mss::cal_steps::MWD_COARSE>())
+    {
+        FAPI_INF("LRDIMM: MWD COARSE is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::mwd_coarse>());
+    }
+
+#endif
 
     // INITIAL_PAT_WR
     if(i_cal_steps.getBit<mss::cal_steps::INITIAL_PAT_WR>())
