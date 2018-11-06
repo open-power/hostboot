@@ -212,6 +212,7 @@ EXTENDED_MODULES += isteps_io
 EXTENDED_MODULES += node_comm
 EXTENDED_MODULES += $(if $(CONFIG_NVDIMM),nvdimm)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
+EXTENDED_MODULES += mmio
 
 #***************************************
 # Working test modules

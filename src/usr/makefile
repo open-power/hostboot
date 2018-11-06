@@ -69,6 +69,7 @@ SUBDIRS += $(if $(CONFIG_HTMGT),htmgt.d)
 SUBDIRS += diag.d
 SUBDIRS += xz.d
 SUBDIRS += hwplibs.d
+SUBDIRS += mmio.d
 SUBDIRS += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat.d,)
 SUBDIRS += $(if $(CONFIG_FSP_BUILD),,nvram.d)
 

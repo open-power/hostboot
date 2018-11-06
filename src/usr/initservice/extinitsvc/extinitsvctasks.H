@@ -388,7 +388,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
             "libisteps.so" ,                                // taskname
             NULL,                                           // no pointer to fn
             {
-                INIT_TASK,                                 // task type
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended Module
+            }
+        },
+
+        /**
+         * @brief   MMIO module
+         */
+        {
+            "libmmio.so" ,                                  // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
                 EXT_IMAGE,                                  // Extended Module
             }
         },
