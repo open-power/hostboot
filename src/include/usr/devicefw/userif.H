@@ -71,6 +71,7 @@ namespace DeviceFW
         NODECOMM,
         NVDIMM,
         FAPI_I2C,
+        MMIO,
         LAST_ACCESS_TYPE,
     };
 
@@ -392,6 +393,17 @@ namespace DeviceFW
      */
     #define DEVICE_FAPI_I2C_ADDRESS()\
         DEVICE_FAPI_I2C_ADDRESS_WCONFIG( 0, NULL )
+
+    /**
+     * @brief Additional device addressing parameters for MMIO ops.
+     *  @param[in] i_offset      - offset (bytes) into the device
+     *  @param[in] i_accessLimit - number of bytes to read/write at a
+     *                             time (device limitation)
+     */
+    #define DEVICE_MMIO_ADDRESS(i_offset, i_accessLimit) \
+        DeviceFW::MMIO, \
+        static_cast<uint64_t>((i_offset)), \
+        static_cast<uint64_t>((i_accessLimit))
 
     /**
      *  @brief Perform a hardware read operation.
