@@ -608,51 +608,6 @@ class mrep : public step
 
 };
 
-///
-/// @brief MPR training step
-///
-class mwd : public step
-{
-    public:
-        mwd() :
-            step("MWD")
-        {}
-
-        ///
-        /// @brief Default virtual destructor
-        ///
-        ~mwd() = default;
-
-        ///
-        /// @brief Sets up and runs the calibration step
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const uint64_t i_rp,
-                               const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Executes a cal step with workarounds
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const uint64_t i_rp,
-                                   const uint8_t i_abort_on_error ) const;
-
-        ///
-        /// @brief Calculates the number of cycles a given calibration step will take
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @return l_cycles - the number of cycles a given calibration step wil take
-        ///
-        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const;
-};
-
 // TK:LRDIMM Identify if Host Interface Write Leveling (HWL) Mode needs to be updated or if the PHY can handle it
 // TK:LRDIMM Identify if Host Interface Read Training is any different
 // TK:LRDIMM Identify if Host Interface Write training Training is any different
