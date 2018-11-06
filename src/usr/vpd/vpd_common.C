@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "vpd.H"
+#include <vpd/vpdreasoncodes.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -57,6 +58,28 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
     TRACUCOMP( g_trac_vpd,
                INFO_MRK"Using VPD location: %d",
                o_vpdLocation );
+
+    if( o_vpdLocation == INVALID__ATTR_VPD_REC_NUM )
+    {
+        TRACFCOMP(g_trac_vpd,ERR_MRK"getVpdLocation() Invalid VPD_REC_NUM for %.8X",
+                  TARGETING::get_huid(i_target));
+        /*@
+         * @errortype
+         * @moduleid     VPD_GET_VPD_LOCATION
+         * @reasoncode   VPD_BAD_REC_NUM
+         * @userdata1    Target HUID
+         * @userdata2    VPD_REC_NUM
+         * @devdesc      getVpdLocation> VPD_REC_NUM is invalid, bad MRW
+         * @custdesc     Firmware configuration error
+         */
+        err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      VPD_GET_VPD_LOCATION,
+                                      VPD_BAD_REC_NUM,
+                                      TARGETING::get_huid(i_target),
+                                      INVALID__ATTR_VPD_REC_NUM,
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+    }
 
     TRACSSCOMP( g_trac_vpd,
                 EXIT_MRK"getVpdLocation()" );

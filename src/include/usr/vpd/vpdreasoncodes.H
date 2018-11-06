@@ -49,6 +49,7 @@ enum vpdModuleId
     VPD_WRITE_PNOR                          = 0x10,
     VPD_ENSURE_CACHE_IS_IN_SYNC             = 0x11,
     VPD_GET_PN_AND_SN                       = 0x12,
+    VPD_GET_VPD_LOCATION                    = 0x13,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,
@@ -85,8 +86,6 @@ enum vpdModuleId
     VPD_SPD_GET_MOD_TYPE                    = 0x6E,
     VPD_SPD_FETCH_DATA                      = 0x6F,
 
-    // Centaur FRU VPD
-
     // Runtime VPD
     VPD_RT_GET_ADDR                         = 0x80,
     VPD_RT_WRITE_PNOR                       = 0x81,
@@ -95,6 +94,12 @@ enum vpdModuleId
     VPD_MOD_XXX                             = 0x84,
     VPD_SEND_I2C_LOCK_MSG                   = 0x85,
     VPD_FILL_I2C_LOCK_MSG                   = 0x86,
+
+    // DDIMM VPD
+    MOD_OCMBPRESENCEDETECT                  = 0x90,
+
+    // Centaur FRU VPD
+
 
 };
 
@@ -149,6 +154,7 @@ enum vpdReasonCode
     VPD_RT_NODE_TOO_LARGE               = VPD_COMP_ID | 0x3b,
     VPD_CANNOT_WRITE_OVERRIDDEN_VPD     = VPD_COMP_ID | 0x3c,
     VPD_FAILED_TO_RESOLVE_NODE_TARGET   = VPD_COMP_ID | 0x3d,
+    VPD_BAD_REC_NUM                     = VPD_COMP_ID | 0x3e,
 };
 
 

@@ -294,5 +294,16 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
  */
 void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
+/**
+ * Define useful constants for VPD code
+ */
+
+// default invalid value for ATTR_VPD_REC_NUM
+constexpr TARGETING::ATTR_VPD_REC_NUM_type INVALID__ATTR_VPD_REC_NUM = 0xFFFF;
+
+// default unknown EC level
+constexpr TARGETING::ATTR_EC_type INVALID__ATTR_EC = 0xFF;
+
+
 }; //end VPD namespace
 #endif

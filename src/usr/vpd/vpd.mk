@@ -22,6 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Needed for chipids.H
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+
 # common objects with runtime
 OBJS += vpd_common.o
 OBJS += ipvpd.o
@@ -31,3 +35,4 @@ OBJS += pvpd.o
 OBJS += dvpd.o
 OBJS += spd.o
 OBJS += errlud_vpd.o
+OBJS += ddimm.o

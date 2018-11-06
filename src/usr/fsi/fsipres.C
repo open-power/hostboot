@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -256,6 +256,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
          * @moduleid     FSI::MOD_FSIPRES_MEMBPRESENCEDETECT
          * @reasoncode   FSI::RC_INVALID_LENGTH
          * @userdata1    Data Length
+         * @userdata2    HUID of target being detected
          * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
          * @custdesc     FSI buffer length is not 1 byte when finding
          *               a memory buffer chip
@@ -265,7 +266,8 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
                                         FSI::MOD_FSIPRES_MEMBPRESENCEDETECT,
                                         FSI::RC_INVALID_LENGTH,
                                         TO_UINT64(io_buflen),
-                                        true /*SW error*/);
+                                        TARGETING::get_huid(i_target),
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         io_buflen = 0;
         return l_errl;
     }

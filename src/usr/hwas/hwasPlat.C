@@ -75,6 +75,41 @@ using   namespace   TARGETING;
 //******************************************************************************
 errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
 {
+    // Call over to the target-specific layer since every chip can have
+    //  unique registers
+    size_t sz = 0;
+    errlHndl_t l_errl =
+      DeviceFW::deviceWrite(i_target,
+                            nullptr,
+                            sz,
+                            DEVICE_IDEC_ADDRESS());
+
+    return l_errl;
+}
+
+/**
+ * @brief Read the chipid and EC/DD-level for standard CFAM chips and set
+ *    the attributes.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (bytes, must equal 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t cfamIDEC(DeviceFW::OperationType i_opType,
+                    TARGETING::Target* i_target,
+                    void* io_buffer,
+                    size_t& io_buflen,
+                    int64_t i_accessType,
+                    va_list i_args)
+{
     // we got a target - read the ID/EC
     //  and update the appropriate ATTR_ field.
     uint64_t id_ec;
@@ -180,6 +215,17 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
 
     return errl;
 } // platReadIDEC
+
+// Register the standard CFAM function for IDEC calls for processors
+//  and memory buffers
+DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
+                      DeviceFW::IDEC,
+                      TARGETING::TYPE_PROC,
+                      cfamIDEC);
+DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
+                      DeviceFW::IDEC,
+                      TARGETING::TYPE_MEMBUF,
+                      cfamIDEC);
 
 //******************************************************************************
 // platIsMinHwCheckingAllowed function
@@ -528,7 +574,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
 
         if (present == true)
         {
-            HWAS_DBG( "pTarget %.8X - detected present",
+            HWAS_INF( "pTarget %.8X - detected present",
                 pTarget->getAttr<ATTR_HUID>());
 
             // advance to next entry in the list
@@ -536,7 +582,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         }
         else
         {   // chip not present -- remove from list
-            HWAS_DBG( "pTarget %.8X - no presence",
+            HWAS_INF( "pTarget %.8X - no presence",
                 pTarget->getAttr<ATTR_HUID>());
 
             // erase this target, and 'increment' to next

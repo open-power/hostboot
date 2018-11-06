@@ -49,29 +49,29 @@ namespace DeviceFW
 
     enum AccessType
     {
-        SCOM = 0,
-        PNOR,
-        MAILBOX,
-        PRESENT,
-        FSI,
-        SPD,
+        SCOM = 0,  // SCOM registers
+        PNOR,      // PNOR flash
+        MAILBOX,   // FSP mailbox
+        PRESENT,   // Presence detection
+        FSI,       // FSI/CFAM registers
+        SPD,       // Serial Presence Detect Data for JEDEC DIMMs
         MVPD,      // Module (processor) VPD
         CVPD,      // Centaur (memory buffer) VPD
-        SCAN,
-        EEPROM,
-        GPIO,
-        LPC,
+        SCAN,      // Scan rings
+        EEPROM,    // Standard EEPROM/SEEPROM over i2c
+        GPIO,      // GPIO registers
+        LPC,       // Low Pin Count bus
         IPMIBT,    // As opposed to other phy's
-        PVPD,
-        TPM,
-        SIO,
-        AHB_SIO,
+        PVPD,      // Planar VPD
+        TPM,       // Trusted Platform Module
+        SIO,       // BMC Super I/O registers
+        AHB_SIO,   // AST Hostbridge via SIO
         DVPD,      // Direct access memory VPD
-        DEPRECATED_MEMD_VPD,
-        NODECOMM,
-        NVDIMM,
-        FAPI_I2C,
-        MMIO,
+        NODECOMM,  // Internode communication
+        NVDIMM,    // Non-volatile DIMM controller access
+        FAPI_I2C,  // FAPI2-triggered i2c accesses
+        MMIO,      // Memory Mapped I/O
+        IDEC,      // Read and set EC and CHIPID values
         LAST_ACCESS_TYPE,
     };
 
@@ -404,6 +404,14 @@ namespace DeviceFW
         DeviceFW::MMIO, \
         static_cast<uint64_t>((i_offset)), \
         static_cast<uint64_t>((i_accessLimit))
+
+    /**
+     * @brief Additional device addressing parameters for MMIO ops.
+     * Construct the device addressing parameters for the IDEC operation
+     *  (no parameters)
+     */
+    #define DEVICE_IDEC_ADDRESS()\
+        DeviceFW::IDEC
 
     /**
      *  @brief Perform a hardware read operation.
