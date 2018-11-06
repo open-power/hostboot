@@ -36,7 +36,6 @@ OBJS += rtvpd_load.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-
 #Updated mvpd to contain VRML so that part/serial numbers can be
 #found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
