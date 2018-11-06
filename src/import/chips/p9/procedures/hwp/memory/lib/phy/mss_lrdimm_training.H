@@ -65,7 +65,6 @@ namespace training
 
 namespace lrdimm
 {
-
 ///
 /// @brief Issues initial pattern write to all ranks in the rank pair
 /// @param[in] i_target the MCA target on which to operate

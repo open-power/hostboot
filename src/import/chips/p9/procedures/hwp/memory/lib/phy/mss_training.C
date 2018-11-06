@@ -60,6 +60,7 @@
     #include <lib/phy/mss_dwl.H>
     #include <lib/phy/mss_mrd_fine.H>
     #include <lib/phy/mss_mwd_coarse.H>
+    #include <lib/phy/mss_mwd_fine.H>
 #endif
 
 namespace mss
@@ -1256,6 +1257,13 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     {
         FAPI_INF("LRDIMM: MWD COARSE is enabled");
         l_steps.push_back(std::make_shared<mss::training::lrdimm::mwd_coarse>());
+    }
+
+    //MWD FINE
+    if(i_cal_steps.getBit<mss::cal_steps::MWD_FINE>())
+    {
+        FAPI_INF("LRDIMM: MWD FINE is enabled");
+        l_steps.push_back(std::make_shared<mss::training::lrdimm::mwd_fine>());
     }
 
 #endif
