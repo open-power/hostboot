@@ -30,8 +30,7 @@
 #include <errl/hberrltypes.H>
 #include <errl/errlreasoncodes.H>
 #include <errl/errlentry.H>
-
-extern trace_desc_t* g_trac_runtime;
+#include <fapi2/fapiPlatTrace.H>
 
 class CreatePlatLogTest : public CxxTest::TestSuite
 {
@@ -39,7 +38,7 @@ public:
 
     void testCreatePlatLogCreatorFapi2()
     {
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorFapi2 running");
+        FAPI_INF("testCreatePlatLogCreatorFapi2 running");
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
         fapi2::errlSeverity_t l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
@@ -54,7 +53,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorFapi2: ERRL_SEV_RECOVERED passed");
+            FAPI_DBG("testCreatePlatLogCreatorFapi2: ERRL_SEV_RECOVERED passed");
         }
         l_rc.forgetData();
 
@@ -72,7 +71,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorFapi2: ERRL_SEV_PREDICTIVE passed");
+            FAPI_DBG("testCreatePlatLogCreatorFapi2: ERRL_SEV_PREDICTIVE passed");
         }
         l_rc.forgetData();
 
@@ -91,16 +90,16 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorFapi2: ERRL_SEV_UNRECOVERABLE passed");
+            FAPI_DBG("testCreatePlatLogCreatorFapi2: ERRL_SEV_UNRECOVERABLE passed");
         }
         l_rc.forgetData();
 
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorFapi2 done");
+        FAPI_INF("testCreatePlatLogCreatorFapi2 done");
     }
 
     void testCreatePlatLogCreatorPlat()
     {
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat running");
+        FAPI_INF("testCreatePlatLogCreatorPlat running");
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
         fapi2::errlSeverity_t l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
@@ -123,7 +122,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat: ERRL_SEV_RECOVERED passed");
+            FAPI_DBG("testCreatePlatLogCreatorPlat: ERRL_SEV_RECOVERED passed");
         }
 
         l_rc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
@@ -148,7 +147,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat: ERRL_SEV_PREDICTIVE passed");
+            FAPI_DBG("testCreatePlatLogCreatorPlat: ERRL_SEV_PREDICTIVE passed");
         }
 
         l_rc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
@@ -173,16 +172,16 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat: ERRL_SEV_UNRECOVERABLE passed");
+            FAPI_DBG("testCreatePlatLogCreatorPlat: ERRL_SEV_UNRECOVERABLE passed");
         }
         l_rc.forgetData();
 
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat done");
+        FAPI_INF("testCreatePlatLogCreatorPlat done");
     }
 
     void testCreatePlatLogCreatorHwp()
     {
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorHwp running");
+        FAPI_INF("testCreatePlatLogCreatorHwp running");
 
         fapi2::ReturnCode l_rc = 0x00000001; // Fake return code wit creator == HWP
         fapi2::errlSeverity_t l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
@@ -197,7 +196,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorHwp: ERRL_SEV_RECOVERED passed");
+            FAPI_DBG("testCreatePlatLogCreatorHwp: ERRL_SEV_RECOVERED passed");
         }
         l_rc.forgetData();
 
@@ -214,7 +213,7 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorHwp: ERRL_SEV_PREDICTIVE passed");
+            FAPI_DBG("testCreatePlatLogCreatorHwp: ERRL_SEV_PREDICTIVE passed");
         }
         l_rc.forgetData();
 
@@ -232,11 +231,11 @@ public:
         }
         else
         {
-            TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorHwp: ERRL_SEV_UNRECOVERABLE passed");
+            FAPI_DBG("testCreatePlatLogCreatorHwp: ERRL_SEV_UNRECOVERABLE passed");
         }
         l_rc.forgetData();
 
-        TRACFCOMP(g_trac_runtime, "testCreatePlatLogCreatorHwp done");
+        FAPI_INF("testCreatePlatLogCreatorHwp done");
     }
 };
 
