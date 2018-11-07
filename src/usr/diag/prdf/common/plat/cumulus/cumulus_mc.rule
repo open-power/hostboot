@@ -284,7 +284,7 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** MC_CHIPLET_FIR[3]
      *  Attention from MC_LFIR
      */
-    (rMC_CHIPLET_FIR, bit(3)) ? analyze(gMC_LFIR);
+    (rMC_CHIPLET_FIR, bit(3)) ? analyzeMC_LFIR;
 
     /** MC_CHIPLET_FIR[4]
      *  Attention from CHIFIR 0
@@ -309,17 +309,17 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** MC_CHIPLET_FIR[12]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_FIR, bit(12)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_FIR, bit(12)) ? analyzeMCBISTFIR;
 
     /** MC_CHIPLET_FIR[13]
      *  Attention from IOMCFIR
      */
-    (rMC_CHIPLET_FIR, bit(13)) ? analyze(gIOMCFIR);
+    (rMC_CHIPLET_FIR, bit(13)) ? analyzeIOMCFIR;
 
     /** MC_CHIPLET_FIR[14]
      *  Attention from MCPPEFIR
      */
-    (rMC_CHIPLET_FIR, bit(14)) ? analyze(gMCPPEFIR);
+    (rMC_CHIPLET_FIR, bit(14)) ? analyzeMCPPEFIR;
 
 };
 
@@ -360,17 +360,17 @@ group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter priority ( 10 )
     /** MC_CHIPLET_UCS_FIR[8]
      *  Attention from MCPPEFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(8)) ? analyze(gMCPPEFIR);
+    (rMC_CHIPLET_UCS_FIR, bit(8)) ? analyzeMCPPEFIR;
 
     /** MC_CHIPLET_UCS_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMCBISTFIR;
 
     /** MC_CHIPLET_UCS_FIR[10]
      *  Attention from IOMCFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(10)) ? analyze(gIOMCFIR);
+    (rMC_CHIPLET_UCS_FIR, bit(10)) ? analyzeIOMCFIR;
 
 };
 
@@ -409,7 +409,7 @@ group gMC_CHIPLET_HA_FIR attntype HOST_ATTN filter singlebit
     /** MC_CHIPLET_HA_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyze(gMCBISTFIR);
+    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMCBISTFIR;
 
 };
 

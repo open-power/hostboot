@@ -91,5 +91,12 @@ actionclass tooManyBusErrors_dmi3_UERE
  calloutBusInterface_dmi3_th_1; funccall("tooManyBusErrors_DMI3");
 };
 
+###############################################################################
+# Analyze groups
+###############################################################################
 
+actionclass analyzeMC_LFIR   { analyze(gMC_LFIR);   };
+actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
+actionclass analyzeIOMCFIR   { analyze(gIOMCFIR);   };
+actionclass analyzeMCPPEFIR  { analyze(gMCPPEFIR);  };
 

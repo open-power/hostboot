@@ -335,24 +335,6 @@ actionclass nx_th_1
 /** Callout connected NX, threshold 1, SUE originated from somewhere else */
 actionclass nx_th_1_SUE { nx_th_1; SueSeen; };
 
-actionclass analyzePciChipletFir0
-{
-    capture(PciChipletFir0);
-    analyze(gPCI0_CHIPLET_FIR);
-};
-
-actionclass analyzePciChipletFir1
-{
-    capture(PciChipletFir1);
-    analyze(gPCI1_CHIPLET_FIR);
-};
-
-actionclass analyzePciChipletFir2
-{
-    capture(PciChipletFir2);
-    analyze(gPCI2_CHIPLET_FIR);
-};
-
 /** PLL Threshold of 2 per 5 mins */
 actionclass thresholdPll
 {
@@ -404,34 +386,6 @@ actionclass pmRecovery
 {
     funccall("PmRecovery");
     threshold1;
-};
-
-/** Special wrapper for NPU0FIR to collect extra FFDC */
-actionclass analyzeNPU0FIR
-{
-    capture(npu0fir_ffdc);
-    analyze(gNPU0FIR);
-};
-
-/** Special wrapper for NPU1FIR to collect extra FFDC */
-actionclass analyzeNPU1FIR
-{
-    capture(npu1fir_ffdc);
-    analyze(gNPU1FIR);
-};
-
-/** Special wrapper for NPU2FIR to collect extra FFDC */
-actionclass analyzeNPU2FIR
-{
-    capture(npu2fir_ffdc);
-    analyze(gNPU2FIR);
-};
-
-/** Special wrapper for INTCQFIR to collect extra FFDC */
-actionclass analyzeINTCQFIR
-{
-    capture(intcqfir_ffdc);
-    analyze(gINTCQFIR);
 };
 
 /** Callout connected XBUS 0 interface on first occurrence */
@@ -669,3 +623,78 @@ actionclass obus3SmpFailure_LALL
     funccall("obus3_callout_L1");
     threshold1;
 };
+
+###############################################################################
+# Analyze groups
+###############################################################################
+
+actionclass analyzePciChipletFir0
+{
+    capture(PciChipletFir0);
+    analyze(gPCI0_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir1
+{
+    capture(PciChipletFir1);
+    analyze(gPCI1_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir2
+{
+    capture(PciChipletFir2);
+    analyze(gPCI2_CHIPLET_FIR);
+};
+
+actionclass analyzeTP_LFIR     { analyze(gTP_LFIR    ); };
+actionclass analyzeOCCFIR      { analyze(gOCCFIR     ); };
+actionclass analyzeN0_LFIR     { analyze(gN0_LFIR    ); };
+actionclass analyzeNXDMAENGFIR { analyze(gNXDMAENGFIR); };
+actionclass analyzeNXCQFIR     { analyze(gNXCQFIR    ); };
+actionclass analyzeNXDMAENGFIR { analyze(gNXDMAENGFIR); };
+actionclass analyzeN1_LFIR     { analyze(gN1_LFIR    ); };
+actionclass analyzeMCDFIR_0    { analyze(gMCDFIR_0   ); };
+actionclass analyzeMCDFIR_1    { analyze(gMCDFIR_1   ); };
+actionclass analyzeVASFIR      { analyze(gVASFIR     ); };
+actionclass analyzeN2_LFIR     { analyze(gN2_LFIR    ); };
+actionclass analyzePSIFIR      { analyze(gPSIFIR     ); };
+actionclass analyzeN3_LFIR     { analyze(gN3_LFIR    ); };
+actionclass analyzePBWESTFIR   { analyze(gPBWESTFIR  ); };
+actionclass analyzePBCENTFIR   { analyze(gPBCENTFIR  ); };
+actionclass analyzePBEASTFIR   { analyze(gPBEASTFIR  ); };
+actionclass analyzeNMMUCQFIR   { analyze(gNMMUCQFIR  ); };
+actionclass analyzeNMMUFIR     { analyze(gNMMUFIR    ); };
+actionclass analyzePBPPEFIR    { analyze(gPBPPEFIR   ); };
+actionclass analyzePBIOEFIR    { analyze(gPBIOEFIR   ); };
+actionclass analyzePBIOOFIR    { analyze(gPBIOOFIR   ); };
+actionclass analyzePBAFIR      { analyze(gPBAFIR     ); };
+actionclass analyzePSIHBFIR    { analyze(gPSIHBFIR   ); };
+actionclass analyzePBAMFIR     { analyze(gPBAMFIR    ); };
+actionclass analyzeENHCAFIR    { analyze(gENHCAFIR   ); };
+actionclass analyzeXB_LFIR     { analyze(gXB_LFIR    ); };
+actionclass analyzeXBPPEFIR    { analyze(gXBPPEFIR   ); };
+
+actionclass analyzeINTCQFIR
+{
+    capture(intcqfir_ffdc);
+    analyze(gINTCQFIR);
+};
+
+actionclass analyzeNPU0FIR
+{
+    capture(npu0fir_ffdc);
+    analyze(gNPU0FIR);
+};
+
+actionclass analyzeNPU1FIR
+{
+    capture(npu1fir_ffdc);
+    analyze(gNPU1FIR);
+};
+
+actionclass analyzeNPU2FIR
+{
+    capture(npu2fir_ffdc);
+    analyze(gNPU2FIR);
+};
+

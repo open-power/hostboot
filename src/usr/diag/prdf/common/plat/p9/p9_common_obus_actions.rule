@@ -88,3 +88,12 @@ actionclass obusSmpFailure_L1
     threshold1;
 };
 
+###############################################################################
+# Analyze groups
+###############################################################################
+
+actionclass analyzeOB_LFIR  { analyze(gOB_LFIR);  };
+actionclass analyzeIOOLFIR  { analyze(gIOOLFIR);  };
+actionclass analyzeIOOBFIR  { analyze(gIOOBFIR);  };
+actionclass analyzeOBPPEFIR { analyze(gOBPPEFIR); };
+

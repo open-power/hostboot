@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_ec_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_eq_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,22 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass self_level2_th_5perHour
-{
-    calloutSelfMed;
-    callout2ndLvlMed;
-    threshold5phour;
-};
-
 ###############################################################################
 # Analyze groups
 ###############################################################################
 
-actionclass analyzeCOREFIR
-{
-    funccall("CheckCoreCheckstop");
-    analyze(gCOREFIR);
-};
-
-actionclass analyzeEC_LFIR { analyze(gEC_LFIR); };
+actionclass analyzeEQ_LFIR { analyze(gEQ_LFIR); };
 

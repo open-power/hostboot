@@ -23,23 +23,10 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** MCBIST capture MCA registers when isolating to MCBIST */
-actionclass analyzeMcbistfir
-{
-    funccall("CaptureMcaRegisters");
-    analyze(gMCBISTFIR);
-};
-
 /** MCBIST program complete */
 actionclass mcbist_program_complete
 {
     funccall("McbistCmdComplete");
-};
-
-/** MCBIST program complete workaround */
-actionclass mcbist_program_complete_workaround
-{
-    funccall("CmdCompleteDd1Workaround");
 };
 
 /** MCBIST Command Address Timeout */
@@ -47,5 +34,17 @@ actionclass command_addr_timeout
 {
     threshold1;
     funccall("commandAddrTimeout");
+};
+
+###############################################################################
+# Analyze groups
+###############################################################################
+
+actionclass analyzeMC_LFIR { analyze(gMC_LFIR); };
+
+actionclass analyzeMCBISTFIR
+{
+    funccall("CaptureMcaRegisters");
+    analyze(gMCBISTFIR);
 };
 

@@ -372,22 +372,22 @@ group gOB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** OB_CHIPLET_FIR[3]
      *  Attention from OB_LFIR
      */
-    (rOB_CHIPLET_FIR, bit(3)) ? analyze(gOB_LFIR);
+    (rOB_CHIPLET_FIR, bit(3)) ? analyzeOB_LFIR;
 
     /** OB_CHIPLET_FIR[4]
      *  Attention from IOOLFIR
      */
-    (rOB_CHIPLET_FIR, bit(4)) ? analyze(gIOOLFIR);
+    (rOB_CHIPLET_FIR, bit(4)) ? analyzeIOOLFIR;
 
     /** OB_CHIPLET_FIR[5]
      *  Attention from IOOBFIR
      */
-    (rOB_CHIPLET_FIR, bit(5)) ? analyze(gIOOBFIR);
+    (rOB_CHIPLET_FIR, bit(5)) ? analyzeIOOBFIR;
 
     /** OB_CHIPLET_FIR[6]
      *  Attention from OBPPEFIR
      */
-    (rOB_CHIPLET_FIR, bit(6)) ? analyze(gOBPPEFIR);
+    (rOB_CHIPLET_FIR, bit(6)) ? analyzeOBPPEFIR;
 
 };
 
@@ -406,12 +406,12 @@ group gOB_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
     /** OB_CHIPLET_UCS_FIR[2]
      *  Attention from IOOBFIR
      */
-    (rOB_CHIPLET_UCS_FIR, bit(2)) ? analyze(gIOOBFIR);
+    (rOB_CHIPLET_UCS_FIR, bit(2)) ? analyzeIOOBFIR;
 
     /** OB_CHIPLET_UCS_FIR[3]
      *  Attention from OBPPEFIR
      */
-    (rOB_CHIPLET_UCS_FIR, bit(3)) ? analyze(gOBPPEFIR);
+    (rOB_CHIPLET_UCS_FIR, bit(3)) ? analyzeOBPPEFIR;
 
 };
 

@@ -2017,12 +2017,12 @@ group gTP_CHIPLET_FIR filter singlebit
     /** TP_CHIPLET_FIR[3]
      *  Attention from TP_LFIR
      */
-    (rTP_CHIPLET_FIR, bit(3)) ? analyze(gTP_LFIR);
+    (rTP_CHIPLET_FIR, bit(3)) ? analyzeTP_LFIR;
 
     /** TP_CHIPLET_FIR[4]
      *  Attention from OCCFIR
      */
-    (rTP_CHIPLET_FIR, bit(4)) ? analyze(gOCCFIR);
+    (rTP_CHIPLET_FIR, bit(4)) ? analyzeOCCFIR;
 
 };
 
@@ -2595,17 +2595,17 @@ group gN0_CHIPLET_FIR filter singlebit
     /** N0_CHIPLET_FIR[3]
      *  Attention from N0_LFIR
      */
-    (rN0_CHIPLET_FIR, bit(3)) ? analyze(gN0_LFIR);
+    (rN0_CHIPLET_FIR, bit(3)) ? analyzeN0_LFIR;
 
     /** N0_CHIPLET_FIR[4]
      *  Attention from NXDMAENGFIR
      */
-    (rN0_CHIPLET_FIR, bit(4)) ? analyze(gNXDMAENGFIR);
+    (rN0_CHIPLET_FIR, bit(4)) ? analyzeNXDMAENGFIR;
 
     /** N0_CHIPLET_FIR[5]
      *  Attention from NXCQFIR
      */
-    (rN0_CHIPLET_FIR, bit(5)) ? analyze(gNXCQFIR);
+    (rN0_CHIPLET_FIR, bit(5)) ? analyzeNXCQFIR;
 
     /** N0_CHIPLET_FIR[6]
      *  Attention from CXAFIR 0
@@ -2629,12 +2629,12 @@ group gN0_CHIPLET_UCS_FIR filter singlebit
     /** N0_CHIPLET_UCS_FIR[1]
      *  Attention from NXDMAENGFIR
      */
-    (rN0_CHIPLET_UCS_FIR, bit(1)) ? analyze(gNXDMAENGFIR);
+    (rN0_CHIPLET_UCS_FIR, bit(1)) ? analyzeNXDMAENGFIR;
 
     /** N0_CHIPLET_UCS_FIR[2]
      *  Attention from NXCQFIR
      */
-    (rN0_CHIPLET_UCS_FIR, bit(2)) ? analyze(gNXCQFIR);
+    (rN0_CHIPLET_UCS_FIR, bit(2)) ? analyzeNXCQFIR;
 
     /** N0_CHIPLET_UCS_FIR[3]
      *  Attention from CXAFIR 0
@@ -3222,7 +3222,7 @@ group gN1_CHIPLET_FIR filter singlebit
     /** N1_CHIPLET_FIR[3]
      *  Attention from N1_LFIR
      */
-    (rN1_CHIPLET_FIR, bit(3)) ? analyze(gN1_LFIR);
+    (rN1_CHIPLET_FIR, bit(3)) ? analyzeN1_LFIR;
 
     /** N1_CHIPLET_FIR[4]
      *  Attention from MCFIR 2
@@ -3237,17 +3237,17 @@ group gN1_CHIPLET_FIR filter singlebit
     /** N1_CHIPLET_FIR[6]
      *  Attention from MCDFIR
      */
-    (rN1_CHIPLET_FIR, bit(6)) ? analyze(gMCDFIR_0);
+    (rN1_CHIPLET_FIR, bit(6)) ? analyzeMCDFIR_0;
 
     /** N1_CHIPLET_FIR[7]
      *  Attention from MCDFIR
      */
-    (rN1_CHIPLET_FIR, bit(7)) ? analyze(gMCDFIR_1);
+    (rN1_CHIPLET_FIR, bit(7)) ? analyzeMCDFIR_1;
 
     /** N1_CHIPLET_FIR[8]
      *  Attention from VASFIR
      */
-    (rN1_CHIPLET_FIR, bit(8)) ? analyze(gVASFIR);
+    (rN1_CHIPLET_FIR, bit(8)) ? analyzeVASFIR;
 
 };
 
@@ -3276,7 +3276,7 @@ group gN1_CHIPLET_UCS_FIR filter singlebit
     /** N1_CHIPLET_UCS_FIR[5]
      *  Attention from VASFIR
      */
-    (rN1_CHIPLET_UCS_FIR, bit(5)) ? analyze(gVASFIR);
+    (rN1_CHIPLET_UCS_FIR, bit(5)) ? analyzeVASFIR;
 
 };
 
@@ -3877,7 +3877,7 @@ group gN2_CHIPLET_FIR filter singlebit
     /** N2_CHIPLET_FIR[3]
      *  Attention from N2_LFIR
      */
-    (rN2_CHIPLET_FIR, bit(3)) ? analyze(gN2_LFIR);
+    (rN2_CHIPLET_FIR, bit(3)) ? analyzeN2_LFIR;
 
     /** N2_CHIPLET_FIR[4]
      *  Attention from CXAFIR 1
@@ -3917,7 +3917,7 @@ group gN2_CHIPLET_FIR filter singlebit
     /** N2_CHIPLET_FIR[11]
      *  Attention from PSIFIR
      */
-    (rN2_CHIPLET_FIR, bit(11)) ? analyze(gPSIFIR);
+    (rN2_CHIPLET_FIR, bit(11)) ? analyzePSIFIR;
 
 };
 
@@ -4109,7 +4109,7 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[3]
      *  Attention from N3_LFIR
      */
-    (rN3_CHIPLET_FIR, bit(3)) ? analyze(gN3_LFIR);
+    (rN3_CHIPLET_FIR, bit(3)) ? analyzeN3_LFIR;
 
     /** N3_CHIPLET_FIR[4]
      *  Attention from MCFIR 0
@@ -4124,17 +4124,17 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[6]
      *  Attention from PBWESTFIR
      */
-    (rN3_CHIPLET_FIR, bit(6)) ? analyze(gPBWESTFIR);
+    (rN3_CHIPLET_FIR, bit(6)) ? analyzePBWESTFIR;
 
     /** N3_CHIPLET_FIR[7]
      *  Attention from PBCENTFIR
      */
-    (rN3_CHIPLET_FIR, bit(7)) ? analyze(gPBCENTFIR);
+    (rN3_CHIPLET_FIR, bit(7)) ? analyzePBCENTFIR;
 
     /** N3_CHIPLET_FIR[8]
      *  Attention from PBEASTFIR
      */
-    (rN3_CHIPLET_FIR, bit(8)) ? analyze(gPBEASTFIR);
+    (rN3_CHIPLET_FIR, bit(8)) ? analyzePBEASTFIR;
 
     /** N3_CHIPLET_FIR[10]
      *  Attention from NPU0FIR
@@ -4149,27 +4149,27 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[12]
      *  Attention from NMMUCQFIR
      */
-    (rN3_CHIPLET_FIR, bit(12)) ? analyze(gNMMUCQFIR);
+    (rN3_CHIPLET_FIR, bit(12)) ? analyzeNMMUCQFIR;
 
     /** N3_CHIPLET_FIR[13]
      *  Attention from NMMUFIR
      */
-    (rN3_CHIPLET_FIR, bit(13)) ? analyze(gNMMUFIR);
+    (rN3_CHIPLET_FIR, bit(13)) ? analyzeNMMUFIR;
 
     /** N3_CHIPLET_FIR[14]
      *  Attention from PBPPEFIR
      */
-    (rN3_CHIPLET_FIR, bit(14)) ? analyze(gPBPPEFIR);
+    (rN3_CHIPLET_FIR, bit(14)) ? analyzePBPPEFIR;
 
     /** N3_CHIPLET_FIR[15]
      *  Attention from PBIOEFIR
      */
-    (rN3_CHIPLET_FIR, bit(15)) ? analyze(gPBIOEFIR);
+    (rN3_CHIPLET_FIR, bit(15)) ? analyzePBIOEFIR;
 
     /** N3_CHIPLET_FIR[16]
      *  Attention from PBIOOFIR
      */
-    (rN3_CHIPLET_FIR, bit(16)) ? analyze(gPBIOOFIR);
+    (rN3_CHIPLET_FIR, bit(16)) ? analyzePBIOOFIR;
 
     /** N3_CHIPLET_FIR[17]
      *  Attention from INTCQFIR
@@ -4179,22 +4179,22 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[18]
      *  Attention from PBAFIR
      */
-    (rN3_CHIPLET_FIR, bit(18)) ? analyze(gPBAFIR);
+    (rN3_CHIPLET_FIR, bit(18)) ? analyzePBAFIR;
 
     /** N3_CHIPLET_FIR[19]
      *  Attention from PSIHBFIR
      */
-    (rN3_CHIPLET_FIR, bit(19)) ? analyze(gPSIHBFIR);
+    (rN3_CHIPLET_FIR, bit(19)) ? analyzePSIHBFIR;
 
     /** N3_CHIPLET_FIR[20]
      *  Attention from PBAMFIR
      */
-    (rN3_CHIPLET_FIR, bit(20)) ? analyze(gPBAMFIR);
+    (rN3_CHIPLET_FIR, bit(20)) ? analyzePBAMFIR;
 
     /** N3_CHIPLET_FIR[22]
      *  Attention from ENHCAFIR
      */
-    (rN3_CHIPLET_FIR, bit(22)) ? analyze(gENHCAFIR);
+    (rN3_CHIPLET_FIR, bit(22)) ? analyzeENHCAFIR;
 
     /** N3_CHIPLET_FIR[23]
      *  Attention from NPU2FIR
@@ -4243,12 +4243,12 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
     /** N3_CHIPLET_UCS_FIR[9]
      *  Attention from NMMUCQFIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(9)) ? analyze(gNMMUCQFIR);
+    (rN3_CHIPLET_UCS_FIR, bit(9)) ? analyzeNMMUCQFIR;
 
     /** N3_CHIPLET_UCS_FIR[10]
      *  Attention from NMMUFIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(10)) ? analyze(gNMMUFIR);
+    (rN3_CHIPLET_UCS_FIR, bit(10)) ? analyzeNMMUFIR;
 
 };
 
@@ -7470,7 +7470,7 @@ group gXB_CHIPLET_FIR filter singlebit
     /** XB_CHIPLET_FIR[3]
      *  Attention from XB_LFIR
      */
-    (rXB_CHIPLET_FIR, bit(3)) ? analyze(gXB_LFIR);
+    (rXB_CHIPLET_FIR, bit(3)) ? analyzeXB_LFIR;
 
     /** XB_CHIPLET_FIR[4]
      *  Attention from IOELFIR 0
@@ -7505,7 +7505,7 @@ group gXB_CHIPLET_FIR filter singlebit
     /** XB_CHIPLET_FIR[11]
      *  Attention from XBPPEFIR
      */
-    (rXB_CHIPLET_FIR, bit(11)) ? analyze(gXBPPEFIR);
+    (rXB_CHIPLET_FIR, bit(11)) ? analyzeXBPPEFIR;
 
 };
 
@@ -7554,7 +7554,7 @@ group gXB_CHIPLET_UCS_FIR filter singlebit
     /** XB_CHIPLET_UCS_FIR[8]
      *  Attention from XBPPEFIR
      */
-    (rXB_CHIPLET_UCS_FIR, bit(8)) ? analyze(gXBPPEFIR);
+    (rXB_CHIPLET_UCS_FIR, bit(8)) ? analyzeXBPPEFIR;
 
 };
 
