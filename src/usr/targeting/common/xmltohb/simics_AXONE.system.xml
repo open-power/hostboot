@@ -4057,7 +4057,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>2</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4065,7 +4065,7 @@
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>HUID</id>
