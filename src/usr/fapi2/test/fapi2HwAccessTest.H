@@ -75,45 +75,15 @@ void test_fapi2HwAccess()
         // Get a list of all of the proc chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-        TARGETING::Target * l_nimbusProc = nullptr;
-        TARGETING::Target * l_cumulusProc = nullptr;
-        TARGETING::Target * l_proc = nullptr;
-
-        //Take the first NIMBUS proc and use it
-        for(uint32_t i = 0; i < l_chipList.size(); i++)
-        {
-            if(TARGETING::MODEL_NIMBUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-                l_nimbusProc = l_chipList[i];
-                break;
-            }
-            if(TARGETING::MODEL_CUMULUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_cumulusProc = l_chipList[i];
-              break;
-            }
-        }
-
         numTests++;
-        if (l_nimbusProc != nullptr)
-        {
-            l_proc = l_nimbusProc;
-        }
-        else if (l_cumulusProc != nullptr)
-        {
-            l_proc = l_cumulusProc;
-        }
-        else //both are nullptr
+        if(l_chipList.size() == 0)
         {
             TS_FAIL("FAPI2_fapi2HwAccess:: could not find any procs, skipping tests");
             numFails++;
             break;
         }
 
-        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
-                l_proc);
+        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_chipList[0]);
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_fail, fapi2_procTarget);
