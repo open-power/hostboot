@@ -201,7 +201,7 @@ group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** EC_CHIPLET_FIR[3]
      *  Attention from EC_LFIR
      */
-    (rEC_CHIPLET_FIR, bit(3)) ? analyze(gEC_LFIR);
+    (rEC_CHIPLET_FIR, bit(3)) ? analyzeEC_LFIR;
 
     /** EC_CHIPLET_FIR[4]
      *  Attention from COREFIR
