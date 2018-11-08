@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_eq_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/nimbus/nimbus_proc_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -24,15 +24,13 @@
 # IBM_PROLOG_END_TAG
 
 ###############################################################################
-# Analyze groups
-###############################################################################
-
-actionclass analyzeEQ_LFIR { analyze(gEQ_LFIR); };
-
-###############################################################################
 # Analyze connected
 ###############################################################################
 
-actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
-actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };
+actionclass analyzeConnectedMCBIST0 { analyze(connected(TYPE_MCBIST,  0)); };
+actionclass analyzeConnectedMCBIST1 { analyze(connected(TYPE_MCBIST,  1)); };
+actionclass analyzeConnectedMCS0    { analyze(connected(TYPE_MCS,     0)); };
+actionclass analyzeConnectedMCS1    { analyze(connected(TYPE_MCS,     1)); };
+actionclass analyzeConnectedMCS2    { analyze(connected(TYPE_MCS,     2)); };
+actionclass analyzeConnectedMCS3    { analyze(connected(TYPE_MCS,     3)); };
 

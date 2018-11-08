@@ -242,3 +242,10 @@ actionclass mainline_ue_handling_1_UERE
 actionclass mainline_rce_pue_handling_0 { funccall("AnalyzeFetchRcePue0"); };
 actionclass mainline_rce_pue_handling_1 { funccall("AnalyzeFetchRcePue1"); };
 
+###############################################################################
+# Analyze connected
+###############################################################################
+
+actionclass analyzeConnectedMBA0 { analyze(connected(TYPE_MBA, 0)); };
+actionclass analyzeConnectedMBA1 { analyze(connected(TYPE_MBA, 1)); };
+

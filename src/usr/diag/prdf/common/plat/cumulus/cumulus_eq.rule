@@ -362,5 +362,3 @@ group gEQ_LFIR filter singlebit, cs_root_cause
 .include "p9_common_actions.rule";
 .include "p9_common_eq_actions.rule";
 
-actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
-actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };

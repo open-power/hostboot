@@ -100,3 +100,12 @@ actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
 actionclass analyzeIOMCFIR   { analyze(gIOMCFIR);   };
 actionclass analyzeMCPPEFIR  { analyze(gMCPPEFIR);  };
 
+###############################################################################
+# Analyze connected
+###############################################################################
+
+actionclass analyzeConnectedDMI0 { analyze(connected(TYPE_DMI, 0)); };
+actionclass analyzeConnectedDMI1 { analyze(connected(TYPE_DMI, 1)); };
+actionclass analyzeConnectedDMI2 { analyze(connected(TYPE_DMI, 2)); };
+actionclass analyzeConnectedDMI3 { analyze(connected(TYPE_DMI, 3)); };
+
