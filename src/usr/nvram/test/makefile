@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/nvram/makefile $
+# $Source: src/usr/nvram/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,18 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-MODULE = nvram
+MODULE = testnvram
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/nvram/import
-
-OBJS += nvram_interface.o
-OBJS += nvram-format.o
-
-VPATH += import
-
-SUBDIRS += test.d
+TESTS = testnvram.H
 
 include ${ROOTPATH}/config.mk
+

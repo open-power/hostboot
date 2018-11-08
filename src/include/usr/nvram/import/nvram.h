@@ -27,6 +27,16 @@
 
 #include <stdint.h>
 
+typedef uint16_t beint16_t;
+typedef beint16_t be16;
+
+struct chrp_nvram_hdr {
+    uint8_t     sig;
+    uint8_t     cksum;
+    be16        len;
+    char        name[12];
+};
+
 extern "C"
 {
 int nvram_format(void *nvram_image, uint32_t nvram_size);
