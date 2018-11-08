@@ -70,8 +70,8 @@ chip nimbus_mcs
         name        "P9 MCS target MCFIR ACT0";
         scomaddr    0x05010806;
         capture     group default;
-        capture     req nonzero("MCFIR");
         capture     group MirrorConfig;
+        capture     req nonzero("MCFIR");
     };
 
     register MCFIR_ACT1
@@ -79,8 +79,8 @@ chip nimbus_mcs
         name        "P9 MCS target MCFIR ACT1";
         scomaddr    0x05010807;
         capture     group default;
-        capture     req nonzero("MCFIR");
         capture     group MirrorConfig;
+        capture     req nonzero("MCFIR");
     };
 
 # Include registers not defined by the xml

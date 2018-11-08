@@ -48,3 +48,12 @@ actionclass analyzeMCBISTFIR
     analyze(gMCBISTFIR);
 };
 
+###############################################################################
+# Analyze connected
+###############################################################################
+
+actionclass analyzeConnectedMCA0 { analyze(connected(TYPE_MCA, 0)); };
+actionclass analyzeConnectedMCA1 { analyze(connected(TYPE_MCA, 1)); };
+actionclass analyzeConnectedMCA2 { analyze(connected(TYPE_MCA, 2)); };
+actionclass analyzeConnectedMCA3 { analyze(connected(TYPE_MCA, 3)); };
+

@@ -89,7 +89,7 @@ actionclass maintenance_iue_handling
     funccall("AnalyzeMaintIue");
 };
 
-actionclass impe_handling { funccall("AnalyzeImpe"); };
+actionclass memory_impe_handling { funccall("AnalyzeImpe"); };
 
 /** Handle Mainline AUEs/IAUEs */
 actionclass mainline_aue_iaue_handling

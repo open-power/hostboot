@@ -535,7 +535,7 @@ rule rIOMCFIR
     IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 &  IOMCFIR_ACT1;
 };
 
-group gIOMCFIR filter singlebit, cs_root_cause( 10, 12, 18, 20, 26, 28, 34, 36 )
+group gIOMCFIR filter singlebit, cs_root_cause( 12, 20, 28, 36 )
 {
     /** IOMCFIR[0]
      *  RX_INVALID_STATE_OR_PARITY_ERROR
@@ -844,7 +844,3 @@ group gMCBISTFIR filter singlebit, cs_root_cause
 .include "p9_common_actions.rule";
 .include "cumulus_mc_actions.rule";
 
-actionclass analyzeConnectedDMI0 { analyze(connected(TYPE_DMI, 0)); };
-actionclass analyzeConnectedDMI1 { analyze(connected(TYPE_DMI, 1)); };
-actionclass analyzeConnectedDMI2 { analyze(connected(TYPE_DMI, 2)); };
-actionclass analyzeConnectedDMI3 { analyze(connected(TYPE_DMI, 3)); };

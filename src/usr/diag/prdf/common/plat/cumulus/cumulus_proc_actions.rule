@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_eq_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/cumulus/cumulus_proc_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -24,15 +24,16 @@
 # IBM_PROLOG_END_TAG
 
 ###############################################################################
-# Analyze groups
-###############################################################################
-
-actionclass analyzeEQ_LFIR { analyze(gEQ_LFIR); };
-
-###############################################################################
 # Analyze connected
 ###############################################################################
 
-actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
-actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };
+actionclass analyzeConnectedOBUS1   { analyze(connected(TYPE_OBUS,    1)); };
+actionclass analyzeConnectedOBUS2   { analyze(connected(TYPE_OBUS,    2)); };
+actionclass analyzeConnectedXBUS0   { analyze(connected(TYPE_XBUS,    0)); };
+actionclass analyzeConnectedMC0     { analyze(connected(TYPE_MC,      0)); };
+actionclass analyzeConnectedMC1     { analyze(connected(TYPE_MC,      1)); };
+actionclass analyzeConnectedMI0     { analyze(connected(TYPE_MI,      0)); };
+actionclass analyzeConnectedMI1     { analyze(connected(TYPE_MI,      1)); };
+actionclass analyzeConnectedMI2     { analyze(connected(TYPE_MI,      2)); };
+actionclass analyzeConnectedMI3     { analyze(connected(TYPE_MI,      3)); };
 

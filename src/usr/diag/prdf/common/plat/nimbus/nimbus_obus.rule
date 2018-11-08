@@ -162,23 +162,6 @@ chip nimbus_obus
         capture     req nonzero("IOOLFIR");
     };
 
-    register IOOLFIR_AND
-    {
-        name        "P9 chip IOOLFIR atomic AND";
-        scomaddr    0x09010801;
-        capture     group never;
-        access      write_only;
-    };
-
-    register IOOLFIR_MASK_OR
-    {
-        name        "P9 chip IOOLFIR atomic OR";
-        scomaddr    0x09010805;
-        capture     group never;
-        access      write_only;
-    };
-
-
     ############################################################################
     # P9 OBUS target IOOBFIR
     ############################################################################
@@ -249,94 +232,6 @@ chip nimbus_obus
         scomaddr    0x09011047;
         capture     group default;
         capture     req nonzero("OBPPEFIR");
-    };
-
-    ############################################################################
-    # P9 OBUS targets for cable FFDC
-    #    One additional reg (IOOLFIR) is in default group
-    ############################################################################
-    register OLL0_XMITLANE_CTL
-    {
-        name        "P9 OBUS target OLL LINK0 TRANSMIT LANE CTL";
-        scomaddr    0x09010810;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL1_XMITLANE_CTL
-    {
-        name        "P9 OBUS target OLL LINK1 TRANSMIT LANE CTL";
-        scomaddr    0x09010811;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL0_RECVLANE_CTL
-    {
-        name        "P9 OBUS target OLL LINK0 RECEIVE LANE CTL";
-        scomaddr    0x09010812;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL1_RECVLANE_CTL
-    {
-        name        "P9 OBUS target OLL LINK1 RECEIVE LANE CTL";
-        scomaddr    0x09010813;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL0_INFO_REG
-    {
-        name        "P9 OBUS target OLL LINK0 INFORMATION REG";
-        scomaddr    0x09010814;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL1_INFO_REG
-    {
-        name        "P9 OBUS target OLL LINK1 INFORMATION REG";
-        scomaddr    0x09010815;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL0_ERROR_STATUS_REG
-    {
-        name        "P9 OBUS target OLL LINK0 ERROR STATUS";
-        scomaddr    0x09010816;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL1_ERROR_STATUS_REG
-    {
-        name        "P9 OBUS target OLL LINK1 ERROR STATUS";
-        scomaddr    0x09010817;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL_REPLAY_THRESHOLD_REG
-    {
-        name        "P9 OBUS target OLL REPLAY THRESHOLD";
-        scomaddr    0x09010818;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL_SLECC_THRESHOLD_REG
-    {
-        name        "P9 OBUS target OLL SL ECC THRESHOLD";
-        scomaddr    0x09010819;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL0_SYNDROME_CAP_REG
-    {
-        name        "P9 OBUS target OLL LINK0 SYNDROME CAPTURE";
-        scomaddr    0x09010822;
-        capture     group smpCableFFDC;
-    };
-
-    register OLL1_SYNDROME_CAP_REG
-    {
-        name        "P9 OBUS target OLL LINK1 SYNDROME CAPTURE";
-        scomaddr    0x09010823;
-        capture     group smpCableFFDC;
     };
 
 # Include registers not defined by the xml
