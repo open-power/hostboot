@@ -205,8 +205,7 @@ fapi2::ReturnCode execute_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
 
         // Makes a copy of the vector, so we can do the function space swaps correctly
-        auto l_bcws = i_bcws;
-        FAPI_TRY(insert_function_space_select(l_bcws));
+        auto l_bcws = convert_to_rcws(i_bcws, commands::BCW_DELAY);
 
 
         FAPI_TRY(control_word_engine(i_target,
