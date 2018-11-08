@@ -400,6 +400,18 @@ void getPervasiveChildTargetsByState(
                        TargetService::PERVASIVE_CHILD);
 }
 
+void getChildOmiTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+
+{
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::OMI_CHILD);
+}
+
 void getParentAffinityTargetsByState(
           TARGETING::TargetHandleList& o_vector,
     const Target*                      i_target,
@@ -421,6 +433,17 @@ void getParentPervasiveTargetsByState(
 {
     getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
                        TargetService::PARENT_PERVASIVE);
+}
+
+void getParentOmicTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+{
+    getAffinityTargets(o_vector, i_target, i_class, i_type, i_state,
+                       TargetService::OMIC_PARENT);
 }
 
 const Target * getParentChip( const Target * i_pChiplet )

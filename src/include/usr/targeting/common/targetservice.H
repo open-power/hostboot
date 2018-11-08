@@ -210,6 +210,8 @@ class TargetService
                                 ///< associated with a pervasive target
             PARENT_PERVASIVE,   ///< The result target should be a pervasive
                                 ///< target
+            OMI_CHILD,          ///< The result target(s) should be an OMI target
+            OMIC_PARENT,        ///< The result target should be an OMIC target
             MAX_ASSOCIATION_TYPES, ///< Number of types, must always be last
         };
 

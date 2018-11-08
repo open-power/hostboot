@@ -53,6 +53,11 @@
 #define OCMB_PER_OMI         1
 #define MEM_PORT_PER_OCMB    1
 
+// Note that OMIC can either have 2 or 3 child OMI
+// targets. There are 3 OMIC targets per MC, OMIC0
+// and OMIC1 have 3 children, OMIC2 has 2 children
+#define MAX_OMI_PER_OMIC     3
+
 #define SIMULATED_GOOD_CORES 4
 
 // non-core and non-cache chiplet ids

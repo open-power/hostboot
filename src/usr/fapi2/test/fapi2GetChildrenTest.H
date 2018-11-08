@@ -233,6 +233,25 @@ void test_fapi2GetChildren()
             }
         }
 
+        if (isHwValid(l_proc, MY_OMIC)
+            && isHwValid(l_proc, MY_OMI))
+        {
+            l_childOMIs = fapi2_omicTarget.getChildren<fapi2::TARGET_TYPE_OMI>(TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OMIC]);
+            l_actualSize = l_childOMIs.size();
+
+            //Set expected size to be the number of OMIs per proc
+            l_expectedSize = MAX_OMI_PER_OMIC;
+            numTests++;
+            if(l_actualSize != l_expectedSize)
+            {
+                FAPI_INF("fapi2TargetTest:: # OMIs foound for OMIC0 proc is %d and not %d",
+                         l_actualSize, l_expectedSize);
+                numFails++;
+                break;
+            }
+        }
+
         if (isHwValid(l_proc, MY_OMI)
             && isHwValid(l_proc, MY_OCMB))
         {
