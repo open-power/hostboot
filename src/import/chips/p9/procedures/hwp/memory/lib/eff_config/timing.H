@@ -233,6 +233,16 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Time it takes to do a buffer control word write
+/// @return constexpr value of 16 clocks
+///
+constexpr uint64_t tbcw()
+{
+    // Per DDR4 buffer JEDEC spec - timing requirements
+    return 16;
+}
+
+///
 /// @brief Mode Register Set Command Cycle Time
 /// @return constexpr value of 8 clocks
 ///

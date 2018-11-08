@@ -95,6 +95,7 @@ fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 class commands
 {
     public:
+        static constexpr uint8_t BCW_DELAY = 255;
         using DIMM_TARGET = fapi2::Target<fapi2::TARGET_TYPE_DIMM>;
         using BCW_MAP = std::map<uint64_t, std::vector<cw_info>>;
 
