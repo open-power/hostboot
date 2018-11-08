@@ -129,6 +129,9 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libhtmgt.so),
         DEP_LIB(libisteps_mss.so),
 #endif
+#ifndef CONFIG_FSP_BUILD
+        DEP_LIB(libnvram.so),
+#endif
         NULL
     }
 };

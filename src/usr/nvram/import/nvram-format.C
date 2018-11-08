@@ -25,13 +25,6 @@
 #include <skiboot.h>
 #include <nvram.h>
 
-struct chrp_nvram_hdr {
-    uint8_t     sig;
-    uint8_t     cksum;
-    be16        len;
-    char        name[12];
-};
-
 static struct chrp_nvram_hdr *skiboot_part_hdr;
 
 static uint8_t chrp_nv_cksum(struct chrp_nvram_hdr *hdr)
@@ -54,9 +47,81 @@ static uint8_t chrp_nv_cksum(struct chrp_nvram_hdr *hdr)
 
 #define NVRAM_SIG_FW_PRIV   0x51
 #define NVRAM_SIG_SYSTEM    0x70
+#define NVRAM_SIG_FREE      0x7f
 #define NVRAM_NAME_COMMON   "common"
 #define NVRAM_NAME_FW_PRIV  "ibm,skiboot"
+#define NVRAM_NAME_FREE     "wwwwwwwwwwww"
+#define NVRAM_SIZE_COMMON   0x10000
 #define NVRAM_SIZE_FW_PRIV  0x1000
+
+int nvram_format(void *nvram_image, uint32_t nvram_size)
+{
+    struct chrp_nvram_hdr *h;
+    unsigned int offset = 0;
+
+    prerror("NVRAM: Re-initializing (size: 0x%08x)\n", nvram_size);
+    memset(nvram_image, 0, nvram_size);
+
+    /* Create private partition */
+    if (nvram_size - offset < NVRAM_SIZE_FW_PRIV)
+        return -1;
+    h =
+#ifdef __HOSTBOOT_MODULE
+        reinterpret_cast<chrp_nvram_hdr*>(
+            static_cast<uint8_t*>(nvram_image) + offset);
+#else
+        nvram_image + offset;
+#endif
+    h->sig = NVRAM_SIG_FW_PRIV;
+    h->len = cpu_to_be16(NVRAM_SIZE_FW_PRIV >> 4);
+    strcpy(h->name, NVRAM_NAME_FW_PRIV);
+    h->cksum = chrp_nv_cksum(h);
+    prlog(PR_DEBUG, "NVRAM: Created '%s' partition at 0x%08x"
+          " for size 0x%08x with cksum 0x%02x\n",
+          NVRAM_NAME_FW_PRIV, offset,
+          be16_to_cpu(h->len), h->cksum);
+    offset += NVRAM_SIZE_FW_PRIV;
+
+    /* Create common partition */
+    if (nvram_size - offset < NVRAM_SIZE_COMMON)
+        return -1;
+    h =
+#ifdef __HOSTBOOT_MODULE
+        reinterpret_cast<chrp_nvram_hdr*>(
+            static_cast<uint8_t*>(nvram_image) + offset);
+#else
+        nvram_image + offset;
+#endif
+    h->sig = NVRAM_SIG_SYSTEM;
+    h->len = cpu_to_be16(NVRAM_SIZE_COMMON >> 4);
+    strcpy(h->name, NVRAM_NAME_COMMON);
+    h->cksum = chrp_nv_cksum(h);
+    prlog(PR_DEBUG, "NVRAM: Created '%s' partition at 0x%08x"
+          " for size 0x%08x with cksum 0x%02x\n",
+          NVRAM_NAME_COMMON, offset,
+          be16_to_cpu(h->len), h->cksum);
+    offset += NVRAM_SIZE_COMMON;
+
+    /* Create free space partition */
+    if (nvram_size - offset < sizeof(struct chrp_nvram_hdr))
+        return -1;
+    h =
+#ifdef __HOSTBOOT_MODULE
+        reinterpret_cast<chrp_nvram_hdr*>(
+            static_cast<uint8_t*>(nvram_image) + offset);
+#else
+        nvram_image + offset;
+#endif
+    h->sig = NVRAM_SIG_FREE;
+    h->len = cpu_to_be16((nvram_size - offset) >> 4);
+    /* We have the full 12 bytes here */
+    memcpy(h->name, NVRAM_NAME_FREE, 12);
+    h->cksum = chrp_nv_cksum(h);
+    prlog(PR_DEBUG, "NVRAM: Created '%s' partition at 0x%08x"
+          " for size 0x%08x with cksum 0x%02x\n",
+          NVRAM_NAME_FREE, offset, be16_to_cpu(h->len), h->cksum);
+    return 0;
+}
 
 static const char *find_next_key(const char *start, const char *end)
 {

@@ -36,10 +36,20 @@ typedef uint16_t beint16_t;
 typedef beint16_t be16;
 
 #define BE16_TO_CPU(le_val) ((uint16_t)(le_val))
+#define CPU_TO_BE16(native) ((beint16_t)(native))
 
 static inline uint16_t be16_to_cpu(beint16_t be_val)
 {
     return BE16_TO_CPU(be_val);
+}
+
+/**
+ * cpu_to_be16 - convert a uint16_t value to big endian.
+ * @native: value to convert
+ */
+static inline beint16_t cpu_to_be16(uint16_t native)
+{
+    return CPU_TO_BE16(native);
 }
 
 // For console logging
