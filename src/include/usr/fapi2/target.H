@@ -704,6 +704,15 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
             requiredPType,
             TARGETING::UTIL_FILTER_ALL);
     }
+    else if(K_PARENT == fapi2::TARGET_TYPE_OMIC)
+    {
+        TARGETING::getParentOmicTargetsByState(
+            l_parentList,
+            static_cast<TARGETING::Target*>(this->get()),
+            TARGETING::CLASS_NA,
+            requiredPType,
+            TARGETING::UTIL_FILTER_ALL);
+    }
     else
     {
         TARGETING::getParentAffinityTargetsByState(
@@ -957,6 +966,14 @@ inline std::vector<Target<K_CHILD, V> >
                           l_type,
                           TARGETING::UTIL_FILTER_ALL);
         }
+        else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
+        {
+            TARGETING::getChildOmiTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_ALL);
+        }
         // DIMMs need to use PRESENT so that we don't report things
         //  that aren't installed
         else if(K_CHILD == fapi2::TARGET_TYPE_DIMM)
@@ -983,6 +1000,14 @@ inline std::vector<Target<K_CHILD, V> >
         if(T_SELF == fapi2::TARGET_TYPE_PERV)
         {
             TARGETING::getPervasiveChildTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_FUNCTIONAL);
+        }
+        else if(T_SELF == fapi2::TARGET_TYPE_OMIC)
+        {
+            TARGETING::getChildOmiTargetsByState(l_childList,
                           static_cast<TARGETING::Target*>(this->get()),
                           TARGETING::CLASS_NA,
                           l_type,

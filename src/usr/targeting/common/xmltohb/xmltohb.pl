@@ -157,11 +157,14 @@ use constant PARENT_BY_AFFINITY => "ParentByAffinity";
 use constant CHILD_BY_AFFINITY => "ChildByAffinity";
 use constant PERVASIVE_CHILD => "PervasiveChild";
 use constant PARENT_PERVASIVE => "ParentPervasive";
+use constant OMIC_PARENT => "OmicParent";
+use constant OMI_CHILD => "OmiChild";
 my @associationTypes = ( PARENT_BY_CONTAINMENT,
     CHILD_BY_CONTAINMENT, PARENT_BY_AFFINITY, CHILD_BY_AFFINITY,
-    PERVASIVE_CHILD, PARENT_PERVASIVE );
+    PERVASIVE_CHILD, PARENT_PERVASIVE, OMIC_PARENT, OMI_CHILD );
 
 # Constants for attribute names (minus ATTR_ prefix)
+use constant ATTR_OMIC_PARENT => "OMIC_PARENT";
 use constant ATTR_PARENT_PERVASIVE => "PARENT_PERVASIVE";
 use constant ATTR_PHYS_PATH => "PHYS_PATH";
 use constant ATTR_AFFINITY_PATH => "AFFINITY_PATH";
@@ -6297,6 +6300,8 @@ sub generateTargetingImage {
         my $ptrToChildByAffinityAssociations = INVALID_POINTER;
         my $ptrToPervasiveChildAssociations = INVALID_POINTER;
         my $ptrToParentPervasiveAssociations = INVALID_POINTER;
+        my $ptrToOmiChildAssociations = INVALID_POINTER;
+        my $ptrToOmicParentAssociations = INVALID_POINTER;
 
         my $id = $targetInstance->{id};
         $targetAddrHash{$id}{offsetToPtrToParentByContainmentAssociations} =
@@ -6323,12 +6328,22 @@ sub generateTargetingImage {
             $offsetWithinTargets + length $data;
         $data .= pack8byte($ptrToParentPervasiveAssociations);
 
+        $targetAddrHash{$id}{offsetToPtrToOmiChildAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToOmiChildAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToOmicParentAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToOmicParentAssociations);
+
         $targetAddrHash{$id}{ParentByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ChildByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ParentByAffinityAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ChildByAffinityAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{PervasiveChildAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ParentPervasiveAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{OmiChildAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{OmicParentAssociations} = [@NullPtrArray];
 
         if($id =~/^sys\d+$/)
         {
@@ -6358,6 +6373,10 @@ sub generateTargetingImage {
         . "$targetAddrHash{$id}{offsetToPtrToPervasiveChildAssociations}");
         ASSOC_DBG("Offset within targets to ptr to parent pervasive list = "
         . "$targetAddrHash{$id}{offsetToPtrToParentPervasiveAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to omi child list = "
+        . "$targetAddrHash{$id}{offsetToPtrToOmiChildAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to omic parent list = "
+        . "$targetAddrHash{$id}{offsetToPtrToOmicParentAssociations}");
 
         $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
             * (length pack8byte(0));
@@ -6498,7 +6517,8 @@ sub generateTargetingImage {
             # path for association processing later on
             if(   ($attributeId eq ATTR_PHYS_PATH)
                || ($attributeId eq ATTR_AFFINITY_PATH)
-               || ($attributeId eq ATTR_PARENT_PERVASIVE))
+               || ($attributeId eq ATTR_PARENT_PERVASIVE)
+               || ($attributeId eq ATTR_OMIC_PARENT))
             {
                 $targetAddrHash{$targetInstance->{id}}{$attributeId} =
                     $attrhash{$attributeId}->{default};
@@ -6630,9 +6650,10 @@ sub generateTargetingImage {
 
                     # Each target is 4 bytes # attributes, 8 bytes pointer
                     # to attribute list, 8 bytes pointer to attribute pointer
-                    # list, 6 x 8 byte pointers to association lists, for total
-                    # of 20 + 48 = 68 bytes per target
-                    $index *= (20 + 48); # length(N + quad + quad + 6x quad)
+                    # list, num associations x 8 byte pointers to association lists
+
+                    # length(double + quad + quad + # associations x quad)
+                    $index *= (20 + 8 * (scalar @associationTypes));
                     $attrhash{$attributeId}->{default} = $index + $firstTgtPtr;
                 }
 
@@ -6942,12 +6963,40 @@ sub generateTargetingImage {
         my $phys_attr = ATTR_PHYS_PATH;
         my $affn_attr = ATTR_AFFINITY_PATH;
         my $parent_pervasive = ATTR_PARENT_PERVASIVE;
+        my $omic_parent = ATTR_OMIC_PARENT;
 
         my $phys_path = $targetAddrHash{$id}{$phys_attr};
         my $parent_phys_path = substr $phys_path, 0, (rindex $phys_path, "/");
 
         my $affn_path = $targetAddrHash{$id}{$affn_attr};
         my $parent_affn_path = substr $affn_path, 0, (rindex $affn_path, "/");
+
+        # If this target has an associated OMIC target, create a
+        # bidirectional relationship between this target and the specified
+        # OMIC target.  This target will point to the OMIC target via
+        # a "OMIC_PARENT" association, and the pervasive target will
+        # point to this target via a "OMI_CHILD" association.
+        if(defined $targetAddrHash{$id}{$omic_parent})
+        {
+            my $parent_omic_path =
+                $targetAddrHash{$id}{$omic_parent};
+
+            if(defined $targetPhysicalPath{$parent_omic_path})
+            {
+                my $parent = $targetPhysicalPath{$parent_omic_path};
+                unshift
+                    @ { $targetAddrHash{$id}
+                        {OmicParentAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$parent}
+                {OffsetToTargetWithinTargetList};
+
+                unshift
+                    @ { $targetAddrHash{$parent}
+                        {OmiChildAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$id}
+                {OffsetToTargetWithinTargetList};
+            }
+        }
 
         # If this target has an associated pervasive target, create a
         # bidirectional relationship between this target and the specified

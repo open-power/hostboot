@@ -5071,6 +5071,20 @@
   </attribute>
 
   <attribute>
+    <description>
+        Physical entity path an OMI's associated OMIC parent target
+    </description>
+    <id>OMIC_PARENT</id>
+    <nativeType>
+      <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <virtual/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Ordinal ID of a target</description>
     <id>ORDINAL_ID</id>
     <persistency>non-volatile</persistency>

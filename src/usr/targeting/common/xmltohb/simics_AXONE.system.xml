@@ -7345,6 +7345,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0</default>
     </attribute>
@@ -7405,6 +7409,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-2</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -7469,6 +7477,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0</default>
     </attribute>
@@ -7529,6 +7541,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -7597,6 +7613,10 @@
         <default>physical:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
+    </attribute>
+    <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
             <field><id>reserved</id><value>0</value></field>
@@ -7653,6 +7673,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -7717,6 +7741,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0</default>
     </attribute>
@@ -7777,6 +7805,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-0/omic-1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -7841,6 +7873,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0</default>
     </attribute>
@@ -7901,6 +7937,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-2</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -7965,6 +8005,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0</default>
     </attribute>
@@ -8025,6 +8069,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -8089,6 +8137,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-0</default>
     </attribute>
@@ -8149,6 +8201,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-0</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -8213,6 +8269,10 @@
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
     <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-0</default>
     </attribute>
@@ -8273,6 +8333,10 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>OMIC_PARENT</id>
+        <default>physical:sys-0/node-0/proc-0/mc-1/omic-1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>

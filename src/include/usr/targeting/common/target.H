@@ -770,14 +770,15 @@ class Target
         // Array of pointers to target handles.  Currently there is one pointer
         // for each supported association type.  The currently supported
         // association types are PARENT, CHILD, PARENT_BY_AFFINITY,
-        // CHILD_BY_AFFINTY, PERVASIVE_CHILD, and PARENT_PERVASIVE.
+        // CHILD_BY_AFFINTY, PERVASIVE_CHILD, PARENT_PERVASIVE,
+        // OMI_CHILD, and OMIC_PARENT.
         // The number of pointers should exactly equal value
         // of TargetService::MAX_ASSOCIATION_TYPES defined in
         // targeting/common/targetservice.H.  Due to the huge code changes
         // necessary to directly use that enum value, a compile time assert in
         // targeting/common/targetservice.C enforces that restriction.
         TARGETING::AbstractPointer< AbstractPointer<Target> >
-            iv_ppAssociations[6];
+            iv_ppAssociations[8];
 
     private: // Private CTORs/DTORs/Operators
 
