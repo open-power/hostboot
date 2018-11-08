@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,8 +142,8 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     uint8_t l_type_index = 0;
     uint8_t l_gen_index = 0;
 
-    FAPI_TRY( mss::vpd_mr_dphy_rlo(i_target, l_rlo) );
-    FAPI_TRY( mss::vpd_mr_dphy_wlo(i_target, l_wlo) );
+    FAPI_TRY( mss::eff_dphy_rlo(i_target, l_rlo) );
+    FAPI_TRY( mss::eff_dphy_wlo(i_target, l_wlo) );
     FAPI_TRY( mss::eff_dram_gen(i_target, &(l_dram_gen[0])) );
     FAPI_TRY( mss::eff_dimm_type(i_target, &(l_dimm_type[0])) );
 

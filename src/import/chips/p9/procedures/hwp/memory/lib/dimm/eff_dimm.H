@@ -583,6 +583,19 @@ class eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode odt_rd() = 0;
+
+        ///
+        /// @brief Determines & sets effective PHY RLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_rlo() = 0;
+
+        ///
+        /// @brief Determines & sets effective PHY WLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_wlo() = 0;
+
         ///
         /// @brief Determines & sets effective config for data_mask
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -1102,6 +1115,19 @@ class eff_lrdimm : public eff_dimm
         virtual fapi2::ReturnCode odt_rd() final;
 
         ///
+        /// @brief Determines & sets effective PHY RLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_rlo() final;
+
+        ///
+        /// @brief Determines & sets effective PHY WLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_wlo() final;
+
+
+        ///
         /// @brief Sets the RTT_NOM value from SPD
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         /// @note used for MRS01
@@ -1420,6 +1446,19 @@ class eff_rdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode odt_rd() final;
+
+        ///
+        /// @brief Determines & sets effective PHY RLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_rlo() final;
+
+        ///
+        /// @brief Determines & sets effective PHY WLO values
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode phy_wlo() final;
+
 
         ///
         /// @brief Sets the RTT_NOM value from SPD

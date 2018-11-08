@@ -425,7 +425,7 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
     uint64_t l_twlo_twloe = 0;
     uint8_t l_twldqsen = 0;
 
-    FAPI_TRY( mss::vpd_mr_dphy_wlo(i_target, l_wlo_ck) );
+    FAPI_TRY( mss::eff_dphy_wlo(i_target, l_wlo_ck) );
     FAPI_TRY( mss::twldqsen(i_target, l_twldqsen) );
 
     // TODO RTC:160356 This changes if wlo is signed, which it's not but I wonder if it should

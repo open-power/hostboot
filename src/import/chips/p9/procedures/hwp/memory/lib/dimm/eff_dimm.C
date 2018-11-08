@@ -5966,6 +5966,98 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Determines & sets effective PHY RLO values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_rdimm::phy_rlo()
+{
+    uint8_t l_mcs_attr[PORTS_PER_MCS] = {};
+    uint8_t l_vpd = 0;
+
+    // Gets the VPD value
+    FAPI_TRY( mss::vpd_mr_dphy_rlo(iv_mca, l_vpd));
+    FAPI_TRY( eff_dphy_rlo( iv_mcs, &(l_mcs_attr[0])) );
+
+    // Sets up the value
+    l_mcs_attr[iv_port_index] = l_vpd;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_RLO, iv_mcs, l_mcs_attr) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective PHY RLO values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_lrdimm::phy_rlo()
+{
+    constexpr uint8_t LR_OFFSET = 1;
+    constexpr uint8_t RLO_MAX = 7;
+    uint8_t l_mcs_attr[PORTS_PER_MCS] = {};
+    uint8_t l_vpd = 0;
+
+    // Gets the VPD value
+    FAPI_TRY( mss::vpd_mr_dphy_rlo(iv_mca, l_vpd));
+    FAPI_TRY( eff_dphy_rlo( iv_mcs, &(l_mcs_attr[0])) );
+
+    // Sets up the value - ensure we don't have a rollover case
+    l_mcs_attr[iv_port_index] = std::min(uint8_t(l_vpd + LR_OFFSET), RLO_MAX);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_RLO, iv_mcs, l_mcs_attr) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective PHY WLO values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_rdimm::phy_wlo()
+{
+    uint8_t l_mcs_attr[PORTS_PER_MCS] = {};
+    uint8_t l_vpd = 0;
+
+    // Gets the VPD value
+    FAPI_TRY( mss::vpd_mr_dphy_wlo(iv_mca, l_vpd));
+    FAPI_TRY( eff_dphy_wlo( iv_mcs, &(l_mcs_attr[0])) );
+
+    // Sets up the value
+    l_mcs_attr[iv_port_index] = l_vpd;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_WLO, iv_mcs, l_mcs_attr) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective PHY WLO values
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_lrdimm::phy_wlo()
+{
+    constexpr uint8_t LR_OFFSET = 2;
+    uint8_t l_mcs_attr[PORTS_PER_MCS] = {};
+    uint8_t l_vpd = 0;
+
+    // Gets the VPD value
+    FAPI_TRY( mss::vpd_mr_dphy_wlo(iv_mca, l_vpd));
+    FAPI_TRY( eff_dphy_wlo( iv_mcs, &(l_mcs_attr[0])) );
+
+    // Sets up the value - ensure we don't have an underflow case
+    l_mcs_attr[iv_port_index] = (l_vpd < LR_OFFSET) ? 0 : (l_vpd - LR_OFFSET);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_DPHY_WLO, iv_mcs, l_mcs_attr) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Determines & sets effective ODT read values
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///

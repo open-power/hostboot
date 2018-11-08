@@ -3077,6 +3077,34 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_EFF_DPHY_WLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Write latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssAccessorName>eff_dphy_wlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_DPHY_RLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Read latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssAccessorName>eff_dphy_rlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
       <id>ATTR_EFF_DRAM_TREFI</id>
       <targetType>TARGET_TYPE_MCS</targetType>
       <description>

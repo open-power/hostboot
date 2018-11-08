@@ -121,6 +121,10 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         FAPI_INF("Running eff_config on %s", mss::c_str(l_dimm) );
 
+        FAPI_TRY(  l_eff_dimm->phy_rlo(),
+                   "Failed phy_rlo for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->phy_wlo(),
+                   "Failed phy_wlo for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->rcd_mfg_id(),
                   "Failed rcd_mfg_id for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->register_type(),
