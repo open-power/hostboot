@@ -2306,6 +2306,16 @@ void IPMIFRUINV::gatherSetData(const TARGETING::Target* i_pSys,
         TARGETING::TargetHandle_t pTarget = *pTarget_it;
         uint32_t l_fruId = pTarget->getAttr<TARGETING::ATTR_FRU_ID>();
 
+        // Check if this is a tpm target, if so zero out the fru entry for now
+        // until we are ready to handle it. The reason we can't handle it is
+        // because it doesn't exist in the MRW yet. But if we add it, then
+        // then hostboot will crash. This helps escape the chicken/egg scenario.
+        // TODO RTC 194318 - remove later as a second step
+        if (TARGETING::TYPE_TPM == pTarget->getAttr<TARGETING::ATTR_TYPE>())
+        {
+            l_fruId = 0;
+        }
+
         // check if this is a membuf target, if it is and the special
         // attribute to say we want a separate fru entry for the centaur ecids
         // is populated, then we will push that ecid to the potential frus
