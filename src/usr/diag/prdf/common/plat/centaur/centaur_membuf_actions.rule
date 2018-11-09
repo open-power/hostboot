@@ -23,20 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** There is a small window during the IPL where the MEM chiplet may be offline
- *  while the rest of the chip is working. Therefore, we cannot capture those
- *  registers unless we have an active attention from the MEM chiplet. */
-actionclass analyzeMemChipletFir
-{
-    capture(MemChipletRegs);
-    analyze(gMEM_CHIPLET_FIR);
-};
-actionclass analyzeMemChipletSpa
-{
-    capture(MemChipletRegs);
-    analyze(gMEM_CHIPLET_SPA_FIR);
-};
-
 /** Callout the connected MBA 0 */
 actionclass calloutMba0 { callout(connected(TYPE_MBA, 0), MRU_MED); };
 
@@ -195,26 +181,26 @@ actionclass l4_cache_co_ue_UERE
 };
 
 /** Verify Chip Mark */
-actionclass verify_chip_mark_0_0 { funccall("AnalyzeFetchMpe0_0"); };
-actionclass verify_chip_mark_0_1 { funccall("AnalyzeFetchMpe0_1"); };
-actionclass verify_chip_mark_0_2 { funccall("AnalyzeFetchMpe0_2"); };
-actionclass verify_chip_mark_0_3 { funccall("AnalyzeFetchMpe0_3"); };
-actionclass verify_chip_mark_0_4 { funccall("AnalyzeFetchMpe0_4"); };
-actionclass verify_chip_mark_0_5 { funccall("AnalyzeFetchMpe0_5"); };
-actionclass verify_chip_mark_0_6 { funccall("AnalyzeFetchMpe0_6"); };
-actionclass verify_chip_mark_0_7 { funccall("AnalyzeFetchMpe0_7"); };
-actionclass verify_chip_mark_1_0 { funccall("AnalyzeFetchMpe1_0"); };
-actionclass verify_chip_mark_1_1 { funccall("AnalyzeFetchMpe1_1"); };
-actionclass verify_chip_mark_1_2 { funccall("AnalyzeFetchMpe1_2"); };
-actionclass verify_chip_mark_1_3 { funccall("AnalyzeFetchMpe1_3"); };
-actionclass verify_chip_mark_1_4 { funccall("AnalyzeFetchMpe1_4"); };
-actionclass verify_chip_mark_1_5 { funccall("AnalyzeFetchMpe1_5"); };
-actionclass verify_chip_mark_1_6 { funccall("AnalyzeFetchMpe1_6"); };
-actionclass verify_chip_mark_1_7 { funccall("AnalyzeFetchMpe1_7"); };
+actionclass verify_chip_mark_rnk0_mba0 { funccall("AnalyzeFetchMpe0_0"); };
+actionclass verify_chip_mark_rnk1_mba0 { funccall("AnalyzeFetchMpe0_1"); };
+actionclass verify_chip_mark_rnk2_mba0 { funccall("AnalyzeFetchMpe0_2"); };
+actionclass verify_chip_mark_rnk3_mba0 { funccall("AnalyzeFetchMpe0_3"); };
+actionclass verify_chip_mark_rnk4_mba0 { funccall("AnalyzeFetchMpe0_4"); };
+actionclass verify_chip_mark_rnk5_mba0 { funccall("AnalyzeFetchMpe0_5"); };
+actionclass verify_chip_mark_rnk6_mba0 { funccall("AnalyzeFetchMpe0_6"); };
+actionclass verify_chip_mark_rnk7_mba0 { funccall("AnalyzeFetchMpe0_7"); };
+actionclass verify_chip_mark_rnk0_mba1 { funccall("AnalyzeFetchMpe1_0"); };
+actionclass verify_chip_mark_rnk1_mba1 { funccall("AnalyzeFetchMpe1_1"); };
+actionclass verify_chip_mark_rnk2_mba1 { funccall("AnalyzeFetchMpe1_2"); };
+actionclass verify_chip_mark_rnk3_mba1 { funccall("AnalyzeFetchMpe1_3"); };
+actionclass verify_chip_mark_rnk4_mba1 { funccall("AnalyzeFetchMpe1_4"); };
+actionclass verify_chip_mark_rnk5_mba1 { funccall("AnalyzeFetchMpe1_5"); };
+actionclass verify_chip_mark_rnk6_mba1 { funccall("AnalyzeFetchMpe1_6"); };
+actionclass verify_chip_mark_rnk7_mba1 { funccall("AnalyzeFetchMpe1_7"); };
 
 /** Fetch NCE */
-actionclass mainline_nce_handling_0 { funccall("AnalyzeFetchNce0"); };
-actionclass mainline_nce_handling_1 { funccall("AnalyzeFetchNce1"); };
+actionclass mainline_nce_handling_mba0 { funccall("AnalyzeFetchNce0"); };
+actionclass mainline_nce_handling_mba1 { funccall("AnalyzeFetchNce1"); };
 
 /** Fetch UE */
 actionclass mainline_ue_0
@@ -229,18 +215,50 @@ actionclass mainline_ue_1
     threshold( field(33 / 30 min) );
     SueSource;
 };
-actionclass mainline_ue_handling_0_UERE
+actionclass mainline_ue_handling_mba0_UERE
 {
     try ( funccall("analyzeMbaRcdParityError0"), mainline_ue_0 );
 };
-actionclass mainline_ue_handling_1_UERE
+actionclass mainline_ue_handling_mba1_UERE
 {
     try ( funccall("analyzeMbaRcdParityError1"), mainline_ue_1 );
 };
 
 /** Fetch RCE or Prefetch UE */
-actionclass mainline_rce_pue_handling_0 { funccall("AnalyzeFetchRcePue0"); };
-actionclass mainline_rce_pue_handling_1 { funccall("AnalyzeFetchRcePue1"); };
+actionclass mainline_rce_pue_handling_mba0 { funccall("AnalyzeFetchRcePue0"); };
+actionclass mainline_rce_pue_handling_mba1 { funccall("AnalyzeFetchRcePue1"); };
+
+###############################################################################
+# Analyze group
+###############################################################################
+
+/** There is a small window during the IPL where the MEM chiplet may be offline
+ *  while the rest of the chip is working. Therefore, we cannot capture those
+ *  registers unless we have an active attention from the MEM chiplet. */
+actionclass analyzeMemChipletFir
+{
+    capture(MemChipletRegs);
+    analyze(gMEM_CHIPLET_FIR);
+};
+
+actionclass analyzeMemChipletSpa
+{
+    capture(MemChipletRegs);
+    analyze(gMEM_CHIPLET_SPA_FIR);
+};
+
+actionclass analyzeTP_LFIR      { analyze(gTP_LFIR);      };
+actionclass analyzeNEST_LFIR    { analyze(gNEST_LFIR);    };
+actionclass analyzeDMIFIR       { analyze(gDMIFIR);       };
+actionclass analyzeMBIFIR       { analyze(gMBIFIR);       };
+actionclass analyzeMBSFIR       { analyze(gMBSFIR);       };
+actionclass analyzeMCBISTFIR_0  { analyze(gMCBISTFIR_0);  };
+actionclass analyzeMCBISTFIR_1  { analyze(gMCBISTFIR_1);  };
+actionclass analyzeMBSECCFIR_0  { analyze(gMBSECCFIR_0);  };
+actionclass analyzeMBSECCFIR_1  { analyze(gMBSECCFIR_1);  };
+actionclass analyzeSCACFIR      { analyze(gSCACFIR);      };
+actionclass analyzeMBSSECUREFIR { analyze(gMBSSECUREFIR); };
+actionclass analyzeMEM_LFIR     { analyze(gMEM_LFIR);     };
 
 ###############################################################################
 # Analyze connected

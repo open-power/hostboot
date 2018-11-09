@@ -25,13 +25,13 @@
 
 chip centaur_membuf
 {
-    name        "Centaur chip";
+    name        "CENTAUR MEMBUF target";
     targettype  TYPE_MEMBUF;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
-#Import signatures
+# Import signatures
 .include "prdfP9ProcMbCommonExtraSig.H";
 .include "prdfLaneRepairExtraSig.H";
 
@@ -670,7 +670,7 @@ group gTP_CHIPLET_FIR filter singlebit
     /** TP_CHIPLET_FIR[3]
      *  Attention from TP_LFIR
      */
-    (rTP_CHIPLET_FIR, bit(3)) ? analyze(gTP_LFIR);
+    (rTP_CHIPLET_FIR, bit(3)) ? analyzeTP_LFIR;
 
 };
 
@@ -811,52 +811,52 @@ group gNEST_CHIPLET_FIR filter priority( 3, 6, 5, 7 )
     /** NEST_CHIPLET_FIR[3]
      *  Attention from NEST_LFIR
      */
-    (rNEST_CHIPLET_FIR, bit(3)) ? analyze(gNEST_LFIR);
+    (rNEST_CHIPLET_FIR, bit(3)) ? analyzeNEST_LFIR;
 
     /** NEST_CHIPLET_FIR[5]
      *  Attention from DMIFIR
      */
-    (rNEST_CHIPLET_FIR, bit(5)) ? analyze(gDMIFIR);
+    (rNEST_CHIPLET_FIR, bit(5)) ? analyzeDMIFIR;
 
     /** NEST_CHIPLET_FIR[6]
      *  Attention from MBIFIR
      */
-    (rNEST_CHIPLET_FIR, bit(6)) ? analyze(gMBIFIR);
+    (rNEST_CHIPLET_FIR, bit(6)) ? analyzeMBIFIR;
 
     /** NEST_CHIPLET_FIR[7]
      *  Attention from MBSFIR
      */
-    (rNEST_CHIPLET_FIR, bit(7)) ? analyze(gMBSFIR);
+    (rNEST_CHIPLET_FIR, bit(7)) ? analyzeMBSFIR;
 
     /** NEST_CHIPLET_FIR[8]
      *  Attention from MCBISTFIR
      */
-    (rNEST_CHIPLET_FIR, bit(8)) ? analyze(gMCBISTFIR_0);
+    (rNEST_CHIPLET_FIR, bit(8)) ? analyzeMCBISTFIR_0;
 
     /** NEST_CHIPLET_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rNEST_CHIPLET_FIR, bit(9)) ? analyze(gMCBISTFIR_1);
+    (rNEST_CHIPLET_FIR, bit(9)) ? analyzeMCBISTFIR_1;
 
     /** NEST_CHIPLET_FIR[10]
      *  Attention from MBSECCFIR
      */
-    (rNEST_CHIPLET_FIR, bit(10)) ? analyze(gMBSECCFIR_0);
+    (rNEST_CHIPLET_FIR, bit(10)) ? analyzeMBSECCFIR_0;
 
     /** NEST_CHIPLET_FIR[11]
      *  Attention from MBSECCFIR
      */
-    (rNEST_CHIPLET_FIR, bit(11)) ? analyze(gMBSECCFIR_1);
+    (rNEST_CHIPLET_FIR, bit(11)) ? analyzeMBSECCFIR_1;
 
     /** NEST_CHIPLET_FIR[13]
      *  Attention from SCACFIR
      */
-    (rNEST_CHIPLET_FIR, bit(13)) ? analyze(gSCACFIR);
+    (rNEST_CHIPLET_FIR, bit(13)) ? analyzeSCACFIR;
 
     /** NEST_CHIPLET_FIR[14]
      *  Attention from MBSSECUREFIR
      */
-    (rNEST_CHIPLET_FIR, bit(14)) ? analyze(gMBSSECUREFIR);
+    (rNEST_CHIPLET_FIR, bit(14)) ? analyzeMBSSECUREFIR;
 
 };
 
@@ -964,7 +964,7 @@ rule rDMIFIR
 };
 
 group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
-                     cs_root_cause( 10, 12 )
+                     cs_root_cause( 12 )
 {
     /** DMIFIR[0]
      *  RX invalid state or parity error
@@ -1438,42 +1438,42 @@ group gMBSECCFIR_0 filter priority ( 19, 41 ),
     /** MBSECCFIR_0[0]
      *  Memory chip mark on rank 0
      */
-    (rMBSECCFIR_0, bit(0)) ? verify_chip_mark_0_0;
+    (rMBSECCFIR_0, bit(0)) ? verify_chip_mark_rnk0_mba0;
 
     /** MBSECCFIR_0[1]
      *  Memory chip mark on rank 1
      */
-    (rMBSECCFIR_0, bit(1)) ? verify_chip_mark_0_1;
+    (rMBSECCFIR_0, bit(1)) ? verify_chip_mark_rnk1_mba0;
 
     /** MBSECCFIR_0[2]
      *  Memory chip mark on rank 2
      */
-    (rMBSECCFIR_0, bit(2)) ? verify_chip_mark_0_2;
+    (rMBSECCFIR_0, bit(2)) ? verify_chip_mark_rnk2_mba0;
 
     /** MBSECCFIR_0[3]
      *  Memory chip mark on rank 3
      */
-    (rMBSECCFIR_0, bit(3)) ? verify_chip_mark_0_3;
+    (rMBSECCFIR_0, bit(3)) ? verify_chip_mark_rnk3_mba0;
 
     /** MBSECCFIR_0[4]
      *  Memory chip mark on rank 4
      */
-    (rMBSECCFIR_0, bit(4)) ? verify_chip_mark_0_4;
+    (rMBSECCFIR_0, bit(4)) ? verify_chip_mark_rnk4_mba0;
 
     /** MBSECCFIR_0[5]
      *  Memory chip mark on rank 5
      */
-    (rMBSECCFIR_0, bit(5)) ? verify_chip_mark_0_5;
+    (rMBSECCFIR_0, bit(5)) ? verify_chip_mark_rnk5_mba0;
 
     /** MBSECCFIR_0[6]
      *  Memory chip mark on rank 6
      */
-    (rMBSECCFIR_0, bit(6)) ? verify_chip_mark_0_6;
+    (rMBSECCFIR_0, bit(6)) ? verify_chip_mark_rnk6_mba0;
 
     /** MBSECCFIR_0[7]
      *  Memory chip mark on rank 7
      */
-    (rMBSECCFIR_0, bit(7)) ? verify_chip_mark_0_7;
+    (rMBSECCFIR_0, bit(7)) ? verify_chip_mark_rnk7_mba0;
 
     /** MBSECCFIR_0[8:15]
      *  Reserved
@@ -1483,12 +1483,12 @@ group gMBSECCFIR_0 filter priority ( 19, 41 ),
     /** MBSECCFIR_0[16]
      *  Memory NCE
      */
-    (rMBSECCFIR_0, bit(16)) ? mainline_nce_handling_0;
+    (rMBSECCFIR_0, bit(16)) ? mainline_nce_handling_mba0;
 
     /** MBSECCFIR_0[17]
      *  Memory RCE
      */
-    (rMBSECCFIR_0, bit(17)) ? mainline_rce_pue_handling_0;
+    (rMBSECCFIR_0, bit(17)) ? mainline_rce_pue_handling_mba0;
 
     /** MBSECCFIR_0[18]
      *  Memory SUE
@@ -1498,7 +1498,7 @@ group gMBSECCFIR_0 filter priority ( 19, 41 ),
     /** MBSECCFIR_0[19]
      *  Memory UE
      */
-    (rMBSECCFIR_0, bit(19)) ? mainline_ue_handling_0_UERE;
+    (rMBSECCFIR_0, bit(19)) ? mainline_ue_handling_mba0_UERE;
 
     /** MBSECCFIR_0[20:27]
      *  Maintenance chip mark
@@ -1548,7 +1548,7 @@ group gMBSECCFIR_0 filter priority ( 19, 41 ),
     /** MBSECCFIR_0[43]
      *  Prefetch Memory UE
      */
-    (rMBSECCFIR_0, bit(43)) ? mainline_rce_pue_handling_0;
+    (rMBSECCFIR_0, bit(43)) ? mainline_rce_pue_handling_mba0;
 
     /** MBSECCFIR_0[44]
      *  Memory RCD parity error
@@ -1610,42 +1610,42 @@ group gMBSECCFIR_1 filter priority ( 19, 41 ),
     /** MBSECCFIR_1[0]
      *  Memory chip mark on rank 0
      */
-    (rMBSECCFIR_1, bit(0)) ? verify_chip_mark_1_0;
+    (rMBSECCFIR_1, bit(0)) ? verify_chip_mark_rnk0_mba1;
 
     /** MBSECCFIR_1[1]
      *  Memory chip mark on rank 1
      */
-    (rMBSECCFIR_1, bit(1)) ? verify_chip_mark_1_1;
+    (rMBSECCFIR_1, bit(1)) ? verify_chip_mark_rnk1_mba1;
 
     /** MBSECCFIR_1[2]
      *  Memory chip mark on rank 2
      */
-    (rMBSECCFIR_1, bit(2)) ? verify_chip_mark_1_2;
+    (rMBSECCFIR_1, bit(2)) ? verify_chip_mark_rnk2_mba1;
 
     /** MBSECCFIR_1[3]
      *  Memory chip mark on rank 3
      */
-    (rMBSECCFIR_1, bit(3)) ? verify_chip_mark_1_3;
+    (rMBSECCFIR_1, bit(3)) ? verify_chip_mark_rnk3_mba1;
 
     /** MBSECCFIR_1[4]
      *  Memory chip mark on rank 4
      */
-    (rMBSECCFIR_1, bit(4)) ? verify_chip_mark_1_4;
+    (rMBSECCFIR_1, bit(4)) ? verify_chip_mark_rnk4_mba1;
 
     /** MBSECCFIR_1[5]
      *  Memory chip mark on rank 5
      */
-    (rMBSECCFIR_1, bit(5)) ? verify_chip_mark_1_5;
+    (rMBSECCFIR_1, bit(5)) ? verify_chip_mark_rnk5_mba1;
 
     /** MBSECCFIR_1[6]
      *  Memory chip mark on rank 6
      */
-    (rMBSECCFIR_1, bit(6)) ? verify_chip_mark_1_6;
+    (rMBSECCFIR_1, bit(6)) ? verify_chip_mark_rnk6_mba1;
 
     /** MBSECCFIR_1[7]
      *  Memory chip mark on rank 7
      */
-    (rMBSECCFIR_1, bit(7)) ? verify_chip_mark_1_7;
+    (rMBSECCFIR_1, bit(7)) ? verify_chip_mark_rnk7_mba1;
 
     /** MBSECCFIR_1[8:15]
      *  Reserved
@@ -1655,12 +1655,12 @@ group gMBSECCFIR_1 filter priority ( 19, 41 ),
     /** MBSECCFIR_1[16]
      *  Memory NCE
      */
-    (rMBSECCFIR_1, bit(16)) ? mainline_nce_handling_1;
+    (rMBSECCFIR_1, bit(16)) ? mainline_nce_handling_mba1;
 
     /** MBSECCFIR_1[17]
      *  Memory RCE
      */
-    (rMBSECCFIR_1, bit(17)) ? mainline_rce_pue_handling_1;
+    (rMBSECCFIR_1, bit(17)) ? mainline_rce_pue_handling_mba1;
 
     /** MBSECCFIR_1[18]
      *  Memory SUE
@@ -1670,7 +1670,7 @@ group gMBSECCFIR_1 filter priority ( 19, 41 ),
     /** MBSECCFIR_1[19]
      *  Memory UE
      */
-    (rMBSECCFIR_1, bit(19)) ? mainline_ue_handling_1_UERE;
+    (rMBSECCFIR_1, bit(19)) ? mainline_ue_handling_mba1_UERE;
 
     /** MBSECCFIR_1[20:27]
      *  Maintenance chip mark
@@ -1720,7 +1720,7 @@ group gMBSECCFIR_1 filter priority ( 19, 41 ),
     /** MBSECCFIR_1[43]
      *  Prefetch Memory UE
      */
-    (rMBSECCFIR_1, bit(43)) ? mainline_rce_pue_handling_1;
+    (rMBSECCFIR_1, bit(43)) ? mainline_rce_pue_handling_mba1;
 
     /** MBSECCFIR_1[44]
      *  Memory RCD parity error
@@ -2049,7 +2049,7 @@ group gMEM_CHIPLET_FIR filter singlebit
     /** MEM_CHIPLET_FIR[3]
      *  Attention from MEM_LFIR
      */
-    (rMEM_CHIPLET_FIR, bit(3)) ? analyze(gMEM_LFIR);
+    (rMEM_CHIPLET_FIR, bit(3)) ? analyzeMEM_LFIR;
 
     /** MEM_CHIPLET_FIR[5]
      *  Attention from MBACALFIR 0
@@ -2229,10 +2229,7 @@ group gMEM_LFIR filter singlebit, cs_root_cause
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "centaur_common_actions.rule";
-# Include the chip-specific action set.
 .include "centaur_membuf_actions.rule";
 
-actionclass analyzeConnectedMBA0 { analyze(connected(TYPE_MBA, 0)); };
-actionclass analyzeConnectedMBA1 { analyze(connected(TYPE_MBA, 1)); };
