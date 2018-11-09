@@ -226,7 +226,8 @@ rule rEX
 
 };
 
-group gEX attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gEX attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     (rEX, bit(0)) ? analyze(gL2FIR);
     (rEX, bit(1)) ? analyze(gNCUFIR);
@@ -246,7 +247,9 @@ rule rL2FIR
     L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
 };
 
-group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
+group gL2FIR
+    filter singlebit,
+           cs_root_cause(1,17,18,20)
 {
     /** L2FIR[0]
      *  L2 cache read CE
@@ -442,7 +445,9 @@ rule rNCUFIR
     NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 &  NCUFIR_ACT1;
 };
 
-group gNCUFIR filter singlebit, cs_root_cause( 3, 4, 7, 8 )
+group gNCUFIR
+    filter singlebit,
+           cs_root_cause(3,4,7,8)
 {
     /** NCUFIR[0]
      *  NCU store queue control error
@@ -583,7 +588,9 @@ rule rL3FIR
     L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
 };
 
-group gL3FIR filter singlebit, cs_root_cause( 5, 8, 11, 17, 21 )
+group gL3FIR
+    filter singlebit,
+           cs_root_cause(5,8,11,17,21)
 {
     /** L3FIR[0]
      *  L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR
@@ -769,7 +776,9 @@ rule rCMEFIR
     CMEFIR & ~CMEFIR_MASK & ~CMEFIR_ACT0 &  CMEFIR_ACT1;
 };
 
-group gCMEFIR filter singlebit, cs_root_cause
+group gCMEFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** CMEFIR[0]
      *  PPE asserted an internal error

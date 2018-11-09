@@ -615,7 +615,8 @@ rule rGLOBAL_FIR
     GLOBAL_RE_FIR;
 };
 
-group gGLOBAL_FIR attntype UNIT_CS, RECOVERABLE filter singlebit
+group gGLOBAL_FIR attntype UNIT_CS, RECOVERABLE
+    filter singlebit
 {
     /** GLOBAL_FIR[1]
      *  Attention from TP chiplet
@@ -644,7 +645,8 @@ rule rGLOBAL_SPA_FIR
     GLOBAL_SPA_FIR;
 };
 
-group gGLOBAL_SPA_FIR attntype HOST_ATTN filter singlebit
+group gGLOBAL_SPA_FIR attntype HOST_ATTN
+    filter singlebit
 {
     /** GLOBAL_SPA_FIR[3]
      *  Attention from MEM chiplet
@@ -665,7 +667,8 @@ rule rTP_CHIPLET_FIR
     (TP_CHIPLET_RE_FIR >> 2) & ~TP_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gTP_CHIPLET_FIR filter singlebit
+group gTP_CHIPLET_FIR
+    filter singlebit
 {
     /** TP_CHIPLET_FIR[3]
      *  Attention from TP_LFIR
@@ -686,7 +689,9 @@ rule rTP_LFIR
     TP_LFIR & ~TP_LFIR_MASK & ~TP_LFIR_ACT0 &  TP_LFIR_ACT1;
 };
 
-group gTP_LFIR filter singlebit, cs_root_cause( 19, 20 )
+group gTP_LFIR
+    filter singlebit,
+           cs_root_cause(19,20)
 {
     /** TP_LFIR[0]
      *  CFIR internal parity error
@@ -802,7 +807,8 @@ rule rNEST_CHIPLET_FIR
     (NEST_CHIPLET_RE_FIR >> 2) & ~NEST_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gNEST_CHIPLET_FIR filter priority( 3, 6, 5, 7 )
+group gNEST_CHIPLET_FIR
+    filter priority(3,6,5,7)
 {
     # NOTE: The MBIFIR must be analyzed before the DMIFIR and both the MBIFIR
     # and DMIFIR must be analyzed before the MBSFIR. All other FIRs will be
@@ -872,7 +878,9 @@ rule rNEST_LFIR
     NEST_LFIR & ~NEST_LFIR_MASK & ~NEST_LFIR_ACT0 &  NEST_LFIR_ACT1;
 };
 
-group gNEST_LFIR filter singlebit, cs_root_cause
+group gNEST_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** NEST_LFIR[0]
      *  CFIR internal parity error
@@ -963,8 +971,9 @@ rule rDMIFIR
     DMIFIR & ~DMIFIR_MASK & ~DMIFIR_ACT0 &  DMIFIR_ACT1;
 };
 
-group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
-                     cs_root_cause( 12 )
+group gDMIFIR
+    filter priority(10,2,11,12,9),
+           cs_root_cause(12)
 {
     /** DMIFIR[0]
      *  RX invalid state or parity error
@@ -1060,8 +1069,9 @@ rule rMBIFIR
     MBIFIR & ~MBIFIR_MASK & ~MBIFIR_ACT0 &  MBIFIR_ACT1;
 };
 
-group gMBIFIR filter priority(  8, 9, 19, 20, 6, 0, 16, 5, 10 ),
-                     cs_root_cause( 0, 6, 8, 9, 19, 20 )
+group gMBIFIR
+    filter priority(8,9,19,20,6,0,16,5,10),
+           cs_root_cause(0,6,8,9,19,20)
 {
     /** MBIFIR[0]
      *  Replay Timeout
@@ -1202,7 +1212,9 @@ rule rMBSFIR
     MBSFIR & ~MBSFIR_MASK & ~MBSFIR_ACT0 &  MBSFIR_ACT1;
 };
 
-group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18, 20, 27, 30 )
+group gMBSFIR
+    filter singlebit,
+           cs_root_cause(0,1,2,4,6,8,10,13,16,18,20,27,30)
 {
     /** MBSFIR[0]
      *  HOST_PROTOCOL_ERROR
@@ -1386,7 +1398,9 @@ rule rMBSSECUREFIR
     MBSSECUREFIR;
 };
 
-group gMBSSECUREFIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5 )
+group gMBSSECUREFIR
+    filter singlebit,
+           cs_root_cause(0,1,2,3,4,5)
 {
     /** MBSSECUREFIR[0]
      *  Invalid MBSXCR access
@@ -1432,8 +1446,9 @@ rule rMBSECCFIR_0
     MBSECCFIR_0 & ~MBSECCFIR_0_MASK & ~MBSECCFIR_0_ACT0 &  MBSECCFIR_0_ACT1;
 };
 
-group gMBSECCFIR_0 filter priority ( 19, 41 ),
-                          cs_root_cause( 19, 44, 47, 49 )
+group gMBSECCFIR_0
+    filter priority(19,41),
+           cs_root_cause(19,44,47,49)
 {
     /** MBSECCFIR_0[0]
      *  Memory chip mark on rank 0
@@ -1604,8 +1619,9 @@ rule rMBSECCFIR_1
     MBSECCFIR_1 & ~MBSECCFIR_1_MASK & ~MBSECCFIR_1_ACT0 &  MBSECCFIR_1_ACT1;
 };
 
-group gMBSECCFIR_1 filter priority ( 19, 41 ),
-                          cs_root_cause( 19, 44, 47, 49 )
+group gMBSECCFIR_1
+    filter priority(19,41),
+           cs_root_cause(19,44,47,49)
 {
     /** MBSECCFIR_1[0]
      *  Memory chip mark on rank 0
@@ -1776,7 +1792,9 @@ rule rSCACFIR
     SCACFIR & ~SCACFIR_MASK & ~SCACFIR_ACT0 &  SCACFIR_ACT1;
 };
 
-group gSCACFIR filter singlebit, cs_root_cause( 25, 26 )
+group gSCACFIR
+    filter singlebit,
+           cs_root_cause(25,26)
 {
     /** SCACFIR[0]
      *  I2CM(0) Invalid Address
@@ -1942,7 +1960,9 @@ rule rMCBISTFIR_0
     MCBISTFIR_0 & ~MCBISTFIR_0_MASK & ~MCBISTFIR_0_ACT0 &  MCBISTFIR_0_ACT1;
 };
 
-group gMCBISTFIR_0 filter singlebit, cs_root_cause( 0, 1 )
+group gMCBISTFIR_0
+    filter singlebit,
+           cs_root_cause(0,1)
 {
     /** MCBISTFIR_0[0]
      *  SCOM Parity Errors
@@ -1993,7 +2013,9 @@ rule rMCBISTFIR_1
     MCBISTFIR_1 & ~MCBISTFIR_1_MASK & ~MCBISTFIR_1_ACT0 &  MCBISTFIR_1_ACT1;
 };
 
-group gMCBISTFIR_1 filter singlebit, cs_root_cause( 0, 1 )
+group gMCBISTFIR_1
+    filter singlebit,
+           cs_root_cause(0,1)
 {
     /** MCBISTFIR_1[0]
      *  SCOM Parity Errors
@@ -2044,7 +2066,8 @@ rule rMEM_CHIPLET_FIR
     (MEM_CHIPLET_RE_FIR >> 2) & ~MEM_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gMEM_CHIPLET_FIR filter singlebit
+group gMEM_CHIPLET_FIR
+    filter singlebit
 {
     /** MEM_CHIPLET_FIR[3]
      *  Attention from MEM_LFIR
@@ -2103,7 +2126,8 @@ rule rMEM_CHIPLET_SPA_FIR
     MEM_CHIPLET_SPA_FIR & ~MEM_CHIPLET_SPA_FIR_MASK;
 };
 
-group gMEM_CHIPLET_SPA_FIR filter singlebit
+group gMEM_CHIPLET_SPA_FIR
+    filter singlebit
 {
     /** MEM_CHIPLET_SPA_FIR[0]
      *  Attention from MBASPA 0
@@ -2129,7 +2153,9 @@ rule rMEM_LFIR
     MEM_LFIR & ~MEM_LFIR_MASK & ~MEM_LFIR_ACT0 &  MEM_LFIR_ACT1;
 };
 
-group gMEM_LFIR filter singlebit, cs_root_cause
+group gMEM_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** MEM_LFIR[0]
      *  CFIR internal parity error

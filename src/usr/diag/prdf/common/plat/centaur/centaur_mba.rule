@@ -231,7 +231,8 @@ rule rMBA
 
 # The MBACALFIR must be analyzed first so that the RCD parity errors are the
 # first to be analyzed.
-group gMBA attntype RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
+group gMBA attntype RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
 {
     (rMBA, bit(0)) ? analyze(gMBACALFIR);
     (rMBA, bit(1)) ? analyze(gMBASECUREFIR);
@@ -254,8 +255,9 @@ rule rMBACALFIR
 
 # RCD parity errors (bits 4 and 7) given priority over potential side effects
 # bits 2 and 17.
-group gMBACALFIR filter priority( 4, 7 ),
-                        cs_root_cause( 0, 1, 2, 4, 5, 6, 7, 8, 9, 11, 13, 15, 17, 18 )
+group gMBACALFIR
+    filter priority(4,7),
+           cs_root_cause(0,1,2,4,5,6,7,8,9,11,13,15,17,18)
 {
     /** MBACALFIR[0]
      *  MBA_RECOVERABLE_ERROR
@@ -399,7 +401,9 @@ rule rMBASECUREFIR
     MBASECUREFIR;
 };
 
-group gMBASECUREFIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5 )
+group gMBASECUREFIR
+    filter singlebit,
+           cs_root_cause(0,1,2,3,4,5)
 {
     /** MBASECUREFIR[0]
      *  Invalid MBA_CALQ0 access
@@ -445,7 +449,9 @@ rule rMBAFIR
     MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
 };
 
-group gMBAFIR filter singlebit, cs_root_cause( 3, 5, 6, 7, 8 )
+group gMBAFIR
+    filter singlebit,
+           cs_root_cause(3,5,6,7,8)
 {
     /** MBAFIR[0]
      *  Invalid Maintenance Command
@@ -519,7 +525,9 @@ rule rMBASPA
     MBASPA & ~MBASPA_MASK;
 };
 
-group gMBASPA filter singlebit, cs_root_cause
+group gMBASPA
+    filter singlebit,
+           cs_root_cause
 {
     /** MBASPA[0]
      *  Maintenance command complete
@@ -590,7 +598,9 @@ rule rMBADDRPHYFIR
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
 };
 
-group gMBADDRPHYFIR filter singlebit, cs_root_cause( 48, 49, 51, 52, 56, 57, 59, 60 )
+group gMBADDRPHYFIR
+    filter singlebit,
+           cs_root_cause(48,49,51,52,56,57,59,60)
 {
     /** MBADDRPHYFIR[48]
      *  FSM Error Checkstop

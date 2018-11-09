@@ -262,7 +262,8 @@ rule rOB_CHIPLET_FIR
     (OB_CHIPLET_RE_FIR >> 2) & ~OB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gOB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gOB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     /** OB_CHIPLET_FIR[3]
      *  Attention from OB_LFIR
@@ -296,7 +297,8 @@ rule rOB_CHIPLET_UCS_FIR
     OB_CHIPLET_UCS_FIR & ~(OB_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
-group gOB_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+group gOB_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter singlebit
 {
     /** OB_CHIPLET_UCS_FIR[2]
      *  Attention from IOOBFIR
@@ -322,7 +324,9 @@ rule rOB_LFIR
     OB_LFIR & ~OB_LFIR_MASK & ~OB_LFIR_ACT0 &  OB_LFIR_ACT1;
 };
 
-group gOB_LFIR filter singlebit, cs_root_cause
+group gOB_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** OB_LFIR[0]
      *  CFIR internal parity error
@@ -418,7 +422,9 @@ rule rIOOLFIR
     IOOLFIR & ~IOOLFIR_MASK & ~IOOLFIR_ACT0 &  IOOLFIR_ACT1;
 };
 
-group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
+group gIOOLFIR
+    filter singlebit,
+           cs_root_cause(54,55,56,57,58,59)
 {
     /** IOOLFIR[0]
      *  link0 trained
@@ -756,7 +762,9 @@ rule rIOOBFIR
     IOOBFIR & ~IOOBFIR_MASK &  IOOBFIR_ACT0 &  IOOBFIR_ACT1;
 };
 
-group gIOOBFIR filter singlebit, cs_root_cause
+group gIOOBFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** IOOBFIR[0]
      *  A RX state machine error
@@ -804,7 +812,9 @@ rule rOBPPEFIR
     OBPPEFIR & ~OBPPEFIR_MASK &  OBPPEFIR_ACT0 &  OBPPEFIR_ACT1;
 };
 
-group gOBPPEFIR filter singlebit, cs_root_cause
+group gOBPPEFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** OBPPEFIR[0:3]
      *  PPE general error.

@@ -210,7 +210,8 @@ rule rMCA
 
 };
 
-group gMCA attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
+group gMCA attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
 {
     (rMCA, bit(0)) ? analyze(gMCACALFIR);
     (rMCA, bit(1)) ? analyze(gMCAECCFIR);
@@ -233,7 +234,9 @@ rule rMCACALFIR
     MCACALFIR & ~MCACALFIR_MASK &  MCACALFIR_ACT0 &  MCACALFIR_ACT1;
 };
 
-group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
+group gMCACALFIR
+    filter priority(13),
+           cs_root_cause(4,13,14)
 {
     /** MCACALFIR[0]
      *  A MBA recoverable error has occurred.
@@ -343,8 +346,9 @@ rule rMCAECCFIR
     MCAECCFIR & ~MCAECCFIR_MASK &  MCAECCFIR_ACT0 &  MCAECCFIR_ACT1;
 };
 
-group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
-                 cs_root_cause(   14, 17, 37 )
+group gMCAECCFIR
+    filter priority(14,17,37),
+           cs_root_cause(14,17,37)
 {
     /** MCAECCFIR[0]
      *  Mainline read MPE on rank 0
@@ -645,7 +649,9 @@ rule rDDRPHYFIR
     DDRPHYFIR & ~DDRPHYFIR_MASK & ~DDRPHYFIR_ACT0 &  DDRPHYFIR_ACT1;
 };
 
-group gDDRPHYFIR filter singlebit, cs_root_cause
+group gDDRPHYFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** DDRPHYFIR[54]
      *  Non-recoverable FSM error

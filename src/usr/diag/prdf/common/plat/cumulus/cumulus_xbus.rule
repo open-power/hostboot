@@ -154,7 +154,8 @@ rule rXBUS
 
 };
 
-group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
+group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
+    filter singlebit
 {
     (rXBUS, bit(0)) ? analyze(gIOXBFIR);
     (rXBUS, bit(1)) ? analyze(gIOELFIR);
@@ -174,7 +175,9 @@ rule rIOXBFIR
     IOXBFIR & ~IOXBFIR_MASK &  IOXBFIR_ACT0 &  IOXBFIR_ACT1;
 };
 
-group gIOXBFIR filter singlebit, cs_root_cause
+group gIOXBFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** IOXBFIR[0]
      *  RX_INVALID_STATE_OR_PARITY_ERROR
@@ -372,7 +375,9 @@ rule rIOELFIR
     IOELFIR & ~IOELFIR_MASK &  IOELFIR_ACT0 &  IOELFIR_ACT1;
 };
 
-group gIOELFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
+group gIOELFIR
+    filter singlebit,
+           cs_root_cause(54,55,56,57,58,59)
 {
     /** IOELFIR[0]
      *  link0 trained

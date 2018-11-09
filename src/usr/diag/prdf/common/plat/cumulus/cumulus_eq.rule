@@ -132,7 +132,8 @@ rule rEQ_CHIPLET_FIR
     (EQ_CHIPLET_RE_FIR >> 2) & ~EQ_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gEQ_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gEQ_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     /** EQ_CHIPLET_FIR[3]
      *  Attention from EQ_LFIR
@@ -193,7 +194,9 @@ rule rEQ_LFIR
     EQ_LFIR & ~EQ_LFIR_MASK & ~EQ_LFIR_ACT0 &  EQ_LFIR_ACT1;
 };
 
-group gEQ_LFIR filter singlebit, cs_root_cause
+group gEQ_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** EQ_LFIR[0]
      *  CFIR internal parity error

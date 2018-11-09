@@ -112,7 +112,8 @@ rule rCAPP
 
 };
 
-group gCAPP attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
+group gCAPP attntype CHECK_STOP, RECOVERABLE, UNIT_CS
+    filter singlebit
 {
     (rCAPP, bit(0)) ? analyze(gCXAFIR);
 };
@@ -131,7 +132,9 @@ rule rCXAFIR
     CXAFIR & ~CXAFIR_MASK &  CXAFIR_ACT0 &  CXAFIR_ACT1;
 };
 
-group gCXAFIR filter singlebit, cs_root_cause
+group gCXAFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** CXAFIR[0]
      *  CXA Informational PE

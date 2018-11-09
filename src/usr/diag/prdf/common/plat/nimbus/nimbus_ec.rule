@@ -191,7 +191,8 @@ rule rEC_CHIPLET_FIR
     (EC_CHIPLET_RE_FIR >> 2) & ~EC_CHIPLET_FIR_MASK & `3fffffffffffffff`;
 };
 
-group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     /** EC_CHIPLET_FIR[2]
      *  Unit Checkstop from COREFIR (bit0 in RER)
@@ -220,7 +221,8 @@ rule rEC_CHIPLET_UCS_FIR
     EC_CHIPLET_UCS_FIR & ~(EC_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
-group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+group gEC_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter singlebit
 {
     /** EC_CHIPLET_UCS_FIR[1]
      *  Attention from COREFIR
@@ -241,7 +243,9 @@ rule rEC_LFIR
     EC_LFIR & ~EC_LFIR_MASK & ~EC_LFIR_ACT0 &  EC_LFIR_ACT1;
 };
 
-group gEC_LFIR filter singlebit, cs_root_cause
+group gEC_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** EC_LFIR[0]
      *  CFIR internal parity error
@@ -329,7 +333,9 @@ rule rCOREFIR
     COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCOREFIR filter priority(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,58,59,60,61,62,63,57), cs_root_cause
+group gCOREFIR
+    filter priority(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,58,59,60,61,62,63,57),
+           cs_root_cause
 {
     /** COREFIR[0]
      *  IFU SRAM Recoverable error
