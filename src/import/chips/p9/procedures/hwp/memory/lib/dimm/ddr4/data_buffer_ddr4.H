@@ -473,19 +473,30 @@ inline fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DI
                                        const mss::states i_state,
                                        std::vector< ccs::instruction_t<T> >& io_inst )
 {
+    // PBA position is really bit 0, but we're right justified on our bit ordering here, so it's bit7
+    constexpr uint64_t PBA_POSITION = 7;
     constexpr uint64_t MAX_VALID = 1;
+    uint8_t l_nominal_bc_value = 0;
 
-    // User input programming error asserts program termination
-    if( i_state > MAX_VALID )
+    // Error checking
+    FAPI_ASSERT(i_state <= MAX_VALID,
+                fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                .set_TARGET(i_target)
+                .set_INDEX(i_state)
+                .set_LIST_SIZE(MAX_VALID)
+                .set_FUNCTION(SET_PBA_MODE),
+                "%s has PBA input (%u) out of bounds: %u",
+                mss::c_str(i_target), i_state, MAX_VALID);
+
+    // Gets our nominal BCW value
+    FAPI_TRY(mss::eff_dimm_ddr4_f0bc1x(i_target, l_nominal_bc_value));
+
     {
-        FAPI_ERR( "%s. Invalid setting received: %d, largest valid PBA setting is %d",
-                  mss::c_str(i_target), i_state, MAX_VALID );
-        fapi2::Assert(false);
+        cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, l_nominal_bc_value, mss::tmrc());
+        l_data.iv_data.writeBit<PBA_POSITION>(i_state);
+        FAPI_INF("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
+        FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
     }
-
-    cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, i_state, mss::tmrc());
-    FAPI_INF("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
-    FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
