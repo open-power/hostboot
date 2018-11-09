@@ -109,13 +109,6 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
     //  then we have to use our special side copy of the driver
     if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
-        //First check/clear the LPC bus of errors and commit any errors found
-        l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
-        if (l_err)
-        {
-            errlCommit(l_err, LPC_COMP_ID);
-        }
-
         l_err = Singleton<LpcDD>::instance().readLPC( l_type,
                                                       l_addr,
                                                       io_buffer,
@@ -126,14 +119,6 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
         if( g_altLpcDD
             && (i_target == g_altLpcDD->getProc()) )
         {
-            //First check/clear the LPC bus of errors and commit
-            //   any errors found
-            l_err = g_altLpcDD->checkForLpcErrors();
-            if (l_err)
-            {
-                errlCommit(l_err, LPC_COMP_ID);
-            }
-
             l_err = g_altLpcDD->readLPC( l_type,
                                          l_addr,
                                          io_buffer,
@@ -230,14 +215,6 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
         if( g_altLpcDD
             && (i_target == g_altLpcDD->getProc()) )
         {
-            //First check/clear the LPC bus of errors and commit
-            //   any errors found
-            l_err = g_altLpcDD->checkForLpcErrors();
-            if (l_err)
-            {
-                errlCommit(l_err, LPC_COMP_ID);
-            }
-
             l_err = g_altLpcDD->writeLPC( l_type,
                                           l_addr,
                                           io_buffer,
@@ -1232,10 +1209,38 @@ errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
 {
     // Grab the lock and call the internal function
     mutex_lock(ivp_mutex);
-    errlHndl_t l_err = _readLPC( i_type, i_addr, o_buffer, io_buflen );
+
+    //First check/clear the LPC bus of errors and commit any errors found
+    errlHndl_t l_err_precheck = checkForLpcErrors();
+    if (l_err_precheck)
+    {
+        l_err_precheck->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+    }
+
+    // Now do the operation
+    errlHndl_t l_err_op = _readLPC( i_type, i_addr, o_buffer, io_buflen );
+
+    // If this op failed and there was something wrong before we started,
+    //  attach the logs together to aid debug
+    if( l_err_op && l_err_precheck )
+    {
+        l_err_precheck->plid(l_err_op->plid());
+        //Note-ideally we would up the severity of l_err_precheck here
+        // as well so that it would be visible everywhere, but we can't
+        // because that breaks the scenario where the caller might want
+        // to delete the log they get back (see SIO).  We don't want
+        // any visible logs in that case.
+    }
+
+    // Always just commit the log for any errors that were present
+    if( l_err_precheck )
+    {
+        errlCommit(l_err_precheck, LPC_COMP_ID);
+    }
+
     mutex_unlock(ivp_mutex);
 
-    return l_err;
+    return l_err_op;
 }
 
 /**
@@ -1248,8 +1253,36 @@ errlHndl_t LpcDD::writeLPC(LPC::TransType i_type,
 {
     // Grab the lock and call the internal function
     mutex_lock(ivp_mutex);
-    errlHndl_t l_err = _writeLPC( i_type, i_addr, i_buffer, io_buflen );
+
+    //First check/clear the LPC bus of errors and commit any errors found
+    errlHndl_t l_err_precheck = checkForLpcErrors();
+    if (l_err_precheck)
+    {
+        l_err_precheck->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+    }
+
+    // Now do the operation
+    errlHndl_t l_err_op = _writeLPC( i_type, i_addr, i_buffer, io_buflen );
+
+    // If this op failed and there was something wrong before we started,
+    //  attach the logs together to aid debug
+    if( l_err_op && l_err_precheck )
+    {
+        l_err_precheck->plid(l_err_op->plid());
+        //Note-ideally we would up the severity of l_err_precheck here
+        // as well so that it would be visible everywhere, but we can't
+        // because that breaks the scenario where the caller might want
+        // to delete the log they get back (see SIO).  We don't want
+        // any visible logs in that case.
+    }
+
+    // Always just commit the log for any errors that were present
+    if( l_err_precheck )
+    {
+        errlCommit(l_err_precheck, LPC_COMP_ID);
+    }
+
     mutex_unlock(ivp_mutex);
 
-    return l_err;
+    return l_err_op;
 }
