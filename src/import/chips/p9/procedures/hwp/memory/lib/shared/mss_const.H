@@ -203,6 +203,7 @@ enum ffdc_function_codes
     // PBA function codes
     PBA_EXECUTE_CONTAINER = 80,
     PBA_EXECUTE_VECTOR = 81,
+    SET_PBA_MODE = 83,
 };
 
 enum states
