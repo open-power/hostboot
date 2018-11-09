@@ -56,6 +56,10 @@ extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"rp: " printf_string,##args)
 
+
+// Set this to true if you want to see all of the pnor messages
+const bool g_PNOR_DEBUG = false;
+
 /**
  * setup _start and handle barrier
  */
@@ -598,11 +602,14 @@ void IpmiRP::execute(void)
         {
             IPMI::Message* l_ipmi_msg =
                 static_cast<IPMI::Message*>(msg->extra_data);
-            const IPMI::command_t l_pnor = IPMI::pnor_hiomap_request();
-            bool l_is_pnor = (l_ipmi_msg->iv_netfun == l_pnor.first &&
-                              l_ipmi_msg->iv_cmd == l_pnor.second);
-            IPMI_TRAC(WARN_MRK "Got message (0x%x:0x%x): l_is_pnor: %d",
-                      l_ipmi_msg->iv_netfun, l_ipmi_msg->iv_cmd, l_is_pnor);
+            bool l_is_pnor = IPMI::is_pnor_req(l_ipmi_msg->iv_netfun,
+                                               l_ipmi_msg->iv_cmd);
+            // don't trace the constant pnor hiomap stuff
+            if( !l_is_pnor || g_PNOR_DEBUG )
+            {
+                IPMI_TRAC(WARN_MRK "Got message (0x%x:0x%x): l_is_pnor: %d",
+                          l_ipmi_msg->iv_netfun, l_ipmi_msg->iv_cmd, l_is_pnor);
+            }
             /* PNOR requests always allowed, else we hang shutdown */
             if (!l_shutdown_pending || l_is_pnor)
             {
@@ -942,7 +949,12 @@ namespace IPMI
         // I think if the buffer is too large this is a programming error.
         assert(io_len <= max_buffer());
 
-        IPMI_TRAC("queuing sync %x:%x", ipmi_msg->iv_netfun, ipmi_msg->iv_cmd);
+        // don't trace the constant pnor hiomap stuff
+        if( !IPMI::is_pnor_req(ipmi_msg->iv_netfun,ipmi_msg->iv_cmd)
+            || g_PNOR_DEBUG )
+        {
+            IPMI_TRAC("queuing sync %x:%x", ipmi_msg->iv_netfun, ipmi_msg->iv_cmd);
+        }
         int rc = msg_sendrecv(mq, ipmi_msg->iv_msg);
 
         // If the kernel didn't give a hassle about the message, check to see if

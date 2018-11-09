@@ -116,6 +116,16 @@ namespace IPMI
         NETFUN_NONE     = (0x30 << 2),
     };
 
+    /**
+     * @brief  Generate the response for IPMI network function
+     * @param[in]  Standard network function
+     * @return  Network function in response (+1)
+     */
+    inline const uint8_t gen_resp_netfn( network_function i_netfn )
+    {
+        return ( ( (i_netfn >> 2) + 1 ) << 2 );
+    };
+
     // SMS_ATN OEM Event constants
     enum oem_event
     {
@@ -313,6 +323,16 @@ namespace IPMI
     // IPMI PNOR
     inline const command_t pnor_hiomap_request(void)
     { return std::make_pair(NETFUN_IBM, 0x5a); }
+
+    // Efficient comparator to see if the message is a pnor hiomap request
+    inline bool is_pnor_req( uint8_t i_netfun, uint8_t i_cmd )
+    {
+        return (((i_netfun == NETFUN_IBM) ||
+                 (i_netfun == gen_resp_netfn(NETFUN_IBM))) //response
+                &&
+                (i_cmd == 0x5a));
+    }
+
 
     /**
      * Send message asynchronously
