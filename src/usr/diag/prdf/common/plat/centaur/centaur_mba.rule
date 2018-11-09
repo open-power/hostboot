@@ -25,12 +25,13 @@
 
 chip centaur_mba
 {
-    name        "Centaur MBA chiplet";
+    name        "CENTAUR MBA target";
     targettype  TYPE_MBA;
     sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
 .include "prdfMemExtraSig.H";
 .include "prdfCenMbaExtraSig.H";
 
@@ -212,31 +213,31 @@ chip centaur_mba
 
 rule rMBA
 {
+  RECOVERABLE:
+    summary( 0, rMBACALFIR ) |
+    summary( 2, rMBAFIR ) |
+    summary( 4, rMBADDRPHYFIR );
+
   UNIT_CS:
     summary( 0, rMBACALFIR ) |
     summary( 1, rMBASECUREFIR ) |
     summary( 2, rMBAFIR ) |
-    summary( 3, rMBADDRPHYFIR );
-
-  RECOVERABLE:
-    summary( 0, rMBACALFIR ) |
-    summary( 1, rMBASECUREFIR ) |
-    summary( 2, rMBAFIR ) |
-    summary( 3, rMBADDRPHYFIR );
+    summary( 4, rMBADDRPHYFIR );
 
   HOST_ATTN:
-    summary( 4, rMBASPA );
+    summary( 3, rMBASPA );
+
 };
 
 # The MBACALFIR must be analyzed first so that the RCD parity errors are the
 # first to be analyzed.
-group gMBA attntype UNIT_CS, RECOVERABLE, HOST_ATTN filter singlebit
+group gMBA attntype RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
 {
     (rMBA, bit(0)) ? analyze(gMBACALFIR);
     (rMBA, bit(1)) ? analyze(gMBASECUREFIR);
     (rMBA, bit(2)) ? analyze(gMBAFIR);
-    (rMBA, bit(3)) ? analyze(gMBADDRPHYFIR);
-    (rMBA, bit(4)) ? analyze(gMBASPA);
+    (rMBA, bit(3)) ? analyze(gMBASPA);
+    (rMBA, bit(4)) ? analyze(gMBADDRPHYFIR);
 };
 
 ################################################################################
@@ -664,8 +665,7 @@ group gMBADDRPHYFIR filter singlebit, cs_root_cause( 48, 49, 51, 52, 56, 57, 59,
  #                                                                            #
  ##############################################################################
 
-# Include the common action set.
+# Include the actions defined for this target
 .include "centaur_common_actions.rule";
-# Include the chip-specific action set.
 .include "centaur_mba_actions.rule";
 
