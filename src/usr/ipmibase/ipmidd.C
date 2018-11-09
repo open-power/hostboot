@@ -60,6 +60,10 @@ TRAC_INIT(&g_trac_ipmi, IPMI_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
 #define IPMI_TRAC(printf_string,args...) \
     TRACFCOMP(g_trac_ipmi,"dd: " printf_string,##args)
 
+// Set this to true if you want to see all of the pnor messages
+const bool g_PNOR_DEBUG = false;
+
+
 /**
  * @brief Performs an IPMI Message Read Operation
  * This function performs a IPMI Message Read operation. It follows a
@@ -330,10 +334,15 @@ errlHndl_t IpmiDD::send(IPMI::BTMessage* i_msg)
     // upper layers will report the re-queue or whatever.
     if (i_msg->iv_state != EAGAIN)
     {
-        IPMI_TRAC(INFO_MRK "write %s %x:%x seq %x len %x",
-                  err ? "err" : "ok",
-                  i_msg->iv_netfun, i_msg->iv_cmd, i_msg->iv_seq,
-                  i_msg->iv_len);
+        // don't trace the constant pnor hiomap stuff
+        if( !IPMI::is_pnor_req(i_msg->iv_netfun,i_msg->iv_cmd)
+            || g_PNOR_DEBUG )
+        {
+            IPMI_TRAC(INFO_MRK "write %s %x:%x seq %x len %x",
+                      err ? "err" : "ok",
+                      i_msg->iv_netfun, i_msg->iv_cmd, i_msg->iv_seq,
+                      i_msg->iv_len);
+        }
     }
 
     return err;
@@ -411,10 +420,14 @@ errlHndl_t IpmiDD::receive(IPMI::BTMessage* o_msg)
 
     mutex_unlock(&iv_mutex);
 
-    IPMI_TRAC(INFO_MRK "read b2h %s %x:%x seq %x len %x cc %x",
-              err ? "err" : "ok",
-              o_msg->iv_netfun, o_msg->iv_cmd, o_msg->iv_seq,
-              o_msg->iv_len, o_msg->iv_cc);
+    // don't trace the constant pnor hiomap stuff
+    if( !IPMI::is_pnor_req(o_msg->iv_netfun,o_msg->iv_cmd) || g_PNOR_DEBUG )
+    {
+        IPMI_TRAC(INFO_MRK "read b2h %s %x:%x seq %x len %x cc %x",
+                  err ? "err" : "ok",
+                  o_msg->iv_netfun, o_msg->iv_cmd, o_msg->iv_seq,
+                  o_msg->iv_len, o_msg->iv_cc);
+    }
 
     return err;
 }
