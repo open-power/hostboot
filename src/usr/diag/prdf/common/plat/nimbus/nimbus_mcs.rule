@@ -119,7 +119,8 @@ rule rMCS
 
 };
 
-group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
+group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
 {
     (rMCS, bit(0)) ? analyze(gMCFIR);
 };
@@ -140,7 +141,9 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
 
-group gMCFIR filter singlebit, cs_root_cause( 0, 6, 8, 9 )
+group gMCFIR
+    filter singlebit,
+           cs_root_cause(0,6,8,9)
 {
     /** MCFIR[0]
      *  mc internal recoverable eror

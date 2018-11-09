@@ -279,7 +279,8 @@ rule rMC_CHIPLET_FIR
     (MC_CHIPLET_RE_FIR >> 2) & ~MC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
 };
 
-group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     /** MC_CHIPLET_FIR[3]
      *  Attention from MC_LFIR
@@ -335,7 +336,8 @@ rule rMC_CHIPLET_UCS_FIR
 
 # The IOMCFIR has been prioritized over all the other bits in this FIR. See the
 # notes in prdfMemUtils.C for the reasons why.
-group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter priority ( 10 )
+group gMC_CHIPLET_UCS_FIR attntype UNIT_CS
+    filter priority(10)
 {
     /** MC_CHIPLET_UCS_FIR[1]
      *  Attention from CHIFIR 0
@@ -384,7 +386,8 @@ rule rMC_CHIPLET_HA_FIR
     MC_CHIPLET_HA_FIR & ~(MC_CHIPLET_HA_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
-group gMC_CHIPLET_HA_FIR attntype HOST_ATTN filter singlebit
+group gMC_CHIPLET_HA_FIR attntype HOST_ATTN
+    filter singlebit
 {
     /** MC_CHIPLET_HA_FIR[1]
      *  Attention from CHIFIR 0
@@ -425,7 +428,9 @@ rule rMC_LFIR
     MC_LFIR & ~MC_LFIR_MASK & ~MC_LFIR_ACT0 &  MC_LFIR_ACT1;
 };
 
-group gMC_LFIR filter singlebit, cs_root_cause
+group gMC_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** MC_LFIR[0]
      *  CFIR internal parity error
@@ -535,7 +540,9 @@ rule rIOMCFIR
     IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 &  IOMCFIR_ACT1;
 };
 
-group gIOMCFIR filter singlebit, cs_root_cause( 12, 20, 28, 36 )
+group gIOMCFIR
+    filter singlebit,
+           cs_root_cause(12,20,28,36)
 {
     /** IOMCFIR[0]
      *  RX_INVALID_STATE_OR_PARITY_ERROR
@@ -710,7 +717,9 @@ rule rMCPPEFIR
     MCPPEFIR & ~MCPPEFIR_MASK &  MCPPEFIR_ACT0 &  MCPPEFIR_ACT1;
 };
 
-group gMCPPEFIR filter singlebit, cs_root_cause
+group gMCPPEFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** MCPPEFIR[0]
      *  PPE general error.
@@ -795,7 +804,9 @@ rule rMCBISTFIR
     MCBISTFIR & ~MCBISTFIR_MASK &  MCBISTFIR_ACT0 &  MCBISTFIR_ACT1;
 };
 
-group gMCBISTFIR filter singlebit, cs_root_cause
+group gMCBISTFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** MCBISTFIR[0]
      *  WAT_DEBUG_ATTN

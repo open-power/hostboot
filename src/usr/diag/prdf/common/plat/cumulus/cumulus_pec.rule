@@ -147,7 +147,8 @@ rule rPEC
 
 };
 
-group gPEC attntype CHECK_STOP, RECOVERABLE filter singlebit
+group gPEC attntype CHECK_STOP, RECOVERABLE
+    filter singlebit
 {
     (rPEC, bit(0)) ? analyze(gPCI_LFIR);
     (rPEC, bit(1)) ? analyze(gIOPCIFIR);
@@ -165,7 +166,9 @@ rule rPCI_LFIR
     PCI_LFIR & ~PCI_LFIR_MASK & ~PCI_LFIR_ACT0 &  PCI_LFIR_ACT1;
 };
 
-group gPCI_LFIR filter singlebit, cs_root_cause
+group gPCI_LFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** PCI_LFIR[0]
      *  CFIR internal parity error
@@ -261,7 +264,9 @@ rule rIOPCIFIR
     IOPCIFIR & ~IOPCIFIR_MASK & ~IOPCIFIR_ACT0 &  IOPCIFIR_ACT1;
 };
 
-group gIOPCIFIR filter singlebit, cs_root_cause
+group gIOPCIFIR
+    filter singlebit,
+           cs_root_cause
 {
     /** IOPCIFIR[0]
      *  HSS ZCAL Calibration Error
