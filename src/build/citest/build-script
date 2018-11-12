@@ -41,8 +41,16 @@ echo "#--------------------------------"
 export SECURITY_HW_POLICY="1"
 
 # Check copyright.
-check-copyright > copyright.log 2>&1 &
-COPYRIGHT_PID=$!
+check-copyright > copyright.log 2>&1
+if [ $? -eq 0 ]; then
+    echo "----Copyright check succeeded."
+    cat copyright.log
+else
+    echo "----Copyright check failed."
+    cat copyright.log
+    exit -1
+fi
+
 
 # Create simics sandbox.
 create-sandbox > create-sandbox.log 2>&1 &
@@ -57,16 +65,6 @@ make -j32 || exit -1
 echo "#--------------------------------"
 printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32\" was started at $my_date)\n\n"
 echo "#--------------------------------"
-# Check copyright completion.
-wait $COPYRIGHT_PID
-if [ $? -eq 0 ]; then
-    echo "----Copyright check succeeded."
-    cat copyright.log
-else
-    echo "----Copyright check failed."
-    cat copyright.log
-    exit -1
-fi
 
 # Check sandbox create completion.
 wait $CREATESANDBOX_PID
