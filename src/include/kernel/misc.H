@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -189,6 +191,18 @@ namespace KernelMisc
      *  @param[in] uint64_t - Data
      */
     void updateScratchReg(MMIO_Scratch_Register scratch_addr, uint64_t data);
+
+    /** @fn Log backtrace to printk
+     *
+     *  @brief Collect the backtrace for the given task and print an
+     *         abbreviated version to the printk buffer.
+     *
+     *  This can be used in task-crash paths for FFDC
+     *
+     *  @param[in] task_t i_task - Task to operate against,
+     *             if i_task==nullptr then call will use user-space interfaces
+     */
+    void printkBacktrace(task_t* i_task);
 
 };
 #endif
