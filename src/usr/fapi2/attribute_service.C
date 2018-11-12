@@ -582,7 +582,7 @@ union wiringData
 //******************************************************************************
 TARGETING::ATTR_MODEL_type __getChipModel()
 {
-    // determine whether this is a Nimbus or Cumulus chip
+    // determine the chip's model
     TARGETING::Target * masterProc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(masterProc);
 
@@ -590,94 +590,58 @@ TARGETING::ATTR_MODEL_type __getChipModel()
 }
 
 //******************************************************************************
-// fapi2::platAttrSvc::__getMcsAndPortSlct function
+// fapi2::platAttrSvc::__getTranslationPortSlct function
 //******************************************************************************
-ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-                                TARGETING::TargetHandle_t &o_mcsTarget,
-                                uint32_t &o_ps )
+ReturnCode __getTranslationPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+                                     uint8_t &o_ps )
 {
-    fapi2::ReturnCode l_rc;
-    errlHndl_t l_errl = nullptr;
-
     // NOTE: this function returns the port select we need for the translation
     // attribute. This means, for Cumulus it returns the MBA port from the
     // centaur perspective (0-3), and for Nimbus it returns the port select from
     // an MCS perspective (0-1).
 
-    do
+    o_ps = 0;
+    TARGETING::ATTR_MODEL_type l_procType = __getChipModel();
+
+    // If the proc is Cumulus, we need to get the MBA.
+    if ( TARGETING::MODEL_CUMULUS == l_procType )
     {
-        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+        Target<TARGET_TYPE_MBA> l_fapiMba =
+            i_fapiDimm.getParent<TARGET_TYPE_MBA>();
 
-        TARGETING::TargetHandle_t l_port = nullptr;
+        // Get the MBA's position
+        uint8_t mbaPos = 0;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_fapiMba, mbaPos) );
+        mbaPos = mbaPos % MAX_MBA_PER_CEN; // 0-1
 
-        // If the proc is Cumulus, we need to get the MBA.
-        if ( TARGETING::MODEL_CUMULUS == procType )
-        {
-            TARGETING::TargetHandle_t l_dimmTarget;
-            l_errl = getTargetingTarget(i_fapiDimm, l_dimmTarget);
-            if ( l_errl )
-            {
-                FAPI_ERR( "__getMcsAndPortSlct: Error from "
-                          "getTargetingTarget getting DIMM" );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
+        // Get the port select from the MBA perspective
+        uint8_t mbaPort = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, i_fapiDimm, mbaPort));
+        mbaPort = mbaPort % MAX_PORTS_PER_MBA; // 0-1
 
-            Target<TARGET_TYPE_MBA> l_fapiMba =
-                i_fapiDimm.getParent<TARGET_TYPE_MBA>();
-            l_errl = getTargetingTarget( l_fapiMba, l_port );
-            if ( l_errl )
-            {
-                FAPI_ERR( "__getMcsAndPortSlct: Error from "
-                          "getTargetingTarget getting MBA." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
+        // Find the port select from the Centaur perspective
+        o_ps = (mbaPos*MAX_PORTS_PER_MBA)+mbaPort; // 0-3
+    }
+    // If the proc is Nimbus, we need to get the MCA.
+    else if ( TARGETING::MODEL_NIMBUS == l_procType )
+    {
+        Target<TARGET_TYPE_MCA> l_fapiMca =
+            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
 
-            uint8_t mbaPos =
-                l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
-                MAX_MBA_PER_CEN; // 0-1
-            uint8_t mbaPort =
-                l_dimmTarget->getAttr<TARGETING::ATTR_CEN_MBA_PORT>() %
-                MAX_PORTS_PER_MBA; // 0-1
-            o_ps = (mbaPos*MAX_PORTS_PER_MBA)+mbaPort; // 0-3
-        }
-        // If the proc is Nimbus, we need to get the MCA.
-        else
-        {
-            Target<TARGET_TYPE_MCA> l_fapiMca =
-                i_fapiDimm.getParent<TARGET_TYPE_MCA>();
-            l_errl = getTargetingTarget( l_fapiMca, l_port );
-            if ( l_errl )
-            {
-                FAPI_ERR( "__getMcsAndPortSlct: Error from "
-                          "getTargetingTarget getting MCA." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
-
-            // Get the MCS.
-            Target<TARGET_TYPE_MCS> l_fapiMcs;
-            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
-
-            l_errl = getTargetingTarget( l_fapiMcs, o_mcsTarget );
-            if ( l_errl )
-            {
-                FAPI_ERR( "__getMcsAndPortSlct: Error from "
-                        "getTargetingTarget getting MCS." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
-
-            o_ps = l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
-                mss::PORTS_PER_MCS;
-        }
+        // Get the port select from the MCS perspective
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_fapiMca, o_ps) );
+        o_ps = o_ps % mss::PORTS_PER_MCS; // 0-1
+    }
+    else
+    {
+        // TODO RTC 201603 - generic/axone case
+        FAPI_ERR( "__getTranslationPortSlct: Invalid procType" );
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
 
 
-
-    }while(0);
-
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
@@ -686,16 +650,15 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 //******************************************************************************
 ReturnCode __badDqBitmapGetHelperAttrs(
     const TARGETING::TargetHandle_t i_dimmTarget,
-    wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint32_t &o_ps )
+    wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint8_t &o_ps )
 {
     fapi2::ReturnCode l_rc;
 
     do
     {
         Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimmTarget );
-        TARGETING::TargetHandle_t l_mcsTarget = nullptr;
 
-        __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, o_ps );
+        __getTranslationPortSlct( l_fapiDimm, o_ps );
 
         TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
@@ -708,7 +671,14 @@ ReturnCode __badDqBitmapGetHelperAttrs(
             // versions and ensure zero initialized array.
             memset( o_wiringData.nimbus, 0, sizeof(o_wiringData.nimbus) );
 
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_mcsTarget,
+            Target<TARGET_TYPE_MCA> l_fapiMca =
+                l_fapiDimm.getParent<TARGET_TYPE_MCA>();
+
+            // Get the MCS.
+            Target<TARGET_TYPE_MCS> l_fapiMcs;
+            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
+
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_fapiMcs,
                                   o_wiringData.nimbus );
         }
         else if ( TARGETING::MODEL_CUMULUS == procType )
@@ -880,16 +850,24 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
         uint32_t l_ds = i_dimm->getAttr<TARGETING::ATTR_FAPI_POS>() %
                         mss::MAX_DIMM_PER_PORT;
 
-        TARGETING::TargetHandle_t l_mcsTarget = nullptr;
-        uint32_t l_ps = 0;
+        uint8_t l_ps = 0;
 
         TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
         if ( TARGETING::MODEL_NIMBUS == procType )
         {
-            __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, l_ps );
+            // We need the port select from the MCS perspective here so we
+            // can just use __getTranslationPortSlct.
+            __getTranslationPortSlct( l_fapiDimm, l_ps );
 
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_mcsTarget,
+            Target<TARGET_TYPE_MCA> l_fapiMca =
+                l_fapiDimm.getParent<TARGET_TYPE_MCA>();
+
+            // Get the MCS.
+            Target<TARGET_TYPE_MCS> l_fapiMcs;
+            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
+
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_fapiMcs,
                                   l_dramSpare );
         }
         else if ( TARGETING::MODEL_CUMULUS == procType )
@@ -909,7 +887,7 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
                                   l_dramSpare );
 
             // In this case we need the port select from the MBA perspective
-            // not the centaur perspective that __getMcsAndPortSlct gives
+            // not the centaur perspective that __getTranslationPortSlct gives
             // us, so we can't use that function.
             l_ps = i_dimm->getAttr<TARGETING::ATTR_CEN_MBA_PORT>() %
                    MAX_PORTS_PER_MBA;
@@ -1121,7 +1099,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
 //******************************************************************************
 ReturnCode __mcLogicalToDimmDqHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
-    wiringData  i_wiringData, uint32_t i_ps, uint8_t i_mcPin,
+    wiringData  i_wiringData, uint8_t i_ps, uint8_t i_mcPin,
     uint8_t &o_dimm_dq )
 {
     fapi2::ReturnCode l_rc;
@@ -1197,7 +1175,7 @@ ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t i_mcLogical_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_dimmDq_bitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     wiringData i_wiringData, uint8_t i_spareByte[mss::MAX_RANK_PER_DIMM],
-    uint32_t i_ps )
+    uint8_t i_ps )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1271,7 +1249,7 @@ ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 //******************************************************************************
 ReturnCode __dimmDqToMcLogicalHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
-    wiringData  i_wiringData, uint32_t i_ps, uint8_t i_dimm_dq,
+    wiringData  i_wiringData, uint8_t i_ps, uint8_t i_dimm_dq,
     uint64_t &o_mcPin )
 {
     fapi2::ReturnCode l_rc;
@@ -1325,7 +1303,7 @@ ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t i_dimmDq_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_mcLogical_bitmap)[mss::MAX_RANK_PER_DIMM]
                                  [mss::BAD_DQ_BYTE_COUNT],
-    wiringData i_wiringData, uint32_t i_ps )
+    wiringData i_wiringData, uint8_t i_ps )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1409,7 +1387,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
         wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
-        uint32_t l_ps = 0;
+        uint8_t l_ps = 0;
 
         l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
                                             l_allMnfgFlags, l_ps );
@@ -1568,7 +1546,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
-        uint32_t l_ps = 0;
+        uint8_t l_ps = 0;
 
         l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
                                             l_allMnfgFlags, l_ps );
@@ -1865,7 +1843,7 @@ ReturnCode __rowRepairTranslateDramPos(
     errlHndl_t l_errl = nullptr;
     wiringData l_wiringData;
     uint64_t l_allMnfgFlags;
-    uint32_t l_ps = 0;
+    uint8_t l_ps = 0;
 
     do
     {
