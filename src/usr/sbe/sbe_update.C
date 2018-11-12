@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -88,6 +88,8 @@ static bool g_mbox_query_result = false;
 static bool g_istep_mode        = false;
 static bool g_update_both_sides = false;
 static uint32_t g_current_nest_freq = 0;
+// g_options tracks main function updateProcessorSbeSeeproms()'s i_options
+static SBE::sbeUpdateOptions g_options = SBE::SBE_UPDATE_PROC_ALL;
 
 // ----------------------------------------
 // Global Variables HW Keys Hash Transition
@@ -110,7 +112,7 @@ namespace SBE
     };
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t updateProcessorSbeSeeproms(sbeUpdateCheckType i_check_type)
+    errlHndl_t updateProcessorSbeSeeproms(sbeUpdateOptions i_options)
     {
         errlHndl_t err = NULL;
         errlHndl_t err_cleanup = NULL;
@@ -120,9 +122,10 @@ namespace SBE
         bool l_cleanupVmmSpace = false;
         bool l_restartNeeded   = false;
 
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"updateProcessorSbeSeeproms(): i_check_type=%d",
-                   i_check_type);
+        g_options=i_options;
+        TRACFCOMP( g_trac_sbe,
+                   ENTER_MRK"updateProcessorSbeSeeproms(): i_options=%d",
+                   i_options);
 
         do{
 
@@ -173,7 +176,15 @@ namespace SBE
                 g_istep_mode = true;
             }
 
-            if (mnfg_flags & MNFG_FLAG_UPDATE_BOTH_SIDES_OF_SBE)
+            if (g_options == SBE_UPDATE_ONLY_SLAVE_PROCS)
+            {
+                TRACFCOMP(g_trac_sbe,INFO_MRK
+                          "Update Both Sides of SBE since forcing update "
+                          "on all Slave Procs. No Re-IPL will be performed "
+                          "after any update - the IPL will continue");
+                g_update_both_sides = true;
+            }
+            else if (mnfg_flags & MNFG_FLAG_UPDATE_BOTH_SIDES_OF_SBE)
             {
                 TRACFCOMP(g_trac_sbe,
                             INFO_MRK"Update Both Sides of SBE Flag Indicated.");
@@ -268,13 +279,16 @@ namespace SBE
                  err = NULL;
             }
 
-            // Check if a key transition is needed
+            // Check if a key transition is allowed/needed
             std::vector<uint8_t> l_transHwKeyHash;
-            err = secureKeyTransition(l_transHwKeyHash);
-            if (err)
+            if (g_options == SBE_UPDATE_PROC_ALL)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");
-                break;
+                err = secureKeyTransition(l_transHwKeyHash);
+                if (err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");
+                    break;
+                }
             }
             // If vector has a size then there is a key to transition to.
             if(!l_transHwKeyHash.empty())
@@ -307,14 +321,20 @@ namespace SBE
                               " (i=%d)",
                               TARGETING::get_huid(sbeState.target), i);
                     sbeState.target_is_master = true;
+
+                    if (g_options == SBE_UPDATE_ONLY_SLAVE_PROCS)
+                    {
+                        TRACFCOMP(g_trac_sbe,"Skipping update on Master Proc "
+                                  "due to i_options=0x%X", g_options);
+                        continue;
+                    }
                 }
                 else
                 {
                     sbeState.target_is_master = false;
                 }
 
-                err = getSbeInfoState(sbeState,
-                                      i_check_type);
+                err = getSbeInfoState(sbeState);
 
                 if (err)
                 {
@@ -331,7 +351,7 @@ namespace SBE
 
                 // Continue if we're just doing the nest freq check and don't
                 // have a mismatch
-                if ( ( i_check_type == SBE_UPDATE_ONLY_CHECK_NEST_FREQ ) &&
+                if ( ( g_options == SBE_UPDATE_ONLY_CHECK_NEST_FREQ ) &&
                      ( sbeState.seeprom_0_ver_Nest_Freq_Mismatch == false ) &&
                      ( sbeState.seeprom_1_ver_Nest_Freq_Mismatch == false ) )
                 {
@@ -362,7 +382,6 @@ namespace SBE
 
                         // Don't break - handle error at the end of the loop,
                     }
-
                 }
 
                 /**********************************************/
@@ -424,7 +443,11 @@ namespace SBE
             /*  Perform System Operation                                  */
             /**************************************************************/
             // Restart IPL if SBE Update requires it or key transition occurred
-            if ( l_restartNeeded == true || g_do_hw_keys_hash_transition )
+            // However, skip restart if only updating Slave Processors
+            if ((   (l_restartNeeded == true)
+                 || (g_do_hw_keys_hash_transition))
+                 && (g_options != SBE_UPDATE_ONLY_SLAVE_PROCS)
+               )
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
@@ -501,13 +524,23 @@ namespace SBE
                 }
 #endif
             }
+            else if ((   (l_restartNeeded == true)
+                      || (g_do_hw_keys_hash_transition))
+                      && (g_options == SBE_UPDATE_ONLY_SLAVE_PROCS)
+               )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"updateProcessorSbeSeeproms(): Restart "
+                           "being skipped because only updating the Slave "
+                           "Procs before starting their SBEs");
+            }
 
             /************************************************************/
             /* Deconfigure any Processors that have a Version different */
             /*   from the Master Processor's Version                    */
             /************************************************************/
-            // skip if we're only checking for NEST_FREQ mismatch
-            if ( i_check_type != SBE_UPDATE_ONLY_CHECK_NEST_FREQ )
+            // Only compare if all the procs are being updated at this time
+            if ( g_options == SBE_UPDATE_PROC_ALL )
             {
                 err = masterVersionCompare(sbeStates_vector);
 
@@ -555,8 +588,9 @@ namespace SBE
             }
         }
 
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"updateProcessorSbeSeeproms()" );
+        TRACFCOMP( g_trac_sbe,EXIT_MRK
+                   "updateProcessorSbeSeeproms(): err plid=0x%.8X, rc=0x%.4X",
+                   ERRL_GETPLID_SAFE(err), ERRL_GETRC_SAFE(err) );
 
         return err;
     }
@@ -1374,7 +1408,6 @@ namespace SBE
         do{
 
              TARGETING::Target * l_target=i_target;
-
 #if defined(CONFIG_SBE_UPDATE_INDEPENDENT) || \
     defined(CONFIG_SBE_UPDATE_SIMULTANEOUS)
 
@@ -1424,8 +1457,7 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState,
-                               sbeUpdateCheckType& i_check_type)
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
 
         TRACUCOMP( g_trac_sbe,
@@ -1495,7 +1527,7 @@ namespace SBE
                            "Error returned from checkNestFreqSettings() ");
                 break;
             }
-            else if ((i_check_type == SBE_UPDATE_ONLY_CHECK_NEST_FREQ) &&
+            else if ((g_options == SBE_UPDATE_ONLY_CHECK_NEST_FREQ) &&
                      (io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch == false) &&
                      (io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch == false))
             {
@@ -2101,6 +2133,7 @@ namespace SBE
                                  reinterpret_cast<void*>
                                  (SBE_ECC_IMG_VADDR),
                                  SBE_ECC_IMG_MAX_SIZE);
+
             if( rc )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
@@ -2256,15 +2289,65 @@ namespace SBE
         //Update both sides of SBE - even in indepent mode
         if (g_update_both_sides)
         {
+            // Special error handling if both sides of the slave processor
+            // need to be updated
+            if ((err != NULL) &&
+                (g_options == SBE_UPDATE_ONLY_SLAVE_PROCS))
+            {
+                // If fail is on side that the master proc boots from, then
+                // must gard out this processor
+                if (// Fail & Boot side is 0
+                    ((io_sbeState.cur_seeprom_side == SBE_SEEPROM0) &&
+                     (io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY))
+                    ||
+                    // Fail & Boot side is 1
+                    ((io_sbeState.cur_seeprom_side == SBE_SEEPROM1) &&
+                     (io_sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP))
+                   )
+                {
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSide(): "
+                              "Unable to update Slave Processor via FSI on "
+                              "boot side %d, so must decoconfigure and gard "
+                              "proc HUID 0x%08X since it cannot be trusted. "
+                              "Using err plid=0x%08X, rc=0x%04X",
+                              io_sbeState.cur_seeprom_side,
+                              get_huid(io_sbeState.target),
+                              ERRL_GETPLID_SAFE(err),
+                              ERRL_GETRC_SAFE(err));
+
+                    err->collectTrace(SBE_COMP_NAME);
+
+                    err->addHwCallout( io_sbeState.target,
+                                       HWAS::SRCI_PRIORITY_HIGH,
+                                       HWAS::DECONFIG,
+                                       HWAS::GARD_Predictive );
+                }
+                else
+                {
+                   TRACFCOMP(g_trac_sbe, ERR_MRK"updateSeepromSide(): "
+                              "Unable to update Slave Processor via FSI on "
+                              "non-boot side %d of proc HUID 0x%08X. Since "
+                              "not boot-side SEEPROM just commit err "
+                              "(plid=0x%08X, rc=0x%04X) and continue",
+                              io_sbeState.cur_seeprom_side,
+                              get_huid(io_sbeState.target),
+                              ERRL_GETPLID_SAFE(err),
+                              ERRL_GETRC_SAFE(err));
+
+                    err->collectTrace(SBE_COMP_NAME);
+
+                    errlCommit( err, SBE_COMP_ID );
+                }
+            }
+
             // If no error, recursively call this function for the other SEEPROM
             if ( ( err == NULL ) &&
                  ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) )
             {
                 io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
-                TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE MNFG Flag indicated, will update both sides" );
-                TRACFCOMP( g_trac_sbe,
-                           "updateSeepromSide(): Recursively calling itself: "
-                           "HUID=0x%.8X, side=%d",
+                TRACFCOMP( g_trac_sbe, "updateSeepromSide(): "
+                           "UPDATE_BOTH_SIDES_OF_SBE indicated - Recursively "
+                           "calling itself: HUID=0x%.8X, side=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            io_sbeState.seeprom_side_to_update);
                  err = updateSeepromSide(io_sbeState);
@@ -2416,7 +2499,6 @@ namespace SBE
                           &(io_sbeState.mvpdSbKeyword),
                           sizeof(mvpdSbKeyword_t));
             }
-
 
             /**************************************************************/
             /*  Determine what side to update                             */
@@ -2576,7 +2658,7 @@ namespace SBE
             i_system_situation &= SITUATION_ALL_BITS_MASK;
 
 #ifdef CONFIG_SBE_UPDATE_INDEPENDENT
-            //Check if MFG flag set to indicate both sides should be updated
+            //Check if MFG flag or input option indicated both sides get updated
             if (g_update_both_sides)
             {
                 decisionTreeForUpdatesSimultaneous(l_actions,
@@ -3201,7 +3283,8 @@ namespace SBE
 #ifdef CONFIG_SBE_UPDATE_INDEPENDENT
                 if (g_update_both_sides)
                 {
-                    TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE MNFG Flag indicated, will update both sides" );
+                    TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE indicated "
+                               " - will update both sides (primary first)" );
                     io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
                 }
 #endif

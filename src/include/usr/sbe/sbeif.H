@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,30 +60,30 @@ namespace SBE
                              sbe_image_version_t* o_version = NULL);
 
     /**
-     * @enum sbeUpdateCheckType
+     * @enum sbeUpdateOptions_t
      *
-     * @brief Determines what types of checks are performed on the SBE Seeproms
-     *        to determine if an update is necessary.
-     *
+     * @brief SBE Update Proc Options enum specifies which Processor targets
+     *        or which checks will be used for the SBE Update process
      */
-    enum sbeUpdateCheckType
+    enum sbeUpdateOptions
     {
-        SBE_UPDATE_CHECK_ALL                   = 0x00,
-        SBE_UPDATE_ONLY_CHECK_NEST_FREQ        = 0x01
+        SBE_UPDATE_PROC_ALL                    = 0x00,
+        SBE_UPDATE_ONLY_CHECK_NEST_FREQ        = 0x01,
+        SBE_UPDATE_ONLY_SLAVE_PROCS            = 0x02,
     };
 
     /**
      * @brief Iterates through all the functional processors and updates
      *        the SBE Image in a SEEPROM, if necessary.
      *
-     * @param[in] i_check_type    Indicates what types of checks are performed
-     *                            on the SBE Seeproms to determine if an update
-     *                            is necessary.
+     * @param[in] i_options  Indicates what types of checks are performed
+     *                       on the SBE Seeproms to determine if an update
+     *                       is necessary.
      *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t updateProcessorSbeSeeproms(
-                   sbeUpdateCheckType i_check_type = SBE_UPDATE_CHECK_ALL);
+                   sbeUpdateOptions i_options = SBE_UPDATE_PROC_ALL);
 
     /**
      * @brief Iterates through all the functional processors and resolves
@@ -97,14 +97,14 @@ namespace SBE
     /**
      * @brief Determines whether we are on the Golden side or not
      *
-     * @param[out] o_isGolden boolean, True if we are on Golden side, False
-     *                        otherwise.
+     * @param[out] o_isGolden   boolean, True if we are on Golden side;
+     *                          False otherwise.
      *
-     * @return errlHndl_t Error log handle on failure.
+     * @return errlHndl_t       Error log handle on failure.
      *
-     * NOTE: -Golden Side means we booted from the Golden Seeprom pointing
+     * NOTE: Golden Side means we booted from the Golden Seeprom pointing
      *        at the Golden side of PNOR.
-     *       -Using master processor to make this determination.
+     *       Using master processor to make this determination.
      */
 
     errlHndl_t isGoldenSide( bool & o_isGolden );

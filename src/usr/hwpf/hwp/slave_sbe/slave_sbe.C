@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,10 +69,8 @@
 #include <config.h>
 #include <pnor/pnorif.H>
 #include <sys/time.h>
-
-#ifdef CONFIG_SECUREBOOT
 #include <secureboot/service.H>
-#endif
+#include "../nest_chiplets/nest_chiplets.H" // customizeChipRegions
 
 
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
@@ -153,6 +151,9 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     // execute proc_read_nest_freq.C
     // execute proc_setup_sbe_config.C
 
+    do
+    {
+
 #ifdef CONFIG_HTMGT
     // Set system frequency attributes
     l_errl = FREQVOLTSVC::setSysFreq();
@@ -181,7 +182,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
-
         }
 
         // Enable SBE interrupt for OP systems
@@ -201,7 +201,96 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
         // Commit Error
         errlCommit( err, HWPF_COMP_ID );
+        break; // break out of do-while loop
+
     }
+
+    // Check to see if a special SBE Update needs to be performed on the
+    // Slave Processors for OpenPower Systems without security enabled
+    if ( !INITSERVICE::spBaseServicesEnabled() &&
+         !SECUREBOOT::enabled() )
+    {
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
+                   "call_host_slave_sbe_config: Force SBE Updates on Slave "
+                   "Procs after some attribute customization" );
+
+        // Run nest_chiplet customizeChipRegions function per Proc
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+
+
+        for ( TargetHandleList::const_iterator
+              l_iter = l_procTargetList.begin();
+              l_iter != l_procTargetList.end();
+              ++l_iter )
+        {
+            const TARGETING::Target*  l_proc_target = *l_iter;
+            const fapi::Target l_fapi_proc_target( fapi::TARGET_TYPE_PROC_CHIP,
+                    ( const_cast<TARGETING::Target*>(l_proc_target) ));
+
+            err = NEST_CHIPLETS::customizeChipRegions(*l_iter);
+            if(err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X : NEST_CHIPLETS::customizeChipRegions "
+                          "returns error",
+                          err->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_stepError.addErrorDetails( err );
+
+                // Commit Error
+                errlCommit( err, HWPF_COMP_ID );
+
+                break; // break out of do-while loop
+            }
+        }
+
+        // If running Sapphire, set sleep enable attribute here so
+        // initfile can be run correctly
+        if(is_sapphire_load())
+        {
+            // Naples is treating sleep as nap, which is the attribute default
+            // value (0x0) so can skip setting for NAPLES
+            TARGETING::Target* l_masterProc = NULL;
+            TARGETING::targetService()
+              .masterProcChipTargetHandle(l_masterProc);
+            if( l_masterProc->getAttr<TARGETING::ATTR_MODEL>()
+                != TARGETING::MODEL_NAPLES )
+            {
+                TARGETING::Target* l_sys = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_sys);
+                assert( l_sys != NULL );
+                uint8_t l_sleepEnable = 1;
+                l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
+            }
+        }
+
+        // Now Force a SBE Update only on the Slave Processors
+        err = SBE::updateProcessorSbeSeeproms(SBE::SBE_UPDATE_ONLY_SLAVE_PROCS);
+        if( err )
+        {
+            // Create IStep error log and cross ref error that occurred
+            l_stepError.addErrorDetails( err );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                       "call_host_slave_sbe_config: call to "
+                       "SBE::updateProcessorSbeSeeproms failed: "
+                       "PLID=0x%.08X, RC=0x%.04X",
+                       err->plid(), err->reasonCode() );
+
+            // Commit Error
+            errlCommit( err, HWPF_COMP_ID );
+            break; // break out of do-while loop
+        }
+    } // end of check to force SBE Update on Slave Processors
+
+
+    } while(0); // end of do-while
 
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,7 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libpstates.so),
       DEP_LIB(libcore_activate.so),
       DEP_LIB(libsecure_boot.so),
+      DEP_LIB(libnest_chiplets.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
       DEP_LIB(libocc.so),
 #endif

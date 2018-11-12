@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -332,13 +332,9 @@ namespace SBE
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
      *
-     * @param[io/out] i_check_type  Determines if an early check should be run
-     *                              before collecting all of the information.
-     *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState,
-                               sbeUpdateCheckType& i_check_type);
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState);
 
     /**
      * @brief Analyze and Determine Update Actions for a specific target
