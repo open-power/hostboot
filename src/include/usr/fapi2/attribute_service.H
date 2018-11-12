@@ -280,22 +280,22 @@ ReturnCode fapiAttrSetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
 /// the Row Repair Data attribute. It should not be called directly.
 ///
-/// @param[in]  i_fapiDimm    DIMM target pointer
+/// @param[in]  i_fapiTarget  DIMM target pointer
 /// @param[out] o_data        Row Repair Data
 /// @return     ReturnCode.   Zero on success, else platform specified error
 ///
-ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&o_data) );
 
 ///
 /// @brief This function is called by the FAPI_ATTR_SET macro when setting
 /// the Row Repair Data attribute. It should not be called directly.
 ///
-/// @param[in] i_fapiDimm    DIMM target pointer
+/// @param[in] i_fapiTarget  DIMM target pointer
 /// @param[in] i_data        Row Repair Data
 /// @return    ReturnCode.   Zero on success, else platform specified error
 ///
-ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&i_data) );
 
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting

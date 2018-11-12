@@ -649,138 +649,94 @@ fapi_try_exit:
 // fapi2::platAttrSvc::__badDqBitmapGetHelperAttrs function
 //******************************************************************************
 ReturnCode __badDqBitmapGetHelperAttrs(
-    const TARGETING::TargetHandle_t i_dimmTarget,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint8_t &o_ps )
 {
-    fapi2::ReturnCode l_rc;
+    TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
-    do
+    FAPI_TRY( __getTranslationPortSlct(i_fapiDimm, o_ps) );
+
+    // Get the DQ to DIMM Connector DQ Wiring attribute.
+    // Note that for C-DIMMs, this will return a simple 1:1 mapping.
+    // This code cannot tell the difference between C-DIMMs and IS-DIMMs.
+    if ( TARGETING::MODEL_NIMBUS == procType )
     {
-        Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimmTarget );
+        // memset to avoid known syntax issue with previous compiler
+        // versions and ensure zero initialized array.
+        memset( o_wiringData.nimbus, 0, sizeof(o_wiringData.nimbus) );
 
-        __getTranslationPortSlct( l_fapiDimm, o_ps );
+        Target<TARGET_TYPE_MCA> l_fapiMca =
+            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
 
-        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+        // Get the MCS.
+        Target<TARGET_TYPE_MCS> l_fapiMcs;
+        l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
 
-        // Get the DQ to DIMM Connector DQ Wiring attribute.
-        // Note that for C-DIMMs, this will return a simple 1:1 mapping.
-        // This code cannot tell the difference between C-DIMMs and IS-DIMMs.
-        if ( TARGETING::MODEL_NIMBUS == procType )
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_DQ_MAP, l_fapiMcs,
+                                o_wiringData.nimbus) );
+    }
+    else if ( TARGETING::MODEL_CUMULUS == procType )
+    {
+        // memset to avoid known syntax issue with previous compiler
+        // versions and ensure zero initialized array.
+        memset( o_wiringData.cumulus, 0, sizeof(o_wiringData.cumulus) );
+
+        // Check DIMM type
+        uint8_t l_dimmType = 0;
+
+        Target<TARGET_TYPE_MBA> l_fapiMba =
+            i_fapiDimm.getParent<TARGET_TYPE_MBA>();
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, l_fapiMba,
+                                l_dimmType) );
+
+        // C-DIMMs return a direct 1:1 mapping
+        if ( fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES == l_dimmType )
         {
-            // memset to avoid known syntax issue with previous compiler
-            // versions and ensure zero initialized array.
-            memset( o_wiringData.nimbus, 0, sizeof(o_wiringData.nimbus) );
-
-            Target<TARGET_TYPE_MCA> l_fapiMca =
-                l_fapiDimm.getParent<TARGET_TYPE_MCA>();
-
-            // Get the MCS.
-            Target<TARGET_TYPE_MCS> l_fapiMcs;
-            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
-
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_fapiMcs,
-                                  o_wiringData.nimbus );
-        }
-        else if ( TARGETING::MODEL_CUMULUS == procType )
-        {
-            // memset to avoid known syntax issue with previous compiler
-            // versions and ensure zero initialized array.
-            memset( o_wiringData.cumulus, 0, sizeof(o_wiringData.cumulus) );
-
-            // Check DIMM type
-            uint8_t l_dimmType = 0;
-
-            Target<TARGET_TYPE_MBA> l_fapiMba =
-                l_fapiDimm.getParent<TARGET_TYPE_MBA>();
-
-            TARGETING::TargetHandle_t l_mba = nullptr;
-            errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mba );
-            if ( l_errl )
+            for ( uint8_t port = 0; port < MAX_PORTS_PER_CEN; port++ )
             {
-                FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error from "
-                        "getTargetingTarget getting MBA." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
-
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, l_mba,
-                                  l_dimmType );
-            if ( l_rc )
-            {
-                FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error getting "
-                          "fapi2::ATTR_CEN_EFF_CUSTOM_DIMM" );
-                break;
-            }
-
-            // C-DIMMs return a direct 1:1 mapping
-            if ( fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES == l_dimmType )
-            {
-                for ( uint8_t port = 0; port < MAX_PORTS_PER_CEN; port++ )
+                for ( uint8_t i = 0; i < DIMM_BAD_DQ_NUM_BYTES; i++ )
                 {
-                    for ( uint8_t i = 0; i < DIMM_BAD_DQ_NUM_BYTES; i++ )
-                    {
-                        o_wiringData.cumulus[port][i] = i;
-                    }
+                    o_wiringData.cumulus[port][i] = i;
                 }
             }
-            // ISDIMMs require the mapping from ATTR_CEN_VPD_ISDIMMTOC4DQ
-            else
-            {
-                Target<TARGET_TYPE_MEMBUF_CHIP> l_fapiMembuf =
-                    l_fapiMba.getParent<TARGET_TYPE_MEMBUF_CHIP>();
-
-                TARGETING::TargetHandle_t l_membuf = nullptr;
-                errlHndl_t l_errl = getTargetingTarget( l_fapiMembuf,
-                                                        l_membuf );
-                if ( l_errl )
-                {
-                    FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error from "
-                              "getTargetingTarget getting Membuf." );
-                    l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                    break;
-                }
-                l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
-                                      l_membuf, o_wiringData.cumulus );
-            }
         }
+        // ISDIMMs require the mapping from ATTR_CEN_VPD_ISDIMMTOC4DQ
         else
         {
-            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Invalid procType" );
-            assert(false);
+            Target<TARGET_TYPE_MEMBUF_CHIP> l_fapiMembuf =
+                l_fapiMba.getParent<TARGET_TYPE_MEMBUF_CHIP>();
+
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
+                                    l_fapiMembuf, o_wiringData.cumulus) );
         }
+    }
+    else
+    {
+        // TODO RTC 201603 - generic/axone case
+
+        FAPI_ERR( "__badDqBitmapGetHelperAttrs: Invalid procType" );
+        assert(false);
+    }
 
 
-        if ( l_rc )
-        {
-            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read mapping "
-                      "attribute" );
-            break;
-        }
+    // Manufacturing flags attribute
+    o_allMnfgFlags = 0;
 
-        // Manufacturing flags attribute
-        o_allMnfgFlags = 0;
+    // Get the manufacturing flags bitmap to be used in both get and set
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS,
+                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            o_allMnfgFlags) );
 
-        // Get the manufacturing flags bitmap to be used in both get and set
-        l_rc = FAPI_ATTR_GET( fapi2::ATTR_MNFG_FLAGS,
-                              fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                              o_allMnfgFlags );
-        if ( l_rc )
-        {
-            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read attribute - "
-                      "ATTR_MNFG_FLAGS" );
-            break;
-        }
-
-    }while(0);
-
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
 // fapi2::platAttrSvc::__dimmUpdateDqBitmapEccByte function
 //******************************************************************************
 errlHndl_t __dimmUpdateDqBitmapEccByte(
-    TARGETING::TargetHandle_t i_dimm,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
 {
     errlHndl_t l_errl = nullptr;
@@ -792,7 +748,16 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
 
     do
     {
-        l_errl = deviceRead( i_dimm,
+        TARGETING::TargetHandle_t l_dimm = nullptr;
+        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+        if ( l_errl )
+        {
+            FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Error from "
+                      "getTargetingTarget" );
+            break;
+        }
+
+        l_errl = deviceRead( l_dimm,
                 l_eccBits,
                 MEM_BUS_WIDTH_SIZE,
                 DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH) );
@@ -833,7 +798,8 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
 //******************************************************************************
 // fapi2::platAttrSvc::__dimmGetDqBitmapSpareByte function
 //******************************************************************************
-ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
+ReturnCode __dimmGetDqBitmapSpareByte(
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t (&o_spareByte)[mss::MAX_RANK_PER_DIMM])
 {
     ReturnCode l_rc;
@@ -845,10 +811,9 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
         uint8_t l_dramSpare[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT]
                            [mss::MAX_RANK_PER_DIMM] = {};
 
-        Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimm );
-
-        uint32_t l_ds = i_dimm->getAttr<TARGETING::ATTR_FAPI_POS>() %
-                        mss::MAX_DIMM_PER_PORT;
+        uint32_t l_ds = 0;
+        l_rc = FAPI_ATTR_GET( fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds );
+        l_ds = l_ds % mss::MAX_DIMM_PER_PORT;
 
         uint8_t l_ps = 0;
 
@@ -858,10 +823,10 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
         {
             // We need the port select from the MCS perspective here so we
             // can just use __getTranslationPortSlct.
-            __getTranslationPortSlct( l_fapiDimm, l_ps );
+            __getTranslationPortSlct( i_fapiDimm, l_ps );
 
             Target<TARGET_TYPE_MCA> l_fapiMca =
-                l_fapiDimm.getParent<TARGET_TYPE_MCA>();
+                i_fapiDimm.getParent<TARGET_TYPE_MCA>();
 
             // Get the MCS.
             Target<TARGET_TYPE_MCS> l_fapiMcs;
@@ -873,7 +838,7 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
         else if ( TARGETING::MODEL_CUMULUS == procType )
         {
             Target<TARGET_TYPE_MBA> l_fapiMba =
-                l_fapiDimm.getParent<TARGET_TYPE_MBA>();
+                i_fapiDimm.getParent<TARGET_TYPE_MBA>();
             TARGETING::TargetHandle_t l_mbaTrgt = nullptr;
             errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mbaTrgt );
             if ( l_errl )
@@ -889,8 +854,8 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
             // In this case we need the port select from the MBA perspective
             // not the centaur perspective that __getTranslationPortSlct gives
             // us, so we can't use that function.
-            l_ps = i_dimm->getAttr<TARGETING::ATTR_CEN_MBA_PORT>() %
-                   MAX_PORTS_PER_MBA;
+            FAPI_ATTR_GET( fapi2::ATTR_CEN_MBA_PORT, i_fapiDimm, l_ps );
+            l_ps = l_ps % MAX_PORTS_PER_MBA;
         }
         else
         {
@@ -943,7 +908,7 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
 // fapi2::platAttrSvc::__dimmUpdateDqBitmapSpareByte function
 //******************************************************************************
 ReturnCode __dimmUpdateDqBitmapSpareByte(
-    TARGETING::TargetHandle_t i_dimm,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
 {
     ReturnCode l_rc;
@@ -953,7 +918,7 @@ ReturnCode __dimmUpdateDqBitmapSpareByte(
         uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
         memset( spareByte, 0, sizeof(spareByte) );
 
-        l_rc = __dimmGetDqBitmapSpareByte( i_dimm, spareByte );
+        l_rc = __dimmGetDqBitmapSpareByte( i_fapiDimm, spareByte );
 
         if ( l_rc )
         {
@@ -974,7 +939,7 @@ ReturnCode __dimmUpdateDqBitmapSpareByte(
 //******************************************************************************
 // fapi2::platAttrSvc::__compareEccAndSpare function
 //******************************************************************************
-ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
+ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     bool & o_mfgModeBadBitsPresent,
     uint8_t i_callersData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_eccSpareBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
@@ -995,7 +960,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
         memset( o_eccSpareBitmap, 0, sizeof(o_eccSpareBitmap) );
 
         // Check ECC.
-        l_errl = __dimmUpdateDqBitmapEccByte(i_dimm, o_eccSpareBitmap);
+        l_errl = __dimmUpdateDqBitmapEccByte(i_fapiDimm, o_eccSpareBitmap);
         if ( l_errl )
         {
             FAPI_ERR( "__compareEccAndSpare: Error getting ECC data "
@@ -1005,7 +970,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
         }
 
         // Check spare DRAM.
-        l_rc = __dimmUpdateDqBitmapSpareByte(i_dimm, o_eccSpareBitmap);
+        l_rc = __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_eccSpareBitmap);
         if ( l_rc )
         {
             FAPI_ERR( "__compareEccAndSpare: Error getting spare DRAM data "
@@ -1035,6 +1000,15 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
                       "DISABLE_DRAM_REPAIRS mode found extra bad bits set for "
                       "DIMM" );
 
+            TARGETING::TargetHandle_t l_dimm = nullptr;
+            l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+            if ( l_errl )
+            {
+                FAPI_ERR("__compareEccAndSpare: Error from getTargetingTarget");
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
             /*@
              * @errortype
              * @moduleid     MOD_FAPI2_BAD_DQ_BITMAP
@@ -1050,7 +1024,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
                     ERRORLOG::ERRL_SEV_PREDICTIVE,
                     MOD_FAPI2_BAD_DQ_BITMAP,
                     RC_BAD_DQ_MFG_MODE_BITS,
-                    TARGETING::get_huid(i_dimm) );
+                    TARGETING::get_huid(l_dimm) );
 
             l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[0],
                              sizeof(o_eccSpareBitmap[0]), 1,
@@ -1084,7 +1058,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
                              sizeof(i_callersData[3]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK3 );
 
-            l_errl->addHwCallout(i_dimm, HWAS::SRCI_PRIORITY_HIGH,
+            l_errl->addHwCallout(l_dimm, HWAS::SRCI_PRIORITY_HIGH,
                                  HWAS::DELAYED_DECONFIG, HWAS::GARD_Predictive);
 
             errlCommit( l_errl, HWPF_COMP_ID );
@@ -1098,7 +1072,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
 // fapi2::platAttrSvc::__mcLogicalToDimmDqHelper function
 //******************************************************************************
 ReturnCode __mcLogicalToDimmDqHelper(
-    const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     wiringData  i_wiringData, uint8_t i_ps, uint8_t i_mcPin,
     uint8_t &o_dimm_dq )
 {
@@ -1171,7 +1145,7 @@ ReturnCode __mcLogicalToDimmDqHelper(
 //******************************************************************************
 // fapi2::platAttrSvc::__mcLogicalToDimmDq function
 //******************************************************************************
-ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_mcLogical_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_dimmDq_bitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     wiringData i_wiringData, uint8_t i_spareByte[mss::MAX_RANK_PER_DIMM],
@@ -1248,7 +1222,7 @@ ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 // fapi2::platAttrSvc::__dimmDqToMcLogicalHelper function
 //******************************************************************************
 ReturnCode __dimmDqToMcLogicalHelper(
-    const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     wiringData  i_wiringData, uint8_t i_ps, uint8_t i_dimm_dq,
     uint64_t &o_mcPin )
 {
@@ -1299,7 +1273,7 @@ ReturnCode __dimmDqToMcLogicalHelper(
 //******************************************************************************
 // fapi2::platAttrSvc::__dimmDqToMcLogical function
 //******************************************************************************
-ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_dimmDq_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_mcLogical_bitmap)[mss::MAX_RANK_PER_DIMM]
                                  [mss::BAD_DQ_BYTE_COUNT],
@@ -1363,21 +1337,22 @@ ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 // fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrGetBadDqBitmap(
-    const Target<TARGET_TYPE_ALL>& i_dimmFapiTarget,
+    const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     ATTR_BAD_DQ_BITMAP_Type (&o_data) )
 {
     FAPI_INF(">>fapiAttrGetBadDqBitmap: Getting bitmap");
 
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
-    TARGETING::TargetHandle_t l_dimmTarget = nullptr;
 
     uint8_t * l_badDqData =
         static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
 
     do
     {
-        l_errl = getTargetingTarget( i_dimmFapiTarget, l_dimmTarget );
+        // Get the TARGETING dimm target
+        TARGETING::TargetHandle_t l_dimmTarget = nullptr;
+        l_errl = getTargetingTarget( i_fapiTarget, l_dimmTarget );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrGetBadDqBitmap: Error from getTargetingTarget" );
@@ -1385,11 +1360,14 @@ ReturnCode fapiAttrGetBadDqBitmap(
             break;
         }
 
+        // Get the FAPI dimm target
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
+
         wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
-        l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
+        l_rc = __badDqBitmapGetHelperAttrs( l_fapiDimm, l_wiringData,
                                             l_allMnfgFlags, l_ps );
         if ( l_rc )
         {
@@ -1428,7 +1406,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
             // avoid issues in the setter when SPD DQ is not initialized.
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_errl = __dimmUpdateDqBitmapEccByte( l_dimmTarget, o_data );
+            l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
             if ( l_errl )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
@@ -1437,7 +1415,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
             }
 
             // Check spare DRAM.
-            l_rc = __dimmUpdateDqBitmapSpareByte( l_dimmTarget, o_data );
+            l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, o_data );
             if ( l_rc )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting spare DRAM "
@@ -1448,7 +1426,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
         else
         {
             // Translate bitmap from DIMM DQ to MC Logical format
-            l_rc = __dimmDqToMcLogical( i_dimmFapiTarget, l_spdData.iv_bitmaps,
+            l_rc = __dimmDqToMcLogical( l_fapiDimm, l_spdData.iv_bitmaps,
                                         o_data, l_wiringData, l_ps );
             if ( l_rc )
             {
@@ -1459,7 +1437,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_errl = __dimmUpdateDqBitmapEccByte( l_dimmTarget, o_data );
+            l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
             if ( l_errl )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
@@ -1468,7 +1446,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
             }
 
             // Check spare DRAM.
-            l_rc = __dimmUpdateDqBitmapSpareByte( l_dimmTarget, o_data );
+            l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, o_data );
             if ( l_rc )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting spare DRAM "
@@ -1485,9 +1463,8 @@ ReturnCode fapiAttrGetBadDqBitmap(
                 uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                         [mss::BAD_DQ_BYTE_COUNT];
 
-                l_rc = __compareEccAndSpare( l_dimmTarget,
-                                             mfgModeBadBitsPresent, o_data,
-                                             l_eccSpareBitmap);
+                l_rc = __compareEccAndSpare( l_fapiDimm, mfgModeBadBitsPresent,
+                                             o_data, l_eccSpareBitmap);
                 if ( l_rc )
                 {
                     FAPI_ERR( "fapiAttrGetBadDqBitmap: Error comparing bitmap "
@@ -1526,17 +1503,18 @@ ReturnCode fapiAttrGetBadDqBitmap(
 // fapi2::platAttrSvc::fapiAttrSetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrSetBadDqBitmap(
-    const Target<TARGET_TYPE_ALL>& i_dimmFapiTarget,
+    const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     ATTR_BAD_DQ_BITMAP_Type (&i_data) )
 {
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
-    TARGETING::TargetHandle_t l_dimmTarget = nullptr;
     uint8_t * l_badDqData =
         static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
     do
     {
-        l_errl = getTargetingTarget(i_dimmFapiTarget, l_dimmTarget);
+        // Get the TARGETING dimm target
+        TARGETING::TargetHandle_t l_dimmTarget = nullptr;
+        l_errl = getTargetingTarget( i_fapiTarget, l_dimmTarget );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Error from getTargetingTarget" );
@@ -1544,11 +1522,14 @@ ReturnCode fapiAttrSetBadDqBitmap(
             break;
         }
 
+        // Get the FAPI dimm target
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
+
         wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
-        l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
+        l_rc = __badDqBitmapGetHelperAttrs( l_fapiDimm, l_wiringData,
                                             l_allMnfgFlags, l_ps );
 
         // Read current BadDqBitmap into l_prev_data
@@ -1568,7 +1549,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         uint8_t l_tmpData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
         memcpy( &l_tmpData, &i_data, sizeof(i_data) );
-        l_errl = __dimmUpdateDqBitmapEccByte( l_dimmTarget, l_tmpData );
+        l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, l_tmpData );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting ECC data." );
@@ -1576,7 +1557,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
             break;
         }
 
-        l_rc = __dimmUpdateDqBitmapSpareByte( l_dimmTarget, l_tmpData );
+        l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, l_tmpData );
         if ( l_rc )
         {
             FAPI_ERR("fapiAttrSetBadDqBitmap: Error getting spare DRAM data.");
@@ -1647,7 +1628,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
             uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                     [mss::BAD_DQ_BYTE_COUNT];
 
-            l_rc = __compareEccAndSpare( l_dimmTarget, mfgModeBadBitsPresent,
+            l_rc = __compareEccAndSpare( l_fapiDimm,
+                                         mfgModeBadBitsPresent,
                                          l_tmpData, l_eccSpareBitmap );
             if ( l_rc )
             {
@@ -1694,7 +1676,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
         uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
         memset( spareByte, 0, sizeof(spareByte) );
 
-        l_rc = __dimmGetDqBitmapSpareByte( l_dimmTarget, spareByte );
+        l_rc = __dimmGetDqBitmapSpareByte( l_fapiDimm, spareByte );
         if ( l_rc )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting spare byte" );
@@ -1702,7 +1684,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
         }
 
         // Translate bitmap from MC Logical to DIMM DQ format
-        l_rc = __mcLogicalToDimmDq( i_dimmFapiTarget, i_data,
+        l_rc = __mcLogicalToDimmDq( l_fapiDimm, i_data,
                                     l_spdData.iv_bitmaps, l_wiringData,
                                     spareByte, l_ps );
         if ( l_rc )
@@ -1736,7 +1718,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
 //******************************************************************************
 // fapi2::platAttrSvc::__isX4Dram function
 //******************************************************************************
-ReturnCode __isX4Dram( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                        bool & o_isX4Dram )
 {
     fapi2::ReturnCode l_rc;
@@ -1780,7 +1762,7 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 //******************************************************************************
 // fapi2::platAttrSvc::__dramToDq function
 //******************************************************************************
-ReturnCode __dramToDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode __dramToDq( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_dram, uint8_t & o_dq )
 {
     fapi2::ReturnCode l_rc;
@@ -1807,7 +1789,7 @@ ReturnCode __dramToDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 //******************************************************************************
 // fapi2::platAttrSvc::__dqToDram function
 //******************************************************************************
-ReturnCode __dqToDram( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode __dqToDram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_dq, uint8_t & o_dram )
 {
     fapi2::ReturnCode l_rc;
@@ -1835,7 +1817,7 @@ ReturnCode __dqToDram( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 // fapi2::platAttrSvc::__rowRepairTranslateDramPos function
 //******************************************************************************
 ReturnCode __rowRepairTranslateDramPos(
-    const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     bool i_mcLogicalToDimmDq,
     ATTR_ROW_REPAIR_DATA_Type & io_translatedData )
 {
@@ -1859,7 +1841,7 @@ ReturnCode __rowRepairTranslateDramPos(
         }
 
         // Get the wiring data and port select for translation.
-        l_rc = __badDqBitmapGetHelperAttrs( l_dimm, l_wiringData,
+        l_rc = __badDqBitmapGetHelperAttrs( i_fapiDimm, l_wiringData,
                                             l_allMnfgFlags, l_ps );
         if ( l_rc )
         {
@@ -1943,7 +1925,7 @@ ReturnCode __rowRepairTranslateDramPos(
 //******************************************************************************
 // fapi2::platAttrSvc::getRowRepairData function
 //******************************************************************************
-ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&o_data) )
 {
     fapi2::ReturnCode l_rc;
@@ -1952,9 +1934,9 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
         static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
     do
     {
-        // Get targeting target for the dimm
-        TARGETING::TargetHandle_t l_dimm = nullptr;
-        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+        // Get the TARGETING dimm target
+        TARGETING::TargetHandle_t l_dimmTarget = nullptr;
+        l_errl = getTargetingTarget( i_fapiTarget, l_dimmTarget );
         if ( l_errl )
         {
             FAPI_ERR( "getRowRepairData: Error from getTargetingTarget" );
@@ -1962,11 +1944,14 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
             break;
         }
 
+        // Get the FAPI dimm target
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
+
         // Zero callers data.
         memset(o_data, 0, sizeof(o_data));
 
         // Read the data
-        l_errl = deviceRead( l_dimm, l_data, DIMM_BAD_DQ_SIZE_BYTES,
+        l_errl = deviceRead( l_dimmTarget, l_data, DIMM_BAD_DQ_SIZE_BYTES,
                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
         if ( l_errl )
         {
@@ -1992,7 +1977,7 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
                     sizeof(ATTR_ROW_REPAIR_DATA_Type) );
 
             // Translate the DRAM position in the row repair data
-            l_rc = __rowRepairTranslateDramPos( i_fapiDimm, false,
+            l_rc = __rowRepairTranslateDramPos( l_fapiDimm, false,
                                                 o_data );
             if ( l_rc )
             {
@@ -2016,7 +2001,7 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 //******************************************************************************
 // fapi2::platAttrSvc::setRowRepairData function
 //******************************************************************************
-ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&i_data) )
 {
     fapi2::ReturnCode l_rc;
@@ -2025,9 +2010,9 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
         static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
     do
     {
-        // Get targeting target for the dimm
-        TARGETING::TargetHandle_t l_dimm = nullptr;
-        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+        // Get the TARGETING dimm target
+        TARGETING::TargetHandle_t l_dimmTarget = nullptr;
+        l_errl = getTargetingTarget( i_fapiTarget, l_dimmTarget );
         if ( l_errl )
         {
             FAPI_ERR( "setRowRepairData: Error from getTargetingTarget" );
@@ -2035,8 +2020,11 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
             break;
         }
 
+        // Get the FAPI dimm target
+        Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
+
         // Get the original data.
-        l_errl = deviceRead( l_dimm, l_data, DIMM_BAD_DQ_SIZE_BYTES,
+        l_errl = deviceRead( l_dimmTarget, l_data, DIMM_BAD_DQ_SIZE_BYTES,
                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
         if ( l_errl )
         {
@@ -2059,7 +2047,7 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
         // Translate the input data
         ATTR_ROW_REPAIR_DATA_Type l_translatedData;
         memcpy( &l_translatedData, i_data, sizeof(ATTR_ROW_REPAIR_DATA_Type) );
-        l_rc = __rowRepairTranslateDramPos( i_fapiDimm, true,
+        l_rc = __rowRepairTranslateDramPos( l_fapiDimm, true,
                                             l_translatedData );
         if ( l_rc )
         {
@@ -2073,7 +2061,7 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
                 sizeof(ATTR_ROW_REPAIR_DATA_Type) );
 
         // Write the data back to VPD.
-        l_errl = deviceWrite( l_dimm, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
+        l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
                               DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
         if ( l_errl )
         {
