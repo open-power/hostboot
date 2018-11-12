@@ -28,6 +28,7 @@ MODULE = testsmf
 
 TESTS = testsmfutils.H
 TESTS += testmemutils.H
+TESTS += testsmf.H
 
 include ${ROOTPATH}/config.mk
 

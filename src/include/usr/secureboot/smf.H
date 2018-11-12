@@ -39,26 +39,59 @@ namespace SMF
 {
 
 /**
- * @brief A function that destributes the requested amount of secure
+ * @brief A function that distributes the requested amount of secure
  *        memory between the functional procs with memory on the system.
  *        The memory is distributed in power-of-two chunks of 256MB
  *        until either all memory is distributed or there are no procs
- *        remaining with memory available. The function returns predictive
- *        or informational errors in the following cases: there is no
- *        available memory behind the procs on the system (predictive error),
- *        the exact amount of secure mem allocated did not match the requested
- *        amount (informational error). If 0 is passed in to the function, no
- *        attempt at distribution occurs and the SMF mode is turned off.
+ *        remaining with memory available. If the requested amount is not
+ *        a power-of-two factor of 256MB, the amount of memory will be rounded
+ *        up accordingly. The function returns predictive or informational
+ *        errors in the following cases: there is no available memory behind the
+ *        procs on the system (predictive error), the exact amount of secure mem
+ *        allocated did not match the requested amount (informational error). If
+ *        0 is passed in to the function, no attempt at distribution occurs and
+ *        the SMF mode is turned off.
  *
  * @param[in] i_requestedSmfMemAmtInBytes the amount of secure memory to be
- *            distributed (in bytes)
- *            among the procs on the system
+ *            distributed (in bytes) among the procs on the system
  *
  * @return   nullptr: the memory was successfully distributed as requested
- *           non-nullptr: a distribution error occurred (this error is never
- *           unrecoverable)
+ *           non-nullptr: a distribution error occurred (the error type will
+ *           never be unrecoverable)
  */
-errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes);
+errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes);
+
+/**
+ * @brief Function to distribute the requested amount of SMF memory between
+ *        passed in procs with available memory. If 0 is passed in to the
+ *        function, no attempt at distribution occurs and the SMF mode is turned
+ *        off. Amount that are not power-of-two factors of 256MB are rounded up
+ *        accordingly.
+ *
+ * @param[in] i_requestedSmfMemAmtInBytes the requested amount of secure memory
+ *            to distribute between the procs (in bytes)
+ *
+ * @param[in] i_procToMemVec the vector of available procs on the system and
+ *            the amount of memory attached to each
+  *
+ * @return nullptr: distribution was successful
+ *         non-nullptr: an error occurred during distribution (the error type
+ *         will never be unrecoverable)
+ */
+errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
+                            std::vector<struct ProcToMemAssoc>& i_procToMemVec);
+
+/**
+ * @brief Helper function to return the total amount of memory available behind
+ *        the given proc
+ *
+ * @param[in] i_proc the proc target to calculate the total memory for
+ *
+ * @pre       the target must not be nullptr or the funtion will assert
+ *
+ * @return the total amount of memory, in bytes, available behind the input proc
+ */
+uint64_t getTotalProcMemSize(const TARGETING::Target* const i_proc);
 
 } // namespace SMF
 } // namespace SECUREBOOT

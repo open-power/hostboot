@@ -39,7 +39,40 @@
 
 class SmfUtilsTestSuite : public CxxTest::TestSuite
 {
+private:
+    bool cv_isSmfLoaded;
+
 public:
+
+    SmfUtilsTestSuite() : cv_isSmfLoaded(false)
+    {
+        errlHndl_t l_errl = nullptr;
+        l_errl = VFS::module_load("libsmf.so");
+        if(l_errl)
+        {
+            TS_FAIL("SmfUtilsTestSuite(): could not load libsmf.so");
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            cv_isSmfLoaded = false;
+        }
+        else
+        {
+            cv_isSmfLoaded = true;
+        }
+    }
+
+    ~SmfUtilsTestSuite()
+    {
+        if(cv_isSmfLoaded)
+        {
+            errlHndl_t l_errl = nullptr;
+            l_errl = VFS::module_unload("libsmf.so");
+            if(l_errl)
+            {
+                TS_FAIL("~SmfUtilsTestSuite(): could not unload libsmf.so");
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+        }
+    }
 
     /**
      * @brief Test isSmfEnabled helper function
@@ -49,18 +82,15 @@ public:
         TS_INFO(ENTER_MRK "testIsSmfEnabled");
 
         do {
+        if(!cv_isSmfLoaded)
+        {
+            break;
+        }
+
         TARGETING::Target* l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_sys);
         assert(l_sys, "The top level target is nullptr!");
         l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(true);
-
-        errlHndl_t l_errl = VFS::module_load("libsmf.so");
-        if(l_errl)
-        {
-            TS_FAIL("Could not load libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
 
         bool l_smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
         if(l_smfEnabled != true)
@@ -75,13 +105,6 @@ public:
             TS_FAIL("testIsSmfEnabled: expected SMF to be disabled, but it's enabled");
         }
 
-        l_errl = VFS::module_unload("libsmf.so");
-        if(l_errl)
-        {
-            TS_FAIL("Could not unload libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
         } while (0);
 
         TS_INFO(EXIT_MRK "testIsSmfEnabled");
@@ -93,20 +116,15 @@ public:
     void testCheckRiskLevelForSmf() const
     {
         TS_INFO(ENTER_MRK "testCheckRiskLevelForSmf");
-        bool l_libsmf_loaded = false;
         errlHndl_t l_errl = nullptr;
 
         do {
-        TARGETING::Target* l_masterProc = nullptr;
-
-        l_errl = VFS::module_load("libsmf.so");
-        if(l_errl)
+        if(!cv_isSmfLoaded)
         {
-            TS_FAIL("Could not load libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
             break;
         }
-        l_libsmf_loaded = true;
+
+        TARGETING::Target* l_masterProc = nullptr;
 
         l_errl = TARGETING::targetService()
                                  .queryMasterProcChipTargetHandle(l_masterProc);
@@ -158,16 +176,6 @@ public:
             }
         }
         } while(0);
-
-        if(l_libsmf_loaded)
-        {
-            l_errl = VFS::module_unload("libsmf.so");
-            if(l_errl)
-            {
-                TS_FAIL("Could not unload libsmf.so");
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
 
         TS_INFO(EXIT_MRK "testCheckRiskLevelForSmf");
     }

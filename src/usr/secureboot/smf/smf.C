@@ -71,19 +71,12 @@ struct ProcToMemAssoc
     }
 };
 
-/**
- * @brief helper function to return the total amount of memory available behind
- *        the given proc
- *
- * @param[in] i_proc the proc target to calculate the total memory for
- *
- * @return the total amount of memory, in bytes, available behind the input proc
- */
 uint64_t getTotalProcMemSize(const TARGETING::Target* const i_proc)
 {
     TARGETING::ATTR_PROC_MEM_SIZES_type l_procMemSizes = {};
     uint64_t l_totProcMem = 0;
 
+    assert(i_proc, "nullptr was passed to getTotalProcMemSize");
     assert(i_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_procMemSizes),
            "Could not get ATTR_PROC_MEM_SIZES from a proc target!");
 
@@ -109,63 +102,28 @@ void setSmfEnabled(bool i_enabled)
     l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(i_enabled);
 }
 
-/**
- * @brief function to distribute the requested amount of memory between procs
- *        with available memory on the system
- *
- * @param[in] i_requestedSmfMemAmtInBytes the requested amount of secure memory
- *            to distribute between the procs (in bytes)
- *
- * @return nullptr: distribution was successful
- *         non-nullptr: an error occurred during distribution (the error will
- *         never be unrecoverable)
- */
-errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
+errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
+                            std::vector<struct ProcToMemAssoc>& i_procToMemVec)
 {
     errlHndl_t l_errl = nullptr;
 
-    do {
+    do{
 
+    // The agreed-upon logic for handling 0 SMF memory request is to turn SMF
+    // mode off and not to attempt to distribute any memory
     if(i_requestedSmfMemAmtInBytes == 0)
     {
         TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: Requested 0 memory amount; SMF mode will be turned off.");
         setSmfEnabled(false);
-        break;
-    }
 
-    std::vector<struct ProcToMemAssoc>l_procToMemVec;
-
-    // Get all the functional procs amongs which we will distribute the
-    // requested SMF memory
-    TARGETING::TargetHandleList l_procList;
-    TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
-
-    assert(l_procList.size(), "distributeSmfMem: no procs were found on the system");
-
-    // Populate the vector of processor memory associations
-    for(const auto l_proc : l_procList)
-    {
-        struct ProcToMemAssoc l_pToM(l_proc,
-                                     0,
-                                     getTotalProcMemSize(l_proc),
-                                     true);
-
-        // The proc with lowest address 0 needs to have 8GB subtracted from
-        // the available mem. This is done to make sure that hostboot can
-        // run on that proc.
-        if(ISTEP::get_bottom_mem_addr(l_proc) == 0)
+        for(auto& l_proc : i_procToMemVec)
         {
-            if(l_pToM.availableMem >= MIN_MEM_RESERVED_FOR_HB)
-            {
-                l_pToM.availableMem -= MIN_MEM_RESERVED_FOR_HB;
-            }
-            else
-            {
-                l_pToM.availableMem = 0;
-            }
-            TRACDCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: memory behind proc 0x%x has been reduced by 0x%x", TARGETING::get_huid(l_proc), MIN_MEM_RESERVED_FOR_HB);
+            l_proc.proc->setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(0);
         }
-        l_procToMemVec.push_back(l_pToM);
+
+        // No need to proceed with trying to allocate the memory if the
+        // requested amt is 0, so break out here.
+        break;
     }
 
     TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: distributing 0x%.16llx requested memory.", i_requestedSmfMemAmtInBytes);
@@ -181,7 +139,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
     // requested memory or ran out of procs to allocate the mem on.
     while(true)
     {
-        for(auto& l_member : l_procToMemVec)
+        for(auto& l_member : i_procToMemVec)
         {
             // This will be recalculated every loop.
             l_allocatedSoFar = 0;
@@ -221,7 +179,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
                 // We need to check this on each allocation (after each proc)
                 // because we may have to stop mid way through the proc loop
                 // when we've allocated all requested mem.
-                for(const auto& l_proc : l_procToMemVec)
+                for(const auto& l_proc : i_procToMemVec)
                 {
                     l_allocatedSoFar += l_proc.memToAllocate;
                 }
@@ -248,7 +206,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
         // Find out if we still have procs remaining. If not, then the
         // user has requested too much memory to be allocated.
         uint8_t l_procsStillRemaining = 0;
-        for(const auto& l_usableProc : l_procToMemVec)
+        for(const auto& l_usableProc : i_procToMemVec)
         {
             l_procsStillRemaining |= l_usableProc.useProc;
         }
@@ -256,7 +214,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
         // Commit the allocated memory to each proc
         if(!l_procsStillRemaining || l_remainingAmtToAllocate <= 0)
         {
-            for(auto l_Proc : l_procToMemVec)
+            for(auto l_Proc : i_procToMemVec)
             {
                 l_Proc.proc->
                     setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(
@@ -268,12 +226,12 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
     } // while true
 
     uint64_t l_totMemOnSystem = 0; // For error handling below
-    for(const auto l_proc : l_procList)
+    for(const auto& l_proc : i_procToMemVec)
     {
         TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: proc 0x%x SMF_BAR_SIZE = 0x%.16llx",
-                  TARGETING::get_huid(l_proc),
-                  l_proc->getAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>());
-        l_totMemOnSystem += getTotalProcMemSize(l_proc);
+                  TARGETING::get_huid(l_proc.proc),
+                  l_proc.proc->getAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>());
+        l_totMemOnSystem += getTotalProcMemSize(l_proc.proc);
     }
 
     // Error conditions
@@ -331,6 +289,75 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
                                          i_requestedSmfMemAmtInBytes,
                                          l_totalAllocated);
         l_errl->collectTrace(SMF_COMP_NAME);
+        break;
+    }
+
+    }while(0);
+
+    return l_errl;
+}
+
+errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+
+    std::vector<struct ProcToMemAssoc>l_procToMemVec;
+
+    // Get all the functional procs amongs which we will distribute the
+    // requested SMF memory
+    TARGETING::TargetHandleList l_procList;
+    TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
+
+    assert(l_procList.size(), "distributeSmfMem: no procs were found on the system");
+
+    // The agreed-upon logic for handling 0 SMF memory request is to turn SMF
+    // mode off and not to attempt to distribute any memory
+    if(i_requestedSmfMemAmtInBytes == 0)
+    {
+        TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: Requested 0 memory amount; SMF mode will be turned off.");
+        setSmfEnabled(false);
+
+        for(auto& l_proc : l_procList)
+        {
+            l_proc->setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(0);
+        }
+
+        // No need to proceed with trying to allocate the memory if the
+        // requested amt is 0, so break out here.
+        break;
+    }
+
+    // Populate the vector of processor memory associations
+    for(const auto l_proc : l_procList)
+    {
+        struct ProcToMemAssoc l_pToM(l_proc,
+                                     0,
+                                     getTotalProcMemSize(l_proc),
+                                     true);
+
+        // The proc with lowest address 0 needs to have 8GB subtracted from
+        // the available mem. This is done to make sure that hostboot can
+        // run on that proc.
+        if(ISTEP::get_bottom_mem_addr(l_proc) == 0)
+        {
+            if(l_pToM.availableMem >= MIN_MEM_RESERVED_FOR_HB)
+            {
+                l_pToM.availableMem -= MIN_MEM_RESERVED_FOR_HB;
+            }
+            else
+            {
+                l_pToM.availableMem = 0;
+            }
+            TRACDCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: memory behind proc 0x%x has been reduced by 0x%x", TARGETING::get_huid(l_proc), MIN_MEM_RESERVED_FOR_HB);
+        }
+        l_procToMemVec.push_back(l_pToM);
+    }
+
+    l_errl = distributeSmfMem(i_requestedSmfMemAmtInBytes, l_procToMemVec);
+    if(l_errl)
+    {
         break;
     }
 

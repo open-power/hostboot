@@ -38,7 +38,40 @@
 
 class MemUtilsTestSuite : public CxxTest::TestSuite
 {
+private:
+    bool cv_isSmfLoaded;
+
 public:
+
+    MemUtilsTestSuite() : cv_isSmfLoaded(false)
+    {
+        errlHndl_t l_errl = nullptr;
+        l_errl = VFS::module_load("libsmf.so");
+        if(l_errl)
+        {
+            TS_FAIL("MemUtilsTestSuite(): could not load libsmf.so");
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            cv_isSmfLoaded = false;
+        }
+        else
+        {
+            cv_isSmfLoaded = true;
+        }
+    }
+
+    ~MemUtilsTestSuite()
+    {
+        if(cv_isSmfLoaded)
+        {
+            errlHndl_t l_errl = nullptr;
+            l_errl = VFS::module_unload("libsmf.so");
+            if(l_errl)
+            {
+                TS_FAIL("~MemUtilsTestSuite(): could not unload libsmf.so");
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+        }
+    }
 
     /**
      * @brief Test get_top_mem_addr and get_bottom_mem_addr helper functions;
@@ -47,10 +80,14 @@ public:
     void testGetTopBotMemAddr() const
     {
         TS_INFO(ENTER_MRK "testGetTopBotMemAddr");
-        bool l_libsmf_loaded = false;
         errlHndl_t l_errl = nullptr;
 
         do {
+        if(!cv_isSmfLoaded)
+        {
+            break;
+        }
+
         const uint64_t TEST_TOP_MEM_SIZE = 0xdeadbeefbeefdead;
         TARGETING::ATTR_PROC_MEM_SIZES_type l_mProcMemSizes = {
             TEST_TOP_MEM_SIZE, 0, 0, 0, 0, 0, 0, 0};
@@ -60,15 +97,6 @@ public:
         TARGETING::ATTR_PROC_MEM_BASES_type l_origMemBases = {};
 
         TARGETING::Target* l_masterProc = nullptr;
-
-        l_errl = VFS::module_load("libsmf.so");
-        if(l_errl)
-        {
-            TS_FAIL("Could not load libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
-        l_libsmf_loaded = true;
 
         l_errl = TARGETING::targetService()
                                  .queryMasterProcChipTargetHandle(l_masterProc);
@@ -146,16 +174,6 @@ public:
         l_masterProc->setAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_origMemBases);
         } while(0);
 
-        if(l_libsmf_loaded)
-        {
-            l_errl = VFS::module_unload("libsmf.so");
-            if(l_errl)
-            {
-                TS_FAIL("Could not unload libsmf.so");
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
-
         TS_INFO(EXIT_MRK "testGetTopBotMemAddr");
     }
 
@@ -166,23 +184,18 @@ public:
     void testGetTopSmfMemAddr() const
     {
         TS_INFO(ENTER_MRK "testGetTopSmfMemAddr");
-        bool l_libsmf_loaded = false;
         errlHndl_t l_errl = nullptr;
 
         do {
+        if(!cv_isSmfLoaded)
+        {
+            break;
+        }
+
         const uint64_t TEST_SMF_MEM_SIZE = 0xbeefdeaddeadbeef;
         const uint64_t TEST_SMF_BAR = 0;
 
         TARGETING::Target* l_masterProc = nullptr;
-
-        l_errl = VFS::module_load("libsmf.so");
-        if(l_errl)
-        {
-            TS_FAIL("Could not load libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
-        l_libsmf_loaded = true;
 
         l_errl = TARGETING::targetService()
                                  .queryMasterProcChipTargetHandle(l_masterProc);
@@ -221,16 +234,6 @@ public:
                    setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(l_origSmfMemSize);
         } while(0);
 
-        if(l_libsmf_loaded)
-        {
-            l_errl = VFS::module_unload("libsmf.so");
-            if(l_errl)
-            {
-                TS_FAIL("Could not unload libsmf.so");
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
-
         TS_INFO(EXIT_MRK "testGetTopSmfMemAddr");
     }
 
@@ -241,24 +244,19 @@ public:
     void testGetTopHomerMemAddr() const
     {
         TS_INFO(ENTER_MRK"testGetTopHomerMemAddr");
-        bool l_libsmf_loaded = false;
         errlHndl_t l_errl = nullptr;
 
         do {
+        if(!cv_isSmfLoaded)
+        {
+            break;
+        }
+
         const uint64_t TEST_SMF_BAR = 0;
         const uint64_t TEST_SMF_BAR_SIZE = 0xdeadbeefdeadbeef;
 
         TARGETING::Target* l_sys = nullptr;
         TARGETING::Target* l_masterProc = nullptr;
-
-        l_errl = VFS::module_load("libsmf.so");
-        if(l_errl)
-        {
-            TS_FAIL("Could not load libsmf.so");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
-        l_libsmf_loaded = true;
 
         l_errl = TARGETING::targetService()
                                  .queryMasterProcChipTargetHandle(l_masterProc);
@@ -305,16 +303,6 @@ public:
                    setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(l_origSmfMemSize);
         l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(false);
         } while(0);
-
-        if(l_libsmf_loaded)
-        {
-            l_errl = VFS::module_unload("libsmf.so");
-            if(l_errl)
-            {
-                TS_FAIL("Could not unload libsmf.so");
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
 
         TS_INFO(EXIT_MRK"testGetTopHomerMemAddr");
     }
