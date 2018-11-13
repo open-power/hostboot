@@ -35,6 +35,16 @@
 namespace SBE
 {
     /**
+     *  @brief Enumeration indicating whether SBE SEEPROM update should
+     *      allow key transitioning (if applicable)
+     */
+    enum KEY_TRANSITION_PERM : uint8_t
+    {
+        INHIBIT_KEY_TRANSITION = 0x00,
+        ALLOW_KEY_TRANSITION   = 0x01,
+    };
+
+    /**
      * @brief Gets a pointer to the proper SBE image in PNOR
      *
      * @param[in] i_target     Target used to find right SBE Image in PNOR
@@ -60,9 +70,14 @@ namespace SBE
      * @brief Iterates through all the functional processors and updates
      *        the SBE Image in a SEEPROM, if necessary.
      *
+     * @param[in] i_keyTransPerm Whether key transitions should be allowed
+     *     or inhibited (if applicable).  By default, they are inhibited.
+     *     Only istep 10.2 should allow key transitioning.
+     *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateProcessorSbeSeeproms();
+    errlHndl_t updateProcessorSbeSeeproms(
+        KEY_TRANSITION_PERM i_keyTransPerm = INHIBIT_KEY_TRANSITION);
 
     /**
      * @brief Determines whether we are on the Golden side or not
