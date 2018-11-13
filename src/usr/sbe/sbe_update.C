@@ -115,7 +115,8 @@ using namespace TARGETING;
 
 namespace SBE
 {
-    errlHndl_t updateProcessorSbeSeeproms()
+    errlHndl_t updateProcessorSbeSeeproms(
+        const KEY_TRANSITION_PERM i_keyTransPerm)
     {
         errlHndl_t err = NULL;
         errlHndl_t err_cleanup = NULL;
@@ -260,8 +261,12 @@ namespace SBE
                  err = NULL;
             }
 
-            // Check if a key transition is needed
-            err = secureKeyTransition();
+            // Check if a key transition is allowed/needed
+            if(i_keyTransPerm == ALLOW_KEY_TRANSITION)
+            {
+                err = secureKeyTransition();
+            }
+
             if (err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");

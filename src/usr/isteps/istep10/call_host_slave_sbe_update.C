@@ -271,7 +271,8 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
         // Call to check state of Processor SBE SEEPROMs and
         // make any necessary updates
-        l_errl = SBE::updateProcessorSbeSeeproms();
+        l_errl = SBE::updateProcessorSbeSeeproms(
+            SBE::KEY_TRANSITION_PERM::ALLOW_KEY_TRANSITION);
 
         if (l_errl)
         {
