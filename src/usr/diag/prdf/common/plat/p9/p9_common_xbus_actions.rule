@@ -68,3 +68,10 @@ actionclass maxSparesExceeded_xbus_clkgrp1 { maxSparesExceeded; };
 actionclass tooManyBusErrors_xbus_clkgrp0 { tooManyBusErrors; };
 actionclass tooManyBusErrors_xbus_clkgrp1 { tooManyBusErrors; };
 
+################################################################################
+# Analyze groups
+################################################################################
+
+actionclass analyzeIOELFIR { analyze(gIOELFIR); };
+actionclass analyzeIOXBFIR { analyze(gIOXBFIR); };
+

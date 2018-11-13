@@ -229,10 +229,10 @@ rule rEX
 group gEX attntype CHECK_STOP, RECOVERABLE
     filter singlebit
 {
-    (rEX, bit(0)) ? analyze(gL2FIR);
-    (rEX, bit(1)) ? analyze(gNCUFIR);
-    (rEX, bit(2)) ? analyze(gL3FIR);
-    (rEX, bit(3)) ? analyze(gCMEFIR);
+    (rEX, bit(0)) ? analyzeL2FIR;
+    (rEX, bit(1)) ? analyzeNCUFIR;
+    (rEX, bit(2)) ? analyzeL3FIR;
+    (rEX, bit(3)) ? analyzeCMEFIR;
 };
 
 ################################################################################

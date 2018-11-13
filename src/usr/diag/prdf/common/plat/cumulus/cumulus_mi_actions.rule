@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/cumulus/cumulus_dmi_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/cumulus/cumulus_mi_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,39 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass analyzeConnectedMembuf
-{
-    analyze(connected(TYPE_MEMBUF, 0));
-};
-
-actionclass analyzeConnectedMembuf_UERE
-{
-    SueSource;
-    analyzeConnectedMembuf;
-};
-
-actionclass dmi_bus_th_1
-{
-    funccall("calloutBusInterfacePlugin");
-    threshold1;
-};
-
-actionclass dmi_bus_th_1_UERE
-{
-    SueSource;
-    dmi_bus_th_1;
-};
-
-actionclass dsffChannelTimeout_UERE
-{
-    SueSource;
-    threshold1;
-    funccall("dsffChannelTimeoutCheck");
-};
-
 ################################################################################
 # Analyze groups
 ################################################################################
 
-actionclass analyzeCHIFIR { analyze(gCHIFIR); };
+actionclass analyzeMCFIR { analyze(gMCFIR); };
 

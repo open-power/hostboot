@@ -82,3 +82,13 @@ actionclass core_recovery_workaround
     try( analyze(connected(TYPE_CORE, 0)),
          analyze(connected(TYPE_CORE, 1)) );
 };
+
+################################################################################
+# Analyze groups
+################################################################################
+
+actionclass analyzeCMEFIR { analyze(gCMEFIR); };
+actionclass analyzeL2FIR  { analyze(gL2FIR);  };
+actionclass analyzeL3FIR  { analyze(gL3FIR);  };
+actionclass analyzeNCUFIR { analyze(gNCUFIR); };
+

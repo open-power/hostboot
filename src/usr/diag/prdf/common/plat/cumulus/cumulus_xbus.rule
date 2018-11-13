@@ -157,8 +157,8 @@ rule rXBUS
 group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
     filter singlebit
 {
-    (rXBUS, bit(0)) ? analyze(gIOXBFIR);
-    (rXBUS, bit(1)) ? analyze(gIOELFIR);
+    (rXBUS, bit(0)) ? analyzeIOXBFIR;
+    (rXBUS, bit(1)) ? analyzeIOELFIR;
 };
 
 ################################################################################

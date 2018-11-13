@@ -188,9 +188,9 @@ rule rPHB
 group gPHB attntype CHECK_STOP, RECOVERABLE
     filter singlebit
 {
-    (rPHB, bit(0)) ? analyze(gPHBNFIR);
-    (rPHB, bit(1)) ? analyze(gPCIFIR);
-    (rPHB, bit(2)) ? analyze(gETUFIR);
+    (rPHB, bit(0)) ? analyzePHBNFIR;
+    (rPHB, bit(1)) ? analyzePCIFIR;
+    (rPHB, bit(2)) ? analyzeETUFIR;
 };
 
 ################################################################################
