@@ -1271,15 +1271,15 @@ TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type )
 
 //------------------------------------------------------------------------------
 
-bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget )
+bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt )
 {
-    bool o_lastEx = false;
+    bool o_lastCore = false;
 
-    TargetHandleList l_list = getFunctionalTargetList( TYPE_EX );
-    if ( 1 == l_list.size() && l_list[0] == i_exTarget )
-        o_lastEx = true;
+    TargetHandleList l_list = getFunctionalTargetList( TYPE_CORE );
+    if ( 1 == l_list.size() && l_list[0] == i_trgt )
+        o_lastCore = true;
 
-    return o_lastEx;
+    return o_lastCore;
 }
 
 //------------------------------------------------------------------------------
