@@ -735,10 +735,11 @@ fapi_try_exit:
 //******************************************************************************
 // fapi2::platAttrSvc::__dimmUpdateDqBitmapEccByte function
 //******************************************************************************
-errlHndl_t __dimmUpdateDqBitmapEccByte(
+ReturnCode __dimmUpdateDqBitmapEccByte(
     const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
 {
+    ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
 
     const uint8_t ECC_DQ_BYTE_NUMBER_INDEX = 8;
@@ -754,17 +755,17 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
         {
             FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Error from "
                       "getTargetingTarget" );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
             break;
         }
 
-        l_errl = deviceRead( l_dimm,
-                l_eccBits,
-                MEM_BUS_WIDTH_SIZE,
-                DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH) );
+        l_errl = deviceRead( l_dimm, l_eccBits, MEM_BUS_WIDTH_SIZE,
+                             DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH) );
         if ( l_errl )
         {
             FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Failed to get "
                       "SPD::MODULE_MEMORY_BUS_WIDTH." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
             break;
         }
 
@@ -792,7 +793,7 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
         l_eccBits = nullptr;
     }
 
-    return l_errl;
+    return l_rc;
 }
 
 //******************************************************************************
@@ -803,105 +804,86 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     uint8_t (&o_spareByte)[mss::MAX_RANK_PER_DIMM])
 {
     ReturnCode l_rc;
+    TARGETING::ATTR_MODEL_type procType = __getChipModel();
+    uint8_t l_ps = 0;
 
-    do
+    // Spare DRAM Attribute: Returns spare DRAM availability for
+    // all DIMMs associated with the target MCS.
+    uint8_t l_dramSpare[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT]
+                       [mss::MAX_RANK_PER_DIMM] = {};
+
+    uint32_t l_ds = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds) );
+    l_ds = l_ds % mss::MAX_DIMM_PER_PORT;
+
+    if ( TARGETING::MODEL_NIMBUS == procType )
     {
-        // Spare DRAM Attribute: Returns spare DRAM availability for
-        // all DIMMs associated with the target MCS.
-        uint8_t l_dramSpare[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT]
-                           [mss::MAX_RANK_PER_DIMM] = {};
+        // We need the port select from the MCS perspective here so we
+        // can just use __getTranslationPortSlct.
+        __getTranslationPortSlct( i_fapiDimm, l_ps );
 
-        uint32_t l_ds = 0;
-        l_rc = FAPI_ATTR_GET( fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds );
-        l_ds = l_ds % mss::MAX_DIMM_PER_PORT;
+        Target<TARGET_TYPE_MCA> l_fapiMca =
+            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
 
-        uint8_t l_ps = 0;
+        // Get the MCS.
+        Target<TARGET_TYPE_MCS> l_fapiMcs;
+        l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
 
-        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_SPARE, l_fapiMcs,
+                                l_dramSpare) );
+    }
+    else if ( TARGETING::MODEL_CUMULUS == procType )
+    {
+        // In this case we need the port select from the MBA perspective
+        // not the centaur perspective that __getTranslationPortSlct gives
+        // us, so we can't use that function.
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, i_fapiDimm, l_ps));
+        l_ps = l_ps % MAX_PORTS_PER_MBA;
 
-        if ( TARGETING::MODEL_NIMBUS == procType )
+        Target<TARGET_TYPE_MBA> l_fapiMba =
+            i_fapiDimm.getParent<TARGET_TYPE_MBA>();
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DIMM_SPARE, l_fapiMba,
+                                l_dramSpare) );
+    }
+    else
+    {
+        // TODO RTC 201603 - generic/axone case
+
+        FAPI_ERR( "__dimmGetDqBitmapSpareByte: Invalid procType" );
+        assert(false);
+    }
+
+    // Iterate through each rank of this DIMM
+    for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+    {
+        // Handle spare DRAM configuration cases
+        switch ( l_dramSpare[l_ps][l_ds][i] )
         {
-            // We need the port select from the MCS perspective here so we
-            // can just use __getTranslationPortSlct.
-            __getTranslationPortSlct( i_fapiDimm, l_ps );
-
-            Target<TARGET_TYPE_MCA> l_fapiMca =
-                i_fapiDimm.getParent<TARGET_TYPE_MCA>();
-
-            // Get the MCS.
-            Target<TARGET_TYPE_MCS> l_fapiMcs;
-            l_fapiMcs = l_fapiMca.getParent<TARGET_TYPE_MCS>();
-
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_fapiMcs,
-                                  l_dramSpare );
-        }
-        else if ( TARGETING::MODEL_CUMULUS == procType )
-        {
-            Target<TARGET_TYPE_MBA> l_fapiMba =
-                i_fapiDimm.getParent<TARGET_TYPE_MBA>();
-            TARGETING::TargetHandle_t l_mbaTrgt = nullptr;
-            errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mbaTrgt );
-            if ( l_errl )
-            {
-                FAPI_ERR( "__dimmGetDqBitmapSpareByte: Error from "
-                          "getTargetingTarget getting MBA." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE:
+                // Set DQ bits reflecting unconnected
+                // spare DRAM in caller's data
+                o_spareByte[i] = 0xFF;
                 break;
-            }
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_DIMM_SPARE, l_mbaTrgt,
-                                  l_dramSpare );
 
-            // In this case we need the port select from the MBA perspective
-            // not the centaur perspective that __getTranslationPortSlct gives
-            // us, so we can't use that function.
-            FAPI_ATTR_GET( fapi2::ATTR_CEN_MBA_PORT, i_fapiDimm, l_ps );
-            l_ps = l_ps % MAX_PORTS_PER_MBA;
-        }
-        else
-        {
-            FAPI_ERR( "__dimmGetDqBitmapSpareByte: Invalid procType" );
-            assert(false);
-        }
+            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE:
+                o_spareByte[i] = 0x0F;
+                break;
 
-        if ( l_rc )
-        {
-            FAPI_ERR( "__dimmGetDqBitmapSpareByte: Error getting DRAM Spare "
-                     "data." );
-            break;
-        }
-
-        // Iterate through each rank of this DIMM
-        for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
-        {
-            // Handle spare DRAM configuration cases
-            switch ( l_dramSpare[l_ps][l_ds][i] )
-            {
-                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE:
-                    // Set DQ bits reflecting unconnected
-                    // spare DRAM in caller's data
-                    o_spareByte[i] = 0xFF;
-                    break;
-
-                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE:
-                    o_spareByte[i] = 0x0F;
-                    break;
-
-                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE:
-                    o_spareByte[i] = 0xF0;
-                    break;
+            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE:
+                o_spareByte[i] = 0xF0;
+                break;
 
                 // As erroneous value will not be encountered.
-                case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE:
-                default:
-                    o_spareByte[i] = 0x0;
-                    break;
-            }
+            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE:
+            default:
+                o_spareByte[i] = 0x0;
+                break;
         }
+    }
 
-    }while(0);
-
-    return l_rc;
-
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -913,27 +895,18 @@ ReturnCode __dimmUpdateDqBitmapSpareByte(
 {
     ReturnCode l_rc;
 
-    do
+    uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
+    memset( spareByte, 0, sizeof(spareByte) );
+
+    FAPI_TRY( __dimmGetDqBitmapSpareByte(i_fapiDimm, spareByte) );
+
+    for ( uint32_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
     {
-        uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
-        memset( spareByte, 0, sizeof(spareByte) );
+        o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] |= spareByte[i];
+    }
 
-        l_rc = __dimmGetDqBitmapSpareByte( i_fapiDimm, spareByte );
-
-        if ( l_rc )
-        {
-            FAPI_ERR("__dimmUpdateDqBitmapSpareByte: Error getting spare byte");
-            break;
-        }
-
-        for ( uint32_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
-        {
-            o_data[i][SPARE_DRAM_DQ_BYTE_NUMBER_INDEX] |= spareByte[i];
-        }
-
-    }while(0);
-
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -960,23 +933,10 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
         memset( o_eccSpareBitmap, 0, sizeof(o_eccSpareBitmap) );
 
         // Check ECC.
-        l_errl = __dimmUpdateDqBitmapEccByte(i_fapiDimm, o_eccSpareBitmap);
-        if ( l_errl )
-        {
-            FAPI_ERR( "__compareEccAndSpare: Error getting ECC data "
-                      "(Mfg mode)" );
-            l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
-            break;
-        }
+        FAPI_TRY( __dimmUpdateDqBitmapEccByte(i_fapiDimm, o_eccSpareBitmap) );
 
         // Check spare DRAM.
-        l_rc = __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_eccSpareBitmap);
-        if ( l_rc )
-        {
-            FAPI_ERR( "__compareEccAndSpare: Error getting spare DRAM data "
-                      "(Mfg mode)" );
-            break;
-        }
+        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_eccSpareBitmap) );
 
         // Compare o_eccSpareBitmap to i_callersData.
         for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
@@ -1065,7 +1025,13 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
         }
     }while(0);
 
-    return l_rc;
+    if ( l_rc )
+    {
+        return l_rc;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -1406,11 +1372,10 @@ ReturnCode fapiAttrGetBadDqBitmap(
             // avoid issues in the setter when SPD DQ is not initialized.
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
+            l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
             if ( l_errl )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
                 break;
             }
 
@@ -1437,11 +1402,10 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
+            l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
             if ( l_errl )
             {
                 FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
                 break;
             }
 
@@ -1549,11 +1513,10 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         uint8_t l_tmpData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
         memcpy( &l_tmpData, &i_data, sizeof(i_data) );
-        l_errl = __dimmUpdateDqBitmapEccByte( l_fapiDimm, l_tmpData );
+        l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, l_tmpData );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting ECC data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
             break;
         }
 
