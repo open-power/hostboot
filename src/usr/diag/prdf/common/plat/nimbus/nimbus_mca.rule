@@ -213,9 +213,9 @@ rule rMCA
 group gMCA attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     filter singlebit
 {
-    (rMCA, bit(0)) ? analyze(gMCACALFIR);
-    (rMCA, bit(1)) ? analyze(gMCAECCFIR);
-    (rMCA, bit(2)) ? analyze(gDDRPHYFIR);
+    (rMCA, bit(0)) ? analyzeMCACALFIR;
+    (rMCA, bit(1)) ? analyzeMCAECCFIR;
+    (rMCA, bit(2)) ? analyzeDDRPHYFIR;
 };
 
 ################################################################################

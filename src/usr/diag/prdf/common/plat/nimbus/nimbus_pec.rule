@@ -150,8 +150,8 @@ rule rPEC
 group gPEC attntype CHECK_STOP, RECOVERABLE
     filter singlebit
 {
-    (rPEC, bit(0)) ? analyze(gPCI_LFIR);
-    (rPEC, bit(1)) ? analyze(gIOPCIFIR);
+    (rPEC, bit(0)) ? analyzePCI_LFIR;
+    (rPEC, bit(1)) ? analyzeIOPCIFIR;
 };
 
 ################################################################################

@@ -115,7 +115,7 @@ rule rCAPP
 group gCAPP attntype CHECK_STOP, RECOVERABLE, UNIT_CS
     filter singlebit
 {
-    (rCAPP, bit(0)) ? analyze(gCXAFIR);
+    (rCAPP, bit(0)) ? analyzeCXAFIR;
 };
 
 ################################################################################

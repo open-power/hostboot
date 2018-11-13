@@ -118,7 +118,7 @@ rule rDMI
 group gDMI attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     filter singlebit
 {
-    (rDMI, bit(0)) ? analyze(gCHIFIR);
+    (rDMI, bit(0)) ? analyzeCHIFIR;
 };
 
 ################################################################################

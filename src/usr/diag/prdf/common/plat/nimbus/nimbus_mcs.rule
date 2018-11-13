@@ -122,7 +122,7 @@ rule rMCS
 group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     filter singlebit
 {
-    (rMCS, bit(0)) ? analyze(gMCFIR);
+    (rMCS, bit(0)) ? analyzeMCFIR;
 };
 
 ################################################################################

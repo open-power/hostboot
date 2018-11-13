@@ -118,7 +118,7 @@ rule rMI
 group gMI attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     filter singlebit
 {
-    (rMI, bit(0)) ? analyze(gMCFIR);
+    (rMI, bit(0)) ? analyzeMCFIR;
 };
 
 ################################################################################

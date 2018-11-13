@@ -131,3 +131,11 @@ actionclass mca_ue_algorithm_th_1
     funccall("mcaUeAlgorithm"); # must be called last
 };
 
+################################################################################
+# Analyze groups
+################################################################################
+
+actionclass analyzeDDRPHYFIR { analyze(gDDRPHYFIR); };
+actionclass analyzeMCACALFIR { analyze(gMCACALFIR); };
+actionclass analyzeMCAECCFIR { analyze(gMCAECCFIR); };
+
