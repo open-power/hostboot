@@ -332,11 +332,11 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target );
 TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type );
 
 /**
- * @brief   Determines if the given target is the last functional EX.
- * @param   i_exTarget A EX target.
- * @return  TRUE if target is last functional EX, FALSE otherwise.
+ * @brief   Determines if the given target is the last functional CORE.
+ * @param   i_trgt A CORE target.
+ * @return  TRUE if target is last functional CORE, FALSE otherwise.
  */
-bool checkLastFuncEx( TARGETING::TargetHandle_t i_exTarget );
+bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt );
 
 /** @return The master PROC target. NULL on failure. */
 TARGETING::TargetHandle_t getMasterProc();
