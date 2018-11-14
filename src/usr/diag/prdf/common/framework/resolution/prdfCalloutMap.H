@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,7 @@ PRDF_TARGET_TYPE_ALIAS( TYPE_EQ,        TARGETING::TYPE_EQ        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_EX,        TARGETING::TYPE_EX        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_CORE,      TARGETING::TYPE_CORE      )
 PRDF_TARGET_TYPE_ALIAS( TYPE_CAPP,      TARGETING::TYPE_CAPP      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_NPU,       TARGETING::TYPE_NPU       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_PEC,       TARGETING::TYPE_PEC       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_PHB,       TARGETING::TYPE_PHB       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_OBUS,      TARGETING::TYPE_OBUS      )
@@ -192,6 +193,8 @@ PRDF_TARGET_TYPE_ALIAS( TYPE_MCA,       TARGETING::TYPE_MCA       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MC,        TARGETING::TYPE_MC        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MI,        TARGETING::TYPE_MI        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_DMI,       TARGETING::TYPE_DMI       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_MCC,       TARGETING::TYPE_MCC       )
+PRDF_TARGET_TYPE_ALIAS( TYPE_OMIC,      TARGETING::TYPE_OMIC      )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MEMBUF,    TARGETING::TYPE_MEMBUF    )
 PRDF_TARGET_TYPE_ALIAS( TYPE_L4,        TARGETING::TYPE_L4        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MBA,       TARGETING::TYPE_MBA       )

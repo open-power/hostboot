@@ -100,10 +100,17 @@ enum PositionBounds
     MAX_L4_PER_MEMBUF   = 1,
 
     MAX_MCC_PER_MI      = 2,
-    MAX_OMI_PER_MCC     = 2,
+    MAX_MCC_PER_MC      = MAX_MCC_PER_MI * MAX_MI_PER_MC,
+    MAX_MCC_PER_PROC    = MAX_MCC_PER_MC * MAX_MC_PER_PROC,
+
     MAX_OMIC_PER_MC     = 3,
+    MAX_OMIC_PER_PROC   = MAX_OMIC_PER_MC * MAX_MC_PER_PROC,
+
+    MAX_OMI_PER_MCC     = 2,
     MAX_OMI_PER_OMIC    = 3,
+
     MAX_OCMB_PER_OMI    = 1,
+
     MAX_NPU_PER_PROC    = 3,
 
     INVALID_POSITION_BOUND = 0xffffffff,

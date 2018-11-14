@@ -61,6 +61,22 @@ namespace PRDF
     const char * cumulus_mi   = "cumulus_mi";
     const char * cumulus_dmi  = "cumulus_dmi";
 
+    // P9 Axone Chip
+    const char * axone_proc = "axone_proc";
+    const char * axone_eq   = "axone_eq";
+    const char * axone_ex   = "axone_ex";
+    const char * axone_ec   = "axone_ec";
+    const char * axone_capp = "axone_capp";
+    const char * axone_npu  = "axone_npu";
+    const char * axone_pec  = "axone_pec";
+    const char * axone_phb  = "axone_phb";
+    const char * axone_xbus = "axone_xbus";
+    const char * axone_obus = "axone_obus";
+    const char * axone_mc   = "axone_mc";
+    const char * axone_mi   = "axone_mi";
+    const char * axone_mcc  = "axone_mcc";
+    const char * axone_omic = "axone_omic";
+
     // Centaur Chip
     const char * centaur_membuf = "centaur_membuf";
     const char * centaur_mba    = "centaur_mba";

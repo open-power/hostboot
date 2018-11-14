@@ -1,0 +1,658 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/axone/axone_mcc.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2018
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip axone_mcc
+{
+    name        "AXONE MCC target";
+    targettype  TYPE_MCC;
+    sigoff      0x0000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 MCC target DSTLFIR
+    ############################################################################
+
+    register DSTLFIR
+    {
+        name        "P9 MCC target DSTLFIR";
+        scomaddr    0x07010900;
+        reset       (&, 0x07010901);
+        mask        (|, 0x07010905);
+        capture     group default;
+    };
+
+    register DSTLFIR_MASK
+    {
+        name        "P9 MCC target DSTLFIR MASK";
+        scomaddr    0x07010903;
+        capture     group default;
+    };
+
+    register DSTLFIR_ACT0
+    {
+        name        "P9 MCC target DSTLFIR ACT0";
+        scomaddr    0x07010906;
+        capture     group default;
+        capture     req nonzero("DSTLFIR");
+    };
+
+    register DSTLFIR_ACT1
+    {
+        name        "P9 MCC target DSTLFIR ACT1";
+        scomaddr    0x07010907;
+        capture     group default;
+        capture     req nonzero("DSTLFIR");
+    };
+
+    ############################################################################
+    # P9 MCC target USTLFIR
+    ############################################################################
+
+    register USTLFIR
+    {
+        name        "P9 MCC target USTLFIR";
+        scomaddr    0x07010a00;
+        reset       (&, 0x07010a01);
+        mask        (|, 0x07010a05);
+        capture     group default;
+    };
+
+    register USTLFIR_MASK
+    {
+        name        "P9 MCC target USTLFIR MASK";
+        scomaddr    0x07010a03;
+        capture     group default;
+    };
+
+    register USTLFIR_ACT0
+    {
+        name        "P9 MCC target USTLFIR ACT0";
+        scomaddr    0x07010a06;
+        capture     group default;
+        capture     req nonzero("USTLFIR");
+    };
+
+    register USTLFIR_ACT1
+    {
+        name        "P9 MCC target USTLFIR ACT1";
+        scomaddr    0x07010a07;
+        capture     group default;
+        capture     req nonzero("USTLFIR");
+    };
+
+# Include registers not defined by the xml
+.include "axone_mcc_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for MCC
+################################################################################
+
+rule rMCC
+{
+  CHECK_STOP:
+    summary( 0, rDSTLFIR ) |
+    summary( 1, rUSTLFIR );
+
+  RECOVERABLE:
+    summary( 0, rDSTLFIR ) |
+    summary( 1, rUSTLFIR );
+
+  UNIT_CS:
+    summary( 0, rDSTLFIR ) |
+    summary( 1, rUSTLFIR );
+
+  HOST_ATTN:
+    summary( 0, rDSTLFIR ) |
+    summary( 1, rUSTLFIR );
+
+};
+
+group gMCC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    (rMCC, bit(0)) ? analyzeDSTLFIR;
+    (rMCC, bit(1)) ? analyzeUSTLFIR;
+};
+
+################################################################################
+# P9 MCC target DSTLFIR
+################################################################################
+
+rule rDSTLFIR
+{
+  CHECK_STOP:
+    DSTLFIR & ~DSTLFIR_MASK & ~DSTLFIR_ACT0 & ~DSTLFIR_ACT1;
+  RECOVERABLE:
+    DSTLFIR & ~DSTLFIR_MASK & ~DSTLFIR_ACT0 &  DSTLFIR_ACT1;
+  HOST_ATTN:
+    DSTLFIR & ~DSTLFIR_MASK &  DSTLFIR_ACT0 & ~DSTLFIR_ACT1;
+  UNIT_CS:
+    DSTLFIR & ~DSTLFIR_MASK &  DSTLFIR_ACT0 &  DSTLFIR_ACT1;
+};
+
+group gDSTLFIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** DSTLFIR[0]
+     *  AFU initiated Checkstop on Subchannel A
+     */
+    (rDSTLFIR, bit(0)) ? defaultMaskedError;
+
+    /** DSTLFIR[1]
+     *  AFU initiated Recoverable Attn on Subchannel A
+     */
+    (rDSTLFIR, bit(1)) ? defaultMaskedError;
+
+    /** DSTLFIR[2]
+     *  AFU initiated Special Attn on Subchannel A
+     */
+    (rDSTLFIR, bit(2)) ? defaultMaskedError;
+
+    /** DSTLFIR[3]
+     *  AFU initiated Application Interrupt Attn on Subchannel A
+     */
+    (rDSTLFIR, bit(3)) ? defaultMaskedError;
+
+    /** DSTLFIR[4]
+     *  AFU initiated Checkstop on Subchannel B
+     */
+    (rDSTLFIR, bit(4)) ? defaultMaskedError;
+
+    /** DSTLFIR[5]
+     *  AFU initiated Recoverable Attn on Subchannel B
+     */
+    (rDSTLFIR, bit(5)) ? defaultMaskedError;
+
+    /** DSTLFIR[6]
+     *  AFU initiated Special Attn on Subchannel B
+     */
+    (rDSTLFIR, bit(6)) ? defaultMaskedError;
+
+    /** DSTLFIR[7]
+     *  AFU initiated Application Interrupt Attn on Subchannel B
+     */
+    (rDSTLFIR, bit(7)) ? defaultMaskedError;
+
+    /** DSTLFIR[8]
+     *  Async crossing parity error
+     */
+    (rDSTLFIR, bit(8)) ? defaultMaskedError;
+
+    /** DSTLFIR[9]
+     *  Async crossing sequence error
+     */
+    (rDSTLFIR, bit(9)) ? defaultMaskedError;
+
+    /** DSTLFIR[10]
+     *  Config reg recoverable parity error
+     */
+    (rDSTLFIR, bit(10)) ? defaultMaskedError;
+
+    /** DSTLFIR[11]
+     *  Config reg fatal parity error
+     */
+    (rDSTLFIR, bit(11)) ? defaultMaskedError;
+
+    /** DSTLFIR[12]
+     *  Subchannel A counter error
+     */
+    (rDSTLFIR, bit(12)) ? defaultMaskedError;
+
+    /** DSTLFIR[13]
+     *  Subchannel B counter error
+     */
+    (rDSTLFIR, bit(13)) ? defaultMaskedError;
+
+    /** DSTLFIR[14]
+     *  Subchannel A timeout error
+     */
+    (rDSTLFIR, bit(14)) ? defaultMaskedError;
+
+    /** DSTLFIR[15]
+     *  Subchannel B timeout error
+     */
+    (rDSTLFIR, bit(15)) ? defaultMaskedError;
+
+    /** DSTLFIR[16]
+     *  Subchannel A buffer overuse error
+     */
+    (rDSTLFIR, bit(16)) ? defaultMaskedError;
+
+    /** DSTLFIR[17]
+     *  Subchannel B buffer overuse error
+     */
+    (rDSTLFIR, bit(17)) ? defaultMaskedError;
+
+    /** DSTLFIR[18]
+     *  Subchannel A DL link down
+     */
+    (rDSTLFIR, bit(18)) ? defaultMaskedError;
+
+    /** DSTLFIR[19]
+     *  Subchannel B DL link down
+     */
+    (rDSTLFIR, bit(19)) ? defaultMaskedError;
+
+    /** DSTLFIR[20]
+     *  Subchannel A fail action
+     */
+    (rDSTLFIR, bit(20)) ? defaultMaskedError;
+
+    /** DSTLFIR[21]
+     *  Subchannel B fail action
+     */
+    (rDSTLFIR, bit(21)) ? defaultMaskedError;
+
+    /** DSTLFIR[22]
+     *  Internal SCOM error
+     */
+    (rDSTLFIR, bit(22)) ? defaultMaskedError;
+
+    /** DSTLFIR[23]
+     *  Internal SCOM error clone
+     */
+    (rDSTLFIR, bit(23)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 MCC target USTLFIR
+################################################################################
+
+rule rUSTLFIR
+{
+  CHECK_STOP:
+    USTLFIR & ~USTLFIR_MASK & ~USTLFIR_ACT0 & ~USTLFIR_ACT1;
+  RECOVERABLE:
+    USTLFIR & ~USTLFIR_MASK & ~USTLFIR_ACT0 &  USTLFIR_ACT1;
+  HOST_ATTN:
+    USTLFIR & ~USTLFIR_MASK &  USTLFIR_ACT0 & ~USTLFIR_ACT1;
+  UNIT_CS:
+    USTLFIR & ~USTLFIR_MASK &  USTLFIR_ACT0 &  USTLFIR_ACT1;
+};
+
+group gUSTLFIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** USTLFIR[0]
+     *  Chan A unexpected data error
+     */
+    (rUSTLFIR, bit(0)) ? defaultMaskedError;
+
+    /** USTLFIR[1]
+     *  Chan B unexpected data error
+     */
+    (rUSTLFIR, bit(1)) ? defaultMaskedError;
+
+    /** USTLFIR[2]
+     *  Chan A invalid template error
+     */
+    (rUSTLFIR, bit(2)) ? defaultMaskedError;
+
+    /** USTLFIR[3]
+     *  Chan B invalid template error
+     */
+    (rUSTLFIR, bit(3)) ? defaultMaskedError;
+
+    /** USTLFIR[4]
+     *  Chan A half speed mode
+     */
+    (rUSTLFIR, bit(4)) ? defaultMaskedError;
+
+    /** USTLFIR[5]
+     *  Chan B half speed mode
+     */
+    (rUSTLFIR, bit(5)) ? defaultMaskedError;
+
+    /** USTLFIR[6]
+     *  WDF buffer CE
+     */
+    (rUSTLFIR, bit(6)) ? defaultMaskedError;
+
+    /** USTLFIR[7]
+     *  WDF buffer UE
+     */
+    (rUSTLFIR, bit(7)) ? defaultMaskedError;
+
+    /** USTLFIR[8]
+     *  WDF buffer SUE
+     */
+    (rUSTLFIR, bit(8)) ? defaultMaskedError;
+
+    /** USTLFIR[9]
+     *  WDF buffer overrun
+     */
+    (rUSTLFIR, bit(9)) ? defaultMaskedError;
+
+    /** USTLFIR[10]
+     *  WDF tag parity error
+     */
+    (rUSTLFIR, bit(10)) ? defaultMaskedError;
+
+    /** USTLFIR[11]
+     *  WDF scom sequencer error
+     */
+    (rUSTLFIR, bit(11)) ? defaultMaskedError;
+
+    /** USTLFIR[12]
+     *  WDF pwctl sequencer error
+     */
+    (rUSTLFIR, bit(12)) ? defaultMaskedError;
+
+    /** USTLFIR[13]
+     *  WDF misc_reg parity error
+     */
+    (rUSTLFIR, bit(13)) ? defaultMaskedError;
+
+    /** USTLFIR[14]
+     *  WDF MCA async error
+     */
+    (rUSTLFIR, bit(14)) ? defaultMaskedError;
+
+    /** USTLFIR[15]
+     *  WDF Data Syndrome NE0
+     */
+    (rUSTLFIR, bit(15)) ? defaultMaskedError;
+
+    /** USTLFIR[16]
+     *  WDF CMT parity error
+     */
+    (rUSTLFIR, bit(16)) ? defaultMaskedError;
+
+    /** USTLFIR[17]
+     *  TBD
+     */
+    (rUSTLFIR, bit(17)) ? defaultMaskedError;
+
+    /** USTLFIR[18]
+     *  TBD
+     */
+    (rUSTLFIR, bit(18)) ? defaultMaskedError;
+
+    /** USTLFIR[19]
+     *  TBD
+     */
+    (rUSTLFIR, bit(19)) ? defaultMaskedError;
+
+    /** USTLFIR[20]
+     *  WRT Buffer CE
+     */
+    (rUSTLFIR, bit(20)) ? defaultMaskedError;
+
+    /** USTLFIR[21]
+     *  WRT Buffer UE
+     */
+    (rUSTLFIR, bit(21)) ? defaultMaskedError;
+
+    /** USTLFIR[22]
+     *  WRT Buffer SUE
+     */
+    (rUSTLFIR, bit(22)) ? defaultMaskedError;
+
+    /** USTLFIR[23]
+     *  WRT scom sequencer error
+     */
+    (rUSTLFIR, bit(23)) ? defaultMaskedError;
+
+    /** USTLFIR[24]
+     *  WRT misc_reg parity error
+     */
+    (rUSTLFIR, bit(24)) ? defaultMaskedError;
+
+    /** USTLFIR[25:26]
+     *  WRT error information spares
+     */
+    (rUSTLFIR, bit(25|26)) ? defaultMaskedError;
+
+    /** USTLFIR[27]
+     *  Chan A fail response checkstop
+     */
+    (rUSTLFIR, bit(27)) ? defaultMaskedError;
+
+    /** USTLFIR[28]
+     *  Chan B fail response checkstop
+     */
+    (rUSTLFIR, bit(28)) ? defaultMaskedError;
+
+    /** USTLFIR[29]
+     *  Chan A fail response recoverable
+     */
+    (rUSTLFIR, bit(29)) ? defaultMaskedError;
+
+    /** USTLFIR[30]
+     *  Chan B fail response recoverable
+     */
+    (rUSTLFIR, bit(30)) ? defaultMaskedError;
+
+    /** USTLFIR[31]
+     *  Chan A lol drop checkstop
+     */
+    (rUSTLFIR, bit(31)) ? defaultMaskedError;
+
+    /** USTLFIR[32]
+     *  Chan B lol drop checkstop
+     */
+    (rUSTLFIR, bit(32)) ? defaultMaskedError;
+
+    /** USTLFIR[33]
+     *  Chan A lol drop recoverable
+     */
+    (rUSTLFIR, bit(33)) ? defaultMaskedError;
+
+    /** USTLFIR[34]
+     *  Chan B lol drop recoverable
+     */
+    (rUSTLFIR, bit(34)) ? defaultMaskedError;
+
+    /** USTLFIR[35]
+     *  Chan A flit parity error
+     */
+    (rUSTLFIR, bit(35)) ? defaultMaskedError;
+
+    /** USTLFIR[36]
+     *  Chan B flit parity error
+     */
+    (rUSTLFIR, bit(36)) ? defaultMaskedError;
+
+    /** USTLFIR[37]
+     *  Chan A fatal parity error
+     */
+    (rUSTLFIR, bit(37)) ? defaultMaskedError;
+
+    /** USTLFIR[38]
+     *  Chan B fatal parity error
+     */
+    (rUSTLFIR, bit(38)) ? defaultMaskedError;
+
+    /** USTLFIR[39]
+     *  Chan A more than 2 data flits for template 9
+     */
+    (rUSTLFIR, bit(39)) ? defaultMaskedError;
+
+    /** USTLFIR[40]
+     *  Chan B more than 2 data flits for template 9
+     */
+    (rUSTLFIR, bit(40)) ? defaultMaskedError;
+
+    /** USTLFIR[41]
+     *  Chan A excess bad data bits
+     */
+    (rUSTLFIR, bit(41)) ? defaultMaskedError;
+
+    /** USTLFIR[42]
+     *  Chan B excess bad data bits
+     */
+    (rUSTLFIR, bit(42)) ? defaultMaskedError;
+
+    /** USTLFIR[43]
+     *  Chan A memory read data returned in template 0
+     */
+    (rUSTLFIR, bit(43)) ? defaultMaskedError;
+
+    /** USTLFIR[44]
+     *  Chan B memory read data returned in template 0
+     */
+    (rUSTLFIR, bit(44)) ? defaultMaskedError;
+
+    /** USTLFIR[45]
+     *  Chan A MMIO in lol mode
+     */
+    (rUSTLFIR, bit(45)) ? defaultMaskedError;
+
+    /** USTLFIR[46]
+     *  Chan B MMIO in lol mode
+     */
+    (rUSTLFIR, bit(46)) ? defaultMaskedError;
+
+    /** USTLFIR[47]
+     *  Chan A bad data
+     */
+    (rUSTLFIR, bit(47)) ? defaultMaskedError;
+
+    /** USTLFIR[48]
+     *  Chan B bad data
+     */
+    (rUSTLFIR, bit(48)) ? defaultMaskedError;
+
+    /** USTLFIR[49]
+     *  Chan A excess data error
+     */
+    (rUSTLFIR, bit(49)) ? defaultMaskedError;
+
+    /** USTLFIR[50]
+     *  Chan B excess data error
+     */
+    (rUSTLFIR, bit(50)) ? defaultMaskedError;
+
+    /** USTLFIR[51]
+     *  Chan A Bad CRC data not valid error
+     */
+    (rUSTLFIR, bit(51)) ? defaultMaskedError;
+
+    /** USTLFIR[52]
+     *  Chan B Bad CRC data not valid error
+     */
+    (rUSTLFIR, bit(52)) ? defaultMaskedError;
+
+    /** USTLFIR[53]
+     *  Chan A FIFO overflow error
+     */
+    (rUSTLFIR, bit(53)) ? defaultMaskedError;
+
+    /** USTLFIR[54]
+     *  Chan B FIFO overflow error
+     */
+    (rUSTLFIR, bit(54)) ? defaultMaskedError;
+
+    /** USTLFIR[55]
+     *  Chan A invalid cmd error
+     */
+    (rUSTLFIR, bit(55)) ? defaultMaskedError;
+
+    /** USTLFIR[56]
+     *  Chan B invalid cmd error
+     */
+    (rUSTLFIR, bit(56)) ? defaultMaskedError;
+
+    /** USTLFIR[57]
+     *  Fatal reg parity error
+     */
+    (rUSTLFIR, bit(57)) ? defaultMaskedError;
+
+    /** USTLFIR[58]
+     *  Recoverable reg parity error
+     */
+    (rUSTLFIR, bit(58)) ? defaultMaskedError;
+
+    /** USTLFIR[59]
+     *  Chan A invalid DL DP combo
+     */
+    (rUSTLFIR, bit(59)) ? defaultMaskedError;
+
+    /** USTLFIR[60]
+     *  Chan B invalid DL DP combo
+     */
+    (rUSTLFIR, bit(60)) ? defaultMaskedError;
+
+    /** USTLFIR[61]
+     *  spare
+     */
+    (rUSTLFIR, bit(61)) ? defaultMaskedError;
+
+    /** USTLFIR[62]
+     *  Internal parity error
+     */
+    (rUSTLFIR, bit(62)) ? defaultMaskedError;
+
+    /** USTLFIR[63]
+     *  Internal parity error copy
+     */
+    (rUSTLFIR, bit(63)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p9_common_actions.rule";
+.include "axone_mcc_actions.rule";
+
