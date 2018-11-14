@@ -1521,6 +1521,7 @@ chip cumulus_proc
 
 # Include registers not defined by the xml
 .include "p9_common_proc_regs.rule";
+.include "p9_common_npu_regs.rule";
 
 };
 
@@ -7979,4 +7980,5 @@ group gPCI2_CHIPLET_FIR
 .include "p9_common_actions.rule";
 .include "p9_common_proc_actions.rule";
 .include "cumulus_proc_actions.rule";
+.include "p9_common_npu_actions.rule";
 

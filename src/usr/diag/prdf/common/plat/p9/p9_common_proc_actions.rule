@@ -680,24 +680,6 @@ actionclass analyzeINTCQFIR
     analyze(gINTCQFIR);
 };
 
-actionclass analyzeNPU0FIR
-{
-    capture(npu0fir_ffdc);
-    analyze(gNPU0FIR);
-};
-
-actionclass analyzeNPU1FIR
-{
-    capture(npu1fir_ffdc);
-    analyze(gNPU1FIR);
-};
-
-actionclass analyzeNPU2FIR
-{
-    capture(npu2fir_ffdc);
-    analyze(gNPU2FIR);
-};
-
 ###############################################################################
 # Analyze connected
 ###############################################################################
