@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_eq_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_common_npu_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,16 +23,25 @@
 #
 # IBM_PROLOG_END_TAG
 
-################################################################################
+###############################################################################
 # Analyze groups
-################################################################################
+###############################################################################
 
-actionclass analyzeEQ_LFIR { analyze(gEQ_LFIR); };
+actionclass analyzeNPU0FIR
+{
+    capture(npu0fir_ffdc);
+    analyze(gNPU0FIR);
+};
 
-################################################################################
-# Analyze connected
-################################################################################
+actionclass analyzeNPU1FIR
+{
+    capture(npu1fir_ffdc);
+    analyze(gNPU1FIR);
+};
 
-actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
-actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };
+actionclass analyzeNPU2FIR
+{
+    capture(npu2fir_ffdc);
+    analyze(gNPU2FIR);
+};
 
