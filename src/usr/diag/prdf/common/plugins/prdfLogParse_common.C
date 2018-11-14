@@ -191,6 +191,13 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
+        case TYPE_NPU:
+            l_chip    = l_chip / MAX_NPU_PER_PROC;
+            l_chiplet = l_chiplet % MAX_NPU_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "npu(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         case TYPE_PEC:
             l_chip    = l_chip / MAX_PEC_PER_PROC;
             l_chiplet = l_chiplet % MAX_PEC_PER_PROC;
@@ -258,6 +265,20 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
             l_chip    = l_chip / MAX_DMI_PER_PROC;
             l_chiplet = l_chiplet % MAX_DMI_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "dmi(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_MCC:
+            l_chip    = l_chip / MAX_MCC_PER_PROC;
+            l_chiplet = l_chiplet % MAX_MCC_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "mcc(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_OMIC:
+            l_chip    = l_chip / MAX_OMIC_PER_PROC;
+            l_chiplet = l_chiplet % MAX_OMIC_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "omic(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
 

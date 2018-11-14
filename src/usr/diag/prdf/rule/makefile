@@ -206,12 +206,14 @@ ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 
 vpath %.rule \
 	  ../common/plat/p9 \
+	  ../common/plat/axone \
 	  ../common/plat/centaur \
 	  ../common/plat/cumulus \
 	  ../common/plat/mem \
 	  ../common/plat/nimbus
 
 PRDRPP_SEARCHDIRS = -I../common/plat/p9 \
+				    -I../common/plat/axone \
 				    -I../common/plat/centaur \
 				    -I../common/plat/cumulus \
 					-I../common/plat/mem \

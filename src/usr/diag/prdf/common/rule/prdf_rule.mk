@@ -51,6 +51,22 @@ PRDR_RULE_TABLES += cumulus_mc.prf
 PRDR_RULE_TABLES += cumulus_mi.prf
 PRDR_RULE_TABLES += cumulus_dmi.prf
 
+# P9 Axone Chip
+PRDR_RULE_TABLES += axone_proc.prf
+PRDR_RULE_TABLES += axone_eq.prf
+PRDR_RULE_TABLES += axone_ex.prf
+PRDR_RULE_TABLES += axone_ec.prf
+PRDR_RULE_TABLES += axone_capp.prf
+PRDR_RULE_TABLES += axone_npu.prf
+PRDR_RULE_TABLES += axone_pec.prf
+PRDR_RULE_TABLES += axone_phb.prf
+PRDR_RULE_TABLES += axone_xbus.prf
+PRDR_RULE_TABLES += axone_obus.prf
+PRDR_RULE_TABLES += axone_mc.prf
+PRDR_RULE_TABLES += axone_mi.prf
+PRDR_RULE_TABLES += axone_mcc.prf
+PRDR_RULE_TABLES += axone_omic.prf
+
 # Centaur Chip
 PRDR_RULE_TABLES += centaur_membuf.prf
 PRDR_RULE_TABLES += centaur_mba.prf

@@ -62,6 +62,22 @@ namespace PRDF
     extern const char * cumulus_mi;
     extern const char * cumulus_dmi;
 
+    // P9 Axone Chip
+    extern const char * axone_proc;
+    extern const char * axone_eq;
+    extern const char * axone_ex;
+    extern const char * axone_ec;
+    extern const char * axone_capp;
+    extern const char * axone_npu;
+    extern const char * axone_pec;
+    extern const char * axone_phb;
+    extern const char * axone_xbus;
+    extern const char * axone_obus;
+    extern const char * axone_mc;
+    extern const char * axone_mi;
+    extern const char * axone_mcc;
+    extern const char * axone_omic;
+
     // Centaur Chip
     extern const char * centaur_membuf;
     extern const char * centaur_mba;
