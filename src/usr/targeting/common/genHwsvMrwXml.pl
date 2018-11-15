@@ -512,6 +512,14 @@ else
     push @systemAttr, ['WOF_VRATIO_SELECT', 'ACTIVE_CORES'];
 }
 
+# Handle the new name when/if it shows up in the xml
+#  otherwise we'll just rely on the default value
+if ( exists $reqPol->{'mss_mrw_nvdimm_plug_rules'} )
+{
+    push @systemAttr, ['MSS_MRW_NVDIMM_PLUG_RULES',
+      $reqPol->{'mss_mrw_nvdimm_plug_rules'}];
+}
+
 
 my $nestFreq = $reqPol->{'proc_pb_frequency'}->{content};
 
