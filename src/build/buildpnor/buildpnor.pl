@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -136,7 +136,10 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
         my $userflags1 = ($pnorLayout{metadata}{sides}{$sideId}{golden} eq "yes") ?
                             0x01 : 0x00;
 
-        #add a golden bit to the misc flags in userflag1
+        # Make the TOC Read-only
+        $userflags1 |= 0x40;
+
+        #add the golden and read-only bits to the misc flags in userflag1
         $userflags1 = $userflags1 << 16;
         trace(2, "$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force");
         system("$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force");
@@ -373,6 +376,11 @@ sub addTOCInfo
         my $otherSide   = getOtherSide($sideId);
         my $numOfTOCs   =  scalar keys %{$$i_pnorLayout{metadata}{sides}{$sideId}{toc}};
 
+        #Using userflags mark these sections read-only (0x40) and indicate that
+        #they are puesdo-partitions that should be skipped on code update (0x20)
+        my $userflags1 = 0x40 | 0x20;
+        $userflags1 = $userflags1 << 16;
+
         #Adding an extra entry in the TOC that points to its backup TOC and other side's TOC (if other side exists).
         #This is used to search for all the TOCs in PnorRP code. The idea is to create a link between the tocs such that
         #if we can find one valid TOC, then we can look at its  BACKUP_PART entry or OTHER_SIDE entry in the TOC to
@@ -388,9 +396,7 @@ sub addTOCInfo
             system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0");
             die "ERROR: Call to add partition $backup_part failed. Aborting!" if ($?);
 
-            #indicate that this is a puesdo-partition and should be skipped on code update
-            my $userflags1 = 0x20;
-            $userflags1 = $userflags1 << 16;
+            #adding user flags
             trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force");
             system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force");
             die "ERROR: Call to set BACKUP_PART as pseudo failed. Aborting!" if ($?);
@@ -404,7 +410,7 @@ sub addTOCInfo
                 system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0");
                 die "ERROR: Call to add partition $other_side failed. Aborting!" if($?);
 
-                #indicate that this is a puesdo-partition and should be skipped on code update
+                #adding user flags
                 trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force");
                 system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force");
                 die "ERROR: Call to set OTHER_SIDE as pseudo failed. Aborting!" if($?);
