@@ -680,6 +680,12 @@
         <no_export/>
     </attribute>
 
+    <!-- HWSV needs to write this based on system usage in some cases -->
+    <attribute>
+        <id>ATTR_CLOCK_PLL_MUX</id>
+        <writeable/>
+    </attribute>
+
     <attribute>
         <id>ATTR_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
