@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -523,6 +523,7 @@ sub manipulateImages
         $isNormalSecure ||= ($eyeCatch eq "TESTRO");
         $isNormalSecure ||= ($eyeCatch eq "TESTLOAD");
         $isNormalSecure ||= ($eyeCatch eq "VERSION");
+        $isNormalSecure ||= ($eyeCatch eq "UVBWLIST");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
