@@ -65,7 +65,7 @@ my %PhysicalOffsets = ();
 # Truncate SHA to n bytes
 use constant SHA_TRUNCATE_SIZE => 32;
 # Defined in src/include/sys/vfs.h
-use constant VFS_EXTENDED_MODULE_MAX => 128;
+use constant VFS_EXTENDED_MODULE_MAX => 192;
 # VfsSystemModule struct size
 use constant VFS_MODULE_TABLE_ENTRY_SIZE => 112;
 # VFS Module table max size
