@@ -747,6 +747,33 @@ namespace SBE
 
                 //Walk the TOC and find our current EC
                 ec = i_target->getAttr<TARGETING::ATTR_EC>();
+
+                // If ec == 0 then this indicates simics is not correctly
+                // writing EC to the FSI register we get the EC level from
+                if(ec == 0)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: invalid EC found, EC cannot be 0, check simics model" );
+
+                    /*@
+                     * @errortype
+                     * @moduleid          SBE_FIND_IN_PNOR
+                     * @reasoncode        SBE_UNSUPPORTED_EC
+                     * @userdata1         Target Huid
+                     * @userdata2         unused
+                     * @devdesc           EC level says 0, which is invalid
+                     * @custdesc          Chip level is invalid
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        SBE_FIND_IN_PNOR,
+                                        SBE_UNSUPPORTED_EC,
+                                        TARGETING::get_huid(i_target),
+                                        0,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    err->collectTrace(SBE_COMP_NAME);
+
+                    break;
+                }
+
                 for(uint32_t i=0; i<MAX_SBE_ENTRIES; i++)
                 {
                     if(static_cast<uint32_t>(ec) == sbeToc->entries[i].ec)
@@ -767,7 +794,7 @@ namespace SBE
                     }
                 }
             }
-
+            // IF we failed to find hdr_Ptr then no matching EC found
             if(NULL == hdr_Ptr)
             {
                 //if we get here, it's an error
