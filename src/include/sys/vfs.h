@@ -44,8 +44,8 @@
 #define VFS_EXTENDED_MODULE_VADDR (1 * 1024 * 1024 * 1024)
 #define VFS_EXTENDED_MODULE_TABLE_ADDRESS (VFS_EXTENDED_MODULE_VADDR)
 #define VFS_EXTENDED_MODULE_TABLE_OFFSET 0
-// Note: VFS_EXTENDED_MODULE_MAX used in src/build/buildpnor/buildpnor.pl
-#define VFS_EXTENDED_MODULE_MAX 128
+// Note: VFS_EXTENDED_MODULE_MAX used in src/build/buildpnor/genPnorImages.pl
+#define VFS_EXTENDED_MODULE_MAX 192
 #define VFS_MODULE_NAME_MAX 64
 #define VFS_SYMBOL_INIT _init
 #define VFS_SYMBOL_START _start
