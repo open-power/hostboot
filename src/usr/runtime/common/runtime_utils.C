@@ -37,6 +37,7 @@ const PreVerifyVector preVerifiedPnorSections {
     {PNOR::OCC, true},
     {PNOR::WOFDATA, true},
     {PNOR::HCODE, true},
+    {PNOR::VERSION, true},
     {PNOR::RINGOVD, false},
 };
 

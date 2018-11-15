@@ -83,6 +83,13 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         // Handle all Pre verified PNOR sections
         for (const auto & secIdPair : RUNTIME::preVerifiedPnorSections)
         {
+
+            // VERSION is not in standalone so ignore it here.
+            if (secIdPair.first == PNOR::VERSION)
+            {
+                continue;
+            }
+
             l_errl = RUNTIME::hbResvLoadSecureSection(secIdPair.first,
                                                       secIdPair.second);
             if (l_errl)
@@ -109,6 +116,10 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         {
             // RINGOVD not permitted in secure mode. Meaning the Header and
             // Content lid will be missing.
+            l_expectedLids -= 2;
+
+            // VERSION is only an OpenPOWER partition so we need to adjust for
+            // it here since it doesn't exist for standalone.
             l_expectedLids -= 2;
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ namespace Util
 enum LidId
 {
     TEST_LIDID = 0x00000111,
+    VERSION_LIDID = 0x0000FFFF,
     OCC_LIDID = 0x81e00430,
     OCC_CONTAINER_LIDID = 0x80d0000b,
     MCL_LIDID = 0x80d00020,
