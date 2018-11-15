@@ -31,6 +31,7 @@ namespace RUNTIME
 //   -- OCC
 //   -- WOFDATA
 //   -- HCODE
+//   -- UVBWLIST
 // -- Images that never have secure headers
 ///  -- RINGOVD
 const PreVerifyVector preVerifiedPnorSections {
@@ -39,6 +40,9 @@ const PreVerifyVector preVerifiedPnorSections {
     {PNOR::HCODE, true},
     {PNOR::VERSION, true},
     {PNOR::RINGOVD, false},
+#ifndef CONFIG_FSP_BUILD
+    {PNOR::UVBWLIST, true},
+#endif
 };
 
 bool isPreVerifiedSection(const PNOR::SectionId i_section)
