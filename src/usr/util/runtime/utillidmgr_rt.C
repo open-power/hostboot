@@ -354,7 +354,8 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
         Util::CUMULUS_HCODE_LIDID,
         Util::HCODE_CONTAINER_LIDID,
         Util::HWREFIMG_RINGOVD_LIDID,
-        Util::TARGETING_BINARY_LIDID
+        Util::TARGETING_BINARY_LIDID,
+        Util::VERSION_LIDID
     };
     *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
     TRACFCOMP(g_trac_hbrt, EXIT_MRK" get_lid_list");
@@ -371,7 +372,8 @@ bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
            i_lidId == Util::CUMULUS_HCODE_LIDID ||
            i_lidId == Util::HCODE_CONTAINER_LIDID ||
            i_lidId == Util::HWREFIMG_RINGOVD_LIDID ||
-           i_lidId == Util::TARGETING_BINARY_LIDID;
+           i_lidId == Util::TARGETING_BINARY_LIDID ||
+           i_lidId == Util::VERSION_LIDID;
 }
 
 //------------------------------------------------------------------------
