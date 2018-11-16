@@ -1240,7 +1240,6 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
-
     uint8_t * l_badDqData =
         static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
 
@@ -1263,18 +1262,11 @@ ReturnCode fapiAttrGetBadDqBitmap(
         uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
-        l_rc = __badDqBitmapGetHelperAttrs( l_fapiDimm, l_wiringData,
-                                            l_allMnfgFlags, l_ps );
-        if ( l_rc )
-        {
-            FAPI_ERR( "fapiAttrGetBadDqBitmap: Error - unable to read "
-                      "attributes" );
-            break;
-        }
+        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData,
+                                              l_allMnfgFlags, l_ps) );
 
-        l_errl = deviceRead(l_dimmTarget, l_badDqData,
-                            DIMM_BAD_DQ_SIZE_BYTES,
-                            DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA));
+        l_errl = deviceRead( l_dimmTarget, l_badDqData, DIMM_BAD_DQ_SIZE_BYTES,
+                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrGetBadDqBitmap: Failed to read DIMM Bad DQ "
@@ -1292,9 +1284,8 @@ ReturnCode fapiAttrGetBadDqBitmap(
         // Check the magic number and version number. Note that the
         // magic number is stored in SPD in big endian format and
         // platforms of any endianness can access it
-        if ( (be32toh(l_spdData.iv_magicNumber) !=
-                    DIMM_BAD_DQ_MAGIC_NUMBER) ||
-                (l_spdData.iv_version != DIMM_BAD_DQ_VERSION) )
+        if ( (be32toh(l_spdData.iv_magicNumber) != DIMM_BAD_DQ_MAGIC_NUMBER) ||
+             (l_spdData.iv_version != DIMM_BAD_DQ_VERSION) )
         {
             FAPI_INF( "fapiAttrGetBadDqBitmap: SPD DQ not initialized." );
 
@@ -1302,21 +1293,10 @@ ReturnCode fapiAttrGetBadDqBitmap(
             // avoid issues in the setter when SPD DQ is not initialized.
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
-            if ( l_errl )
-            {
-                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
-                break;
-            }
+            FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, o_data) );
 
             // Check spare DRAM.
-            l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, o_data );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting spare DRAM "
-                        "data" );
-                break;
-            }
+            FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, o_data) );
         }
         else
         {
@@ -1324,61 +1304,33 @@ ReturnCode fapiAttrGetBadDqBitmap(
             uint8_t l_spareByte[mss::MAX_RANK_PER_DIMM];
             memset( l_spareByte, 0, sizeof(l_spareByte) );
 
-            l_rc = __dimmGetDqBitmapSpareByte( l_fapiDimm, l_spareByte );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting spare byte" );
-                break;
-            }
+            FAPI_TRY( __dimmGetDqBitmapSpareByte(l_fapiDimm, l_spareByte) );
 
             // Translate bitmap from DIMM DQ to MC Logical format
-            l_rc = __badDqBitTranslation( l_fapiDimm, l_spdData.iv_bitmaps,
-                                          o_data, l_wiringData, l_spareByte,
-                                          l_ps, false );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error from "
-                          "__badDqBitTranslation." );
-                break;
-            }
+            FAPI_TRY( __badDqBitTranslation(l_fapiDimm, l_spdData.iv_bitmaps,
+                                            o_data, l_wiringData, l_spareByte,
+                                            l_ps, false) );
 
             // Set bits for any unconnected DQs.
             // First, check ECC.
-            l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, o_data );
-            if ( l_errl )
-            {
-                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting ECC data" );
-                break;
-            }
+            FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, o_data) );
 
             // Check spare DRAM.
-            l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, o_data );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error getting spare DRAM "
-                          "data" );
-                break;
-            }
+            FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, o_data) );
 
             if ( l_allMnfgFlags &
                     fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS )
             {
                 // Flag to set if the discrepancies are found.
-                bool mfgModeBadBitsPresent = false;
+                bool l_mfgModeBadBitsPresent = false;
 
                 uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                         [mss::BAD_DQ_BYTE_COUNT];
 
-                l_rc = __compareEccAndSpare( l_fapiDimm, mfgModeBadBitsPresent,
-                                             o_data, l_eccSpareBitmap);
-                if ( l_rc )
-                {
-                    FAPI_ERR( "fapiAttrGetBadDqBitmap: Error comparing bitmap "
-                              "with ECC/Spare bits set with caller's data" );
-                    break;
-                }
+                FAPI_TRY( __compareEccAndSpare(l_fapiDimm,
+                          l_mfgModeBadBitsPresent, o_data, l_eccSpareBitmap) );
 
-                if ( mfgModeBadBitsPresent )
+                if ( l_mfgModeBadBitsPresent )
                 {
                     // correct the output bit map
                     for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
@@ -1396,13 +1348,23 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
     }while(0);
 
+fapi_try_exit:
+
+    FAPI_INF("<<fapiAttrGetBadDqBitmap: Finished getting bitmap");
+
     if ( l_badDqData != nullptr )
     {
         free( l_badDqData );
         l_badDqData = nullptr;
     }
 
-    return l_rc;
+    if ( l_rc )
+    {
+        return l_rc;
+    }
+
+    return fapi2::current_err;
+
 }
 
 //******************************************************************************
@@ -1412,6 +1374,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
     const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     ATTR_BAD_DQ_BITMAP_Type (&i_data) )
 {
+    FAPI_INF(">>fapiAttrSetBadDqBitmap: Setting bitmap");
+
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
     uint8_t * l_badDqData =
@@ -1435,39 +1399,24 @@ ReturnCode fapiAttrSetBadDqBitmap(
         uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
-        l_rc = __badDqBitmapGetHelperAttrs( l_fapiDimm, l_wiringData,
-                                            l_allMnfgFlags, l_ps );
+        FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData,
+                                              l_allMnfgFlags, l_ps) );
 
         // Read current BadDqBitmap into l_prev_data
         uint8_t l_prev_data[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
 
         bool badDqSet = false;
-        l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTarget,
-                              l_prev_data );
-        if (l_rc)
-        {
-            FAPI_ERR("fapiAttrSetBadDqBitmap: Error getting DQ bitmap");
-            break;
-        }
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTarget,
+                                l_prev_data) );
 
         // Flag to set if the discrepancies are found
         bool mfgModeBadBitsPresent = false;
 
         uint8_t l_tmpData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
         memcpy( &l_tmpData, &i_data, sizeof(i_data) );
-        l_rc = __dimmUpdateDqBitmapEccByte( l_fapiDimm, l_tmpData );
-        if ( l_errl )
-        {
-            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting ECC data." );
-            break;
-        }
+        FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, l_tmpData) );
 
-        l_rc = __dimmUpdateDqBitmapSpareByte( l_fapiDimm, l_tmpData );
-        if ( l_rc )
-        {
-            FAPI_ERR("fapiAttrSetBadDqBitmap: Error getting spare DRAM data.");
-            break;
-        }
+        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, l_tmpData) );
 
         // Check if Bad DQ bit set
         // Loop through all ranks
@@ -1499,30 +1448,16 @@ ReturnCode fapiAttrSetBadDqBitmap(
             FAPI_INF("fapiAttrSetBadDqBitmap: Reconfigure needed, Bad DQ set");
 
             fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_RECONFIGURE_LOOP,
-                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                  l_reconfigAttr );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting "
-                          "ATTR_RECONFIGURE_LOOP" );
-                break;
-            }
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_RECONFIGURE_LOOP,
+                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_reconfigAttr) );
 
             // 'OR' values in case of multiple reasons for reconfigure
             l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
 
-            #ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
-            l_rc = FAPI_ATTR_SET( fapi2::ATTR_RECONFIGURE_LOOP,
-                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                  l_reconfigAttr );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error setting "
-                          "ATTR_RECONFIGURE_LOOP" );
-                break;
-            }
-            #endif
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_RECONFIGURE_LOOP,
+                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_reconfigAttr) );
         }
 
         // If system is in DISABLE_DRAM_REPAIRS mode
@@ -1533,16 +1468,10 @@ ReturnCode fapiAttrSetBadDqBitmap(
             uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                     [mss::BAD_DQ_BYTE_COUNT];
 
-            l_rc = __compareEccAndSpare( l_fapiDimm,
-                                         mfgModeBadBitsPresent,
-                                         l_tmpData, l_eccSpareBitmap );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error comparing "
-                          "bitmap with ECC/Spare bits set with "
-                          "caller's data." );
-                break;
-            }
+            FAPI_TRY( __compareEccAndSpare(l_fapiDimm,
+                                           mfgModeBadBitsPresent,
+                                           l_tmpData, l_eccSpareBitmap) );
+
             // Don't write bad dq bitmap if discrepancies are found
             // Break out of do while loop
             if ( mfgModeBadBitsPresent ) break;
@@ -1559,9 +1488,9 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         // We need to make sure the rest of the data in VPD beyond the bad dq
         // bitmap is unchanged.
-        l_errl = deviceRead(l_dimmTarget, l_badDqData,
-                            DIMM_BAD_DQ_SIZE_BYTES,
-                            DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA));
+        l_errl = deviceRead( l_dimmTarget, l_badDqData,
+                             DIMM_BAD_DQ_SIZE_BYTES,
+                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to read DIMM Bad DQ "
@@ -1578,26 +1507,15 @@ ReturnCode fapiAttrSetBadDqBitmap(
                 sizeof(l_spdData.iv_unused) );
 
         // Get the spare byte
-        uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
-        memset( spareByte, 0, sizeof(spareByte) );
+        uint8_t l_spareByte[mss::MAX_RANK_PER_DIMM];
+        memset( l_spareByte, 0, sizeof(l_spareByte) );
 
-        l_rc = __dimmGetDqBitmapSpareByte( l_fapiDimm, spareByte );
-        if ( l_rc )
-        {
-            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting spare byte" );
-            break;
-        }
+        FAPI_TRY( __dimmGetDqBitmapSpareByte(l_fapiDimm, l_spareByte) );
 
         // Translate bitmap from MC Logical to DIMM DQ format
-        l_rc = __badDqBitTranslation( l_fapiDimm, i_data,
-                                      l_spdData.iv_bitmaps, l_wiringData,
-                                      spareByte, l_ps, true );
-        if ( l_rc )
-        {
-            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error from "
-                      "__badDqBitTranslation." );
-            break;
-        }
+        FAPI_TRY( __badDqBitTranslation(l_fapiDimm, i_data,
+                                        l_spdData.iv_bitmaps, l_wiringData,
+                                        l_spareByte, l_ps, true) );
 
         l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
                               DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
@@ -1611,13 +1529,22 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
     }while(0);
 
+fapi_try_exit:
+
+    FAPI_INF("<<fapiAttrSetBadDqBitmap: Finished setting bitmap");
+
     if ( l_badDqData != nullptr )
     {
         free( l_badDqData );
         l_badDqData = nullptr;
     }
 
-    return l_rc;
+    if ( l_rc )
+    {
+        return l_rc;
+    }
+
+    return fapi2::current_err;
 }
 
 //******************************************************************************
