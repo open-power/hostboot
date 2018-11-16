@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Maxim Polyakov                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -685,5 +686,52 @@ class membufIpmiFruInv : public IpmiFruInv
                           bool i_typeLengthByte=true);
 
 };
+
+//Child class for building up TPM Fru Inventory Record Data
+class tpmIpmiFruInv : public IpmiFruInv
+{
+
+  public:
+
+     /**
+     * @brief Constructor
+     *
+     * @param[in] TargetHandle_t i_target Handle to TPM target for which
+     *            to get relevant IPMI FRU Data from
+     */
+    tpmIpmiFruInv( TARGETING::TargetHandle_t i_target);
+
+    /**
+     * @brief Builds the Internal Use Area Data Section
+     * @param[in/out] io_data The container to put internal use area data in
+     */
+    errlHndl_t buildInternalUseArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Chassis Info Area Data Section
+     * @param[in/out] io_data The container to put chassis info area data in
+     */
+    errlHndl_t buildChassisInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Board Info Area Data Section
+     * @param[in/out] io_data The container to put board info area data in
+     */
+    errlHndl_t buildBoardInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the Product Info Area Data Section
+     * @param[in/out] io_data The container to put product info area data in
+     */
+    errlHndl_t buildProductInfoArea(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Builds the MultiRecord Info Area Data Section
+     * @param[in/out] io_data The container to put multirecord info area data in
+     */
+    errlHndl_t buildMultiRecordInfoArea(std::vector<uint8_t> &io_data);
+
+};
+
 
 #endif
