@@ -130,7 +130,6 @@ errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
 
     int64_t l_remainingAmtToAllocate = i_requestedSmfMemAmtInBytes;
     uint64_t l_currChunkSize = MIN_SMF_MEMORY_AMT;
-    bool l_doubleChunk = false;
     uint64_t l_allocatedSoFar = 0;
     uint64_t l_totalAllocated = 0;
 
@@ -161,9 +160,6 @@ errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
                     // The proc is out of memory; we can't use it any more
                     // in the allocation algorithm
                     l_member.useProc = false;
-                    // We still need to allocate the current chunk to some other
-                    // proc though, so don't increment the chunks for now.
-                    l_doubleChunk = false;
                     TRACDCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: proc 0x%x ran out of memory.", TARGETING::get_huid(l_member.proc));
                 }
                 else
@@ -171,37 +167,27 @@ errlHndl_t distributeSmfMem(const uint64_t i_requestedSmfMemAmtInBytes,
                     // Can fit the current chunk.
                     l_member.memToAllocate = l_currChunkSize;
 
-                    // We were able to allocate; now double the next chunk
-                    l_doubleChunk = true;
-                }
+                    // Tally up the total amt of memory allocated so far.
+                    // We need to check this on each allocation after each proc
+                    // because we may have to stop mid way through the proc loop
+                    // when we've allocated all requested mem.
+                    for(const auto& l_proc : i_procToMemVec)
+                    {
+                        l_allocatedSoFar += l_proc.memToAllocate;
+                    }
 
-                // Tally up the total amt of memory allocated so far.
-                // We need to check this on each allocation (after each proc)
-                // because we may have to stop mid way through the proc loop
-                // when we've allocated all requested mem.
-                for(const auto& l_proc : i_procToMemVec)
-                {
-                    l_allocatedSoFar += l_proc.memToAllocate;
-                }
-
-                if(l_doubleChunk)
-                {
                     // Only calculate the remaining amt when we've successfully
-                    // allocated a chunk (which will force the boolean to
-                    // be true). If we could not allocate the chunk, then the
-                    // remaining amount didn't change.
+                    // allocated a chunk. If we could not allocate the chunk,
+                    // then the remaining amount didn't change.
                     l_remainingAmtToAllocate = i_requestedSmfMemAmtInBytes
                                               - l_allocatedSoFar;
                 }
             } // useProc
         } // l_member
 
-        if(l_doubleChunk)
-        {
-            // Double the amt of mem we will try to allocate on the next
-            // iteration of the while loop.
-            l_currChunkSize = l_currChunkSize << 1;
-        }
+        // Double the amt of mem we will try to allocate on the next
+        // iteration of the while loop.
+        l_currChunkSize = l_currChunkSize << 1;
 
         // Find out if we still have procs remaining. If not, then the
         // user has requested too much memory to be allocated.

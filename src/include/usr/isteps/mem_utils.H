@@ -51,7 +51,7 @@ uint64_t get_top_mem_addr(const TARGETING::Target* i_proc);
 /**
  * @brief Utility function to obtain the lowest known address in the system
  *
- * @return the lowest know address in the system
+ * @return the lowest known address in the system
  */
 uint64_t get_bottom_mem_addr();
 
@@ -62,7 +62,7 @@ uint64_t get_bottom_mem_addr();
  *                    must not be nullptr or the func will assert
  *                    must be of TYPE_PROC or the func will assert
  *
- * @return the lowest know address on the specified proc
+ * @return the lowest known address on the specified proc
  */
 uint64_t get_bottom_mem_addr(const TARGETING::Target* i_proc);
 
