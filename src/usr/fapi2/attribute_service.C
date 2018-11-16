@@ -914,10 +914,9 @@ fapi_try_exit:
 //******************************************************************************
 ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     bool & o_mfgModeBadBitsPresent,
-    uint8_t i_callersData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
+    uint8_t i_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_eccSpareBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
 {
-
     // This function will compare o_eccSpareBitmap, which represents a bad dq
     // bitmap with the appropriate spare/ECC bits set (if any) and all other DQ
     // lines functional, to the caller's data. If discrepancies are found, we
@@ -929,22 +928,17 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 
     do
     {
-        // Zero-initialize the o_eccSpareBitmap bad dq bitmap.
+        // Set a clean bitmap with only the appropriate spare/ECC bits set
         memset( o_eccSpareBitmap, 0, sizeof(o_eccSpareBitmap) );
-
-        // Check ECC.
         FAPI_TRY( __dimmUpdateDqBitmapEccByte(i_fapiDimm, o_eccSpareBitmap) );
-
-        // Check spare DRAM.
         FAPI_TRY( __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_eccSpareBitmap) );
 
-        // Compare o_eccSpareBitmap to i_callersData.
+        // Compare o_eccSpareBitmap to i_bitmap.
         for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
         {
             for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
             {
-                if ( i_callersData[i][j] !=
-                     o_eccSpareBitmap[i][j] )
+                if ( i_bitmap[i][j] != o_eccSpareBitmap[i][j] )
                 {
                     o_mfgModeBadBitsPresent = true;
                     break;
@@ -1002,20 +996,20 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                              sizeof(o_eccSpareBitmap[3]), 1,
                              CLEAN_BAD_DQ_BITMAP_RANK3 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[0],
-                             sizeof(i_callersData[0]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &i_bitmap[0],
+                             sizeof(i_bitmap[0]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK0 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[1],
-                             sizeof(i_callersData[1]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &i_bitmap[1],
+                             sizeof(i_bitmap[1]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK1 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[2],
-                             sizeof(i_callersData[2]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &i_bitmap[2],
+                             sizeof(i_bitmap[2]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK2 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[3],
-                             sizeof(i_callersData[3]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &i_bitmap[3],
+                             sizeof(i_bitmap[3]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK3 );
 
             l_errl->addHwCallout(l_dimm, HWAS::SRCI_PRIORITY_HIGH,
@@ -1230,6 +1224,67 @@ fapi_try_exit:
 }
 
 //******************************************************************************
+// fapi2::platAttrSvc::__badDqBitmapCheckForReconfigLoop function
+//******************************************************************************
+ReturnCode __badDqBitmapCheckForReconfigLoop(
+    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+    uint8_t i_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
+{
+    // If, when setting the bad dq bitmap, we find new bits are set, we will
+    // want to trigger a reconfig loop.
+    bool l_badDqSet = false;
+
+    // Read current BadDqBitmap into l_prev_data
+    uint8_t l_prev_data[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_fapiDimm,
+              l_prev_data) );
+
+    // Check if Bad DQ bit set
+    // Loop through all ranks
+    for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+    {
+        // Loop through all DQs
+        for ( uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++ )
+        {
+            // Loop through all bits
+            for ( uint8_t k = 0; k < mss::BITS_PER_BYTE; k++ )
+            {
+                uint8_t prevBit = (l_prev_data[i][j] >> k) & 0x01;
+                uint8_t newBit  = (i_bitmap[i][j] >> k) & 0x01;
+                // Check for differences, and the bit was set, not cleared
+                if ( (prevBit != newBit) && (newBit != 0) )
+                {
+                    l_badDqSet = true;
+                    break;
+                }
+            }
+            if ( l_badDqSet ) break;
+        }
+        if ( l_badDqSet ) break;
+    }
+
+    // Set ATTR_RECONFIGURE_LOOP to indicate a bad DqBitMap was set
+    if ( l_badDqSet )
+    {
+        FAPI_INF( "__badDqBitmapCheckForReconfigLoop: Reconfigure needed, "
+                  "Bad DQ set" );
+
+        fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_RECONFIGURE_LOOP,
+                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr) );
+
+        // 'OR' values in case of multiple reasons for reconfigure
+        l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_RECONFIGURE_LOOP,
+                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//******************************************************************************
 // fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrGetBadDqBitmap(
@@ -1399,66 +1454,20 @@ ReturnCode fapiAttrSetBadDqBitmap(
         uint64_t l_allMnfgFlags;
         uint8_t l_ps = 0;
 
+        // Get the helper attributes
         FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData,
                                               l_allMnfgFlags, l_ps) );
 
-        // Read current BadDqBitmap into l_prev_data
-        uint8_t l_prev_data[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+        // Make sure to update the ecc and spare bytes in the inputted bitmap
+        // just to make sure we don't see any differences there.
+        uint8_t l_tmpBitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+        memcpy( &l_tmpBitmap, &i_data, sizeof(i_data) );
 
-        bool badDqSet = false;
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTarget,
-                                l_prev_data) );
+        FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, l_tmpBitmap) );
+        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, l_tmpBitmap) );
 
-        // Flag to set if the discrepancies are found
-        bool mfgModeBadBitsPresent = false;
-
-        uint8_t l_tmpData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
-        memcpy( &l_tmpData, &i_data, sizeof(i_data) );
-        FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, l_tmpData) );
-
-        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, l_tmpData) );
-
-        // Check if Bad DQ bit set
-        // Loop through all ranks
-        for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
-        {
-            // Loop through all DQs
-            for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
-            {
-                // Loop through all bits
-                for ( uint8_t k = 0; k < mss::BITS_PER_BYTE; k++ )
-                {
-                    uint8_t prevBit = (l_prev_data[i][j] >> k) & 0x01;
-                    uint8_t newBit  = (l_tmpData[i][j]   >> k) & 0x01;
-                    // Check for differences, and the bit was set, not cleared
-                    if ( (prevBit != newBit) && (newBit != 0) )
-                    {
-                        badDqSet = true;
-                        break;
-                    }
-                }
-                if ( badDqSet ) break;
-            }
-            if ( badDqSet ) break;
-        }
-
-        // Set ATTR_RECONFIGURE_LOOP to indicate a bad DqBitMap was set
-        if ( badDqSet )
-        {
-            FAPI_INF("fapiAttrSetBadDqBitmap: Reconfigure needed, Bad DQ set");
-
-            fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_RECONFIGURE_LOOP,
-                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                    l_reconfigAttr) );
-
-            // 'OR' values in case of multiple reasons for reconfigure
-            l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_RECONFIGURE_LOOP,
-                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                    l_reconfigAttr) );
-        }
+        // Check if we need to trigger a reconfig loop.
+        FAPI_TRY( __badDqBitmapCheckForReconfigLoop(l_fapiDimm, l_tmpBitmap) );
 
         // If system is in DISABLE_DRAM_REPAIRS mode
         if ( l_allMnfgFlags &
@@ -1468,13 +1477,13 @@ ReturnCode fapiAttrSetBadDqBitmap(
             uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                     [mss::BAD_DQ_BYTE_COUNT];
 
-            FAPI_TRY( __compareEccAndSpare(l_fapiDimm,
-                                           mfgModeBadBitsPresent,
-                                           l_tmpData, l_eccSpareBitmap) );
+            bool l_mfgModeBadBitsPresent = false;
+            FAPI_TRY( __compareEccAndSpare(l_fapiDimm, l_mfgModeBadBitsPresent,
+                                           l_tmpBitmap, l_eccSpareBitmap) );
 
             // Don't write bad dq bitmap if discrepancies are found
             // Break out of do while loop
-            if ( mfgModeBadBitsPresent ) break;
+            if ( l_mfgModeBadBitsPresent ) break;
         }
 
         // Set up the data to write to SPD
