@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Jim Yuan                                                           */
 /*                                                                        */
@@ -107,6 +107,9 @@ IpmiFruInv *IpmiFruInv::Factory(TARGETING::TargetHandleList i_targets,
         case TARGETING::TYPE_SYS:
             // Use sys target for setting System Firmware Info
             l_fru = new systemFwIpmiFruInv(l_target);
+            break;
+        case TARGETING::TYPE_TPM:
+            l_fru = new tpmIpmiFruInv(l_target);
             break;
         default:
             assert(false,
@@ -1384,6 +1387,109 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
     }
 
     return l_errl;
+}
+
+//##############################################################################
+tpmIpmiFruInv::tpmIpmiFruInv( TARGETING::TargetHandle_t i_target )
+    :IpmiFruInv(i_target)
+{
+    TRACFCOMP(g_trac_ipmi, "tpmIpmiFruInv::tpmIpmiFruInv - Creating TPM Fru Inventory object");
+};
+
+errlHndl_t tpmIpmiFruInv::buildInternalUseArea(std::vector<uint8_t> &io_data)
+{
+    //This section not needed for TPM type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t tpmIpmiFruInv::buildChassisInfoArea(std::vector<uint8_t> &io_data)
+{
+    //This section not needed for TPM type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t tpmIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
+{
+    errlHndl_t l_errl = NULL;
+
+    do {
+
+        //Set formatting data that goes at the beginning of the record
+        preFormatProcessing(io_data, true);
+
+        //MFG Date/Time - Blank
+        io_data.push_back(0);
+        io_data.push_back(0);
+        io_data.push_back(0);
+
+        //Board Manufacturer - IBM
+        //Board MFG - Type/Length Byte
+        // - Indicate 8-bit Ascii + Latin 1 (0xC0 via leading two bits)
+        // - and a size of 3 for "IBM" - 0x3
+        // - add together and the value for this byte is 0xC3
+        io_data.push_back(0xC3);
+        // - Now put in 'IBM'
+        io_data.push_back('I');
+        io_data.push_back('B');
+        io_data.push_back('M');
+
+        //Board Product Name - type/length byte
+        //Set Board Info description to 'TPM'
+        // - Indicate 8-bit Ascii + Latin 1 (0xC0 via leading two bits)
+        // - add a size 0x3 for TPM
+        io_data.push_back(0xC3);
+        io_data.push_back('T');
+        io_data.push_back('P');
+        io_data.push_back('M');
+
+        //Set Board Info serial number to 0
+        // - Indicate binary data (leading two zero bits)
+        // - and add a size of 0x1 for a single zero byte
+        io_data.push_back(0x01);
+        io_data.push_back(0);
+
+        //Set Board part number to IBM part number BLAH BLAH
+        // - Indicate 8-bit Ascii + Latin 1 (0xC0 via leading two bits)
+        // - and add a size of 0x7 since it is seven bytes of data
+        io_data.push_back(0xC7);
+        // add seven zeros as placeholder for the part number
+        // use a for loop to save PNOR space
+        for (uint8_t i=0; i<7; i++)
+        {
+            io_data.push_back('0');
+        }
+
+        //Push Fru File ID Byte - NULL
+        io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+        //Indicate end of custom fields
+        io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
+
+    } while (0);
+
+    //Complete formatting for this data record
+    postFormatProcessing(io_data);
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_ipmi,"buildBoardInfoArea - Errors Collecting TPM "
+                  "FRU Inventory Board Info Data");
+    }
+
+    return l_errl;
+}
+
+errlHndl_t tpmIpmiFruInv::buildProductInfoArea(std::vector<uint8_t> &io_data)
+{
+    //This section not needed for TPM type
+    return IpmiFruInv::buildEmptyArea(io_data);
+}
+
+errlHndl_t tpmIpmiFruInv::buildMultiRecordInfoArea(
+                                                 std::vector<uint8_t> &io_data)
+{
+    //This section not needed for TPM type
+    return IpmiFruInv::buildEmptyArea(io_data);
 }
 
 errlHndl_t membufIpmiFruInv::buildProductInfoArea(
