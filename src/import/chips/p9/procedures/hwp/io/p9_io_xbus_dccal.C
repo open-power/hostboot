@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -730,6 +730,43 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+/**
+ * @brief Xbus Common Mode Workaround
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp Clock Group
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9x_cm_workaround( const XBUS_TGT i_tgt, const uint8_t i_grp )
+{
+    FAPI_IMP( "p9x_cm_workaround: I/O EDI+ Xbus Entering" );
+    const uint8_t CMDAC      = 5; // Initialize with a CMDAC = 2
+    const uint8_t XBUS_LANES = 17;
+    const uint8_t LN0        = 0;
+    uint32_t      l_cm_crs   = 0;
+    uint64_t      l_data     = 0;
+
+    FAPI_TRY( io::rmw( EDIP_RX_PG_SPARE_MODE_0, i_tgt, i_grp, LN0, ((CMDAC >> 2) & 0x1)));
+    FAPI_TRY( io::rmw( EDIP_RX_PG_SPARE_MODE_1, i_tgt, i_grp, LN0, ((CMDAC >> 1) & 0x1)));
+    FAPI_TRY( io::rmw( EDIP_RX_PG_SPARE_MODE_2, i_tgt, i_grp, LN0, ((CMDAC >> 0) & 0x1)));
+    FAPI_TRY( io::rmw( EDIP_RX_RC_ENABLE_CM_FINE_CAL, i_tgt, i_grp, LN0, 0));
+    FAPI_TRY( io::rmw( EDIP_RX_EO_ENABLE_DAC_H1_TO_A_CAL, i_tgt, i_grp, LN0, 1));
+    FAPI_TRY( io::rmw( EDIP_RX_EO_ENABLE_DAC_H1_CAL, i_tgt, i_grp, LN0, 1));
+
+    for( uint8_t l_lane = 0; l_lane < XBUS_LANES; ++l_lane )
+    {
+        FAPI_TRY( io::read( EDIP_RX_A_INTEG_COARSE_GAIN, i_tgt, i_grp, l_lane, l_data ));
+        l_cm_crs = io::get( EDIP_RX_A_INTEG_COARSE_GAIN, l_data );
+        l_cm_crs = ( l_cm_crs * 5 ) / 10;
+        FAPI_TRY( io::rmw( EDIP_RX_A_INTEG_COARSE_GAIN, i_tgt, i_grp, l_lane, l_cm_crs));
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "p9x_cm_workaround: I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+
 /**
  * @brief Rx Dc Calibration
  * @param[in] i_tgt FAPI2 Target
@@ -841,6 +878,9 @@ fapi2::ReturnCode rx_dccal_poll_grp( const XBUS_TGT i_tgt, const uint8_t  i_grp 
 
     // Restore the invalid bits, Wiretest will modify these as training is run.
     FAPI_TRY( set_lanes_invalid( i_tgt, i_grp, 1 ), "Error Setting Lane Invalid to 1" );
+
+    // FW685728 : Data Compression Workaround
+    FAPI_TRY( p9x_cm_workaround( i_tgt, i_grp ), "p9x_cm_workound call failed" );
 
     FAPI_DBG( "I/O EDI+ Xbus Rx Dccal Complete on Group(%d)", i_grp );
 

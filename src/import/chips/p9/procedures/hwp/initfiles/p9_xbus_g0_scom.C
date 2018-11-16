@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,12 +43,12 @@ constexpr uint64_t literal_0b0000011 = 0b0000011;
 constexpr uint64_t literal_0b000000 = 0b000000;
 constexpr uint64_t literal_0b100111 = 0b100111;
 constexpr uint64_t literal_0b1010 = 0b1010;
-constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b11 = 0b11;
+constexpr uint64_t literal_0b01010000 = 0b01010000;
 constexpr uint64_t literal_0b01011100 = 0b01011100;
-constexpr uint64_t literal_0b01100110 = 0b01100110;
+constexpr uint64_t literal_0b00110111 = 0b00110111;
 constexpr uint64_t literal_0b00111101 = 0b00111101;
-constexpr uint64_t literal_0b01000100 = 0b01000100;
 constexpr uint64_t literal_0b0010000 = 0b0010000;
 constexpr uint64_t literal_0b00001 = 0b00001;
 constexpr uint64_t literal_0b0001 = 0b0001;
@@ -61,7 +61,7 @@ constexpr uint64_t literal_0b0000000000000000 = 0b0000000000000000;
 constexpr uint64_t literal_0b01111111 = 0b01111111;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0b1100 = 0b1100;
-constexpr uint64_t literal_0b00 = 0b00;
+constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b01110 = 0b01110;
 
 fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& TGT0,
@@ -3213,7 +3213,7 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8008c00006010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b01 );
+            l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b00 );
             constexpr auto l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF = 0x0;
             l_scom_buffer.insert<55, 1, 63, uint64_t>(l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF );
             l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b11 );
@@ -3240,20 +3240,20 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
 
             if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_VGA_GAIN_TARGET))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01011100 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01010000 );
             }
             else if (( true ))
             {
-                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01100110 );
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01011100 );
             }
 
             if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_VGA_GAIN_TARGET))
             {
-                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b00111101 );
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b00110111 );
             }
             else if (( true ))
             {
-                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b01000100 );
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b00111101 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008d00006010c3full, l_scom_buffer));
@@ -3377,6 +3377,7 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
 
             constexpr auto l_IOF1_RX_RX0_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF = 0x0;
             l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOF1_RX_RX0_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF );
+            l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800b800006010c3full, l_scom_buffer));
         }
         {

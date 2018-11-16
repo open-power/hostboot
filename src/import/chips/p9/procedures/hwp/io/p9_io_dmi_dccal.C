@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -663,6 +663,54 @@ fapi_try_exit:
 }
 
 /**
+ * @brief P9 Rx Xbus Override Common Mode Settings :: SW446658
+ * @param[in] i_tgt    FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9_dmi_override_cm(const DMI_TGT i_tgt)
+{
+    const uint8_t XBUS_LANES = 17;
+    const uint8_t GRP3       =  3;
+    const uint8_t LANE_00    =  0;
+    uint64_t      l_data     =  0;
+    uint64_t      l_cmcrs    =  0;
+
+    FAPI_IMP("p9_dmi_override_cm: I/O EDI+ Xbus Entering");
+
+    // Set CMDAC = 2->5. This is needed to keep the common mode at the
+    //   sampling latch equivalent
+    FAPI_TRY(io::rmw(EDIP_RX_PG_SPARE_MODE_0, i_tgt, GRP3, LANE_00, 0x1));
+    FAPI_TRY(io::rmw(EDIP_RX_PG_SPARE_MODE_1, i_tgt, GRP3, LANE_00, 0x0));
+    FAPI_TRY(io::rmw(EDIP_RX_PG_SPARE_MODE_2, i_tgt, GRP3, LANE_00, 0x1));
+
+    // Since we fixing the common mode at the summer node, we need to rerun:
+    // - H1 To A Cal
+    // - H1 Cal
+    FAPI_TRY(io::rmw(EDIP_RX_EO_ENABLE_DAC_H1_TO_A_CAL, i_tgt, GRP3, LANE_00, 0x1));
+    FAPI_TRY(io::rmw(EDIP_RX_EO_ENABLE_DAC_H1_CAL,      i_tgt, GRP3, LANE_00, 0x1));
+
+    // As we are modifying the Common Mode, we need to disable the CM Fine Calibration,
+    //   otherwise this calibration will overwrite any fixes we apply.
+    FAPI_TRY(io::rmw(EDIP_RX_RC_ENABLE_CM_FINE_CAL, i_tgt, GRP3, LANE_00, 0x0));
+
+
+    for(uint8_t l_lane = 0; l_lane < XBUS_LANES; ++l_lane)
+    {
+        FAPI_TRY(io::read(EDIP_RX_A_INTEG_COARSE_GAIN, i_tgt, GRP3, l_lane, l_data));
+
+        l_cmcrs = io::get(EDIP_RX_A_INTEG_COARSE_GAIN, l_data);
+        l_cmcrs = (l_cmcrs * 5) / 10;
+        io::set(EDIP_RX_A_INTEG_COARSE_GAIN, l_cmcrs, l_data);
+
+        FAPI_TRY(io::write(EDIP_RX_A_INTEG_COARSE_GAIN, i_tgt, GRP3, l_lane, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_IMP("p9_dmi_override_cm: I/O EDI+ Xbus Exiting");
+    return fapi2::current_err;
+}
+
+/**
  * @brief Start Cleanup Pll
  * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
@@ -841,6 +889,9 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
 
     // Restore the invalid bits, Wiretest will modify these as training is run.
     FAPI_TRY(set_lanes_invalid(i_tgt, 1), "Error Setting Lane Invalid to 1");
+
+    // Run DMI Common Mode Workaround
+    FAPI_TRY( p9_dmi_override_cm( i_tgt ), "Error Running P9 Xbus Common Mode Workaround" );
 
     FAPI_DBG("I/O EDI+ Dmi Rx Dccal Complete");
 
