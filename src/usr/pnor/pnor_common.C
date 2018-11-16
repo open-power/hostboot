@@ -443,7 +443,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     o_TOC[secId].misc = ffsUserData->miscFlags;
 
                     TRACFCOMP(g_trac_pnor,"PNOR::parseTOC: User Data %s",
-                            cur_entry->name);
+                              cur_entry->name);
 
                     if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
                     {
@@ -610,8 +610,10 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
         tmpId = (PNOR::SectionId) (tmpId + 1) )
     {
         TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X  "
-               "virt=0x%.16X", cv_EYECATCHER[tmpId], o_TOC[tmpId].size,
-               o_TOC[tmpId].flashAddr, o_TOC[tmpId].virtAddr );
+                  "virt=0x%.16X  misc=0x%.2X",
+                  cv_EYECATCHER[tmpId], o_TOC[tmpId].size,
+                  o_TOC[tmpId].flashAddr, o_TOC[tmpId].virtAddr,
+                  o_TOC[tmpId].misc );
     }
 
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
