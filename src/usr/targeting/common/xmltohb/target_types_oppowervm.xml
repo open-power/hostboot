@@ -185,6 +185,7 @@
     <id>sys-sys-power9</id>
     <attribute>
       <id>ASCII_VPD_LX_KEYWORD</id>
+      <default>0x3100070100300FF1</default>
     </attribute>
     <attribute>
       <id>HUGE_PAGE_COUNT</id>
