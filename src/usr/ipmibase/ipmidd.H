@@ -27,6 +27,7 @@
 
 #include <sys/msg.h>
 #include <ipmi/ipmiif.H>
+#include <sys/time.h>
 #include "ipmibt.H"
 
 /** @file ipmidd.H
@@ -61,7 +62,7 @@ enum {
     INT_BMC_HWRST      = (1 << 7),
 
     // How long to sychronously wait for the device to change state (in ns)
-    WAIT_TIME = 10000000,
+    WAIT_TIME = (1*NS_PER_MSEC),
 };
 
 /**
