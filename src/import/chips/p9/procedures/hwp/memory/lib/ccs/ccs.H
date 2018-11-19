@@ -73,6 +73,24 @@ class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
 
         enum
         {
+            // Non address values that are needed for helper functions
+
+            // ODT values used for beautification
+            // Attribute locations
+            ATTR_ODT_DIMM0_R0 = 0,
+            ATTR_ODT_DIMM0_R1 = 1,
+            ATTR_ODT_DIMM1_R0 = 4,
+            ATTR_ODT_DIMM1_R1 = 5,
+
+            // Right justified output - makes it so we can use insertFromRight
+            CCS_ODT_DIMM0_R0 = 4,
+            CCS_ODT_DIMM0_R1 = 5,
+            CCS_ODT_DIMM1_R0 = 6,
+            CCS_ODT_DIMM1_R1 = 7,
+
+            // Default ODT cycle length is 5 - one for the preamble and 4 for the data
+            DEFAULT_ODT_CYCLE_LEN = 5,
+
             // CCS MODEQ
             STOP_ON_ERR = MCBIST_CCS_MODEQ_STOP_ON_ERR,
             UE_DISABLE = MCBIST_CCS_MODEQ_UE_DISABLE,
@@ -491,6 +509,50 @@ inline instruction_t<T> des_command()
     return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), NO_CHIP_SELECT_ACTIVE,
                             rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
+
+///
+/// @brief Converts an ODT attribute to CCS array input
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_attr_value ODT attribute value
+/// @return CCS value for the ODT's
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline uint8_t convert_odt_attr_to_ccs(const fapi2::buffer<uint8_t>& i_attr_value)
+{
+    // ODT value buffer
+    fapi2::buffer<uint8_t> l_ccs_value;
+    l_ccs_value.template writeBit<TT::CCS_ODT_DIMM0_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM0_R0>())
+    .template writeBit<TT::CCS_ODT_DIMM0_R1>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM0_R1>())
+    .template writeBit<TT::CCS_ODT_DIMM0_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM0_R0>())
+    .template writeBit<TT::CCS_ODT_DIMM1_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R0>())
+    .template writeBit<TT::CCS_ODT_DIMM1_R1>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R1>());
+
+    return uint8_t(l_ccs_value);
+}
+
+///
+/// @brief Create, initialize a JEDEC Device Deselect CCS command
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_odt_values CCS defined ODT values
+/// @param[in] i_cycles the number of cycles to hold the ODT for - defaults to DEFAULT_ODT_CYCLE_LEN
+/// @return the Device Deselect CCS instruction
+/// @note This technically is not a JEDEC command, but is needed for CCS to hold the ODT cycles
+/// CCS by design does not repeat or latch ODT's appropriately
+/// As such, it's up to the programmers to hold the ODT's appropriately
+/// This "command" will greatly help us do that
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> odt_command(const uint8_t i_odt_values, const uint64_t i_cycles = TT::DEFAULT_ODT_CYCLE_LEN)
+{
+    auto l_odt_cmd = des_command<T>();
+    l_odt_cmd.arr0.template insertFromRight<TT::ARR0_DDR_ODT, TT::ARR0_DDR_ODT_LEN>(i_odt_values);
+    l_odt_cmd.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(i_cycles);
+
+    return l_odt_cmd;
+}
+
 
 ///
 /// @brief Create, initialize a NTTM read CCS command
