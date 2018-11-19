@@ -35,9 +35,9 @@
 #include <errl/errlmanager.H>        // errlCommit
 #include <errl/errludtarget.H>       // ErrlUserDetailsTarget
 #include <devicefw/driverif.H>       // OperationType
-#include <expscom/expscom_reasoncodes.H>
-#include "expscom_trace.H"
-#include "expscom_utils.H"
+#include <expscom/expscom_reasoncodes.H> // ReasonCodes/ModuleIds
+#include "expscom_trace.H" //g_trac_expscom
+#include "expscom_utils.H" //validateInputs
 
 namespace EXPSCOM
 {
@@ -45,7 +45,7 @@ namespace EXPSCOM
 constexpr uint64_t FIRST_4_BYTES = 0xFFFFFFFF00000000;
 
 ///////////////////////////////////////////////////////////////////////////////
-// See above for doxygen documentation
+// See header file for doxygen documentation
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t validateInputs(DeviceFW::OperationType i_opType,
                           const TARGETING::Target* i_target,

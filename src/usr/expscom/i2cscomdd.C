@@ -35,8 +35,7 @@
 #include <lib/i2c/exp_i2c_scom.H>  // i2c_get_scom
 #include <errl/errludtarget.H>     // ErrlUserDetailsTarget
 #include <hwpf/fapi2/include/fapi2_hwp_executor.H> // FAPI_EXEC_HWP
-#include <expscom/expscom_reasoncodes.H> //  EXPSCOM::MOD_I2CSCOM_PERFORM_OP
-#include "i2cscomdd.H" //i2cScomPerformOp
+#include "i2cscomdd.H"     //i2cScomPerformOp
 #include "expscom_trace.H" //g_trac_expscom
 #include "expscom_utils.H" //validateInputs
 

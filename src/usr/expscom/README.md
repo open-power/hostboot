@@ -150,12 +150,12 @@ targets will be processed (lets say for now this is IBM scom address):
 
     fapi2::getScom(myOcmbTarget, scomAddr, io_buffer);
 
-* Platform Specifc FAPI2 getScom API
+* Platform Specific FAPI2 getScom API
 
 
     fapi2::platGetScom(myOcmbTarget, scomAddr, io_buffer);
 
-* Platform Specifc FAPI2 getScom API resolves to calling into our device framework to whatever
+* Platform Specific FAPI2 getScom API resolves to calling into our device framework to whatever
 function is registered to read OCMB target for DeviceFW::SCOM operations
 
 
@@ -241,7 +241,8 @@ for OCMB target scoms so we will end up calling doScomOp
                   DeviceFW::MMIO,
                   address, readLimit);
 
-* mmioPerformOp resolves to doing a memcpy on the address requested
+* mmioPerformOp will execute the actual load/store operation input memory-mapped i/o
+space and handle errors in that operation
 
 
     if (i_opType == DeviceFW::READ)
