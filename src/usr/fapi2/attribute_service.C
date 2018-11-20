@@ -1562,43 +1562,36 @@ fapi_try_exit:
 ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                        bool & o_isX4Dram )
 {
-    fapi2::ReturnCode l_rc;
+    o_isX4Dram = false;
 
-    do
+    TARGETING::ATTR_MODEL_type procType = __getChipModel();
+
+    // Get if drams are x4 or x8
+    if ( TARGETING::MODEL_NIMBUS == procType )
     {
-        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+        // Nimbus only supports x4 DRAMs
+        o_isX4Dram = true;
+    }
+    else if ( TARGETING::MODEL_CUMULUS == procType )
+    {
+        // Get the MBA
+        Target<TARGET_TYPE_MBA> l_fapiMba =
+            i_fapiDimm.getParent<TARGET_TYPE_MBA>();
 
-        // Get if drams are x4 or x8
-        if ( TARGETING::MODEL_NIMBUS == procType )
-        {
-            // Nimbus only supports x4 DRAMs
-            o_isX4Dram = true;
-        }
-        else if ( TARGETING::MODEL_CUMULUS == procType )
-        {
-            // Get the MBA
-            Target<TARGET_TYPE_MBA> l_fapiMba =
-                i_fapiDimm.getParent<TARGET_TYPE_MBA>();
-            TARGETING::TargetHandle_t l_mbaTrgt = nullptr;
-            errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mbaTrgt );
-            if ( l_errl )
-            {
-                FAPI_ERR( "__isX4Dram: Error from "
-                          "getTargetingTarget getting MBA." );
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-                break;
-            }
-            o_isX4Dram = ( TARGETING::CEN_EFF_DRAM_WIDTH_X4 ==
-                l_mbaTrgt->getAttr<TARGETING::ATTR_CEN_EFF_DRAM_WIDTH>() );
-        }
-        else
-        {
-            FAPI_ERR( "__isX4Dram: Invalid procType" );
-            assert(false);
-        }
-    }while(0);
+        uint8_t l_dramWidth;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, l_fapiMba,
+                                l_dramWidth) );
+        o_isX4Dram = ( fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 == l_dramWidth );
+    }
+    else
+    {
+        // TODO RTC 201603 - generic/axone case
+        FAPI_ERR( "__isX4Dram: Invalid procType" );
+        assert(false);
+    }
 
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 //******************************************************************************
 // fapi2::platAttrSvc::__dramToDq function
@@ -1606,25 +1599,17 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 ReturnCode __dramToDq( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_dram, uint8_t & o_dq )
 {
-    fapi2::ReturnCode l_rc;
+    o_dq = 0;
 
-    do
-    {
-        // Convert dram pos to symbol
-        // Get if drams are x4 or x8
-        bool l_isX4 = false;
-        l_rc = __isX4Dram( i_fapiDimm, l_isX4 );
-        if ( l_rc )
-        {
-            FAPI_ERR( "__dramToDq: Error from __isX4Dram." );
-            break;
-        }
+    // Convert dram pos to symbol
+    // Get if drams are x4 or x8
+    bool l_isX4 = false;
+    FAPI_TRY( __isX4Dram(i_fapiDimm, l_isX4) );
 
-        o_dq = i_dram * ( l_isX4 ? 4 : 8 );
+    o_dq = i_dram * ( l_isX4 ? 4 : 8 );
 
-    }while(0);
-
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -1633,25 +1618,17 @@ ReturnCode __dramToDq( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 ReturnCode __dqToDram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     uint8_t i_dq, uint8_t & o_dram )
 {
-    fapi2::ReturnCode l_rc;
+    o_dram = 0;
 
-    do
-    {
-        // Convert symbol to dram pos
-        // Get if drams are x4 or x8
-        bool l_isX4 = false;
-        l_rc = __isX4Dram( i_fapiDimm, l_isX4 );
-        if ( l_rc )
-        {
-            FAPI_ERR( "__dqToDram: Error from __isX4Dram." );
-            break;
-        }
+    // Convert symbol to dram pos
+    // Get if drams are x4 or x8
+    bool l_isX4 = false;
+    FAPI_TRY( __isX4Dram(i_fapiDimm, l_isX4) );
 
-        o_dram = i_dq / ( l_isX4 ? 4 : 8 );
+    o_dram = i_dq / ( l_isX4 ? 4 : 8 );
 
-    }while(0);
-
-    return l_rc;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -1662,102 +1639,57 @@ ReturnCode __rowRepairTranslateDramPos(
     bool i_mcLogicalToDimmDq,
     ATTR_ROW_REPAIR_DATA_Type & io_translatedData )
 {
-    fapi2::ReturnCode l_rc;
-    errlHndl_t l_errl = nullptr;
     wiringData l_wiringData;
     uint64_t l_allMnfgFlags;
     uint8_t l_ps = 0;
 
-    do
+    // Get the wiring data and port select for translation.
+    FAPI_TRY( __badDqBitmapGetHelperAttrs(i_fapiDimm, l_wiringData,
+                                          l_allMnfgFlags, l_ps) );
+
+    // Loop through each rank.
+    for ( uint8_t rank = 0; rank < mss::MAX_RANK_PER_DIMM; rank++ )
     {
-        // Get targeting target for the dimm
-        TARGETING::TargetHandle_t l_dimm = nullptr;
-        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
-        if ( l_errl )
+        // The first 5 bits of the stored row repair are the dram position
+        // that needs to be translated. The next three are the slave rank.
+        uint8_t l_dramPosAndSrank = io_translatedData[rank][0];
+        uint8_t l_dramPos = (l_dramPosAndSrank >> 3) & 0x1f;
+        uint8_t l_srank = l_dramPosAndSrank & 0x07;
+
+        // The last bit of the row repair stores the validity bit
+        bool l_valid = io_translatedData[rank][mss::ROW_REPAIR_BYTE_COUNT-1]
+            & 0x01;
+
+        // If the row repair isn't valid, no need to translate anything
+        if ( !l_valid ) continue;
+
+        uint8_t l_dq = 0;
+        FAPI_TRY( __dramToDq(i_fapiDimm, l_dramPos, l_dq) );
+
+        uint8_t l_translatedDq = 0;
+
+        if ( i_mcLogicalToDimmDq )
         {
-            FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                      "getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-            break;
+            FAPI_TRY( __mcLogicalToDimmDqHelper(i_fapiDimm, l_wiringData,
+                                                l_ps, l_dq, l_translatedDq) );
+        }
+        else
+        {
+            FAPI_TRY( __dimmDqToMcLogicalHelper(i_fapiDimm, l_wiringData,
+                                                l_ps, l_dq, l_translatedDq) );
         }
 
-        // Get the wiring data and port select for translation.
-        l_rc = __badDqBitmapGetHelperAttrs( i_fapiDimm, l_wiringData,
-                                            l_allMnfgFlags, l_ps );
-        if ( l_rc )
-        {
-            FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                      "__badDqBitmapGetHelperAttrs." );
-            break;
-        }
+        uint8_t l_translatedDram = 0;
+        FAPI_TRY( __dqToDram(i_fapiDimm, l_translatedDq, l_translatedDram) );
 
-        // Loop through each rank.
-        for ( uint8_t rank = 0; rank < mss::MAX_RANK_PER_DIMM; rank++ )
-        {
-            // The first 5 bits of the stored row repair are the dram position
-            // that needs to be translated. The next three are the slave rank.
-            uint8_t l_dramPosAndSrank = io_translatedData[rank][0];
-            uint8_t l_dramPos = (l_dramPosAndSrank >> 3) & 0x1f;
-            uint8_t l_srank = l_dramPosAndSrank & 0x07;
+        uint8_t l_updatedData = (l_translatedDram << 3) | l_srank;
 
-            // The last bit of the row repair stores the validity bit
-            bool l_valid = io_translatedData[rank][mss::ROW_REPAIR_BYTE_COUNT-1]
-                           & 0x01;
+        io_translatedData[rank][0] = l_updatedData;
+    }
 
-            // If the row repair isn't valid, no need to translate anything
-            if ( !l_valid ) continue;
+fapi_try_exit:
+    return fapi2::current_err;
 
-            uint8_t l_dq = 0;
-            l_rc = __dramToDq( i_fapiDimm, l_dramPos, l_dq );
-            if ( l_rc )
-            {
-                FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                          "__dramToDq" );
-                break;
-            }
-
-            uint8_t l_translatedDq = 0;
-
-            if ( i_mcLogicalToDimmDq )
-            {
-                l_rc = __mcLogicalToDimmDqHelper( i_fapiDimm, l_wiringData,
-                                                  l_ps, l_dq, l_translatedDq );
-                if ( l_rc )
-                {
-                    FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                              "__mcLogicalToDimmDqHelper" );
-                    break;
-                }
-            }
-            else
-            {
-                l_rc = __dimmDqToMcLogicalHelper( i_fapiDimm, l_wiringData,
-                                                  l_ps, l_dq, l_translatedDq );
-                if ( l_rc )
-                {
-                    FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                              "__dimmDqToMcLogicalHelper" );
-                    break;
-                }
-            }
-
-            uint8_t l_translatedDram = 0;
-            l_rc = __dqToDram( i_fapiDimm, l_translatedDq, l_translatedDram );
-            if ( l_rc )
-            {
-                FAPI_ERR( "__rowRepairTranslateDramPos: Error from "
-                          "__dqToDram" );
-                break;
-            }
-
-            uint8_t l_updatedData = (l_translatedDram << 3) | l_srank;
-
-            io_translatedData[rank][0] = l_updatedData;
-
-        }
-    }while(0);
-
-    return l_rc;
 }
 
 //******************************************************************************
@@ -1766,6 +1698,8 @@ ReturnCode __rowRepairTranslateDramPos(
 ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&o_data) )
 {
+    FAPI_INF(">>getRowRepairData: Getting row repair data");
+
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
     uint8_t * l_data =
@@ -1815,17 +1749,14 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                     sizeof(ATTR_ROW_REPAIR_DATA_Type) );
 
             // Translate the DRAM position in the row repair data
-            l_rc = __rowRepairTranslateDramPos( l_fapiDimm, false,
-                                                o_data );
-            if ( l_rc )
-            {
-                FAPI_ERR( "getRowRepairData: Error from "
-                          "__rowRepairTranslateDramPos" );
-                break;
-            }
+            FAPI_TRY( __rowRepairTranslateDramPos(l_fapiDimm, false, o_data ) );
         }
 
     }while(0);
+
+fapi_try_exit:
+
+    FAPI_INF("<<getRowRepairData: Finished getting row repair data");
 
     if ( l_data != nullptr )
     {
@@ -1833,7 +1764,12 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         l_data = nullptr;
     }
 
-    return l_rc;
+    if ( l_rc )
+    {
+        return l_rc;
+    }
+
+    return fapi2::current_err;
 }
 
 //******************************************************************************
@@ -1842,6 +1778,8 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              ATTR_ROW_REPAIR_DATA_Type (&i_data) )
 {
+    FAPI_INF(">>setRowRepairData: Setting row repair data");
+
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
     uint8_t * l_data =
@@ -1885,15 +1823,8 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         // Translate the input data
         ATTR_ROW_REPAIR_DATA_Type l_translatedData;
         memcpy( &l_translatedData, i_data, sizeof(ATTR_ROW_REPAIR_DATA_Type) );
-        l_rc = __rowRepairTranslateDramPos( l_fapiDimm, true,
-                                            l_translatedData );
-        if ( l_rc )
-        {
-            FAPI_ERR( "setRowRepairData: Error from "
-                      "__rowRepairTranslateDramPos" );
-            break;
-        }
-
+        FAPI_TRY( __rowRepairTranslateDramPos(l_fapiDimm, true,
+                                              l_translatedData) );
         // Update the row repair data
         memcpy( &l_spdData.iv_rowRepairData, l_translatedData,
                 sizeof(ATTR_ROW_REPAIR_DATA_Type) );
@@ -1904,12 +1835,16 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if ( l_errl )
         {
             FAPI_ERR( "setRowRepairData: Failed to call deviceWrite to set "
-                      "l_data." );
+                      "l_spdData." );
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
             break;
         }
 
     }while(0);
+
+fapi_try_exit:
+
+    FAPI_INF("<<setRowRepairData: Finished setting row repair data");
 
     if ( l_data != nullptr )
     {
@@ -1917,7 +1852,12 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         l_data = nullptr;
     }
 
-    return l_rc;
+    if ( l_rc )
+    {
+        return l_rc;
+    }
+
+    return fapi2::current_err;
 }
 
 //******************************************************************************
