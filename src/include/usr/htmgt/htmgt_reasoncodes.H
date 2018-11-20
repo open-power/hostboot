@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,9 +43,8 @@ namespace HTMGT
         HTMGT_MOD_PASS_THRU             = 0x09,
         HTMGT_MOD_CFG_FREQ_POINTS       = 0x0A,
         HTMGT_MOD_WAIT_FOR_CHECKPOINT   = 0x0B,
+        HTMGT_MODID_PROCESS_ELOG        = 0x10,
         HTMGT_MOD_OCC_POLL              = 0x76,
-        HTMGT_MOD_BAD_FRU_CALLOUTS      = 0x7D,
-        HTMGT_MOD_MISMATCHING_SEVERITY  = 0x7F,
         HTMGT_MOD_READ_OCC_SRAM         = 0x85,
         HTMGT_MOD_SEND_OCC_CMD          = 0x90,
         HTMGT_MOD_WRITE_OCC_CMD         = 0x91,
@@ -89,6 +88,9 @@ namespace HTMGT
         HTMGT_RC_TARGET_NOT_FUNCTIONAL = HTMGT_COMP_ID | 0x54,
         HTMGT_RC_OCC_MASTER_NOT_FOUND  = HTMGT_COMP_ID | 0x55,
         HTMGT_RC_OCC_RESET_THREHOLD    = HTMGT_COMP_ID | 0x56,
+        HTMGT_RC_INVALID_OCC_ELOG      = HTMGT_COMP_ID | 0x63,
+        HTMGT_RC_BAD_FRU_CALLOUTS      = HTMGT_COMP_ID | 0x7D,
+        HTMGT_RC_MISMATCHING_SEVERITY  = HTMGT_COMP_ID | 0x7F,
         HTMGT_RC_PCAP_CALC_COMPLETE    = HTMGT_COMP_ID | 0xB9,
         HTMGT_RC_ENERGYSCALE_FFDC      = HTMGT_COMP_ID | 0xFD,
     };
