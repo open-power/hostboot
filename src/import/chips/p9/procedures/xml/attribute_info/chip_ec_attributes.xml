@@ -4726,7 +4726,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4835,12 +4835,19 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD13_SECURITY</id>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD13_NDD23_SECURITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Security settings for Cumulus DD1.3
+      Security settings for Cumulus DD1.3 and Nimbus DD2.3
     </description>
     <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
@@ -4870,6 +4877,88 @@
         <ec>
           <value>0x12</value>
           <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD13_COMPATIBILITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Used to revert Cumulus DD1.3 back to Cumulus DD1.2 inits
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_NDD23_COMPATIBILITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Used to revert Nimbus DD2.3 back to Nimbus DD2.2 inits
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_NDD23_CDD12_LOGIC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Logic that only exist for NDD23+, CDD12+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x12</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_NDD23_CDD13_LOGIC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Logic that only exist for NDD23+, CDD13+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4937,14 +5026,15 @@
     <id>ATTR_CHIP_EC_FEATURE_DIS_PATTERN_CACHE_RL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Disable Pattern Cache at risklevel=0 for Nimbus DD2.2
+      Disable Pattern Cache at risklevel=0 for Nimbus DD2.2 and Nimbus DD2.3 compatibility
+      Also disable for all Nimbus DD2.3 native modes
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4954,18 +5044,18 @@
     <id>ATTR_CHIP_EC_FEATURE_DIS_PATTERN_CACHE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Disable Pattern Cache globally for Cumulus and Nimbus DD2.3+
+      Disable Pattern Cache globally for Cumulus and Axone
     </description>
     <chipEcFeature>
       <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x23</value>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <name>ENUM_ATTR_NAME_AXONE</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -4985,7 +5075,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
