@@ -91,4 +91,27 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_LRDIMM_CAL_NO_TRANSITION</rc>
+    <description>
+      Set if a buffer does not see a transition during a calibration step
+    </description>
+    <ffdc>NIBBLE_FLAGS</ffdc>
+    <ffdc>CALIBRATION_STEP</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_LRDIMM_CAL_INVALID_DATA</rc>
+    <description>
+      Set if a buffer sees invalid data during a calibration step
+    </description>
+    <ffdc>NIBBLE_FLAGS</ffdc>
+    <ffdc>INVALID_DATA_COUNT</ffdc>
+    <ffdc>CALIBRATION_STEP</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+  </hwpError>
+
 </hwpErrors>
