@@ -51,6 +51,10 @@
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/ddr4/pba.H>
 
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_lrdimm_training_helper.H>
+#endif
+
 namespace mss
 {
 
