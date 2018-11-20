@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -38,6 +39,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/phy/mss_lrdimm_training.H>
+#include <lib/phy/mss_lrdimm_training_helper.H>
 #include <lib/phy/mss_dwl.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
@@ -261,12 +263,13 @@ fapi2::ReturnCode dwl::process_results( const fapi2::Target<fapi2::TARGET_TYPE_M
         }
     }
 
-    // Otherwise, note that this data is a bit weird...
-    // Note: this will be logged as an error in the RAS updates for DWL
+    // Otherwise, note that this data is invalid.
+    // Note it via via debug and set our "non-zero and non-one data" flag
     else
     {
-        FAPI_ERR("DWL %s rank%u buffer%u nibble%u has seen weird data at delay 0x%02x data:0x%02x",
-                 mss::c_str(i_target), i_rank, i_buffer, i_nibble, i_delay, i_result);
+        io_recorder.iv_invalid_data_count++;
+        FAPI_DBG("DWL %s rank%u buffer%u nibble%u has seen invalid data at delay 0x%02x data:0x%02x - count %u",
+                 mss::c_str(i_target), i_rank, i_buffer, i_nibble, i_delay, i_result, io_recorder.iv_invalid_data_count);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -316,6 +319,152 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Creates the nibble flags for the invalid data callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @param[out] o_invalid_count number of invalid data occurances seen
+/// @return invalid data nibble flags
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+uint32_t dwl::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const uint8_t i_rank,
+                                 const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                 uint64_t& o_invalid_count) const
+{
+    o_invalid_count = 0;
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        // Updates the bitmap
+        o_invalid_count += l_recorder.first.iv_invalid_data_count + l_recorder.second.iv_invalid_data_count;
+        append_nibble_flags(l_recorder.first.iv_invalid_data_count != recorder::CLEAN,
+                            l_recorder.second.iv_invalid_data_count != recorder::CLEAN,
+                            l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if invalid data is seen during this calibration step
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+fapi2::ReturnCode dwl::callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    // Per nibble invalid data - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    // We also count the number of occurances of invalid data across the port/rank
+    // This count gives more insight into the fails
+    // Low counts mean one off data glitches
+    // High counts indicate that one or more nibbles are having issues
+    uint64_t l_invalid_data_count = 0;
+    const auto l_per_nibble_flags = flag_invalid_data( i_target, i_rank, i_recorders, l_invalid_data_count);
+
+    FAPI_TRY(callout::invalid_data( i_target,
+                                    i_rank,
+                                    l_per_nibble_flags,
+                                    l_invalid_data_count,
+                                    mss::cal_steps::DWL,
+                                    "DWL"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates the nibble flags for the no transition callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return no transition nibble flags
+///
+uint32_t dwl::flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint8_t i_rank,
+                                  const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        const bool l_nibble0_no_transition = !l_recorder.first.iv_seen0 || !l_recorder.first.iv_seen1;
+        const bool l_nibble1_no_transition = !l_recorder.second.iv_seen0 || !l_recorder.second.iv_seen1;
+
+        // Updates the bitmap
+        append_nibble_flags(l_nibble0_no_transition, l_nibble1_no_transition, l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if a rank does not see a 0->1 transition
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode dwl::callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    // Per nibble weird data and no transition flags - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    uint32_t l_per_nibble_flags = flag_no_transition( i_target, i_rank, i_recorders);
+
+    // Error checking here
+    FAPI_TRY(callout::no_transition( i_target,
+                                     i_rank,
+                                     l_per_nibble_flags,
+                                     mss::cal_steps::DWL,
+                                     "DWL"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Analyzes the results for a given DWL run
 /// @param[in] i_target the DIMM target on which to operate
 /// @param[in] i_rank the current rank
@@ -326,31 +475,11 @@ fapi2::ReturnCode dwl::analyze_results( const fapi2::Target<fapi2::TARGET_TYPE_D
                                         const uint8_t i_rank,
                                         const std::vector<std::pair<recorder, recorder>>& i_recorders) const
 {
-    // Note: update this during DWL RAS commit
-    uint8_t l_buffer = 0;
+    FAPI_TRY(callout_no_transition(i_target, i_rank, i_recorders));
+    FAPI_TRY(callout_invalid_data(i_target, i_rank, i_recorders));
 
-    for(const auto& l_recorder : i_recorders)
-    {
-        // Nibble 0 callout
-        // Note: this will be changed into an actual error during the DWL RAS commit
-        if(!l_recorder.first.iv_seen0 || !l_recorder.first.iv_seen1)
-        {
-            FAPI_ERR("DWL %s rank%u seen0=%u seen1=%u buffer%u nibble0 has not seen both a 0 and a 1",
-                     mss::c_str(i_target), i_rank, l_recorder.first.iv_seen0, l_recorder.first.iv_seen1, l_buffer);
-        }
-
-        // Nibble 1 callout
-        // Note: this will be changed into an actual error during the DWL RAS commit
-        if(!l_recorder.second.iv_seen0 || !l_recorder.second.iv_seen1)
-        {
-            FAPI_ERR("DWL %s rank%u seen0=%u seen1=%u buffer%u nibble1 has not seen both a 0 and a 1",
-                     mss::c_str(i_target), i_rank, l_recorder.second.iv_seen0, l_recorder.second.iv_seen1, l_buffer);
-        }
-
-        l_buffer++;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

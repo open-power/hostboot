@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -70,27 +71,31 @@ class dwl : public step
         ///
         struct recorder
         {
+            static constexpr uint64_t CLEAN = 0;
             ///
             /// @brief Default constructor
             ///
             recorder() :
                 iv_seen0(false),
                 iv_seen1(false),
-                iv_delay(0)
+                iv_delay(0),
+                iv_invalid_data_count(CLEAN)
             {}
 
             ///
             /// @brief constructor
             ///
-            recorder(const bool i_seen0, const bool i_seen1, const uint8_t i_delay) :
+            recorder(const bool i_seen0, const bool i_seen1, const uint8_t i_delay, const uint64_t i_invalid_count = CLEAN) :
                 iv_seen0(i_seen0),
                 iv_seen1(i_seen1),
-                iv_delay(i_delay)
+                iv_delay(i_delay),
+                iv_invalid_data_count(i_invalid_count)
             {}
 
             bool iv_seen0;
             bool iv_seen1;
             uint8_t iv_delay;
+            uint64_t iv_invalid_data_count;
         };
 
         ///
@@ -191,7 +196,7 @@ class dwl : public step
                                            recorder& io_recorder) const;
 
         ///
-        /// @brief Analyzes the results for a given DWL run
+        /// @brief Callsout if a rank does not see a 0->1 transition
         /// @param[in] i_target the DIMM target on which to operate
         /// @param[in] i_rank the current rank
         /// @param[in] i_recorders the recorders on which to process the data
@@ -200,6 +205,54 @@ class dwl : public step
         fapi2::ReturnCode analyze_results( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                            const uint8_t i_rank,
                                            const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Creates the nibble flags for the invalid data callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @param[out] o_invalid_count number of invalid data occurances seen
+        /// @return invalid data nibble flags
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint8_t i_rank,
+                                    const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                    uint64_t& o_invalid_count) const;
+
+        ///
+        /// @brief Calls out if invalid data is seen during this calibration step
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                const uint8_t i_rank,
+                                                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Creates the nibble flags for the no transition callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return no transition nibble flags
+        ///
+        uint32_t flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_rank,
+                                     const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Calls out if a rank does not see a 0->1 transition
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
 
         ///
         /// @brief Write the results to buffer generate PBA commands
