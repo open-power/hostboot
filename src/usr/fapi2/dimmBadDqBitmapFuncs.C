@@ -127,6 +127,7 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
         }
         else
         {
+            // TODO RTC 201603 - axone/generic updates
             // Invalid target.
             FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Invalid proc model" );
             l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
