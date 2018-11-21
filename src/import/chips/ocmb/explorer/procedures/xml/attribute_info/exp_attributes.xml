@@ -52,6 +52,7 @@
             ENTERPRISE = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_enterprise_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -68,6 +69,7 @@
             OVERRIDE_NON_ENTERPRISE = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_nonenterprise_mode_override</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -84,6 +86,7 @@
             HALF_DIMM = 1
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_half_dimm_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -100,6 +103,7 @@
             OVERRIDE_HALF_DIMM = 2
         </enum>
         <writeable/>
+        <mssAccessorName>ocmb_half_dimm_mode_override</mssAccessorName>
     </attribute>
 
 </attributes>
