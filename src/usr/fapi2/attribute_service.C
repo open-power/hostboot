@@ -1198,6 +1198,10 @@ ReturnCode __badDqBitTranslation( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                             FAPI_TRY( __mcLogicalToDimmDqHelper(i_fapiDimm,
                                       i_wiringData, i_ps, l_pin,
                                       l_translatedPin) );
+                            FAPI_INF( "__badDqBitTranslation: Bad bit set, "
+                                      "rank:%d before translation:%d, after "
+                                      "translation:%d", rank, l_pin,
+                                      l_translatedPin );
                         }
                         else
                         {
@@ -1681,6 +1685,13 @@ ReturnCode __rowRepairTranslateDramPos(
 
         uint8_t l_translatedDram = 0;
         FAPI_TRY( __dqToDram(i_fapiDimm, l_translatedDq, l_translatedDram) );
+
+        if ( i_mcLogicalToDimmDq )
+        {
+            FAPI_INF( "__rowRepairTranslateDramPos: Row repair set, rank:%d "
+                      "dram pos before translation:%d, after translation:%d",
+                      rank, l_dramPos, l_translatedDram );
+        }
 
         uint8_t l_updatedData = (l_translatedDram << 3) | l_srank;
 
