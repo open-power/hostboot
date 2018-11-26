@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] Artem Senichev                                                     */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +132,7 @@ namespace CVPD
         pd6         = 0x44, //#6
         pd8         = 0x45, //#8
         pdY         = 0x46, //#Y
+        MB          = 0x47,
 
         // Last Keyword
         CVPD_LAST_KEYWORD,
