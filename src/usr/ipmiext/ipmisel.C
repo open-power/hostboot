@@ -554,6 +554,10 @@ void IpmiSEL::execute(void)
  */
 void IpmiSEL::errlEnable(errlHndl_t& o_errl)
 {
+    // Force constructor to run immediately in order to register the shutdown
+    // handler.
+    Singleton<IpmiSEL>::instance();
+
     // call ErrlManager function - tell him that IPMI is ready!
     ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::IPMI);
 }
