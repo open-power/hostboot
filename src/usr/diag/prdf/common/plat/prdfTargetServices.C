@@ -1275,8 +1275,19 @@ bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt )
 {
     bool o_lastCore = false;
 
-    TargetHandleList l_list = getFunctionalTargetList( TYPE_CORE );
-    if ( 1 == l_list.size() && l_list[0] == i_trgt )
+    // Default for non-fused cores.
+    TARGETING::TYPE type = TYPE_CORE;
+    TargetHandle_t  trgt = i_trgt;
+
+    // Check for fused-core mode.
+    if ( is_fused_mode() )
+    {
+        type = TYPE_EX;
+        trgt = getConnectedParent( trgt, type );
+    }
+
+    TargetHandleList l_list = getFunctionalTargetList( type );
+    if ( 1 == l_list.size() && l_list[0] == trgt )
         o_lastCore = true;
 
     return o_lastCore;
