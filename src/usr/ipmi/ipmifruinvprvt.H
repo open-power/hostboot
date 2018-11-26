@@ -142,6 +142,24 @@ class IpmiFruInv
     void addDataToRecord(const std::vector<uint8_t>& i_data);
 
     /**
+     * @brief Format inpuuted data to hex data that contains build date info
+     *
+     * @param[in] mfgDateData, MFG date data container from VPD
+     * @param[out] mfgDate, MFG date data value in minutes
+    */
+    errlHndl_t formatMfgData(std::vector<uint8_t> i_mfgDateData,
+                             uint32_t& o_mfgDate);
+
+    /**
+     * @brief Add product build date to IPMI fru record
+     *
+     * @param[in/out] data, The container to put build date in
+     * @param[in] mfgDateData, MFG date data container from VPD
+    */
+    void  setMfgData(std::vector<uint8_t> &io_data,
+                     std::vector<uint8_t> &i_mfgDateData);
+
+    /**
      * @brief Builds the Internal Use Area Data Section
      * @param[in/out] data, The container to put intenral use area data in
      */

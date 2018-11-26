@@ -104,6 +104,7 @@ namespace PVPD
         { VS,  "VS" },
         { VZ,  "VZ" },
         { LX,  "LX" },
+        { MB,  "MB" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
