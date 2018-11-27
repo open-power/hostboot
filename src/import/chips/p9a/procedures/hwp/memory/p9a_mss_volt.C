@@ -22,3 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mss_volt.C
+/// @brief Calculate and save off rail voltages
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin  <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#include <p9a_mss_volt.H>
+
+///
+/// @brief Calculate and save off rail voltages
+/// @param[in] i_targets vector of ports (e.g., MEM_PORT)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode p9a_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_targets )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+} // p9_mss_volt
