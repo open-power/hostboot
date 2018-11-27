@@ -22,3 +22,35 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mss_eff_config.H
+/// @brief Command and Control for the memory subsystem - populate attributes
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+#ifndef P9A_MSS_EFF_CONFIG_H_
+#define P9A_MSS_EFF_CONFIG_H_
+
+#include <fapi2.H>
+#include <vector>
+
+typedef fapi2::ReturnCode (*p9a_mss_eff_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Configure the attributes for each controller
+    /// @param[in] i_target port target
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
+
+}
+
+#endif
