@@ -22,3 +22,26 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mss_freq_system.C
+/// @brief Matches OMI freq with DDR freq
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+// fapi2
+#include <p9a_mss_freq_system.H>
+
+///
+/// @brief Matches OMI freq with DDR freq
+/// @param[in] i_target controller (e.g. MC)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode p9a_mss_freq_system( const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
