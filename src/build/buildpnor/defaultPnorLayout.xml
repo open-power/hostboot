@@ -319,7 +319,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3BD0000</physicalOffset>
+        <physicalOffset>0x3CD0000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
