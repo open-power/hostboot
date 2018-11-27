@@ -22,3 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Include the macros and things for MSS procedures
+-include 00p9a_common.mk
+
+PROCEDURE=p9a_mss_eff_config_thermal
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)
