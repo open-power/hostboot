@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@
 #define P9_OBUS2_PHY_BASE_0x0B010C00     0x0B010C00
 #define P9_OBUS3_PHY_BASE_0x0C010C00     0x0C010C00
 #define P9_DMI0_PHY_BASE_0x07011000      0x07011000
+#define P9A_OMI_PHY_BASE_0x07011000      0x07011000
 #define CEN_PHY_BASE_0x02010400          0x02010400
 
 //-----------------------------------------------------------------------------
@@ -133,6 +134,14 @@ inline uint32_t get_base_address( const fapi2::Target < K > i_target, uint32_t& 
 
         case fapi2::TargetType::TARGET_TYPE_DMI:
             o_base_addr = P9_DMI0_PHY_BASE_0x07011000;
+            break;
+
+        case fapi2::TargetType::TARGET_TYPE_OMI:
+            o_base_addr = P9A_OMI_PHY_BASE_0x07011000;
+            break;
+
+        case fapi2::TargetType::TARGET_TYPE_OMIC:
+            o_base_addr = P9A_OMI_PHY_BASE_0x07011000;
             break;
 
         case fapi2::TargetType::TARGET_TYPE_MC:
