@@ -22,3 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mss_eff_config_thermal.H
+/// @brief Perform thermal calculations as part of the effective configuration
+///
+// *HWP HWP Owner: Andre A. Marin  <aamarin@us.ibm.com>
+// *HWP HWP Backup: Michael Pardeik <pardeik@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+#ifndef P9A_MSS_EFF_CONFIG_THERMAL_H_
+#define P9A_MSS_EFF_CONFIG_THERMAL_H_
+
+#include <fapi2.H>
+#include <vector>
+
+typedef fapi2::ReturnCode (*p9a_mss_eff_config_thermal_FP_t) (const std::vector
+        <fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Perform thermal calculations as part of the effective configuration
+    /// @param[in] i_targets vector of ports (e.g., MEM_PORT) all on the same VDDR domain
+    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note sets ATTR_MSS_MEM_WATT_TARGET, ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT and _PER_SLOT, and ATTR_MSS_PORT_MAXPOWER
+    ///
+    fapi2::ReturnCode p9a_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >&
+            i_targets );
+
+}
+
+#endif
