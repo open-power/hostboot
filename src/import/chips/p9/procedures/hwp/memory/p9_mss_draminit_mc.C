@@ -146,7 +146,8 @@ extern "C"
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
-        FAPI_TRY( mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target) );
+        FAPI_TRY( mss::unmask::after_draminit_mc<mss::mc_type::NIMBUS>(i_target), "%s Failed after_draminit_mc",
+                  mss::c_str(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit MC");

@@ -57,7 +57,7 @@ namespace unmask
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode after_draminit_mc( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode after_draminit_mc<mss::mc_type::NIMBUS>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_INF("unmask mss fir after draminit_mc");
 
@@ -121,7 +121,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode after_draminit_training( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode after_draminit_training<mss::mc_type::NIMBUS>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_INF("unmask mss fir after draminit_training");
 
@@ -165,7 +165,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode after_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode after_scominit<mss::mc_type::NIMBUS>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_INF("unmask (and clear) mss fir after scominit");
 
@@ -202,7 +202,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode after_phy_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode after_phy_reset<mss::mc_type::NIMBUS>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_INF("unmask mss fir after phy reset");
 

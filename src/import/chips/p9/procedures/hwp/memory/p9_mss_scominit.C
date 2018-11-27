@@ -117,7 +117,8 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
     FAPI_TRY( mss::phy_scominit(i_target), "%s failed phy_scominit", mss::c_str(i_target) );
 
     // Do FIRry things
-    FAPI_TRY( mss::unmask::after_scominit(i_target), "%s failed after_scominit", mss::c_str(i_target) );
+    FAPI_TRY( mss::unmask::after_scominit<mss::mc_type::NIMBUS>(i_target), "%s failed after_scominit",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     FAPI_INF("%s End MSS SCOM init ReturnCode:0x%016lx", mss::c_str(i_target), uint64_t(fapi2::current_err));
