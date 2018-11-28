@@ -139,8 +139,16 @@ class Target
             iv_handle(Value)
         {
             plat_apply_target_limits<K, M, V>();
-        };
 
+            /* Iff this is a potential mcast target, update the handle.
+             * We can't know the mcast op of the V handed in, so we have
+             * to incur the cost of the update even if unnecessary.
+             */
+            if (K & TARGET_TYPE_MULTICAST)
+            {
+                mcUpdateHandle();
+            }
+        };
 
         ///
         /// @brief Assignment Operator.
@@ -309,6 +317,36 @@ class Target
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
+        /// @brief Get a multicast target for a given chip
+        /// @tparam T The type of target to return; TARGET_TYPE_MULTICAST is added automatically
+        /// @tparam O The type of multicast read operation for the target; defaults to OR
+        /// @param[in] i_group The abstract multicast group the target should point to
+        /// @return The multicast target
+        ///
+        /// This method is only applicable to chip-level targets.
+        /// If the requested multicast group cannot be mapped to an available HW multicast
+        /// group, a platform specific error will be thrown.
+        ///
+        template< TargetType T, MulticastType O = MULTICAST_OR >
+        inline Target < T | TARGET_TYPE_MULTICAST, O, V >
+        getMulticast(const MulticastGroup i_group) const;
+
+        ///
+        /// @brief Get a multicast core target for a given chip
+        /// @tparam O The type of multicast read operation for the target; defaults to OR
+        /// @param[in] i_group The abstract multicast group (selecting EQs) the target should point to
+        /// @param[in] i_cores Which cores inside the selected EQ should be targeted
+        /// @return The multicast target
+        ///
+        /// This method is only applicable to chip-level targets.
+        /// If the requested multicast group cannot be mapped to an available HW multicast
+        /// group, a platform specific error will be thrown.
+        ///
+        template< MulticastType O = MULTICAST_OR >
+        inline Target < TARGET_TYPE_CORE | TARGET_TYPE_MULTICAST, O, V >
+        getMulticast(const MulticastGroup i_group, const MulticastCoreSelect i_cores) const;
+
+        ///
         /// @brief Get the target at the other end of a bus
         /// @tparam T The type of the target on the other end
         /// @param[out] o_target A target representing the thing on the other end
@@ -326,7 +364,6 @@ class Target
         /// @brief Is the target functional?
         /// @return true if target is functional, false if non-functional
         ///
-
         inline bool
         isFunctional(void) const;
 
@@ -335,18 +372,20 @@ class Target
         /// @return The chiplet number for the Target. 0 is returned if the
         /// Target does not have a chiplet number (for ex, the PROC_CHIP Target)
         /// @note For logical targets such as the EX, the chiplet number of
-        /// their immediate parent chiplet is returned
+        /// their immediate parent chiplet is returned. For multicast targets
+        /// getChipletNumber() is not supported.
         ///
         inline uint8_t
         getChipletNumber(void) const;
 
         ///
-        /// @brief Copy from a Target<O> to a Target<K>
+        /// @brief Copy from a Target<O, MO> to a Target<K, M>
         /// @tparam O the target type of the other
+        /// @tparam MO the multicast type of the other
         ///
-        template<TargetType O, MulticastType MO, typename VO>
-        inline Target( const Target<O, MO, VO>& Other ):
-            Target<K, M, V>(Other.get())
+        template<TargetType O, MulticastType MO>
+        inline Target( const Target<O, MO, V>& Other ):
+            iv_handle(Other.get())
         {
             plat_apply_target_limits<K, M, V>();
 
@@ -356,6 +395,12 @@ class Target
 
             static_assert( bitCount<K>::count >= bitCount<O>::count,
                            "unable to cast to specialized Target");
+
+            // Only need to update the handle if we're coming from a target that's already MULTICAST
+            if ((O & TARGET_TYPE_MULTICAST) && (MO != M))
+            {
+                mcUpdateHandle();
+            }
         }
 
     private:
