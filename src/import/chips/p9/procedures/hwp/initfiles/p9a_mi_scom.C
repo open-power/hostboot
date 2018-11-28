@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9a_omi_scom.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9a_mi_scom.C $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "p9a_omi_scom.H"
+#include "p9a_mi_scom.H"
 #include <stdint.h>
 #include <stddef.h>
 #include <fapi2.H>
@@ -33,30 +33,17 @@ constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x19 = 0x19;
 constexpr uint64_t literal_0b0000000000001000 = 0b0000000000001000;
-constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_2 = 2;
-constexpr uint64_t literal_0b1 = 0b1;
+constexpr uint64_t literal_0b011 = 0b011;
 constexpr uint64_t literal_0b01 = 0b01;
 
-fapi2::ReturnCode p9a_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT0,
-                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2,
-                               const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT3)
+fapi2::ReturnCode p9a_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
+                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
     {
-        fapi2::ATTR_EC_Type   l_chip_ec;
-        fapi2::ATTR_NAME_Type l_chip_id;
-        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
-        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
         uint64_t l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC = literal_1;
         fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT0_ATTR_CHIP_UNIT_POS;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS));
-        uint64_t l_def_OMI_POSITION = (l_TGT0_ATTR_CHIP_UNIT_POS % literal_2);
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT3_ATTR_CHIP_UNIT_POS;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT3, l_TGT3_ATTR_CHIP_UNIT_POS));
-        uint64_t l_def_MCC_POSITION = (l_TGT3_ATTR_CHIP_UNIT_POS % literal_2);
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
@@ -114,26 +101,6 @@ fapi2::ReturnCode p9a_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT0
                 l_scom_buffer.insert<24, 16, 48, uint64_t>(literal_0b0000000000001000 );
             }
 
-            if (((l_def_MCC_POSITION == literal_0) && (l_def_OMI_POSITION == literal_0)))
-            {
-                l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            if (((l_def_MCC_POSITION == literal_0) && (l_def_OMI_POSITION == literal_1)))
-            {
-                l_scom_buffer.insert<54, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            if (((l_def_MCC_POSITION == literal_1) && (l_def_OMI_POSITION == literal_0)))
-            {
-                l_scom_buffer.insert<55, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            if (((l_def_MCC_POSITION == literal_1) && (l_def_OMI_POSITION == literal_1)))
-            {
-                l_scom_buffer.insert<56, 1, 63, uint64_t>(literal_0b1 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
         }
         {
@@ -178,6 +145,7 @@ fapi2::ReturnCode p9a_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT0
                 l_scom_buffer.insert<35, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_CLIB_HANG_ON );
             }
 
+            l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b011 );
             l_scom_buffer.insert<2, 2, 62, uint64_t>(literal_0b01 );
 
             if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))

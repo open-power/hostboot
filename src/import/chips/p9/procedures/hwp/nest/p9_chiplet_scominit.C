@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,8 +51,10 @@
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
-#include <p9a_omi_scom.H>
+#include <p9a_mi_omi_scom.H>
 #include <p9a_mcc_omi_scom.H>
+#include <p9a_mc_scom.H>
+#include <p9a_mi_scom.H>
 #include <p9_fbc_smp_utils.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
@@ -215,6 +217,26 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             }
         }
 
+        if (l_is_axone)
+        {
+            //--------------------------------------------------
+            //-- Axone
+            //--------------------------------------------------
+            for (const auto& l_mc_target : l_mc_targets)
+            {
+                fapi2::toString(l_mc_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+                FAPI_DBG("Invoking p9a.mc.scom.initfile on target %s...", l_chipletTargetStr);
+                FAPI_EXEC_HWP(l_rc, p9a_mc_scom, l_mc_target, FAPI_SYSTEM, i_target);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9a.mc.scom.initfile");
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
+            }
+        }
+
         for (const auto& l_mi_target : l_mi_targets)
         {
             //--------------------------------------------------
@@ -239,11 +261,22 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             //--------------------------------------------------
             if (l_is_axone)
             {
+                fapi2::toString(l_mi_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+                FAPI_DBG("Invoking p9a.mi.scom.initfile on target %s...", l_chipletTargetStr);
+                FAPI_EXEC_HWP(l_rc, p9a_mi_scom, l_mi_target, FAPI_SYSTEM);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9a.mi.scom.initfile");
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
+
                 l_mcc_targets = l_mi_target.getChildren<fapi2::TARGET_TYPE_MCC>();
 
                 for (const auto& l_mcc_target : l_mcc_targets)
                 {
-                    FAPI_EXEC_HWP(l_rc, p9a_mcc_omi_scom, l_mcc_target, FAPI_SYSTEM);
+                    FAPI_EXEC_HWP(l_rc, p9a_mcc_omi_scom, l_mcc_target, FAPI_SYSTEM, i_target);
 
                     if (l_rc)
                     {
@@ -256,11 +289,11 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
                     for (auto l_omi_target : l_omi_targets)
                     {
-                        FAPI_EXEC_HWP(l_rc, p9a_omi_scom, l_mi_target, l_omi_target, l_mcc_target, FAPI_SYSTEM);
+                        FAPI_EXEC_HWP(l_rc, p9a_mi_omi_scom, l_mi_target, l_omi_target, l_mcc_target);
 
                         if (l_rc)
                         {
-                            FAPI_ERR("Error from p9a.omi.scom.initfile");
+                            FAPI_ERR("Error from p9a.mi.omi.scom.initfile");
                             fapi2::current_err = l_rc;
                             goto fapi_try_exit;
                         }

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9a_omi_scom.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9a_mcc_omi_scan.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _INIT_P9A_OMI_SCOM_PROCEDURE_H_
-#define _INIT_P9A_OMI_SCOM_PROCEDURE_H_
+#ifndef _INIT_P9A_MCC_OMI_SCAN_PROCEDURE_H_
+#define _INIT_P9A_MCC_OMI_SCAN_PROCEDURE_H_
 
 
 #include <stddef.h>
 #include <stdint.h>
 #include <fapi2.H>
 
+#ifdef IFCOMPILER_PLAT
+#define INITFILE_PROCEDURE \
+    p9a_mcc_omi_scan(TGT0);
+#endif
 
-typedef fapi2::ReturnCode (*p9a_omi_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OMI>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MCC>&);
+typedef fapi2::ReturnCode (*p9a_mcc_omi_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9a_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT0,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT3);
+    fapi2::ReturnCode p9a_mcc_omi_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0);
 
 }
 

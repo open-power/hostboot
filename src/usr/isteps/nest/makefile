@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -68,6 +68,9 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mcc_omi_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_init_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mc_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_omi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mi_scom.mk
 
 # call_host_p9_fbc_eff_config_links: Determine powerbus config
 include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk
