@@ -53,14 +53,16 @@ inline uint64_t convertType( T& i_value )
 };
 
 // convert platform target handle to a uint64_t
-template<fapi2::TargetType T>
-inline uint64_t convertType( const fapi2::Target<T>& i_value)
+template<fapi2::TargetType T, fapi2::MulticastType M>
+inline uint64_t convertType( const fapi2::Target<T, M>& i_value)
 {
     // send the target type and instance as ffdc they will be used
     // to instantiate a target before logging the ffdc data
-    return static_cast<uint64_t>((static_cast<uint64_t>(
-                                      (i_value.get().getFapiTargetType())) << 32) |
-                                 i_value.get().getTargetInstance());
+    return static_cast<uint64_t>(
+               (static_cast<uint64_t>(
+                    (i_value.get().getFapiTargetType() |
+                     (i_value.get().fields.is_multicast << 31))
+                ) << 32) | i_value.get().getTargetInstance());
 };
 #endif
 
