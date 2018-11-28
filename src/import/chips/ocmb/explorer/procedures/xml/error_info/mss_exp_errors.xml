@@ -25,6 +25,51 @@
 <hwpErrors>
 
   <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DIMM_TYPE</rc>
+    <description>Unsupported DIMM type encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>TYPE</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DRAM_WIDTH</rc>
+    <description>Unsupported DRAM width encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>DATA_WIDTH</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT</rc>
+    <description>Unsupported 3DS height encountered in draminit_training procedure</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>HEIGHT</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_ENTERPRISE_SETUP_ERROR</rc>
     <description>The enterprise mode bit is in the incorrect state</description>
     <ffdc>EXPECTED</ffdc>

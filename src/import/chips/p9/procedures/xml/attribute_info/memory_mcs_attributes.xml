@@ -1599,8 +1599,8 @@
             creator: mss_eff_cnfg
             consumer: various
             firmware notes: none
-    </description>
-    <initToZero></initToZero>
+        </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
         <writeable/>
@@ -3350,7 +3350,7 @@
       <valueType>int8</valueType>
       <platInit/>
       <overrideOnly/>
-      <initToZero/>
+        <initToZero></initToZero>
       <writeable/>
       <mssAccessorName>wr_vref_offset</mssAccessorName>
     </attribute>

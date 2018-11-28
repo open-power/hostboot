@@ -172,7 +172,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>dram_columns_bits</mssAccessorName>
+        <mssAccessorName>dram_column_bits</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -785,6 +785,62 @@
         <writeable/>
         <mssUnits> mV </mssUnits>
         <mssAccessorName>volt_vpp</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_MRAM_SUPPORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Supports MRAM or not
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>NORMAL = 0, EVERSPIN = 1</enum>
+        <writeable/>
+        <mssAccessorName>mram_support</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_3DS_HEIGHT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            ARRAY[DIMM]
+            Primary SDRAM Package Type.
+            Decodes Byte 6.
+            This byte defines the primary set of SDRAMs.
+            Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8</enum>
+        <writeable/>
+        <mssAccessorName>3ds_height</mssAccessorName>
+    </attribute>
+
+<attribute>
+        <id>ATTR_MEM_EFF_DDP_COMPATIBLE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DDP Compatibility
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <mssAccessorName>ddp_compatibility</mssAccessorName>
+    </attribute>
+
+<attribute>
+        <id>ATTR_MEM_EFF_TSV8H_SUPPORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            TSVH8 Support
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <mssAccessorName>tsv8h_support</mssAccessorName>
     </attribute>
 
 </attributes>

@@ -122,6 +122,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
+        <enum>READ_PREAMBLE_BIT = 3, WRITE_PREAMBLE_BIT = 7</enum>
         <mssUnits>nCK</mssUnits>
         <mssAccessorName>si_dram_preamble</mssAccessorName>
     </attribute>

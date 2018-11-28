@@ -49,6 +49,15 @@ namespace exp
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
 
 ///
+/// @brief common explorer sizes
+///
+enum sizes
+{
+    MAX_DIMM_PER_PORT = 2,
+    MAX_RANK_PER_DIMM = 4,
+};
+
+///
 /// @brief explorer ffdc codes
 ///
 enum ffdc_codes

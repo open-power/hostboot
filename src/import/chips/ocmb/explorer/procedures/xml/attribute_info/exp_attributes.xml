@@ -120,4 +120,153 @@
         <mssAccessorName>mvpd_fwms</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MEM_EXP_FIRMWARE_EMULATION_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable Special mode for Emulation Support
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>NORMAL = 0, EMULATION = 1</enum>
+        <writeable/>
+        <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_CHIP_SELECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Indicate presence of DRAM at each Chip Select for PHY
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_chip_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_PHY_EQUALIZATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Phy Equalization mode enable
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <mssAccessorName>exp_phy_equalization</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_INIT_VREF_DQ</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Initial VrefDQ setting before training
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_init_vref_dq</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_INIT_PHY_VREF</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Initial DQ Vref setting of PHY before training
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_init_phy_vref</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_ODT_MAP_CS_WR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Desired ODT Value to write to the ranks
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_odt_map_cs_wr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_ODT_MAP_CS_RD</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Desired ODT Value when reading from the ranks
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_odt_map_cs_rd</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_DIC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           CA and CS signal Driver Characteristics from F0RC03, F0RC04, F0RC05
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_rcd_dic</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_VOLTAGE_CTRL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           RCD operating voltage VDD and VrefCA control from F0RC0B and F0RC1x
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>exp_rcd_voltage_ctrl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_DRAM_ADDRESS_MIRRORING</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Ranks that have address mirroring.
+            This data is derived from SPD or VPD.
+            Note: This is a bit-wise map and muliple ranks can be mirrored.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>exp_dram_address_mirroring</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_SPD_CL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Cas Latency Supported by DRAM
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssAccessorName>exp_spd_cl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EXP_RCD_SLEW_RATE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            RCD slew rate control from F1RC02,F1RC03,F1RC04,F1RC05
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>exp_rcd_slew_rate</mssAccessorName>
+    </attribute>
+
 </attributes>

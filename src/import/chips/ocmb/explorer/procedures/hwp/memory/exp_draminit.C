@@ -36,6 +36,7 @@
 #include <exp_inband.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_draminit_utils.H>
+#include <lib/shared/exp_consts.H>
 
 ///
 /// @brief Initializes DRAM

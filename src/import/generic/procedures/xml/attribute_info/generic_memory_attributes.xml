@@ -95,4 +95,306 @@
     <array>72</array>
   </attribute>
 
+    <attribute>
+        <id>ATTR_MEM_GEARDOWN_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Gear Down Mode.
+          This is for DDR4 MRS3.
+          Computed in mss_eff_cnfg.
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>HALF =0, QUARTER=1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>geardown_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC0F</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          F0RC0F - Command Latency Adder Control Word;  Default value - 04. Values Range from 00 to 04. No need to calculate; User can override with desired experimental value.
+          creator: mss_eff_cnfg
+          consumer: mss_dram_init
+          firmware notes: none</description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc0f</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_CS_CMD_LATENCY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          CS to CMD/ADDR Latency.
+          This is for DDR4 MRS4.
+          Computed in mss_eff_cnfg.
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>cs_cmd_latency</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_CA_PARITY_LATENCY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          C/A Parity Latency Mode. This is for DDR4 MRS5.
+          Computed in mss_eff_cnfg. Each memory channel will have a value.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, PL4 = 4, PL5 = 5, PL6 = 6, PL8 = 8</enum>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>ca_parity_latency</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC02</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            F0RC02: Timing and IBT Control Word; Default value - 0x00.
+            Values Range from 0-8. No need to calculate;
+            User can override with desired experimental value.
+            creator: mss_eff_cnfg
+            consumer: mss_dram_init
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc02</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC03</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            F0RC03 - CA and CS Signals Driver Characteristics Control Word;
+            Default value - 0x05 (Moderate Drive). Values Range from 00 to 0F. Has to be picked up from SPD byte 137, 1st Nibble for CS and CA.
+            creator: mss_eff_cnfg
+            consumer: mss_dram_init
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc03</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC04</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            F0RC04 - ODT and CKE Signals Driver Characteristics Control Word;
+            Default value - 0x05 (Moderate Drive).
+            Values Range from 00 to 0F. Has to be picked up from SPD byte 137, 2nd Nibble for ODT and CKE.
+            creator: mss_eff_cnfg
+            consumer: mss_dram_init
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc04</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC05</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            F0RC05 - Clock Driver Characteristics Control Word;
+            Default value - 0x05 (Moderate Drive).
+            Values Range from 00 to 0F. Has to be picked up from SPD byte 138, 2nd Nibble for CK.
+            creator: mss_eff_cnfg
+            consumer: mss_dram_init
+            firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc05</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC0B</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT_VDDR. Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
+        creator: mss_eff_cnfg
+        consumer: mss_dram_init
+        firmware notes: none</description>
+    <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc0b</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_DIMM_DDR4_F0RC1X</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>F0RC1x - Internal VrefCA Control Word; Default value - 00. Values Range from 00 to 3F.No need to calculate; User can override with desired experimental value.
+        creator: mss_eff_cnfg
+        consumer: mss_dram_init
+        firmware notes: none</description>
+    <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc1x</mssAccessorName>
+    </attribute>
+
+    <attribute>
+       <id>ATTR_MEM_DIMM_DDR4_F0RC7X</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>F0RC7x: IBT Control Word; Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value.
+        creator: mss_eff_cnfg
+        consumer: mss_dram_init
+        firmware notes: none</description>
+    <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f0rc7x</mssAccessorName>
+    </attribute>
+
+    <attribute>
+       <id>ATTR_MEM_DIMM_DDR4_F1RC00</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>F1RC00: Data Buffer Interface Driver Characteristics Control Word; Default value - 00. Values Range from 00 to 0F.No need to calculate; User can override with desired experimental value.
+        creator: mss_eff_cnfg
+        consumer: mss_dram_init
+        firmware notes: none</description>
+    <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>dimm_ddr4_f1rc00</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_VREF_DQ_TRAIN_VALUE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            vrefdq_train value. This is for DDR4 MRS6.
+            Computed in mss_eff_cnfg. Each memory channel will have a value.
+            Creator: mss_eff_cnfg
+            Consumer:various
+            Firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 4</array>
+        <mssAccessorName>vref_dq_train_value</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_VREF_DQ_TRAIN_RANGE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            vrefdq_train range. This is for DDR4 MRS6.
+            Computed in mss_eff_cnfg. Each memory channel will have a value.
+            Creator: mss_eff_cnfg
+            Consumer:various
+            Firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>RANGE1 = 0, RANGE2 = 1</enum>
+        <writeable/>
+        <array> 2 4</array>
+        <mssAccessorName>vref_dq_train_range</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_PSTATES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Number of p-states used
+            Always set NumPStates to 1 for Explorer.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>pstates</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_BYTE_ENABLES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable/Disable DBYTE macro (clock gating and IO tri-state)
+            10-bit bitmap
+            Right aligned
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>byte_enables</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_NIBBLE_ENABLES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Account/Ignore training/dfi_bist result on the selected nibble.
+            20-bit bitmap
+            Right aligned
+        </description>
+        <valueType>uint32</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>nibble_enables</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_TAA_MIN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           Timing value used to calculate CAS Latency
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nck</mssUnits>
+        <mssAccessorName>taa_min</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_RANK_FOUR_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           DIMM Rank 4 mode enable
+        </description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <initToZero></initToZero>
+        <writeable/>
+        <mssAccessorName>rank4_mode</mssAccessorName>
+    </attribute>
+
 </attributes>
