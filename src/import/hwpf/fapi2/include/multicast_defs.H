@@ -36,7 +36,50 @@ enum MulticastType
     MULTICAST_COMPARE = 4,
 };
 
-typedef uint32_t MulticastGroup;
+/**
+ * @brief Abstract multicast group definitions
+ *
+ * These are abstract multicast groups that a procedure may want to talk to.
+ * They are being mapped to hardware MC group IDs by the platform layer.
+ * Due to the limited amount of hardware MC groups, the availability of
+ * certain abstract groups will be dependent on system state, for example
+ * the currently executing istep.
+ *
+ * The actual multicast group enumerations will be defined in a project specific header.
+ */
+enum MulticastGroup : uint32_t;
+
+    /**
+     * @brief Single FAPI->HW multicast group mapping
+     *
+     * This is used to provide a mapping of an abstract MulticastGroup to a hardware dependent
+     * value. The calling HWP and platform layer must have the same understanding of the HW
+     * value (e.g. PCB multicast group ID), FAPI2 is only the conduit and imposes no restriction
+     * on hwValue.
+     */
+    struct MulticastGroupMapping
+{
+    MulticastGroup abstractGroup;
+    uint32_t       hwValue;
+};
+
+/**
+ * @brief Bit mask for selecting cores out of an EQ.
+ */
+enum MulticastCoreSelect
+{
+    MCCORE_0   = 0x8,
+    MCCORE_1   = 0x4,
+    MCCORE_2   = 0x2,
+    MCCORE_3   = 0x1,
+    MCCORE_ALL = 0xF,
+};
+
+inline MulticastCoreSelect operator|(const MulticastCoreSelect a, const MulticastCoreSelect b)
+{
+    return static_cast<MulticastCoreSelect>(a | b);
+}
+
 }
 
 #endif
