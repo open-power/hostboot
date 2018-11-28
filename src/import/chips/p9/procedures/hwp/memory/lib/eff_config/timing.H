@@ -1189,5 +1189,25 @@ constexpr uint64_t tccd_s()
     return 4;
 }
 
+namespace lrdimm
+{
+
+///
+/// @brief Return the VREF to VREF change time long
+/// @tparam fapi2::TargetType T - type of the target on which to operate
+/// @param[in] i_target the fapi2 target
+/// @return value in clocks
+/// @note VREF time change long is used for changing by more than one VREF tick
+///
+template< fapi2::TargetType T >
+inline uint64_t vref_time_long(const fapi2::Target<T>& i_target)
+{
+    // Taken from the LRDIMM spec
+    constexpr uint64_t VREF_TIME_LONG_NS = 500;
+    return mss::spd::ns_to_nck(i_target, VREF_TIME_LONG_NS);
+}
+
+} // ns lrdimm
+
 } // mss
 #endif
