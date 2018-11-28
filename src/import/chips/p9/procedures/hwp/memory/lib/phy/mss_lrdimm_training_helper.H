@@ -575,7 +575,6 @@ inline fapi2::ReturnCode invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DI
                 "%s rank%u has counted %u invalid data on nibbles 0x%x in %s",
                 mss::c_str(i_target), i_rank, i_invalid_data_count, i_per_nibble_flags, i_name);
 
-
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -613,6 +612,42 @@ inline fapi2::ReturnCode no_transition( const fapi2::Target<fapi2::TARGET_TYPE_D
                 "%s rank%u has found no transitions on nibbles 0x%x in %s",
                 mss::c_str(i_target), i_rank, i_per_nibble_flags, i_name);
 
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    // Log the error as recovered
+    // We "recover" by setting a default value and continuing with calibration
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calls out if a rank see more than one passing region
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_per_nibble_flags flags for which nibbles are failing
+/// @param[in] i_calibration_step calibration step number
+/// @param[in] i_name string of the calibration steps name
+/// @return FAPI2_RC_SUCCESS if okay
+///
+inline fapi2::ReturnCode not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const uint32_t i_per_nibble_flags,
+        const uint64_t i_calibration_step,
+        const char* i_name)
+{
+    // Per nibble invalid data - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    FAPI_ASSERT(i_per_nibble_flags == CLEAN_BITMAP,
+                fapi2::MSS_LRDIMM_CAL_NOT_ONE_PASSING_REGION()
+                .set_TARGET(i_target)
+                .set_RANK(i_rank)
+                .set_CALIBRATION_STEP(i_calibration_step)
+                .set_NIBBLE_FLAGS(i_per_nibble_flags),
+                "%s rank%u has found not only one passing region on nibbles 0x%x in %s",
+                mss::c_str(i_target), i_rank, i_per_nibble_flags, i_name);
 
     return fapi2::FAPI2_RC_SUCCESS;
 

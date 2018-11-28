@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -123,12 +124,12 @@ class mrd_coarse : public step
                     l_passed = true;
                 }
 
-                // Anything else is an error case just call it not passed for now
-                // TK RAS
+                // Anything else is an error case
                 else
                 {
                     l_passed = false;
-                    FAPI_ERR("delay%u has a bad result of 0x%02x", i_delay, i_result);
+                    FAPI_DBG("delay%u has a invalid result of 0x%02x", i_delay, i_result);
+                    iv_invalid_data_count++;
                 }
 
                 FAPI_TRY(iv_results.writeBit(l_passed, i_delay));
@@ -252,7 +253,55 @@ class mrd_coarse : public step
                                           std::vector<std::pair<recorder, recorder>>& io_results) const;
 
         ///
-        /// @brief Finds the final results for the whole DIMM rank
+        /// @brief Creates the nibble flags for the invalid data callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @param[out] o_invalid_count number of invalid data occurances seen
+        /// @return invalid data nibble flags
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint8_t i_rank,
+                                    const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                    uint64_t& o_invalid_count) const;
+
+        ///
+        /// @brief Calls out if invalid data is seen during this calibration step
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                const uint8_t i_rank,
+                                                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Creates the nibble flags for the not one passing region callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return passing region nibble flags
+        ///
+        uint32_t flag_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                              const uint8_t i_rank,
+                                              const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Calls out if a rank found not one passing region
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Finds the final results for the whole DIMM rank, and callsout
         /// @param[in] i_target the DIMM target
         /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
         /// @param[in,out] io_results the results
