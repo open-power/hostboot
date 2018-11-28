@@ -76,6 +76,26 @@ inline void setOpMode(const OpModes i_mode);
 inline OpModes getOpMode(void);
 
 //--------------------------------------------------------------------------
+// Multicast mapping functions
+//--------------------------------------------------------------------------
+
+/// @brief Set up or replace the multicast group mapping for a given chip
+/// @param[in] i_chip     The chip whose multicast map is to be replaced
+/// @param[in] i_mappings A list of multicast group mappings
+/// @return FAPI2_RC_SUCCESS if the map was updated, otherwise error code.
+///
+/// This replaces the given chip's map of abstract multicast groups to chip
+/// specific hardware values with a new map. Any abstract group not explicitly
+/// mapped via i_mappings will be unmapped after this call returns success,
+/// and attempting to create multicast targets targeting unmapped groups will
+/// result in error.
+/// i_mappings may contain an arbitrary amount of abstract/HW pairs, but the
+/// function may return an error if too many mappings are specified.
+template< MulticastType M, typename V >
+inline ReturnCode setMulticastGroupMap(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_chip,
+                                       const std::vector< MulticastGroupMapping >& i_mappings);
+
+//--------------------------------------------------------------------------
 // HW Communication Functions
 //--------------------------------------------------------------------------
 
