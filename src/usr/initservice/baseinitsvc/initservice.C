@@ -900,9 +900,6 @@ void InitService::doShutdown(uint64_t i_status,
     TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
     MAGIC_INST_PRINT_ISTEP(21,4);
 
-    // Ensure all traces get flushed to the console
-    TRAC_FLUSH_BUFFERS();
-
     shutdown(worst_status,
              i_payload_base,
              i_payload_entry,
