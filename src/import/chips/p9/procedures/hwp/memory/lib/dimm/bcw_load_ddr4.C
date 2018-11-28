@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/workarounds/ccs_workarounds.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -122,8 +123,8 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
             // Function space 5
             { FUNC_SPACE_5, FUNC_SPACE_SELECT_CW,   FUNC_SPACE_5,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},
-            { FUNC_SPACE_5, HOST_VREF_CW,           eff_dimm_ddr4_f5bc5x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
-            { FUNC_SPACE_5, DRAM_VREF_CW,           eff_dimm_ddr4_f5bc6x, mss::tmrc(), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_5, HOST_VREF_CW,           eff_dimm_ddr4_f5bc5x, mss::lrdimm::vref_time_long(i_target), CW8_DATA_LEN, cw_info::BCW},
+            { FUNC_SPACE_5, DRAM_VREF_CW,           eff_dimm_ddr4_f5bc6x, mss::lrdimm::vref_time_long(i_target), CW8_DATA_LEN, cw_info::BCW},
 
             // Function space 6
             { FUNC_SPACE_6,  FUNC_SPACE_SELECT_CW,  FUNC_SPACE_6,         mss::tmrd(), CW8_DATA_LEN, cw_info::BCW},

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -5315,13 +5315,16 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dimm_f0bc1x()
 {
+    // Enables package rank timing
+    // The LR buffers will have the same timing communicating to the host
+    constexpr uint8_t DEFAULT = 0x80;
     uint8_t l_attrs_dimm_bc_1x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_f0bc1x(iv_mcs, &l_attrs_dimm_bc_1x[0][0]) );
 
     // Setup to default as we want to be in runtime mode
-    l_attrs_dimm_bc_1x[iv_port_index][iv_dimm_index] = 0;
+    l_attrs_dimm_bc_1x[iv_port_index][iv_dimm_index] = DEFAULT;
 
     FAPI_INF( "%s: F0BC1X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_bc_1x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_F0BC1x, iv_mcs, l_attrs_dimm_bc_1x) );
@@ -5917,22 +5920,20 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
         0x00,
         0x00,
     };
+
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM];
 
     // Gets the VPD value
-    FAPI_TRY( mss::vpd_mt_odt_wr(iv_dimm, &(l_vpd_odt[0])));
     FAPI_TRY( eff_odt_wr( iv_mcs, &(l_mcs_attr[0][0][0])) );
 
     // Loops through and sets/updates all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
         // TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
-        // So, here we do a bitwise or of our LR settings and our VPD settings
-        // The VPD contains the host <-> buffer settings
-        // The constant contains the buffer <-> DRAM
-        // Due to how the ODT functions, we need to or them
-        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_vpd_odt[l_rank] | ODT_2R_1DROP_VALUES[l_rank];
+        // Currently, we're using a 2R single drop system
+        // To avoid terminating our 0th rank twice, we just want to pass in the termination directly
+        // This will be sorted out as part of the above RTC
+        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = ODT_2R_1DROP_VALUES[l_rank];
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_ODT_WR, iv_mcs, l_mcs_attr) );
