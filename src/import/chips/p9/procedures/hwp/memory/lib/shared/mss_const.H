@@ -180,6 +180,11 @@ enum ffdc_function_codes
     PDA_WR_VREF_LATCH_VECTOR = 81,
     PDA_ADD_COMMAND = 82,
 
+    // PBA function codes
+    PBA_EXECUTE_CONTAINER = 80,
+    PBA_EXECUTE_VECTOR = 81,
+    SET_PBA_MODE = 83,
+
     // WR VREF workaround functions
     WR_VREF_TRAINING_WORKAROUND = 90,
     CONFIGURE_WR_VREF_TO_NOMINAL = 91,
@@ -200,10 +205,9 @@ enum ffdc_function_codes
     CW_DATA_ENGINE = 117,
     CW_INFO_ENGINE = 118,
 
-    // PBA function codes
-    PBA_EXECUTE_CONTAINER = 80,
-    PBA_EXECUTE_VECTOR = 81,
-    SET_PBA_MODE = 83,
+    // LR helper functions
+    FINE_RECORDER_ADD_RESULTS = 119,
+    FINE_RECORDER_FIND_EYE = 120,
 };
 
 enum states
