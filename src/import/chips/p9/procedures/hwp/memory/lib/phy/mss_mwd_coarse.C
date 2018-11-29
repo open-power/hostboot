@@ -209,6 +209,151 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Creates the nibble flags for the invalid data callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @param[out] o_invalid_count number of invalid data occurances seen
+/// @return invalid data nibble flags
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+uint32_t mwd_coarse::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_rank,
+                                        const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                        uint64_t& o_invalid_count) const
+{
+    o_invalid_count = 0;
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        // Updates the bitmap
+        o_invalid_count += l_recorder.first.iv_invalid_data_count + l_recorder.second.iv_invalid_data_count;
+        append_nibble_flags(l_recorder.first.iv_invalid_data_count != recorder::CLEAN,
+                            l_recorder.second.iv_invalid_data_count != recorder::CLEAN,
+                            l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if invalid data is seen during this calibration step
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Invalid data is defined as not having all zeros or all ones
+///
+fapi2::ReturnCode mwd_coarse::callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    // Per nibble invalid data - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    // We also count the number of occurances of invalid data across the port/rank
+    // This count gives more insight into the fails
+    // Low counts mean one off data glitches
+    // High counts indicate that one or more nibbles are having issues
+    uint64_t l_invalid_data_count = 0;
+    const auto l_per_nibble_flags = flag_invalid_data( i_target, i_rank, i_recorders, l_invalid_data_count);
+
+    FAPI_TRY(callout::invalid_data( i_target,
+                                    i_rank,
+                                    l_per_nibble_flags,
+                                    l_invalid_data_count,
+                                    mss::cal_steps::MWD_COARSE,
+                                    "MWD_COARSE"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates the nibble flags for the not one passing region callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return passing region nibble flags
+///
+uint32_t mwd_coarse::flag_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    uint8_t l_buffer = 0;
+
+    // Per nibble invalid data flags - bitmap
+    uint32_t l_per_nibble_flags = 0;
+
+    for(const auto& l_recorder : i_recorders)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        const bool l_nibble0_not_one_passing_region = (1 != mss::bit_count((uint8_t) l_recorder.first.iv_results));
+        const bool l_nibble1_not_one_passing_region = (1 != mss::bit_count((uint8_t) l_recorder.second.iv_results));
+
+        // Updates the bitmap
+        append_nibble_flags(l_nibble0_not_one_passing_region, l_nibble1_not_one_passing_region, l_per_nibble_flags);
+
+        l_buffer++;
+    }
+
+    return l_per_nibble_flags;
+}
+
+///
+/// @brief Calls out if a rank found not one passing region
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_recorders the recorders on which to process the data
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mwd_coarse::callout_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+{
+    // Per nibble weird data and no transition flags - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    uint32_t l_per_nibble_flags = flag_not_one_passing_region( i_target, i_rank, i_recorders);
+
+    FAPI_TRY(callout::not_one_passing_region( i_target,
+             i_rank,
+             l_per_nibble_flags,
+             mss::cal_steps::MWD_COARSE,
+             "MWD_COARSE"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Finds the final results for the whole DIMM rank
 /// @param[in] i_target the MCA target
 /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
@@ -233,6 +378,9 @@ fapi2::ReturnCode mwd_coarse::find_final_results(const fapi2::Target<fapi2::TARG
                  l_buffer_result.first.iv_final_delay, l_buffer_result.second.iv_final_delay);
         ++l_buffer;
     }
+
+    FAPI_TRY(callout_invalid_data(i_target, i_dimm_rank, io_results));
+    FAPI_TRY(callout_not_one_passing_region(i_target, i_dimm_rank, io_results));
 
 fapi_try_exit:
     return fapi2::current_err;

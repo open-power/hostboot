@@ -421,8 +421,7 @@ class fine_recorder
 };
 
 ///
-/// @brief Enums for per-nibble or per-bit level for LRDIMM training
-/// @note Values taken from the buffer spec
+/// @brief Enums for clean bitmap
 ///
 enum errors : uint64_t
 {

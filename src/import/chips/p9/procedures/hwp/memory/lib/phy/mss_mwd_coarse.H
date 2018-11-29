@@ -80,24 +80,28 @@ class mwd_coarse : public step
         ///
         struct recorder
         {
+            static constexpr uint64_t CLEAN = 0;
+
             ///
             /// @brief Default constructor
             ///
             recorder() :
                 iv_results(DEFAULT_TO_PASS),
-                iv_final_delay(DEFAULT_DELAYS)
+                iv_final_delay(DEFAULT_DELAYS),
+                iv_invalid_data_count(CLEAN)
             {}
 
             ///
             /// @brief constructor
-            /// @param[in] i_results results from the MRD_COARSE run
-            /// @param[in] i_final final delay chosen by the MRD_COARSE run
+            /// @param[in] i_results results from the MWD_COARSE run
+            /// @param[in] i_final final delay chosen by the MWD_COARSE run
+            /// @param[in] i_invalid_count invalid data count from MWD_COARSE run
             ///
-            recorder(fapi2::buffer<uint8_t> i_result, uint8_t i_delay)
-            {
-                this->iv_results = i_result;
-                this->iv_final_delay = i_delay;
-            }
+            recorder(const fapi2::buffer<uint8_t> i_results, const uint8_t i_final_delay, const uint64_t i_invalid_count = CLEAN) :
+                iv_results(i_results),
+                iv_final_delay(i_final_delay),
+                iv_invalid_data_count(i_invalid_count)
+            {}
 
             // Records a given bit per nibble per delay
             // 1 = compare
@@ -105,6 +109,7 @@ class mwd_coarse : public step
             // Fun thing is the LRDIMM spec sends out 1's for compares, so no enums needed
             fapi2::buffer<uint8_t> iv_results;
             uint8_t iv_final_delay;
+            uint64_t iv_invalid_data_count;
 
             ///
             /// @brief Adds results to the recorder
@@ -128,12 +133,12 @@ class mwd_coarse : public step
                     l_passed = iv_results.getBit(i_delay);
                 }
 
-                // Anything else is an error case just call it not passed for now
-                // TK RAS
+                // Anything else is an error case
                 else
                 {
                     l_passed = false;
-                    FAPI_ERR("delay%u has a bad result of 0x%02x", i_delay, i_result);
+                    FAPI_DBG("delay%u has a invalid result of 0x%02x", i_delay, i_result);
+                    iv_invalid_data_count++;
                 }
 
                 FAPI_TRY(iv_results.writeBit(l_passed, i_delay));
@@ -265,7 +270,53 @@ class mwd_coarse : public step
                                           const uint8_t i_delay,
                                           std::vector<std::pair<recorder, recorder>>& io_results) const;
 
-        // Add in function to do a PBA set of the delays for a vector of recorders
+        ///
+        /// @brief Creates the nibble flags for the invalid data callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @param[out] o_invalid_count number of invalid data occurances seen
+        /// @return invalid data nibble flags
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const uint8_t i_rank,
+                                    const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                    uint64_t& o_invalid_count) const;
+
+        ///
+        /// @brief Calls out if invalid data is seen during this calibration step
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Invalid data is defined as not having all zeros or all ones
+        ///
+        fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                const uint8_t i_rank,
+                                                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Creates the nibble flags for the not one passing region callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return passing region nibble flags
+        ///
+        uint32_t flag_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                              const uint8_t i_rank,
+                                              const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+
+        ///
+        /// @brief Calls out if a rank found not one passing region
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_recorders the recorders on which to process the data
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
 
         ///
         /// @brief Finds the final results for the whole DIMM rank
