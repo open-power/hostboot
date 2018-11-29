@@ -60,6 +60,276 @@ namespace lrdimm
 {
 
 ///
+/// @class fine_recorder
+/// @brief Records results on a per-bit level for fine calibration algorithms
+/// @note Each vector's array position represents one bit
+/// @note Each bit in an element represents whether the data compared or mis-compared at that delay
+/// @note Fine calibration algorithms refer to sub-cycle calibration algorithms (MRD_FINE and MWD_FINE)
+///
+class fine_recorder
+{
+    public:
+        // Both MRD and MWD fine have the same maximum delay of 31
+        enum
+        {
+            MAX_FINE_DELAY = 31
+        };
+
+
+        ///
+        /// @brief Recorder default constructor
+        ///
+        fine_recorder()
+        {
+            iv_results = std::vector<fapi2::buffer<uint32_t>>(MAX_DQ_BITS);
+        }
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~fine_recorder() = default;
+
+        ///
+        /// @brief add results
+        /// @tparam fapi2::TargetType T target type on which to operate
+        /// @param[in] i_target target for error logging if needed
+        /// @param[in] i_bit dq number
+        /// @param[in] i_delay current calibration delay for which to set the result
+        /// @param[in] i_result true if passing false if failing
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        template<fapi2::TargetType T>
+        fapi2::ReturnCode add_results(const fapi2::Target<T>& i_target,
+                                      const uint64_t i_bit,
+                                      const uint64_t i_delay,
+                                      const bool i_result)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+            // Ensure that the bit is within the range (programming error otherwise)
+            FAPI_ASSERT(i_bit < MAX_DQ_BITS,
+                        fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                        .set_TARGET(i_target)
+                        .set_INDEX(i_bit)
+                        .set_LIST_SIZE(MAX_DQ_BITS)
+                        .set_FUNCTION(FINE_RECORDER_ADD_RESULTS),
+                        "%s has DQ bit input (%u) out of bounds: %u",
+                        mss::c_str(i_target), i_bit, MAX_DQ_BITS);
+
+            // Ensure that the delay is in range
+            // We check this as our delay does not fill up the full buffer
+            // So we need to ensure we don't accidentally put results into non-existant delays
+            FAPI_ASSERT(i_delay < MAX_FINE_DELAY,
+                        fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                        .set_TARGET(i_target)
+                        .set_INDEX(i_delay)
+                        .set_LIST_SIZE(MAX_FINE_DELAY)
+                        .set_FUNCTION(FINE_RECORDER_ADD_RESULTS),
+                        "%s has delay input (%u) out of bounds: %u",
+                        mss::c_str(i_target), i_delay, MAX_FINE_DELAY);
+
+            {
+                // Const here refers to the iterator, so we only get the iterator for our individual bit and cannot change to a different bit
+                const auto l_it = iv_results.begin() + i_bit;
+                FAPI_TRY(l_it->writeBit(i_result, i_delay));
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Finds a vector of the passing eyes
+        /// @tparam fapi2::TargetType T target type on which to operate
+        /// @param[in] i_target target for error logging if needed
+        /// @param[in] i_bit dq number
+        /// @param[in] i_calibration the current calibration step - used for error logging
+        /// @param[out] o_data raw data - used for debug prints
+        /// @param[out] o_eyes vector of pairs - pair first is left edge pair second is right edge
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        template<fapi2::TargetType T>
+        fapi2::ReturnCode find_eyes(const fapi2::Target<T>& i_target,
+                                    const uint64_t i_calibration,
+                                    const uint64_t i_bit,
+                                    uint32_t& o_data,
+                                    std::vector<std::pair<uint16_t, uint16_t>>& o_eyes) const
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            o_eyes.clear();
+
+            // Ensure that the bit is within the range (programming error otherwise)
+            FAPI_ASSERT(i_bit < MAX_DQ_BITS,
+                        fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                        .set_TARGET(i_target)
+                        .set_INDEX(i_bit)
+                        .set_LIST_SIZE(MAX_DQ_BITS)
+                        .set_FUNCTION(FINE_RECORDER_ADD_RESULTS),
+                        "%s has DQ bit input (%u) out of bounds: %u in cal step %u",
+                        mss::c_str(i_target), i_bit, MAX_DQ_BITS, i_calibration);
+
+            {
+                // Gets our current bit
+                const auto l_it = iv_results.begin() + i_bit;
+                o_data = *l_it;
+                uint16_t l_left_edge = 0;
+                uint16_t l_right_edge = 0;
+
+                // Seen 0 can be set to true. We have two edge cases:
+                // 1) We have a 0 at our edge - setting seen0 to true has no effect
+                // 2) We have a 1 at our edge - we want to note that we have an "edge" at the 0th delay
+                // The way we do that is by showing that we've seen a 0 then a 1, so setting to true is needed
+                bool l_seen0 = true;
+                bool l_seen1 = false;
+                bool l_found_left_edge = false;
+                bool l_found_right_edge = false;
+
+                // Loops through all of the delays and assembles a vector of the eyes
+                // The vector contains a pair and has the left and right edge noted
+                for(uint16_t l_delay = 0; l_delay < MAX_FINE_DELAY; l_delay++)
+                {
+                    // We've found that we're at a 0 (miscompare)
+                    if(l_it->getBit(l_delay) == false)
+                    {
+                        l_seen0 = true;
+
+                        // We're at a 0 now, and if we've found a 1 prior (1->0) transition
+                        // And have not found a right edge, so note that we've found a right edge and set the delay
+                        if((l_seen1 == true) && (l_found_right_edge == false))
+                        {
+                            // Right edge is our current delay - 1
+                            // This is the last time we saw a compare on the eye
+                            l_right_edge = l_delay - 1;
+                            l_found_right_edge = true;
+
+                        }
+
+                        l_seen1 = false;
+                    }
+
+                    // We've found that we're at a 1 (compare)
+                    if(l_it->getBit(l_delay) == true)
+                    {
+                        l_seen1 = true;
+
+                        // We're at a 1, have found a 0 prior (so 0->1 transition)
+                        // and not have a left edge, so note that we've found a left edge and set the delay
+                        if(l_seen0 == true && l_found_left_edge == false)
+                        {
+                            l_left_edge = l_delay;
+                            l_found_left_edge = true;
+                        }
+
+                        l_seen0 = false;
+                    }
+
+                    // If we've found a left and a right edge, then we've found an eye, so note it as such
+                    // We should always find our right edge after our first edge, set seen0 to true
+                    if(l_found_left_edge && l_found_right_edge)
+                    {
+                        o_eyes.push_back({l_left_edge, l_right_edge});
+                        l_found_left_edge = l_found_right_edge = false;
+                        l_seen0 = true;
+                        l_seen1 = false;
+                    }
+                }
+
+                // If we have a case where we pass at the maximum delay
+                // This means that we are in a passing eye but have not recorded the eye above
+                // Our "edge" then becomes the right most delay as we want to note
+                if(l_found_left_edge && !l_found_right_edge)
+                {
+                    o_eyes.push_back({l_left_edge, MAX_FINE_DELAY - 1});
+                }
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief find eye size and delay value for one dq
+        /// @param[in] i_delay_eyes left/right edges for each eye in the vector
+        /// @param[out] o_delay mid point of eye
+        /// @param[out] o_eye_size eye size
+        ///
+        void find_eye_size_and_delay(const std::vector<std::pair<uint16_t, uint16_t>>& i_delay_eyes,
+                                     uint16_t& o_delay,
+                                     uint16_t& o_eye_size) const
+        {
+            o_delay = 0;
+            o_eye_size = 0;
+
+            // Loops through and finds the best case eye
+            for(const auto& l_delay_eye : i_delay_eyes)
+            {
+                // Our eye size is our right minus our left edge + 1 to account that our edges are passing
+                const auto l_cur_eye_size = (l_delay_eye.second - l_delay_eye.first) + 1;
+
+                if(o_eye_size < l_cur_eye_size)
+                {
+                    o_eye_size = l_cur_eye_size;
+
+                    // Our setpoint for the eye is the average of our left and right edges
+                    o_delay = (l_delay_eye.second + l_delay_eye.first) / 2;
+                }
+            }
+        }
+
+        ///
+        /// @brief find eye size and delay value for one dq
+        /// @tparam fapi2::TargetType T target type on which to operate
+        /// @param[in] i_target target for error logging if needed
+        /// @param[in] i_bit dq number
+        /// @param[in] i_calibration the current calibration step - used for error logging
+        /// @param[out] o_delay mid point of eye
+        /// @param[out] o_eye_size eye size
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        template<fapi2::TargetType T>
+        fapi2::ReturnCode find_eye_size_and_delay(const fapi2::Target<T>& i_target,
+                const uint64_t i_calibration,
+                const uint64_t i_bit,
+                uint16_t& o_delay,
+                uint16_t& o_eye_size) const
+        {
+            o_delay = 0;
+            o_eye_size = 0;
+            std::vector<std::pair<uint16_t, uint16_t>> l_delay_eyes;
+            uint32_t l_data = 0;
+            FAPI_TRY(find_eyes(i_target,
+                               i_calibration,
+                               i_bit,
+                               l_data,
+                               l_delay_eyes));
+
+            find_eye_size_and_delay(l_delay_eyes, o_delay, o_eye_size);
+
+            // Note: we just blindly return the eye sizes
+            // The individual calibration steps will check and verify that we:
+            // 1) saw at least one passing region
+            // 2) saw a failing region
+
+            FAPI_DBG("bit%u found %u eyes. best case eye size%u with setpoint delay of %u from data 0x%08x",
+                     i_bit, l_delay_eyes.size(), o_eye_size, o_delay, l_data);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief get the iv_results
+        /// @return the vector of iv_results
+        ///
+        const std::vector<fapi2::buffer<uint32_t>>& get()const
+        {
+            return iv_results;
+        }
+
+        std::vector<fapi2::buffer<uint32_t>> iv_results;
+};
+
+///
 /// @brief Enums for per-nibble or per-bit level for LRDIMM training
 /// @note Values taken from the buffer spec
 ///
