@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,8 +63,7 @@ typedef struct __attribute__((packed))
     union
     {
         HOMER_ChipNimbus_t   hChipN;
-        HOMER_ChipCumulus_t  hChipC;
-        HOMER_ChipCentaur_t  hChipM;
+        HOMER_ChipAxone_t    hChipA;
     };
 
 } HOMER_ChipInfo_t;
@@ -208,41 +207,49 @@ private:
                         // prepare for next chip (if any)
                         l_bytePtr += sizeof(HOMER_ChipNimbus_t);
                     }
-                    else if (HOMER_CHIP_CUMULUS == l_chipPtr->chipType)
+                    else if (HOMER_CHIP_AXONE == l_chipPtr->chipType)
                     {
-                        HOMER_ChipCumulus_t *l_cumPtr =
-                             reinterpret_cast<HOMER_ChipCumulus_t *>(l_bytePtr);
+                        HOMER_ChipAxone_t *l_axPtr =
+                             reinterpret_cast<HOMER_ChipAxone_t *>(l_bytePtr);
 
                         // MC
-                        if (l_cumPtr->mcMask != 0)
+                        if (l_axPtr->mcMask != 0)
                         {
                             TS_FAIL("ERROR: MC should not be available. "
-                                    "(MC: 0x%x)", l_cumPtr->mcMask);
+                                    "(MC: 0x%x)", l_axPtr->mcMask);
                             break;
                         }
 
-                        // MCS
-                        if (l_cumPtr->miMask != 0)
+                        // MI
+                        if (l_axPtr->miMask != 0)
                         {
                             TS_FAIL("ERROR: MI should not be available. "
-                                    "(MI: 0x%x)", l_cumPtr->miMask);
+                                    "(MI: 0x%x)", l_axPtr->miMask);
                             break;
                         }
 
-                        // MCA
-                        if (l_cumPtr->dmiMask != 0)
+                        // MCC
+                        if (l_axPtr->mccMask != 0)
                         {
-                            TS_FAIL("ERROR: DMI should not be available. "
-                                    "(DMI: 0x%x)", l_cumPtr->dmiMask);
+                            TS_FAIL("ERROR: MCC should not be available. "
+                                    "(MCC: 0x%x)", l_axPtr->mccMask);
+                            break;
+                        }
+
+                        // OMIC
+                        if (l_axPtr->omicMask != 0)
+                        {
+                            TS_FAIL("ERROR: OMIC should not be available. "
+                                    "(OMIC: 0x%x)", l_axPtr->omicMask);
                             break;
                         }
 
                         // prepare for next chip (if any)
-                        l_bytePtr += sizeof(HOMER_ChipCumulus_t);
+                        l_bytePtr += sizeof(HOMER_ChipAxone_t);
                     }
-                    else if (HOMER_CHIP_CENTAUR == l_chipPtr->chipType)
+                    else if (HOMER_CHIP_EXPLORER == l_chipPtr->chipType)
                     {
-                        TS_FAIL("ERROR: MEMBUF should not be available ");
+                        TS_FAIL("ERROR: OCMB should not be available ");
                         break;
                     }
 
@@ -273,6 +280,13 @@ public:
     {
         using namespace PRDF;
 
+        // FIRDATA not supported on Cumulus based systems. So do nothing.
+        if ( TARGETING::MODEL_CUMULUS ==
+             PlatServices::getChipModel(PlatServices::getMasterProc()) )
+        {
+            return;
+        }
+
         TS_TRACE("- Write Homer Test 1 - Master Proc Core - Start -");
 
         errlHndl_t errl = fakeWriteHomerFirData(hBuf, sizeof(hBuf),
@@ -294,6 +308,13 @@ public:
     void TestWriteHomerAllProcMasterCore(void)
     {
         using namespace PRDF;
+
+        // FIRDATA not supported on Cumulus based systems. So do nothing.
+        if ( TARGETING::MODEL_CUMULUS ==
+             PlatServices::getChipModel(PlatServices::getMasterProc()) )
+        {
+            return;
+        }
 
         TS_TRACE("- Write Homer Test 2 - All Proc Master Core - Start -");
 
@@ -318,6 +339,13 @@ public:
     {
         using namespace PRDF;
 
+        // FIRDATA not supported on Cumulus based systems. So do nothing.
+        if ( TARGETING::MODEL_CUMULUS ==
+             PlatServices::getChipModel(PlatServices::getMasterProc()) )
+        {
+            return;
+        }
+
         TS_TRACE("- Write Homer Test 3 - All Proc Mem Master Core - Start -");
 
         errlHndl_t errl = fakeWriteHomerFirData(hBuf, sizeof(hBuf),
@@ -340,6 +368,13 @@ public:
     void TestWriteHomerAllHardware(void)
     {
         using namespace PRDF;
+
+        // FIRDATA not supported on Cumulus based systems. So do nothing.
+        if ( TARGETING::MODEL_CUMULUS ==
+             PlatServices::getChipModel(PlatServices::getMasterProc()) )
+        {
+            return;
+        }
 
         TS_TRACE("- Write Homer Test 4 - All Hardware - Start -");
 

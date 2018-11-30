@@ -1330,6 +1330,7 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
                 case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
                 case TYPE_MEMBUF:
+                case TYPE_OCMB_CHIP:
                     o_pos = i_trgt->getAttr<ATTR_POSITION>();
                     break;
 
