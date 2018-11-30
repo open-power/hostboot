@@ -507,18 +507,37 @@ void  obus_getSmpTarget( TargetHandle_t &i_obusTgt,
 void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link,
                             STEP_CODE_DATA_STRUCT & i_sc )
 {
-    TargetHandle_t  l_smpTarg     = nullptr;
+    #define PRDF_FUNC "[LaneRepair::obus_smpCallout_link] "
 
+    if ( !obusInSmpMode(i_obusTgt) )
+    {
+        // There is no support in for calling out the other end of an NV or
+        // openCAPI bus. By design, any FIR bits associated with those bus types
+        // should not be driving attentions. So instead use the default callout.
 
-    // Get the associated SMP target for this OBUS target
-    obus_getSmpTarget( i_obusTgt, i_link, l_smpTarg );
-    PRDF_ASSERT(nullptr != l_smpTarg);
+        PRDF_ERR( PRDF_FUNC "Bus callouts only supported in SMP mode: "
+                  "i_obusTgt=0x%08x", getHuid(i_obusTgt) );
 
-    // Callout both SMPGROUPS
-    obus_smpCallout( l_smpTarg, i_obusTgt, i_sc );
+        i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
+        i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
+        i_sc.service_data->setServiceCall();
+    }
+    else
+    {
+        TargetHandle_t  l_smpTarg     = nullptr;
 
+        // Get the associated SMP target for this OBUS target
+        obus_getSmpTarget( i_obusTgt, i_link, l_smpTarg );
+        PRDF_ASSERT(nullptr != l_smpTarg);
+
+        // Callout both SMPGROUPS
+        obus_smpCallout( l_smpTarg, i_obusTgt, i_sc );
+    }
 
     return;
+
+    #undef PRDF_FUNC
+
 } // end  obus_smpCallout_link -  smp link number
 
 
