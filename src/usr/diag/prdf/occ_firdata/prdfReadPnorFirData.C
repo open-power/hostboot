@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ class FirData
 
 TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
 {
-    TargetHandle_t o_trgt = NULL;
+    TargetHandle_t o_trgt = nullptr;
 
     do
     {
@@ -88,74 +88,56 @@ TargetHandle_t getTargetHandle( PNOR_Trgt_t * i_pTrgt )
         TYPE type = TYPE_LAST_IN_RANGE;
         switch ( i_pTrgt->trgtType )
         {
-            // TODO RTC 173614: story for CUMULUS for mc mi dmi  types
-            case TRGT_PROC:   type = TYPE_PROC;   break;
-            case TRGT_XBUS:   type = TYPE_XBUS ;  break;
-            case TRGT_OBUS:   type = TYPE_OBUS ;  break;
-            case TRGT_EC:     type = TYPE_CORE ;  break;
-            case TRGT_EQ:     type = TYPE_EQ ;    break;
-            case TRGT_EX:     type = TYPE_EX;     break;
-            case TRGT_MCBIST: type = TYPE_MCBIST; break;
-            case TRGT_MCS:    type = TYPE_MCS;    break;
-            case TRGT_MCA:    type = TYPE_MCA ;   break;
-            case TRGT_CAPP:   type = TYPE_CAPP;   break;
-            case TRGT_PEC:    type = TYPE_PEC;    break;
-            case TRGT_PHB:    type = TYPE_PHB;    break;
-
-            case TRGT_MEMBUF:  type = TYPE_MEMBUF; break;
-            case TRGT_MBA:     type = TYPE_MBA;    break;
+            case TRGT_PROC:   type = TYPE_PROC;      break;
+            case TRGT_XBUS:   type = TYPE_XBUS;      break;
+            case TRGT_OBUS:   type = TYPE_OBUS;      break;
+            case TRGT_EC:     type = TYPE_CORE;      break;
+            case TRGT_EQ:     type = TYPE_EQ;        break;
+            case TRGT_EX:     type = TYPE_EX;        break;
+            case TRGT_MCBIST: type = TYPE_MCBIST;    break;
+            case TRGT_MCS:    type = TYPE_MCS;       break;
+            case TRGT_MCA:    type = TYPE_MCA;       break;
+            case TRGT_CAPP:   type = TYPE_CAPP;      break;
+            case TRGT_PEC:    type = TYPE_PEC;       break;
+            case TRGT_PHB:    type = TYPE_PHB;       break;
+            case TRGT_MC:     type = TYPE_MC;        break;
+            case TRGT_MI:     type = TYPE_MI;        break;
+            case TRGT_MCC:    type = TYPE_MCC;       break;
+            case TRGT_OMIC:   type = TYPE_OMIC;      break;
+            case TRGT_NPU:    type = TYPE_NPU;       break;
+            case TRGT_OCMB:   type = TYPE_OCMB_CHIP; break;
         }
         if ( TYPE_LAST_IN_RANGE == type ) break;
 
-        // Get the PROC target.
-        TargetHandle_t procTrgt = NULL;
-        TargetHandleList procList = getFunctionalTargetList( TYPE_PROC );
-        for ( TargetHandleList::iterator i = procList.begin();
-              i != procList.end(); ++i )
+        if ( TYPE_OCMB_CHIP == type )
         {
-            if ( i_pTrgt->chipPos == getTargetPosition(*i) )
+            // Get the OCMB target.
+            for ( auto & trgt : getFunctionalTargetList(type) )
             {
-                procTrgt = *i;
-                break;
-            }
-        }
-
-        if ( NULL == procTrgt ) break;
-
-        if ( TYPE_PROC == type )
-        {
-            o_trgt = procTrgt; // nothing more to do.
-        }
-        else if ( TYPE_MEMBUF == type )
-        {
-            // Get the Centaur target
-            TargetHandleList  membList = getFunctionalTargetList( TYPE_MEMBUF );
-
-            for ( TargetHandleList::iterator l_mb = membList.begin();
-                  l_mb != membList.end(); ++l_mb )
-            {
-                if ( i_pTrgt->chipPos == getTargetPosition(*l_mb) )
+                if ( i_pTrgt->chipPos == getTargetPosition(trgt) )
                 {
-                    o_trgt = *l_mb;
+                    o_trgt = trgt;
                     break;
                 }
             }
         }
-        else if ( TYPE_MBA == type )
+        else // Must be a PROC or sub-unit.
         {
-            // Get the connected MEMBUF
-            TargetHandle_t membTrgt = getConnectedChild( procTrgt, TYPE_MEMBUF,
-                                                         i_pTrgt->chipPos );
-            if ( NULL != membTrgt )
+            // Get the PROC target.
+            for ( auto & trgt : getFunctionalTargetList(TYPE_PROC) )
             {
-                // Get the connected MBA
-                o_trgt = getConnectedChild( membTrgt, type, i_pTrgt->unitPos );
+                if ( i_pTrgt->chipPos == getTargetPosition(trgt) )
+                {
+                    o_trgt = trgt;
+                    break;
+                }
             }
-        }
-        else
-        {
-            // Get the connected child
-            o_trgt = getConnectedChild( procTrgt, type, i_pTrgt->unitPos );
+
+            if ( TYPE_PROC != type )
+            {
+                // This is a unit so get the connected child target.
+                o_trgt = getConnectedChild( o_trgt, type, i_pTrgt->unitPos );
+            }
         }
 
     } while (0);

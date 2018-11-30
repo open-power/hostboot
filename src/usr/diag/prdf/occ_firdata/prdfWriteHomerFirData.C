@@ -529,160 +529,126 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x1001181B, // L3 Edram Bank Fail
     };
 
-/* TODO: RTC 177481
-    // These are all Centaur addresses below
-    // (Should match P8 except for global broadcast FIRs)
-    io_targMap[TRGT_MEMBUF][REG_GLBL] =
+    io_targMap[TRGT_NPU][REG_FIR] =
     {
-        0x500F001C, // GLOBAL_CS_FIR
-        0x500F001B, // GLOBAL_RE_FIR
+        0x05013C00, // NPU0FIR
+        0x05013C40, // NPU1FIR
+        0x05013C80, // NPU2FIR
     };
 
-    io_targMap[TRGT_MEMBUF][REG_FIR] =
+    io_targMap[TRGT_NPU][REG_REG] =
     {
-        0x0104000a, // TP_LFIR
-        0x02010400, // DMIFIR
-        0x02010800, // MBIFIR
-        0x02011400, // MBSFIR
-        0x02011440, // MBSECCFIR_0
-        0x02011480, // MBSECCFIR_1
-        0x020115c0, // SCACFIR
-        0x02011600, // MCBISTFIR_0
-        0x02011700, // MCBISTFIR_1
-        0x0204000a, // NEST_LFIR
-        0x0304000a, // MEM_LFIR
+        // There are over 90 registers captured for NPU0FIR, but that is too
+        // much for the limited space in the OP checkstop analysis design. The
+        // hardware team agreed this was the minimum set of registers needed
+        // for a checkstop. We have also been told most of these should have a
+        // zero value so they should not take up too much space.
+        0x05011018, // NPU_S0_CS_SM0_CERR_1
+        0x05011019, // NPU_S0_CS_SM0_CERR_2
+        0x05011048, // NPU_S0_CS_SM1_CERR_1
+        0x05011049, // NPU_S0_CS_SM1_CERR_2
+        0x05011078, // NPU_S0_CS_SM2_CERR_1
+        0x05011079, // NPU_S0_CS_SM2_CERR_2
+        0x050110A8, // NPU_S0_CS_SM3_CERR_1
+        0x050110A9, // NPU_S0_CS_SM3_CERR_2
+        0x050110DB, // NPU_S0_CS_CTL_CERR_1
+        0x050110FA, // NPU_S0_DAT_CERR_LOG_HOLD
+        0x050110FD, // NPU_S0_DAT_REM0
+        0x050110FE, // NPU_S0_DAT_REM1
+        0x05011218, // NPU_S1_CS_SM0_CERR_1
+        0x05011219, // NPU_S1_CS_SM0_CERR_2
+        0x05011248, // NPU_S1_CS_SM1_CERR_1
+        0x05011249, // NPU_S1_CS_SM1_CERR_2
+        0x05011278, // NPU_S1_CS_SM2_CERR_1
+        0x05011279, // NPU_S1_CS_SM2_CERR_2
+        0x050112A8, // NPU_S1_CS_SM3_CERR_1
+        0x050112A9, // NPU_S1_CS_SM3_CERR_2
+        0x050112DB, // NPU_S1_CS_CTL_CERR_1
+        0x050112FA, // NPU_S1_DAT_CERR_LOG_HOLD
+        0x050112FD, // NPU_S1_DAT_REM0
+        0x050112FE, // NPU_S1_DAT_REM1
+        0x05011418, // NPU_S2_CS_SM0_CERR_1
+        0x05011419, // NPU_S2_CS_SM0_CERR_2
+        0x05011448, // NPU_S2_CS_SM1_CERR_1
+        0x05011449, // NPU_S2_CS_SM1_CERR_2
+        0x05011478, // NPU_S2_CS_SM2_CERR_1
+        0x05011479, // NPU_S2_CS_SM2_CERR_2
+        0x050114A8, // NPU_S2_CS_SM3_CERR_1
+        0x050114A9, // NPU_S2_CS_SM3_CERR_2
+        0x050114DB, // NPU_S2_CS_CTL_CERR_1
+        0x050114FA, // NPU_S2_DAT_CERR_LOG_HOLD
+        0x050114FD, // NPU_S2_DAT_REM0
+        0x050114FE, // NPU_S2_DAT_REM1
     };
 
-    io_targMap[TRGT_MEMBUF][REG_REG] =
+    io_targMap[TRGT_MC][REG_GLBL] =
     {
-        // Global FIRs
-        0x500F001A, // GLOBAL_SPA (for FFDC only)
-
-        // Chiplet FIRs
-        0x01040000, // TP_CHIPLET_CS_FIR
-        0x01040001, // TP_CHIPLET_RE_FIR
-        0x01040002, // TP_CHIPLET_FIR_MASK
-        0x02040000, // NEST_CHIPLET_CS_FIR
-        0x02040001, // NEST_CHIPLET_RE_FIR
-        0x02040002, // NEST_CHIPLET_FIR_MASK
-
-        0x03040000, // MEM_CHIPLET_CS_FIR
-        0x03040001, // MEM_CHIPLET_RE_FIR
-        0x03040002, // MEM_CHIPLET_FIR_MASK
-        0x03040004, // MEM_CHIPLET_SPA (for FFDC only)
-        0x03040007, // MEM_CHIPLET_SPA_MASK (for FFDC only)
-
-        // FIRs for FFDC only
-        0x02010880, // NESTFBISTFIR
-        0x0201141e, // MBSSECUREFIR
-
-        // c_err_rpt and extra FFDC registers
-        0x01030009, // TP_ERROR_STATUS
-        0x0201080F, // MBIERPT
-        0x0201140A, // MBSXCR
-        0x0201140B, // MBA0_MBAXCR
-        0x0201140C, // MBA1_MBAXCR
-        0x02011413, // MBSCERR1
-        0x02011416, // MBCELOG
-        0x0201142C, // MBSCERR2
-        0x02011466, // MBA0_MBSECCERRPT_0
-        0x02011467, // MBA0_MBSECCERRPT_1
-        0x020114A6, // MBA1_MBSECCERRPT_0
-        0x020114A7, // MBA1_MBSECCERRPT_1
-        0x020115D4, // SENSORCACHEERRPT
-        0x0201168f, // MBA0_MBXERRSTAT
-        0x0201178f, // MBA1_MBXERRSTAT
-        0x02030009, // NEST_ERROR_STATUS
-        0x03030009, // MEM_ERROR_STATUS
-        0x020115D4, // SensorCache ERR report
-
-        // ECC address registers (will be used in analysis).
-        0x0201165f, // MBA0_MBSEVR
-        0x02011660, // MBA0_MBNCER
-        0x02011661, // MBA0_MBRCER
-        0x02011662, // MBA0_MBMPER
-        0x02011663, // MBA0_MBUER
-        0x0201175f, // MBA1_MBSEVR
-        0x02011760, // MBA1_MBNCER
-        0x02011761, // MBA1_MBRCER
-        0x02011762, // MBA1_MBMPER
-        0x02011763, // MBA1_MBUER
-
-        // Other ECC regs (won't be used in analysis, but could be useful FFDC)
-        0x02011653, // MBA0_MBSEC0
-        0x02011654, // MBA0_MBSEC1
-        0x02011655, // MBSTR_0
-        0x02011656, // MBA0_MBSSYMEC0
-        0x02011657, // MBA0_MBSSYMEC1
-        0x02011658, // MBA0_MBSSYMEC2
-        0x02011659, // MBA0_MBSSYMEC3
-        0x0201165a, // MBA0_MBSSYMEC4
-        0x0201165b, // MBA0_MBSSYMEC5
-        0x0201165c, // MBA0_MBSSYMEC6
-        0x0201165d, // MBA0_MBSSYMEC7
-        0x0201165e, // MBA0_MBSSYMEC8
-        0x02011753, // MBA1_MBSEC0
-        0x02011754, // MBA1_MBSEC1
-        0x02011755, // MBSTR_1
-        0x02011756, // MBA1_MBSSYMEC0
-        0x02011757, // MBA1_MBSSYMEC1
-        0x02011758, // MBA1_MBSSYMEC2
-        0x02011759, // MBA1_MBSSYMEC3
-        0x0201175a, // MBA1_MBSSYMEC4
-        0x0201175b, // MBA1_MBSSYMEC5
-        0x0201175c, // MBA1_MBSSYMEC6
-        0x0201175d, // MBA1_MBSSYMEC7
-        0x0201175e, // MBA1_MBSSYMEC8
-
-        // Others from HDCT
-        0x00010000, // EFUSE part0
-        0x00010001, // EFUSE part1
-        0x000F001A, // Int reg
+        0x07040000, // MC_CHIPLET_CS_FIR
+        0x07040001, // MC_CHIPLET_RE_FIR
+        0x07040018, // MC_CHIPLET_UCS_FIR
     };
 
-    io_targMap[TRGT_MBA][REG_FIR] =
+    io_targMap[TRGT_MC][REG_FIR] =
     {
-        0x03010600, // MBAFIR
-        0x03010400, // MBACALFIR
+        0x07012300, // MCBISTFIR
     };
 
-    io_targMap[TRGT_MBA][REG_REG] =
+    io_targMap[TRGT_MI][REG_FIR] =
     {
-        0x0301041B, // MBASECUREFIR
-        0x03010611, // MBASPA (for FFDC only)
-        0x03010614, // MBASPA_MASK (for FFDC only)
-
-        0x0301041A, // MBA_ERR_REPORT
-        0x030106E7, // MBA_MCBERRPTQ
-
-        // Scrub registers (won't be used in analysis, but could be useful FFDC)
-        0x0301060A, // MBMCT
-        0x0301060C, // MBMSR
-        0x0301060D, // MBMACA
-        0x0301060E, // MBMEA
-        0x0301060F, // MBASCTL
-        0x03010610, // MBAECTL
+        0x05010800, // MCFIR
     };
 
-    io_targMap[TRGT_MBA][REG_IDFIR] =
+    io_targMap[TRGT_MI][REG_REG] =
     {
-        0x800200900301143Fll, // MBADDRPHYFIR
+        // c_err_rpt registers
+        0x0501081E, // MCERPT0
+        0x0501081F, // MCERPT1
+        0x0501081A, // MCERPT2
+        0x0501080A, // MCFGP
+        0x0501080C, // MCFGPM
     };
 
-    io_targMap[TRGT_MBA][REG_IDREG] =
+    io_targMap[TRGT_MCC][REG_FIR] =
     {
-        0x8000D0060301143Fll, // DDRPHY_APB_FIR_ERR0_P0
-        0x8000D0070301143Fll, // DDRPHY_APB_FIR_ERR1_P0
-        0x8001D0060301143Fll, // DDRPHY_APB_FIR_ERR0_P1
-        0x8001D0070301143Fll, // DDRPHY_APB_FIR_ERR1_P1
+        0x07010900, // DSTLFIR
+        0x07010a00, // USTLFIR
     };
-*/
+
+    io_targMap[TRGT_OMIC][REG_FIR] =
+    {
+        0x07011000, // IOOMIFIR
+        0x07012440, // MCPPEFIR
+        0x07013340, // OMIDLFIR
+    };
+
+    io_targMap[TRGT_OCMB][REG_GLBL] =
+    {
+        0x08040000, // MB_CHIPLET_CS_FIR
+        0x08040001, // MB_CHIPLET_RE_FIR
+        0x08040004, // MB_CHIPLET_SPA_FIR
+    };
+
+    io_targMap[TRGT_OCMB][REG_FIR] =
+    {
+        0x0804000a, // MB_LFIR
+        0x08010870, // MMIOFIR
+        0x08011400, // SRQFIR
+        0x08011800, // MCBISTFIR
+        0x08011c00, // RDFFIR
+        0x08012400, // TLXFIR
+        0x08012800, // OMIDLFIR
+    };
+
+    io_targMap[TRGT_OCMB][REG_REG] =
+    {
+        0x08040002, // MB_CHIPLET_FIR_MASK
+        0x08040007, // MB_CHIPLET_SPA_FIR_MASK
+    };
 
     // EC level handling will be done with a
     // structure and separate register count field.
 
 } // end getAddresses
-
 
 //------------------------------------------------------------------------------
 
@@ -736,13 +702,12 @@ errlHndl_t getPnorInfo( HOMER_Data_t & o_data )
  */
 typedef struct __attribute__((packed))
 {
-    HOMER_Chip_t  hChipType;  /* Nimbus, Centaur, EC Level, etc...*/
+    HOMER_Chip_t  hChipType;  /* Nimbus, Axone, EC Level, etc...*/
 
     union
     {
         HOMER_ChipNimbus_t   hChipN;
-        HOMER_ChipCumulus_t  hChipC;
-        HOMER_ChipCentaur_t  hChipM;
+        HOMER_ChipAxone_t    hChipA;
     };
 
 } HOMER_ChipInfo_t;
@@ -794,15 +759,9 @@ uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
             case TYPE_MCA:    maxPos = TrgtPos_t::MAX_MCA_PER_PROC;    break;
             case TYPE_MC:     maxPos = TrgtPos_t::MAX_MC_PER_PROC;     break;
             case TYPE_MI:     maxPos = TrgtPos_t::MAX_MI_PER_PROC;     break;
-            case TYPE_DMI:    maxPos = TrgtPos_t::MAX_DMI_PER_PROC;    break;
-            default: ;
-        }
-    }
-    else if ( TYPE_MEMBUF == getTargetType(i_chip) )
-    {
-        switch ( i_unitType )
-        {
-            case TYPE_MBA: maxPos = TrgtPos_t::MAX_MBA_PER_MEMBUF; break;
+            case TYPE_MCC:    maxPos = TrgtPos_t::MAX_MCC_PER_PROC;    break;
+            case TYPE_OMIC:   maxPos = TrgtPos_t::MAX_OMIC_PER_PROC;   break;
+            case TYPE_NPU:    maxPos = TrgtPos_t::MAX_NPU_PER_PROC;    break;
             default: ;
         }
     }
@@ -842,7 +801,8 @@ uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
         case TYPE_MCA:
         case TYPE_MC:
         case TYPE_MI:
-        case TYPE_DMI:
+        case TYPE_MCC:
+        case TYPE_OMIC:
             if ( ALL_PROC_MEM_MASTER_CORE != i_curHw &&
                  ALL_HARDWARE             != i_curHw    )
             {
@@ -913,8 +873,8 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
             HOMER_ChipType_t procModelType = HOMER_CHIP_INVALID;
             switch ( getChipModel(proc) )
             {
-                case MODEL_NIMBUS:  procModelType = HOMER_CHIP_NIMBUS;  break;
-                case MODEL_CUMULUS: procModelType = HOMER_CHIP_CUMULUS; break;
+                case MODEL_NIMBUS: procModelType = HOMER_CHIP_NIMBUS; break;
+                case MODEL_AXONE:  procModelType = HOMER_CHIP_AXONE;  break;
                 default:
                     PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
                               procModelType, getHuid(proc) );
@@ -947,26 +907,28 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
                 ci.hChipN.mcsMask    = __getUnitMask(proc, TYPE_MCS,   i_curHw);
                 ci.hChipN.mcaMask    = __getUnitMask(proc, TYPE_MCA,   i_curHw);
             }
-            else if ( HOMER_CHIP_CUMULUS == procModelType )
+            else if ( HOMER_CHIP_AXONE == procModelType )
             {
                 // Init the chiplet masks
-                ci.hChipC = HOMER_initChipCumulus();
+                ci.hChipA = HOMER_initChipAxone();
 
                 // Check for master processor
-                ci.hChipC.isMaster = (proc == masterProc) ? 1 : 0;
+                ci.hChipA.isMaster = (proc == masterProc) ? 1 : 0;
 
                 // Set all of the unit masks.
-                ci.hChipC.cappMask = __getUnitMask(proc, TYPE_CAPP, i_curHw);
-                ci.hChipC.xbusMask = __getUnitMask(proc, TYPE_XBUS, i_curHw);
-                ci.hChipC.obusMask = __getUnitMask(proc, TYPE_OBUS, i_curHw);
-                ci.hChipC.pecMask  = __getUnitMask(proc, TYPE_PEC,  i_curHw);
-                ci.hChipC.phbMask  = __getUnitMask(proc, TYPE_PHB,  i_curHw);
-                ci.hChipC.eqMask   = __getUnitMask(proc, TYPE_EQ,   i_curHw);
-                ci.hChipC.exMask   = __getUnitMask(proc, TYPE_EX,   i_curHw);
-                ci.hChipC.ecMask   = __getUnitMask(proc, TYPE_CORE, i_curHw);
-                ci.hChipC.mcMask   = __getUnitMask(proc, TYPE_MC,   i_curHw);
-                ci.hChipC.miMask   = __getUnitMask(proc, TYPE_MI,   i_curHw);
-                ci.hChipC.dmiMask  = __getUnitMask(proc, TYPE_DMI,  i_curHw);
+                ci.hChipA.cappMask = __getUnitMask(proc, TYPE_CAPP, i_curHw);
+                ci.hChipA.xbusMask = __getUnitMask(proc, TYPE_XBUS, i_curHw);
+                ci.hChipA.obusMask = __getUnitMask(proc, TYPE_OBUS, i_curHw);
+                ci.hChipA.pecMask  = __getUnitMask(proc, TYPE_PEC,  i_curHw);
+                ci.hChipA.phbMask  = __getUnitMask(proc, TYPE_PHB,  i_curHw);
+                ci.hChipA.eqMask   = __getUnitMask(proc, TYPE_EQ,   i_curHw);
+                ci.hChipA.exMask   = __getUnitMask(proc, TYPE_EX,   i_curHw);
+                ci.hChipA.ecMask   = __getUnitMask(proc, TYPE_CORE, i_curHw);
+                ci.hChipA.npuMask  = __getUnitMask(proc, TYPE_NPU,  i_curHw);
+                ci.hChipA.mcMask   = __getUnitMask(proc, TYPE_MC,   i_curHw);
+                ci.hChipA.miMask   = __getUnitMask(proc, TYPE_MI,   i_curHw);
+                ci.hChipA.mccMask  = __getUnitMask(proc, TYPE_MCC,  i_curHw);
+                ci.hChipA.omicMask = __getUnitMask(proc, TYPE_OMIC, i_curHw);
             }
 
             // Save the chip info we collected.
@@ -977,99 +939,31 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
         if ( ALL_PROC_MEM_MASTER_CORE != i_curHw && ALL_HARDWARE != i_curHw )
             break;
 
-        // Get the complete MEMBUF list.
-        TargetHandleList membList = getFunctionalTargetList( TYPE_MEMBUF );
-
-        // Iterate the connected MEMBUFs.
-        for ( auto & memb : membList )
+        // Iterate all of the OCMB chips.
+        for ( auto & ocmb : getFunctionalTargetList(TYPE_OCMB_CHIP) )
         {
-            // Get the MEMBUF model type.
-            HOMER_ChipType_t membModelType = HOMER_CHIP_INVALID;
-            switch ( getChipModel(memb) )
+            // Get the chip model type.
+            HOMER_ChipType_t modelType = HOMER_CHIP_INVALID;
+            switch ( getChipModel(ocmb) )
             {
-                case MODEL_CENTAUR: membModelType = HOMER_CHIP_CENTAUR; break;
+                case MODEL_EXPLORER: modelType = HOMER_CHIP_EXPLORER; break;
                 default:
                     PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
-                              membModelType, getHuid(memb) );
+                              modelType, getHuid(ocmb) );
                     PRDF_ASSERT( false );
             }
 
             // Init the chip info.
             HOMER_ChipInfo_t ci;
-            __initChipInfo( memb, membModelType, MAX_MEMBUF_PER_NODE, ci );
+            __initChipInfo( ocmb, modelType, MAX_OCMB_PER_NODE, ci );
 
-            // Set the chip specific data.
-            if ( HOMER_CHIP_CENTAUR == membModelType )
-            {
-                // Init the chiplet masks
-                ci.hChipM = HOMER_initChipCentaur();
-
-                // Set all of the unit masks.
-                ci.hChipM.mbaMask = __getUnitMask(memb, TYPE_MBA, i_curHw);
-            }
+            // NOTE: Explorer does not have any unit data.
 
             // Save the chip info we collected.
             o_chipInfVector.push_back( ci );
         }
 
     } while (0);
-
-#if 1
-    // TODO RTC 173623:  Remove when done with initial testing
-    // Traces the information built into the vector
-    PRDF_TRAC("HOMER: Number of elements:%d", o_chipInfVector.size() );
-    for ( auto & ci : o_chipInfVector )
-    {
-        PRDF_TRAC("HOMER: ChipPosition:%d", ci.hChipType.chipPos);
-        PRDF_TRAC("HOMER: EC Level:0x%02X", ci.hChipType.chipEcLevel);
-        PRDF_TRAC("HOMER: FSI Addr:0x%08X", ci.hChipType.fsiBaseAddr);
-
-        switch ( ci.hChipType.chipType )
-        {
-            case HOMER_CHIP_NIMBUS:
-                PRDF_TRAC("HOMER: NIMBUS chip");
-                PRDF_TRAC(" isMaster:   %d",     ci.hChipN.isMaster );
-                PRDF_TRAC(" xbusMask:   0x%06X", ci.hChipN.xbusMask );
-                PRDF_TRAC(" obusMask:   0x%06X", ci.hChipN.obusMask );
-                PRDF_TRAC(" ecMask:     0x%06X", ci.hChipN.ecMask );
-                PRDF_TRAC(" eqMask:     0x%06X", ci.hChipN.eqMask );
-                PRDF_TRAC(" exMask:     0x%06X", ci.hChipN.exMask );
-                PRDF_TRAC(" mcbistMask: 0x%06X", ci.hChipN.mcbistMask );
-                PRDF_TRAC(" mcsMask:    0x%06X", ci.hChipN.mcsMask );
-                PRDF_TRAC(" mcaMask:    0x%06X", ci.hChipN.mcaMask );
-                PRDF_TRAC(" cappMask:   0x%06X", ci.hChipN.cappMask );
-                PRDF_TRAC(" pecMask:    0x%06X", ci.hChipN.pecMask );
-                PRDF_TRAC(" phbMask:    0x%06X", ci.hChipN.phbMask );
-                break;
-
-            case HOMER_CHIP_CUMULUS:
-                PRDF_TRAC("HOMER: CUMULUS chip");
-                PRDF_TRAC(" isMaster: %d",     ci.hChipC.isMaster );
-                PRDF_TRAC(" xbusMask: 0x%06X", ci.hChipC.xbusMask );
-                PRDF_TRAC(" obusMask: 0x%06X", ci.hChipC.obusMask );
-                PRDF_TRAC(" ecMask:   0x%06X", ci.hChipC.ecMask );
-                PRDF_TRAC(" eqMask:   0x%06X", ci.hChipC.eqMask );
-                PRDF_TRAC(" exMask:   0x%06X", ci.hChipC.exMask );
-                PRDF_TRAC(" mcMask:   0x%06X", ci.hChipC.mcMask );
-                PRDF_TRAC(" miMask:   0x%06X", ci.hChipC.miMask );
-                PRDF_TRAC(" dmiMask:  0x%06X", ci.hChipC.dmiMask );
-                PRDF_TRAC(" cappMask: 0x%06X", ci.hChipC.cappMask );
-                PRDF_TRAC(" pecMask:  0x%06X", ci.hChipC.pecMask );
-                PRDF_TRAC(" phbMask:  0x%06X", ci.hChipC.phbMask );
-                break;
-
-            case HOMER_CHIP_CENTAUR:
-                PRDF_TRAC("HOMER: CENTAUR chip");
-                PRDF_TRAC(" mbaMask: 0x%X", ci.hChipM.mbaMask );
-                break;
-
-            default:
-                PRDF_TRAC("HOMER: Unknown Chip:%d",
-                          ci.hChipType.chipType );
-                break;
-        }
-    }
-#endif // 1 for temporary debug
 
     return errl;
 
@@ -1161,24 +1055,22 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             // loop thru register types
             for ( auto & r : t.second )
             {
-                // TODO RTC 173614:
-                // For CUMULUS  Add memory targets
-
                 // Want all proc chiplets but only include
                 // memory when asked for
                 if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
                      (ALL_HARDWARE == i_curHw)             ||
                      ( (TRGT_MCBIST != t.first) &&
-                       (TRGT_MCS != t.first)    &&
-                       (TRGT_MCA != t.first)    &&
-                       (TRGT_MEMBUF != t.first) &&
-                       (TRGT_MBA != t.first)
+                       (TRGT_MCS    != t.first) &&
+                       (TRGT_MCA    != t.first) &&
+                       (TRGT_MC     != t.first) &&
+                       (TRGT_MI     != t.first) &&
+                       (TRGT_MCC    != t.first) &&
+                       (TRGT_OMIC   != t.first)
                      )
                    )
                 {
                     // save the number of regs for target/regType
-                    io_homerData.regCounts[t.first][r.first] =
-                      r.second.size();
+                    io_homerData.regCounts[t.first][r.first] = r.second.size();
                 } // end if need this target included
 
             } // end for on regTypes
@@ -1223,33 +1115,35 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                 memcpy( &i_hBuf[idx], &(l_chipItr->hChipType),
                         l_chipTypeSize ); idx += l_chipTypeSize;
 
-                // place the configured chiplet information
-                if (HOMER_CHIP_CENTAUR != l_chipItr->hChipType.chipType)
+                // Place the configured chiplet information.
+                if ( HOMER_CHIP_NIMBUS == l_chipItr->hChipType.chipType )
                 {
                     // Ensure we won't copy beyond space allowed
                     sz_hBuf += sizeof(HOMER_ChipNimbus_t);
                     errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
                     if (NULL != errl) { break; }
 
-                    // Cumulus and Nimbus are the same size area
                     memcpy( &i_hBuf[idx], &(l_chipItr->hChipN),
                             sizeof(HOMER_ChipNimbus_t) );
 
                     idx += sizeof(HOMER_ChipNimbus_t);
-                } // end if PROC (not-centaur)
-                else
+                }
+                else if ( HOMER_CHIP_AXONE == l_chipItr->hChipType.chipType )
                 {
                     // Ensure we won't copy beyond space allowed
-                    sz_hBuf += sizeof(HOMER_ChipCentaur_t);
+                    sz_hBuf += sizeof(HOMER_ChipAxone_t);
                     errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
                     if (NULL != errl) { break; }
 
-                    // Centaur is smaller area than PROC chips
-                    memcpy( &i_hBuf[idx], &(l_chipItr->hChipM),
-                            sizeof(HOMER_ChipCentaur_t) );
+                    memcpy( &i_hBuf[idx], &(l_chipItr->hChipA),
+                            sizeof(HOMER_ChipAxone_t) );
 
-                    idx += sizeof(HOMER_ChipCentaur_t);
-                } // end else CENTAUR chip
+                    idx += sizeof(HOMER_ChipAxone_t);
+                }
+                else if ( HOMER_CHIP_EXPLORER == l_chipItr->hChipType.chipType )
+                {
+                    // NOTE: Explorer does not have any unit data.
+                }
 
             } // end for loop on chip vector
 
@@ -1296,16 +1190,16 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             // loop thru targets
             for ( auto & t : l_targMap )
             {
-                // TODO RTC 173614: story for CUMULUS when we know the regs
-                // for sure TRGT_MC TRGT_MI TRGT_DMI -- probably NOOP now
                 if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
                      (ALL_HARDWARE == i_curHw)             ||
                      ( (TRGT_MCBIST != t.first) &&
-                       (TRGT_MCS != t.first)    &&
-                       (TRGT_MCA != t.first)    &&
-                       (TRGT_MEMBUF != t.first) &&
-                       (TRGT_MBA != t.first)
-                      )
+                       (TRGT_MCS    != t.first) &&
+                       (TRGT_MCA    != t.first) &&
+                       (TRGT_MC     != t.first) &&
+                       (TRGT_MI     != t.first) &&
+                       (TRGT_MCC    != t.first) &&
+                       (TRGT_OMIC   != t.first)
+                     )
                    )
                 {
                     // loop thru register types
@@ -1368,6 +1262,9 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
 
     do
     {
+        // FIRDATA not supported on Cumulus based systems. So do nothing.
+        if ( MODEL_CUMULUS == getChipModel(getMasterProc()) ) break;
+
         HOMER_Data_t  l_homerData = HOMER_getData(); // Initializes data
 
         // Set flag indicating if IPL or runtime situation.

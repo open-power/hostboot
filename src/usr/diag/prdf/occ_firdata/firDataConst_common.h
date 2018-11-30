@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,16 +33,12 @@
 #include <stdint.h>
 
 /** Target types for all supported targets. */
-/** NOTE: These are used to build the register list in HOMER data      */
-/**       and also to create the exiting chiplet masks. Hence,         */
-/**       the numbers assigned here have to match the sequence         */
-/**       of chiplets in HOMER_ChipNimbus_t, HOMER_ChipCumulus_t, etc. */
 typedef enum
 {
     /* NOTE: These will be used as array indexes. */
     TRGT_FIRST = 0,
 
-    /** Common Nimbus/Cumulus types */
+    /** Common Nimbus/Axone types */
     TRGT_PROC = TRGT_FIRST,
     TRGT_CAPP,
     TRGT_XBUS,
@@ -58,16 +54,15 @@ typedef enum
     TRGT_MCS,
     TRGT_MCA,
 
-    /* Cumulus only */
-    /* NOTE: Nimbus and Cumulus cannot be used at the same time. So we can have
-     *       These array indexes overlap to save space. */
-    TRGT_MC = TRGT_MCBIST,
+    /* Axone only */
+    TRGT_MC,
     TRGT_MI,
-    TRGT_DMI,
+    TRGT_MCC,
+    TRGT_OMIC,
+    TRGT_NPU,
 
-    /* Centaur only */
-    TRGT_MEMBUF,
-    TRGT_MBA,
+    /* Explorer only */
+    TRGT_OCMB,
 
     TRGT_MAX,
 
@@ -76,11 +71,11 @@ typedef enum
 /** Boundary/position ranges for each target type. */
 typedef enum
 {
-    /* Common Nimbus/Cumulus */
+    /* Common Nimbus/Axone */
     MAX_PROC_PER_NODE   =  8,
     MAX_CAPP_PER_PROC   =  2,
-    MAX_XBUS_PER_PROC   =  3, /* Nimbus 1 and 2, Cumulus 0, 1, and 2 */
-    MAX_OBUS_PER_PROC   =  4, /* Nimbus 0 and 3, Cumulus 0, 1, 2, and 3 */
+    MAX_XBUS_PER_PROC   =  3, /* Nimbus 1 and 2, Axone 0, 1, and 2 */
+    MAX_OBUS_PER_PROC   =  4, /* Nimbus 0 and 3, Axone 0, 1, 2, and 3 */
     MAX_PEC_PER_PROC    =  3,
     MAX_PHB_PER_PROC    =  6,
     MAX_EQ_PER_PROC     =  6,
@@ -92,16 +87,16 @@ typedef enum
     MAX_MCS_PER_PROC    =  4,
     MAX_MCA_PER_PROC    =  8,
 
-    /** Cumulus only */
+    /** Axone only */
     MAX_MC_PER_PROC     =  2,
     MAX_MI_PER_PROC     =  4,
-    MAX_DMI_PER_PROC    =  8,
+    MAX_MCC_PER_PROC    =  8,
+    MAX_OMIC_PER_PROC   =  6,
+    MAX_NPU_PER_PROC    =  3,
 
-    /** Centaur only */
-    MAX_MEMBUF_PER_PROC =  8,
-    MAX_MEMBUF_PER_NODE =  MAX_MEMBUF_PER_PROC * MAX_PROC_PER_NODE,
-    MAX_MBA_PER_MEMBUF  =  2,
-    MAX_MBA_PER_PROC    =  MAX_MEMBUF_PER_PROC * MAX_MBA_PER_MEMBUF,
+    /** Explorer only */
+    MAX_OCMB_PER_PROC   = 16 ,
+    MAX_OCMB_PER_NODE   = MAX_OCMB_PER_PROC * MAX_PROC_PER_NODE,
 
 } TrgtPos_t;
 
