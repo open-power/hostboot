@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -321,11 +321,13 @@ fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
                                const std::vector<dimm::kind>& i_kinds)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    bool l_nvdimm_in_port = false;
 
     // Note: NVDIMM + non-NVDIMM mixing is checked in check hybrid
     for(const auto& l_kind : i_kinds)
     {
         bool l_nvdimm_supported = true;
+        l_nvdimm_in_port |= l_kind.iv_hybrid_memory_type;
         FAPI_TRY(dimm_slot_is_nv_capable(l_kind.iv_target, l_nvdimm_supported));
 
         // We're always good if NVDIMM is supported OR we're not an NVDIMM, otherwise, throw an error
@@ -336,6 +338,22 @@ fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
                      .set_MCA_TARGET(i_target),
                      "%s is an NVDIMM plugged into a DIMM slot where NVDIMM are not supported",
                      mss::c_str(l_kind.iv_target) );
+    }
+
+    // Update ATTR_SBE_NVDIMM_IN_PORT if the port contains nvdimm for future use
+    if (l_nvdimm_in_port == fapi2::ENUM_ATTR_SBE_NVDIMM_IN_PORT_YES)
+    {
+        FAPI_DBG("NVDIMM found in port %s", mss::c_str(i_target));
+        fapi2::buffer<uint8_t> l_nvdimm_port_bitmap = 0;
+
+        // Get the mca position relative to the proc
+        const auto l_mca_pos = mss::pos<fapi2::TARGET_TYPE_MCA>(i_target);
+        const auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+        FAPI_TRY( mss::sbe_nvdimm_in_port(l_chip_target, l_nvdimm_port_bitmap) );
+
+        // Set the bitmap. 0...7
+        FAPI_TRY( l_nvdimm_port_bitmap.setBit(l_mca_pos) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_SBE_NVDIMM_IN_PORT, l_chip_target, l_nvdimm_port_bitmap) );
     }
 
 fapi_try_exit:

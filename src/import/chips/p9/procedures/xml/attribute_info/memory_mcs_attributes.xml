@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -3312,6 +3312,24 @@
       <initToZero/>
       <writeable/>
       <mssAccessorName>wr_vref_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SBE_NVDIMM_IN_PORT</id>
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <description>
+          A bitmap to indicate which ports under the processor have NVDIMM
+          plugged. This is needed to support SBE to trigger CSAVE during
+          controlled shutdown, warm reboot, and MPIPL.
+          For example, 0b11000000 indicates port 0 and 1 contain NVDIMMs.
+          creator: eff_confg
+          consumer: SBE
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum> NO = 0, YES = 1 </enum>
+        <mssAccessorName>sbe_nvdimm_in_port</mssAccessorName>
     </attribute>
 
 </attributes>

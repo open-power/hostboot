@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
+    PORTS_PER_MODULE = MC_PER_MODULE * MCS_PER_MC * PORTS_PER_MCS,
     BITS_PER_DP = 16,
     NIBBLES_PER_DP = BITS_PER_DP / BITS_PER_NIBBLE,
     BYTES_PER_DP = BITS_PER_DP /  BITS_PER_BYTE,
