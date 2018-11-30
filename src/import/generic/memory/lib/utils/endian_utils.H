@@ -58,7 +58,7 @@ void forceLE(const T& i_input, std::vector<uint8_t>& io_data)
 
     for(size_t i = 0; i < sizeof(i_input); i++)
     {
-        // Grab the lowe rorder byte and add it to the back of the vector
+        // Grab the lowest order byte and add it to the back of the vector
         const uint8_t l_byte = l_temp & 0xFF;
         io_data.push_back(l_byte);
 
@@ -80,6 +80,51 @@ inline void forceLEArray(const T* i_input, const uint64_t i_size, std::vector<ui
     for(size_t i = 0; i < i_size; i++)
     {
         forceLE(i_input[i], io_data);
+    }
+}
+
+///
+/// @brief Forces native data into BE order
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in,out] io_data vector to append data to
+///
+template < typename T >
+void forceBE(const T& i_input, std::vector<uint8_t>& io_data)
+{
+    // Temporary variable to process - we'll be doing bit shifts below
+    T l_temp = i_input;
+
+    std::vector<uint8_t> l_tempBuffer;
+
+    // This loop will put i_input into l_tempBuffer in BE order
+    for(size_t i = 0; i < sizeof(i_input); i++)
+    {
+        // Grab the lowest order byte and add it to the front of the vector
+        const uint8_t l_byte = l_temp & 0xFF;
+        l_tempBuffer.insert(l_tempBuffer.begin(), l_byte);
+
+        // Shift higher byte value into lowest no matter existing endianness
+        l_temp >>= BITS_PER_BYTE;
+    }
+
+    // Put the new BE formatted data at the end of the input buffer
+    io_data.insert(io_data.end(), l_tempBuffer.begin(), l_tempBuffer.end());
+}
+
+///
+/// @brief Forces native data into BE order for an array
+/// @tparam T the data type to process
+/// @param[in] i_input inputted data to process
+/// @param[in] i_size size of the array
+/// @param[in,out] io_data vector to append data to
+///
+template < typename T >
+inline void forceBEArray(const T* i_input, const uint64_t i_size, std::vector<uint8_t>& io_data)
+{
+    for(size_t i = 0; i < i_size; i++)
+    {
+        forceBE(i_input[i], io_data);
     }
 }
 
