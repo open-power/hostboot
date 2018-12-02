@@ -171,14 +171,10 @@ errlHndl_t platHandleHWCallout(
 }
 
 //******************************************************************************
-// platHandleBusCallout
+// platHandleAddBusCallout
 //******************************************************************************
-errlHndl_t platHandleBusCallout(
-        TARGETING::Target *i_pTarget1,
-        TARGETING::Target *i_pTarget2,
-        busTypeEnum i_busType,
-        callOutPriority i_priority,
-        errlHndl_t &io_errl)
+errlHndl_t platHandleAddBusCallout( HWAS::busCallout_t &io_busCallout,
+                                    errlHndl_t &io_errl)
 {
     // WARNING:
     // this hostboot code should not change io_errl, unless the caller of the
