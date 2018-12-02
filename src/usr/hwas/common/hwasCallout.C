@@ -177,23 +177,27 @@ void processCallout(errlHndl_t &io_errl,
         } // PROCEDURE_CALLOUT
         case (BUS_CALLOUT):
         {
-            TARGETING::Target *pTarget1 = NULL;
-            TARGETING::Target *pTarget2 = NULL;
+            HWAS::busCallout_t io_busCallout;
 
             uint8_t * l_targetData = (uint8_t *)(pCalloutUD + 1);
-            bool l_err1 = retrieveTarget(l_targetData, pTarget1, io_errl);
-            bool l_err2 = retrieveTarget(l_targetData, pTarget2, io_errl);
+            bool l_err1 = retrieveTarget(l_targetData,
+                                         io_busCallout.TargetPart1,
+                                         io_errl);
+            bool l_err2 = retrieveTarget(l_targetData,
+                                         io_busCallout.TargetPart2,
+                                         io_errl);
+
+            io_busCallout.busType = pCalloutUD->busType;
+            io_busCallout.priority = pCalloutUD->priority;
+            io_busCallout.flag = pCalloutUD->flag;
 
             if (!l_err1 && !l_err2)
             {
-                errlHndl_t errl = platHandleBusCallout(
-                                        pTarget1, pTarget2,
-                                        pCalloutUD->busType,
-                                        pCalloutUD->priority,
-                                        io_errl);
+                errlHndl_t errl = platHandleAddBusCallout(
+                                     io_busCallout, io_errl );
                 if (errl)
                 {
-                    HWAS_ERR("processCallout: error from platHandlBusCallout");
+                    HWAS_ERR("processCallout: error in platHandlAddBusCallout");
                     errlCommit(errl, HWAS_COMP_ID);
                 }
             }

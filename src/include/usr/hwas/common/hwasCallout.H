@@ -398,21 +398,21 @@ errlHndl_t platHandleHWCallout(
  * @brief platform specific code to handle a bus callout that has been
  *  found in an errlog
  *
- * @param[in]  i_pTarget1       target endpoint1
- * @param[in]  i_pTarget2       target endpoint2
- * @param[in]  i_busType        bus type Enum
- * @param[in]  i_priority       Enum indicating the priority of the callout
- * @param[in]  io_errl          reference to errlHnld for this errlog
+ * @param[in]  io_busCallout a structure of all the fields data needed for
+ *             bus callout
+ *             TargetPart1: target endpoint1
+ *             TargetPart2: target endpoint2
+ *             busType:     bus type Enum
+ *             priority:    Enum indicating the priority of the callout
+ *             flag:        Flag for CBLV link state of SMP cables only
  *
+ * @param[in] io_errl  reference to errlHnld for this errlog
  * @return errlHndl_t       valid errlHndl_t handle if there was an error,
  *                          NULL if no errors;
  */
-errlHndl_t platHandleBusCallout(
-        TARGETING::Target *i_pTarget1,
-        TARGETING::Target *i_pTarget2,
-        busTypeEnum i_busType,
-        callOutPriority i_priority,
-        errlHndl_t &io_errl);
+errlHndl_t platHandleAddBusCallout(busCallout_t &io_busCallout,
+                                   errlHndl_t &io_errl);
+
 
 /**
  * @brief platform specific code to handle a clock callout that has been
