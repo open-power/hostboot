@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -135,5 +135,18 @@
     <ffdc>CALIBRATION_RAW_DATA</ffdc>
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_LRDIMM_RECORDER_SIZE_SMALL</rc>
+    <description>
+      Set if the given recorder size is too small
+    </description>
+    <ffdc>BUFFER</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>
