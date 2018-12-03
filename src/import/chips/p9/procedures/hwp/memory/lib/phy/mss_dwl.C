@@ -39,7 +39,6 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/phy/mss_lrdimm_training.H>
-#include <lib/phy/mss_lrdimm_training_helper.H>
 #include <lib/phy/mss_dwl.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
@@ -61,7 +60,6 @@ namespace training
 
 namespace lrdimm
 {
-
 ///
 /// @brief Configures the given rank into WR LVL mode
 /// @param[in] i_target DIMM target on which to operate
@@ -178,7 +176,7 @@ fapi_try_exit:
 /// @brief Sets DWL Delay value
 /// @param[in] i_target the DIMM target
 /// @param[in] i_rank the rank to operate on - drives the function space select
-/// @param[in] delay value /64 Tck - MREP delay value
+/// @param[in] delay value /64 Tck - DWL delay value
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note Sets DA setting for buffer control word (F[3:0]BC2x, F[3:0]BC3x)
 ///
@@ -228,101 +226,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Processes the results for a given DWL run
-/// @param[in] i_target the target on which the code is operating
-/// @param[in] i_rank rank for test
-/// @param[in] i_buffer the buffer associated with the data
-/// @param[in] i_nibble the nibble associated with the data
-/// @param[in] i_result the results for the current nibble
-/// @param[in] i_delay the current delay
-/// @param[in,out] io_recorder the recorder on which to process the data
-/// @return FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode dwl::process_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                        const uint64_t i_rank,
-                                        const uint8_t i_buffer,
-                                        const uint8_t i_nibble,
-                                        const uint8_t i_result,
-                                        const uint8_t i_delay,
-                                        recorder& io_recorder) const
-{
-    // If we have a 0 value, then set seen 0
-    if(i_result == 0x00)
-    {
-        io_recorder.iv_seen0 = true;
-    }
-
-    // If we have a F value, then start processing looking for a 0->1 transition
-    else if(i_result == 0x0f)
-    {
-        io_recorder.iv_seen1 = true;
-
-        // If we have seen a 0 and have not recorded a transition
-        // Then note this as our 0->1 transition
-        if(io_recorder.iv_seen0 && io_recorder.iv_delay == 0)
-        {
-            io_recorder.iv_delay = i_delay;
-            FAPI_DBG("DWL %s rank%u buffer%u nibble%u has seen a 0->1 transition at 0x%02x",
-                     mss::c_str(i_target), i_rank, i_buffer, i_nibble, i_delay);
-        }
-    }
-
-    // Otherwise, note that this data is invalid.
-    // Note it via via debug and set our "non-zero and non-one data" flag
-    else
-    {
-        io_recorder.iv_invalid_data_count++;
-        FAPI_DBG("DWL %s rank%u buffer%u nibble%u has seen invalid data at delay 0x%02x data:0x%02x - count %u",
-                 mss::c_str(i_target), i_rank, i_buffer, i_nibble, i_delay, i_result, io_recorder.iv_invalid_data_count);
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
-/// @brief Processes the results for a given DWL run
-/// @param[in] i_target the MCA target on which to operate
-/// @param[in] i_rank rank for test
-/// @param[in] i_delay the current delay
-/// @param[in,out] io_recorders the recorders on which to process the data
-/// @return FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode dwl::process_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                        const uint64_t i_rank,
-                                        const uint8_t i_delay,
-                                        std::vector<std::pair<recorder, recorder>>& io_recorders) const
-{
-    data_response l_data;
-    uint8_t l_buffer = 0;
-
-    FAPI_TRY(l_data.read(i_target), "%s failed to read MREP data response delay:0x%02x", mss::c_str(i_target), i_delay);
-
-    // Note: we want to update the value of the results recorder, so no const
-    for(auto& l_recorder : io_recorders)
-    {
-        // All beats should be the same, until proven otherwise, just use beat 0
-        constexpr uint64_t DEFAULT_BEAT = 0;
-        const fapi2::buffer<uint8_t> l_buffer_result(l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT]);
-
-        FAPI_DBG("DWL %s rank%u delay:0x%02x buffer:%u saw data of 0x%02x",
-                 mss::c_str(i_target), i_rank, i_delay, l_buffer, l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT]);
-
-        uint8_t l_nibble_result = 0;
-        l_buffer_result.extractToRight<0, BITS_PER_NIBBLE>(l_nibble_result);
-        FAPI_TRY(process_results(i_target, i_rank, l_buffer, 0, l_nibble_result, i_delay, l_recorder.first));
-
-        l_buffer_result.extractToRight<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(l_nibble_result);
-        FAPI_TRY(process_results(i_target, i_rank, l_buffer, 1, l_nibble_result, i_delay, l_recorder.second));
-
-        ++l_buffer;
-    }
-
-fapi_try_exit:
-    // If we are here then we FAPI_ASSERT'ed out
-    return fapi2::current_err;
-}
-
-///
 /// @brief Creates the nibble flags for the invalid data callout
 /// @param[in] i_target the DIMM target on which to operate
 /// @param[in] i_rank the current rank
@@ -333,7 +236,7 @@ fapi_try_exit:
 ///
 uint32_t dwl::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const uint8_t i_rank,
-                                 const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                 const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
                                  uint64_t& o_invalid_count) const
 {
     o_invalid_count = 0;
@@ -357,8 +260,8 @@ uint32_t dwl::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 
         // Updates the bitmap
         o_invalid_count += l_recorder.first.iv_invalid_data_count + l_recorder.second.iv_invalid_data_count;
-        append_nibble_flags(l_recorder.first.iv_invalid_data_count != recorder::CLEAN,
-                            l_recorder.second.iv_invalid_data_count != recorder::CLEAN,
+        append_nibble_flags(l_recorder.first.iv_invalid_data_count != mrep_dwl_recorder::CLEAN,
+                            l_recorder.second.iv_invalid_data_count != mrep_dwl_recorder::CLEAN,
                             l_per_nibble_flags);
 
         l_buffer++;
@@ -377,7 +280,7 @@ uint32_t dwl::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 ///
 fapi2::ReturnCode dwl::callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
 {
     // Per nibble invalid data - bitmap
     // A bitmap is used to simplify the error callouts
@@ -409,7 +312,7 @@ fapi_try_exit:
 ///
 uint32_t dwl::flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const uint8_t i_rank,
-                                  const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+                                  const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
 {
     uint8_t l_buffer = 0;
 
@@ -450,7 +353,7 @@ uint32_t dwl::flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 ///
 fapi2::ReturnCode dwl::callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
 {
     // Per nibble weird data and no transition flags - bitmap
     // A bitmap is used to simplify the error callouts
@@ -475,9 +378,9 @@ fapi_try_exit:
 /// @param[in] i_recorders the recorders on which to process the data
 /// @return FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode dwl::analyze_results( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                        const uint8_t i_rank,
-                                        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+fapi2::ReturnCode dwl::check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_rank,
+                                     const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
 {
     FAPI_TRY(callout_no_transition(i_target, i_rank, i_recorders));
     FAPI_TRY(callout_invalid_data(i_target, i_rank, i_recorders));
@@ -490,14 +393,14 @@ fapi_try_exit:
 /// @brief Write the results to buffer generate PBA commands
 /// @param[in] i_target the DIMM target
 /// @param[in] i_rank the rank number
-/// @param[in] i_recorders a vector of the MREP result
+/// @param[in] i_recorders a vector of the DWL result
 /// @param[out] o_container the PBA commands structure
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note a little helper to allow us to unit test that we generate the PBA commands ok
 ///
 fapi2::ReturnCode dwl::write_result_to_buffers_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders,
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
         mss::ddr4::pba::commands& o_container) const
 {
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
@@ -563,7 +466,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode dwl::write_result_to_buffers( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const
 {
     mss::ddr4::pba::commands l_container;
 
@@ -575,7 +478,7 @@ fapi2::ReturnCode dwl::write_result_to_buffers( const fapi2::Target<fapi2::TARGE
              "%s rank%u failed generating PBA commands",
              mss::c_str(i_target), i_rank);
 
-    // Issue the PBA to set the final MREP results
+    // Issue the PBA to set the final DWL results
     FAPI_TRY(mss::ddr4::pba::execute_commands(l_container));
 
 fapi_try_exit:
@@ -599,7 +502,7 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
     const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
 
     FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
-             "Failed get_ranks_in_pair in mrep::run %s",
+             "Failed get_ranks_in_pair in dwl::run %s",
              mss::c_str(i_target));
 
     // Loops over all ranks within this rank pair
@@ -617,7 +520,9 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
 
         // Vector represents the number of LRDIMM buffers
         // The pair represents the two nibbles that we need to calibrate within the buffer
-        std::vector<std::pair<recorder, recorder>> l_results_recorder(MAX_LRDIMM_BUFFERS);
+        std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>> l_results_recorder(MAX_LRDIMM_BUFFERS);
+        //Loop through all of our delays multiple times to reduce noise issues
+        std::vector<mrep_dwl_result> l_loop_results(MREP_DWL_LOOP_TIMES);
 
         // 1) Puts the DRAM into WR LVL mode
         FAPI_TRY(dram_wr_lvl(l_dimm, l_rank, mss::states::ON), "%s failed set_buffer_training",
@@ -629,19 +534,23 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
         // 3) Puts the buffer into WR LVL mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::DWL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // Loop through all of our delays
-        for(uint8_t l_delay = 0; l_delay < MAX_DELAY; ++l_delay)
+        for(auto& l_loop_result : l_loop_results)
         {
-            // 4) Set the DWL l_delay -> host issues BCW's
-            FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
+            // Loop through all of our delays
+            for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
+            {
+                // 4) Set the DWL l_delay -> host issues BCW's
+                FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
-            // 5) Do an NTTM mode read -> forces the logic to read out the data
-            FAPI_TRY(execute_nttm_mode_read(i_target));
+                // 5) Do an NTTM mode read -> forces the logic to read out the data
+                FAPI_TRY(execute_nttm_mode_read(i_target));
 
-            // 6) Processes the results for this delay and updates the recorder
-            FAPI_TRY(process_results(i_target, l_rank, l_delay, l_results_recorder), "%s failed process_results rank%u delay%u",
-                     mss::c_str(l_dimm), l_rank, l_delay);
-        } //l_delay loop
+                // 6) Get the results for this delay and updates result and the recorder
+                FAPI_TRY(get_result(l_dimm, mss::cal_steps::DWL, l_delay, l_loop_result, l_results_recorder),
+                         "%s failed get_result rank%u delay%u",
+                         mss::c_str(l_dimm), l_rank, l_delay);
+            } //l_delay loop
+        }
 
         // 7) Takes the buffer out of WR LVL mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
@@ -650,11 +559,16 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
         FAPI_TRY(dram_wr_lvl(l_dimm, l_rank, mss::states::OFF), "%s failed set_buffer_training",
                  mss::c_str(l_dimm));
 
-        // 9) Analyzes the final results and does some error checking
-        FAPI_TRY(analyze_results(l_dimm, l_rank, l_results_recorder), "%s failed error_check rank:%u", mss::c_str(l_dimm),
+        // 9) Analyze loop results
+        FAPI_TRY( analyze_result(l_dimm, mss::cal_steps::DWL, l_loop_results, l_results_recorder),
+                  "%s failed analyze_dwl_result rank%u",
+                  mss::c_str(l_dimm), l_rank);
+
+        // 10) Checks for errors
+        FAPI_TRY(check_errors(l_dimm, l_rank, l_results_recorder), "%s failed error_check rank:%u", mss::c_str(l_dimm),
                  l_rank);
 
-        // 10) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
+        // 11) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
         FAPI_TRY( write_result_to_buffers(l_dimm, l_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
                   mss::c_str(l_dimm), l_rank);
     }//l_rank loop

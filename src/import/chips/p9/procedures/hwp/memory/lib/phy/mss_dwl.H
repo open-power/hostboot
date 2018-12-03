@@ -39,6 +39,11 @@
 #define MSS_DWL_H
 
 #include <lib/phy/mss_lrdimm_training.H>
+#include <lib/shared/mss_const.H>
+
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_lrdimm_training_helper.H>
+#endif
 
 namespace mss
 {
@@ -59,44 +64,10 @@ class dwl : public step
             step("DWL")
         {}
 
-        static constexpr uint64_t MAX_DELAY = 64;
-
         ///
         /// @brief Default virtual destructor
         ///
-        ~dwl() = default;
-
-        ///
-        /// @brief Records the results for a given nibble
-        ///
-        struct recorder
-        {
-            static constexpr uint64_t CLEAN = 0;
-            ///
-            /// @brief Default constructor
-            ///
-            recorder() :
-                iv_seen0(false),
-                iv_seen1(false),
-                iv_delay(0),
-                iv_invalid_data_count(CLEAN)
-            {}
-
-            ///
-            /// @brief constructor
-            ///
-            recorder(const bool i_seen0, const bool i_seen1, const uint8_t i_delay, const uint64_t i_invalid_count = CLEAN) :
-                iv_seen0(i_seen0),
-                iv_seen1(i_seen1),
-                iv_delay(i_delay),
-                iv_invalid_data_count(i_invalid_count)
-            {}
-
-            bool iv_seen0;
-            bool iv_seen1;
-            uint8_t iv_delay;
-            uint64_t iv_invalid_data_count;
-        };
+        virtual ~dwl() = default;
 
         ///
         /// @brief Sets the rank to calibrate for WR LVL in the buffer
@@ -163,37 +134,6 @@ class dwl : public step
                                     const uint8_t i_rank,
                                     const uint8_t i_delay ) const;
 
-        ///
-        /// @brief Processes the results for a given DWL run
-        /// @param[in] i_target the MCA target on which to operate
-        /// @param[in] i_rank rank for test
-        /// @param[in] i_delay the current delay
-        /// @param[in,out] io_recorders the recorders on which to process the data
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode process_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                           const uint64_t i_rank,
-                                           const uint8_t i_delay,
-                                           std::vector<std::pair<recorder, recorder>>& io_recorders) const;
-
-        ///
-        /// @brief Processes the results for a given DWL run
-        /// @param[in] i_target the target on which the code is operating
-        /// @param[in] i_rank rank for test
-        /// @param[in] i_buffer the buffer associated with the data
-        /// @param[in] i_nibble the nibble associated with the data
-        /// @param[in] i_result the results for the current nibble
-        /// @param[in] i_delay the current delay
-        /// @param[in,out] io_recorder the recorder on which to process the data
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode process_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                           const uint64_t i_rank,
-                                           const uint8_t i_buffer,
-                                           const uint8_t i_nibble,
-                                           const uint8_t i_result,
-                                           const uint8_t i_delay,
-                                           recorder& io_recorder) const;
 
         ///
         /// @brief Callsout if a rank does not see a 0->1 transition
@@ -202,9 +142,9 @@ class dwl : public step
         /// @param[in] i_recorders the recorders on which to process the data
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode analyze_results( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                           const uint8_t i_rank,
-                                           const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+        fapi2::ReturnCode check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_rank,
+                                        const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
         ///
         /// @brief Creates the nibble flags for the invalid data callout
@@ -217,7 +157,7 @@ class dwl : public step
         ///
         uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_rank,
-                                    const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                    const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
                                     uint64_t& o_invalid_count) const;
 
         ///
@@ -230,7 +170,7 @@ class dwl : public step
         ///
         fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                 const uint8_t i_rank,
-                                                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                                                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
         ///
         /// @brief Creates the nibble flags for the no transition callout
@@ -241,7 +181,7 @@ class dwl : public step
         ///
         uint32_t flag_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                      const uint8_t i_rank,
-                                     const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                                     const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
         ///
         /// @brief Calls out if a rank does not see a 0->1 transition
@@ -252,7 +192,7 @@ class dwl : public step
         ///
         fapi2::ReturnCode callout_no_transition( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
         ///
         /// @brief Write the results to buffer generate PBA commands
@@ -265,7 +205,7 @@ class dwl : public step
         ///
         fapi2::ReturnCode write_result_to_buffers_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders,
                 mss::ddr4::pba::commands& o_container) const;
 
         ///
@@ -277,7 +217,7 @@ class dwl : public step
         ///
         fapi2::ReturnCode write_result_to_buffers( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                const std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& i_recorders) const;
 
 
         ///

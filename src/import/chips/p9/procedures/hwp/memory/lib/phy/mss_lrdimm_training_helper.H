@@ -62,7 +62,7 @@ namespace lrdimm
 
 static constexpr uint8_t MREP_DWL_MAX_DELAY = 64;
 static constexpr uint8_t MREP_DWL_LOOP_TIMES = 0x05;
-static constexpr uint8_t MREP_DWL_THRESHOLD = 0x3;
+static constexpr uint8_t MREP_DWL_THRESHOLD = 0x5;
 ///
 /// @brief Records the results for a given nibble
 ///
@@ -463,15 +463,36 @@ enum training_level : uint64_t
 ///
 /// @brief Get the results for loop
 /// @param[in] i_target the DIMM target
+/// @param[in] i_buffer the buffer to operate on
+/// @param[in] i_nibble the nibble to operate on
+/// @param[in] i_delay the delay value
+/// @param[in] i_result_nibble the nibble result value to analyze
+/// @param[in,out] io_invalid_data_count the invalid data count
+/// @param[out] o_result_nibble_bool the bool result value
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode get_result_nibble_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_buffer,
+        const uint8_t i_nibble,
+        const uint8_t i_delay,
+        const uint8_t i_result_nibble,
+        uint64_t& io_invalid_data_count,
+        bool& o_result_nibble_bool);
+
+///
+/// @brief Get the results for loop
+/// @param[in] i_target the DIMM target
 /// @param[in] i_calibration the current calibration step - used for error logging
 /// @param[in] i_delay the delay value
 /// @param[in,out] io_loop_result the result for all delay
+/// @param[in,out] io_results_recorder a vector of the DWL final results
 /// @return FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const uint64_t i_calibration,
                               const uint8_t i_delay,
-                              mrep_dwl_result& io_loop_result ) ;
+                              mrep_dwl_result& io_loop_result,
+                              std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& io_results_recorder);
 
 ///
 /// @brief analyze with each nibble

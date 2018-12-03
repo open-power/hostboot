@@ -37,9 +37,11 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-
-#include <lib/phy/mss_lrdimm_training_helper.H>
 #include <lib/phy/mss_lrdimm_training.H>
+
+#ifdef LRDIMM_CAPABLE
+    #include <lib/phy/mss_lrdimm_training_helper.H>
+#endif
 
 namespace mss
 {
@@ -195,15 +197,56 @@ fapi_try_exit:
 ///
 /// @brief Get the results for loop
 /// @param[in] i_target the DIMM target
+/// @param[in] i_buffer the buffer to operate on
+/// @param[in] i_nibble the nibble to operate on
+/// @param[in] i_delay the delay value
+/// @param[in] i_result_nibble the nibble result value to analyze
+/// @param[in,out] io_invalid_data_count the invalid data count
+/// @param[out] o_result_nibble_bool the bool result value
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode get_result_nibble_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_buffer,
+        const uint8_t i_nibble,
+        const uint8_t i_delay,
+        const uint8_t i_result_nibble,
+        uint64_t& io_invalid_data_count,
+        bool& o_result_nibble_bool)
+{
+    switch(i_result_nibble)
+    {
+        case 0:
+            o_result_nibble_bool = false;
+            break;
+
+        case 0xF0:
+            o_result_nibble_bool = true;
+            break;
+
+        default:
+            io_invalid_data_count++;
+            o_result_nibble_bool = false;
+            FAPI_DBG("%s buffer%u nibble%u has seen invalid data at delay 0x%02x data:0x%02x --count%u",
+                     mss::c_str(i_target), i_buffer, i_nibble, i_delay, i_result_nibble, io_invalid_data_count);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Get the results for loop
+/// @param[in] i_target the DIMM target
 /// @param[in] i_calibration the current calibration step - used for error logging
 /// @param[in] i_delay the delay value
 /// @param[in,out] io_loop_result the result for all delay
+/// @param[in,out] io_results_recorder a vector of the DWL final results
 /// @return FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const uint64_t i_calibration,
                               const uint8_t i_delay,
-                              mrep_dwl_result& io_loop_result )
+                              mrep_dwl_result& io_loop_result,
+                              std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& io_results_recorder)
 {
     data_response l_data;
     // Get's the MCA
@@ -218,21 +261,35 @@ fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     {
         // All beats should be the same, until proven otherwise, just use beat 0
         constexpr uint64_t DEFAULT_BEAT = 0;
+        constexpr uint8_t NIBBLE0 = 0;
+        constexpr uint8_t NIBBLE1 = 1;
         const uint8_t l_buffer_result = l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT];
         const auto l_result_nibble0 = l_buffer_result & MASK_NIBBLE0;
         const auto l_result_nibble1 = (l_buffer_result & MASK_NIBBLE1) << BITS_PER_NIBBLE;
-        const bool l_result_nibble0_bool = (l_result_nibble0 == 0xF0) ? true : false;
-        const bool l_result_nibble1_bool = (l_result_nibble1 == 0xF0) ? true : false;
+        bool l_result_nibble0_bool = false;
+        bool l_result_nibble1_bool = false;
 
+        FAPI_ASSERT(io_results_recorder.size() >= MAX_LRDIMM_BUFFERS,
+                    fapi2::MSS_LRDIMM_RECORDER_SIZE_SMALL()
+                    .set_TARGET(i_target)
+                    .set_BUFFER(l_buffer),
+                    "%s io_results_recorder size: %d smaller than MAX_LRDIMM_BUFFERS",
+                    mss::c_str(i_target), io_results_recorder.size());
+
+        auto l_it_recorder = io_results_recorder.begin() + l_buffer;
 
         FAPI_DBG( "%s delay:0x%02x result buffer:%u data:0x%02x N0:0x%02x N1:0x%02x, N0_result:%u, N1_result:%u",
                   mss::c_str(i_target), i_delay,
                   l_buffer, l_buffer_result,
                   l_result_nibble0, l_result_nibble1, l_result_nibble0_bool, l_result_nibble1_bool);
 
+        FAPI_TRY(get_result_nibble_helper(i_target, l_buffer, NIBBLE0, i_delay, l_result_nibble0,
+                                          l_it_recorder->first.iv_invalid_data_count, l_result_nibble0_bool));
+        FAPI_TRY(get_result_nibble_helper(i_target, l_buffer, NIBBLE1, i_delay, l_result_nibble1,
+                                          l_it_recorder->second.iv_invalid_data_count, l_result_nibble1_bool));
+
         FAPI_TRY(io_loop_result.add_results(i_target, i_calibration, l_buffer, i_delay, l_result_nibble0_bool,
                                             l_result_nibble1_bool));
-
     }
 
 fapi_try_exit:
