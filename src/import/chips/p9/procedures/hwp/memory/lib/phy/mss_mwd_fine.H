@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -76,6 +77,7 @@ class mwd_fine : public step
         {
             uint8_t iv_nibble_delay;
             int8_t iv_offset[BITS_PER_NIBBLE];
+            uint8_t iv_no_pass_region_dq_map;
         };
 
         ///

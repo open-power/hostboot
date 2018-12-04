@@ -375,6 +375,7 @@ class fine_recorder
         /// @param[in] i_calibration the current calibration step - used for error logging
         /// @param[out] o_delay mid point of eye
         /// @param[out] o_eye_size eye size
+        /// @param[out] o_no_pass_region if no pass region, true or false
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         template<fapi2::TargetType T>
@@ -382,10 +383,12 @@ class fine_recorder
                 const uint64_t i_calibration,
                 const uint64_t i_bit,
                 uint16_t& o_delay,
-                uint16_t& o_eye_size) const
+                uint16_t& o_eye_size,
+                bool& o_no_pass_region) const
         {
             o_delay = 0;
             o_eye_size = 0;
+            o_no_pass_region = false;
             std::vector<std::pair<uint16_t, uint16_t>> l_delay_eyes;
             uint32_t l_data = 0;
             FAPI_TRY(find_eyes(i_target,
@@ -400,6 +403,16 @@ class fine_recorder
             // The individual calibration steps will check and verify that we:
             // 1) saw at least one passing region
             // 2) saw a failing region
+
+            if(l_delay_eyes.size() == 0)
+            {
+                o_no_pass_region = true;
+            }
+
+            if(o_eye_size == MAX_FINE_DELAY)
+            {
+                o_no_pass_region = true;
+            }
 
             FAPI_DBG("bit%u found %u eyes. best case eye size%u with setpoint delay of %u from data 0x%08x",
                      i_bit, l_delay_eyes.size(), o_eye_size, o_delay, l_data);
@@ -447,6 +460,42 @@ inline void append_nibble_flags(const bool i_nibble0, const bool i_nibble1, uint
     io_bitmap |= i_nibble0 ? 1 : 0;
     io_bitmap <<= 1;
     io_bitmap |= i_nibble1 ? 1 : 0;
+}
+
+///
+/// @brief Appends a dq's error callouts per-dq onto the nibble bitmap
+/// @param[in] i_dq flag for one dq - true is fail
+/// @param[in,out] io_bitmap bitmap to update
+/// @note Bit flags are used for the nibbles to simplify the error callouts
+/// We can callout one bitmap
+///
+inline void append_dq_flags(const bool i_dq, uint8_t& io_bitmap)
+{
+
+    // Update the bitmap
+    // bit logic shifts the bit to the left then OR's in the given dq
+    // This forces dq 0 to be the leftmost bit in the flag(bit 3), while dq 3 is the right most bit in the flag
+
+    io_bitmap <<= 1;
+    io_bitmap |= i_dq ? 1 : 0;
+}
+
+//
+/// @brief Appends a nibble's error callouts per-nibble (4 dq) onto the all dq bitmap
+/// @param[in] i_nibble0 flag for nibble 0 - low 4 bit valid ,true is fail
+/// @param[in] i_nibble1 flag for nibble 1 - low 4 bit valid ,true is fail
+/// @param[in,out] io_bitmap bitmap to update
+/// @note Bit flags are used for the dq to simplify the error callouts
+/// We can callout one bitmap
+///
+inline void append_four_dq_flags(const uint8_t i_nibble0, const uint8_t i_nibble1, uint64_t& io_bitmap)
+{
+    constexpr uint8_t MAX_DQ_PER_BUFFER = 8;
+    // Update the bitmap
+    // bit logic shifts the 8 bits for one buffer to the left then OR's in the given nibble
+    // This forces 8 dq of buffer 0 to be the leftmost bit in the flag, while 8 dq of buffer 7 is the right most bit in the flag
+    io_bitmap <<= MAX_DQ_PER_BUFFER;
+    io_bitmap |= (i_nibble1 & 0x0F) | ((i_nibble0 & 0x0F) << BITS_PER_NIBBLE);
 }
 
 ///
@@ -680,6 +729,46 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Calls out if a rank does not see a 0->1 transition
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_per_dq_flags_msb flags for which dqs are failing
+/// @param[in] i_per_dq_flags_lsb flags for which dqs are failing
+/// @param[in] i_calibration_step calibration step number
+/// @param[in] i_name string of the calibration steps name
+/// @return FAPI2_RC_SUCCESS if okay
+///
+inline fapi2::ReturnCode no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const uint64_t i_per_dq_flags_msb,
+        const uint64_t i_per_dq_flags_lsb,
+        const uint64_t i_calibration_step,
+        const char* i_name)
+{
+    // Per nibble invalid data - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    FAPI_ASSERT((i_per_dq_flags_msb | i_per_dq_flags_lsb) == CLEAN_BITMAP,
+                fapi2::MSS_LRDIMM_NO_PASS_REGION()
+                .set_TARGET(i_target)
+                .set_RANK(i_rank)
+                .set_CALIBRATION_STEP(i_calibration_step)
+                .set_DQ_FLAGS_MSB(i_per_dq_flags_msb)
+                .set_DQ_FLAGS_LSB(i_per_dq_flags_lsb),
+                "%s rank%u has found no pass region on dqs msb:0x%16lx lsb:0x%16lx in %s",
+                mss::c_str(i_target), i_rank, i_per_dq_flags_msb, i_per_dq_flags_lsb, i_name);
+
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    // Log the error as recovered
+    // We "recover" by setting a default value and continuing with calibration
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
+}
 } // ns callout
 
 namespace workarounds

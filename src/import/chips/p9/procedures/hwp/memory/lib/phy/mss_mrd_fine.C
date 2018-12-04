@@ -105,141 +105,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief find eye size and delay value for one dq
-/// @param[in] i_bit dq number
-/// @param[out] o_delay mid point of eye
-/// @param[out] o_eye_size eye size
-/// @return FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode mrd_fine::recorder::find_eye_size_and_delay(const uint64_t i_bit,
-        uint16_t& o_delay,
-        uint16_t& o_eye_size) const
-{
-    // Ensure that the bit is within the range (programming error otherwise)
-    // TODO:RTC200369 Update MRD_FINE for RAS
-    if(i_bit >= MAX_DQ_BITS)
-    {
-        FAPI_ERR("bit%u is out of range of the maximum number of bits %u", i_bit, MAX_DQ_BITS);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
-
-    {
-        // Gets our current bit
-        const auto l_it = l_results.begin() + i_bit;
-        std::vector<std::pair<uint16_t, uint16_t>> l_delay_eyes;
-        uint16_t l_left_edge = 0;
-        uint16_t l_right_edge = 0;
-
-        // If we have a case where we had a compare on our 0'th delay, we want to mark that as our left edge of the eye
-        // So, seen0 needs to be initialized to the result from the test of our 0'th delay
-        bool l_seen0 = l_it->getBit(0);
-        bool l_seen1 = false;
-        bool l_found_left_edge = false;
-        bool l_found_right_edge = false;
-
-        // Loops through all of the delays and assembles a vector of the eyes
-        // The vector contains a pair and has the left and right edge noted
-        for(uint16_t l_delay = 0; l_delay < MRD_MAX_DELAY; l_delay++)
-        {
-            // We've found that we're at a 0 (miscompare)
-            if(l_it->getBit(l_delay) == false)
-            {
-                l_seen0 = true;
-
-                // We're at a 0 now, and if we've found a 1 prior (1->0) transition
-                // And have not found a right edge, so note that we've found a right edge and set the delay
-                if((l_seen1 == true) && (l_found_right_edge == false))
-                {
-                    // Right edge is our current delay - 1
-                    // This is the last time we saw a compare on the eye
-                    l_right_edge = l_delay - 1;
-                    l_found_right_edge = true;
-
-                }
-
-                l_seen1 = false;
-            }
-
-            // We've found that we're at a 1 (compare)
-            if(l_it->getBit(l_delay) == true)
-            {
-                l_seen1 = true;
-
-                // We're at a 1, have found a 0 prior (so 0->1 transition)
-                // and not have a left edge, so note that we've found a left edge and set the delay
-                if(l_seen0 == true && l_found_left_edge == false)
-                {
-                    l_left_edge = l_delay;
-                    l_found_left_edge = true;
-                }
-
-                l_seen0 = false;
-            }
-
-            // If we've found a left and a right edge, then we've found an eye, so note it as such
-            // We should always find our right edge after our first edge, set seen0 to true
-            if(l_found_left_edge && l_found_right_edge)
-            {
-                l_delay_eyes.push_back({l_left_edge, l_right_edge});
-                l_found_left_edge = l_found_right_edge = false;
-                l_seen0 = true;
-                l_seen1 = false;
-            }
-        }
-
-        // If we have a case where we pass at the maximum delay, then add in an eye there
-        if(l_found_left_edge && !l_found_right_edge)
-        {
-            l_delay_eyes.push_back({l_left_edge, MRD_MAX_DELAY - 1});
-        }
-
-
-        // Loops through and finds the best case eye
-        uint16_t l_eye_size = 0;
-        uint16_t l_mid_delay = 0;
-
-        for(const auto& l_delay_eye : l_delay_eyes)
-        {
-            // Our eye size is our right minus our left edge
-            const auto l_cur_eye_size = l_delay_eye.second - l_delay_eye.first;
-
-            if(l_eye_size < l_cur_eye_size)
-            {
-                l_eye_size = l_cur_eye_size;
-
-                // Our setpoint for the eye is the average of our left and right edges
-                l_mid_delay = (l_delay_eye.second + l_delay_eye.first) / 2;
-            }
-        }
-
-        // Checks error cases here
-        // TODO:RTC200369 Update MRD_FINE for RAS
-
-        // First error case, we never found a passing region, so our eye size is 0
-        if(l_eye_size == 0)
-        {
-            FAPI_ERR("bit%u never found a passing region! results 0x%08x", i_bit, *l_it);
-        }
-
-
-        // Second error case: no failing region
-        if(l_eye_size == MRD_MAX_DELAY)
-        {
-            FAPI_ERR("bit%u never found a failing region! results 0x%08x", i_bit, *l_it);
-        }
-
-        FAPI_DBG("bit%u found %u eyes. best case eye size%u with setpoint delay of %u from data 0x%08x",
-                 i_bit, l_delay_eyes.size(), l_eye_size, l_mid_delay, *l_it);
-
-        o_delay = l_mid_delay;
-        o_eye_size = l_eye_size;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-}
-
-///
 /// @brief convert loop value to register definition for nibble
 /// @param[in] i_delay the value to convert
 /// @return the value after convert
@@ -318,7 +183,7 @@ fapi_try_exit:
 fapi2::ReturnCode mrd_fine::analyze_mrd_result_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint8_t i_delay,
         const data_response i_data,
-        recorder& io_recorders) const
+        lrdimm::fine_recorder& io_recorders) const
 {
     // Now, looop through all of the DQ and analyze the results on a per DQ basis
     for(uint8_t l_dq = 0; l_dq < MAX_DQ_BITS; l_dq++)
@@ -342,7 +207,7 @@ fapi2::ReturnCode mrd_fine::analyze_mrd_result_helper( const fapi2::Target<fapi2
         FAPI_DBG("%s delay:0x%02x MRD_FINE result buffer %u result 0x%02x, dq %u result %u ",
                  mss::c_str(i_target), i_delay, l_dq / MAX_DQ_PER_BUFFER, uint8_t(l_buffer_result), l_dq, l_dq_result);
 
-        FAPI_TRY(io_recorders.add_results(l_dq, i_delay, l_dq_result));
+        FAPI_TRY(io_recorders.add_results(i_target, l_dq, i_delay, l_dq_result));
 
     }
 
@@ -359,7 +224,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrd_fine::analyze_mrd_result( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint8_t i_delay,
-        recorder& io_recorders) const
+        lrdimm::fine_recorder& io_recorders) const
 {
     // Reads out the data results from the MRD_FINE
     data_response l_data;
@@ -383,18 +248,23 @@ fapi_try_exit:
 
 ///
 /// @brief find best delay for one nibble
-/// @param[in] i_recorder mrd_fine training recorder for each delay
+/// @param[in] i_target the target which we are operating on
+/// @param[in] i_rank the rank which we are operating on
+/// @param[in] i_recorder training fine_recorder for each delay
 /// @param[in] i_buffer the buffer number
 /// @param[in] i_nibble the nibble number
 /// @param[in,out] io_eye_sizes_dq a vector of eye size for all dq
 /// @param[out] o_final_nibble_delays_buffer  the best delay value of one nibble and all dq
 /// @return FAPI2_RC_SUCCESS if and only if ok
 //
-fapi2::ReturnCode mrd_fine::find_best_delay_for_nibble( const recorder& i_recorder,
-        const uint64_t i_buffer,
-        const uint64_t i_nibble,
-        std::vector<uint16_t>& io_eye_sizes_dq,
-        final_nibble_delay& o_final_nibble_delays_buffer)const
+fapi2::ReturnCode mrd_fine::find_best_delay_for_nibble(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_rank,
+    const lrdimm::fine_recorder& i_recorder,
+    const uint64_t i_buffer,
+    const uint64_t i_nibble,
+    std::vector<uint16_t>& io_eye_sizes_dq,
+    final_nibble_delay& o_final_nibble_delays_buffer)const
 {
     constexpr int8_t MIN_DQ_OFFSET = -3;
     constexpr int8_t MAX_DQ_OFFSET =  3;
@@ -406,12 +276,14 @@ fapi2::ReturnCode mrd_fine::find_best_delay_for_nibble( const recorder& i_record
     uint16_t l_best_delays[BITS_PER_NIBBLE] = {};
     uint64_t l_index = 0;
     uint16_t l_nibble_average = 0;
+    bool l_flag_no_pass_region = false;
 
     // Loops through all of the DQ in this nibble
     for(uint64_t l_dq = l_dq_start; l_dq < l_dq_end; ++l_dq)
     {
-        FAPI_TRY(i_recorder.find_eye_size_and_delay(l_dq, l_best_delays[l_index], io_eye_sizes_dq[l_dq]));
-
+        FAPI_TRY(i_recorder.find_eye_size_and_delay(i_target, MRD_FINE, l_dq, l_best_delays[l_index], io_eye_sizes_dq[l_dq],
+                 l_flag_no_pass_region));
+        append_dq_flags(l_flag_no_pass_region, o_final_nibble_delays_buffer.iv_no_pass_region_dq_map);
         l_nibble_average += l_best_delays[l_index];
         l_index++;
     }
@@ -440,14 +312,19 @@ fapi_try_exit:
 
 ///
 /// @brief find best delay for each DQ
-/// @param[in] i_recorder mrd_fine training recorder for each delay
+/// @param[in] i_target the target which we are operating on
+/// @param[in] i_rank the rank which we are operating on
+/// @param[in] i_recorder training fine_recorder for each delay
 /// @param[in,out] io_eye_sizes_dq a vector of eye size for all dq
 /// @param[in,out] io_final_nibble_delays_buffer a vector of the MRD_FINE results
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-fapi2::ReturnCode mrd_fine::find_best_delay_for_each_dq( const recorder& i_recorder,
-        std::vector<uint16_t>& io_eye_sizes_dq,
-        std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& io_final_nibble_delays_buffer) const
+fapi2::ReturnCode mrd_fine::find_best_delay_for_each_dq(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_rank,
+    const lrdimm::fine_recorder& i_recorder,
+    std::vector<uint16_t>& io_eye_sizes_dq,
+    std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& io_final_nibble_delays_buffer) const
 {
     constexpr uint8_t NIBBLE0 = 0x0;
     constexpr uint8_t NIBBLE1 = 0x1;
@@ -455,10 +332,122 @@ fapi2::ReturnCode mrd_fine::find_best_delay_for_each_dq( const recorder& i_recor
 
     for(auto& l_buffer_final_delays : io_final_nibble_delays_buffer)
     {
-        FAPI_TRY(find_best_delay_for_nibble(i_recorder, l_buffer, NIBBLE0, io_eye_sizes_dq, l_buffer_final_delays.first));
-        FAPI_TRY(find_best_delay_for_nibble(i_recorder, l_buffer, NIBBLE1, io_eye_sizes_dq, l_buffer_final_delays.second));
+        FAPI_TRY(find_best_delay_for_nibble(i_target,
+                                            i_rank,
+                                            i_recorder,
+                                            l_buffer,
+                                            NIBBLE0,
+                                            io_eye_sizes_dq,
+                                            l_buffer_final_delays.first));
+        FAPI_TRY(find_best_delay_for_nibble(i_target,
+                                            i_rank,
+                                            i_recorder,
+                                            l_buffer,
+                                            NIBBLE1,
+                                            io_eye_sizes_dq,
+                                            l_buffer_final_delays.second));
         ++l_buffer;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates the dq flags for the no pass region callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+/// @param[in] io_per_dq_flags_msb flags for which dqs are failing
+/// @param[in] io_per_dq_flags_lsb flags for which dqs are failing
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode mrd_fine::flag_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer,
+        uint64_t& io_per_dq_flags_msb,
+        uint64_t& io_per_dq_flags_lsb) const
+{
+    uint8_t l_buffer = 0;
+
+    for(const auto& l_final_delay : i_final_nibble_delays_buffer)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        // Updates the bitmap, DQ0..63 bit flags go to LSB, DQ64..71 bit flags go to MSB
+        if(l_buffer * MAX_DQ_PER_BUFFER < LENGTH_OF_64BITS)
+        {
+            append_four_dq_flags(l_final_delay.first.iv_no_pass_region_dq_map, l_final_delay.second.iv_no_pass_region_dq_map,
+                                 io_per_dq_flags_lsb);
+        }
+        else
+        {
+            append_four_dq_flags(l_final_delay.first.iv_no_pass_region_dq_map, l_final_delay.second.iv_no_pass_region_dq_map,
+                                 io_per_dq_flags_msb);
+        }
+
+        l_buffer++;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Calls out if a rank does not see pass region
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mrd_fine::callout_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const
+{
+    // Per nibble weird data and no transition flags - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    uint64_t l_per_dq_flags_msb = 0;
+    uint64_t l_per_dq_flags_lsb = 0;
+
+    FAPI_TRY(flag_no_pass_region( i_target,
+                                  i_rank,
+                                  i_final_nibble_delays_buffer,
+                                  l_per_dq_flags_msb,
+                                  l_per_dq_flags_lsb));
+
+    // Error checking here
+    FAPI_TRY(callout::no_pass_region( i_target,
+                                      i_rank,
+                                      l_per_dq_flags_msb,
+                                      l_per_dq_flags_lsb,
+                                      mss::cal_steps::MRD_FINE,
+                                      "MRD_FINE"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check errors for MRD FINE
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mrd_fine::check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const
+{
+    FAPI_TRY(callout_no_pass_region(i_target, i_rank, i_final_nibble_delays_buffer));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -696,7 +685,7 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
     constexpr uint8_t MPR_LOCATION0 = 0;
     std::vector<uint64_t> l_ranks;
     uint8_t l_rank_index = 0;
-    recorder l_recorder;
+    lrdimm::fine_recorder l_recorder;
     constexpr uint8_t l_pattern = 0x2B;
 
     FAPI_INF("%s RP%d starting to try to calibrate MRD_FINE", mss::c_str(i_target), i_rp);
@@ -779,17 +768,22 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 
         // 10) Finds the best delay for each bit
         // Note: also updates the minimum eye size vector here
-        FAPI_TRY( find_best_delay_for_each_dq(l_recorder, l_eye_sizes_dq, l_final_nibble_delays_buffer),
+        FAPI_TRY( find_best_delay_for_each_dq(i_target, l_rank, l_recorder, l_eye_sizes_dq, l_final_nibble_delays_buffer),
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
 
         // 11) Takes this rank out of MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load %u", mss::c_str(l_dimm),
                   l_rank);
+
         // 12) Takes the buffer out of MRD_FINE and sets it into mainline mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // 13) Writes the best delays to the buffers using PBA
+        // 13) check errors
+        FAPI_TRY( check_errors(l_dimm, l_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u", mss::c_str(l_dimm),
+                  l_rank);
+
+        // 14) Writes the best delays to the buffers using PBA
         FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
 

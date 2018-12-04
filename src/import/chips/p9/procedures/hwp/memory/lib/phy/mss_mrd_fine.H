@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -38,6 +39,7 @@
 #define MSS_MRD_FINE_H
 
 #include <lib/phy/mss_training.H>
+#include <lib/phy/mss_lrdimm_training_helper.H>
 
 namespace mss
 {
@@ -57,6 +59,7 @@ class mrd_fine : public step
         // Per the LRDIMM spec, the MRD_FINE training values have one cycle per 32 ticks
         static constexpr uint8_t MRD_MAX_DELAY = 31;
         static constexpr uint8_t MAX_DQ_PER_BUFFER = 8;
+        static constexpr uint8_t LENGTH_OF_64BITS = 64;
 
         ///
         /// @class final_nibble_delay
@@ -66,72 +69,7 @@ class mrd_fine : public step
         {
             uint8_t iv_nibble_delay;
             int8_t iv_offset[BITS_PER_NIBBLE];
-        };
-        ///
-        /// @class recorder
-        /// @brief Records results on a per-bit level
-        /// @note Each vector's array position represents one bit
-        /// @note Each bit in an element represents whether the data compared or mis-compared at that delay
-        ///
-        class recorder
-        {
-            public:
-                ///
-                /// @brief Recorder default constructor
-                ///
-                recorder()
-                {
-                    l_results = std::vector<fapi2::buffer<uint32_t>>(MAX_DQ_BITS);
-                }
-
-                // Add in the following functions:
-
-                ///
-                /// @brief add results
-                /// @param[in] i_bit dq number
-                /// @param[in] i_delay delay
-                /// @param[in] i_result 0 or 1
-                /// @return FAPI2_RC_SUCCESS if okay
-                ///
-                fapi2::ReturnCode add_results(const uint64_t i_bit, const uint64_t i_delay, const bool i_result)
-                {
-                    // Ensure that the bit is within the range (programming error otherwise)
-                    // TODO:RTC200369 Update MRD_FINE for RAS
-                    if(i_bit >= MAX_DQ_BITS)
-                    {
-                        FAPI_ERR("bit%u is out of range of the maximum number of bits %u", i_bit, MAX_DQ_BITS);
-                        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-                    }
-
-                    {
-                        // Const here refers to the iterator, so we only get the iterator for our individual bit and cannot change to a different bit
-                        const auto l_it = l_results.begin() + i_bit;
-                        return l_it->writeBit(i_result, i_delay);
-                    }
-
-                    return fapi2::FAPI2_RC_SUCCESS;
-                }
-
-                ///
-                /// @brief find eye size and delay value for one dq
-                /// @param[in] i_bit dq number
-                /// @param[out] o_delay mid point of eye
-                /// @param[out] o_eye_size eye size
-                /// @return FAPI2_RC_SUCCESS if okay
-                ///
-                fapi2::ReturnCode find_eye_size_and_delay(const uint64_t i_bit, uint16_t& o_delay, uint16_t& o_eye_size) const;
-
-                ///
-                /// @brief get the l_results
-                /// @return the vector of l_results
-                ///
-                const std::vector<fapi2::buffer<uint32_t>>& get()const
-                {
-                    return l_results;
-                }
-
-            private:
-                std::vector<fapi2::buffer<uint32_t>> l_results;
+            uint8_t iv_no_pass_region_dq_map;
         };
 
         mrd_fine() :
@@ -229,7 +167,7 @@ class mrd_fine : public step
         fapi2::ReturnCode analyze_mrd_result_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                 const uint8_t i_delay,
                 const data_response i_data,
-                recorder& io_recorders) const;
+                lrdimm::fine_recorder& io_recorders) const;
         ///
         /// @brief Analyze mrd_fine result
         /// @param[in] i_target the MCA target
@@ -239,7 +177,7 @@ class mrd_fine : public step
         ///
         fapi2::ReturnCode analyze_mrd_result( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                               const uint8_t i_delay,
-                                              recorder& io_recorders) const;
+                                              lrdimm::fine_recorder& io_recorders) const;
 
 
         ///
@@ -271,33 +209,80 @@ class mrd_fine : public step
                 const uint8_t i_rank,
                 const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const;
 
-
-
         ///
         /// @brief find best delay for one nibble
-        /// @param[in] i_recorder mrd_fine training recorder for each delay
+        /// @param[in] i_target the target which we are operating on
+        /// @param[in] i_rank the rank which we are operating on
+        /// @param[in] i_recorder training fine_recorder for each delay
         /// @param[in] i_buffer the buffer number
         /// @param[in] i_nibble the nibble number
         /// @param[in,out] io_eye_sizes_dq a vector of eye size for all dq
-        /// @param[out] o_final_nibble_delays_buffer  the best delay value of one nibble and 4 dq
+        /// @param[out] o_final_nibble_delays_buffer  the best delay value of one nibble and all dq
         /// @return FAPI2_RC_SUCCESS if and only if ok
         //
-        fapi2::ReturnCode find_best_delay_for_nibble( const recorder& i_recorder,
-                const uint64_t i_buffer,
-                const uint64_t i_nibble,
-                std::vector<uint16_t>& io_eye_sizes_dq,
-                final_nibble_delay& o_final_nibble_delays_buffer)const;
+        fapi2::ReturnCode find_best_delay_for_nibble(
+            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+            const uint64_t i_rank,
+            const lrdimm::fine_recorder& i_recorder,
+            const uint64_t i_buffer,
+            const uint64_t i_nibble,
+            std::vector<uint16_t>& io_eye_sizes_dq,
+            final_nibble_delay& o_final_nibble_delays_buffer)const;
 
         ///
         /// @brief find best delay for each DQ
-        /// @param[in] i_recorder mrd_fine training recorder for each delay
+        /// @param[in] i_target the target which we are operating on
+        /// @param[in] i_rank the rank which we are operating on
+        /// @param[in] i_recorder training fine_recorder for each delay
         /// @param[in,out] io_eye_sizes_dq a vector of eye size for all dq
         /// @param[in,out] io_final_nibble_delays_buffer a vector of the MRD_FINE results
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode find_best_delay_for_each_dq( const recorder& i_recorder,
-                std::vector<uint16_t>& io_eye_sizes_dq,
-                std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& io_final_nibble_delays_buffer) const;
+        fapi2::ReturnCode find_best_delay_for_each_dq(
+            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+            const uint64_t i_rank,
+            const lrdimm::fine_recorder& i_recorder,
+            std::vector<uint16_t>& io_eye_sizes_dq,
+            std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& io_final_nibble_delays_buffer) const;
+
+        ///
+        /// @brief Creates the dq flags for the no pass region callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+        /// @param[in] io_per_dq_flags_msb flags for which dqs are failing
+        /// @param[in] io_per_dq_flags_lsb flags for which dqs are failing
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode flag_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                               const uint8_t i_rank,
+                                               const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer,
+                                               uint64_t& io_per_dq_flags_msb,
+                                               uint64_t& io_per_dq_flags_lsb) const;
+
+
+        ///
+        /// @brief Calls out if a rank does not see pass region
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const;
+
+        ///
+        /// @brief Check errors for MRD FINE
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MRD results
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_rank,
+                                        std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const;
+
 
         ///
         /// @brief convert loop value to register definition for nibble
@@ -336,11 +321,9 @@ class mrd_fine : public step
             uint8_t& o_bcw_bcax_setting,
             uint8_t& o_bcw_bcbx_setting) const;
 
-        ///
-        /// @brief Updates the eye size vector with the latest data results
-        /// @note This will be used for the buffer RD VREF calibration
+        /// Updates the eye size vector with the latest data results
+        /// This will be used for the buffer RD VREF calibration
         /// Not needed for 1D calibration
-        ///
     private:
         mutable std::vector<uint16_t> iv_minimum_eye_sizes;
 };

@@ -278,12 +278,18 @@ fapi2::ReturnCode mwd_fine::find_best_delay_for_nibble(
     uint16_t l_best_delays[BITS_PER_NIBBLE] = {};
     uint64_t l_index = 0;
     uint16_t l_nibble_average = 0;
+    bool l_flag_no_pass_region = false;
+
+    // initialize this dq map value to zero before the loop
+    o_final_nibble_delays_buffer.iv_no_pass_region_dq_map = 0;
 
     // Loops through all of the DQ in this nibble
     for(uint64_t l_dq = l_dq_start; l_dq < l_dq_end; ++l_dq)
     {
-        FAPI_TRY(i_recorder.find_eye_size_and_delay(i_target, MWD_FINE, l_dq, l_best_delays[l_index], io_eye_sizes_dq[l_dq]));
-
+        FAPI_TRY(i_recorder.find_eye_size_and_delay(i_target, MWD_FINE, l_dq, l_best_delays[l_index], io_eye_sizes_dq[l_dq],
+                 l_flag_no_pass_region));
+        o_final_nibble_delays_buffer.iv_no_pass_region_dq_map <<= 1;
+        o_final_nibble_delays_buffer.iv_no_pass_region_dq_map |= l_flag_no_pass_region ? 1 : 0;
         l_nibble_average += l_best_delays[l_index];
         l_index++;
     }
