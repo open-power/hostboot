@@ -46,15 +46,17 @@ namespace mss
 namespace lrdimm
 {
 
-///
-/// @brief raw card revs for LRDIMMs
-/// @note In the order of the vector below which needs to be sorted by enum value
-///
+// raw card revs for LRDIMMs
+// In the order of the vector below which needs to be sorted by enum value
 enum raw_card_rev : uint8_t
 {
-    // TODO RTC:160116 Fill in valid RCD data for LRDIMM
-    /// LRDIMM Raw Card encoding for B0
+    // Fill in valid RCD data for LRDIMM
+    // LRDIMM Raw Card encoding for A0,B0,B1,B2,D2
+    A0 = 0x00,
     B0 = 0x01,
+    B1 = 0x21,
+    B2 = 0x41,
+    D2 = 0x43,
 };
 
 // Raw cards can share the same raw card # between RDIMM and LRDIMMs so
@@ -65,7 +67,11 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 }// lrdimm
 
 // Exposed so we can test them.
+extern rcw_settings lrdimm_rc_a0;
 extern rcw_settings lrdimm_rc_b0;
+extern rcw_settings lrdimm_rc_b1;
+extern rcw_settings lrdimm_rc_b2;
+extern rcw_settings lrdimm_rc_d2;
 extern rcw_settings lrdimm_rc_default;
 
 }// mss
