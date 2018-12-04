@@ -100,6 +100,10 @@
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>RANK</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -111,6 +115,10 @@
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>RANK</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -123,18 +131,10 @@
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>RANK</ffdc>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_LRDIMM_CAL_NOISE</rc>
-    <description>
-      Set if training result show too much noise during a calibration step
-    </description>
-    <ffdc>NIBBLE</ffdc>
-    <ffdc>BUFFER</ffdc>
-    <ffdc>CALIBRATION_RAW_DATA</ffdc>
-    <ffdc>CALIBRATION_STEP</ffdc>
-    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -147,6 +147,26 @@
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>RANK</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+    <hwpError>
+    <rc>RC_MSS_LRDIMM_CAL_NOISE</rc>
+    <description>
+      Set if training result show too much noise during a calibration step
+    </description>
+    <ffdc>NIBBLE</ffdc>
+    <ffdc>BUFFER</ffdc>
+    <ffdc>CALIBRATION_RAW_DATA</ffdc>
+    <ffdc>CALIBRATION_STEP</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
