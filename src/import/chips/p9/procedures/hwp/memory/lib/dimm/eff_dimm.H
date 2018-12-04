@@ -1074,20 +1074,54 @@ class eff_dimm
 ///
 class eff_lrdimm : public eff_dimm
 {
+    protected:
+        uint8_t iv_master_ranks_index;
+
     public:
+        enum
+        {
+            NUM_VALID_RANKS_CONFIGS = 2,
+        };
+
+
         ///
         /// @brief constructor for the eff_lrdimm class
         /// @param[in] i_spd_decoder the SPD decoder
+        /// @param[in] i_rcw the RCW settings for this DIMM
+        /// @param[in] i_master_ranks the number of master ranks on this DIMM
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
         eff_lrdimm( const spd::facade& i_spd_decoder,
                     const rcw_settings& i_rcw,
+                    const uint8_t i_master_rank,
                     fapi2::ReturnCode& o_rc ):
-            eff_dimm ( i_spd_decoder, i_rcw, o_rc )
+            eff_dimm ( i_spd_decoder, i_rcw, o_rc ),
+            iv_master_ranks_index(master_ranks_to_index(i_master_rank))
         {
-            FAPI_DBG("Constructing LRDIMM for %s", mss::c_str(iv_dimm));
+            FAPI_DBG("Constructing LRDIMM for %s with %u master ranks", mss::c_str(iv_dimm), i_master_rank);
+        }
+
+        ///
+        /// @brief Finds the master rank index
+        /// @param[in] i_master_rank number of master ranks for this DIMM
+        /// @return master rank index - 0 if 2R, 1 otherwise (4R)
+        /// @note LRDIMM's should only support 2R and 4R
+        /// We use an index to speed up our lookups for LR settings
+        ///
+        uint8_t master_ranks_to_index(const uint8_t i_master_rank) const
+        {
+            return i_master_rank == 2 ? 0 : 1;
+        }
+
+        ///
+        /// @brief Sets the master rank index based upon the number of master ranks
+        /// @param[in] i_master_rank the number of master ranks on this DIMM
+        ///
+        void set_master_rank_index(const uint8_t i_master_rank)
+        {
+            iv_master_ranks_index = master_ranks_to_index(i_master_rank);
         }
 
         ///
@@ -1307,14 +1341,17 @@ class eff_lrdimm_db01 : public eff_lrdimm
         ///
         /// @brief constructor for the eff_lrdimm_db01 (LRDIMM DataBuffer 1) class
         /// @param[in] i_spd_decoder the SPD decoder
+        /// @param[in] i_rcw the RCW settings for this DIMM
+        /// @param[in] i_master_ranks the number of master ranks on this DIMM
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
         eff_lrdimm_db01( const spd::facade& i_spd_decoder,
                          const rcw_settings& i_rcw,
+                         const uint8_t i_master_rank,
                          fapi2::ReturnCode& o_rc ) :
-            eff_lrdimm( i_spd_decoder, i_rcw, o_rc )
+            eff_lrdimm( i_spd_decoder, i_rcw, i_master_rank, o_rc )
         {
             FAPI_DBG("Constructing LRDIMM_DB01 for %s", mss::c_str(iv_dimm))
         }
@@ -1364,14 +1401,17 @@ class eff_lrdimm_db02 : public eff_lrdimm
         ///
         /// @brief constructor for the eff_lrdimm_db02 (LRDIMM DataBuffer 2) class
         /// @param[in] i_spd_decoder the SPD decoder
+        /// @param[in] i_rcw the RCW settings for this DIMM
+        /// @param[in] i_master_ranks the number of master ranks on this DIMM
         /// @param[out] o_rc fapi2::ReturnCode
         /// @note also sets class variables for parent MCA/ MCS and for freqs
         /// @note calls eff_dimm ctor
         ///
         eff_lrdimm_db02( const spd::facade& i_spd_decoder,
                          const rcw_settings& i_rcw,
+                         const uint8_t i_master_rank,
                          fapi2::ReturnCode& o_rc ) :
-            eff_lrdimm( i_spd_decoder, i_rcw, o_rc )
+            eff_lrdimm( i_spd_decoder, i_rcw, i_master_rank, o_rc )
         {
             FAPI_DBG("Constructing LRDIMM_DB02 for %s", mss::c_str(iv_dimm));
         }

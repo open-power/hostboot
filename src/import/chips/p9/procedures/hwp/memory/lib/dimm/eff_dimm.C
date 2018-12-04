@@ -638,6 +638,7 @@ fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
     uint8_t l_buffer_type = 0;
     kind_t l_dimm_kind = DEFAULT_KIND;
     rcw_settings l_raw_card;
+    uint8_t l_master_ranks = 0;
 
     fapi2::ReturnCode l_rc;
     const auto l_dimm = i_spd_decoder.get_dimm_target();
@@ -646,6 +647,8 @@ fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
     // Dram_gen and dimm_type are set in mss_freq and we'll call the SPD decoder to get the reg and buff type
     FAPI_TRY( eff_dram_gen(l_dimm, l_gen), "Failed eff_dram_gen() accessor for %s", mss::c_str(l_dimm) );
     FAPI_TRY( eff_dimm_type(l_dimm, l_type), "Failed eff_dimm_type() accessor for %s", mss::c_str(l_dimm) );
+    FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_master_ranks), "Failed eff_dimm_type() accessor for %s",
+              mss::c_str(l_dimm) );
 
     FAPI_TRY( i_spd_decoder.register_and_buffer_type(l_buffer_type),
               "Failed decoding register and buffer type from SPD for %s", mss::c_str(l_dimm) );
@@ -660,7 +663,7 @@ fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
             switch (l_buffer_type)
             {
                 case LRDIMM_DB01:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db01>( i_spd_decoder, l_raw_card, l_rc );
+                    o_fact_obj = std::make_shared<eff_lrdimm_db01>( i_spd_decoder, l_raw_card, l_master_ranks, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -675,7 +678,7 @@ fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
                     break;
 
                 case LRDIMM_DB02:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db02>( i_spd_decoder, l_raw_card, l_rc );
+                    o_fact_obj = std::make_shared<eff_lrdimm_db02>( i_spd_decoder, l_raw_card, l_master_ranks, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -2900,12 +2903,26 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for Vref DQ Train Value and Range
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::vref_dq_train_value_and_range()
 {
+    constexpr uint8_t VREF_73PERCENT = 0x14;
+    constexpr uint8_t VREF_83PERCENT = 0x24;
+    constexpr uint8_t TRAIN_VALUE[NUM_VALID_RANKS_CONFIGS] =
+    {
+        VREF_73PERCENT, // 2 ranks per DIMM
+        VREF_83PERCENT, // 4 ranks per DIMM
+    };
+    // Yes, range1 has a value of 0 this is taken from the JEDEC spec
+    constexpr uint8_t RANGE1 = 0x00;
+    constexpr uint8_t TRAIN_RANGE[NUM_VALID_RANKS_CONFIGS] =
+    {
+        RANGE1,
+        RANGE1,
+    };
+
+
     uint8_t l_vref_dq_train_value[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     uint8_t l_vref_dq_train_range[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    fapi2::buffer<uint8_t> l_vref_range;
 
     // Gets the attributes
     FAPI_TRY( eff_vref_dq_train_value(iv_mcs, &l_vref_dq_train_value[0][0][0]) );
@@ -2915,11 +2932,8 @@ fapi2::ReturnCode eff_lrdimm::vref_dq_train_value_and_range()
     // It should be good enough to get us going
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        constexpr uint8_t VREF_79PERCENT = 0x1d;
-        // Yes, range1 has a value of 0 this is taken from the JEDEC spec
-        constexpr uint8_t RANGE1 = 0x00;
-        l_vref_dq_train_value[iv_port_index][iv_dimm_index][l_rank] = VREF_79PERCENT;
-        l_vref_dq_train_range[iv_port_index][iv_dimm_index][l_rank] = RANGE1;
+        l_vref_dq_train_value[iv_port_index][iv_dimm_index][mss::index(l_rank)] = TRAIN_VALUE[iv_master_ranks_index];
+        l_vref_dq_train_range[iv_port_index][iv_dimm_index][mss::index(l_rank)] = TRAIN_RANGE[iv_master_ranks_index];
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_VALUE, iv_mcs, l_vref_dq_train_value),
@@ -4400,21 +4414,22 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note used for MRS01
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b111, // 2R - 34Ohm
+        0b111, // 4R - 34Ohm
+    };
+
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     FAPI_TRY( eff_dram_rtt_nom(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
-    // The host is in charge of ensuring good termination from the buffer to the DRAM
-    // That means that we need to know and set the settings
-    // Currently, our SI team thinks that the 2R single drop open power settings will work for BUP
-    // We're going to hard code in those settings the above story can be used as a catchall to improve settings if need be
-    // Loops through all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        // Taking the 34ohm value from up above
-        l_mcs_attrs[iv_port_index][iv_dimm_index][l_rank] = 0b111;
+        // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+        // We do a bitwise mask here to only get the ODT for the current DIMM
+        l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_NOM, iv_mcs, l_mcs_attrs) );
@@ -4481,9 +4496,14 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note used for MRS02
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b000, // 2R - disable
+        0b001, // 4R - 120Ohm
+    };
+
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     FAPI_TRY( eff_dram_rtt_wr(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
@@ -4494,8 +4514,9 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
     // Loops through all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        // Taking the disable value from up above
-        l_mcs_attrs[iv_port_index][iv_dimm_index][l_rank] = 0b000;
+        // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+        // We do a bitwise mask here to only get the ODT for the current DIMM
+        l_mcs_attrs[iv_port_index][iv_dimm_index][l_rank] = DRAM_RTT_VALUES[iv_master_ranks_index];
     }
 
     // Set the attribute
@@ -4554,9 +4575,14 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note used for MRS05
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
 {
+    constexpr uint8_t DRAM_RTT_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        0b000, // 2R - disable
+        0b010, // 4R - 120Ohm
+    };
+
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
 
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
@@ -4568,8 +4594,9 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     // Loops through all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        // Taking the disable value from up above
-        l_mcs_attrs[iv_port_index][iv_dimm_index][l_rank] = 0b000;
+        // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+        // We do a bitwise mask here to only get the ODT for the current DIMM
+        l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_PARK, iv_mcs, l_mcs_attrs) );
@@ -4909,7 +4936,6 @@ fapi_try_exit:
 /// DRAM Interface MDQ/MDQS ODT Strength for Data Buffer
 /// Comes from SPD
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dimm_bc04()
 {
     // Retrieve MCS attribute data
@@ -4934,7 +4960,6 @@ fapi_try_exit:
 /// Page 57 Table 28
 /// @note DRAM Interface MDQ/MDQS Output Driver Impedance control
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dimm_bc05()
 {
     // Taken from the SI spreadsheet - we want 34 Ohms so 0x01
@@ -5469,17 +5494,22 @@ fapi_try_exit:
 /// @brief Determines and sets DIMM F5BC6x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dimm_f5bc6x()
 {
     constexpr uint8_t VREF_73PERCENT = 0x14;
+    constexpr uint8_t VREF_83PERCENT = 0x24;
+    constexpr uint8_t RD_VREF[NUM_VALID_RANKS_CONFIGS] =
+    {
+        VREF_73PERCENT, // 2 ranks per DIMM
+        VREF_83PERCENT, // 4 ranks per DIMM
+    };
     uint8_t l_attrs_dimm_f5bc6x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_f5bc6x(iv_mcs, &l_attrs_dimm_f5bc6x[0][0]) );
 
     // F5BC6x is just the VREF training range
-    l_attrs_dimm_f5bc6x[iv_port_index][iv_dimm_index] = VREF_73PERCENT;
+    l_attrs_dimm_f5bc6x[iv_port_index][iv_dimm_index] = RD_VREF[iv_master_ranks_index];
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_F5BC6x, iv_mcs, l_attrs_dimm_f5bc6x),
               "Failed setting attribute for ATTR_EFF_DIMM_DDR4_F5BC6x");
@@ -5529,9 +5559,14 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for DRAM output driver impedance control
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-// TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
 fapi2::ReturnCode eff_lrdimm::dram_odic()
 {
+    constexpr uint8_t DRAM_ODIC_VALUES[NUM_VALID_RANKS_CONFIGS] =
+    {
+        fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34, // 2 ranks per DIMM
+        fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34, // 4 ranks per DIMM
+    };
+
     uint8_t l_dram_odic[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     FAPI_TRY( eff_dram_odic(iv_mcs, &l_dram_odic[0][0][0]));
 
@@ -5539,7 +5574,7 @@ fapi2::ReturnCode eff_lrdimm::dram_odic()
     for(uint8_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
         // JEDEC setting - taken from SI spreadsheet
-        l_dram_odic[iv_port_index][iv_dimm_index][l_rank] = fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34;
+        l_dram_odic[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_ODIC_VALUES[iv_master_ranks_index];
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_ODIC, iv_mcs, l_dram_odic) );
@@ -5936,27 +5971,38 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::odt_wr()
 {
-    constexpr uint8_t ODT_2R_1DROP_VALUES[MAX_RANK_PER_DIMM] =
+    constexpr uint8_t DRAM_ODT_VALUES[NUM_VALID_RANKS_CONFIGS][MAX_RANK_PER_DIMM] =
     {
-        0x40,
-        0x80,
-        0x00,
-        0x00,
+        { 0x44, 0x88, 0x00, 0x00, }, // 2 ranks per DIMM
+        { 0xcc, 0xcc, 0xcc, 0xcc, }, // 4 ranks per DIMM
     };
 
+    // Masks on the ODT for a specific DIMM
+    constexpr uint8_t DIMM_ODT_MASK[MAX_DIMM_PER_PORT] = { 0xf0, 0x0f };
+
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
     // Gets the VPD value
     FAPI_TRY( eff_odt_wr( iv_mcs, &(l_mcs_attr[0][0][0])) );
+    FAPI_TRY( mss::vpd_mt_odt_wr(iv_dimm, &(l_vpd_odt[0])));
 
     // Loops through and sets/updates all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        // TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
-        // Currently, we're using a 2R single drop system
-        // To avoid terminating our 0th rank twice, we just want to pass in the termination directly
-        // This will be sorted out as part of the above RTC
-        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = ODT_2R_1DROP_VALUES[l_rank];
+        // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+        // We do a bitwise mask here to only get the ODT for the current DIMM
+        const auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
+
+        // For the host side ODT, we want to get the ODT from the VPD and do a bitwise or to only get the ODT for the opposite DIMM
+        // If we include the ODT for this DIMM, we could end up over terminating the DRAM side ODT
+        // The buffer's or the ODT together AND all of our LRDIMM values include ODT, so we will get the ODT we need for the host-> buffer interface
+        // We also use the 0th position for the host side ODT as we use the 1R termination settings for LRDIMM
+        const auto l_opposite_dimm_index = (iv_dimm_index + 1) % MAX_DIMM_PER_PORT;
+        const auto l_host_odt = l_vpd_odt[0] & DIMM_ODT_MASK[l_opposite_dimm_index];
+
+        // Do the final bitwise or
+        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt | l_host_odt;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_ODT_WR, iv_mcs, l_mcs_attr) );
@@ -6085,8 +6131,17 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::odt_rd()
 {
+    constexpr uint8_t DRAM_ODT_VALUES[NUM_VALID_RANKS_CONFIGS][MAX_RANK_PER_DIMM] =
+    {
+        { 0x00, 0x00, 0x00, 0x00, }, // 2 ranks per DIMM
+        { 0x44, 0x88, 0x44, 0x88, }, // 4 ranks per DIMM
+    };
+
+    // Masks on the ODT for a specific DIMM
+    constexpr uint8_t DIMM_ODT_MASK[MAX_DIMM_PER_PORT] = { 0xf0, 0x0f };
+
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM];
+    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
     // Gets the VPD value
     FAPI_TRY( mss::vpd_mt_odt_rd(iv_dimm, &(l_vpd_odt[0])));
@@ -6095,12 +6150,19 @@ fapi2::ReturnCode eff_lrdimm::odt_rd()
     // Loops through and sets/updates all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        // TODO:RTC200577 Update LRDIMM termination settings for dual drop and 4 rank DIMM's
-        // So, here we do a bitwise or of our LR settings and our VPD settings
-        // The VPD contains the host <-> buffer settings
-        // The constant contains the buffer <-> DRAM
-        // Due to how the ODT functions, we need to or them
-        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_vpd_odt[l_rank] | 0x00;
+        // Gets the ODT scheme for the DRAM for this DIMM - we only want to toggle ODT to the DIMM we are writing to
+        // We do a bitwise mask here to only get the ODT for the current DIMM
+        const auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
+
+        // For the host side ODT, we want to get the ODT from the VPD and do a bitwise or to only get the ODT for the opposite DIMM
+        // If we include the ODT for this DIMM, we could end up over terminating the DRAM side ODT
+        // The buffer's or the ODT together AND all of our LRDIMM values include ODT, so we will get the ODT we need for the host-> buffer interface
+        // We also use the 0th position for the host side ODT as we use the 1R termination settings for LRDIMM
+        const auto l_opposite_dimm_index = (iv_dimm_index + 1) % MAX_DIMM_PER_PORT;
+        const auto l_host_odt = l_vpd_odt[0] & DIMM_ODT_MASK[l_opposite_dimm_index];
+
+        // Do the final bitwise or
+        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt | l_host_odt;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_ODT_RD, iv_mcs, l_mcs_attr) );
