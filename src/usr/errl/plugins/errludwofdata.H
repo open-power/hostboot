@@ -118,10 +118,9 @@ public:
           tableEntries = actualTableCount;  // don't go over buffer length
         }
 
-        // Check that the remaining data breaks down into parsable
-        // wofTableCompareData_t entries
-        if ( (i_buflen - sizeof(tableEntries))
-              % sizeof(wofTableCompareData_t) == 0 )
+        // Verify the buffer contains at least the specified number of entries
+        if ( (i_buflen - sizeof(tableEntries) -
+              tableEntries * sizeof(wofTableCompareData_t)) >= 0 )
         {
             i_parser.PrintString("---------------------------------------",
                                  "---------------------------------------");
@@ -185,7 +184,9 @@ public:
         }
         else
         {
+            i_parser.PrintString("Unable to parse too small buffer","");
             i_parser.PrintNumber("WOF Buffer length", "0x%X", i_buflen);
+            i_parser.PrintNumber("Total entry count", "0x%X", tableEntries);
             i_parser.PrintString("Expected buffer format:",
                         "uint16_t count, match this entry, unmatched entries");
             i_parser.PrintNumber("Each entry size", "%d",
