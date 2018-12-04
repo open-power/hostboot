@@ -289,8 +289,8 @@ fapi2::ReturnCode mwd_fine::find_best_delay_for_nibble(
     {
         FAPI_TRY(i_recorder.find_eye_size_and_delay(i_target, MWD_FINE, l_dq, l_best_delays[l_index], io_eye_sizes_dq[l_dq],
                  l_flag_no_pass_region));
-        o_final_nibble_delays_buffer.iv_no_pass_region_dq_map <<= 1;
-        o_final_nibble_delays_buffer.iv_no_pass_region_dq_map |= l_flag_no_pass_region ? 1 : 0;
+
+        append_dq_flags(l_flag_no_pass_region, o_final_nibble_delays_buffer.iv_no_pass_region_dq_map);
         l_nibble_average += l_best_delays[l_index];
         l_index++;
     }
@@ -351,6 +351,109 @@ fapi2::ReturnCode mwd_fine::find_best_delay_for_each_dq(
                                             l_buffer_final_delays.second));
         ++l_buffer;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates the dq flags for the no pass region callout
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+/// @param[in] io_per_dq_flags_ecc flags for which dqs are failing
+/// @param[in] io_per_dq_flags_data flags for which dqs are failing
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode mwd_fine::flag_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer,
+        uint64_t& io_per_dq_flags_ecc,
+        uint64_t& io_per_dq_flags_data) const
+{
+    uint8_t l_buffer = 0;
+
+    for(const auto& l_final_delay : i_final_nibble_delays_buffer)
+    {
+
+        // This is a coding issue here, just break out of the loop
+        // We should never have more data than recorders
+        // No need to log it, just recover and continue
+        if(l_buffer >= MAX_LRDIMM_BUFFERS)
+        {
+            FAPI_ERR("%s rank%u saw buffer%u when number of buffers is %u. Continuing gracefully",
+                     mss::c_str(i_target), i_rank, l_buffer, MAX_LRDIMM_BUFFERS);
+            break;
+        }
+
+        // Updates the bitmap, the first 64 dq bit is for data, the last 8 bit is for ecc
+        // assembling the no passing bit flags and that there are 4 flags per each recorder
+        // (first Nibble0  and second Nibble1). we shift by BITS_PER_BUFFER to put the flags
+        // in the right place.
+        if(l_buffer * MAX_DQ_PER_BUFFER < MAX_LONG_BIT_COUNT)
+        {
+            append_four_dq_flags(l_final_delay.first.iv_no_pass_region_dq_map, l_final_delay.second.iv_no_pass_region_dq_map,
+                                 io_per_dq_flags_data);
+        }
+        else
+        {
+            append_four_dq_flags(l_final_delay.first.iv_no_pass_region_dq_map, l_final_delay.second.iv_no_pass_region_dq_map,
+                                 io_per_dq_flags_ecc);
+        }
+
+        l_buffer++;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Calls out if a rank does not see pass region
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mwd_fine::callout_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const
+{
+    // Per nibble weird data and no transition flags - bitmap
+    // A bitmap is used to simplify the error callouts
+    // We callout one bitmap vs 18 bits
+    uint64_t l_per_dq_flags_ecc = 0;
+    uint64_t l_per_dq_flags_data = 0;
+
+    FAPI_TRY(flag_no_pass_region( i_target,
+                                  i_rank,
+                                  i_final_nibble_delays_buffer,
+                                  l_per_dq_flags_ecc,
+                                  l_per_dq_flags_data));
+
+    // Error checking here
+    FAPI_TRY(callout::no_pass_region( i_target,
+                                      i_rank,
+                                      l_per_dq_flags_ecc,
+                                      l_per_dq_flags_data,
+                                      mss::cal_steps::MWD_FINE,
+                                      "MWD_FINE"));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check errors for MWD FINE
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank the current rank
+/// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode mwd_fine::check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rank,
+        std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const
+{
+    FAPI_TRY(callout_no_pass_region(i_target, i_rank, i_final_nibble_delays_buffer));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -798,12 +901,17 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         FAPI_TRY( find_best_delay_for_each_dq(i_target, l_rank, l_recorder, l_eye_sizes_dq, l_final_nibble_delays_buffer),
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
-        // 11) Set best case results into buffer using PBA
+        // 11) check errors
+        FAPI_TRY( check_errors(l_dimm, l_dimm_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u",
+                  mss::c_str(l_dimm),
+                  l_dimm_rank);
+
+        // 12) Set best case results into buffer using PBA
         FAPI_TRY( mwd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
-                  "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
+                  "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_dimm_rank);
     }
 
-    // 12) set for two or four rank dimms
+    // 13) set for two or four rank dimms
     for (const auto& l_dimm : l_dimms)
     {
         uint8_t l_rank_num = 0;

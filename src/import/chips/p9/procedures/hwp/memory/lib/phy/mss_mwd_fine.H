@@ -68,6 +68,8 @@ class mwd_fine : public step
         // Per the LRDIMM spec, the MWD training values have one cycle per 32 ticks
         static constexpr uint8_t MWD_MAX_DELAY = 31;
         static constexpr uint8_t MAX_DQ_PER_BUFFER = 8;
+        static constexpr uint8_t MAX_LONG_BIT_COUNT = 64;
+
 
         ///
         /// @class final_nibble_delay
@@ -180,6 +182,44 @@ class mwd_fine : public step
             const lrdimm::fine_recorder& i_recorder,
             std::vector<uint16_t>& io_eye_sizes_dq,
             std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& io_final_nibble_delays_buffer) const;
+
+        ///
+        /// @brief Creates the dq flags for the no pass region callout
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+        /// @param[in] io_per_dq_flags_msb flags for which dqs are failing
+        /// @param[in] io_per_dq_flags_lsb flags for which dqs are failing
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode flag_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                               const uint8_t i_rank,
+                                               const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer,
+                                               uint64_t& io_per_dq_flags_msb,
+                                               uint64_t& io_per_dq_flags_lsb) const;
+
+
+        ///
+        /// @brief Calls out if a rank does not see pass region
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode callout_no_pass_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const uint8_t i_rank,
+                const std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const;
+
+        ///
+        /// @brief Check errors for MWD FINE
+        /// @param[in] i_target the DIMM target on which to operate
+        /// @param[in] i_rank the current rank
+        /// @param[in] i_final_nibble_delays_buffer a vector of the MWD results
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode check_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_rank,
+                                        std::vector<std::pair<final_nibble_delay, final_nibble_delay>>& i_final_nibble_delays_buffer) const;
 
         ///
         /// @brief convert loop value to register definition for nibble
