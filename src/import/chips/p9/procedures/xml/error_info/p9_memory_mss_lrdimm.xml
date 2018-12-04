@@ -125,7 +125,7 @@
     <ffdc>RANK</ffdc>
   </hwpError>
 
-    <hwpError>
+  <hwpError>
     <rc>RC_MSS_LRDIMM_CAL_NOISE</rc>
     <description>
       Set if training result show too much noise during a calibration step
@@ -135,6 +135,18 @@
     <ffdc>CALIBRATION_RAW_DATA</ffdc>
     <ffdc>CALIBRATION_STEP</ffdc>
     <ffdc>TARGET</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_LRDIMM_NO_PASS_REGION</rc>
+    <description>
+      Set if a buffer sees no pass region in a calibration step
+    </description>
+    <ffdc>DQ_FLAGS_MSB</ffdc>
+    <ffdc>DQ_FLAGS_LSB</ffdc>
+    <ffdc>CALIBRATION_STEP</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
   </hwpError>
 
   <hwpError>
