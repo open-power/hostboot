@@ -53,7 +53,7 @@
 typedef PnorSfcDD PnorDD;
 #elif CONFIG_PNORDD_IS_IPMI
 #include "pnor_ipmidd.H"
-using PnorDD = PnorIpmiDD;
+typedef PnorIpmiDD PnorDD;
 #else
 #error "No PNOR DD implementation configured"
 #endif

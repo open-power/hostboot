@@ -33,6 +33,6 @@ TESTS = pnorddtest.H ecctest.H pnorrptest.H
 
 #SFC Implementations
 TESTS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibmtest.H)
-TESTS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400test.H)
+#TESTS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400test.H)
 
 include ${ROOTPATH}/config.mk

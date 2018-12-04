@@ -48,10 +48,8 @@
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <sio/sio.H>
-#include "ast_mboxdd.H"
 #include "pnor_ipmidd.H"
 #include "pnor_common.H"
-#include "pnor_utils.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <sys/time.h>
