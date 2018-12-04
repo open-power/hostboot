@@ -46,27 +46,35 @@
 namespace mss
 {
 
-///
-/// @brief raw card B0 settings
-///
-// TODO RTC:160116 Fill in valid RCD data for LRDIMM
-rcw_settings lrdimm_rc_b0( 0x00, // RC00
+// raw card settings
+// fill in valid RCD data for LRDIMM
+rcw_settings lrdimm_rc_a0( 0x00,  // RC00
                            0x00); // RC01
-
+rcw_settings lrdimm_rc_b0( 0x00,
+                           0x00);
+rcw_settings lrdimm_rc_b1( 0x00,
+                           0x00);
+rcw_settings lrdimm_rc_b2( 0x00,
+                           0x00);
+rcw_settings lrdimm_rc_d2( 0x00,
+                           0x00);
 rcw_settings lrdimm_rc_default( 0x00, // RC00
                                 0x00); // RC01
-
 
 namespace lrdimm
 {
 
-// TODO - RTC:160121 Catch all for adding raw card data for DIMMs
+// Catch all for adding raw card data for DIMMs
 const std::vector< std::pair< uint8_t , rcw_settings> > RAW_CARDS =
 {
     // I expect this to grow as Warren M. expects us to have
     // settings for every raw card that JEDEC puts out.  Openpower
     // can't break due to a missing raw card...
+    {raw_card_rev::A0, lrdimm_rc_a0},
     {raw_card_rev::B0, lrdimm_rc_b0},
+    {raw_card_rev::B1, lrdimm_rc_b1},
+    {raw_card_rev::B2, lrdimm_rc_b2},
+    {raw_card_rev::D2, lrdimm_rc_d2},
 };
 
 }// lrdimm
