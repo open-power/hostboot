@@ -1202,7 +1202,7 @@ errlHndl_t hdatService::findSpira( void )
             errhdl = new ERRORLOG::ErrlEntry(
                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            RUNTIME::MOD_HDATSERVICE_FINDSPIRA,
-                           RUNTIME::RC_BAD_NACA,
+                           RUNTIME::RC_NO_SPIRA,
                            TWO_UINT32_TO_UINT64(ERRL_GETRC_SAFE(errhdl_l),
                                                 ERRL_GETEID_SAFE(errhdl_l)),
                            TWO_UINT32_TO_UINT64(ERRL_GETRC_SAFE(errhdl_s),
