@@ -417,6 +417,41 @@
     <writeable/>
     <initToZero/>
   </attribute>
+   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevent attributes and required data for
+    WOV Overvolting to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Indicator that all relevent attributes and required data for
+    WOV Undervolting to be enabled is present and valid
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SGPE_PHANTOM_HALT_ENABLE</id>
