@@ -50,8 +50,8 @@ namespace fapi2
 ///                          The size of the buffer determines the number of
 ///                          amount of bytes that are read.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, typename V >
-inline ReturnCode getMMIO(const Target<K, V>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode getMMIO(const Target<K, M, V>& i_target,
                           const uint64_t i_mmioAddr,
                           const size_t i_transSize,
                           std::vector<uint8_t>& o_data);
@@ -68,8 +68,8 @@ inline ReturnCode getMMIO(const Target<K, V>& i_target,
 ///                          The size of the buffer determines the number of
 ///                          amount of bytes that are written.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, typename V >
-inline ReturnCode putMMIO(const Target<K, V>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode putMMIO(const Target<K, M, V>& i_target,
                           const uint64_t i_mmioAddr,
                           const size_t i_transSize,
                           const std::vector<uint8_t>& i_data);
