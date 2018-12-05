@@ -430,13 +430,14 @@ sub FilterACKedLogs
 # PEL data. The function also does some processing of the input string to
 # convert it to format acceptable by the errl parser. It returns a string with
 # PEL data (without the eSEL header) or an empty string if the input does not
-# contain PEL data (does not contain 'df' or '20 00 04').
+# contain PEL data (does not contain either 'df' or 'dd' followed a few bytes
+# later by '20 00 04').
 #
 # Ex input 1: "ESEL=00 00 df 00 00 00 00 20 00 04 0c b8 07 aa 00 00 50 48 00 30
 # 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>",
 # Ex output 1: 50 48 00 30 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
 #
-# Ex input 2: ESEL=00 00 df 00 00 00 00 20 00 04 0c b8 07 aa 00 00 50 48 00 30
+# Ex input 2: ESEL=00 00 dd 00 00 00 00 20 00 04 0c b8 07 aa 00 00 50 48 00 30
 # 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
 # Ex output 2: 50 48 00 30 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
 #
@@ -451,11 +452,13 @@ sub ProcessEselString
         $inputString =~ s/ESEL=//g; # strip ESEL=
         ($debug) && print "ESEL data #$esel_record_count = $inputString\n";
     }
-    # If the SEL entry contains the "df" key, AND it has '040020' it's our eSEL
-    if(!($inputString =~ /df/) or !($inputString =~ /20 00 04/))
+    # If the SEL entry contains the "df" (regular) or "dd" (call home
+    # informational) key followed (a few bytes later) by '040020' it's our eSEL
+    my $criteria = qr/df|dd.*20 00 04/;
+    if(!($inputString =~ /$criteria/))
     {
         ($debug) &&
-               print " \'df\' or \'20 00 04\' was not found in $inputString.\n";
+               print " Did not find \'df\' or \'dd\' followed (a few bytes later) by \'20 00 04\' in $inputString.\n";
         return "";
     }
 
@@ -666,6 +669,7 @@ sub GetAmiEselData
     for(my $i=0; $i<$sel_count; $i++)
     {
         # If the SEL entry contains the "df" key, AND it has '040020' it's our eSEL
+        # AMI BMC does not support call home informationals
         if (($SEL_list[$i] =~ / OEM record df /) && ($SEL_list[$i] =~ /040020/))
         {
             push @eSEL_list, $SEL_list[$i];
