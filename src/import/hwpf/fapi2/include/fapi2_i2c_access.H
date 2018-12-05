@@ -66,8 +66,8 @@ namespace fapi2
 ///                          before the read.
 /// @param[out] o_data       Buffer that holds data read from HW target.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, typename V >
-inline ReturnCode getI2c(const Target<K, V>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode getI2c(const Target<K, M, V>& i_target,
                          const size_t i_get_size,
                          const std::vector<uint8_t>& i_data,
                          std::vector<uint8_t>& o_data);
@@ -87,8 +87,8 @@ inline ReturnCode getI2c(const Target<K, V>& i_target,
 /// @param[in] i_target     HW target to operate on.
 /// @param[in] i_data       Buffer that holds data to write to the HW target.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, typename V >
-inline ReturnCode putI2c(const Target<K, V>& i_target,
+template< TargetType K, MulticastType M, typename V >
+inline ReturnCode putI2c(const Target<K, M, V>& i_target,
                          const std::vector<uint8_t>& i_data);
 
 };
