@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,8 @@ typedef struct
     bool iv_vdm_enabled;
     bool iv_ivrm_enabled;
     bool iv_wof_enabled;
+    bool iv_wov_underv_enabled;
+    bool iv_wov_overv_enabled;
 } PSTATE_attribute_state;
 
 // Safe mode frequency and voltage params
@@ -270,6 +272,21 @@ typedef struct
     uint32_t freq_proc_refclock_khz;
     uint32_t proc_dpll_divider;
 
+//Undervolt and Overvolt Attributes
+    uint8_t attr_wov_underv_enable;
+    uint8_t attr_wov_overv_enable;
+    uint8_t attr_wov_underv_force;
+    uint32_t attr_wov_sample_125us;
+    uint32_t attr_wov_max_droop_pct;
+    uint8_t attr_wov_underv_perf_loss_thresh_pct;
+    uint8_t attr_wov_underv_step_incr_pct;
+    uint8_t attr_wov_underv_step_decr_pct;
+    uint8_t attr_wov_underv_max_pct;
+    uint16_t attr_wov_underv_vmin_mv;
+    uint16_t attr_wov_overv_vmax_mv;
+    uint8_t attr_wov_overv_step_incr_pct;
+    uint8_t attr_wov_overv_step_decr_pct;
+    uint8_t attr_wov_overv_max_pct;
 } AttributeList;
 
 /// The layout of the various Pstate Parameter Blocks (PPBs) passed a single
@@ -600,7 +617,6 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
 /// -------------------------------------------------------------------
 void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
                                      GlobalPstateParmBlock* o_gppb);
-
 
 /// -------------------------------------------------------------------
 /// @brief  Print a GlobalPstateParameterBlock structure on a given stream

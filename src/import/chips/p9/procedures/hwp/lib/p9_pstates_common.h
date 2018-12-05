@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,12 +149,6 @@ typedef enum
 #define VPD_PV_PB_FREQ_MHZ      0
 #define VPD_PV_VDN_MV           1
 #define VPD_PV_IDN_100MA        2
-
-//Remove this. RTC: 174743
-#define VPD_NUM_SLOPES_SET      2
-#define VPD_SLOPES_RAW          0
-#define VPD_SLOPES_BIASED       1
-//Remove until here. RTC: 174743
 
 #define VPD_NUM_SLOPES_REGION       3
 #define REGION_POWERSAVE_NOMINAL    0

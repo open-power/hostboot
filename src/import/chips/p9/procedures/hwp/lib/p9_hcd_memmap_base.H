@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -558,6 +558,8 @@ HCD_CONST(PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE,     0x0040)
 HCD_CONST(PGPE_FLAG_ENABLE_FRATIO,              0x0020)
 HCD_CONST(PGPE_FLAG_ENABLE_VRATIO,              0x0010)
 HCD_CONST(PGPE_FLAG_VRATIO_MODIFIER,            0x0008)
+HCD_CONST(PGPE_FLAG_WOV_UNDERVOLT_ENABLE,       0x0004)
+HCD_CONST(PGPE_FLAG_WOV_OVERVOLT_ENABLE,        0x0002)
 HCD_CONST(PGPE_FLAG_PHANTOM_HALT_ENABLE,        0x0001)
 
 /// PGPE Hcode

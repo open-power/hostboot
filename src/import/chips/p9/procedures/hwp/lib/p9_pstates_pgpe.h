@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,13 +278,47 @@ typedef struct
     /// Nest frequency in Mhz. This is used by FIT interrupt
     uint32_t nest_frequency_mhz;
 
-    /// Precalculated Pstate-Voltage Slopes
-    /// \todo Remove this. RTC: 174743
-    uint16_t PsVSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
+    //Maximum performance loss threshold when undervolting(in 0.1%, tenths of percent)
+    uint8_t wov_underv_perf_loss_thresh_pct;
 
-    /// Precalculated Voltage-Pstates Slopes
-    /// \todo Remove this. RTC: 174743
-    uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
+    //WOV undervolting increment percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_step_incr_pct;
+
+    //WOV undervolting decrement percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_step_decr_pct;
+
+    //WOV undervolting max percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_max_pct;
+
+    //When undervolting, if this value is non-zero, then voltage will never be set
+    //below this value. If it is zero, then the minimum voltage is only bounded by
+    //wov_underv_max_pct.
+    uint16_t wov_underv_vmin_mv;
+
+    //When overvolting, then voltage will never be set above this value
+    uint16_t wov_overv_vmax_mv;
+
+    //WOV overvolting increment percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_step_incr_pct;
+
+    //WOV overvolting decrement percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_step_decr_pct;
+
+    //WOV overvolting max percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_max_pct;
+
+    uint8_t pad;
+
+    //Determine how often to call the wov algorithm with respect
+    //to PGPE FIT ticks
+    uint32_t wov_sample_125us;
+
+    //Maximum performance loss(in 0.1%, tenths of percent). We should never be at
+    //this level, but we check using this value inside PGPE to make sure that this
+    //is reported if it ever happens
+    uint32_t wov_max_droop_pct;
+
+    uint32_t pad1;
 
     /// All operating points
     VpdOperatingPoint operating_points_set[NUM_VPD_PTS_SET][NUM_OP_POINTS];

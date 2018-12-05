@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,8 +191,10 @@ typedef struct
 {
     poundw_entry_t poundw[NUM_OP_POINTS];
     resistance_entry_t resistance_data;
+    uint8_t undervolt_tested;
+    uint8_t reserved;
     uint64_t reserved1;
-    uint16_t reserved2;
+    uint8_t reserved2; //This field was added to keep the size of struct same when undervolt_tested field was added
 } PoundW_data;
 
 /// VDM/Droop Parameter Block

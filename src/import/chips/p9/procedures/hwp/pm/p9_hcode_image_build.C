@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1202,6 +1202,33 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("System Voltage Ratio Select   :   %s", attrVal ? "FULL" : "ACTIVE CORES" );
+
+        ///
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOV_OVERV_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOV_OVERV_ENABLED" );
+
+    if( attrVal )
+    {
+        pgpeFlag |= PGPE_FLAG_WOV_OVERVOLT_ENABLE;
+    }
+    FAPI_DBG("WOV Overvolt Enable          :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOV_UNDERV_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOV_UNDERV_ENABLED" );
+
+
+    if( attrVal )
+    {
+        pgpeFlag |= PGPE_FLAG_WOV_UNDERVOLT_ENABLE;
+    }
+    FAPI_DBG("WOV Undervolt Enable          :   %s", attrVal ? "TRUE" : "FALSE" );
+
+
 
     ///
 

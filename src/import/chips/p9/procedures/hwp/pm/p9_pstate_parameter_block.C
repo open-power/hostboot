@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -246,6 +246,43 @@ is_vdm_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
          ? true : false;
 }
 
+///--------------------------------------
+/// @brief Check wov_underv is enabled or not
+/// @param[in]  pstate attribute state
+/// @return true or false
+///--------------------------------------
+bool
+is_wov_underv_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+               PSTATE_attribute_state* i_state)
+{
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t attr_system_wov_underv_disable = 0;
+
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOV_UNDERV_DISABLE, FAPI_SYSTEM, attr_system_wov_underv_disable);
+    return
+        (!(attr_system_wov_underv_disable) &&
+         i_state->iv_wov_underv_enabled)
+         ? true : false;
+}
+
+///--------------------------------------
+/// @brief Check wov_underv is enabled or not
+/// @param[in]  pstate attribute state
+/// @return true or false
+///--------------------------------------
+bool
+is_wov_overv_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+               PSTATE_attribute_state* i_state)
+{
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t attr_system_wov_overv_disable = 0;
+
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOV_OVERV_DISABLE, FAPI_SYSTEM, attr_system_wov_overv_disable);
+    return
+        (!(attr_system_wov_overv_disable) &&
+         i_state->iv_wov_overv_enabled)
+         ? true : false;
+}
 
 void
 load_gppb_attrs(const AttributeList*   i_attr,
@@ -338,6 +375,19 @@ load_gppb_attrs(const AttributeList*   i_attr,
 
 
     }
+
+   //WOV parameters
+   o_globalppb->wov_sample_125us                = revle32(i_attr->attr_wov_sample_125us);
+   o_globalppb->wov_max_droop_pct               = revle32(i_attr->attr_wov_max_droop_pct);
+   o_globalppb->wov_underv_perf_loss_thresh_pct = i_attr->attr_wov_underv_perf_loss_thresh_pct;
+   o_globalppb->wov_underv_step_incr_pct        = i_attr->attr_wov_underv_step_incr_pct;
+   o_globalppb->wov_underv_step_decr_pct        = i_attr->attr_wov_underv_step_decr_pct;
+   o_globalppb->wov_underv_max_pct              = i_attr->attr_wov_underv_max_pct;
+   o_globalppb->wov_underv_vmin_mv              = revle16(i_attr->attr_wov_underv_vmin_mv);
+   o_globalppb->wov_overv_vmax_mv               = revle16(i_attr->attr_wov_overv_vmax_mv);
+   o_globalppb->wov_overv_step_incr_pct         = i_attr->attr_wov_overv_step_incr_pct;
+   o_globalppb->wov_overv_step_decr_pct         = i_attr->attr_wov_overv_step_decr_pct;
+   o_globalppb->wov_overv_max_pct               = i_attr->attr_wov_overv_max_pct;
 }
 
 
@@ -389,17 +439,21 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_state.iv_vdm_enabled     = false;
         l_state.iv_ivrm_enabled    = false;
         l_state.iv_wof_enabled     = false;
+        l_state.iv_wov_underv_enabled   = false;
+        l_state.iv_wov_overv_enabled   = false;
 
         //By default first disable the PSTATE attributes
         FAPI_TRY(p9_pstate_set_global_feature_attributes(i_target,
                                                          l_state,
                                                          &l_qm_flags));
 
-        l_state.iv_pstates_enabled = true;
-        l_state.iv_resclk_enabled  = true;
-        l_state.iv_vdm_enabled     = true;
-        l_state.iv_ivrm_enabled    = true;
-        l_state.iv_wof_enabled     = true;
+        l_state.iv_pstates_enabled      = true;
+        l_state.iv_resclk_enabled       = true;
+        l_state.iv_vdm_enabled          = true;
+        l_state.iv_ivrm_enabled         = true;
+        l_state.iv_wof_enabled          = true;
+        l_state.iv_wov_underv_enabled   = true;
+        l_state.iv_wov_overv_enabled    = true;
 
         // Enablement state
         PoundW_data l_poundw_data;
@@ -744,8 +798,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_globalppb.ivrm = l_ivrmpb;
 
         // Calculate pre-calculated slopes
-        p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb); //Remote this RTC: 174743
         p9_pstate_compute_PStateV_slope(l_operating_points, &l_globalppb);
+
 
         l_globalppb.dpll_pstate0_value =
                 revle32(revle32(l_globalppb.reference_frequency_khz)  /
@@ -967,6 +1021,33 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         l_occppb.wof.wof_enabled = l_state.iv_wof_enabled;
 
+        //Check whether to enable WOV Undervolting. WOV can
+        //only be enabled if VDMs are enabled
+        FAPI_INF("WOV_VMIN_MV=%u",attr.attr_wov_underv_vmin_mv);
+        if (attr.attr_wov_underv_vmin_mv == 0) {
+            l_globalppb.wov_underv_vmin_mv = revle16(uint16_t(revle32(l_globalppb.safe_voltage_mv)));
+            FAPI_INF("WOV_VMIN_MV=%u",revle16(l_globalppb.wov_underv_vmin_mv));
+            FAPI_INF("SafeVoltage=%u",revle32(l_globalppb.safe_voltage_mv));
+        }
+        if (is_wov_underv_enabled(i_target, &l_state) && 
+            is_vdm_enabled(i_target, &l_state)){
+            l_state.iv_wov_underv_enabled = true;
+        } else{
+            FAPI_INF("WOV Undervolting is not enabled");
+            l_state.iv_wov_underv_enabled = false;
+        }
+
+        //Check whether to enable WOV Overvolting. WOV can
+        //only be enabled if VDMs are enabled
+        if (is_wov_overv_enabled(i_target, &l_state) && 
+            is_vdm_enabled(i_target, &l_state)){
+            l_state.iv_wov_overv_enabled = true;
+        } else{
+            FAPI_INF("WOV Overvolting is not enabled");
+            l_state.iv_wov_overv_enabled = false;
+        }
+
+        // QuadManagerFlags
         FAPI_TRY(p9_pstate_set_global_feature_attributes(i_target,
                  l_state,
                  &l_qm_flags));
@@ -1183,6 +1264,8 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
+
 // START OF GET ATTRIBUTES
 
 fapi2::ReturnCode
@@ -1316,6 +1399,22 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_as
     DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        i_target, proc_dpll_divider);
     // AVSBus ... needed by p9_setup_evid
 
+    //Get WOV attributes
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,        FAPI_SYSTEM,attr_wov_overv_enable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,       FAPI_SYSTEM,attr_wov_underv_enable);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_FORCE,               i_target,attr_wov_underv_force);
+    DATABLOCK_GET_ATTR(ATTR_WOV_SAMPLE_125US,               i_target,attr_wov_sample_125us);
+    DATABLOCK_GET_ATTR(ATTR_WOV_MAX_DROOP_10THPCT,          i_target,attr_wov_max_droop_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT,i_target,attr_wov_underv_perf_loss_thresh_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,   i_target,attr_wov_underv_step_incr_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,   i_target,attr_wov_underv_step_decr_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,         i_target,attr_wov_underv_max_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_UNDERV_VMIN_MV,             i_target,attr_wov_underv_vmin_mv);
+    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,     i_target,attr_wov_overv_vmax_mv);
+    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,    i_target,attr_wov_overv_step_incr_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,    i_target,attr_wov_overv_step_decr_pct);
+    DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,          i_target,attr_wov_overv_max_pct);
+
     // Deal with defaults if attributes are not set
 #define SET_DEFAULT(_attr_name, _attr_default) \
     if (!(io_attr->_attr_name)) \
@@ -1333,7 +1432,52 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_as
     SET_DEFAULT(attr_ext_vrm_stabilization_time_us, EXT_VRM_STABILIZATION_TIME_NS)
     SET_DEFAULT(attr_ext_vrm_step_size_mv, EXT_VRM_STEPSIZE_MV)
 
-    // Deal with crital attributes that are not set and that any defaults chosen
+    SET_DEFAULT(attr_wov_sample_125us, 2);
+    SET_DEFAULT(attr_wov_max_droop_pct, 125);
+    SET_DEFAULT(attr_wov_overv_step_incr_pct, 5);
+    SET_DEFAULT(attr_wov_overv_step_decr_pct, 5);
+    SET_DEFAULT(attr_wov_overv_max_pct, 0);
+    SET_DEFAULT(attr_wov_overv_vmax_mv, 1150);
+    SET_DEFAULT(attr_wov_underv_step_incr_pct, 5);
+    SET_DEFAULT(attr_wov_underv_step_decr_pct, 5);
+    SET_DEFAULT(attr_wov_underv_max_pct, 100);
+    SET_DEFAULT(attr_wov_underv_perf_loss_thresh_pct, 5);
+
+
+    //Ensure that the ranges for WOV attributes are honored
+    if (io_attr->attr_wov_sample_125us < 2) {
+        io_attr->attr_wov_sample_125us = 2;
+    }
+
+    if(io_attr->attr_wov_overv_step_incr_pct > 20) {
+        io_attr->attr_wov_overv_step_incr_pct = 20;
+    }
+
+    if(io_attr->attr_wov_overv_step_decr_pct > 20) {
+        io_attr->attr_wov_overv_step_decr_pct = 20;
+    }
+
+    if(io_attr->attr_wov_overv_max_pct > 100) {
+        io_attr->attr_wov_overv_max_pct = 100;
+    }
+
+    if(io_attr->attr_wov_underv_step_incr_pct > 20) {
+        io_attr->attr_wov_underv_step_incr_pct = 20;
+    }
+
+    if(io_attr->attr_wov_underv_step_decr_pct > 20) {
+        io_attr->attr_wov_underv_step_decr_pct = 20;
+    }
+
+    if(io_attr->attr_wov_underv_max_pct < 10) {
+        io_attr->attr_wov_underv_step_decr_pct = 10;
+    }
+
+    if (io_attr->attr_wov_underv_perf_loss_thresh_pct > 20) {
+        io_attr->attr_wov_underv_perf_loss_thresh_pct = 20;
+    }
+
+    // Deal with critical attributes that are not set and that any defaults chosen
     // could well be very wrong
     FAPI_ASSERT(io_attr->attr_nest_frequency_mhz,
                 fapi2::PSTATE_PB_NEST_FREQ_EQ_ZERO()
@@ -2627,80 +2771,6 @@ compute_slope_thresh(int32_t y1, int32_t y0, int32_t x1, int32_t x0)
            );
 }
 
-//
-// p9_pstate_compute_PsV_slopes
-//
-// Computes slope of voltage-PState curve and PState-voltage
-//
-// PState(Frequency) on y-axis, Voltage is on x-axis for VF curve
-// Interpolation formula: (y-y0)/(x-x0) = (y1-y0)/(x1-x0)
-// m   = (x1-x0)/(y1-y0), then use this to calculate voltage, x = (y-y0)*m + x0
-// 1/m = (y1-y0)/(x1-x0) here, then use this to calculate pstate(frequency), y = (x-x0)*m + y0
-// Region 0 is b/w POWERSAVE and NOMINAL
-// Region 1 is b/w NOMINAL and TURBO
-// Region 2 is between TURBO and ULTRA_TURBO
-//
-// Inflection Point 3 is ULTRA_TURBO
-// Inflection Point 2 is TURBO
-// Inflection Point 1 is NOMINAL
-// Inflection Point 0 is POWERSAVE
-//
-//\todo: Remove this. RTC: 174743
-void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
-                                  GlobalPstateParmBlock* o_gppb)
-{
-
-    for(auto pt_set = 0; pt_set < VPD_NUM_SLOPES_SET; ++pt_set)
-    {
-        FAPI_DBG("PsVSlopes pt_set %d", pt_set);
-
-        // ULTRA TURBO pstate check is not required because its pstate will be 0
-        if (!(i_operating_points[pt_set][POWERSAVE].pstate) ||
-            !(i_operating_points[pt_set][NOMINAL].pstate) ||
-            !(i_operating_points[pt_set][TURBO].pstate))
-        {
-            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s (%d)", vpdSetStr[pt_set], pt_set);
-            break;
-        }
-
-        //Calculate slopes
-        for(auto region(REGION_POWERSAVE_NOMINAL); region <= REGION_TURBO_ULTRA; ++region)
-        {
-            // Pstate value decreases with increasing region.  Thus the values
-            // are swapped to result in a positive difference.
-            o_gppb->PsVSlopes[pt_set][region] =
-                revle16(
-                    compute_slope_3_13(revle32(i_operating_points[pt_set][region + 1].vdd_mv),
-                                       revle32(i_operating_points[pt_set][region].vdd_mv),
-                                       i_operating_points[pt_set][region].pstate,
-                                       i_operating_points[pt_set][region + 1].pstate)
-                );
-
-            FAPI_DBG("PsVSlopes[%s][%s] 0x%04x %d", vpdSetStr[pt_set], region_names[region],
-                     revle16(o_gppb->PsVSlopes[pt_set][region]),
-                     revle16(o_gppb->PsVSlopes[pt_set][region]));
-        }
-
-        //Calculate inverted slopes
-        for(auto region(REGION_POWERSAVE_NOMINAL); region <= REGION_TURBO_ULTRA; ++region)
-        {
-            // Pstate value decreases with increasing region.  Thus the values
-            // are swapped to result in a positive difference.
-            o_gppb->VPsSlopes[pt_set][region] =
-                revle16(
-                    compute_slope_3_13(i_operating_points[pt_set][region].pstate,
-                                       i_operating_points[pt_set][region + 1].pstate,
-                                       revle32(i_operating_points[pt_set][region + 1].vdd_mv),
-                                       revle32(i_operating_points[pt_set][region].vdd_mv))
-                );
-
-            FAPI_DBG("VPsSlopes[%s][%s] 0x%04x %d", vpdSetStr[pt_set], region_names[region],
-                     revle16(o_gppb->VPsSlopes[pt_set][region]),
-                     revle16(o_gppb->VPsSlopes[pt_set][region]));
-        }
-    }
-}
-
 //This fills up the PStateVSlopes and VPStatesSlopes in GlobalParmBlock
 //Going forward this method should be retained in favor of the p9_pstate_compute_PsVSlopes
 void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
@@ -2756,6 +2826,7 @@ void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
         }
     }
 }
+
 
 #define CENTER_STR(_buffer, _variable, _width)                  \
    {                                                            \
@@ -2927,50 +2998,6 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
              revle32(i_gppb->nest_frequency_mhz),
              revle32(i_gppb->nest_frequency_mhz));
 
-
-    // 2 Slope sets
-
-    sprintf(l_buffer, "PsVSlopes:");
-    sprintf( l_temp_buffer,  "%9s", "");
-    strcat(l_buffer, l_temp_buffer);
-    for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
-    {
-        sprintf(l_temp_buffer, " %s  ", prt_region_names[j]);
-        strcat(l_buffer, l_temp_buffer);
-    }
-    FAPI_INF("%s", l_buffer);
-    for (auto i = 0; i < VPD_NUM_SLOPES_SET; ++i)
-    {
-        sprintf(l_buffer, " %-16s : ", vpdSetStr[i]);
-        for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
-        {
-            sprintf(l_temp_buffer, "%6s%04X%7s ",
-                    " ",revle16(i_gppb->PsVSlopes[i][j])," ");
-            strcat(l_buffer, l_temp_buffer);
-        }
-        FAPI_INF("%s", l_buffer);
-    }
-
-    sprintf(l_buffer, "VPsSlopes:");
-    sprintf( l_temp_buffer,  "%9s", "");
-    strcat(l_buffer, l_temp_buffer);
-    for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
-    {
-        sprintf(l_temp_buffer, " %s  ", prt_region_names[j]);
-        strcat(l_buffer, l_temp_buffer);
-    }
-    FAPI_INF("%s", l_buffer);
-    for (auto i = 0; i < VPD_NUM_SLOPES_SET; ++i)
-    {
-        sprintf(l_buffer, " %-16s : ", vpdSetStr[i]);
-        for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
-        {
-            sprintf(l_temp_buffer, "%6s%04X%7s ",
-                    " ",revle16(i_gppb->VPsSlopes[i][j])," ");
-            strcat(l_buffer, l_temp_buffer);
-        }
-        FAPI_INF("%s", l_buffer);
-    }
 
     // 4 Slope sets
     sprintf(l_buffer, "PstateVSlopes:");
@@ -3975,6 +4002,19 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                         l_pound_w_points[i]);
         }
 
+        //If we have reached this point, that means VDM is ok to be enabled. Only then we try to
+        //enable wov undervolting
+        uint8_t wov_underv_force;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOV_UNDERV_FORCE, i_target, wov_underv_force),
+                    "Error from FAPI_ATTR_GET for attribute ATTR_WOV_UNDERV_FORCE");
+        if ( ((o_data->undervolt_tested == 1) || (wov_underv_force == 1))  && 
+            is_wov_underv_enabled(i_target,o_state) == 1) {
+            o_state->iv_wov_underv_enabled = true;
+            FAPI_INF("UNDERV_TESTED or UNDERV_FORCE set to 1");
+        } else{
+            o_state->iv_wov_underv_enabled = false;
+            FAPI_INF("UNDERV_TESTED and UNDERV_FORCE set to 0");
+        }
 
         memcpy(&(o_vdmpb->vpd_w_data), o_data, sizeof(o_vdmpb->vpd_w_data));
     }
@@ -3983,11 +4023,13 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
 fapi_try_exit:
 
-    // Given #W has both VDM and WOF content, a failure needs to disable both
+    // Given #W has VDM, WOF, and WOV content, a failure needs to disable all
     if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
         o_state->iv_vdm_enabled = false;
         o_state->iv_wof_enabled = false;
+        o_state->iv_wov_underv_enabled = false;
+        o_state->iv_wov_overv_enabled = false;
     }
 
     if (!(o_state->iv_vdm_enabled))
@@ -4523,6 +4565,12 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
         (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
 
+    fapi2::ATTR_WOV_UNDERV_ENABLED_Type l_wov_underv_enabled =
+        (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_FALSE;
+
+    fapi2::ATTR_WOV_OVERV_ENABLED_Type l_wov_overv_enabled =
+        (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_FALSE;
+
     if (i_state.iv_pstates_enabled)
     {
         l_ps_enabled = (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE;
@@ -4548,6 +4596,15 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
         l_wof_enabled = (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
     }
 
+    if (i_state.iv_wov_underv_enabled)
+    {
+        l_wov_underv_enabled = (fapi2::ATTR_WOV_UNDERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_UNDERV_ENABLED_TRUE;
+    }
+
+    if (i_state.iv_wov_overv_enabled)
+    {
+        l_wov_overv_enabled = (fapi2::ATTR_WOV_OVERV_ENABLED_Type)fapi2::ENUM_ATTR_WOV_OVERV_ENABLED_TRUE;
+    }
 
 #define SET_ATTR(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_SET(attr_name, target, attr_assign),"Attribute set failed"); \
@@ -4558,7 +4615,8 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, attr_assign, attr_assign);
     SET_ATTR(fapi2::ATTR_VDM_ENABLED, i_target, l_vdm_enabled);
     SET_ATTR(fapi2::ATTR_IVRM_ENABLED, i_target, l_ivrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED, i_target, l_wof_enabled);
-
+    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, i_target, l_wov_underv_enabled);
+    SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, i_target, l_wov_overv_enabled);
 
     // ----------------
     // set CME QM flags
