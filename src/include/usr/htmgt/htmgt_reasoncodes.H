@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,6 @@ namespace HTMGT
         HTMGT_RC_ECMD_DBUF_COPY_FAIL   = HTMGT_COMP_ID | 0x53,
         HTMGT_RC_TARGET_NOT_FUNCTIONAL = HTMGT_COMP_ID | 0x54,
         HTMGT_RC_OCC_MASTER_NOT_FOUND  = HTMGT_COMP_ID | 0x55,
-        HTMGT_RC_OCC_RESET_THREHOLD    = HTMGT_COMP_ID | 0x56,
         HTMGT_RC_INVALID_OCC_ELOG      = HTMGT_COMP_ID | 0x63,
         HTMGT_RC_BAD_FRU_CALLOUTS      = HTMGT_COMP_ID | 0x7D,
         HTMGT_RC_MISMATCHING_SEVERITY  = HTMGT_COMP_ID | 0x7F,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,9 +147,11 @@ namespace HTMGT
                                 {
                                     // Limit number of elogs retrieved so
                                     // we do not get stuck in loop
-                                    TMGT_INF("pollForErrors: OCC%d still has"
-                                             "more errors to report.",
-                                             iv_instance);
+                                    TMGT_INF("pollForErrors: OCC%d still has "
+                                             "more errors to report. "
+                                             "(ID 0x%02X)",
+                                             iv_instance,
+                                             currentPollRsp->errorId);
                                     continuePolling = false;
                                 }
                             }
@@ -316,7 +318,10 @@ namespace HTMGT
                               iv_role, pollRsp->status,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    iv_resetReason = OCC_RESET_REASON_ERROR;
+                    if (iv_resetReason == OCC_RESET_REASON_NONE)
+                    {
+                        iv_resetReason = OCC_RESET_REASON_ERROR;
+                    }
                     break;
                 }
 
@@ -343,7 +348,10 @@ namespace HTMGT
                               iv_occsPresent, pollRsp->status,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    iv_resetReason = OCC_RESET_REASON_ERROR;
+                    if (iv_resetReason == OCC_RESET_REASON_NONE)
+                    {
+                        iv_resetReason = OCC_RESET_REASON_ERROR;
+                    }
                 }
             }
 
