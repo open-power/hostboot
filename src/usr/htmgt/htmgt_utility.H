@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,11 +155,12 @@ namespace HTMGT
         SUBSEC_ADDITIONAL_SRC         = 0x0C,
         SUBSEC_OCC_CMD_DATA           = 0x0D,
         SUBSEC_OCC_RSP_DATA           = 0x0E,
-        //SUBSEC_ELOG_TYPE_TOIF_RESET   = 0x10,
+        SUBSEC_ELOG_TYPE_HTMGT_DATA   = 0x10,
         //SUBSEC_ELOG_TYPE_OCC_RESET    = 0x11,
         //SUBSEC_ELOG_TYPE_PCAP_DATA    = 0x12,
         //SUBSEC_ELOG_TYPE_THERMAL_DATA = 0x13,
         //SUBSEC_PROC_SCOM_REGISTERS    = 0x14,
+        //SUBSEC_ELOG_TYPE_OCC_TRACE    = 0x15,
         // 0xE0-0xEF are reserved for OCC Exceptions
     };
 
@@ -178,12 +179,6 @@ namespace HTMGT
         PASSTHRU_OCC_CFG_DATA           = 0x0C,
     };
 
-    enum htmgtAttrName
-    {
-        ATTR_PSTATE         = 0x01,
-        ATTR_PSTATE_MFG     = 0x02,
-        ATTR_RAW            = 0xFF
-    };
 
     /**
      * @brief Create/Build an Error log and add HTMGT component trace
@@ -267,6 +262,12 @@ namespace HTMGT
       */
      bool int_flags_set(const uint32_t i_mask);
 
+     /**
+      * @brief Check if OCC reset counters need to be cleared.
+      *        Function is called periodically (OCC_RCOUNT_RESET_TIME)
+      *
+      */
+     void check_reset_count();
 
 } // end namespace
 #endif

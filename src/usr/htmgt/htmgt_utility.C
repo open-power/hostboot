@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #include "htmgt_utility.H"
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/attributes.H>
+#include <time.h>
 
 using namespace TARGETING;
 
@@ -38,6 +39,8 @@ namespace HTMGT
     uint32_t G_debug_data = 0;
     uint32_t G_debug_trace = DEBUG_TRACE_FULL_NONVERBOSE;
 
+    // Timer for periodically clearing OCC reset counts (seconds)
+    const uint64_t OCC_RCOUNT_RESET_TIME = 60 * 60; // 1 hour
 
     // Create/Build an Error log and add HTMGT component trace
     void bldErrLog(errlHndl_t &   io_err,
@@ -70,9 +73,6 @@ namespace HTMGT
         }
         else
         {
-            // TODO RTC 124739
-            // - collectTrace will not filter dup traces and no way to clear
-            // - no way to add secondary SRC to elog
             io_err->collectTrace("HTMGT");
 
             uint32_t additionalSrc[] =
@@ -87,10 +87,21 @@ namespace HTMGT
                             1,  // version
                             SUBSEC_ADDITIONAL_SRC);
         }
+
+        // Add HTMGT/OCC state data
+        uint16_t occ_data_len = 0;
+        uint8_t  occ_data[OCC_MAX_DATA_LENGTH];
+        OccManager::getHtmgtData(occ_data_len, occ_data);
+        if (occ_data_len > 0)
+        {
+            io_err->addFFDC(HTMGT_COMP_ID,
+                            occ_data,
+                            occ_data_len,
+                            1, //version
+                            SUBSEC_ELOG_TYPE_HTMGT_DATA);
+        }
     }
 
-
-    // TODO RTC 124739 - refactor/optimize trace strings
 
     // Internal utility to convert OCC command type to a string
     const char *command_string(const uint8_t i_cmd)
@@ -118,7 +129,6 @@ namespace HTMGT
         const uint8_t l_total =
             sizeof(L_cmd_string) / sizeof(struct string_data_t);
 
-        // TODO RTC 124739
         uint8_t l_idx = 0;
         for (l_idx=0; l_idx<l_total; l_idx++)
         {
@@ -221,6 +231,49 @@ namespace HTMGT
         }
 
         return flags_are_set;
+    }
+
+    // Check if reset count needs to be cleared due to periodic timer.
+    // Should not be called if the system is in safe mode.
+    void check_reset_count()
+    {
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        if (sys)
+        {
+            uint8_t safeMode = 0;
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+            if (safeMode == 0)
+            {
+                const uint64_t last_clear =
+                    sys->getAttr<ATTR_HTMGT_PMCOMPLEX_RESET_COUNT_TIMER>();
+                timespec_t curTime;
+
+                if (clock_gettime(CLOCK_MONOTONIC, &curTime) == 0)
+                {
+                    bool update_attr = false;
+                    if (last_clear == 0)
+                    {
+                        // First call since boot
+                        update_attr = true;
+                    }
+                    else if ((curTime.tv_sec < last_clear) ||
+                             (curTime.tv_sec - last_clear >
+                              OCC_RCOUNT_RESET_TIME))
+                    {
+                        // Clear reset counters (counter wrapped/exceeded time)
+                        OccManager::clearResetCounts();
+                        update_attr = true;
+                    }
+                    if (update_attr)
+                    {
+                        sys->setAttr
+                            <TARGETING::ATTR_HTMGT_PMCOMPLEX_RESET_COUNT_TIMER>
+                            (curTime.tv_sec);
+                    }
+                }
+            }
+        }
     }
 
 } // end namespace

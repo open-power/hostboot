@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,18 @@ namespace HTMGT
         }
         TMGT_INF("processOccStartStatus(Start Success=%c, failedOcc=0x%08X)",
                  i_startCompleted?'y':'n', l_huid);
+
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        if(sys)
+        {
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+        }
+        if (safeMode == 0)
+        {
+            check_reset_count();
+        }
 
         if (false == int_flags_set(FLAG_HOLD_OCCS_IN_RESET))
         {
@@ -263,6 +275,8 @@ namespace HTMGT
             return;
         }
 
+        check_reset_count();
+
         bool polledOneOcc = false;
         errlHndl_t err = OccManager::buildOccs();
         if (nullptr == err)
@@ -342,6 +356,8 @@ namespace HTMGT
             return;
         }
 
+        check_reset_count();
+
         if( i_proc )
         {
             TARGETING::TargetHandleList pOccs;
@@ -385,7 +401,8 @@ namespace HTMGT
 
         if (false == int_flags_set(FLAG_EXT_RESET_DISABLED))
         {
-            errl = OccManager::resetOccs(failedOccTarget);
+            errl = OccManager::resetOccs(failedOccTarget, false, false,
+                                         OCC_RESET_REASON_EXTERNAL_REQUEST);
             if(errl)
             {
                 ERRORLOG::errlCommit(errl, HTMGT_COMP_ID); // sets errl to nullptr
@@ -419,6 +436,8 @@ namespace HTMGT
 
         if (0 == safeMode)
         {
+            check_reset_count();
+
             occStateId targetState = OCC_STATE_ACTIVE;
             if (false == i_occActivation)
             {
@@ -502,7 +521,37 @@ namespace HTMGT
         htmgtReasonCode failingSrc = HTMGT_RC_NO_ERROR;
         o_rspLength = 0;
 
-        err = OccManager::buildOccs();
+        if ((i_cmdLength > 0) && (NULL != i_cmdData))
+        {
+            TMGT_INF(">>passThruCommand(0x%02X)", i_cmdData[0]);
+        }
+        else
+        {
+            TMGT_INF(">>passThruCommand()");
+        }
+
+        TARGETING::Target* sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        if(sys)
+        {
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+        }
+        if (safeMode == 0)
+        {
+            check_reset_count();
+        }
+
+        bool skip_occ_comm = false;
+        if (safeMode ||
+            (i_cmdData[0] == PASSTHRU_INTERNAL_FLAG) ||
+            (i_cmdData[0] == PASSTHRU_OCC_CFG_DATA))
+        {
+            // No need to talk to OCC
+            skip_occ_comm = true;
+        }
+
+        err = OccManager::buildOccs(false, skip_occ_comm);
         if (nullptr == err)
         {
             if ((i_cmdLength > 0) && (NULL != i_cmdData))
@@ -510,8 +559,20 @@ namespace HTMGT
                 switch (i_cmdData[0])
                 {
                     case PASSTHRU_OCC_STATUS:
-                        TMGT_INF("passThruCommand: OCC Status");
-                        OccManager::getOccData(o_rspLength, o_rspData);
+                        TMGT_INF("passThruCommand: HTMGT/OCC Status");
+                        if (safeMode == 0)
+                        {
+                            // Send poll to confirm comm, update states and
+                            // flush errors
+                            TMGT_INF("passThruCommand: Sending Poll(s)");
+                            err = OccManager::sendOccPoll(true, nullptr);
+                            if (err)
+                            {
+                                TMGT_ERR("passThruCommand: Poll OCCs failed.");
+                                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                            }
+                        }
+                        OccManager::getHtmgtData(o_rspLength, o_rspData);
                         break;
 
                     case PASSTHRU_INTERNAL_FLAG:
@@ -538,7 +599,7 @@ namespace HTMGT
                         break;
 
                     case PASSTHRU_SEND_OCC_COMMAND:
-                        if (i_cmdLength >= 3)
+                        if ((i_cmdLength >= 3) && (safeMode == 0))
                         {
                             const uint8_t occInstance = i_cmdData[1];
                             const occCommandType occCmd =
@@ -586,34 +647,50 @@ namespace HTMGT
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: invalid OCC command "
-                                     "length %d", i_cmdLength);
-                            failingSrc = HTMGT_RC_INVALID_LENGTH;
+                            if (safeMode)
+                            {
+                                TMGT_ERR("passThruCommand: Ignoring OCC command"
+                                         " because system is in safe mode");
+                                failingSrc = HTMGT_RC_OCC_CRIT_FAILURE;
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Invalid OCC command "
+                                         "length %d", i_cmdLength);
+                                failingSrc = HTMGT_RC_INVALID_LENGTH;
+                            }
                         }
                         break;
 
                     case PASSTHRU_CLEAR_RESET_COUNTS:
                         TMGT_INF("passThruCommand: Clear all OCC reset counts");
-                        OccManager::clearResetCounts();
+                        if (safeMode == 0)
+                        {
+                            OccManager::clearResetCounts();
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: Clear ignored because "
+                                     "system is in safe mode");
+                            failingSrc = HTMGT_RC_OCC_CRIT_FAILURE;
+                        }
                         break;
 
                     case PASSTHRU_EXIT_SAFE_MODE:
+                        TMGT_INF("passThruCommand: Clear Safe Mode");
+                        if (safeMode)
                         {
-                            TMGT_INF("passThruCommand: Clear Safe Mode");
-                            // Clear OCC reset counts and failed flags
-                            OccManager::clearResetCounts();
                             // Clear safe mode reason
                             OccManager::updateSafeModeReason(0, 0);
                             // Clear system safe mode flag/attribute
-                            TARGETING::Target* sys = NULL;
-                            TARGETING::targetService().getTopLevelTarget(sys);
-                            const uint8_t safeMode = 0;
-                            // Mark system as NOT being in safe mode
                             if(sys)
                             {
+                                safeMode = 0;
                                 sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>
                                     (safeMode);
                             }
+                            // Clear OCC reset counts and failed flags
+                            OccManager::clearResetCounts();
                             // Reset the OCCs (do not increment reset count
                             // or attempt comm with OCC since they are in reset)
                             TMGT_INF("passThruCommand: Calling resetOccs");
@@ -625,44 +702,56 @@ namespace HTMGT
                                          err->reasonCode());
                             }
                         }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: Clear ignored, "
+                                     "system is NOT in safe mode");
+                            failingSrc=HTMGT_RC_PRESENT_STATE_PROHIBITS;
+                        }
                         break;
 
                     case PASSTHRU_RESET_PM_COMPLEX:
                         TMGT_INF("passThruCommand: Reset PM Complex");
-
-                        err = OccManager::resetOccs(nullptr, true, true);
-                        if(err)
+                        if (safeMode == 0)
                         {
-                            TMGT_ERR("passThruCommand: Reset PM Complex FAIL "
-                                        "with rc 0x%04X", err->reasonCode() );
+                            // Will not increment reset count or attempt comm
+                            err = OccManager::
+                                resetOccs(nullptr, true, true,
+                                          OCC_RESET_REASON_EXTERNAL_REQUEST);
+                            if(err)
+                            {
+                                TMGT_ERR("passThruCommand: Reset PM Complex "
+                                         "FAIL with rc 0x%04X",
+                                         err->reasonCode());
+                            }
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: Ignoring reset because "
+                                     "system is in safe mode");
+                            failingSrc = HTMGT_RC_OCC_CRIT_FAILURE;
                         }
                         break;
 
-                    //HOLD for future need. case PASSTHRU_QUERY_MODE_FUNCTION:
-                    //    TMGT_INF("passThruCommand: Query mode or function");
-
-                    //    break;
-
                     case PASSTHRU_ENA_DIS_OPAL_STATE:
-                      {
-                        TMGT_INF("passThruCommand: enable/disable OPAL STATE");
-
-                        if (i_cmdLength == 2)
+                        TMGT_INF("passThruCommand: set OPAL state(%d)",
+                                 i_cmdData[1]);
+                        if ((i_cmdLength == 2) && (safeMode == 0))
                         {
-                           //0 = disable OPAL mode (i.e. run as PowerVM)
-                           if (i_cmdData[1] == 0)
-                           {
-                               G_system_type = OCC_CFGDATA_OPENPOWER_POWERVM;
-                           }
-                           //1 = enable OPAL mode
-                           else if (i_cmdData[1] == 1)
-                           {
+                            //0 = disable OPAL mode (i.e. run as PowerVM)
+                            if (i_cmdData[1] == 0)
+                            {
+                                G_system_type = OCC_CFGDATA_OPENPOWER_POWERVM;
+                            }
+                            //1 = enable OPAL mode
+                            else if (i_cmdData[1] == 1)
+                            {
                                 G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
-                           }
-                           else
-                           {
-                              TMGT_ERR("passThruCommand: Invalid requested OPAL"
-                                         " mode 0x%02X ", i_cmdData[1] );
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Invalid requested "
+                                         "OPAL mode 0x%02X ", i_cmdData[1] );
                                 /*@
                                  * @errortype
                                  * @reasoncode   HTMGT_RC_INVALID_PARAMETER
@@ -671,33 +760,45 @@ namespace HTMGT
                                  * @userdata2    command data length
                                  * @devdesc      Invalid pass thru command data
                                  */
-                              failingSrc = HTMGT_RC_INVALID_PARAMETER;
-                           }
+                                failingSrc = HTMGT_RC_INVALID_PARAMETER;
+                            }
                             if(failingSrc == HTMGT_RC_NO_ERROR)
                             {
-                              TMGT_INF("passThruCommand: OPAL State(0x%02X), "
-                                        "resetting PM Complex", G_system_type);
-                              err = OccManager::resetOccs(nullptr,true,true);
-                              if(err)
-                              {
-                                TMGT_ERR("passThruCommand: PM Complex Reset "
-                                        "failed with rc 0x%04X after updating "
-                                        "OPAL state", err->reasonCode());
-                              }
-                           }
+                                TMGT_INF("passThruCommand: OPAL State(0x%02X), "
+                                         "resetting PM Complex", G_system_type);
+                                err = OccManager::resetOccs(nullptr,true,true,
+                                             OCC_RESET_REASON_EXTERNAL_REQUEST);
+                                if(err)
+                                {
+                                    TMGT_ERR("passThruCommand: PM Complex Reset"
+                                             " failed with rc 0x%04X after "
+                                             "updating OPAL state",
+                                             err->reasonCode());
+                                }
+                            }
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: invalid OPAL State "
-                                     "length %d", i_cmdLength);
-                            failingSrc = HTMGT_RC_INVALID_LENGTH;
+                            if (safeMode)
+                            {
+                                TMGT_ERR("passThruCommand: Ignoring Opal state"
+                                         " because system is in safe mode");
+                                failingSrc = HTMGT_RC_OCC_CRIT_FAILURE;
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Invalid command "
+                                         "length %d", i_cmdLength);
+                                failingSrc = HTMGT_RC_INVALID_LENGTH;
+                            }
                         }
-                      }
-                      break;
+                        break;
 
                     case PASSTHRU_SET_OCC_STATE:
+                        TMGT_INF("passThruCommand: Set OCC State(%d)",
+                                 i_cmdData[1]);
+                        if ((i_cmdLength == 2) && (safeMode == 0))
                         {
-                            TMGT_INF("passThruCommand: Set OCC State");
                             occStateId l_targetState = (occStateId)i_cmdData[1];
                             //Validate state requested is supported.
                             if( (l_targetState == OCC_STATE_OBSERVATION) ||
@@ -708,14 +809,15 @@ namespace HTMGT
                                 err = OccManager::setOccState(l_targetState);
                                 if (nullptr == err)
                                 {
-                                    TMGT_INF("passThruCommand: OCC states  "
-                                            "updated to 0x%02X", l_targetState);
+                                    TMGT_INF("passThruCommand: OCC states "
+                                             "updated to 0x%02X",
+                                             l_targetState);
                                 }
                                 else
                                 {
                                     TMGT_ERR("passThruCommand: OCC state change"
-                                            " FAIL with rc 0x%04X",
-                                            err->reasonCode());
+                                             " FAIL with rc 0x%04X",
+                                             err->reasonCode());
                                 }
                             }
                             else
@@ -725,8 +827,22 @@ namespace HTMGT
                                 failingSrc = HTMGT_RC_INVALID_PARAMETER;
                             }
                         }
+                        else
+                        {
+                            if (safeMode)
+                            {
+                                TMGT_ERR("passThruCommand: Ignoring set state"
+                                         " because system is in safe mode");
+                                failingSrc = HTMGT_RC_OCC_CRIT_FAILURE;
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Invalid command "
+                                         "length %d", i_cmdLength);
+                                failingSrc = HTMGT_RC_INVALID_LENGTH;
+                            }
+                        }
                         break;
-
 
 
                     case PASSTHRU_WOF_RESET_REASONS:
@@ -758,8 +874,8 @@ namespace HTMGT
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: invalid data length %d",
-                                     i_cmdLength);
+                            TMGT_ERR("passThruCommand: Invalid command "
+                                     "length %d", i_cmdLength);
                             failingSrc = HTMGT_RC_INVALID_LENGTH;
                         }
                         break;
@@ -791,6 +907,8 @@ namespace HTMGT
                 }
             }
         }
+        TMGT_INF("<<passThruCommand() returning 0x%04X",
+                 (err==nullptr) ? 0 : err->reasonCode());
 
         return err;
 

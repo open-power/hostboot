@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -204,6 +204,20 @@
       </uint16_t>
     </simpleType>
     <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
+    <description>
+        Number of PM Complex resets since the system was booted.
+        Value will only be cleared at power on.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
   </attribute>
@@ -551,6 +565,20 @@
       </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HTMGT_PMCOMPLEX_RESET_COUNT_TIMER</id>
+    <description>
+       Timer value used to periodically clear the PM Complex reset
+       counters.  Used internally by HTMGT.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
   </attribute>
@@ -1303,30 +1331,6 @@ ID for the sensor number returned with the elog. -->
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-  </attribute>
-
-  <attribute>
-    <id>PSTATE_TABLE</id>
-    <description>HTMGT PSTATE data</description>
-    <simpleType>
-      <uint8_t/>
-      <array>3656</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
-    <id>PSTATE_TABLE_MFG</id>
-    <description>HTMGT PSTATE data for mfg</description>
-    <simpleType>
-      <uint8_t/>
-      <array>3656</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
   </attribute>
 
   <attribute>

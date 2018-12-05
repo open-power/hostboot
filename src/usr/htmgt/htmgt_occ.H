@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,9 @@ namespace HTMGT
         OCC_RESET_REASON_POWER_FAULT       = 0x04,
         OCC_RESET_REASON_DIFF_OCC          = 0x05,
         OCC_RESET_REASON_OCC_REQUEST       = 0x06,
-        OCC_RESET_REASON_WOF_REQUEST       = 0x07,
+        OCC_RESET_REASON_EXTERNAL_REQUEST  = 0x0A,
+        OCC_RESET_REASON_WOF_REQUEST       = 0x0C,
+        OCC_RESET_REASON_CHECKPOINT_FAIL   = 0x0D,
     };
 
     // OCC Callout Structure
@@ -161,7 +163,7 @@ namespace HTMGT
             /**
              * @brief Return pointer OCC target
              *
-             * @return pointer to last poll response
+             * @return pointer to OCC target (not processor target)
              */
             TARGETING::TargetHandle_t getTarget() { return iv_target; };
 
@@ -515,11 +517,15 @@ namespace HTMGT
              * @param[in] i_skipComm            true will prevent attempts to
              *            communicate with OCC before reset (poll/resetPrep)
              *            Used when exiting safe mode.
+             * @param[in] i_reason              reason for the reset
+             *            Reason will not be updated for OCC_RESET_REASON_NONE
              * @return Error Log | NULL
              */
             static errlHndl_t resetOccs(TARGETING::Target * i_failedOccTarget,
                                         bool i_skipCountIncrement = false,
-                                        bool i_skipComm = false);
+                                        bool i_skipComm = false,
+                                        enum occResetReason i_reason =
+                                        OCC_RESET_REASON_NONE);
 
 
             /**
@@ -615,7 +621,7 @@ namespace HTMGT
              * @param[out] o_data   Buffer of 256 bytes where data will
              *                      be copied
              */
-            static void getOccData(uint16_t & o_length, uint8_t *o_data);
+            static void getHtmgtData(uint16_t & o_length, uint8_t *o_data);
 
             /**
              * @brief Collect WOF reset reasons for ALL OCCs
@@ -627,36 +633,6 @@ namespace HTMGT
              */
             static void getWOFResetReasons(uint16_t & o_length,
                                            uint8_t * o_data);
-
-            /**
-             * @brief Load specified pstate tables for all OCCs.
-             *        This will reset all OCCs so they pick up the new
-             *        tables.
-             *
-             * @param[in] i_normalPstates true to generate normal pstate tables
-             *                            false to generate mfg pstate tables
-             *
-             * @return NULL on success, else error handle
-             */
-            static errlHndl_t loadPstates(bool i_normalPstates);
-
-
-            /**
-             * @brief Determine if normal pstate tables should be used
-             *
-             * @return true if normal pstates should be used
-             */
-            static bool isNormalPstate();
-
-
-            /**
-             * @brief Determine if normal pstate tables should be used
-             *
-             * @param[in] i_useNormal  Set to true if normal pstate table
-             *                         should be used (vs MFG table)
-             */
-            static void setPstateTable(bool i_useNormal);
-
 
             /**
              * @brief Update error log with safe mode callouts and set
@@ -698,7 +674,6 @@ namespace HTMGT
             occStateId              iv_state;
             occStateId              iv_targetState;
             uint8_t                 iv_sysResetCount;
-            bool                    iv_normalPstateTables;
 
 
             /**
@@ -766,8 +741,9 @@ namespace HTMGT
 
             /* See resetOccs() above */
             errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget,
-                                  bool i_skipCountIncrement = false,
-                                  bool i_skipComm = false);
+                                  bool i_skipCountIncrement,
+                                  bool i_skipComm,
+                                  enum occResetReason i_reason);
 
             /** See sendOccPoll() above */
             /* @param[in] i_onlyIfEstablished: If true, only send poll if
@@ -791,26 +767,11 @@ namespace HTMGT
             /** See occFailed() above */
             bool _occFailed();
 
-            /** See getOccData() above */
-            void _getOccData(uint16_t & o_length, uint8_t *o_data);
+            /** See getHtmgtData() above */
+            void _getHtmgtData(uint16_t & o_length, uint8_t *o_data);
 
             /** See getWOFResetReasons above */
             void _getWOFResetReasons(uint16_t & o_length, uint8_t *o_data);
-
-            /** See loadPstates() above */
-            errlHndl_t _loadPstates(bool i_normalPstates);
-
-            /** See isNormalPstate() above */
-            bool _isNormalPstate()
-            {
-                return(true == iv_normalPstateTables);
-            };
-
-            /** See setPstateTable() above */
-            void _setPstateTable(bool i_useNormal)
-            {
-                iv_normalPstateTables = i_useNormal;
-            };
 
             /** See syncOccStates() above */
             void _syncOccStates();

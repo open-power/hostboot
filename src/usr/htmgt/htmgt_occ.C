@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,8 +417,7 @@ namespace HTMGT
         :iv_occMaster(nullptr),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
-        iv_sysResetCount(0),
-        iv_normalPstateTables(true)
+        iv_sysResetCount(0)
     {
     }
 
@@ -828,6 +827,14 @@ namespace HTMGT
 
                     if (nullptr == l_err)
                     {
+                        // Clear safe mode reason since OCC is at target state
+                        if (cv_safeReturnCode != 0)
+                        {
+                            TMGT_INF("_setOccState: clearing safe mode reason "
+                                     "(0x%04X)", cv_safeReturnCode);
+                            cv_safeReturnCode = 0;
+                            cv_safeOccInstance = 0;
+                        }
                         TMGT_INF("_setOccState: All OCCs have reached state "
                                  "0x%02X", requestedState);
                         iv_state = requestedState;
@@ -875,7 +882,8 @@ namespace HTMGT
 
     errlHndl_t OccManager::_resetOccs(TARGETING::Target * i_failedOccTarget,
                                       bool i_skipCountIncrement,
-                                      bool i_skipComm)
+                                      bool i_skipComm,
+                                      enum occResetReason i_reason)
     {
         errlHndl_t err = nullptr;
         bool atThreshold = false;
@@ -910,6 +918,10 @@ namespace HTMGT
 
                 for(const auto & occ : iv_occArray )
                 {
+                    if (i_reason != OCC_RESET_REASON_NONE)
+                    {
+                        occ->iv_resetReason = i_reason;
+                    }
                     if(occ->getTarget() == i_failedOccTarget)
                     {
                         occ->failed(true);
@@ -953,8 +965,23 @@ namespace HTMGT
                 }
 
                 uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
+                TARGETING::Target* sys = nullptr;
+                TARGETING::targetService().getTopLevelTarget(sys);
                 while(retryCount)
                 {
+                    if (sys)
+                    {
+                        // Increment cumulative reset count since boot
+                        uint8_t count = sys->getAttr<TARGETING::
+                            ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>();
+                        if (count < 0xFF)
+                        {
+                            ++count;
+                            sys->setAttr<TARGETING::
+                                ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>(count);
+                        }
+                    }
+
                     // Reset all OCCs
                     TMGT_INF("_resetOccs: Calling HBPM::resetPMAll");
                     err = HBPM::resetPMAll();
@@ -991,7 +1018,7 @@ namespace HTMGT
                 {
                     for( const auto & occ : iv_occArray )
                     {
-                        // After OCC has been reset, clear flag
+                        // After OCC has been reset, clear internal flags
                         occ->postResetClear();
                     }
 
@@ -1033,11 +1060,12 @@ namespace HTMGT
                               0, cv_safeReturnCode, 0, cv_safeOccInstance,
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
+                    TMGT_ERR("_resetOccs: Safe Mode (RC: 0x%04X OCC%d)",
+                             cv_safeReturnCode, cv_safeOccInstance);
+
                     // Check if OCC already logged reason for safe mode
                     // (add proc callout if non-OCC safe mode reason or
                     //  the OCC hit an exception)
-                    TMGT_ERR("_resetOccs: Safe Mode (RC: 0x%04X OCC%d)",
-                             cv_safeReturnCode, cv_safeOccInstance);
                     if (((cv_safeReturnCode & OCCC_COMP_ID) != OCCC_COMP_ID) ||
                         ((cv_safeReturnCode & 0xE0) == 0xE0))
                     {
@@ -1159,7 +1187,7 @@ namespace HTMGT
                         TARGETING::getParentChip(occ->getTarget() );
 
                     // Read SRAM response buffer to check for OCC checkpoint
-                     errlHndl_t l_err = nullptr;
+                    errlHndl_t l_err = nullptr;
                     const uint16_t l_length = 8;  //Note: number of bytes
                     uint8_t l_sram_data[l_length] = { 0x0 };
                     l_err = HBOCC::readSRAM(procTarget,
@@ -1325,36 +1353,21 @@ namespace HTMGT
 
 
     // Collect HTMGT Status Information for debug
-    // NOTE: o_data is pointer to 4096 byte buffer
-    void OccManager::_getOccData(uint16_t & o_length, uint8_t *o_data)
+    // NOTE: o_data is pointer to OCC_MAX_DATA_LENGTH byte buffer
+    void OccManager::_getHtmgtData(uint16_t & o_length, uint8_t *o_data)
     {
         uint16_t index = 0;
 
-        // If the system is in safemode then can't talk to OCCs (no build/poll)
         TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
         uint8_t safeMode = 0;
-        if (sys &&
-            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
-            (0 == safeMode))
+        uint8_t resets_since_boot = 0;
+        if (sys)
         {
-            // Make sure OCCs were built first (so data is valid)
-            errlHndl_t err = _buildOccs(); // if not already built.
-            if (err)
-            {
-                TMGT_ERR("_getOccData: failed to build OCC structures "
-                         "rc=0x%04X", err->reasonCode());
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-            // Send poll to confirm comm, update states and flush errors
-            err = _sendOccPoll(true, nullptr);
-            if (err)
-            {
-                TMGT_ERR("_getOccData: Poll OCCs failed.");
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+            sys->tryGetAttr<TARGETING::ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>
+                (resets_since_boot);
         }
-
         // First add HTMGT specific data
         o_data[index++] = _getNumOccs();
         o_data[index++] =
@@ -1362,7 +1375,7 @@ namespace HTMGT
         o_data[index++] = iv_state;
         o_data[index++] = iv_targetState;
         o_data[index++] = iv_sysResetCount;
-        o_data[index++] = iv_normalPstateTables ? 0 : 1;
+        o_data[index++] = resets_since_boot;
         o_data[index++] = 0x00; // STATUS VERSION (for future expansion)
         o_data[index++] = safeMode;
         UINT32_PUT(&o_data[index], cv_safeReturnCode);
@@ -1428,23 +1441,6 @@ namespace HTMGT
     }
 
 
-
-    // Set default pstate table type and reset all OCCs to pick them up
-    errlHndl_t OccManager::_loadPstates(bool i_normalPstates)
-    {
-        errlHndl_t err = nullptr;
-
-        // Set default pstate table type
-        _setPstateTable(i_normalPstates);
-
-        // Reset OCCs to pick up new tables (skip incrementing reset count)
-        TMGT_INF("_loadPstates: Resetting OCCs");
-        err = _resetOccs(nullptr, true);
-
-        return err;
-    }
-
-
     // Consolidate all OCC states
     void OccManager::_syncOccStates()
     {
@@ -1479,18 +1475,12 @@ namespace HTMGT
 
 
     // Clear all OCC reset counts
+    // Should not be called if the system is in safe mode.
     void OccManager::_clearResetCounts()
     {
-        TARGETING::Target* sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        uint8_t safeMode = 0;
-        if (sys)
-        {
-            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
-        }
         for( const auto & occ : iv_occArray )
         {
-            if ( occ->iv_resetCount != 0 )
+            if (occ->iv_resetCount != 0)
             {
                 TMGT_INF("_clearResetCounts: Clearing OCC%d reset count "
                          "(was %d)",
@@ -1499,28 +1489,15 @@ namespace HTMGT
                 occ->iv_resetCount = 0;
             }
 
-            if( occ->iv_wofResetCount != 0 )
+            if (occ->iv_wofResetCount != 0)
             {
-                occ->iv_wofResetCount = 0;
                 TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset count "
-                         "( was %d)",
+                         "(was %d) reason(s): 0x%08X",
                          occ->getInstance(),
-                         occ->iv_wofResetCount);
+                         occ->iv_wofResetCount,
+                         occ->iv_wofResetReasons);
+                occ->iv_wofResetCount = 0;
             }
-
-            if( occ->iv_wofResetReasons != 0 )
-            {
-                TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset reasons "
-                         "( was 0x%08x)",
-                         occ->getInstance(),
-                         occ->iv_wofResetReasons );
-            }
-            if( safeMode )
-            {
-                // Clear OCC flags (failed, commEstablished, etc)
-                occ->postResetClear();
-            }
-
         }
 
         if (iv_sysResetCount != 0)
@@ -1571,12 +1548,14 @@ namespace HTMGT
 
     errlHndl_t OccManager::resetOccs(TARGETING::Target * i_failedOccTarget,
                                      bool i_skipCountIncrement,
-                                     bool i_skipComm)
+                                     bool i_skipComm,
+                                     enum occResetReason i_reason)
     {
         return
             Singleton<OccManager>::instance()._resetOccs(i_failedOccTarget,
                                                          i_skipCountIncrement,
-                                                         i_skipComm);
+                                                         i_skipComm,
+                                                         i_reason);
     }
 
 
@@ -1614,30 +1593,15 @@ namespace HTMGT
         return Singleton<OccManager>::instance()._occFailed();
     }
 
-    void OccManager::getOccData(uint16_t & o_length, uint8_t *o_data)
+    void OccManager::getHtmgtData(uint16_t & o_length, uint8_t *o_data)
     {
-        Singleton<OccManager>::instance()._getOccData(o_length, o_data);
+        Singleton<OccManager>::instance()._getHtmgtData(o_length, o_data);
     }
 
     void OccManager::getWOFResetReasons(uint16_t & o_length, uint8_t * o_data)
     {
         Singleton<OccManager>::instance()._getWOFResetReasons(o_length,
                                                               o_data);
-    }
-
-    errlHndl_t OccManager::loadPstates(bool i_normalPstates)
-    {
-        return Singleton<OccManager>::instance()._loadPstates(i_normalPstates);
-    }
-
-    bool OccManager::isNormalPstate()
-    {
-        return Singleton<OccManager>::instance()._isNormalPstate();
-    }
-
-    void OccManager::setPstateTable(bool i_useNormal)
-    {
-        Singleton<OccManager>::instance()._setPstateTable(i_useNormal);
     }
 
     void OccManager::clearResetCounts()

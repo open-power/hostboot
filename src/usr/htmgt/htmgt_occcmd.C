@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -548,11 +548,14 @@ namespace HTMGT
         if (l_errlHndl)
         {
             // Add OCC command data to user details
-            l_errlHndl->addFFDC(HTMGT_COMP_ID,
-                                iv_OccCmd.cmdData,
-                                std::min(iv_OccCmd.dataLength, MAX_FFDC),
-                                1,  // version
-                                SUBSEC_OCC_CMD_DATA);
+            if (iv_OccCmd.dataLength > 0)
+            {
+                l_errlHndl->addFFDC(HTMGT_COMP_ID,
+                                    iv_OccCmd.cmdData,
+                                    std::min(iv_OccCmd.dataLength, MAX_FFDC),
+                                    1,  // version
+                                    SUBSEC_OCC_CMD_DATA);
+            }
         }
 
         return l_errlHndl;

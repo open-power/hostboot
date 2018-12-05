@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -129,16 +129,6 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>occ</id>
-    <attribute>
-      <id>PSTATE_TABLE</id>
-    </attribute>
-    <attribute>
-      <id>PSTATE_TABLE_MFG</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
     <id>sys-sys-power9</id>
     <attribute>
       <id>ADC_CHANNEL_FUNC_IDS</id>
@@ -174,7 +164,13 @@
       <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
     </attribute>
     <attribute>
+      <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
+    </attribute>
+    <attribute>
       <id>HTMGT_INTERNAL_FLAGS</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_PMCOMPLEX_RESET_COUNT_TIMER</id>
     </attribute>
     <attribute>
       <id>HTMGT_SAFEMODE</id>
