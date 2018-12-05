@@ -1007,6 +1007,75 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_WOV_UNDERV_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enables Workload Optimized Voltage (WOV) undervolting algorithms which 
+    dynamically modify voltage below the value calculated from VPD.
+
+    OFF:            Will enable WOV undervolting given all validity check pass.  If
+                    validity checks fail, WOV undervolting will be disabled for the
+                    present IPL.
+    ON:             Will disable WOV undervolting 
+
+    Producer: Override
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_FORCE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Overrides VPD_UNDERVOLT_TEST value to 1. The VPD_UNDERVOLT_TEST is 
+    set to 1 by mSLT or MFT, and means that undervolting test was run and passed on the
+    part. However, for older parts, the field will be set to 0, so to force enablement of 
+    undervolting on older parts, this attribute can be set to override the VPD_UNDERVOLT_TEST.
+
+    ON:         Will override VPD_UNDERVOLT_TEST value to 1.
+    OFF:        Will not override VPD_UNDERVOLT_TEST 
+
+    Producer: Override
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOV_OVERV_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enables Workload Optimized Voltage (WOV) undervolting algorithms which 
+    dynamically modify voltage below the value calculated from VPD.
+
+    OFF:        Will enable WOV overvolting given all validity check pass.  If
+                validity checks fail, WOV overvolting will be disabled for the
+                present IPL.
+    ON:         Will disable WOV overvolting 
+
+    Producer: Override
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_IVRM_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Disables IVRM enablement in the system
@@ -1069,6 +1138,270 @@
     <platInit/>
     <initToZero/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_SAMPLE_125US</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+       If WOV undervolting and/or WOF overvolting is enabled, then this overrides default
+       period at which the undervolting and/or overvolting is run. 
+       
+       If 0, then will interally default to 2(~250us), and is also the minimum value
+      </description>
+      <valueType>uint32</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_MAX_DROOP_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+       If WOV undervolting and/or WOF overvolting is enabled, then this is used to
+       used as a check for maximum frequency loss. If frequency in tenths of percentage
+       is below this value, then an error is logged and WOV is disabled. 
+      
+      </description>
+      <valueType>uint32</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_VMIN_MV</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      Minimum voltage(floor) that regulator voltage is set to  whether undervolting or not.
+
+      If 0, the Psafe computed voltage uplifted by the loadline*PowerSave RDP current is used. 
+      This implies that no undervolting can happen at Psafe, and very little undervolting 
+      slightly above Psafe frequency (slightly lower Pstate).
+      
+      Otherwise, setting this parameter higher than the (default) Psafe voltage effectively 
+      changes the Pstate table, raising any Pstate voltage to this value.
+
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_LIMIT_ALGORITHM</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      Defines the algorithm used to set the voltage to quit undervolting.
+
+      If 0, then value specified by ATTR_WOV_UNDERV_VMIN_MV attribute is used.
+      
+      UNDERV_VMIN(default): Stops undervolting below the value specified by 
+                            ATTR_WOV_UNDERV_VMIN_MV.
+      UNDERV_LIMIT: Learns the value of the undervolting limit based on part VPD 
+      TURBO: Stops undervolting below the TURBO VPD voltage. 
+      NOMINAL: Stops undervolting below the NOMINIAL VPD voltage.
+       
+      </description>
+      <valueType>uint8</valueType>
+      <enum>UNDERV_VMIN=0, UNDERV_LIMIT=1, TURBO=2, NOMINAL=3 </enum>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_LIMIT_MV</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      The lowest voltage below at which undervolting stops.
+
+      If 0, then this is calculated using the value provided by the attribute
+      ATTR_WOV_UNDERV_LIMIT_10THPCT.
+
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_LIMIT_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description> Used to calculate the value for ATTR_WOV_UNDERV_LIMIT_MV, if
+      ATTR_WOV_UNDERV_LIMIT_MV is set to 0. The value is specified in tenths of
+      percent
+
+      If 0, then default value of 50(5%)
+
+      Value can range from 1(0.1%) to 250(25%). 
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_OVERV_VMAX_SETPOINT_MV</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      Maximum regulator voltage allowed without exceeding the technology Vmax 
+      at the chip pins.
+      
+      If, 0, then default value of 1150(1.15V)
+
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_STEP_INCR_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV undervolting is enabled, then this specifies the amount by which to 
+      increment percentage of undervolt amount. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If 0, then default value of 0.5%(5) is used.
+
+      Value can range from 1(0.1%) to 20(2%). Values greater than 20 are
+      clipped to 20(2%)
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_STEP_DECR_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV undervolting is enabled, then this specifies the amount by which to 
+      decrement percentage of undervolt amount. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If 0, then default value of 0.5%(5) is used.
+
+      Value can range from 1(0.1%) to 20(2%). Values greater than 20 are
+      clipped to 20(2%)
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_MAX_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV undervolting is enabled, then this specifies the maximum amount 
+      of undervolt percentage. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If, 0, then default value of 10%(100) is used.
+
+      Value can range from 10(1%) to 255(25.5%). For values between 1(0.1%) and 9(0.9%)
+      ,value of 10(1%) will be used.
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV undervolting is enabled, then this specifies the maximum amount 
+      of performance loss at which undervolting increments are stopped(and may be reduced). 
+      The value is specified in tenths of percentage(0.1%).
+
+      If, 0, then default value of 0.5%(5) is used.
+
+      Value can range from 1(0.1%) to 20(2%). All other values will be
+      clipped to 20(2%).
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_OVERV_STEP_INCR_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV overvolting is enabled, then this specifies the amount by which to 
+      increment percentage of overvolt amount. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If 0, then default value of 0.5%(5) is used.
+
+      Value can range from 1(0.1%) to 20(2%). Values greater than 20 are
+      clipped to 20(2%)
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_OVERV_STEP_DECR_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV overvolting is enabled, then this specifies the amount by which to 
+      decrement percentage of overvolt amount. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If 0, then default value of 0.5%(5) is used.
+
+      Value can range from 1(0.1%) to 20(2%). Values greater than 20 are
+      clipped to 20(2%)
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_WOV_OVERV_MAX_10THPCT</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      If WOV overvolting is enabled, then this specifies the maximum amount 
+      of overvolt percentange. The value is specified in tenths 
+      of percentage(0.1%).
+
+      If, 0, then default value of 0(0%) is used.
+
+      Value can range from 1(0.1%) to 100(10%). Values greater than 100 are
+      clipped to 100(10%)
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+      <initToZero/>
+    <overrideOnly/>
+  </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PBAX_GROUPID</id>
