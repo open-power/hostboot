@@ -2254,4 +2254,20 @@
     <default>TRUE</default>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Address is allocated by hostboot and HBRT and is populated 
+    by p9_hcode_image_build with sc2 instruction. It enables CME to invoke
+    a transition from HV to UV during STOP entry on an SMF enabled system.
+    Address value should be aligned with 2MB boundary.
+
+    Producer: Initialized by Hostboot firmware based on platform support
+    Consumers: Read by p9_hcode_image_build.C
+    </description>
+    <valueType>uint64</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
