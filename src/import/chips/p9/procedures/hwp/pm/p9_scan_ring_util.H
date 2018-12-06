@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -321,9 +321,9 @@ class P9FuncModel
         uint8_t getChipName() const;
 
         /**
-         * returns true if URMOR has a hw bug else false.
+         * reutrns true if SMF is enabled else false.
          */
-        bool hasUrmorBug() const;
+        bool isSmfEnabled() const;
 
         /**
          * @brief   constructor
@@ -338,7 +338,7 @@ class P9FuncModel
         uint8_t  iv_funcQuads;
         uint8_t  iv_ddLevel;
         uint8_t  iv_chipName;
-        uint8_t  iv_urmorBug;
+        uint8_t  iv_smfEn;
         uint8_t  iv_reserve[2];
 };
 

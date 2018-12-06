@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -777,7 +777,7 @@ P9FuncModel::P9FuncModel(  ):
     iv_funcQuads(0),
     iv_ddLevel(0),
     iv_chipName(0),
-    iv_urmorBug(0)
+    iv_smfEn(0)
 { }
 //-------------------------------------------------------------------------
 
@@ -789,7 +789,8 @@ P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_
 
     auto l_core_functional_vector =
         i_procTgt.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL);
-    uint8_t l_corePos = 0;
+    uint8_t l_corePos       =   0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     for( auto it : l_core_functional_vector )
     {
@@ -802,12 +803,12 @@ P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_
 
     FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTgt, iv_ddLevel);
     FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTgt, iv_chipName);
-    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW403111, i_procTgt, iv_urmorBug);
+    FAPI_ATTR_GET(fapi2::ATTR_SMF_ENABLED, FAPI_SYSTEM,  iv_smfEn );
 
     FAPI_DBG("functional core : 0x%08x Ex  : 0x%08x quad 0x%08x"
-             "EC : 0x%02x ChipName : 0x%02x URMOR Bug 0x%02x",
+             "EC : 0x%02x ChipName : 0x%02x SMF Enable : %s",
              iv_funcCores, iv_funcExes, iv_funcQuads, iv_ddLevel,
-             iv_chipName, iv_urmorBug );
+             iv_chipName, iv_smfEn ? "Yes" : "No" );
 }
 
 //---------------------------------------------------------------------------
@@ -851,11 +852,10 @@ uint8_t P9FuncModel::getChipName() const
 }
 
 //-------------------------------------------------------------------------
-bool P9FuncModel::hasUrmorBug() const
+bool P9FuncModel::isSmfEnabled() const
 {
-    return iv_urmorBug ? true : false;
+    return iv_smfEn ? true : false;
 }
-
 //-------------------------------------------------------------------------
 
 }

@@ -1410,9 +1410,9 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
  * @brief   updates various CPMR fields which are associated with self restore code.
  * @param[in]   i_pChipHomer    points to start of P9 HOMER.
  * @param[in]   i_fuseState     core fuse status
- * @param[in]   i_urmorFix      true if URMOR correction is needed else false.
+ * @param[in]   i_smfEnabled    true if SMF is enabled else  false.
  */
-void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState, uint8_t i_urmorFix, uint32_t i_smfSign )
+void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState, uint8_t i_smfEnabled, uint32_t i_smfSign )
 {
     FAPI_INF(">> updateCpmrHeaderSR");
     cpmrHeader_t* pCpmrHdr =
@@ -1423,15 +1423,20 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState, uint
     pCpmrHdr->fusedModeStatus = i_fusedState ? uint32_t(FUSED_CORE_MODE) :
                                 uint32_t(NONFUSED_CORE_MODE);
 
-    if( i_urmorFix )
+    if( i_smfEnabled )
     {
-        if( SMF_SELF_SIGNATURE  ==  i_smfSign )
-        {
-            pCpmrHdr->selfRestoreVer    =   0x01;
-            pCpmrHdr->stopApiVer        =   0x01;
-        }
-
         pCpmrHdr->urmorFix      =   0x01;
+    }
+
+    if( SMF_SELF_SIGNATURE  ==  i_smfSign )
+    {
+        pCpmrHdr->selfRestoreVer    =   0x01;
+        pCpmrHdr->stopApiVer        =   0x01;
+    }
+    else
+    {
+        pCpmrHdr->selfRestoreVer    =   0x00;
+        pCpmrHdr->stopApiVer        =   0x00;
     }
 
     pCmeHdr->g_cme_mode_flags = SWIZZLE_4_BYTE(i_fusedState ? 1 : 0);
@@ -1819,7 +1824,7 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
         //Padding SPR restore area with ATTN Opcode
         FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
 
-        if( i_procFuncModel.hasUrmorBug() && ( SMF_SELF_SIGNATURE == l_pSmfSignature ) ) // Nimbus >= DD22 and Cumulus >= DD13
+        if( SMF_SELF_SIGNATURE == l_pSmfSignature ) // Nimbus >= DD22 and Cumulus >= DD13
         {
             FAPI_TRY( initSelfRestoreRegion( i_pChipHomer ),
                       "Failed To Initialize The Self-Restore Region" );
@@ -1832,10 +1837,9 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
             FAPI_TRY( initSmfDisabledSelfRestore( i_pChipHomer ),
                       "Failed To Initialize Self-Restore Region In Non SMF Mode" );
         }
-
     }
 
-    updateCpmrHeaderSR( i_pChipHomer, i_fusedState, i_procFuncModel.hasUrmorBug(), l_pSmfSignature );
+    updateCpmrHeaderSR( i_pChipHomer, i_fusedState, i_procFuncModel.isSmfEnabled(), l_pSmfSignature );
 
     if( i_imgType.coreScomBuild )
     {
