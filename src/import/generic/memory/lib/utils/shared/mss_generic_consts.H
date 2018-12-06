@@ -244,6 +244,17 @@ enum guard_band : uint16_t
 
 }// spd
 
+///
+/// @brief DIMM nibble mask
+/// @note nibble0: 4 high bits, nibble1: 4 low bits
+///
+enum nibble_mask
+{
+    MASK_NIBBLE0 = 0xf0,
+    MASK_NIBBLE1 = 0x0f,
+};
+
+
 }// mss
 
 #endif
