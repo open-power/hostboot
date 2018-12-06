@@ -378,16 +378,31 @@ extern "C"
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_dram the DRAM index
     /// @param[in] i_rankpair_table table of rank to rank pairs for this port
+    /// @param[in] i_ranks_on_port number of ranks on this port
     /// @param[in] i_bad_bits array bad bits data from VPD for all ranks on the port
     /// @param[out] o_uncalibrated true if DRAM was marked bad in all ranks, false otherwise
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode check_for_uncalibrated_dram(const uint8_t i_dram_width,
             const uint8_t i_dram,
             const uint8_t (&i_rankpair_table)[MAX_RANKS_PER_PORT],
+            const uint8_t i_ranks_on_port,
             const uint8_t (&i_bad_bits)[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE],
             bool& o_uncalibrated)
     {
         constexpr uint8_t NO_RP = 255;
+
+        // On a port with only 1 rank configured, we can't tell if a DRAM is uncalibrated or if it just
+        // failed calibration.
+        // This is handled in draminit_training by calibrating any DRAM with a row repair request
+        // (regardless of whether it had bad bits set), and clearing the row repair request if the
+        // DRAM fails training. So by the time we get here, if we're 1-rank and a row repair
+        // request exists, we know the DRAM has been calibrated.
+        if (i_ranks_on_port == 1)
+        {
+            FAPI_INF("DRAM index %d was calibrated since it's on a single-rank port", i_dram);
+            o_uncalibrated = false;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         // The DRAM index in ATTR_ROW_REPAIR_DATA is relative to Centaur perspective.
         // The bad_bits attribute is as well, so we can just index into the bad bits array
@@ -566,6 +581,23 @@ extern "C"
         return fapi2::current_err;
     }
 
+    /// @brief Count the number of ranks per port
+    /// @param[in] i_target_mba mba target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    void count_ranks_per_port(const uint8_t (&i_ranks_per_dimm)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT],
+                              uint8_t (&o_ranks_per_port)[MAX_PORTS_PER_MBA])
+    {
+        for (uint8_t l_port = 0; l_port < MAX_PORTS_PER_MBA; ++l_port)
+        {
+            o_ranks_per_port[l_port] = 0;
+
+            for (uint8_t l_dimm = 0; l_dimm < MAX_DIMM_PER_PORT; ++l_dimm)
+            {
+                o_ranks_per_port[l_port] += i_ranks_per_dimm[l_port][l_dimm];
+            }
+        }
+    }
+
     /// @brief Deploy PPR row repairs, if supported, according to VPD attributes
     /// @param[in] i_target_mba mba target
     /// @return FAPI2_RC_SUCCESS iff successful
@@ -576,6 +608,8 @@ extern "C"
         bool l_sppr_supported = true;
         uint64_t l_mnfg_flags = 0;
         uint8_t l_dram_width = 0;
+        uint8_t l_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
+        uint8_t l_ranks_per_port[MAX_PORTS_PER_MBA];
         uint8_t l_dram = 0;
         uint8_t l_srank = 0;
         uint8_t l_bg = 0;
@@ -587,6 +621,10 @@ extern "C"
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mnfg_flags));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target_mba, l_dram_width));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target_mba, l_ranks_per_dimm));
+
+        // Calculate the number of ranks on each port
+        count_ranks_per_port(l_ranks_per_dimm, l_ranks_per_port);
 
         // If row repairs are not supported, we're done
         for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_mba))
@@ -681,7 +719,8 @@ extern "C"
 
                     // If a DRAM position is marked bad in VPD for all valid ranks, skip row repair and clear row repair entry from VPD
                     // as this means the DRAM position has not been calibrated during draminit_training (Centaur workaround)
-                    FAPI_TRY(check_for_uncalibrated_dram(l_dram_width, l_dram, l_rankpair_table, l_bad_bits, l_uncalibrated));
+                    FAPI_TRY(check_for_uncalibrated_dram(l_dram_width, l_dram, l_rankpair_table, l_ranks_per_port[l_port],
+                                                         l_bad_bits, l_uncalibrated));
 
                     if (l_uncalibrated)
                     {

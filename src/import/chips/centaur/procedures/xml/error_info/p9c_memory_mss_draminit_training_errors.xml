@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -364,6 +364,18 @@
     <target>TARGET_MBA_ERROR</target>
     <priority>LOW</priority>
   </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_DIMM_NOT_FOUND_FROM_INDEX</rc>
+  <description>A DIMM target could not be found for the given port and DIMM index.</description>
+  <ffdc>MBA</ffdc>
+  <ffdc>PORT_INDEX</ffdc>
+  <ffdc>DIMM_INDEX</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,10 @@
 #include <p9c_mss_unmask_errors.H>
 #include "p9c_mss_access_delay_reg.H"
 #include <p9c_mss_mrs6_DDR4.H>
+#include <p9c_mss_row_repair.H>
 #include <p9c_mss_draminit_training.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/find.H>
 #include <dimmConsts.H>
 #include <delayRegs.H>
 
@@ -1994,6 +1996,10 @@ extern "C" {
         uint8_t l_port = 0;
         FAPI_INF("%s Running flash->registers(set)", mss::c_str(i_mba_target));
         uint8_t l_prank = 0;
+        uint8_t l_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t l_ranks_per_port[MAX_PORTS_PER_MBA] = {0};
+        // This vector contains a row repair entry for each DIMM rank
+        std::vector<fapi2::buffer<uint32_t>> l_repairs_per_dimm;
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_mba_dimms;
         l_mba_dimms = i_mba_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
 
@@ -2002,6 +2008,7 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_mba_target, l_prg[2]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_mba_target, l_prg[3]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_mba_target, l_dram_width));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_mba_target, l_ranks_per_dimm));
 
         //DECONFIG and FFDC INFO
         FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4
@@ -2013,6 +2020,9 @@ extern "C" {
                     l_dram_width);
 
         l_data_buffer.flush<0>();
+
+        // Calculate the number of ranks on each port
+        count_ranks_per_port(l_ranks_per_dimm, l_ranks_per_port);
 
         for (l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++ )  // [0:1]
         {
@@ -2146,6 +2156,20 @@ extern "C" {
                     continue;
                 }
 
+                // 1-rank workaround: Read row repair attribute and build table
+                if (l_ranks_per_port[l_port] == 1)
+                {
+                    uint8_t l_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK] = {0};
+
+                    // Get DIMM target from port/index
+                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm_target;
+                    FAPI_TRY(find_dimm_from_index(i_mba_target, l_port, l_dimm, l_dimm_target));
+
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm_target, l_row_repair_data));
+
+                    FAPI_TRY(build_row_repair_table(l_dimm_target, l_dram_width, l_row_repair_data, l_repairs_per_dimm));
+                }
+
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
                     uint8_t l_disable1_data = 0;
@@ -2173,7 +2197,7 @@ extern "C" {
                     // clear bits 48:63
                     l_data_buffer.flush<0>();
 
-                    for (uint8_t n = 0; n < 4; n++) // check each nibble
+                    for (uint8_t n = 0; n < MAX_NIBBLES_PER_BLOCK; n++) // check each nibble
                     {
                         l_nmask = l_mask >> (4 * n);
 
@@ -2183,6 +2207,7 @@ extern "C" {
                                      l_dimm,
                                      l_prank, l_rank, l_data);
 
+                            // Check if nibble is marked bad on all valid ranks
                             if ( ( ((l_nmask & l_data_rank0) == l_nmask) || (l_rank0_invalid) ) &&
                                  ( ((l_nmask & l_data_rank1) == l_nmask) || (l_rank1_invalid) ) &&
                                  ( ((l_nmask & l_data_rank2) == l_nmask) || (l_rank2_invalid) ) &&
@@ -2192,11 +2217,30 @@ extern "C" {
                                  ( ((l_nmask & l_data_rank6) == l_nmask) || (l_rank6_invalid) ) &&
                                  ( ((l_nmask & l_data_rank7) == l_nmask) || (l_rank7_invalid) )   )
                             {
-                                //Leave it an F.
-                                FAPI_DBG("BYTE DISABLE WORKAROUND  All ranks are a F so writing an 0xF to disable regs.");
-                                FAPI_DBG("BYTE DISABLE WORKAROUND  data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                         l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
-                                l_all_F_mask = 1;
+                                // 1-rank workaround: if there's a row repair requested on this DRAM, don't disable it so we can try training it
+                                bool l_workaround_needed = false;
+
+                                if (l_ranks_per_port[l_port] == 1)
+                                {
+                                    FAPI_TRY(row_repair_workaround_check(i_mba_target, l_port, l_rank, i, n * BITS_PER_NIBBLE,
+                                                                         l_dram_width, l_repairs_per_dimm, l_workaround_needed));
+
+                                    if (l_workaround_needed)
+                                    {
+                                        FAPI_INF("%s Port %d Rank %d DP%d Nibble %d is marked bad, but has a row repair request. Will not disable this nibble",
+                                                 mss::c_str(i_mba_target), l_port, l_rank, i, n * BITS_PER_NIBBLE);
+                                        l_data = l_data & ~(l_nmask);
+                                    }
+                                }
+
+                                if (!l_workaround_needed)
+                                {
+                                    //Leave it an F.
+                                    FAPI_DBG("BYTE DISABLE WORKAROUND  All ranks are a F so writing an 0xF to disable regs.");
+                                    FAPI_DBG("BYTE DISABLE WORKAROUND  data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                             l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                                    l_all_F_mask = 1;
+                                }
                             }
                             else
                             {
@@ -2439,6 +2483,8 @@ extern "C" {
         uint8_t l_is_clean = 1;
         uint8_t l_port = 0;
         uint8_t l_prank = 0;
+        uint8_t l_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t l_ranks_per_port[MAX_PORTS_PER_MBA] = {0};
         //Storing all the errors across rank/eff dimm
         fapi2::variable_buffer l_db_reg_dimm0_rank0(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_dimm0_rank1(LANES_PER_PORT);
@@ -2448,6 +2494,8 @@ extern "C" {
         fapi2::variable_buffer l_db_reg_dimm1_rank1(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_dimm1_rank2(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_dimm1_rank3(LANES_PER_PORT);
+        // This vector contains a row repair entry for each DIMM rank
+        std::vector<fapi2::buffer<uint32_t>> l_repairs_per_dimm;
 
         FAPI_INF("%s Running (get)registers->flash", mss::c_str(i_mba_target));
 
@@ -2461,6 +2509,7 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_mba_target, l_prg[2]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_mba_target, l_prg[3]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_mba_target, l_dram_width));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_mba_target, l_ranks_per_dimm));
 
         FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4
                     || l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8,
@@ -2470,6 +2519,9 @@ extern "C" {
                     "ATTR_EFF_DRAM_WIDTH is invalid %u", l_dram_width);
 
         l_data_buffer.flush<0>();
+
+        // Calculate the number of ranks on each port
+        count_ranks_per_port(l_ranks_per_dimm, l_ranks_per_port);
 
         for (l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++ )  // [0:1]
         {
@@ -2643,6 +2695,19 @@ extern "C" {
 
                 FAPI_DBG("%s Port%i, dimm=%i, prg%i rank=%i", mss::c_str(i_mba_target), l_port, l_dimm, l_prank, l_rank);
 
+                uint8_t l_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK] = {0};
+                // Get DIMM target from port/index
+                fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm_target;
+                FAPI_TRY(find_dimm_from_index(i_mba_target, l_port, l_dimm, l_dimm_target));
+
+                // 1-rank workaround: Read row repair requests for this DIMM
+                if (l_ranks_per_port[l_port] == 1)
+                {
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm_target, l_row_repair_data));
+
+                    FAPI_TRY(build_row_repair_table(l_dimm_target, l_dram_width, l_row_repair_data, l_repairs_per_dimm));
+                }
+
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
                     FAPI_TRY(l_db_reg_dimm0_rank0.extract(l_data_rank0, i * 16, 16));
@@ -2696,10 +2761,11 @@ extern "C" {
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, l_dimm, l_rank, l_db_reg_vpd, l_is_clean));
                     FAPI_TRY(l_db_reg_vpd.extract(l_data_curr_vpd, i * 16, 16));
 
-                    for (uint8_t n = 0; n < 4; n++) // check each nibble
+                    for (uint8_t n = 0; n < MAX_NIBBLES_PER_BLOCK; n++) // check each nibble
                     {
                         l_nmask = l_mask >> (4 * n);
 
+                        // Nibble marked bad in bad bits
                         if ((l_nmask & l_data_curr_vpd) == l_nmask)
                         {
                             FAPI_DBG("BYTE DISABLE WORKAROUND: %s Found a 0XF on nibble=%i Port%i, dimm=%i, prg%i rank=%i data= 0x%04X",
@@ -2720,6 +2786,7 @@ extern "C" {
                             }
                             else
                             {
+                                // Nibble marked bad in bad bits in all valid ranks
                                 if ( ( ((l_nmask & l_data_rank0) == l_nmask) || (l_rank0_invalid) ) &&
                                      ( ((l_nmask & l_data_rank1) == l_nmask) || (l_rank1_invalid) ) &&
                                      ( ((l_nmask & l_data_rank2) == l_nmask) || (l_rank2_invalid) ) &&
@@ -2729,8 +2796,43 @@ extern "C" {
                                      ( ((l_nmask & l_data_rank6) == l_nmask) || (l_rank6_invalid) ) &&
                                      ( ((l_nmask & l_data_rank7) == l_nmask) || (l_rank7_invalid) )   )
                                 {
-                                    FAPI_DBG("BYTE DISABLE WORKAROUND: %s All ranks were F's and training was not successful.  Uncool.",
-                                             mss::c_str(i_mba_target));
+                                    // 1-rank workaround: if training failed on DRAM with row repair request, then clear the request
+                                    // and trigger a reconfig loop to re-run training
+                                    bool l_workaround_needed = false;
+
+                                    if (l_ranks_per_port[l_port] == 1)
+                                    {
+                                        FAPI_TRY(row_repair_workaround_check(i_mba_target, l_port, l_rank, i, n * BITS_PER_NIBBLE,
+                                                                             l_dram_width, l_repairs_per_dimm, l_workaround_needed));
+
+                                        if (l_workaround_needed)
+                                        {
+                                            FAPI_INF("%s Port %d Rank %d DP%d Nibble %d failed training, but has a row repair request. Clearing row repair request",
+                                                     mss::c_str(i_mba_target), l_port, l_rank, i, n * BITS_PER_NIBBLE);
+                                            FAPI_TRY(clear_row_repair_entry(l_rank, l_row_repair_data));
+                                            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm_target, l_row_repair_data));
+
+                                            FAPI_INF("%s Triggering a reconfig loop due to 1-rank row repair workaround...",
+                                                     mss::c_str(i_mba_target));
+                                            fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
+                                            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RECONFIGURE_LOOP,
+                                                                   fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr));
+
+                                            // This value makes it look like new bad bits were found during training.
+                                            // It is how the PRD code triggers a reconfig when it sets new bad bits in the VPD.
+                                            // 'OR' values in case of multiple reasons for reconfigure
+                                            l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
+                                            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_RECONFIGURE_LOOP,
+                                                                   fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reconfigAttr));
+                                        }
+                                    }
+
+                                    if (!l_workaround_needed)
+                                    {
+                                        FAPI_DBG("BYTE DISABLE WORKAROUND: %s All ranks were F's and training was not successful.  Uncool.",
+                                                 mss::c_str(i_mba_target));
+                                    }
+
                                     continue;
                                 }
                                 else
@@ -3302,6 +3404,105 @@ extern "C" {
                 }
             }
         }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+///
+/// @brief Check row repair requests for a bad nibble and decide whether it affects training
+/// @param[in] i_target mba target
+/// @param[in] i_port port index
+/// @param[in] i_rank rank index
+/// @param[in] i_dp DP18 index of nibble in question
+/// @param[in] i_lane DP18 lane of nibble in question
+/// @param[in] i_dram_width DRAM width
+/// @param[in] i_repairs_per_dimm table of row repair requests, from build_row_repair_table
+/// @param[out] o_workaround_needed true if the workaround applies (we should train the nibble or clear the row repair request), false if not
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    bool row_repair_workaround_check(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                     const uint8_t i_port,
+                                     const uint8_t i_rank,
+                                     const uint8_t i_dp,
+                                     const uint8_t i_lane,
+                                     const uint8_t i_dram_width,
+                                     const std::vector<fapi2::buffer<uint32_t>> i_repairs_per_dimm,
+                                     bool& o_workaround_needed)
+    {
+        uint8_t l_dram = 0;
+        uint8_t l_srank = 0;
+        uint8_t l_bg = 0;
+        uint8_t l_bank = 0;
+        uint32_t l_row = 0;
+
+        o_workaround_needed = false;
+
+        if (valid_row_repair_entry(i_repairs_per_dimm[i_rank], l_dram, l_srank, l_bg, l_bank, l_row))
+        {
+            uint8_t l_phy_lane = 0;
+            uint8_t l_phy_block = 0;
+            const auto l_row_repair_nibble = (i_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
+                                             l_dram * 2 :
+                                             l_dram;
+            // This guy can't be const because it's not in the mss_c4_phy API
+            uint8_t l_row_repair_index = l_row_repair_nibble * BITS_PER_NIBBLE;
+
+            // Training works on a phy-perspective, and the row repair attribute is on a Centaur perspective
+            // so we need to convert the row repair's DRAM into PHY block/lane
+            FAPI_TRY(mss_c4_phy(i_target, i_port, 0, RD_DQ, l_row_repair_index, 0, l_phy_lane, l_phy_block, 0));
+
+            // Then normalize the lane to get the 0th bit on the nibble
+            l_phy_lane = (l_phy_lane / BITS_PER_NIBBLE) * BITS_PER_NIBBLE;
+
+            if ((l_phy_block == i_dp) && (l_phy_lane == i_lane))
+            {
+                o_workaround_needed = true;
+            }
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+///
+/// @brief Find a DIMM target on an MBA target, from a port and DIMM index
+/// @param[in] i_target mba target
+/// @param[in] i_port_index port index
+/// @param[in] i_dimm_index DIMM index
+/// @param[out] o_dimm DIMM target
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode find_dimm_from_index(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                           const uint8_t i_port_index,
+                                           const uint8_t i_dimm_index,
+                                           fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm)
+    {
+        bool l_found_dimm = false;
+
+        // Find DIMM target with this port and dimm index
+        for (const auto l_dimm_target : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+        {
+            uint8_t l_this_port = 0;
+            uint8_t l_this_dimm = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, l_dimm_target, l_this_port));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm_target, l_this_dimm));
+
+            if ((l_this_port == i_port_index) && (l_this_dimm == i_dimm_index))
+            {
+                l_found_dimm = true;
+                o_dimm = l_dimm_target;
+                break; // Break out of for loop since we found the DIMM target for this i_port and i_dimm
+            }
+        }
+
+        FAPI_ASSERT(l_found_dimm,
+                    fapi2::CEN_DIMM_NOT_FOUND_FROM_INDEX().
+                    set_MBA(i_target).
+                    set_PORT_INDEX(i_port_index).
+                    set_DIMM_INDEX(i_dimm_index),
+                    "Did not find DIMM for %s, port index:%d dimm index:%d",
+                    mss::c_str(i_target), i_port_index, i_dimm_index);
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,6 +222,39 @@ extern "C"
                                       const uint8_t i_state,
                                       uint32_t& io_ccs_inst_cnt);
 
+///
+/// @brief Check row repair requests for a bad nibble and decide whether it affects training
+/// @param[in] i_target mba target
+/// @param[in] i_port port index
+/// @param[in] i_rank rank index
+/// @param[in] i_dp DP18 index of nibble in question
+/// @param[in] i_lane DP18 lane of nibble in question
+/// @param[in] i_dram_width DRAM width
+/// @param[in] i_repairs_per_dimm table of row repair requests, from build_row_repair_table
+/// @param[out] o_workaround_needed true if the workaround applies (we should train the nibble or clear the row repair request), false if not
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    bool row_repair_workaround_check(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                     const uint8_t i_port,
+                                     const uint8_t i_rank,
+                                     const uint8_t i_dp,
+                                     const uint8_t i_lane,
+                                     const uint8_t i_dram_width,
+                                     const std::vector<fapi2::buffer<uint32_t>> i_repairs_per_dimm,
+                                     bool& o_workaround_needed);
+
+///
+/// @brief Find a DIMM target on an MBA target, from a port and DIMM index
+/// @param[in] i_target mba target
+/// @param[in] i_port_index port index
+/// @param[in] i_dimm_index DIMM index
+/// @param[out] o_dimm DIMM target
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode find_dimm_from_index(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                           const uint8_t i_port_index,
+                                           const uint8_t i_dimm_index,
+                                           fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm);
 } // extern "C"
 
 #endif // mss_draminit_training_H_

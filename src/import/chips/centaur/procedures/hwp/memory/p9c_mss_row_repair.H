@@ -88,12 +88,14 @@ extern "C"
     /// @param[in] i_dram_width the DRAM width
     /// @param[in] i_dram the DRAM index
     /// @param[in] i_rankpair_table table of rank to rank pairs for this port
+    /// @param[in] i_ranks_on_port number of ranks on this port
     /// @param[in] i_bad_bits array bad bits data from VPD for all ranks on the port
     /// @param[out] o_uncalibrated true if DRAM was marked bad in all ranks, false otherwise
     /// @return FAPI2_RC_SUCCESS iff successful
     fapi2::ReturnCode check_for_uncalibrated_dram(const uint8_t i_dram_width,
             const uint8_t i_dram,
             const uint8_t (&i_rankpair_table)[MAX_RANKS_PER_PORT],
+            const uint8_t i_ranks_on_port,
             const uint8_t (&i_bad_bits)[MAX_RANKS_PER_PORT][DIMM_DQ_RANK_BITMAP_SIZE],
             bool& o_uncalibrated);
 
@@ -143,6 +145,12 @@ extern "C"
             const uint8_t i_dram_width,
             const uint8_t i_row_repair_data[MAX_RANKS_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
             std::vector<fapi2::buffer<uint32_t>>& o_repairs_per_dimm);
+
+    /// @brief Count the number of ranks per port
+    /// @param[in] i_target_mba mba target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    void count_ranks_per_port(const uint8_t (&i_ranks_per_dimm)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT],
+                              uint8_t (&o_ranks_per_port)[MAX_PORTS_PER_MBA]);
 }
 
 #endif

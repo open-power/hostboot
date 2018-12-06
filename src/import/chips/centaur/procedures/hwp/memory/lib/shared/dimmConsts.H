@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,8 @@ enum consts : size_t
 
     LANES_PER_BLOCK = 16,
     MAX_BLOCKS_PER_RANK = 5,
-    MAX_BYTES_PER_BLOCK = 2,
+    MAX_BYTES_PER_BLOCK = LANES_PER_BLOCK / BITS_PER_BYTE,
+    MAX_NIBBLES_PER_BLOCK = LANES_PER_BLOCK / BITS_PER_NIBBLE,
     MAX_BYTES_PER_RANK = MAX_BYTES_PER_BLOCK * MAX_BLOCKS_PER_RANK,
     LANES_PER_PORT = LANES_PER_BLOCK * MAX_BLOCKS_PER_RANK,
 
