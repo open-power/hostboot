@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -38,6 +39,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/phy/mss_lrdimm_training_helper.H>
+#include <lib/phy/mss_lrdimm_training.H>
 
 namespace mss
 {
@@ -185,6 +187,308 @@ fapi2::ReturnCode set_expected_mpr_pattern(const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY( ccs::execute(l_mcbist,
                            l_program,
                            l_mca) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the results for loop
+/// @param[in] i_target the DIMM target
+/// @param[in] i_calibration the current calibration step - used for error logging
+/// @param[in] i_delay the delay value
+/// @param[in,out] io_loop_result the result for all delay
+/// @return FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const uint64_t i_calibration,
+                              const uint8_t i_delay,
+                              mrep_dwl_result& io_loop_result )
+{
+    data_response l_data;
+    // Get's the MCA
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    FAPI_TRY( l_data.read(l_mca),
+              "%s failed to read data response delay:0x%02x",
+              mss::c_str(l_mca),
+              i_delay );
+
+    for(uint8_t l_buffer = 0; l_buffer < MAX_LRDIMM_BUFFERS; ++l_buffer)
+    {
+        // All beats should be the same, until proven otherwise, just use beat 0
+        constexpr uint64_t DEFAULT_BEAT = 0;
+        const uint8_t l_buffer_result = l_data.iv_buffer_beat[l_buffer][DEFAULT_BEAT];
+        const auto l_result_nibble0 = l_buffer_result & MASK_NIBBLE0;
+        const auto l_result_nibble1 = (l_buffer_result & MASK_NIBBLE1) << BITS_PER_NIBBLE;
+        const bool l_result_nibble0_bool = (l_result_nibble0 == 0xF0) ? true : false;
+        const bool l_result_nibble1_bool = (l_result_nibble1 == 0xF0) ? true : false;
+
+
+        FAPI_DBG( "%s delay:0x%02x result buffer:%u data:0x%02x N0:0x%02x N1:0x%02x, N0_result:%u, N1_result:%u",
+                  mss::c_str(i_target), i_delay,
+                  l_buffer, l_buffer_result,
+                  l_result_nibble0, l_result_nibble1, l_result_nibble0_bool, l_result_nibble1_bool);
+
+        FAPI_TRY(io_loop_result.add_results(i_target, i_calibration, l_buffer, i_delay, l_result_nibble0_bool,
+                                            l_result_nibble1_bool));
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief analyze with each nibble
+/// @param[in] i_target the DIMM target
+/// @param[in] i_calibration the current calibration step - used for error logging
+/// @param[in] i_result_nibble the result need to analyze
+/// @param[in] i_buffer the buffer number
+/// @param[in] i_nibble the nibble number
+/// @param[in, out] io_recorder we need to get and record
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode analyze_result_for_each_nibble( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_calibration,
+        const fapi2::buffer<uint64_t>& i_result_nibble,
+        const uint8_t i_buffer,
+        const uint8_t i_nibble,
+        mrep_dwl_recorder& io_recorder )
+{
+    constexpr uint8_t MIN_CONTINUE0_NUM = 6;
+    constexpr uint8_t MIN_CONTINUE1_NUM = 6;
+    constexpr uint8_t NO_TRANSITION_FOUND = 0xff;
+    constexpr uint8_t TOLERANCE_NUMBER = 2;
+    bool final_delay_found = false;
+    uint8_t l_first_transition = NO_TRANSITION_FOUND;
+
+    // for the 0->1 transition is in 0th delay
+    io_recorder.iv_seen0 = i_result_nibble.getBit<0>() && (!(i_result_nibble.getBit < MREP_DWL_MAX_DELAY - 1 > ()));
+
+    for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; l_delay++)
+    {
+        switch(i_result_nibble.getBit(l_delay))
+        {
+            case false:
+                io_recorder.iv_seen0 = true;
+                break;
+
+            case true:
+
+                // We need to see a 0 prior to a 1 for a 0 to 1 transition
+                if(io_recorder.iv_seen0)
+                {
+                    io_recorder.iv_seen1 = true;
+                }
+
+                break;
+        }
+
+        // Record the 0->1 transition only if:
+        // 1) we've seen a 0
+        // 2) we've seen a 1
+        // 3) if find 0->1 transition, need check  5 delay before this point get 0 and after this point , more than 3 delay get 1
+
+        if( (io_recorder.iv_seen0 == true) &&
+            (io_recorder.iv_seen1 == true) &&
+            (final_delay_found == false) )
+        {
+
+            uint8_t l_continue0 = 0;
+            uint8_t l_continue1 = 0;
+
+            // record first transition regardless of before/after
+            if(l_first_transition == NO_TRANSITION_FOUND)
+            {
+                l_first_transition = l_delay;
+            }
+
+            //Check 5 delays before our suspected 0->1 transition to ensure
+            //that we can find a non-noise related transition
+            for(uint8_t l_delay_back = 1; l_delay_back < MIN_CONTINUE0_NUM; ++l_delay_back)
+            {
+                //see 0~63 delay as ring, if l_delay is 0, need check delay 63, 62 ...
+                const uint8_t l_bit = (l_delay + MREP_DWL_MAX_DELAY  - l_delay_back ) % MREP_DWL_MAX_DELAY;
+
+                if (!(i_result_nibble.getBit(l_bit)))
+                {
+                    l_continue0++;
+                }
+            }
+
+            for(uint8_t l_delay_ahead = 1; l_delay_ahead < MIN_CONTINUE1_NUM; ++l_delay_ahead)
+            {
+                const uint8_t l_bit = (l_delay + l_delay_ahead) % MREP_DWL_MAX_DELAY;
+
+                if (i_result_nibble.getBit(l_bit))
+                {
+                    l_continue1++;
+                }
+            }
+
+            if((l_continue0 >= (MIN_CONTINUE0_NUM - TOLERANCE_NUMBER))
+               && (l_continue1 >= (MIN_CONTINUE1_NUM - 1 - TOLERANCE_NUMBER)))
+            {
+                io_recorder.iv_delay = l_delay;
+                final_delay_found = true;
+                FAPI_DBG( "%s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x of result 0x%16lx, have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
+                          mss::c_str(i_target), i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
+            }
+            else
+            {
+                io_recorder.iv_seen0 = false;
+                io_recorder.iv_seen1 = false;
+                FAPI_DBG( "%s buffer:%u nibble:%u found a wrong 0->1 transition at delay 0x%02x of result 0x%16lx, just have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
+                          mss::c_str(i_target), i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
+            }
+        }
+
+    }
+
+    if(final_delay_found == false)
+    {
+        //found transition but have not enough 0/f count before/after it
+        //use first transition as the final delay
+        //report error
+        if(l_first_transition != NO_TRANSITION_FOUND)
+        {
+            io_recorder.iv_delay = l_first_transition;
+            io_recorder.iv_seen0 = true;
+            io_recorder.iv_seen1 = true;
+
+            FAPI_ASSERT(false,
+                        fapi2::MSS_LRDIMM_CAL_NOISE()
+                        .set_TARGET(i_target)
+                        .set_BUFFER(i_buffer)
+                        .set_CALIBRATION_STEP(i_calibration)
+                        .set_CALIBRATION_RAW_DATA(i_result_nibble)
+                        .set_NIBBLE(i_nibble),
+                        "%s found a noise result in buffer%u nibble%u , the data is 0x%16lx",
+                        mss::c_str(i_target), i_buffer, i_nibble, i_result_nibble);
+
+        }
+
+        // We will callout no 0->1 transitions when we do our full error checking
+        FAPI_INF( "%s buffer:%u nibble:%u can not found a 0->1 transition of result 0x%16lx",
+                  mss::c_str(i_target), i_buffer, i_nibble, i_result_nibble);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    // Log the error as recovered
+    // We "recover" by setting a default value and continuing with calibration
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
+}
+
+///
+/// @brief smoothing the result
+/// @param[in] i_loop_results the results of loop times
+/// @param[in, out] io_filter_result the result after smoothing
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode smoothing(const std::vector<mrep_dwl_result>& i_loop_results,
+                            mrep_dwl_result& io_final_result)
+{
+
+    for(uint8_t l_buffer = 0; l_buffer < MAX_LRDIMM_BUFFERS; ++l_buffer)
+    {
+        for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
+        {
+            uint8_t nibble0_seen_1 = 0;
+            uint8_t nibble1_seen_1 = 0;
+            uint8_t loop_time = 0;
+
+            //for each delay, collect how much times get 1
+            for(auto& l_loop_result : i_loop_results )
+            {
+                auto l_it = l_loop_result.iv_results.begin() + l_buffer;
+
+                if(l_it->first.getBit(l_delay))
+                {
+                    ++nibble0_seen_1;
+                }
+
+                if(l_it->second.getBit(l_delay))
+                {
+                    ++nibble1_seen_1;
+                }
+
+                loop_time++;
+            }
+
+            //if more than MREP_DWL_THRESHOLD get 1, the final result get 1
+            {
+                auto l_it_final = io_final_result.iv_results.begin() + l_buffer;
+
+                if (nibble0_seen_1 >= MREP_DWL_THRESHOLD)
+                {
+                    FAPI_TRY(l_it_final->first.setBit(l_delay));
+                }
+
+                if (nibble1_seen_1 >= MREP_DWL_THRESHOLD)
+                {
+                    FAPI_TRY(l_it_final->second.setBit(l_delay));
+                }
+
+            }
+        }//delay loop
+    }//buffer loop
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief analyze the result
+/// @param[in] i_target the MCA target
+/// @param[in] i_calibration the current calibration step - used for error logging
+/// @param[in] i_loop_results the results of loop times
+/// @param[in, out] io_recorders a vector of the results
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode analyze_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint64_t i_calibration,
+                                  const std::vector<mrep_dwl_result>& i_loop_results,
+                                  std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& io_recorders)
+{
+    mrep_dwl_result l_final_result;
+    uint8_t l_buffer = 0;
+    constexpr uint8_t NIBBLE0 = 0;
+    constexpr uint8_t NIBBLE1 = 1;
+
+    //filter plus
+    FAPI_TRY(smoothing(i_loop_results, l_final_result));
+
+    // Note: we want to update the value of the results recorder, so no const
+    for(auto& l_recorder : io_recorders)
+    {
+
+        const auto l_it_final = l_final_result.iv_results.begin() + l_buffer;
+        const auto& l_result_nibble0 = l_it_final->first;
+        const auto& l_result_nibble1 = l_it_final->second;
+        // Temporary variables for some beautification below
+        auto& l_recorder_nibble0 = l_recorder.first;
+        auto& l_recorder_nibble1 = l_recorder.second;
+
+        FAPI_TRY(analyze_result_for_each_nibble( i_target,
+                 i_calibration,
+                 l_result_nibble0,
+                 l_buffer,
+                 NIBBLE0,
+                 l_recorder_nibble0) );
+        FAPI_TRY(analyze_result_for_each_nibble( i_target,
+                 i_calibration,
+                 l_result_nibble1,
+                 l_buffer,
+                 NIBBLE1,
+                 l_recorder_nibble1) );
+
+        l_buffer++;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
