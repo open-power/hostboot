@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,8 @@ enum PositionBounds
 
     MAX_OCMB_PER_OMI    = 1,
 
+    MAX_MEM_PORT        = 2,
+
     MAX_NPU_PER_PROC    = 3,
 
     INVALID_POSITION_BOUND = 0xffffffff,
@@ -181,8 +183,7 @@ namespace DQ_BITMAP
     enum
     {
         BITMAP_SIZE = 10, // 80-bit bitmap
-        MCA_ENTRY_SIZE  = sizeof(uint8_t) + MCA_DIMMS_PER_RANK * BITMAP_SIZE,
-        MBA_ENTRY_SIZE  = sizeof(uint8_t) + MBA_DIMMS_PER_RANK * BITMAP_SIZE,
+        ENTRY_SIZE  = sizeof(uint8_t)*2 + BITMAP_SIZE,
     };
 
 } // namespace DQ_BITMAP

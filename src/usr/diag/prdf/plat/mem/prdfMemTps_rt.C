@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -284,12 +284,11 @@ void __analyzeNibbleSyms( MemUtils::MaintSymbols i_nibbleStats,
 
 //------------------------------------------------------------------------------
 
-template<DIMMS_PER_RANK T>
 uint32_t __updateVpdSumAboveOne( CeCount i_sumAboveOneCount,
-                                 MemDqBitmap<T> & io_dqBitmap )
+                                 MemDqBitmap & io_dqBitmap )
 {
 
-    #define PRDF_FUNC "[__updateVpdSumAboveOne<T>] "
+    #define PRDF_FUNC "[__updateVpdSumAboveOne] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -459,14 +458,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // Get the Bad DQ Bitmap.
         TargetHandle_t mcaTrgt = iv_chip->getTrgt();
-        MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+        MemDqBitmap dqBitmap;
 
-        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, iv_rank, dqBitmap);
+        o_rc = getBadDqBitmap( mcaTrgt, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                      "(0x%08x, 0x%02x) failed", getHuid(mcaTrgt),
-                      iv_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed",
+                      getHuid(mcaTrgt), iv_rank.getKey() );
             break;
         }
 
@@ -541,12 +539,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // Placing a symbol mark risks a UE.
                     // For nibbles under threshold with a sum greater than 1,
                     // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_sumAboveOneCount, dqBitmap );
+                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                                  "_RANK::MCA>() failed." );
+                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -622,12 +618,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // Placing a symbol mark risks a UE.
                     // For nibbles under threshold with a sum greater than 1,
                     // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_sumAboveOneCount, dqBitmap );
+                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                                  "_RANK::MCA>() failed." );
+                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -701,12 +695,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // Placing a mark risks a UE.
                     // For nibbles under threshold with a sum greater than 1,
                     // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_sumAboveOneCount, dqBitmap );
+                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                                  "_RANK::MCA>() failed." );
+                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -805,12 +797,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // Placing a chip mark risks a UE.
                     // For nibbles under threshold with a sum greater than 1,
                     // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_sumAboveOneCount, dqBitmap );
+                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                                  "_RANK::MCA>() failed." );
+                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -862,12 +852,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // Placing the symbol mark risks a UE.
                     // For nibbles under threshold with a sum greater than 1,
                     // update VPD with it's non-zero symbols.
-                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_sumAboveOneCount, dqBitmap );
+                    o_rc = __updateVpdSumAboveOne(i_sumAboveOneCount, dqBitmap);
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                                  "_RANK::MCA>() failed." );
+                        PRDF_ERR(PRDF_FUNC "__updateVpdSumAboveOne() failed.");
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -887,12 +875,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // There are enough errors that this could be a potential UE.
             // For nibbles under threshold with a sum greater than 1,
             // update VPD with it's non-zero symbols.
-            o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
-                i_sumAboveOneCount, dqBitmap );
+            o_rc = __updateVpdSumAboveOne( i_sumAboveOneCount, dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
-                          "_RANK::MCA>() failed." );
+                PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne() failed." );
             }
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
@@ -917,12 +903,11 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         }
 
         // Write any updates to VPD.
-        o_rc = setBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, iv_rank, dqBitmap);
+        o_rc = setBadDqBitmap( mcaTrgt, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR(PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                    "(0x%08x, 0x%02x) failed", getHuid(mcaTrgt),
-                    iv_rank.getKey());
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed",
+                      getHuid(mcaTrgt), iv_rank.getKey() );
             break;
         }
 
@@ -959,14 +944,13 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
     {
         // Get the Bad DQ Bitmap.
         TargetHandle_t mcaTrgt = iv_chip->getTrgt();
-        MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+        MemDqBitmap dqBitmap;
 
-        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, iv_rank, dqBitmap);
+        o_rc = getBadDqBitmap( mcaTrgt, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                      "(0x%08x,%d) failed", getHuid(mcaTrgt),
-                      iv_rank.getMaster() );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,%d) failed",
+                      getHuid(mcaTrgt), iv_rank.getMaster() );
             break;
         }
         std::vector<MemSymbol> bmSymList = dqBitmap.getSymbolList();
@@ -989,12 +973,12 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
             uint8_t baseSymbol = SYMBOLS_PER_CE_REG * regIdx;
 
             for ( uint8_t i = 0; i < SYMBOLS_PER_CE_REG;
-                  i += MCA_SYMBOLS_PER_NIBBLE )
+                  i += MEM_SYMBOLS_PER_NIBBLE )
             {
                 MemUtils::MaintSymbols nibbleStats;
 
                 // Get a nibble's worth of symbols.
-                for ( uint8_t n = 0; n < MCA_SYMBOLS_PER_NIBBLE; n++ )
+                for ( uint8_t n = 0; n < MEM_SYMBOLS_PER_NIBBLE; n++ )
                 {
                     uint8_t sym = baseSymbol + (i+n);
                     PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
@@ -1416,8 +1400,7 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
         }
 
         // Add all symbols to the VPD.
-        MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
-
+        MemDqBitmap bitmap;
         o_rc = getBadDqBitmap( trgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
@@ -1676,7 +1659,7 @@ uint32_t TpsEvent<TYPE_MBA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             }
 
             // Add this symbol to the VPD.
-            MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
+            MemDqBitmap bitmap;
             o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {

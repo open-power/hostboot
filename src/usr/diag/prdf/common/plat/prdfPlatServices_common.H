@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,8 +55,6 @@ namespace PRDF
 {
 
 class CenAddr;
-enum DIMMS_PER_RANK : uint8_t;
-template <DIMMS_PER_RANK T>
 class MemDqBitmap;
 class CenMark;
 class CenRank;
@@ -195,27 +193,25 @@ bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 
 /**
  * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt        A MCA/MBA target.
+ * @param  i_trgt        A MCA/MBA/MEM_PORT target.
  * @param  i_rank        Target rank.
  * @param  o_bitmap      DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-template <DIMMS_PER_RANK T>
-int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
-                        const MemRank & i_rank, MemDqBitmap<T> & o_bitmap );
+uint32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
+                         const MemRank & i_rank, MemDqBitmap & o_bitmap );
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt   A MCA/MBA target.
+ * @param  i_trgt   A MCA/MBA/MEM_PORT target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-template <DIMMS_PER_RANK T>
-int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
-                        const MemRank & i_rank,
-                        const MemDqBitmap<T> & i_bitmap );
+uint32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
+                         const MemRank & i_rank,
+                         const MemDqBitmap & i_bitmap );
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.

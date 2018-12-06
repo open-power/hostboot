@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,15 +208,14 @@ uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
 
 
 //------------------------------------------------------------------------------
-template<>
 uint32_t mssIplUeIsolation( TargetHandle_t i_mba, const MemRank & i_rank,
-    MemDqBitmap<DIMMS_PER_RANK::MBA> & o_bitmap )
+                            MemDqBitmap & o_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::mssIplUeIsolation] "
 
     uint32_t o_rc = SUCCESS;
 
-    uint8_t data[DIMMS_PER_RANK::MBA][DQ_BITMAP::BITMAP_SIZE];
+    uint8_t data[MAX_PORT_PER_MBA][DQ_BITMAP::BITMAP_SIZE];
 
     errlHndl_t errl = NULL;
     fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba( i_mba );
@@ -231,7 +230,12 @@ uint32_t mssIplUeIsolation( TargetHandle_t i_mba, const MemRank & i_rank,
     }
     else
     {
-        o_bitmap = MemDqBitmap<DIMMS_PER_RANK::MBA>( i_mba, i_rank, data );
+        BitmapData bitmapData;
+        for ( uint8_t p = 0; p < MAX_PORT_PER_MBA; p++ )
+        {
+            memcpy( bitmapData[p].bitmap, data[p], sizeof(data[p]) );
+        }
+        o_bitmap = MemDqBitmap( i_mba, i_rank, bitmapData );
     }
 
     return o_rc;

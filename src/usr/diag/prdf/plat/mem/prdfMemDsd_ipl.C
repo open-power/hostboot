@@ -128,10 +128,8 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
             // Set the bad spare in the VPD. At this point, the chip mark
             // should have already been set in the VPD because it was recently
             // verified.
-            MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>( iv_chip->getTrgt(),
-                                                        iv_rank, bitmap );
-
+            MemDqBitmap bitmap;
+            o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
@@ -151,8 +149,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
                 }
             }
 
-            o_rc = setBadDqBitmap<DIMMS_PER_RANK::MBA>( iv_chip->getTrgt(),
-                                                        iv_rank, bitmap );
+            o_rc = setBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );

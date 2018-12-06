@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 #ifndef __prdfMemDqBitmap_H
 #define __prdfMemDqBitmap_H
 
+#include <map>
+
 #include <prdfPlatServices.H>
 
 #include <prdfMemAddress.H>
@@ -41,16 +43,16 @@ namespace PRDF
 class CaptureData;
 class MemSymbol;
 
-enum DIMMS_PER_RANK : uint8_t
+struct data
 {
-    MCA = MCA_DIMMS_PER_RANK,
-    MBA = MBA_DIMMS_PER_RANK,
+    uint8_t bitmap[DQ_BITMAP::BITMAP_SIZE];
 };
+// Map from port (uint8_t) to the bitmap data (uint8_t[DQ_BITMAP::BITMAP_SIZE])
+typedef std::map<uint8_t, data> BitmapData;
 
 /**
  * @brief Container for DIMM's DQ bitmap.
  */
-template <DIMMS_PER_RANK T>
 class MemDqBitmap
 {
   private: // enums, constants
@@ -66,19 +68,12 @@ class MemDqBitmap
   public: // constructors
 
     /** @brief Default constructor */
-    MemDqBitmap()
-    {
-        memset( iv_data, 0x00, sizeof(iv_data) );
-    }
+    MemDqBitmap() {}
 
     /** @brief Constructor from components */
     MemDqBitmap( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-                 const uint8_t (&i_d)[T][DQ_BITMAP::BITMAP_SIZE] ) :
-        iv_trgt(i_trgt), iv_rank(i_rank),
-        iv_x4Dram(PlatServices::isDramWidthX4(i_trgt))
-    {
-        memcpy( iv_data, i_d, sizeof(iv_data) );
-    }
+                 BitmapData i_d ) : iv_trgt(i_trgt), iv_rank(i_rank),
+                 iv_x4Dram(PlatServices::isDramWidthX4(i_trgt)), iv_data(i_d){}
 
   public: // functions
 
@@ -96,7 +91,7 @@ class MemDqBitmap
      *                    FALSE otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t badDqs( bool & o_badDqs, uint8_t i_portSlct = 0 ) const;
+    uint32_t badDqs( bool & o_badDqs, uint8_t i_portSlct = 0 ) const;
 
     /**
      * @brief  Sets the specified DQ.
@@ -104,7 +99,7 @@ class MemDqBitmap
      * @param  i_portSlct The optional target port. The default is port 0.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setDq( uint8_t i_dq, uint8_t i_portSlct = 0 );
+    uint32_t setDq( uint8_t i_dq, uint8_t i_portSlct = 0 );
 
     /**
      * @brief  Sets the specified symbol.
@@ -114,7 +109,7 @@ class MemDqBitmap
      *                  is to set both pins.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setSymbol( const MemSymbol & i_symbol, uint8_t i_pins = 0x3 );
+    uint32_t setSymbol( const MemSymbol & i_symbol, uint8_t i_pins = 0x3 );
 
     /**
      * @brief  Sets the specified DRAM.
@@ -124,7 +119,7 @@ class MemDqBitmap
      *                  DRAM's pins. The default is to set all pins.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setDram( const MemSymbol & i_symbol, uint8_t i_pins = 0xff );
+    uint32_t setDram( const MemSymbol & i_symbol, uint8_t i_pins = 0xff );
 
     /**
      * @brief  Clears the specified DRAM.
@@ -142,10 +137,26 @@ class MemDqBitmap
      */
     void getCaptureData( CaptureData & o_cd ) const;
 
-    /** @return A reference to the data array. */
-    const uint8_t (&getData()const)[T][DQ_BITMAP::BITMAP_SIZE]
+    /** @return The bitmap data. */
+    const BitmapData & getData() const
     {
         return iv_data;
+    }
+
+    /**
+     * @brief  Gets the bitmap data for a specified port.
+     * @param  i_ps The port select.
+     * @return A reference to the bitmap data at a certain port.
+     */
+    const uint8_t (&getData(uint8_t i_ps)const)[DQ_BITMAP::BITMAP_SIZE]
+    {
+        return iv_data.at(i_ps).bitmap;
+    }
+
+    /** @return The size of the data map, ie how many ports there are */
+    const size_t getNumPorts() const
+    {
+        return iv_data.size();
     }
 
     /**
@@ -158,8 +169,8 @@ class MemDqBitmap
      * @param  o_bitIdx   The bit index of the symbol (0,2,4,6).
      * @return Non-SUCCESS if the symbol is invalid, SUCCESS otherwise.
      */
-    int32_t getPortByteBitIdx( const MemSymbol & i_symbol, uint8_t & o_portSlct,
-                               uint8_t & o_byteIdx, uint8_t & o_bitIdx ) const;
+    uint32_t getPortByteBitIdx(const MemSymbol & i_symbol, uint8_t & o_portSlct,
+                               uint8_t & o_byteIdx, uint8_t & o_bitIdx) const;
 
     /**
      * @brief  Checks if chip mark is present on specified DRAM.
@@ -168,7 +179,7 @@ class MemDqBitmap
      * @param  o_cm     True if chip mark is present false otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t isChipMark( const MemSymbol & i_symbol, bool & o_cm );
+    uint32_t isChipMark( const MemSymbol & i_symbol, bool & o_cm );
 
     /**
      * @brief  Returns a list of all active (non-zero) symbols.
@@ -185,8 +196,8 @@ class MemDqBitmap
      * @param  o_eccSpare  TRUE if the ECC spare is available, FALSE otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t isSpareAvailable( uint8_t i_portSlct,
-                              bool & o_dramSpare, bool & o_eccSpare );
+    uint32_t isSpareAvailable( uint8_t i_portSlct,
+                               bool & o_dramSpare, bool & o_eccSpare );
 
     /**
      * @brief  Sets the ECC spare on the specified port (x4 mode only).
@@ -194,7 +205,7 @@ class MemDqBitmap
      *                    The default is to set all pins.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setEccSpare( uint8_t i_pins = 0x0f );
+    uint32_t setEccSpare( uint8_t i_pins = 0x0f );
 
     /**
      * @brief  Sets the DRAM spare on the specified port.
@@ -203,17 +214,17 @@ class MemDqBitmap
      *                    the DRAM's pins. The default is to set all pins.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    int32_t setDramSpare( uint8_t i_portSlct, uint8_t i_pins = 0xff );
+    uint32_t setDramSpare( uint8_t i_portSlct, uint8_t i_pins = 0xff );
 
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA
+    TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA/MEM_PORT
     MemRank iv_rank;                   ///< Target rank
     bool iv_x4Dram;                    ///< TRUE if iv_trgt uses x4 DRAMs
 
     /** A bitmap of all bad DQs for each port. */
-    uint8_t iv_data[T][DQ_BITMAP::BITMAP_SIZE];
+    BitmapData iv_data;
 };
 
 //##############################################################################
@@ -226,7 +237,6 @@ class MemDqBitmap
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-template<TARGETING::TYPE T>
 uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
                        MemSymbol i_symbol );
 
@@ -236,7 +246,6 @@ uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-template<TARGETING::TYPE T>
 uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
                          MemSymbol i_symbol );
 

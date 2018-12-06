@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+template<TARGETING::TYPE T>
 void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
                     TargetHandle_t i_dimmTrgt )
 {
@@ -123,17 +123,20 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     std::vector<MemRank> ranks;
     getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
 
-    uint8_t data[D][DQ_BITMAP::BITMAP_SIZE];
-    memset( data, 0x00, sizeof(data) );
+    BitmapData data;
+    for ( uint8_t p = 0; p < MAX_MEM_PORT; p++ )
+    {
+        memset( data[p].bitmap, 0x00, sizeof(data) );
+    }
 
     for ( auto & rank : ranks )
     {
-        MemDqBitmap<D> dqBitmap { i_portTrgt, rank, data };
+        MemDqBitmap dqBitmap { i_portTrgt, rank, data };
 
-        if ( SUCCESS != setBadDqBitmap<D>(i_portTrgt, rank, dqBitmap) )
+        if ( SUCCESS != setBadDqBitmap(i_portTrgt, rank, dqBitmap) )
         {
-            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<%d>(0x%08x,0x%02x) failed",
-                      D, getHuid(i_portTrgt), rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x,0x%02x) failed",
+                      getHuid(i_portTrgt), rank.getKey() );
             continue;
         }
     }
@@ -251,8 +254,7 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
         // Callout all DIMMs in the map.
         for ( auto const & dimm : calloutList )
         {
-            __calloutDimm<TYPE_MCA, DIMMS_PER_RANK::MCA>( errl, i_trgt,
-                                                          dimm.first );
+            __calloutDimm<TYPE_MCA>( errl, i_trgt, dimm.first );
         }
 
         // Commit the error log, if needed.
@@ -374,8 +376,7 @@ bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
             // Callout all DIMMs in the map.
             for ( auto const & dimm : calloutList )
             {
-                __calloutDimm<TYPE_MBA, DIMMS_PER_RANK::MBA>( errl, i_trgt,
-                                                              dimm.first );
+                __calloutDimm<TYPE_MBA>( errl, i_trgt, dimm.first );
             }
 
             o_calloutMade = true;
@@ -432,7 +433,7 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
                                              i_trgt, PRDFSIG_RdrRepairUnavail );
             }
 
-            __calloutDimm<TYPE_MCA, DIMMS_PER_RANK::MCA>( errl, i_trgt, dimm );
+            __calloutDimm<TYPE_MCA>( errl, i_trgt, dimm );
 
             o_calloutMade = true;
         }
@@ -474,7 +475,7 @@ bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         uint8_t dimmSlct = getDimmSlct( dimm );
 
         // The 4 bits of i_badDimmMask is defined as p0d0, p0d1, p1d0, and p1d1.
-        uint8_t mask = 0x8 >> (portSlct * MBA_DIMMS_PER_RANK + dimmSlct);
+        uint8_t mask = 0x8 >> (portSlct * MAX_PORT_PER_MBA + dimmSlct);
 
         if ( 0 != (i_badDimmMask & mask) )
         {
@@ -484,7 +485,7 @@ bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
                                              i_trgt, PRDFSIG_RdrRepairUnavail );
             }
 
-            __calloutDimm<TYPE_MBA, DIMMS_PER_RANK::MBA>( errl, i_trgt, dimm );
+            __calloutDimm<TYPE_MBA>( errl, i_trgt, dimm );
 
             o_calloutMade = true;
         }
@@ -505,25 +506,6 @@ bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE>
-int32_t __readBadDqBitmap( TargetHandle_t i_trgt, MemRank i_rank );
-
-template<>
-int32_t __readBadDqBitmap<TYPE_MCA>( TargetHandle_t i_trgt, MemRank i_rank )
-{
-    MemDqBitmap<DIMMS_PER_RANK::MCA> bitmap;
-    return getBadDqBitmap<DIMMS_PER_RANK::MCA>( i_trgt, i_rank, bitmap );
-}
-
-template<>
-int32_t __readBadDqBitmap<TYPE_MBA>( TargetHandle_t i_trgt, MemRank i_rank )
-{
-    MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
-    return getBadDqBitmap<DIMMS_PER_RANK::MBA>( i_trgt, i_rank, bitmap );
-}
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T>
 bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
 {
@@ -540,10 +522,10 @@ bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
         // if it has DRAM Repairs VPD and the DISABLE_DRAM_REPAIRS MNFG policy
         // flag is set. PRD will simply need to iterate through all the ranks
         // to ensure all DIMMs are screen and the procedure will do the rest.
-
-        if ( SUCCESS != __readBadDqBitmap<T>(i_trgt, rank) )
+        MemDqBitmap bitmap;
+        if ( SUCCESS != getBadDqBitmap(i_trgt, rank, bitmap) )
         {
-            PRDF_ERR( PRDF_FUNC "__readBadDqBitmap() failed: TRGT=0x%08x "
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: TRGT=0x%08x "
                       "rank=0x%02x", getHuid(i_trgt), rank.getKey() );
             analysisErrors = true;
             continue; // skip this rank

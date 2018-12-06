@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -626,33 +626,30 @@ bool obusInSmpMode( TargetHandle_t obus )
 //##                        Memory specific functions
 //##############################################################################
 
-template <DIMMS_PER_RANK T>
-int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-                        MemDqBitmap<T> & o_bitmap )
+template <fapi2::TargetType T>
+uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+                           MemDqBitmap & o_bitmap )
 {
-    #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
+    #define PRDF_FUNC "[PlatServices::__getBadDqBitmap] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     #ifdef __HOSTBOOT_MODULE
 
-    uint8_t data[T][DQ_BITMAP::BITMAP_SIZE] = {0};
+    BitmapData data;
 
-    for ( int32_t ps = 0; ps < T; ps++ )
+    for ( uint32_t ps = 0; ps < MAX_MEM_PORT; ps++ )
     {
-        // Don't proceed unless the DIMM exists
-        PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
+        // Skip if the DIMM doesn't exist
+        if ( nullptr != getConnectedDimm(i_trgt, i_rank, ps) ) continue;
 
         errlHndl_t errl = nullptr;
 
-        constexpr fapi2::TargetType l_trgtType = ( T == DIMMS_PER_RANK::MBA ) ?
-            fapi2::TARGET_TYPE_MBA : fapi2::TARGET_TYPE_MCA;
-
-        fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
+        fapi2::Target<T> l_fapiTrgt( i_trgt );
 
         FAPI_INVOKE_HWP( errl, p9DimmGetBadDqBitmap, l_fapiTrgt,
                          i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                         data[ps], ps );
+                         data[ps].bitmap, ps );
 
         if ( nullptr != errl )
         {
@@ -666,7 +663,7 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     if ( SUCCESS == o_rc )
     {
-        o_bitmap = MemDqBitmap<T>( i_trgt, i_rank, data );
+        o_bitmap = MemDqBitmap( i_trgt, i_rank, data );
     }
 
     #endif // __HOSTBOOT_MODULE
@@ -676,48 +673,69 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-template
-int32_t getBadDqBitmap<DIMMS_PER_RANK::MCA>(
-    TargetHandle_t i_trgt, const MemRank & i_rank,
-    MemDqBitmap<DIMMS_PER_RANK::MCA> & o_bitmap );
+uint32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+                         MemDqBitmap & o_bitmap )
+{
+    #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
 
-template
-int32_t getBadDqBitmap<DIMMS_PER_RANK::MBA>(
-    TargetHandle_t i_trgt, const MemRank & i_rank,
-    MemDqBitmap<DIMMS_PER_RANK::MBA> & o_bitmap );
+    uint32_t o_rc = SUCCESS;
+    TYPE trgtType = getTargetType( i_trgt );
+
+    switch( trgtType )
+    {
+        case TYPE_MCA:
+            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
+                                                             o_bitmap );
+            break;
+        case TYPE_MBA:
+            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MBA>( i_trgt, i_rank,
+                                                             o_bitmap );
+            break;
+        case TYPE_MEM_PORT:
+            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
+                i_rank, o_bitmap );
+            break;
+        default:
+            PRDF_ERR( PRDF_FUNC "Invalid trgt type" );
+            o_rc = FAIL;
+            break;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-                        const MemDqBitmap<T> & i_bitmap )
+template <fapi2::TargetType T>
+uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+                        const MemDqBitmap & i_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     #ifdef __HOSTBOOT_MODULE
 
     if ( !areDramRepairsDisabled() )
     {
-        const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
+        const BitmapData data = i_bitmap.getData();
 
-        for ( int32_t ps = 0; ps < T; ps++ )
+        size_t maxPorts = i_bitmap.getNumPorts();
+        for ( uint32_t ps = 0; ps < maxPorts; ps++ )
         {
             // Don't proceed unless the DIMM exists
             PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
 
             errlHndl_t errl = nullptr;
 
-            constexpr fapi2::TargetType l_trgtType =
-                ( T == DIMMS_PER_RANK::MBA ) ? fapi2::TARGET_TYPE_MBA
-                                             : fapi2::TARGET_TYPE_MCA;
-
-            fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
+            fapi2::Target<T> l_fapiTrgt( i_trgt );
 
             FAPI_INVOKE_HWP( errl, p9DimmSetBadDqBitmap, l_fapiTrgt,
                              i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                             data[ps], ps );
+                             data.at(ps).bitmap, ps );
 
             if ( nullptr != errl )
             {
@@ -737,17 +755,38 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-template
-int32_t setBadDqBitmap<DIMMS_PER_RANK::MCA>(
-    TargetHandle_t i_trgt, const MemRank & i_rank,
-    const MemDqBitmap<DIMMS_PER_RANK::MCA> & i_bitmap );
+uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+    const MemDqBitmap & i_bitmap )
+{
+    #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
 
-template
-int32_t setBadDqBitmap<DIMMS_PER_RANK::MBA>(
-    TargetHandle_t i_trgt, const MemRank & i_rank,
-    const MemDqBitmap<DIMMS_PER_RANK::MBA> & i_bitmap );
+    uint32_t o_rc = SUCCESS;
+    TYPE trgtType = getTargetType( i_trgt );
 
+    switch( trgtType )
+    {
+        case TYPE_MCA:
+            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MCA>( i_trgt, i_rank,
+                                                             i_bitmap );
+            break;
+        case TYPE_MBA:
+            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MBA>( i_trgt, i_rank,
+                                                             i_bitmap );
+            break;
+        case TYPE_MEM_PORT:
+            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
+                i_rank, i_bitmap );
+            break;
+        default:
+            PRDF_ERR( PRDF_FUNC "Invalid trgt type" );
+            o_rc = FAIL;
+            break;
+    }
 
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 template<>
@@ -1005,9 +1044,9 @@ uint32_t isDramSparingEnabled<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
-uint32_t __isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
-                             uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
+template<TARGETING::TYPE T>
+uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
+                           uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
 {
     #define PRDF_FUNC "[PlatServices::isSpareAvailable] "
 
@@ -1044,8 +1083,8 @@ uint32_t __isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
         bool eccSparePossible  = false;
 
         // Get the bad dq data
-        MemDqBitmap<D> dqBitmap;
-        o_rc = getBadDqBitmap<D>( i_trgt, i_rank, dqBitmap );
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
@@ -1077,13 +1116,9 @@ uint32_t __isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 }
 
-template<>
+template
 uint32_t isSpareAvailable<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
-    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
-{
-    return __isSpareAvailable<TYPE_MBA, DIMMS_PER_RANK::MBA>( i_trgt, i_rank,
-        i_ps, o_spAvail, o_eccAvail );
-}
+    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 //------------------------------------------------------------------------------
 
