@@ -348,11 +348,13 @@ fapi2::ReturnCode getOCCfg(
 ///
 /// @param[in] i_target     The Explorer chip to read data from
 /// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
+///                         The size of this buffer will be a multiple of 8
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    host_fw_response_struct& o_rsp) ;
+    host_fw_response_struct& o_rsp, std::vector<uint8_t>& o_data) ;
 
 
 

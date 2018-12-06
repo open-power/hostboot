@@ -40,7 +40,7 @@
 ///
 /// @brief Initializes DRAM
 /// @param[in] i_target the controller
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
@@ -65,7 +65,8 @@ fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     // Read the response message from EXP-FW RESP buffer
     {
         host_fw_response_struct l_response;
-        FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response),
+        std::vector<uint8_t> l_rsp_data;
+        FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
                   "Failed getRSP() for  %s", mss::c_str(i_target) );
 
         // Check if cmd was successful

@@ -454,16 +454,32 @@ fapi_try_exit:
 ///
 /// @param[in] i_target     The Explorer chip to read data from
 /// @param[out] o_rsp       The response data read from the buffer
+/// @param[out] o_data      Raw (little-endian) response data buffer portion
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    host_fw_response_struct& o_rsp)
+    host_fw_response_struct& o_rsp, std::vector<uint8_t>& o_data)
 {
     std::vector<uint8_t> l_data(static_cast<int>(sizeof(o_rsp)));
     FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, 8, l_data));
 
     FAPI_TRY(host_fw_response_struct_from_little_endian(i_target, l_data, o_rsp));
+
+    // If response data in buffer portion, return that too
+    if (o_rsp.response_length > 0)
+    {
+        // make sure expected size is a multiple of 8
+        o_data.resize( o_rsp.response_length +
+                       (8 - (o_rsp.response_length % 8)) );
+
+        FAPI_TRY( fapi2::getMMIO(i_target, EXPLR_IB_DATA_ADDR, 8, o_data) );
+    }
+    else
+    {
+        // make sure no buffer data is returned
+        o_data.clear();
+    }
 
 fapi_try_exit:
     FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
