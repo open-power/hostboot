@@ -336,6 +336,157 @@ typedef union requested_active_quads
 // End Quad State
 // -----------------------------------------------------------------------------
 
+typedef struct
+{
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t average_pstate             : 8;
+            uint64_t average_frequency_pstate   : 8;
+            uint64_t clip_pstate                : 8;
+            uint64_t reserved                   : 8;
+            uint64_t vratio_inst                : 16;
+            uint64_t vratio_avg                 : 16;
+        } fields;
+    } dw0;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t idd_avg_ma                 : 16;
+            uint64_t ics_avg_ma                 : 16;
+            uint64_t idn_avg_ma                 : 16;
+            uint64_t iio_avg_ma                 : 16;
+
+        } fields;
+    } dw1;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t vdd_avg_mv                 : 16;
+            uint64_t vcs_avg_mv                 : 16;
+            uint64_t vdn_avg_mv                 : 16;
+            uint64_t vio_avg_mv                 : 16;
+        } fields;
+    } dw2;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t ocs_avg_0p01pct            : 16;
+            uint64_t reserved                   : 48;
+        } fields;
+    } dw3;
+} pgpe_wof_values_t;
+
+typedef struct
+{
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t magic_word                 : 32; //ELTC
+            uint64_t total_log_slots            : 8;
+            uint64_t reserved                   : 24;
+        } fields;
+    } dw0;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t errlog_id                  : 8;
+            uint64_t errlog_src                 : 8;
+            uint64_t errlog_len                 : 16;
+            uint64_t pgpe_critical_log_address  : 32;
+        } fields;
+    } dw1;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t errlog_id                  : 8;
+            uint64_t errlog_src                 : 8;
+            uint64_t errlog_len                 : 16;
+            uint64_t pgpe_info_log_address      : 32;
+        } fields;
+    } dw2;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t errlog_id                  : 8;
+            uint64_t errlog_src                 : 8;
+            uint64_t errlog_len                 : 16;
+            uint64_t sgpe_critical_log_address  : 32;
+        } fields;
+    } dw3;
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t errlog_id                  : 8;
+            uint64_t errlog_src                 : 8;
+            uint64_t errlog_len                 : 16;
+            uint64_t sgpe_info_log_address      : 32;
+        } fields;
+    } dw4;
+} errlog_idx_t;
 
 typedef struct
 {
@@ -357,8 +508,17 @@ typedef struct
     ///Requested Active Quads
     requested_active_quads_t    req_active_quads;
 
-    /// FFDC Address list
-    Hcode_FFDC_list_t   ffdc_list;
+    //PGPE WOF Values
+    pgpe_wof_values_t    pgpe_wof_values;
+
+    //Reserved
+    uint64_t            reserved1;
+
+    /// Hcode Error Log Index
+    errlog_idx_t        errlog_idx;
+
+    //Reserved
+    uint64_t            reserved2[24];
 
     /// Pstate Table
     OCCPstateTable_t    pstate_table;
