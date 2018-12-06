@@ -173,8 +173,8 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     // far if CONFIG_TPMDD wasn't set
 #ifdef CONFIG_TPMDD
     err = TRUSTEDBOOT::GetRandom(tpm_tgt,
-                                 reinterpret_cast<uint8_t*>(&o_nonce),
-                                 sizeof(o_nonce));
+                                 sizeof(o_nonce),
+                                 reinterpret_cast<uint8_t*>(&o_nonce));
 #endif
     if (err)
     {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -846,6 +846,216 @@ errlHndl_t flushTpmQueue()
     l_msg = nullptr;
 
     TRACFCOMP(g_trac_trustedboot, EXIT_MRK"flushTpmQueue()");
+#endif
+    return l_errl;
+}
+
+errlHndl_t createAttestationKeys(TpmTarget* i_target)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    TpmTargetData* l_data = new TpmTargetData{i_target};
+
+    l_msg = Message::factory(MSG_TYPE_CREATE_ATT_KEYS,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "createAttestationKeys: l_msg is nullptr");
+    l_data = nullptr; //l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    MOD_CREATE_ATT_KEYS
+         * @reasoncode  RC_SENDRECV_FAIL
+         * @userdata1   rc from msg_sendrecv
+         * @userdata2   TPM HUID
+         * @devdesc     msg_sendrecv failed for createAttestationKeys
+         * @custdesc    trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_CREATE_ATT_KEYS,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
+#endif
+    return l_errl;
+}
+
+errlHndl_t readAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    ReadAKCertData* l_data = new ReadAKCertData {i_target, o_data};
+
+    l_msg = Message::factory(MSG_TYPE_READ_AK_CERT,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "readAKCertificate: l_msg is nullptr");
+    l_data = nullptr; // l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    MOD_READ_AK_CERT
+         * @reasoncode  RC_SENDRECV_FAIL
+         * @userdata1   rc from msg_sendrecv
+         * @userdata2   TPM HUID
+         * @devdesc     msg_sendrecv failed for readAKCertificate
+         * @custdesc    trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_READ_AK_CERT,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
+#endif
+    return l_errl;
+}
+
+errlHndl_t generateQuote(TpmTarget* i_target,
+                         MasterTpmNonce_t* i_masterNonce,
+                         QuoteDataOut* o_data)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    GenQuoteData* l_data = new GenQuoteData{i_target, i_masterNonce, o_data};
+
+    l_msg = Message::factory(MSG_TYPE_GEN_QUOTE,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "generateQuote: l_msg is nullptr");
+    l_data = nullptr; //l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    MOD_GEN_QUOTE
+         * @reasoncode  RC_SENDRECV_FAIL
+         * @userdata1   rc from msg_sendrecv
+         * @userdata2   TPM HUID
+         * @devdesc     msg_sendrecv failed for generateQuote
+         * @custdesc    trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_GEN_QUOTE,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
+#endif
+    return l_errl;
+}
+
+errlHndl_t flushContext(TpmTarget* i_target)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    TpmTargetData* l_data = new TpmTargetData{i_target};
+
+    l_msg = Message::factory(MSG_TYPE_FLUSH_CONTEXT,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "flushContext: l_msg is nullptr");
+    l_data = nullptr;
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    MOD_FLUSH_CONTEXT
+         * @reasoncode  RC_SENDRECV_FAIL
+         * @userdata1   rc from msg_sendrecv
+         * @userdata2   TPM HUID
+         * @devdesc     msg_sendrecv failed for TPM2_FlushContext
+         * @custdesc    trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_FLUSH_CONTEXT,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
 #endif
     return l_errl;
 }

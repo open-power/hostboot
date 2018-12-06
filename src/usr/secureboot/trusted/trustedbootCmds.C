@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include "trustedbootUtils.H"
 #include "trustedboot.H"
 #include "trustedTypes.H"
+#include <secureboot/trustedbootif.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -368,6 +369,8 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
         switch (i_commandCode)
         {
           // Empty response commands
+          case TPM_CC_CreatePrimary:
+          case TPM_CC_FlushContext:
           case TPM_CC_Startup:
           case TPM_CC_PCR_Extend:
             // Nothing to do
@@ -398,6 +401,32 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                   auto respPtr = reinterpret_cast<TPM2_GetRandomOut*>(o_outBuf);
                   sBuf = TPM2B_DIGEST_unmarshal(&respPtr->randomBytes, sBuf,
                                                 &i_respBufSize);
+              }
+              break;
+
+          case TPM_CC_NV_Read:
+              {
+                  // Read out the TPM NV Data
+                  TPM2_NVReadOut* l_respPtr =
+                                    reinterpret_cast<TPM2_NVReadOut*>(o_outBuf);
+                  TPM2_NVReadOut* l_tpmRespData =
+                                   reinterpret_cast<TPM2_NVReadOut*>(i_respBuf);
+                  memcpy(l_tpmRespData->NVData,
+                         l_respPtr->NVData,
+                         TPM_NV_DATA_SIZE);
+              }
+              break;
+
+          case TPM_CC_Quote:
+              {
+                  // Pass back the quote data
+                  TPM2_QuoteOut* l_respPtr =
+                                reinterpret_cast<TPM2_QuoteOut*>(o_outBuf);
+                  TPM2_QuoteOut* l_tpmRespData =
+                                reinterpret_cast<TPM2_QuoteOut*>(i_respBuf);
+                  memcpy(l_respPtr->quoteData,
+                         l_tpmRespData->quoteData,
+                         sizeof(l_tpmRespData->base.responseSize));
               }
               break;
 
@@ -1235,6 +1264,332 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
 
 }
 
+errlHndl_t tpmCmdCreateAttestationKeys(TpmTarget* i_target)
+{
+    TRACFCOMP(g_trac_trustedboot,
+              ENTER_MRK"tpmCmdCreateAttestationKeys()");
+    errlHndl_t l_errl = nullptr;
+
+    uint8_t l_dataBuf[BUFSIZE] = {};
+    TPM2_CreatePrimaryIn* l_cmd =
+                             reinterpret_cast<TPM2_CreatePrimaryIn*>(l_dataBuf);
+    TPM2_BaseOut* l_resp = reinterpret_cast<TPM2_BaseOut*>(l_dataBuf);
+
+    do {
+    uint64_t l_cmdData[] = { 0x0000000000000400,
+                             0x0000000018002300,
+                             0x0B00050472000000,
+                             0x100018000B000300,
+                             0x1000000000000000,
+                             0 };
+    l_cmd->base.tag = TPM_ST_SESSIONS;
+    l_cmd->base.commandSize = TPM_CREATE_PRIMARY_SIZE;
+    l_cmd->base.commandCode = TPM_CC_CreatePrimary;
+    l_cmd->primaryHandle = TPM_RH_PLATFORM;
+    l_cmd->inSensitive.size = TPM_IN_SENSITIVE_SIZE;
+    l_cmd->inSensitive.sensitive.userAuth = TPM_RS_PW;
+
+    memcpy(l_cmd->inSensitive.sensitive.data, l_cmdData, sizeof(l_cmdData));
+
+    size_t l_dataSize = MAX_TRANSMIT_SIZE;
+
+    l_errl = tpmTransmit(i_target,
+                         l_dataBuf,
+                         l_cmd->base.commandSize,
+                         l_dataSize,
+                         TPM_LOCALITY_0);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdCreateAttestationKeys: could not transmit TPM command");
+        break;
+    }
+
+    l_errl = tpmUnmarshalResponseData(TPM_CC_CreatePrimary,
+                                      l_dataBuf,
+                                      l_dataSize,
+                                      l_resp,
+                                      l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdCreateAttestationKeys: could not unmarshal response data");
+        break;
+    }
+
+    // Check response return code
+    if(TPM_SUCCESS != l_resp->responseCode)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdCreateAttestationKeys: TPM (HUID 0x%x) returned a nonzero return code. Expected RC 0x%x, actual RC 0x%x", TARGETING::get_huid(i_target), TPM_SUCCESS, l_resp->responseCode);
+        /*@
+         * @errortype         ERRL_SEV_UNRECOVERABLE
+         * @reasoncode        RC_TPM_BAD_RESP
+         * @moduleid          MOD_TPM_CMD_CREATE_ATTEST
+         * @userdata1         TPM HUID
+         * @userdata2[0..31]  Expected response RC
+         * @userdata2[32..63] Actual response RC
+         * @devdesc           Incorrect response from TPM_CC_CreatePrimary
+         *                    command (see logs for TPM HUID)
+         * @custdesc          Trusted boot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_CREATE_ATTEST,
+                                   RC_TPM_BAD_RESP,
+                                   TARGETING::get_huid(i_target),
+                                   TWO_UINT32_TO_UINT64(
+                                        TPM_SUCCESS,
+                                        l_resp->responseCode));
+        break;
+    }
+
+    } while(0);
+
+    TRACFCOMP(g_trac_trustedboot,
+              EXIT_MRK"tpmCmdCreateAttestationKeys()");
+    return l_errl;
+}
+
+errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
+{
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdReadAKCertificate()");
+    errlHndl_t l_errl = nullptr;
+
+    size_t l_dataSize = MAX_TRANSMIT_SIZE;
+
+    uint8_t l_dataBuf[l_dataSize] = {};
+    TPM2_NVReadIn* l_cmd = reinterpret_cast<TPM2_NVReadIn*>(l_dataBuf);
+    TPM2_BaseOut* l_resp = reinterpret_cast<TPM2_BaseOut*>(l_dataBuf);
+
+    do {
+    uint64_t l_cmdData[] = { 0x01C1018101C10181,
+                             0x0000000940000009,
+                             0x000000000001F400,
+                             0, };
+    l_cmd->base.tag = TPM_ST_SESSIONS;
+    l_cmd->base.commandSize = TPM_NV_READ_SIZE;
+    l_cmd->base.commandCode = TPM_CC_NV_Read;
+
+    memcpy(l_cmd->data, l_cmdData, sizeof(l_cmdData));
+
+    l_errl = tpmTransmit(i_target,
+                         l_dataBuf,
+                         l_cmd->base.commandSize,
+                         l_dataSize,
+                         TPM_LOCALITY_0);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmUnmarshalResponseData(TPM_CC_NV_Read,
+                                      l_dataBuf,
+                                      l_dataSize,
+                                      l_resp,
+                                      l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdReadAKCertificate: could not unmarshal response data");
+        break;
+    }
+
+    if(TPM_SUCCESS != l_resp->responseCode)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdReadAKCertificate: TPM (HUID 0x%x) returned a nonzero return code. Expected RC 0x%x, actual RC 0x%x", TARGETING::get_huid(i_target), TPM_SUCCESS, l_resp->responseCode);
+        /*@
+         * @errortype         ERRL_SEV_UNRECOVERABLE
+         * @reasoncode        RC_TPM_BAD_RESP
+         * @moduleid          MOD_TPM_CMD_READ_AK_CERT
+         * @userdata1         TPM HUID
+         * @userdata2[0..31]  Expected response RC
+         * @userdata2[32..63] Actual response RC
+         * @devdesc           Incorrect response from TPM_CC_NV_Read
+         *                    command (see logs for TPM HUID)
+         * @custdesc          Trusted boot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_READ_AK_CERT,
+                                   RC_TPM_BAD_RESP,
+                                   TARGETING::get_huid(i_target),
+                                   TWO_UINT32_TO_UINT64(
+                                        TPM_SUCCESS,
+                                        l_resp->responseCode));
+        break;
+    }
+
+    TPM2_NVReadOut* l_read = reinterpret_cast<TPM2_NVReadOut*>(l_resp);
+    // NVRAM holds the AK certificate. Copy out a fixed size of 500 bytes
+    memcpy(*o_data, l_read->NVData, TPM_NV_DATA_SIZE);
+
+    }while(0);
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"tpmCmdReadAKCertificate()");
+    return l_errl;
+}
+
+errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
+                               MasterTpmNonce_t* i_masterNonce,
+                               QuoteDataOut* o_data)
+{
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdGenerateQuote()");
+    errlHndl_t l_errl = nullptr;
+
+    size_t l_dataSize = MAX_TRANSMIT_SIZE;
+    uint8_t l_dataBuf[l_dataSize] = {};
+    TPM2_QuoteIn* l_cmd = reinterpret_cast<TPM2_QuoteIn*>(l_dataBuf);
+    TPM2_BaseOut* l_resp = reinterpret_cast<TPM2_BaseOut*>(l_dataBuf);
+
+    do {
+    uint64_t l_tpmiDhObject[] = { 0x8000000000000009,
+                                  0x4000000900000000,
+                                  0x0000200000000000 };
+    uint16_t l_data = 0x0018;
+
+    l_cmd->base.tag = TPM_ST_SESSIONS;
+    l_cmd->base.commandSize = TPM_QUOTE_SIZE;
+    l_cmd->base.commandCode = TPM_CC_Quote;
+
+    memcpy(l_cmd->quoteData.tpmiDhObject,l_tpmiDhObject,sizeof(l_tpmiDhObject));
+
+    memcpy(l_cmd->quoteData.masterNonce,
+           *i_masterNonce,
+           TPM_NONCE_SIZE_BYTES);
+
+    l_cmd->quoteData.data = l_data;
+    l_cmd->quoteData.inScheme = TPM_ALG_SHA256;
+
+    l_cmd->quoteData.pcrSelection.count = 1;
+    l_cmd->quoteData.pcrSelection.pcrSelections[0].algorithmId = TPM_ALG_SHA256;
+    l_cmd->quoteData.pcrSelection.pcrSelections[0].sizeOfSelect =PCR_SELECT_MAX;
+
+    for(size_t i = PCR_0; i <= PCR_7 ; ++i)
+    {
+        l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect[i/8] =
+            0x01 << (i % 8);
+    }
+
+    l_errl = tpmTransmit(i_target,
+                         l_dataBuf,
+                         l_cmd->base.commandSize,
+                         l_dataSize,
+                         TPM_LOCALITY_0);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdGenerateQuote(): could not transmit TPM command");
+        break;
+    }
+
+    l_errl = tpmUnmarshalResponseData(TPM_CC_Quote,
+                                      l_dataBuf,
+                                      l_dataSize,
+                                      l_resp,
+                                      l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdGenerateQuote(): could not unmarshal response data");
+        break;
+    }
+
+    if(TPM_SUCCESS != l_resp->responseCode)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdGenerateQuote: TPM (HUID 0x%x) returned a nonzero return code. Expected RC 0x%x, actual RC 0x%x", TARGETING::get_huid(i_target), TPM_SUCCESS, l_resp->responseCode);
+        /*@
+         * @errortype         ERRL_SEV_UNRECOVERABLE
+         * @reasoncode        RC_TPM_BAD_RESP
+         * @moduleid          MOD_TPM_CMD_GEN_QUOTE
+         * @userdata1         TPM HUID
+         * @userdata2[0..31]  Expected response RC
+         * @userdata2[32..63] Actual response RC
+         * @devdesc           Incorrect response from TPM_CC_Quote
+         *                    command (see logs for TPM HUID)
+         * @custdesc          Trusted boot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_GEN_QUOTE,
+                                   RC_TPM_BAD_RESP,
+                                   TARGETING::get_huid(i_target),
+                                   TWO_UINT32_TO_UINT64(
+                                        TPM_SUCCESS,
+                                        l_resp->responseCode));
+        break;
+    }
+
+    TPM2_QuoteOut* l_read = reinterpret_cast<TPM2_QuoteOut*>(l_resp);
+    void* l_quoteDataPtr = &l_read->quoteData;
+
+    // The response size contains the size of the base response structure too,
+    // so subtract that size from the size of the actual quote data.
+    o_data->size = l_read->base.responseSize-sizeof(l_read->base);
+    memcpy(o_data->data, l_quoteDataPtr, o_data->size);
+
+    } while(0);
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"tpmCmdGenerateQuote()");
+    return l_errl;
+}
+
+errlHndl_t tpmCmdFlushContext(TpmTarget* i_target)
+{
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdFlushContext()");
+    errlHndl_t l_errl = nullptr;
+
+    size_t l_dataSize = MAX_TRANSMIT_SIZE;
+    uint8_t l_dataBuf[l_dataSize] = {};
+
+    TPM2_FlushContextIn* l_cmd =
+                              reinterpret_cast<TPM2_FlushContextIn*>(l_dataBuf);
+    TPM2_BaseOut* l_resp = reinterpret_cast<TPM2_BaseOut*>(l_dataBuf);
+    do {
+    l_cmd->base.tag = TPM_ST_NO_SESSIONS;
+    l_cmd->base.commandSize = TPM_FLUSH_CONTEXT_SIZE;
+    l_cmd->base.commandCode = TPM_CC_FlushContext;
+
+    l_cmd->flushHandle = TPM_HT_TRANSIENT;
+
+    l_errl = tpmTransmit(i_target,
+                         l_dataBuf,
+                         l_cmd->base.commandSize,
+                         l_dataSize,
+                         TPM_LOCALITY_0);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdFlushContext(): could not transmit TPM command");
+        break;
+    }
+
+    l_errl = tpmUnmarshalResponseData(TPM_CC_FlushContext,
+                                      l_dataBuf,
+                                      l_dataSize,
+                                      l_resp,
+                                      l_dataSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdFlushContext(): could not unmarshal response data");
+        break;
+    }
+
+    if(TPM_SUCCESS != l_resp->responseCode)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdFlushContext: TPM (HUID 0x%x) returned a nonzero return code. Expected RC 0x%x, actual RC 0x%x", TARGETING::get_huid(i_target), TPM_SUCCESS, l_resp->responseCode);
+        /*@
+         * @errortype         ERRL_SEV_UNRECOVERABLE
+         * @reasoncode        RC_TPM_BAD_RESP
+         * @moduleid          MOD_TPM_CMD_FLUSH_CONTEXT
+         * @userdata1         TPM HUID
+         * @userdata2[0..31]  Expected response RC
+         * @userdata2[32..63] Actual response RC
+         * @devdesc           Incorrect response from TPM2_FlushContext
+         *                    command (see logs for TPM HUID)
+         * @custdesc          Trusted boot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_FLUSH_CONTEXT,
+                                   RC_TPM_BAD_RESP,
+                                   TARGETING::get_huid(i_target),
+                                   TWO_UINT32_TO_UINT64(
+                                        TPM_SUCCESS,
+                                        l_resp->responseCode));
+        break;
+    }
+
+    } while(0);
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"tpmCmdFlushContext()");
+    return l_errl;
+}
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT

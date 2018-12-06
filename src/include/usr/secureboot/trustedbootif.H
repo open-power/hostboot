@@ -50,9 +50,33 @@ namespace TRUSTEDBOOT
 
     struct _TpmLogMgr;
 
+    // Structure that contains the TPM quote data and the size thereof
+    struct _QuoteDataOut
+    {
+        size_t size; // the size (bytes) of the data pointer
+        uint8_t* data; // the actual quote data
+    } PACKED;
+    typedef struct _QuoteDataOut QuoteDataOut;
+
     // Hostboot code just maps the TpmTarget type, which shared APIs use, as a
     // targeting target
     typedef TARGETING::Target TpmTarget;
+
+    enum
+    {
+        // The size of AK certificate from the TPM, in bytes
+        TPM_NV_DATA_SIZE          = 0x1F4,
+        // The size of the master nonce, in bytes
+        TPM_NONCE_SIZE_BYTES      = 0x20,
+    };
+
+    // The structure that defines the size of the TPM AK certificate
+    // (in bytes)
+    typedef uint8_t AKCertificate_t[TPM_NV_DATA_SIZE];
+
+    // The structure that defines the size of the master node nonce
+    // (in bytes)
+    typedef uint8_t MasterTpmNonce_t[TPM_NONCE_SIZE_BYTES];
 
     /**
      *  @brief Enum used for the getTPMs API to specify scope of TPMs to return
@@ -250,17 +274,17 @@ namespace TRUSTEDBOOT
      *            be functional. All of these conditions must be met or an error
      *            log will result.
      *
-     *  @param[out] o_randNum A pointer to the array to be filled with random
-     *              bits
-     *
      *  @param[in] i_randNumSize The desired size (bytes) of the random number
      *             to be requested from the TPM
+     *
+     *  @param[out] o_randNum A pointer to the array to be filled with random
+     *              bits
      *
      *  @return errlHndl_t nullptr on success or an error log pointer on failure
      */
     errlHndl_t GetRandom(const TpmTarget* i_pTpm,
-                         uint8_t* o_randNum,
-                         size_t i_randNumSize);
+                         size_t i_randNumSize,
+                         uint8_t* o_randNum);
     #endif
 
     /**
@@ -354,6 +378,49 @@ namespace TRUSTEDBOOT
      *      error log.
      */
     errlHndl_t flushTpmQueue();
+
+    /**
+     * @brief Send the command to the given TPM to create node attestation
+     *        key pair
+     *
+     * @param[in] i_target the pointer to the TPM target to send the command to
+     * @return nullptr if success; non-nullptr on error
+     */
+    errlHndl_t createAttestationKeys(TpmTarget* i_target);
+
+    /**
+     * @brief Send the command to the given TPM to retrieve the AK certificate
+     *        from its NVRAM
+     *
+     * @param[in] i_target the pointer to the TPM target to send the command to
+     * @param[out] o_data the buffer to store the contents of AK certificate
+     * @return nullptr if success; non-nullptr on error
+     */
+    errlHndl_t readAKCertificate(TpmTarget* i_target,
+                                 AKCertificate_t* o_data);
+
+    /**
+     * @brief Send the command to the given TPM to generate the quote
+     *
+     * @param[in] i_target the pointer to the TPM target to send the command to
+     * @param[in] i_masterNonce the 32-byte nonce from the master node
+     * @param[out] o_data a pointer to the  data structure containing the size
+     *             of the quote data from the TPM and the actual data
+     * @return nullptr if success; non-nullptr on error
+     */
+    errlHndl_t generateQuote(TpmTarget* i_target,
+                             MasterTpmNonce_t* i_masterNonce,
+                             QuoteDataOut* o_data);
+
+    /**
+     * @brief Send the command to the given TPM to remove all context associated
+     *        with created objects
+     *
+     * @param[in] i_target the pointer to the TPM target to send the command to
+     * @return nullptr if success; non-nullptr on error
+     */
+    errlHndl_t flushContext(TpmTarget* i_target);
+
 
 } // end TRUSTEDBOOT namespace
 

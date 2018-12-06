@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,12 +49,6 @@ using namespace TPMDD;
 namespace TRUSTEDBOOT
 {
 #endif
-
-enum
-{
-    BUFSIZE         = 256,
-    MAX_TRANSMIT_SIZE = 1024, ///< Maximum send/receive transmit size
-};
 
 /**
  * @brief Transmit the command to the TPM and perform marshaling
@@ -180,6 +174,47 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
                          TPM_Alg_Id i_algId,
                          uint8_t* o_digest,
                          size_t  i_digestSize);
+
+
+/**
+ * @brief Send the TPM_CC_Create to the TPM
+ * @param[in] i_target the target TPM (must not be nullptr)
+ * @return nullptr if successful; non-nullptr if error
+ *
+ */
+errlHndl_t tpmCmdCreateAttestationKeys(TpmTarget* i_target);
+
+/**
+ * @brief Send the TPM_CC_NV_Read command to the given TPM to read the AK
+ *        certificate from its NVRAM
+ * @param[in] i_target the TPM target (must not be nullptr)
+ * @param[out] o_data the pointer to the data contained within NVRAM of the TPM
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target,
+                                   AKCertificate_t* o_data);
+
+/**
+ * @brief Send the TPM_CC_Quote command to the given TPM to generate quote
+ *        and signature information (returned in o_data)
+ * @param[in] i_target the TPM target (must not be nullptr)
+ * @param[in] i_masterNonce the 32-byte master nonce
+ * @param[out] o_data a pointer to the  data structure containing the size of
+ *             the quote data from the TPM and the actual data
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
+                               MasterTpmNonce_t* i_masterNonce,
+                               QuoteDataOut* o_data);
+
+/**
+ * @brief Send the TPM2_FlushContext command to the given TPM to remove
+ *        transient objects
+ * @param[in] i_target the TPM target (must not be nullptr)
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t tpmCmdFlushContext(TpmTarget* i_target);
+
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
