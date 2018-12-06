@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -262,14 +262,15 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+template<TARGETING::TYPE T>
 void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
 {
     #define PRDF_FUNC "[captureDramRepairsVpd] "
 
     // Get the maximum capture data size.
     static const size_t sz_rank  = sizeof(uint8_t);
-    static const size_t sz_entry = D * DQ_BITMAP::BITMAP_SIZE;
+    static const size_t sz_port  = sizeof(uint8_t);
+    static const size_t sz_entry = DQ_BITMAP::BITMAP_SIZE;
     static const size_t sz_word  = sizeof(CPU_WORD);
 
     do
@@ -283,7 +284,7 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         }
 
         // Get the maximum capture data size.
-        size_t sz_maxData = masterRanks.size() * (sz_rank + sz_entry);
+        size_t sz_maxData = masterRanks.size() * (sz_rank + sz_port + sz_entry);
 
         // Adjust the size for endianness.
         sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
@@ -296,22 +297,29 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         uint32_t idx = 0;
         for ( auto & rank : masterRanks )
         {
-            MemDqBitmap<D> bitmap;
+            MemDqBitmap bitmap;
 
-            if ( SUCCESS != getBadDqBitmap<D>(i_trgt, rank, bitmap) )
+            if ( SUCCESS != getBadDqBitmap(i_trgt, rank, bitmap) )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: MCA=0x%08x"
                           " rank=0x%02x", getHuid(i_trgt), rank.getKey() );
                 continue; // skip this rank
             }
+            size_t numPorts = bitmap.getNumPorts();
 
             if ( bitmap.badDqs() ) // make sure the data is non-zero
             {
-                // Add the rank, then the entry data.
-                capData[idx] = rank.getMaster();
-                idx += sz_rank;
-                memcpy(&capData[idx], bitmap.getData(), sz_entry);
-                idx += sz_entry;
+                // Iterate over the ports
+                for ( uint8_t ps = 0; ps < numPorts; ps++ )
+                {
+                    // Add the rank, port, then the entry data.
+                    capData[idx] = rank.getMaster();
+                    idx += sz_rank;
+                    capData[idx] = ps;
+                    idx += sz_port;
+                    memcpy(&capData[idx], bitmap.getData(ps), sz_entry);
+                    idx += sz_entry;
+                }
             }
         }
 
@@ -458,7 +466,7 @@ void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
     captureDramRepairsData<TYPE_MCA>( trgt, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MCA, DIMMS_PER_RANK::MCA>( trgt, cd );
+    captureDramRepairsVpd<TYPE_MCA>( trgt, cd );
 
     // Add IUE counts to capture data.
     captureIueCounts<McaDataBundle*>( trgt, db, cd );
@@ -503,7 +511,7 @@ void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
     captureDramRepairsData<TYPE_MBA>( i_chip->getTrgt(), cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip->getTrgt(), cd);
+    captureDramRepairsVpd<TYPE_MBA>(i_chip->getTrgt(), cd);
 
     // Add Row Repair data from VPD
     captureRowRepairVpd<TYPE_MBA>(i_chip->getTrgt(), cd);
@@ -521,7 +529,7 @@ void addEccData<TYPE_MCA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
     captureDramRepairsData<TYPE_MCA>( i_trgt, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MCA, DIMMS_PER_RANK::MCA>( i_trgt, cd );
+    captureDramRepairsVpd<TYPE_MCA>( i_trgt, cd );
 
     ErrDataService::AddCapData( cd, io_errl );
 }
@@ -535,7 +543,7 @@ void addEccData<TYPE_MBA>( TargetHandle_t i_trgt, errlHndl_t io_errl )
     captureDramRepairsData<TYPE_MBA>( i_trgt, cd );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_MBA, DIMMS_PER_RANK::MBA>( i_trgt, cd );
+    captureDramRepairsVpd<TYPE_MBA>( i_trgt, cd );
 
     // Add Row Repair data from VPD.
     captureRowRepairVpd<TYPE_MBA>( i_trgt, cd );

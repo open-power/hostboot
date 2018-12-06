@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,9 +171,9 @@ uint8_t MemSymbol::getDramPins() const
     bool isMba = TYPE_MBA == getTargetType(iv_trgt);
     bool isX4  = isDramWidthX4( iv_trgt );
 
-    uint32_t dps = isMba ? MBA_DQS_PER_SYMBOL : MCA_DQS_PER_SYMBOL;
+    uint32_t dps = isMba ? MBA_DQS_PER_SYMBOL : MEM_DQS_PER_SYMBOL;
     uint32_t spd = isMba ? isX4 ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE
-                         : isX4 ? MCA_SYMBOLS_PER_NIBBLE : MCA_SYMBOLS_PER_BYTE;
+                         : isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
 
     return iv_pins << (((spd - 1) - (iv_symbol % spd)) * dps);
 }

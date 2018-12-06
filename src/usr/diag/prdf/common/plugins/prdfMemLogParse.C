@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2789,32 +2789,25 @@ void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 // Gets the string representation for a single bad DQ bitmap entry.
 void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str, TYPE i_type )
 {
-    uint8_t dimmsPerRank = MCA_DIMMS_PER_RANK;
-    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
-
-    if ( TYPE_MBA == i_type )
-    {
-        dimmsPerRank = MBA_DIMMS_PER_RANK;
-        entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
-    }
+    uint32_t entrySize = DQ_BITMAP::ENTRY_SIZE;
 
     UtilMem membuf( i_buffer, entrySize );
 
     uint8_t rank; membuf >> rank;
     snprintf( o_str, DATA_SIZE, "R:%1d", rank );
 
-    for ( int32_t p = 0; p < dimmsPerRank; p++ )
+    char temp[DATA_SIZE];
+    uint8_t port; membuf >> port;
+    snprintf( temp, DATA_SIZE, "P:%1d", port );
+    strcat( o_str, temp );
+
+    strcat( o_str, "  " );
+
+    for ( int32_t b = 0; b < DQ_BITMAP::BITMAP_SIZE; b++ )
     {
-        char temp[DATA_SIZE];
-
-        strcat( o_str, "  " );
-
-        for ( int32_t b = 0; b < DQ_BITMAP::BITMAP_SIZE; b++ )
-        {
-            uint8_t byte; membuf >> byte;
-            snprintf( temp, DATA_SIZE, "%02x", byte );
-            strcat( o_str, temp );
-        }
+        uint8_t byte; membuf >> byte;
+        snprintf( temp, DATA_SIZE, "%02x", byte );
+        strcat( o_str, temp );
     }
 }
 
@@ -3364,8 +3357,7 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
-    if ( TYPE_MBA == i_type ) entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
+    uint32_t entrySize = DQ_BITMAP::ENTRY_SIZE;
 
     const uint32_t entries = i_buflen / entrySize;
 
@@ -3391,8 +3383,7 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
-    if ( TYPE_MBA == i_type ) entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
+    uint32_t entrySize = DQ_BITMAP::ENTRY_SIZE;
 
     if ( entrySize > i_buflen ) // Data is expected to be one entry.
     {

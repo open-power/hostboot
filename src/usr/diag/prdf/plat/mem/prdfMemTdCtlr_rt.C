@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -894,7 +894,7 @@ SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
                                                           : "MBSECCFIR_1_AND" );
 }
 
-template <TARGETING::TYPE TP, DIMMS_PER_RANK D, TARGETING::TYPE TC>
+template <TARGETING::TYPE TP, TARGETING::TYPE TC>
 uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
 {
     #define PRDF_FUNC "[__findChipMarks] "
@@ -919,7 +919,7 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
         if ( !chipMark.isValid() ) continue; // no chip mark present
 
         // Get the DQ Bitmap data.
-        MemDqBitmap<D> dqBitmap;
+        MemDqBitmap dqBitmap;
         o_rc = getBadDqBitmap( chip->getTrgt(), rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
@@ -990,7 +990,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
         }
 
         // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MCA,DIMMS_PER_RANK::MCA>( iv_rankList );
+        o_rc = __findChipMarks<TYPE_MCA>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1029,7 +1029,7 @@ uint32_t MemTdCtlr<TYPE_MBA>::initialize()
         }
 
         // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MBA,DIMMS_PER_RANK::MBA>( iv_rankList );
+        o_rc = __findChipMarks<TYPE_MBA>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1121,13 +1121,13 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::handleRrFo()
 
             // Get the DQ Bitmap data.
             TargetHandle_t mcaTrgt = mcaChip->GetChipHandle();
-            MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+            MemDqBitmap dqBitmap;
 
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, rank, dqBitmap);
+            o_rc = getBadDqBitmap( mcaTrgt, rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                        "(0x%08x, %d)", getHuid(mcaTrgt), rank.getMaster() );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
+                          getHuid(mcaTrgt), rank.getMaster() );
                 break;
             }
 
@@ -1232,13 +1232,13 @@ uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
 
             // Get the DQ Bitmap data.
             TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
-            MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
+            MemDqBitmap dqBitmap;
 
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>(mbaTrgt, rank, dqBitmap);
+            o_rc = getBadDqBitmap( mbaTrgt, rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MBA>"
-                        "(0x%08x, %d)", getHuid(mbaTrgt), rank.getMaster() );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
+                          getHuid(mbaTrgt), rank.getMaster() );
                 break;
             }
 

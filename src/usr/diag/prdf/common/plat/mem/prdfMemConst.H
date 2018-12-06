@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,16 +49,15 @@ enum
     DQS_PER_BYTE     = 8,
     DQS_PER_NIBBLE   = 4,
 
-    // MCA only
-    MCA_DIMMS_PER_RANK     = 1,
+    MEM_DIMMS_PER_RANK     = 1,
 
-    MCA_BYTES_PER_RANK     = BYTES_PER_DIMM   * MCA_DIMMS_PER_RANK,
-    MCA_NIBBLES_PER_RANK   = NIBBLES_PER_DIMM * MCA_DIMMS_PER_RANK,
+    MEM_BYTES_PER_RANK     = BYTES_PER_DIMM   * MEM_DIMMS_PER_RANK,
+    MEM_NIBBLES_PER_RANK   = NIBBLES_PER_DIMM * MEM_DIMMS_PER_RANK,
 
-    MCA_SYMBOLS_PER_BYTE   = SYMBOLS_PER_RANK / MCA_BYTES_PER_RANK,
-    MCA_SYMBOLS_PER_NIBBLE = SYMBOLS_PER_RANK / MCA_NIBBLES_PER_RANK,
+    MEM_SYMBOLS_PER_BYTE   = SYMBOLS_PER_RANK / MEM_BYTES_PER_RANK,
+    MEM_SYMBOLS_PER_NIBBLE = SYMBOLS_PER_RANK / MEM_NIBBLES_PER_RANK,
 
-    MCA_DQS_PER_SYMBOL     = DQS_PER_BYTE / MCA_SYMBOLS_PER_BYTE,
+    MEM_DQS_PER_SYMBOL     = DQS_PER_BYTE / MEM_SYMBOLS_PER_BYTE,
 
     // MBA only
     MBA_DIMMS_PER_RANK     = 2,

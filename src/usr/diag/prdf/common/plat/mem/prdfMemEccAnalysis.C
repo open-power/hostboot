@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,9 +164,8 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
             MbaDataBundle * mbadb = getMbaDataBundle( i_chip );
 
-            MemDqBitmap<DIMMS_PER_RANK::MBA> l_dqBitmap;
-            o_rc = mssIplUeIsolation<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
-                                                           rank, l_dqBitmap );
+            MemDqBitmap l_dqBitmap;
+            o_rc = mssIplUeIsolation( i_chip->getTrgt(), rank, l_dqBitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssIplUeIsolation(0x%08x, 0x%02x) failed",
@@ -179,7 +178,7 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
             // Add all DIMMs with bad bits to the callout list.
             TargetHandleList callouts;
-            for ( uint8_t ps = 0; ps < DIMMS_PER_RANK::MBA; ps++ )
+            for ( uint8_t ps = 0; ps < MAX_PORT_PER_MBA; ps++ )
             {
                 bool badDqs = false;
                 o_rc = l_dqBitmap.badDqs( badDqs, ps );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ uint8_t symbol2Dq<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 template<>
 uint8_t symbol2PortSlct<TARGETING::TYPE_MBA>( uint8_t i_symbol )
 {
-    uint8_t portSlct = MBA_DIMMS_PER_RANK;
+    uint8_t portSlct = MAX_PORT_PER_MBA;
 
     if ( SYMBOLS_PER_RANK > i_symbol )
     {
@@ -154,6 +154,15 @@ uint8_t dq2Symbol<TARGETING::TYPE_MCA>( uint8_t i_dq, uint8_t i_ps )
     }
 
     return symbol;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq, uint8_t i_ps )
+{
+    // MEM_PORT case is identical to MCA
+    return dq2Symbol<TARGETING::TYPE_MCA>( i_dq, i_ps );
 }
 
 //------------------------------------------------------------------------------
@@ -234,7 +243,7 @@ uint8_t symbol2Nibble<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     return (SYMBOLS_PER_RANK > i_symbol)
             ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/4)
-            : MCA_NIBBLES_PER_RANK;
+            : MEM_NIBBLES_PER_RANK;
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +262,7 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     return (SYMBOLS_PER_RANK > i_symbol)
             ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/8)
-            : MCA_BYTES_PER_RANK;
+            : MEM_BYTES_PER_RANK;
 }
 
 

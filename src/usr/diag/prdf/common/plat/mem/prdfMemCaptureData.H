@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl );
 /**
  * @brief Queries hardware for all DRAM repairs data (chip/symbol marks, DRAM
  *        spare, etc.) for the given MBA or MCA and adds it to the capture data.
- * @param i_trgt An MBA or MCA target.
+ * @param i_trgt An MBA, MCA, or MEM_PORT target.
  * @param io_cd  Capture data struct.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
@@ -80,13 +80,13 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief Queries the Bad DQ attributes for the content of the DRAM repairs VPD
  *        and adds it to the capture data.
- * @param i_trgt An MBA or MCA target.
+ * @param i_trgt An MBA, MCA, or MEM_PORT target.
  * @param io_cd  Capture data struct.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
  *        update the error log.
  */
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+template<TARGETING::TYPE T>
 void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
                             CaptureData & io_cd );
 

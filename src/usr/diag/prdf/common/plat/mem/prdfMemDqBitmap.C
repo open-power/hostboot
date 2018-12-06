@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,18 +36,20 @@ namespace PRDF
 
 using namespace PlatServices;
 using namespace PARSERUTILS;
+using namespace TARGETING;
 using namespace fapi2; // for spare dram config
 
-template <DIMMS_PER_RANK T>
-bool MemDqBitmap<T>::badDqs() const
+bool MemDqBitmap::badDqs() const
 {
     bool o_badDqs = false;
 
-    for ( uint32_t i = 0; i < T; i++ )
+    size_t maxPorts = getNumPorts();
+
+    for ( uint32_t i = 0; i < maxPorts; i++ )
     {
         for ( uint32_t j = 0; j < DQ_BITMAP::BITMAP_SIZE; j++ )
         {
-            if ( 0 != iv_data[i][j] )
+            if ( 0 != iv_data.at(i).bitmap[j] )
             {
                 o_badDqs = true;
                 break;
@@ -61,18 +63,19 @@ bool MemDqBitmap<T>::badDqs() const
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t MemDqBitmap<T>::badDqs( bool & o_badDqs, uint8_t i_portSlct ) const
+uint32_t MemDqBitmap::badDqs( bool & o_badDqs, uint8_t i_portSlct ) const
 {
     #define PRDF_FUNC "[MemDqBitmap::badDqs] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     o_badDqs = false;
 
     do
     {
-        if ( T <= i_portSlct )
+        size_t maxPorts = getNumPorts();
+
+        if ( maxPorts <= i_portSlct )
         {
             PRDF_ERR(PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
             o_rc = FAIL; break;
@@ -80,7 +83,7 @@ int32_t MemDqBitmap<T>::badDqs( bool & o_badDqs, uint8_t i_portSlct ) const
 
         for ( uint32_t j = 0; j < DQ_BITMAP::BITMAP_SIZE; j++ )
         {
-            if ( 0 != iv_data[i_portSlct][j] )
+            if ( 0 != iv_data.at(i_portSlct).bitmap[j] )
             {
                 o_badDqs = true;
                 break;
@@ -96,12 +99,11 @@ int32_t MemDqBitmap<T>::badDqs( bool & o_badDqs, uint8_t i_portSlct ) const
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t MemDqBitmap<T>::setDq( uint8_t i_dq, uint8_t i_portSlct )
+uint32_t MemDqBitmap::setDq( uint8_t i_dq, uint8_t i_portSlct )
 {
     #define PRDF_FUNC "[MemDqBitmap::setDq] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
@@ -111,7 +113,9 @@ int32_t MemDqBitmap<T>::setDq( uint8_t i_dq, uint8_t i_portSlct )
             o_rc = FAIL; break;
         }
 
-        if ( T <= i_portSlct )
+        size_t maxPorts = getNumPorts();
+
+        if ( maxPorts <= i_portSlct )
         {
             PRDF_ERR(PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
             o_rc = FAIL; break;
@@ -121,7 +125,7 @@ int32_t MemDqBitmap<T>::setDq( uint8_t i_dq, uint8_t i_portSlct )
         uint8_t bitIdx  = i_dq % DQS_PER_BYTE;
 
         uint32_t shift = (DQS_PER_BYTE-1) - bitIdx; // 0-7
-        iv_data[i_portSlct][byteIdx] |= 0x01 << shift;
+        iv_data[i_portSlct].bitmap[byteIdx] |= 0x01 << shift;
 
     } while (0);
 
@@ -132,12 +136,11 @@ int32_t MemDqBitmap<T>::setDq( uint8_t i_dq, uint8_t i_portSlct )
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t MemDqBitmap<T>::setSymbol( const MemSymbol & i_symbol, uint8_t i_pins )
+uint32_t MemDqBitmap::setSymbol( const MemSymbol & i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[MemDqBitmap::setSymbol] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
@@ -150,18 +153,19 @@ int32_t MemDqBitmap<T>::setSymbol( const MemSymbol & i_symbol, uint8_t i_pins )
         }
 
         uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
-        if ( DIMMS_PER_RANK::MBA == T )
-        {
-            i_pins &= 0x3; // limit to 2 bits for MBA
-            shift = (shift / MBA_DQS_PER_SYMBOL) * MBA_DQS_PER_SYMBOL; //0,2,4,6
-        }
-        else
-        {
-            i_pins &= 0x1; // limit to 1 bit for MCA
-            shift = (shift / MCA_DQS_PER_SYMBOL) * MCA_DQS_PER_SYMBOL; //0-7
-        }
 
-        iv_data[portSlct][byteIdx] |= i_pins << shift;
+        // The number of dqs per symbol is equivalent to the ports we have here
+        size_t dqsPerSym = getNumPorts();
+
+        // Calculate pin mask -> (2^dqsPerSym)-1
+        uint8_t pinMask = 2;
+        for ( uint8_t i = 1; i < dqsPerSym; i++ ) {pinMask *= 2;}
+        pinMask -= 1;
+
+        i_pins &= pinMask; // Limit to the number of dqs per symbols
+        shift = (shift / dqsPerSym) * dqsPerSym;
+
+        iv_data[portSlct].bitmap[byteIdx] |= i_pins << shift;
 
     } while (0);
 
@@ -172,12 +176,11 @@ int32_t MemDqBitmap<T>::setSymbol( const MemSymbol & i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t MemDqBitmap<T>::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
+uint32_t MemDqBitmap::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[MemDqBitmap::setDram] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
@@ -194,12 +197,12 @@ int32_t MemDqBitmap<T>::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
             i_pins &= 0xf; // limit to 4 bits
             uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
             shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
-            iv_data[portSlct][byteIdx] |= i_pins << shift;
+            iv_data[portSlct].bitmap[byteIdx] |= i_pins << shift;
         }
         else
         {
             i_pins &= 0xff; // limit to 8 bits
-            iv_data[portSlct][byteIdx] |= i_pins;
+            iv_data[portSlct].bitmap[byteIdx] |= i_pins;
         }
 
     } while (0);
@@ -211,12 +214,11 @@ int32_t MemDqBitmap<T>::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-uint32_t MemDqBitmap<T>::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
+uint32_t MemDqBitmap::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
 {
     #define PRDF_FUNC "[MemDqBitmap::clearDram] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
@@ -233,12 +235,12 @@ uint32_t MemDqBitmap<T>::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
             i_pins &= 0xf; // limit to 4 bits
             uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
             shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
-            iv_data[portSlct][byteIdx] &= ~(i_pins << shift);
+            iv_data[portSlct].bitmap[byteIdx] &= ~(i_pins << shift);
         }
         else
         {
             i_pins &= 0xff; // limit to 8 bits
-            iv_data[portSlct][byteIdx] &= ~(i_pins);
+            iv_data[portSlct].bitmap[byteIdx] &= ~(i_pins);
         }
 
     } while (0);
@@ -250,8 +252,7 @@ uint32_t MemDqBitmap<T>::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-void MemDqBitmap<T>::getCaptureData( CaptureData & o_cd ) const
+void MemDqBitmap::getCaptureData( CaptureData & o_cd ) const
 {
     uint8_t rank   = iv_rank.getMaster();
     size_t sz_rank = sizeof(rank);
@@ -266,7 +267,14 @@ void MemDqBitmap<T>::getCaptureData( CaptureData & o_cd ) const
     memset( capData, 0x00, sz_capData );
 
     capData[0] = rank;
-    memcpy( &capData[1], iv_data, sizeof(iv_data) );
+
+    uint8_t numPorts = getNumPorts();
+    uint8_t idx = 1;
+    for ( uint8_t ps = 0; ps < numPorts; ps++ )
+    {
+        memcpy( &capData[idx], getData(ps), sizeof(capData[idx]) );
+        idx += DQ_BITMAP::BITMAP_SIZE;
+    }
 
     // Fix endianness issues with non PPC machines.
     for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
@@ -278,15 +286,14 @@ void MemDqBitmap<T>::getCaptureData( CaptureData & o_cd ) const
 
 //------------------------------------------------------------------------------
 
-template <DIMMS_PER_RANK T>
-int32_t MemDqBitmap<T>::getPortByteBitIdx( const MemSymbol & i_symbol,
-                                           uint8_t & o_portSlct,
-                                           uint8_t & o_byteIdx,
-                                           uint8_t & o_bitIdx ) const
+uint32_t MemDqBitmap::getPortByteBitIdx( const MemSymbol & i_symbol,
+                                        uint8_t & o_portSlct,
+                                        uint8_t & o_byteIdx,
+                                        uint8_t & o_bitIdx ) const
 {
     #define PRDF_FUNC "[MemDqBitmap::getPortByteBitIdx] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
@@ -322,13 +329,11 @@ int32_t MemDqBitmap<T>::getPortByteBitIdx( const MemSymbol & i_symbol,
 
 //------------------------------------------------------------------------------
 
-template<>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MCA>::isChipMark(
-    const MemSymbol & i_symbol, bool & o_cm )
+uint32_t MemDqBitmap::isChipMark( const MemSymbol & i_symbol, bool & o_cm )
 {
-    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MCA>::isChipMark] "
+    #define PRDF_FUNC "[MemDqBitmap::isChipMark] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
     o_cm = false;
 
     do
@@ -343,53 +348,7 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MCA>::isChipMark(
             break;
         }
 
-        uint8_t cmData = iv_data[portSlct][byteIdx];
-
-        // Find which nibble to check.
-        uint8_t nibble;
-        if ( bitIdx < 4 )
-            nibble = ( (cmData>>4) & 0xf );
-        else
-            nibble = cmData & 0xf;
-
-        // This nibble must have 2 or more symbols set.
-        o_cm = ( (0x0 != nibble) &&
-                 (0x8 != nibble) &&
-                 (0x4 != nibble) &&
-                 (0x2 != nibble) &&
-                 (0x1 != nibble) );
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isChipMark(
-    const MemSymbol & i_symbol, bool & o_cm )
-{
-    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::isChipMark] "
-
-    int32_t o_rc = SUCCESS;
-    o_cm = false;
-
-    do
-    {
-        // If 2 or more symbols are set in a nibble, the chip mark is present.
-
-        uint8_t portSlct, byteIdx, bitIdx;
-        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
-            break;
-        }
-
-        uint8_t cmData = iv_data[portSlct][byteIdx];
+        uint8_t cmData = iv_data[portSlct].bitmap[byteIdx];
 
         // x4 Drams
         if ( iv_x4Dram )
@@ -431,36 +390,59 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isChipMark(
 
 //------------------------------------------------------------------------------
 
-template <>
-std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MCA>::getSymbolList(
-    uint8_t i_portSlct )
+std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
 {
     #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
 
     std::vector<MemSymbol> o_symbolList;
 
-    // loop through all dimms
-    for ( uint8_t dimm = 0; dimm < DIMMS_PER_RANK::MCA; dimm++ )
+    size_t maxPorts = getNumPorts();
+
+    // The number of dqs per symbol is equivalent to the ports we have here
+    size_t dqsPerSymbol = getNumPorts();
+    uint8_t symbolsPerByte = SYMBOLS_PER_RANK/(BYTES_PER_DIMM*dqsPerSymbol);
+
+    // Calculate bit mask -> (2^dqsPerSym)-1
+    uint8_t bitMask = 2;
+    for ( uint8_t i = 1; i < dqsPerSymbol; i++ ) {bitMask *= 2;}
+    bitMask -= 1;
+
+    // loop through all ports
+    for ( uint8_t port = 0; port < maxPorts; port++ )
     {
         // loop through each byte in the bitmap
         for ( uint8_t byte = 0; byte < DQ_BITMAP::BITMAP_SIZE; byte++ )
         {
             // loop through each symbol index
-            for ( uint8_t symIdx = 0; symIdx < MCA_SYMBOLS_PER_BYTE; symIdx++ )
+            for ( uint8_t symIdx = 0; symIdx < symbolsPerByte; symIdx++ )
             {
-                uint8_t shift = ((MCA_SYMBOLS_PER_BYTE - 1) - symIdx) *
-                                MCA_DQS_PER_SYMBOL;
+                uint8_t shift = ((symbolsPerByte - 1) - symIdx) * dqsPerSymbol;
 
-                // if the bit is active
-                if ( ((iv_data[dimm][byte] >> shift) & 0x1) != 0 )
+                // if the bit/bit pair is active
+                if ( ((iv_data[port].bitmap[byte] >> shift) & bitMask) != 0 )
                 {
                     // get the dq
-                    uint8_t dq = (byte * DQS_PER_BYTE) +
-                                 (symIdx * MCA_DQS_PER_SYMBOL);
+                    uint8_t dq = (byte * DQS_PER_BYTE)+(symIdx * dqsPerSymbol);
 
                     // convert the dq to symbol
-                    uint8_t symbol = dq2Symbol<TARGETING::TYPE_MCA>( dq,
-                        i_portSlct );
+                    uint8_t symbol =  SYMBOLS_PER_RANK;
+                    TYPE trgtType = getTargetType( iv_trgt );
+                    switch( trgtType )
+                    {
+                        case TYPE_MCA:
+                            symbol = dq2Symbol<TYPE_MCA>( dq, i_portSlct );
+                            break;
+                        case TYPE_MBA:
+                            symbol = dq2Symbol<TYPE_MBA>( dq, i_portSlct );
+                            break;
+                        case TYPE_MEM_PORT:
+                            symbol = dq2Symbol<TYPE_MEM_PORT>( dq, i_portSlct );
+                            break;
+                        default:
+                            PRDF_ERR( "Invalid trgt type" );
+                            PRDF_ASSERT( false );
+                            break;
+                    }
 
                     // add symbol to output
                     o_symbolList.push_back( MemSymbol::fromSymbol(iv_trgt,
@@ -478,110 +460,122 @@ std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MCA>::getSymbolList(
 
 //------------------------------------------------------------------------------
 
-template <>
-std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MBA>::getSymbolList(
-    uint8_t i_portSlct )
+uint32_t __getSpareInfo( TargetHandle_t i_trgt, MemRank i_rank,
+    uint8_t i_portSlct, uint8_t & o_spareConfig, uint8_t & o_noSpare,
+    uint8_t & o_lowNibble, uint8_t & o_highNibble, bool & o_spareSupported )
 {
-    #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
+    #define PRDF_FUNC "[__getSpareInfo] "
 
-    std::vector<MemSymbol> o_symbolList;
-
-    // loop through all dimms
-    for ( uint8_t dimm = 0; dimm < DIMMS_PER_RANK::MBA; dimm++ )
-    {
-        // loop through each byte in the bitmap
-        for ( uint8_t byte = 0; byte < DQ_BITMAP::BITMAP_SIZE; byte++ )
-        {
-            // loop through each bit pair
-            for (uint8_t symIdx = 0; symIdx < MBA_SYMBOLS_PER_BYTE; symIdx++)
-            {
-                uint8_t shift = ((MBA_SYMBOLS_PER_BYTE - 1) - symIdx) *
-                                MBA_DQS_PER_SYMBOL;
-
-                // if the bit pair is active
-                if ( ((iv_data[dimm][byte] >> shift) & 0x3) != 0 )
-                {
-                    // get the dq
-                    uint8_t dq = (byte * DQS_PER_BYTE) +
-                                 (symIdx * MBA_DQS_PER_SYMBOL);
-
-                    // convert the dq to symbol
-                    uint8_t symbol = dq2Symbol<TARGETING::TYPE_MBA>( dq,
-                        i_portSlct );
-
-                    // add symbol to output
-                    o_symbolList.push_back( MemSymbol::fromSymbol(iv_trgt,
-                                            iv_rank, symbol) );
-                }
-
-            }
-        }
-    }
-
-    return o_symbolList;
-
-    #undef PRDF_FUNC
-
-}
-
-//------------------------------------------------------------------------------
-template <>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable( uint8_t i_portSlct,
-                                       bool & o_dramSpare, bool & o_eccSpare )
-{
-    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable] "
-
-    int32_t o_rc = SUCCESS;
-
-    o_dramSpare = false;
-    o_eccSpare  = false;
+    uint32_t o_rc = SUCCESS;
+    o_spareSupported = true;
 
     do
     {
-        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
+        TYPE trgtType = getTargetType( i_trgt );
+
+        // Spares not supported on MCA
+        if ( TYPE_MCA == trgtType )
         {
-            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
-            o_rc = FAIL; break;
+            o_spareSupported = false;
+        }
+        // Centaur/MBA case
+        else if ( TYPE_MBA == trgtType )
+        {
+            o_noSpare     = CEN_VPD_DIMM_SPARE_NO_SPARE;
+            o_lowNibble   = CEN_VPD_DIMM_SPARE_LOW_NIBBLE;
+            o_highNibble  = CEN_VPD_DIMM_SPARE_HIGH_NIBBLE;
+            o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+            o_rc = getDimmSpareConfig<TYPE_MBA>( i_trgt, i_rank, i_portSlct,
+                                                 o_spareConfig );
+        }
+        // Generic/MEM_PORT case
+        else
+        {
+            /* TODO RTC 192544
+            o_noSpare     = CEN_VPD_DIMM_SPARE_NO_SPARE;
+            o_lowNibble   = CEN_VPD_DIMM_SPARE_LOW_NIBBLE;
+            o_highNibble  = CEN_VPD_DIMM_SPARE_HIGH_NIBBLE;
+            o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+            TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT,
+                                                        i_portSlct );
+            o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank,
+                i_portSlct, o_spareConfig );
+            */
         }
 
-        uint8_t spareConfig = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
-        o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( iv_trgt , iv_rank,
-                                                      i_portSlct, spareConfig );
         if( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
             break;
         }
+    }while(0);
 
-        uint8_t spareDqBits = iv_data[i_portSlct][DRAM_SPARE_BYTE];
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
+                                        bool & o_eccSpare )
+{
+    #define PRDF_FUNC "[MemDqBitmap::isSpareAvailable] "
+
+    uint32_t o_rc = SUCCESS;
+    o_dramSpare = false;
+    o_eccSpare  = false;
+
+    do
+    {
+        // Check to make sure the portSlct is valid
+        size_t maxPorts = getNumPorts();
+        if ( maxPorts <= i_portSlct )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
+            o_rc = FAIL; break;
+        }
+
+        uint8_t spareConfig, noSpare, lowNibble, highNibble;
+        bool spareSupported = true;
+        o_rc = __getSpareInfo( iv_trgt, iv_rank, i_portSlct, spareConfig,
+                               noSpare, lowNibble, highNibble, spareSupported );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__getSpareInfo failed" );
+            break;
+        }
+
+        // Spare is not available.
+        if ( noSpare == spareConfig || !spareSupported )
+        {
+            o_dramSpare = false;
+            break;
+        }
+
+        uint8_t spareDqBits = iv_data.at(i_portSlct).bitmap[DRAM_SPARE_BYTE];
 
         if ( iv_x4Dram )
         {
-            // Check for DRAM spare
-            if ( TARGETING::CEN_VPD_DIMM_SPARE_LOW_NIBBLE == spareConfig )
+            // Spare is on the lower nibble
+            if ( lowNibble == spareConfig )
             {
                 o_dramSpare = ( 0 == ( spareDqBits & 0xf0 ) );
             }
-            else if ( TARGETING::CEN_VPD_DIMM_SPARE_HIGH_NIBBLE == spareConfig )
+            // Spare is on the higher nibble
+            else if ( highNibble == spareConfig )
             {
                 o_dramSpare = ( 0 == ( spareDqBits & 0x0f ) );
             }
 
             // Check for ECC spare
-            uint8_t eccDqBits = iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE];
+            uint8_t eccDqBits =
+                iv_data.at(ECC_SPARE_PORT).bitmap[ECC_SPARE_BYTE];
             o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
         }
         else
         {
-            if ( TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
-            {
-                // spare is not available.
-                o_dramSpare = false;
-            }
-            else
-            {
-                o_dramSpare = ( 0 == spareDqBits );
-            }
+            o_dramSpare = ( 0 == spareDqBits );
         }
 
     } while (0);
@@ -592,44 +586,36 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable( uint8_t i_portSlct,
 }
 
 //------------------------------------------------------------------------------
-template <>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MCA>::isSpareAvailable( uint8_t i_portSlct,
-                                       bool & o_dramSpare, bool & o_eccSpare )
-{
-    // spares not supported on MCA
-    o_dramSpare = false;
-    o_eccSpare = false;
-    return SUCCESS;
-}
-//------------------------------------------------------------------------------
-template <>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare( uint8_t i_portSlct,
-                                                        uint8_t i_pins )
-{
-    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare] "
 
-    int32_t o_rc = SUCCESS;
+uint32_t MemDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
+{
+    #define PRDF_FUNC "[MemDqBitmap::setDramSpare] "
+
+    uint32_t o_rc = SUCCESS;
 
     do
     {
-        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
+        // Check to make sure the portSlct is valid
+        size_t maxPorts = getNumPorts();
+        if ( maxPorts <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
             o_rc = FAIL; break;
         }
 
-        uint8_t spareConfig = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
-        o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( iv_trgt, iv_rank,
-                                                      i_portSlct, spareConfig );
+        uint8_t spareConfig, noSpare, lowNibble, highNibble;
+        bool spareSupported = true;
+        o_rc = __getSpareInfo( iv_trgt, iv_rank, i_portSlct, spareConfig,
+                               noSpare, lowNibble, highNibble, spareSupported );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
-            o_rc = FAIL; break;
+            PRDF_ERR( PRDF_FUNC "__getSpareInfo failed" );
+            break;
         }
 
-        if ( TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
+        if ( noSpare == spareConfig || !spareSupported )
         {
-            PRDF_ERR( PRDF_FUNC "DRAM Spare is not avaiable" );
+            PRDF_ERR( PRDF_FUNC "DRAM Spare is not available" );
             o_rc = FAIL; break;
         }
 
@@ -637,16 +623,16 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare( uint8_t i_portSlct,
         {
             i_pins &= 0xf; // limit to 4 bits
 
-            if ( TARGETING::CEN_VPD_DIMM_SPARE_LOW_NIBBLE == spareConfig )
+            if ( lowNibble == spareConfig )
             {
                 i_pins = i_pins << DQS_PER_NIBBLE;
             }
-            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
+            iv_data[i_portSlct].bitmap[DRAM_SPARE_BYTE] |= i_pins;
         }
         else
         {
             i_pins &= 0xff; // limit to 8 bits
-            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
+            iv_data[i_portSlct].bitmap[DRAM_SPARE_BYTE] |= i_pins;
         }
 
     } while (0);
@@ -657,24 +643,38 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare( uint8_t i_portSlct,
 }
 
 //------------------------------------------------------------------------------
-template <>
-int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setEccSpare( uint8_t i_pins )
+
+uint32_t MemDqBitmap::setEccSpare( uint8_t i_pins )
 {
     #define PRDF_FUNC "[MemDqBitmap::setEccSpare] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     do
     {
+        // Use __getSpareInfo just to check if spares are supported or not
+        uint8_t spareConfig, noSpare, lowNibble, highNibble;
+        bool spareSupported = true;
+        o_rc = __getSpareInfo( iv_trgt, iv_rank, 0, spareConfig,
+                               noSpare, lowNibble, highNibble, spareSupported );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__getSpareInfo failed" );
+            break;
+        }
+
+        // Break out if spares are not supported
+        if ( !spareSupported ) break;
+
         if ( !iv_x4Dram )
         {
-            PRDF_ERR( PRDF_FUNC "MBA 0x %08x does not support x4 ECC spare",
+            PRDF_ERR( PRDF_FUNC "0x%08x does not support x4 ECC spare",
                       getHuid(iv_trgt) );
             o_rc = FAIL; break;
         }
 
         i_pins &= 0xf; // limit to 4 bits
-        iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE] |= i_pins;
+        iv_data[ECC_SPARE_PORT].bitmap[ECC_SPARE_BYTE] |= i_pins;
 
     } while( 0 );
 
@@ -683,19 +683,12 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setEccSpare( uint8_t i_pins )
     #undef PRDF_FUNC
 }
 
-
-//------------------------------------------------------------------------------
-// Avoid linker errors with the template.
-template class MemDqBitmap<DIMMS_PER_RANK::MCA>;
-template class MemDqBitmap<DIMMS_PER_RANK::MBA>;
-
 //##############################################################################
 //                              Utility Functions
 //##############################################################################
 
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
-uint32_t __setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
-                         MemSymbol i_symbol )
+uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       MemSymbol i_symbol )
 {
     #define PRDF_FUNC "[MemDqBitmap::__setDramInVpd] "
 
@@ -705,8 +698,8 @@ uint32_t __setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
     {
         TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
 
-        MemDqBitmap<D> dqBitmap;
-        o_rc = getBadDqBitmap<D>( trgt, i_rank, dqBitmap );
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -721,7 +714,7 @@ uint32_t __setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
             break;
         }
 
-        o_rc = setBadDqBitmap<D>( trgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -735,30 +728,10 @@ uint32_t __setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-
-template<>
-uint32_t setDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                            const MemRank & i_rank,
-                                            MemSymbol i_symbol )
-{
-    return __setDramInVpd<TARGETING::TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip,
-        i_rank, i_symbol);
-}
-
-template<>
-uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
-                                            const MemRank & i_rank,
-                                            MemSymbol i_symbol )
-{
-    return __setDramInVpd<TARGETING::TYPE_MCA, DIMMS_PER_RANK::MCA>(i_chip,
-        i_rank, i_symbol);
-}
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, DIMMS_PER_RANK D>
-uint32_t __clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
-                           MemSymbol i_symbol )
+uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                         MemSymbol i_symbol )
 {
     #define PRDF_FUNC "[MemDqBitmap::__clearDramInVpd] "
 
@@ -768,8 +741,8 @@ uint32_t __clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
     {
         TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
 
-        MemDqBitmap<D> dqBitmap;
-        o_rc = getBadDqBitmap<D>( trgt, i_rank, dqBitmap );
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -784,7 +757,7 @@ uint32_t __clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
             break;
         }
 
-        o_rc = setBadDqBitmap<D>( trgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -796,24 +769,6 @@ uint32_t __clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-template<>
-uint32_t clearDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
-                                              const MemRank & i_rank,
-                                              MemSymbol i_symbol )
-{
-    return __clearDramInVpd<TARGETING::TYPE_MCA, DIMMS_PER_RANK::MCA>(i_chip,
-        i_rank, i_symbol);
-}
-
-template<>
-uint32_t clearDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
-                                              const MemRank & i_rank,
-                                              MemSymbol i_symbol )
-{
-    return __clearDramInVpd<TARGETING::TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip,
-        i_rank, i_symbol);
 }
 
 //------------------------------------------------------------------------------

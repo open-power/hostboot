@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,10 +92,9 @@ uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
  * @param  o_bitmap DQ bitmap container.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-template<DIMMS_PER_RANK D>
 uint32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
                            const MemRank & i_rank,
-                           MemDqBitmap<D> & o_bitmap );
+                           MemDqBitmap & o_bitmap );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

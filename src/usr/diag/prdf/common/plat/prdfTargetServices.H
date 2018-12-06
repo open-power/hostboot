@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -293,7 +293,7 @@ TARGETING::TargetHandle_t getConnectedPeerTarget(
                                   TARGETING::TargetHandle_t i_tgt);
 
 /**
- * @param  i_trgt The target MBA or MCA.
+ * @param  i_trgt The target MBA, MCA, or MEM_PORT.
  * @param  i_rank The target rank.
  * @return A list of DIMMs connected to the target and rank.
  */
@@ -301,14 +301,15 @@ TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
                                                const MemRank & i_rank );
 
 /**
- * @param  i_trgt The target MBA or MCA.
+ * @param  i_trgt The target MBA, MCA, or MEM_PORT.
  * @param  i_rank The target rank.
- * @param  i_port Port select.
+ * @param  i_port Port select, only needed for MBA. MCA and MEM_PORT are
+ *                targets equivalent to the port already.
  * @return The DIMM connected to the target and rank on a port.
  */
 TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
                                             const MemRank & i_rank,
-                                            uint8_t i_port );
+                                            uint8_t i_port = 0 );
 
 /**
  * @brief   Returns the system target.
