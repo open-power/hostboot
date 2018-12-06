@@ -906,8 +906,8 @@ class TrustedBootTest: public CxxTest::TestSuite
         {
             uint64_t randNum = 0;
             err = TRUSTEDBOOT::GetRandom(pTpm,
-                                         reinterpret_cast<uint8_t*>(&randNum),
-                                         sizeof(randNum));
+                                         sizeof(randNum),
+                                         reinterpret_cast<uint8_t*>(&randNum));
             num_ops ++;
             if(err)
             {

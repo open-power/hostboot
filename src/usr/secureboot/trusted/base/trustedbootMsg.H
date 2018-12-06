@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <sys/msg.h>
 #include "../trustedTypes.H"
+#include <secureboot/trustedbootif.H>
 
 namespace TRUSTEDBOOT
 {
@@ -57,7 +58,11 @@ namespace TRUSTEDBOOT
         MSG_TYPE_SHUTDOWN,
         MSG_TYPE_INIT_BACKUP_TPM,
         MSG_TYPE_GETRANDOM,
-        MSG_TYPE_LAST = MSG_TYPE_GETRANDOM,
+        MSG_TYPE_CREATE_ATT_KEYS,
+        MSG_TYPE_READ_AK_CERT,
+        MSG_TYPE_GEN_QUOTE,
+        MSG_TYPE_FLUSH_CONTEXT,
+        MSG_TYPE_LAST = MSG_TYPE_FLUSH_CONTEXT,
     };
 
     /// PCREXTEND message data
@@ -78,6 +83,47 @@ namespace TRUSTEDBOOT
         TARGETING::Target* i_pTpm; // the TPM to obtain random data from
         size_t i_randNumSize;      // the size (in bytes) of the rand number
         uint8_t* o_randNum;        // the random data is populated here
+    };
+
+    // Pure Target* cannot be sent as extra_data through a synchronous message
+    // because the act of deleting the sync mesage attempts to delete the ptr
+    // to the target as well, which causes hostboot crashes. This struct is
+    // a simple wrapper around the Target* for the messages requiring just the
+    // TPM target to be passed.
+    struct TpmTargetData
+    {
+        TpmTarget* tpm;
+        TpmTargetData(TpmTarget* i_tpm) :
+            tpm(i_tpm)
+        {
+        }
+    };
+
+    // The struct used to read the AK ceritificate from TPM's NVRAM
+    struct ReadAKCertData
+    {
+        TpmTarget* tpm;
+        AKCertificate_t* data; // The output of NVRAM read
+        ReadAKCertData(TpmTarget* i_tpm, AKCertificate_t* i_data) :
+            tpm(i_tpm), data(i_data)
+        {
+        }
+    };
+
+    // The struct used to generate TPM quote
+    struct GenQuoteData
+    {
+        TpmTarget* tpm;
+        MasterTpmNonce_t* masterNonce; // 32-byte nonce value
+        QuoteDataOut* data; // Output - the quote and signature fields
+        GenQuoteData(TpmTarget* i_tpm,
+                     MasterTpmNonce_t* i_masterNonce,
+                     QuoteDataOut* o_data) :
+                     tpm(i_tpm),
+                     masterNonce(i_masterNonce),
+                     data(o_data)
+        {
+        }
     };
 
     // Trustedboot message class

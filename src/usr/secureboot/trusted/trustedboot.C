@@ -1479,6 +1479,93 @@ void doInitBackupTpm()
     }
 }
 
+errlHndl_t doCreateAttKeys(TpmTarget* i_tpm)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdCreateAttestationKeys(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    } while(0);
+
+    return l_errl;
+}
+
+errlHndl_t doReadAKCert(TpmTarget* i_tpm, AKCertificate_t* o_data)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdReadAKCertificate(i_tpm, o_data);
+    if(l_errl)
+    {
+        break;
+    }
+    } while(0);
+
+    return l_errl;
+}
+
+errlHndl_t doGenQuote(TpmTarget* i_tpm,
+                      MasterTpmNonce_t* i_masterNonce,
+                      QuoteDataOut* o_data)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdGenerateQuote(i_tpm, i_masterNonce, o_data);
+    if(l_errl)
+    {
+        break;
+    }
+    } while(0);
+
+    return l_errl;
+}
+
+errlHndl_t doFlushContext(TpmTarget* i_tpm)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdFlushContext(i_tpm);
+    if(l_errl)
+    {
+        break;
+    }
+    } while(0);
+
+    return l_errl;
+}
+
 void* tpmDaemon(void* unused)
 {
     bool shutdownPending = false;
@@ -1687,6 +1774,44 @@ void* tpmDaemon(void* unused)
           case TRUSTEDBOOT::MSG_TYPE_FLUSH:
               {
                   TRACFCOMP(g_trac_trustedboot, "Flushing TPM message queue");
+              }
+              break;
+
+          case TRUSTEDBOOT::MSG_TYPE_CREATE_ATT_KEYS:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  TpmTargetData* l_data =
+                           reinterpret_cast<TpmTargetData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doCreateAttKeys(l_data->tpm);
+              }
+              break;
+
+          case TRUSTEDBOOT::MSG_TYPE_READ_AK_CERT:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  ReadAKCertData* l_data =
+                             reinterpret_cast<ReadAKCertData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doReadAKCert(l_data->tpm, l_data->data);
+              }
+              break;
+
+          case TRUSTEDBOOT::MSG_TYPE_GEN_QUOTE:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  GenQuoteData* l_data =
+                               reinterpret_cast<GenQuoteData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doGenQuote(l_data->tpm,
+                                               l_data->masterNonce,
+                                               l_data->data);
+              }
+              break;
+
+          case TRUSTEDBOOT::MSG_TYPE_FLUSH_CONTEXT:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  TpmTargetData* l_data =
+                              reinterpret_cast<TpmTargetData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doFlushContext(l_data->tpm);
               }
               break;
 
@@ -1955,8 +2080,8 @@ errlHndl_t tpmDrtmReset(TpmTarget* const i_pTpm)
 
 #ifdef CONFIG_TPMDD
 errlHndl_t GetRandom(const TpmTarget* i_pTpm,
-                     uint8_t* o_randNum,
-                     const size_t i_randNumSize)
+                     const size_t i_randNumSize,
+                     uint8_t* o_randNum)
 {
     errlHndl_t err = nullptr;
     Message* msg = nullptr;
@@ -2056,8 +2181,8 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
     // Note: GetRandom validates the TPM handle internally and returns an
     // error log if invalid
     l_errl = GetRandom(i_pTpm,
-                       reinterpret_cast<uint8_t*>(&l_randNum),
-                       sizeof(l_randNum));
+                       sizeof(l_randNum),
+                       reinterpret_cast<uint8_t*>(&l_randNum));
 
     if (l_errl)
     {
@@ -2093,6 +2218,5 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
 #endif
     return l_errl;
 }
-
 
 } // end TRUSTEDBOOT

@@ -2262,8 +2262,9 @@ errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
     tpm_sts_reg_t stsReg;
     errlHndl_t err = NULL;
 
-    // Operation TIMEOUT_A defined by TCG spec for data available
-    for (size_t delay = 0; delay < TPMDD::TPM_TIMEOUT_A; delay += 10)
+    // Use the longer timeout B here since some of the TPM commands may take
+    // more than timeout A to complete
+    for (size_t delay = 0; delay < TPMDD::TPM_TIMEOUT_B; delay += 10)
     {
         err = tpmReadSTSRegValid(i_tpmInfo,
                                  stsReg);

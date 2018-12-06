@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,11 +52,18 @@ namespace TRUSTEDBOOT
 {
 #endif
 
+    // TPM Command buffer sizes
+    enum
+    {
+        BUFSIZE         = 256,
+        MAX_TRANSMIT_SIZE = 1024, ///< Maximum send/receive transmit size
+    };
+
     /// TPM Algorithm defines
     typedef enum
     {
-        TPM_ALG_SHA1    = 0x0004,   ///< SHA1 Id
-        TPM_ALG_SHA256  = 0x000B,   ///< SHA256 Id
+        TPM_ALG_SHA1      = 0x0004,   ///< SHA1 Id
+        TPM_ALG_SHA256    = 0x000B,   ///< SHA256 Id
         TPM_ALG_INVALID_ID          ///< Used for error checking
     } TPM_Alg_Id;
 
@@ -103,7 +110,11 @@ namespace TRUSTEDBOOT
         TPM_ST_SESSIONS           = 0x8002,    ///< A command has sessions
 
         // Command Codes
+        TPM_CC_CreatePrimary      = 0x00000131,
         TPM_CC_Startup            = 0x00000144,
+        TPM_CC_NV_Read            = 0x0000014E,
+        TPM_CC_Quote              = 0x00000158,
+        TPM_CC_FlushContext       = 0x00000165,
         TPM_CC_GetCapability      = 0x0000017A,
         TPM_CC_GetRandom          = 0x0000017B,
         TPM_CC_PCR_Read           = 0x0000017E,
@@ -130,12 +141,22 @@ namespace TRUSTEDBOOT
 
         // TPM Return Codes
         TPM_SUCCESS               = 0x000,
-
         TPM_RC_INITIALIZE         = 0x100,
 
 
         // TPM Authorization types
         TPM_RS_PW                 = 0x40000009,
+        TPM_RH_PLATFORM           = 0x4000000C,
+
+        // TPM Command Sizes
+        TPM_CREATE_PRIMARY_SIZE   = 0x00000041,
+        TPM_IN_SENSITIVE_SIZE     = 0x00000009,
+        TPM_NV_READ_SIZE          = 0x00000023,
+        TPM_QUOTE_SIZE            = 0x0000004B,
+        TPM_FLUSH_CONTEXT_SIZE    = 0x0000000E,
+
+        // Transient Objects handle
+        TPM_HT_TRANSIENT          = 0x80000000,
 
     };
 
@@ -483,6 +504,81 @@ namespace TRUSTEDBOOT
     uint8_t* TPMS_AUTH_COMMAND_marshal(const TPMS_AUTH_COMMAND* val,
                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                        size_t* io_cmdSize);
+
+    struct _TPMS_SENSITIVE_CREATE
+    {
+        uint32_t userAuth;
+        uint8_t data[43];
+    } PACKED;
+    typedef struct _TPMS_SENSITIVE_CREATE TPMS_SENSITIVE_CREATE;
+
+    // Structure that contains the sensitive creation data
+    struct _TPM2B_SENSITIVE_CREATE
+    {
+        uint32_t size;
+        TPMS_SENSITIVE_CREATE sensitive;
+    } PACKED;
+    typedef struct _TPM2B_SENSITIVE_CREATE TPM2B_SENSITIVE_CREATE;
+
+   // Incoming CreatePrimary structure
+    struct _TPM2_CreatePrimaryIn
+    {
+        TPM2_BaseIn base;
+        uint32_t    primaryHandle;
+        TPM2B_SENSITIVE_CREATE inSensitive;
+    } PACKED;
+    typedef struct _TPM2_CreatePrimaryIn TPM2_CreatePrimaryIn;
+
+    // Incoming NV Read structure
+    struct _TPM2_NVReadIn
+    {
+        TPM2_BaseIn base;
+        uint8_t data[25];
+    } PACKED;
+    typedef struct _TPM2_NVReadIn TPM2_NVReadIn;
+
+    // Outgoing NV Read structure
+    struct _TPM2_NVReadOut
+    {
+        TPM2_BaseOut base;
+        uint8_t NVData[TPM_NV_DATA_SIZE];
+    } PACKED;
+    typedef struct _TPM2_NVReadOut TPM2_NVReadOut;
+
+    // Struct for the data portion of the Quote request
+    struct _TPM2_QuoteData
+    {
+        uint8_t tpmiDhObject[19];
+        MasterTpmNonce_t masterNonce;
+        uint16_t data;
+        uint16_t inScheme;
+        TPML_PCR_SELECTION pcrSelection;
+    } PACKED;
+    typedef struct _TPM2_QuoteData TPM2_QuoteData;
+
+    // Incoming TPM Quote structure
+    struct _TPM2_QuoteIn
+    {
+        TPM2_BaseIn base;
+        TPM2_QuoteData quoteData;
+    } PACKED;
+    typedef struct _TPM2_QuoteIn TPM2_QuoteIn;
+
+    // Outgoing Quote structure
+    struct _TPM2_QuoteOut
+    {
+        TPM2_BaseOut base;
+        uint8_t quoteData[MAX_TRANSMIT_SIZE];
+    } PACKED;
+    typedef struct _TPM2_QuoteOut TPM2_QuoteOut;
+
+    // Incoming Context Flush structure
+    struct _TPM2_FlushContextIn
+    {
+        TPM2_BaseIn base;
+        uint32_t flushHandle;
+    } PACKED;
+    typedef struct _TPM2_FlushContextIn TPM2_FlushContextIn;
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace

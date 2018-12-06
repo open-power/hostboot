@@ -69,6 +69,14 @@ namespace TRUSTEDBOOT
         MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM = 0x17,
         MOD_TPM_GETRANDOM                   = 0x18,
         MOD_VALIDATE_TPM_HANDLE             = 0x19,
+        MOD_TPM_CMD_CREATE_ATTEST           = 0x1A,
+        MOD_CREATE_ATT_KEYS                 = 0x1B,
+        MOD_READ_AK_CERT                    = 0x1C,
+        MOD_TPM_CMD_READ_AK_CERT            = 0x1D,
+        MOD_TPM_CMD_GEN_QUOTE               = 0x1E,
+        MOD_GEN_QUOTE                       = 0x1F,
+        MOD_TPM_CMD_FLUSH_CONTEXT           = 0x20,
+        MOD_FLUSH_CONTEXT                   = 0x21,
    };
 
     enum TRUSTEDReasonCode
@@ -104,6 +112,7 @@ namespace TRUSTEDBOOT
         RC_NON_FUNCTIONAL_TPM_HANDLE     = TRBOOT_COMP_ID | 0xB9,
         RC_UNREACHABLE_TPM               = TRBOOT_COMP_ID | 0xBA,
         RC_RAND_NUM_TOO_BIG              = TRBOOT_COMP_ID | 0xBB,
+        RC_TPM_BAD_RESP                  = TRBOOT_COMP_ID | 0xBC,
     };
 #ifdef __cplusplus
 }
