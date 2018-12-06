@@ -114,4 +114,15 @@
     <ffdc>RANK</ffdc>
   </hwpError>
 
+    <hwpError>
+    <rc>RC_MSS_LRDIMM_CAL_NOISE</rc>
+    <description>
+      Set if training result show too much noise during a calibration step
+    </description>
+    <ffdc>NIBBLE</ffdc>
+    <ffdc>BUFFER</ffdc>
+    <ffdc>CALIBRATION_RAW_DATA</ffdc>
+    <ffdc>CALIBRATION_STEP</ffdc>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
 </hwpErrors>
