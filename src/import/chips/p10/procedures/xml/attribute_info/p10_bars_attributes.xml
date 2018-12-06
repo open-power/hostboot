@@ -1,0 +1,455 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_bars_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_sbe_scominit
+    firmware notes:
+      Defines 16GB range (size implied) mapped for XSCOM usage
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 20:29
+      (excludes smf/memory select/translation table index fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_LPC_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_sbe_scominit
+    firmware notes:
+      Defines 4GB range (size implied) mapped for LPC usage
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 20:31
+      (excludes smf/memory select/translation table index fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FSP_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes:
+      Defines range mapped for FSP MMIO
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 20:43
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FSP_BAR_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes: none
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+      4_GB = 0xFFFFF000FFFFFFFF,
+      2_GB = 0xFFFFF0007FFFFFFF,
+      1_GB = 0xFFFFF0003FFFFFFF,
+    512_MB = 0xFFFFF0001FFFFFFF,
+    256_MB = 0xFFFFF0000FFFFFFF,
+    128_MB = 0xFFFFF00007FFFFFF,
+     64_MB = 0xFFFFF00003FFFFFF,
+     32_MB = 0xFFFFF00001FFFFFF,
+     16_MB = 0xFFFFF00000FFFFFF,
+      8_MB = 0xFFFFF000007FFFFF,
+      4_MB = 0xFFFFF000003FFFFF,
+      2_MB = 0xFFFFF000001FFFFF,
+      1_MB = 0xFFFFF000000FFFFF
+  </enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FSP_MMIO_MASK_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes:
+      AND mask applied to RA 32:35 when transmitting address to FSP
+      NOTE: RA 8:31 are always replaced with zero
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+      4_GB = 0x00F0000000000000,
+      2_GB = 0x0070000000000000,
+      1_GB = 0x0030000000000000,
+    512_MB = 0x0010000000000000,
+    256_MB = 0x0000000000000000
+  </enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_PAU_MMIO_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_setup_bars
+    firmware notes:
+      Defines 1MB range (size implied) mapped for PSI host-bridge
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 20:43
+      (excludes smf/memory select/translation table index fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_NX_RNG_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_rng_init_phase2
+    firmware notes: none
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    creator: platform
+    consumer: p10_rng_init_phase2
+    firmware notes:
+      Defines 8KB range (size implied) mapped for NX RNG function
+      Attributes holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 20:51
+      (excludes smf/memory select/translation table index fields)
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_NX_RNG_FAILED_INT_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_rng_init_phase2
+    firmware notes:
+      Enables optional post of interrupt when both NX RNG voice sources
+      have failed
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_NX_RNG_FAILED_INT_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    creator: platform
+    consumer: p10_rng_init_phase2
+    firmware notes:
+      Address used to post interrupt when both NX RNG noise sources
+      have failed. Register covers RA 12:51.
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_NHTM_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The base address where the NHTM traces start. They are
+    calculated based on the NHTM trace size requested by user.
+    This address in memory will be the location where NHTM0/1
+    traces are output.
+    Set by p10_mss_eff_grouping.
+    Used by p10_setup_bars and p10_htm_setup.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_NHTM_BAR_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The amount of memory a user can reserve to store NHTM traces.
+    This amount will be used to store both NHTM0 and NHTM1 traces.
+    Used by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_CHTM_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The base addresses where the CHTM traces start. They are
+    calculated based on the CHTM trace sizes requested by users.
+    There are 24 different CHTM regions, thus 24 different sizes.
+    Each region is to store HTM trace for a core.
+    Set by p10_mss_eff_grouping.
+    Used by p10_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>24</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_CHTM_BAR_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The amount of memory a user can reserve to store CHTM traces.
+    There are 32 cores, thus 32 different sizes.
+    Used by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <array>32</array>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_SMF_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The base address where the SMF bar starts. It is
+    calculated based on the SMF size requested by users.
+    Set by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_SMF_BAR_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The total amount of memory a user has requested to reserve for
+    secure memory functions. Minimum requirement of 256MB.
+    Used by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SMF_CONFIG</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Controls the enabling and disabling of smf.
+    Used by unit initfiles, p10_mss_eff_grouping.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SMF_ENABLED</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    True if smf config is enabled and smf is supported in the
+    chip ec level. Set by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x00,
+    TRUE = 0x01
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The base address where the OCC sandbox starts. It is
+    calculated based on the OCC sandbox size requested by users.
+    Set by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The amount of memory a user can reserve to store OCC sandbox
+    functions.
+    Used by p10_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>
