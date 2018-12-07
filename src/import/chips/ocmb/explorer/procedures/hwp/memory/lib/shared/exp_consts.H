@@ -78,7 +78,7 @@ enum sizes
 {
     // 32-bit commands
     FW_BOOT_CONFIG_BYTE_LEN = 4,
-    FW_STATUS_BYTE_LEN      = 4,
+    FW_STATUS_BYTE_LEN      = 5,
 
     FW_WRITE_REG_DATA_SIZE  = 0x08,
     FW_REG_ADDR_LATCH_SIZE  = 0x04,
