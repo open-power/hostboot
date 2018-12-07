@@ -82,6 +82,7 @@ enum
     MOD_TYPE_DDR4_MINI_UDIMM = 0x06,
     MOD_TYPE_DDR4_SO_RDIMM   = 0x08,
     MOD_TYPE_DDR4_SO_UDIMM   = 0x09,
+    MOD_TYPE_DDIMM           = 0x0A,
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
@@ -98,6 +99,7 @@ typedef enum
     RMM     = 0x02, // Registered Memory Modules
     CMM     = 0x04, // Clocked Memory Modules
     LRMM    = 0x08, // Load Reduction Memory Modules
+    DDIMM   = 0x0A,
     ALL     = 0xFFFF,
 } modSpecTypes_t;
 

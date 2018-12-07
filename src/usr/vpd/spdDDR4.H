@@ -103,6 +103,7 @@ const KeywordData ddr4Data[] =
     { TRCDMIN_FINE_OFFSET,              0x7a,   0x01,   0x00,   0x00, false, false, NA },
     { TRPMIN_FINE_OFFSET,               0x79,   0x01,   0x00,   0x00, false, false, NA },
     { TRCMIN_FINE_OFFSET,               0x78,   0x01,   0x00,   0x00, false, false, NA },
+    // Note - All data below 128 is common across all DDR4 DIMMs, even DDIMM
     { MODULE_TYPE_SPECIFIC_SECTION,     0x80,   0x80,   0x00,   0x00, false, false, NA },
     { MODULE_MANUFACTURER_ID,           0x141,  0x02,   0x00,   0x00, true,  false, NA },
     { MODULE_MANUFACTURING_LOCATION,    0x142,  0x01,   0x00,   0x00, false, false, NA },

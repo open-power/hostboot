@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Jim Yuan                                                           */
 /* [+] Maxim Polyakov                                                     */
@@ -97,7 +97,8 @@ static const JedecNameMap jedecBasicType[] =
     { 0x0C, "DDR4" },
     { 0x0E, "DDR4E" },
     { 0x0F, "LPDDR3" },
-    { 0x10, "LPDDR4" }
+    { 0x10, "LPDDR4" },
+    { 0x12, "DDR5" }
 };
 
 static const JedecNameMap jedecModuleType[] =
@@ -110,6 +111,7 @@ static const JedecNameMap jedecModuleType[] =
     { 0x06, "MINI UDIMM" },
     { 0x08, "SORDIMM 72b"},
     { 0x09, "SOUDIMM 72b" },
+    { 0x0A, "DDIMM" },
     { 0x0C, "SODIMM 16b" },
     { 0x0D, "SODIMM 32b" }
 };
