@@ -257,6 +257,7 @@ TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_FSP_BUILD),,testnvram)
 TESTCASE_MODULES += testsmf
+TESTCASE_MODULES += testexpscom
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,8 @@
 #include <lib/i2c/exp_i2c_scom.H>  // i2c_get_scom
 #include <errl/errludtarget.H>     // ErrlUserDetailsTarget
 #include <hwpf/fapi2/include/fapi2_hwp_executor.H> // FAPI_EXEC_HWP
-#include "i2cscomdd.H"     //i2cScomPerformOp
+#include <expscom/expscom_reasoncodes.H> //  EXPSCOM::MOD_I2CSCOM_PERFORM_OP
+#include "i2cscomdd.H" //i2cScomPerformOp
 #include "expscom_trace.H" //g_trac_expscom
 #include "expscom_utils.H" //validateInputs
 
@@ -68,10 +69,13 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
     fapi2::buffer<uint32_t> l_fapi2Buffer32;
     l_fapi2Buffer64.extractToRight<32,32>(l_fapi2Buffer32);
 
+    TRACDCOMP( g_trac_expscom, ERR_MRK "i2cScomPerformOp> %s 0x%.16x or 0x%.8x to  Address 0x%lx ",
+                               i_opType == DeviceFW::READ ? "READ" : "WRITE", l_fapi2Buffer64(), l_fapi2Buffer32() , l_scomAddr );
+
     do
     {
         // First make sure the inputs are valid
-        l_err = EXPSCOM::validateInputs ( i_opType, i_target, l_scomAddr, io_buflen);
+        l_err = EXPSCOM::validateInputs ( i_opType, i_target, io_buflen, l_scomAddr );
 
         if(l_err)
         {
