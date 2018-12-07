@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,10 @@
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
 #include <attributeenums.H>                // ATTRIBUTE_ID
+
+#ifdef CONFIG_NVDIMM
+#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
+#endif
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -229,6 +233,55 @@ void sbeAttemptRecovery(uint64_t i_data)
     TRACFCOMP(g_trac_runtime, EXIT_MRK"sbeAttemptRecovery");
 }
 
+/**
+ *  @brief Attempt to notify PHYP of OCC active status change
+ *  @param[in] i_data - contains a byte indicating OCC active status
+ *  @platform FSP
+ **/
+void occActiveNotification( void * i_data )
+{
+    // data is one byte - 1 = OCC active, 0 = OCC not active
+    uint8_t * l_active = reinterpret_cast<uint8_t*>(i_data);
+
+    // Just a safety check
+    assert(l_active != nullptr, "occActiveNotification: invalid NULL data ptr");
+
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"occActiveNotification: 0x%02X", *l_active);
+
+#ifdef CONFIG_NVDIMM
+    errlHndl_t l_err = nullptr;
+
+    TargetHandleList l_procList;
+    getAllChips(l_procList, TYPE_PROC);
+
+    // Now send msg to PHYP notifying them if OCC is protecting the NVDIMMs
+    for (auto & l_proc : l_procList)
+    {
+        if (*l_active)
+        {
+            l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
+                                                         NVDIMM::PROTECTED);
+        }
+        else
+        {
+            l_err = NVDIMM::notifyNvdimmProtectionChange(l_proc,
+                                                         NVDIMM::NOT_PROTECTED);
+        }
+
+        // commit error if it exists
+        // continue notification to all functional processors
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_runtime,
+                      ERR_MRK"occActiveNotification: 0x%02X - 0x%.8X processor",
+                      *l_active, TARGETING::get_huid(l_proc));
+
+            errlCommit(l_err, RUNTIME_COMP_ID);
+            l_err = nullptr;
+        }
+    }
+#endif
+}
 
 /**
  *  @brief Attempt to sync attribute setting with the FSP
@@ -316,7 +369,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
    errlHndl_t l_err = nullptr;
 
-    // Flag to detect an invlaid/unknown/not used message
+    // Flag to detect an invalid/unknown/not used message
     bool l_badMessage = false;
 
     // Capture the unique message data associated with errant message
@@ -350,6 +403,13 @@ void firmware_notify( uint64_t i_len, void *i_data )
                          MBOX::HB_ATTR_SYNC_MSGQ) )
               {
                 attrSyncRequest((void*)&(l_hbrt_fw_msg->generic_msg.data));
+              }
+              else if ((l_hbrt_fw_msg->generic_msg.msgType ==
+                         GenericFspMboxMessage_t::MSG_OCC_ACTIVE) &&
+                        (l_hbrt_fw_msg->generic_msg.msgq ==
+                         MBOX::FSP_OCC_MSGQ_ID) )
+              {
+                occActiveNotification((void*)&(l_hbrt_fw_msg->generic_msg.data));
               }
               // Placing this at end as it does not have a msgq specified
               // Want to match msgType & msgq combos first

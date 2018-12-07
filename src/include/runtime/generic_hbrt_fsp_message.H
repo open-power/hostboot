@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,6 +191,7 @@ struct GenericFspMboxMessage_t
         MSG_SINGLE_SCOM_OP               = 0x0005,
         MSG_MULTI_SCOM_OP                = 0x0006,
         MSG_ATTR_SYNC_REQUEST            = 0x000000A5,
+        MSG_OCC_ACTIVE                   = 0x000000A6,
         MSG_SBE_ERROR                    = 0x000000D4,
         MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5,
         MSG_SBE_RECOVERY_FAILED          = 0x000000D6,
