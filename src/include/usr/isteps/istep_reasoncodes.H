@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,7 @@ namespace ISTEP
         RC_LINK_TRAIN_ERRORS_FROM_HWP            = ISTEP_COMP_ID | 0x4A,
         RC_RISK_LEVEL_TOO_LOW                    = ISTEP_COMP_ID | 0x4B,
         RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
+        RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
     };
 
 };

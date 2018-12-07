@@ -49,6 +49,8 @@ class PnorHiomapDD : public PnorIf
         PnorHiomapDD(TARGETING::Target* i_target = NULL);
         ~PnorHiomapDD();
 
+        PNOR::hiomapMode getAccessMode(void);
+
         virtual errlHndl_t readFlash(void* o_buffer,
                                      size_t& io_buflen,
                                      uint64_t i_address);
@@ -63,6 +65,7 @@ class PnorHiomapDD : public PnorIf
 
     private:
         PnorIf* iv_pnor;
+        PNOR::hiomapMode iv_mode;
 };
 
 #endif
