@@ -2598,7 +2598,6 @@
     Consumers: Read by p9_hcode_image_build.C
     </description>
     <valueType>uint64</valueType>
-    <writeable/>
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
