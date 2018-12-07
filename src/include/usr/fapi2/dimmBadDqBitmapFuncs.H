@@ -41,16 +41,17 @@ extern "C"
  * dimmBadDqBitmapAccessHwp to get the DQ bitmap and returns the data
  * for the specified rank.
  *
- * @param[in]  i_fapiTrgt Reference to MCA/MBA Target
+ * @param[in]  i_fapiTrgt Reference to MCA/MBA/MEM_PORT Target
  * @param[in]  i_dimm     MCA/MBA port DIMM number
  * @param[in]  i_rank     DIMM rank number
  * @param[out] o_data     Reference to data where Bad DQ bitmap is copied to
- * @param[in]  i_port     Optional port for MBA targets. Default is port 0.
+ * @param[in]  i_port     Optional port for MBA targets only. Default is port 0.
  *
  * @return ReturnCode
  */
 fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
@@ -66,16 +67,17 @@ fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
  * dimmBadDqBitmapAccessHwp to get the DQ bitmap, fills in the data for the
  * specified rank and calls dimmBadDqBitmapAccessHwp to set the DQ bitmap
  *
- * @param[in] i_fapiTrgt Reference to MCA/MBA Chiplet
+ * @param[in] i_fapiTrgt Reference to MCA/MBA/MEM_PORT Target
  * @param[in] i_dimm     MCA/MBA port DIMM number
  * @param[in] i_rank     DIMM rank number
  * @param[in] i_data     Reference to data where Bad DQ bitmap is copied from
- * @param[in] i_port     Optional port for MBA targets. Default is port 0.
+ * @param[in] i_port     Optional port for MBA targets only. Default is port 0.
  *
  * @return ReturnCode
  */
 fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],

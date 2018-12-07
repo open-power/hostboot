@@ -38,7 +38,8 @@ extern "C"
 // Utility function to check parameters and get the Bad DQ bitmap
 //------------------------------------------------------------------------------
 fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_port,
     const uint8_t i_dimm,
     const uint8_t i_rank,
@@ -72,66 +73,33 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
             break;
         }
 
-        // Get the proc model
-        TARGETING::Target* l_masterProc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
-        TARGETING::ATTR_MODEL_type l_procModel =
-            l_masterProc->getAttr<TARGETING::ATTR_MODEL>();
-
         // Get all functional DIMMs
         TargetHandleList l_dimmList;
         getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM );
 
-        if ( TARGETING::MODEL_CUMULUS == l_procModel )
+        // Find the DIMM with the correct port/dimm slct
+        uint8_t l_port = 0;
+        uint8_t l_dimm = 0;
+
+        for ( auto &dimmTrgt : l_dimmList )
         {
-            // Find the DIMM with the correct MBA port/dimm
-            uint8_t l_port = 0;
-            uint8_t l_dimm = 0;
+            // Get and compare the port
+            l_port = dimmTrgt->getAttr<ATTR_MEM_PORT>();
 
-            for ( auto &dimmTrgt : l_dimmList )
+            if ( l_port == i_port )
             {
-                // Get and compare the port
-                l_port = dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
+                // Get and compare the dimm
+                l_dimm = dimmTrgt->getAttr<ATTR_POS_ON_MEM_PORT>();
 
-                if ( l_port == i_port )
-                {
-                    // Get and compare the dimm
-                    l_dimm = dimmTrgt->getAttr<ATTR_CEN_MBA_DIMM>();
-
-                    if ( l_dimm == i_dimm )
-                    {
-                        o_dimmTrgt = dimmTrgt;
-                        // Port and dimm are correct, get the Bad DQ bitmap
-                        l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP,
-                                              dimmTrgt, o_dqBitmap );
-                        if ( l_rc ) break;
-                    }
-                }
-            }
-        }
-        else if ( TARGETING::MODEL_NIMBUS == l_procModel )
-        {
-            for ( auto &dimmTrgt : l_dimmList )
-            {
-                uint32_t l_pos = dimmTrgt->getAttr<ATTR_FAPI_POS>() %
-                                 mss::MAX_DIMM_PER_PORT;
-                if ( l_pos == i_dimm )
+                if ( l_dimm == i_dimm )
                 {
                     o_dimmTrgt = dimmTrgt;
-                    // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
-                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP,
-                                          o_dimmTrgt, o_dqBitmap );
-                    break;
+                    // Port and dimm are correct, get the Bad DQ bitmap
+                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, dimmTrgt,
+                                          o_dqBitmap );
+                    if ( l_rc ) break;
                 }
             }
-        }
-        else
-        {
-            // TODO RTC 201603 - axone/generic updates
-            // Invalid target.
-            FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Invalid proc model" );
-            l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
-            break;
         }
 
         if ( l_rc )
@@ -147,7 +115,8 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
@@ -182,7 +151,8 @@ fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],
