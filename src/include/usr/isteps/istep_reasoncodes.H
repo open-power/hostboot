@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,7 @@ namespace ISTEP
         RC_FAILED_TO_BOOT_SBE                    = ISTEP_COMP_ID | 0x38,
         RC_REDISCOVERED_TARGETS                  = ISTEP_COMP_ID | 0x39,
         RC_P9N_LESS_THAN_DD22_NOT_SUPPORTED      = ISTEP_COMP_ID | 0x3A,
+        RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x3B,
     };
 
 };
