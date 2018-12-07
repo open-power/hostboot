@@ -193,6 +193,10 @@
         <default>2000</default>
     </attribute>
     <attribute>
+        <id>ASYNC_NEST_FREQ_MHZ</id>
+        <default>0xFFFF</default>
+    </attribute>
+    <attribute>
         <id>HB_SETTINGS</id>
         <default>
             <field><id>reserved</id><value/></field>
