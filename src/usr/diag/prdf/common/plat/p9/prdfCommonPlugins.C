@@ -90,6 +90,21 @@ PRDF_PLUGIN_DEFINE_NS( cumulus_proc,   CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( cumulus_xbus,   CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( centaur_membuf, CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( centaur_mba,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_capp,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_ec,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_eq,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_mc,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_mcc,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_mi,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_npu,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_obus,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_omic,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_pec,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_phb,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( axone_xbus,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding
@@ -110,6 +125,7 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS(nimbus_proc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(cumulus_proc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(axone_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 } // namespace CommonPlugins ends
 

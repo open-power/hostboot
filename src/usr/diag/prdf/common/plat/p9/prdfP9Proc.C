@@ -95,6 +95,7 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForRecovered );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
 /**
@@ -176,6 +177,7 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForRecoveredSev );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
  *  To be called from the fabric domain to gather Checkstop information.  This
@@ -273,6 +275,7 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, GetCheckstopInfo );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, GetCheckstopInfo );
 
 //------------------------------------------------------------------------------
 
@@ -325,6 +328,7 @@ int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, isHostAttnFirAccessible );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isHostAttnFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -363,6 +367,7 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, isUcsFirAccessible );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -381,6 +386,7 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleDeadmanTimer );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
 
@@ -422,6 +428,7 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleSbeVital );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
 
@@ -456,6 +463,7 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckForUnitCs );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckForUnitCs );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
 
@@ -490,6 +498,7 @@ int32_t PmRecovery( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, PmRecovery );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, PmRecovery );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 
@@ -565,6 +574,7 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleIntCqFirPcRecovError );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleIntCqFirPcRecovError );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------
 
