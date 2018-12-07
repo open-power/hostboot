@@ -107,6 +107,8 @@ namespace KernelMisc
                 if (c->master)
                 {
                     printk("No payload... nap'ing all threads.\n");
+                    // Let Simics know that we booted successfully
+                    MAGIC_INST_PRINT_ISTEP(0xFF,0xFF);
                 }
 
                 // Clear LPCR values that wakes up from nap.  LPCR[49, 50, 51]
