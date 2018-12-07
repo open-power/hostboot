@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,10 @@
 #include <sys/mmio.h>
 #include <console/consoleif.H>
 #include <initservice/initserviceif.H>
+
+#if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+#include <pnor/pnorif.H>
+#endif
 
 namespace ISTEP_06
 {
@@ -124,6 +128,63 @@ void* host_set_ipl_parms( void *io_pArgs )
         errlCommit( l_err, ISTEP_COMP_ID );
     }
 
+
+#if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+    // Add a check to indicate the BMC does not support HIOMAP pnor-ipmi access
+    // and the BMC firmware should be updated
+    PNOR::hiomapMode l_mode = PNOR::getPnorAccessMode();
+    if( l_mode != PNOR::PNOR_IPMI )
+    {
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(ISTEP_COMP_NAME,
+            "HIOMAP PNOR-IPMI not enabled, BMC firmware needs to be updated.");
+#endif
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "HIOMAP PNOR-IPMI not enabled, BMC firmware needs to be updated.");
+      
+#ifdef CONFIG_PNORDD_IS_BMCMBOX
+        bool l_IS_BMCMBOX = true;
+#else
+        bool l_IS_BMCMBOX = false;
+#endif      
+
+#ifdef CONFIG_PNORDD_IS_IPMI
+        bool l_IS_IPMI = true;
+#else
+        bool l_IS_IPMI = false;
+#endif      
+
+        /*@
+         * @errortype
+         * @moduleid     ISTEP::MOD_SET_IPL_PARMS
+         * @reasoncode   ISTEP::RC_PNOR_IPMI_NOT_ENABLED
+         * @userdata1    HIOMAP Mode
+         * @userdata2[0-31]  CONFIG_PNORDD_IS_BMCMBOX
+         * @userdata2[32:63] CONFIG_PNORDD_IS_IPMI
+         * @devdesc      PNOR-IPMI not enabled, BMC firmware needs to be updated
+         * @custdesc     PNOR-IPMI not enabled, BMC firmware needs to be updated
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        ISTEP::MOD_SET_IPL_PARMS,
+                                        ISTEP::RC_PNOR_IPMI_NOT_ENABLED,
+                                        l_mode,
+                                        TWO_UINT32_TO_UINT64(
+                                            l_IS_BMCMBOX,
+                                            l_IS_IPMI));
+
+        l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+
+        l_err->collectTrace(PNOR_COMP_NAME);
+        l_err->collectTrace("ISTEPS_TRACE",256);
+
+        // Create IStep error log and cross ref error that occurred
+        l_stepError.addErrorDetails( l_err );
+        errlCommit( l_err, ISTEP_COMP_ID );
+    }
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
 

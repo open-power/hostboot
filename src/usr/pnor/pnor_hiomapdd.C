@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,6 +181,14 @@ void getPnorInfo( PnorInfo_t& o_pnorInfo )
         Singleton<PnorHiomapDD>::instance().getNorSize();
 }
 
+/**
+ * @brief Get HIOMAP PNOR access mode
+ */
+PNOR::hiomapMode getPnorAccessMode(void)
+{
+    return Singleton<PnorHiomapDD>::instance().getAccessMode();
+}
+
 // Register access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::PNOR,
@@ -218,18 +226,26 @@ uint32_t PnorHiomapDD::getNorWorkarounds(void)
     return iv_pnor->getNorWorkarounds();
 }
 
-static PnorIf* probeHiomapTransport(TARGETING::Target* i_target)
+PNOR::hiomapMode PnorHiomapDD::getAccessMode(void)
+{
+    return iv_mode;
+}
+
+static PnorIf* probeHiomapTransport(TARGETING::Target* i_target,
+                                    PNOR::hiomapMode& io_mode)
 {
     PnorIf* pnor;
 
     do {
         if ((pnor = PnorIpmiDD::probe(i_target)))
         {
+            io_mode = PNOR::PNOR_IPMI;
             break;
         }
 
         if ((pnor = PnorMboxDD::probe(i_target)))
         {
+            io_mode = PNOR::PNOR_MBOX;
             break;
         }
     } while (0);
@@ -250,8 +266,9 @@ static PnorIf* probeHiomapTransport(TARGETING::Target* i_target)
 }
 
 PnorHiomapDD::PnorHiomapDD(TARGETING::Target* i_target)
+:iv_mode(PNOR::PNOR_UNKNOWN)
 {
-    iv_pnor = probeHiomapTransport(i_target);
+    iv_pnor = probeHiomapTransport(i_target, iv_mode);
 }
 
 PnorHiomapDD::~PnorHiomapDD()

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -58,6 +58,14 @@ struct PnorInfo_t
     uint32_t mmioOffset; //< Address of MMIO access
     uint32_t norWorkarounds; //< NOR flash workarounds
     uint32_t flashSize; //< Size of PNOR in bytes
+};
+
+/** PNOR access mode */
+enum hiomapMode
+{
+    PNOR_IPMI,
+    PNOR_MBOX,
+    PNOR_UNKNOWN
 };
 
 /**
@@ -202,6 +210,13 @@ errlHndl_t validateAltMaster( void );
  * @param[out] o_pnorInfo Information about PNOR
  */
 void getPnorInfo( PnorInfo_t& o_pnorInfo );
+
+/**
+ * @brief Get HIOMAP PNOR access mode
+ *
+ * @return hiomapMode  Pnor access mode (ipmi/mbox)
+ */
+hiomapMode getPnorAccessMode( void );
 
 
 /**
