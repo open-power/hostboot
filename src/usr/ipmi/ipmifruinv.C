@@ -1261,10 +1261,18 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         // Grab VPD data into seperate data vector
         std::vector<uint8_t> mfgDateData;
         l_errl = addVpdData(mfgDateData, PVPD::OPFR, PVPD::MB, false, false);
-        if (l_errl) { break; }
-
-        // Pass that to the function that sets the Build date
-        setMfgData(io_data, mfgDateData);
+        if (l_errl)
+        {
+            // The MB keyword was optional on older cards so just ignore
+            //  any errors
+            delete l_errl;
+            l_errl = NULL;
+        }
+        else
+        {
+            // Pass that to the function that sets the Build date
+            setMfgData(io_data, mfgDateData);
+        }
 
         //Set Vendor Name - ascii formatted data
         l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VN, true);
