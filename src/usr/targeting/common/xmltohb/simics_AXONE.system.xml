@@ -8478,6 +8478,10 @@
         <id>POSITION</id>
         <default>0</default>
     </attribute>
+      <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8505,6 +8509,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>1</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>1</default>
     </attribute>
 </targetInstance>
@@ -8536,6 +8544,10 @@
         <id>POSITION</id>
         <default>2</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8563,6 +8575,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>3</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>3</default>
     </attribute>
 </targetInstance>
@@ -8594,6 +8610,10 @@
         <id>POSITION</id>
         <default>4</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>4</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8621,6 +8641,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>5</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>5</default>
     </attribute>
 </targetInstance>
@@ -8652,6 +8676,10 @@
         <id>POSITION</id>
         <default>6</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8679,6 +8707,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>7</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>7</default>
     </attribute>
 </targetInstance>
@@ -8710,6 +8742,10 @@
         <id>POSITION</id>
         <default>8</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8737,6 +8773,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>9</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>9</default>
     </attribute>
 </targetInstance>
@@ -8768,6 +8808,10 @@
         <id>POSITION</id>
         <default>10</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>10</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8795,6 +8839,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>11</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>11</default>
     </attribute>
 </targetInstance>
@@ -8826,6 +8874,10 @@
         <id>POSITION</id>
         <default>12</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>12</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8853,6 +8905,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>13</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>13</default>
     </attribute>
 </targetInstance>
@@ -8884,6 +8940,10 @@
         <id>POSITION</id>
         <default>14</default>
     </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8911,6 +8971,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>15</default>
+    </attribute>
+        <attribute>
+        <id>VPD_REC_NUM</id>
         <default>15</default>
     </attribute>
 </targetInstance>
