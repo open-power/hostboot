@@ -70,7 +70,7 @@ errlHndl_t mmioScomPerformOp(DeviceFW::OperationType i_opType,
     do
     {
         // First make sure the inputs are valid
-        l_err = EXPSCOM::validateInputs ( i_opType, i_target, l_expAddr, io_buflen);
+        l_err = EXPSCOM::validateInputs ( i_opType, i_target, io_buflen, l_expAddr);
 
         if(l_err)
         {
