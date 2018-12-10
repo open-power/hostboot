@@ -22,6 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+# nvdimmm.mk should only be called when CONFIG_NVDIMM is set
+# Called by src/makefile with the condition that CONFIG_NVDIMM is defined
+
 PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 #Add all the extra include paths
@@ -44,5 +47,12 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/ffdc/
 OBJS += nvdimm.o
 OBJS += nvdimmdd.o
 OBJS += errlud_nvdimm.o
+
+ifneq (${HOSTBOOT_RUNTIME},1)
+
+# code update path for NVDIMMs (not at RUNTIME)
+OBJS += nvdimm_update.o
+
+endif
 
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/

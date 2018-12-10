@@ -73,6 +73,7 @@ enum nvdimmModuleId
     NVDIMM_ARM_ERASE                        = 0x17,
     NVDIMM_CHECK_READY                      = 0x18,
     NOTIFY_NVDIMM_PROTECTION_CHG            = 0x19,
+    NVDIMM_RUN_UPDATE                       = 0x1A,
 };
 
 /**
@@ -112,6 +113,7 @@ enum nvdimmReasonCode
     NVDIMM_RESTORE_FAILED                   = NVDIMM_COMP_ID | 0x1A,   // Failure to restore
     NVDIMM_NOT_READY                        = NVDIMM_COMP_ID | 0x1B,   // NVDIMM not ready for host to access
     NVDIMM_NULL_FIRMWARE_REQUEST_PTR        = NVDIMM_COMP_ID | 0x1C,   // Firmware request is NULL
+    NVDIMM_UNSUPPORTED_NVDIMM_TYPE          = NVDIMM_COMP_ID | 0x1D,   // Unsupported NVDIMM type for update
 };
 
 enum UserDetailsTypes

@@ -329,19 +329,27 @@ TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc )
 {
     TargetHandleList o_nvdimmList;
 
-    TargetHandleList l_dimmTargetList;
-    getChildAffinityTargets( l_dimmTargetList, i_proc, CLASS_NA, TYPE_DIMM );
+    TARGETING::ATTR_MODEL_type l_chipModel =
+        i_proc->getAttr<TARGETING::ATTR_MODEL>();
 
-    for (TargetHandleList::iterator it = l_dimmTargetList.begin();
-             it != l_dimmTargetList.end(); ++it)
+    // NVDIMM only present on NIMBUS systems
+    if (l_chipModel == TARGETING::MODEL_NIMBUS)
     {
-        TARGETING::Target* l_dimm = *it;
-        if (TARGETING::isNVDIMM(l_dimm))
+        TargetHandleList l_dimmTargetList;
+        getChildAffinityTargets(l_dimmTargetList, i_proc, CLASS_NA, TYPE_DIMM);
+
+        for (TargetHandleList::iterator it = l_dimmTargetList.begin();
+                 it != l_dimmTargetList.end(); ++it)
         {
-            // Found a valid NVDIMM
-            o_nvdimmList.push_back(l_dimm);
+            TARGETING::Target* l_dimm = *it;
+            if (TARGETING::isNVDIMM(l_dimm))
+            {
+                // Found a valid NVDIMM
+                o_nvdimmList.push_back(l_dimm);
+            }
         }
     }
+
     return o_nvdimmList;
 }
 
