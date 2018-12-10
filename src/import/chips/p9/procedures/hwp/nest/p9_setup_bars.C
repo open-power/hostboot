@@ -41,7 +41,7 @@
 #include <p9_fbc_utils.H>
 #include <p9_fbc_smp_utils.H>
 #include <p9_mss_eff_grouping.H>
-
+#include <target_filters.H>
 
 //-----------------------------------------------------------------------------------
 // Constant definitions
