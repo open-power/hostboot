@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_setup_bars
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include/)
 OBJS+=p9_fbc_utils.o
 OBJS+=p9_fbc_smp_utils.o
 $(call BUILD_PROCEDURE)
