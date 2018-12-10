@@ -56,6 +56,7 @@ int32_t Initialize( ExtensibleChip * i_exChip )
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, Initialize );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, Initialize );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, Initialize );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -171,6 +172,7 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, PostAnalysis );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, PostAnalysis );
 
 /**
  * @brief  For L2/L3 Cache CEs, L3 Directory CEs, and L3 LRU Parity Errors.
@@ -197,6 +199,7 @@ int32_t cacheCeWorkaround( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, cacheCeWorkaround );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, cacheCeWorkaround );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, cacheCeWorkaround );
 
 /**
  * @brief Adds L2 Line Delete/Column Repair FFDC to an SDC.
@@ -321,6 +324,7 @@ int32_t L2UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2UE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2UE );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2UE );
 
 /**
  * @brief  Handle an L3 UE
@@ -369,6 +373,7 @@ int32_t L3UE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3UE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3UE );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3UE );
 
 /**
  * @brief  Handle an L2 CE
@@ -484,6 +489,7 @@ int32_t L2CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L2CE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L2CE );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L2CE );
 
 /**
  * @brief Handle an L3 CE
@@ -640,6 +646,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,  Ex, L3CE );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ex, Ex, L3CE );
+PRDF_PLUGIN_DEFINE_NS( axone_ex,   Ex, L3CE );
 
 }
 }
