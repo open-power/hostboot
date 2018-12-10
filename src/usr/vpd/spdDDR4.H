@@ -47,7 +47,7 @@ namespace SPD
 const KeywordData ddr4Data[] =
 {
     // ----------------------------------------------------------------------------------
-    // NOTE: This list must remain an ordered list! The Keyword must be in numerical 
+    // NOTE: This list must remain an ordered list! The Keyword must be in numerical
     //       order (values defined in spdenums.H) to allow efficient searching, a unit
     //       test enforces this.
     // ----------------------------------------------------------------------------------
@@ -136,6 +136,8 @@ const KeywordData ddr4Data[] =
     { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, NA },
     { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, NA },
     { NVM_INIT_TIME,                    0xCB,   0x01,   0x00,   0x00, false, false, NA },
+    { RAW_MODULE_PRODUCT_ID,            0xc0,   0x02,   0x00,   0x00, false, false, NA },
+    { RAW_MODULE_MANUFACTURER_ID,       0x140,  0x02,   0x00,   0x00, false, false, NA },
     // Module Specific fields supported on both DDR3 and DDR4
     { MODSPEC_COM_NOM_HEIGHT_MAX,       0x80,   0x01,   0x1f,   0x00, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_BACK,       0x81,   0x01,   0xf0,   0x04, false, false, ALL },

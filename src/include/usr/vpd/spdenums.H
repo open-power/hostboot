@@ -143,7 +143,9 @@ enum
     DRAM_STEPPING                    = SPD_FIRST_NORM_KEYWORD | 0x57,
     MANUFACTURING_SECTION_CRC        = SPD_FIRST_NORM_KEYWORD | 0x58,
     NVM_INIT_TIME                    = SPD_FIRST_NORM_KEYWORD | 0x59,
-    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x59,
+    RAW_MODULE_PRODUCT_ID            = SPD_FIRST_NORM_KEYWORD | 0x5a,
+    RAW_MODULE_MANUFACTURER_ID       = SPD_FIRST_NORM_KEYWORD | 0x5b,
+    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x5b,
 
     // ==============================================================
     // Module Specific Keywords (Available for both DDR3 and DDR4 DIMMs)
@@ -343,7 +345,7 @@ enum
 };
 
 enum
-{   
+{
     // These are LRDIMM values for Module Type attribute
     // according to ver3 and ver4 JEDEC specs
     JEDEC_VER3_LRDIMM_VAL      = 0x0b,

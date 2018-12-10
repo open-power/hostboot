@@ -54,6 +54,21 @@ enum nvdimm_err_status
  *
  **/
 void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
+
+
+/**
+ * @brief Entry function for updating NV controller code on the NVDIMMs
+ *        Each nvdimm will be checked for a possible update.  The update
+ *        will be performed if the dimm is a known type and its version level
+ *        does not match its corresponding lid's version level.
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors were logged, else false
+ *
+ **/
+bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
+
 #endif
 
 
