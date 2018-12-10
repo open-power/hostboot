@@ -6102,6 +6102,10 @@ sub generate_is_dimm
     <attribute>
         <id>REL_POS</id>
         <default>$dimm_drop</default>
+    </attribute>
+    <attribute>
+        <id>POS_ON_MEM_PORT</id>
+        <default>$dimm_rel_mca</default>
     </attribute>";
 
         # Add TEMP_SENSOR_I2C_CONFIG
