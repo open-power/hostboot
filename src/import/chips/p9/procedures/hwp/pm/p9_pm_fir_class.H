@@ -864,7 +864,7 @@ fapi2::ReturnCode PMFir<Ftype>::restoreSavedMask()
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
 {
-    uint64_t l_mask;
+    uint64_t l_mask = 0;
     uint64_t l_tempMask;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
@@ -891,7 +891,7 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
 {
-    uint64_t l_mask;
+    uint64_t l_mask = 0;
     uint64_t l_tempMask;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
