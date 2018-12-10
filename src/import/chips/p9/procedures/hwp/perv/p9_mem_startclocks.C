@@ -45,7 +45,7 @@
 #include "p9_quad_scom_addresses_fld.H"
 #include "p9_sbe_common.H"
 #include "p9_sbe_chiplet_reset.H"  //For MCGR_CNFG_SETTING_GROUP
-
+#include <target_filters.H>
 
 enum P9_MEM_STARTCLOCKS_Private_Constants
 {
