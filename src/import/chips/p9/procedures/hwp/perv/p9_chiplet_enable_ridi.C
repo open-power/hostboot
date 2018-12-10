@@ -40,6 +40,7 @@
 #include "p9_chiplet_enable_ridi.H"
 
 #include "p9_perv_scom_addresses.H"
+#include <target_filters.H>
 
 static fapi2::ReturnCode p9_chiplet_enable_ridi_net_ctrl_action_function(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
