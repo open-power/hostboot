@@ -271,8 +271,6 @@ void log_fir_helper( const fapi2::Target<T>& i_target, const bool i_fir_error, f
     }
 }
 
-
-
 ///
 /// @brief Checks whether any of the PLL unlock values are set
 /// @param[in] i_local_fir - the overall FIR register
