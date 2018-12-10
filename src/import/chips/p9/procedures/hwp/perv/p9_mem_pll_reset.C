@@ -40,6 +40,7 @@
 #include <p9_mem_pll_reset.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
+#include <target_filters.H>
 
 enum P9_MEM_PLL_RESET_Private_Constants
 {
