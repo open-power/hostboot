@@ -23,5 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_mem_startclocks
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include/)
 OBJS+=p9_sbe_common.o
 $(call BUILD_PROCEDURE)
