@@ -53,6 +53,7 @@
 //  Includes
 // -----------------------------------------------------------------------------
 #include "p9_update_ec_eq_state.H"
+#include <target_filters.H>
 
 #define PERV_TO_CORE_POS_OFFSET 0x20
 #define PERV_TO_EQ_POS_OFFSET 0x10
