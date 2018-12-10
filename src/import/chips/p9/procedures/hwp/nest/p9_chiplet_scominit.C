@@ -64,6 +64,7 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_obus_fir_utils.H>
+#include <target_filters.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
