@@ -86,6 +86,7 @@ void getChpltList ( ExtensibleChip * i_chip,
             o_cfgRegStr = "PCI_CONFIG_REG";
             break;
         case TYPE_MCBIST:
+        case TYPE_MC:
             o_errRegStr = "MC_ERROR_REG";
             o_cfgRegStr = "MC_CONFIG_REG";
             break;
@@ -345,7 +346,8 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
             if (CheckChipletPll(i_chip, TYPE_PROC) ||
                 CheckChipletPll(i_chip, TYPE_XBUS) ||
                 CheckChipletPll(i_chip, TYPE_OBUS) ||
-                CheckChipletPll(i_chip, TYPE_MCBIST))
+                CheckChipletPll(i_chip, TYPE_MCBIST) ||
+                CheckChipletPll(i_chip, TYPE_MC))
             {
                 o_errType |= SYS_PLL_UNLOCK;
             }
@@ -364,6 +366,7 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, CheckErrorType );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, CheckErrorType );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckErrorType );
 
 /**
  * @brief Clear Chiplet PCB slave reg parity errors
@@ -382,6 +385,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
         ClearChipletParityError(i_chip, TYPE_XBUS);
         ClearChipletParityError(i_chip, TYPE_OBUS);
         ClearChipletParityError(i_chip, TYPE_MCBIST);
+        ClearChipletParityError(i_chip, TYPE_MC);
         ClearChipletParityError(i_chip, TYPE_PEC);
         ClearChipletParityError(i_chip, TYPE_EQ);
         ClearChipletParityError(i_chip, TYPE_CORE);
@@ -392,6 +396,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, clearParityError );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, clearParityError );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, clearParityError );
 
 /**
   * @brief Query the PLL chip for a PLL error on P9
@@ -428,6 +433,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, QueryPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, QueryPll );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, QueryPll );
 
 /**
   * @brief  Clear the PLL error for P9 Plugin
@@ -449,6 +455,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         ClearChipletPll(i_chip, TYPE_XBUS);
         ClearChipletPll(i_chip, TYPE_OBUS);
         ClearChipletPll(i_chip, TYPE_MCBIST);
+        ClearChipletPll(i_chip, TYPE_MC);
 
         // Clear TP_LFIR
         SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
@@ -471,6 +478,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearPll );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearPll );
 
 int32_t ClearMfPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
@@ -504,6 +512,7 @@ int32_t ClearMfPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, ClearMfPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, ClearMfPll );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearMfPll );
 
 /**
   * @brief Mask the PLL error for P9 Plugin
@@ -524,6 +533,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         MaskChipletPll(i_chip, TYPE_XBUS);
         MaskChipletPll(i_chip, TYPE_OBUS);
         MaskChipletPll(i_chip, TYPE_MCBIST);
+        MaskChipletPll(i_chip, TYPE_MC);
     }
 
     if (PCI_PLL_UNLOCK & i_errType)
@@ -564,6 +574,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, MaskPll );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, MaskPll );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
 
 /**
  * @brief   capture additional PLL FFDC
@@ -599,6 +610,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, capturePllFfdc );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, capturePllFfdc );
 
 } // end namespace Proc
 
