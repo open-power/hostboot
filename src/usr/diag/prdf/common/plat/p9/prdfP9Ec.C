@@ -135,6 +135,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, PostAnalysis );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PostAnalysis );
+PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PostAnalysis );
 
 /**
  * @brief Checks if this core has checkstopped as a side effect of its
@@ -252,6 +253,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, PreAnalysis );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, PreAnalysis );
+PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PreAnalysis );
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
@@ -401,6 +403,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( nimbus_ec,  Ec, CheckCoreCheckstop );
 PRDF_PLUGIN_DEFINE_NS( cumulus_ec, Ec, CheckCoreCheckstop );
+PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, CheckCoreCheckstop );
 
 } // end namespace Ec
 } // end namespace PRDF

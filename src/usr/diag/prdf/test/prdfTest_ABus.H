@@ -46,8 +46,7 @@ class PBESFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
+            if ( TARGETING::MODEL_NIMBUS == PRDF::PlatServices::getChipModel(
                     PRDF::PlatServices::getMasterProc() ) )
             {
                 PRDS_BEGIN("PBIOOFIR Recoverable attention");
