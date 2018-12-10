@@ -2589,7 +2589,7 @@
   <attribute>
     <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Address is allocated by hostboot and HBRT and is populated 
+    <description>Address is allocated by hostboot and HBRT and is populated
     by p9_hcode_image_build with sc2 instruction. It enables CME to invoke
     a transition from HV to UV during STOP entry on an SMF enabled system.
     Address value should be aligned with 2MB boundary.
@@ -2601,4 +2601,19 @@
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_UNSECURE_HOMER_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Size of memory which hostboot must copy from a temp buffer to
+    an unsecure region of main store memory. Once HOMER is built, hostboot reads
+    the attribute and copies the amount of memory specified in this attribute from
+    a temp buffer to an unsecure region of main memory specifed in an attribute
+    ATTR_UNSECURE_HOMER_ADDRESS
+    Producer: Initialized by hostboot firmware based on platform support
+    Consumers: Read by p9_hcode_image_build.C
+    </description>
+    <writeable/>
+    <valueType>uint32</valueType>
+    <initToZero/>
+  </attribute>
 </attributes>
