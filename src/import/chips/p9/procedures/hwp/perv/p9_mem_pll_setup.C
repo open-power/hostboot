@@ -41,6 +41,7 @@
 
 #include "p9_perv_scom_addresses.H"
 #include <p9_perv_scom_addresses_fld.H>
+#include <target_filters.H>
 
 enum P9_MEM_PLL_SETUP_Private_Constants
 {
