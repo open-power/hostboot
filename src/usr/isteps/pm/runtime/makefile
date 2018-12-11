@@ -28,11 +28,13 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 VPATH += ../
+VPATH += ${ROOTPATH}/src/usr/secureboot/smf
 
 MODULE = pm_rt
 
 ## Objects unique to HBRT
 OBJS += rt_pm.o
+OBJS += smf_utils.o
 
 SUBDIRS += test.d
 

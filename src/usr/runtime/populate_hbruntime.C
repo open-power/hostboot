@@ -81,6 +81,8 @@
 #include <vmmconst.h>
 #include <runtime/customize_attrs_for_payload.H>
 #include <isteps/mem_utils.H>
+#include <secureboot/smf_utils.H>
+#include <secureboot/smf.H>
 
 namespace RUNTIME
 {
@@ -1078,6 +1080,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
     do
     {
+        TARGETING::Target* l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert(l_sys != nullptr,
+               "populate_HbRsvMem: top level target nullptr" );
+
         // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
         // whichever hypervisor is loaded can reference equivalent targets
         // When populating hbRuntimeData, we make IPC calls if we are running
@@ -1128,11 +1135,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
             // If mirroring enabled,
             // change address start to be at its mirrored address equivalent
-            TARGETING::Target* l_sys = nullptr;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-            assert( l_sys != nullptr,
-                    "populate_HbRsvMem: top level target nullptr" );
-
             auto l_mirrored =
                       l_sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
             if (l_mirrored)
@@ -1257,8 +1259,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
             ////////////////////////////////////////////////////////////////////
             // Set the Architected Reserve area in OPAL and pass it down to SBE
-            uint64_t l_memBase = l_topMemAddr -
-                VMM_ARCH_REG_DATA_SIZE_ALL_PROC - VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+            uint64_t l_memBase = l_topMemAddr
+                                 - VMM_ALL_HOMER_OCC_MEMORY_SIZE
+                                 - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
+
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                           i_nodeId,
                                           l_memBase,
@@ -1343,8 +1347,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         }
         else if(TARGETING::is_sapphire_load())
         {
-            l_endAddr = l_topMemAddr -
-                VMM_ALL_HOMER_OCC_MEMORY_SIZE - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
+            l_endAddr = l_topMemAddr
+                        - VMM_ALL_HOMER_OCC_MEMORY_SIZE
+                        - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
             startAddressValid = false;
         }
 
@@ -1686,6 +1691,40 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             {
                 MCL::MasterContainerLidMgr l_mcl;
                 l_elog = l_mcl.processComponents();
+                if(l_elog)
+                {
+                    break;
+                }
+            }
+
+            // Also add unsecure HOMER to the reserved mem if in SMF mode
+            if(SECUREBOOT::SMF::isSmfEnabled())
+            {
+                auto l_unsecureHomerSize = l_sys->
+                                 getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
+
+                // The address of unsecure HOMER is the same among all the
+                // procs, so we can just fetch it from the master proc.
+                TARGETING::Target* l_masterProc = nullptr;
+                l_elog = TARGETING::targetService()
+                                 .queryMasterProcChipTargetHandle(l_masterProc);
+                if(l_elog)
+                {
+                    break;
+                }
+
+                auto l_unsecureHomerAddr = l_masterProc->
+                              getAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>();
+                assert(l_unsecureHomerAddr,
+                       "populate_HbRsvMem: Unsecure HOMER address is 0");
+                assert(l_unsecureHomerSize <= MAX_UNSECURE_HOMER_SIZE,
+                       "populate_HbRsvMem: Unsecure HOMER size is bigger than 0x%x", MAX_UNSECURE_HOMER_SIZE);
+
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_UNSECURE_HOMER,
+                                              i_nodeId,
+                                              l_unsecureHomerAddr,
+                                              l_unsecureHomerSize,
+                                              HBRT_RSVD_MEM__UNSEC_HOMER);
                 if(l_elog)
                 {
                     break;

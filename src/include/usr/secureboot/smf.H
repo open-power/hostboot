@@ -27,6 +27,10 @@
 
 #include <errl/errlentry.H>
 #include <stdint.h>
+#include <limits.h>
+
+// The maximum size of the unsecure HOMER region in reserved memory
+#define MAX_UNSECURE_HOMER_SIZE (1 * PAGESIZE)
 
 namespace SMF_TRACE
 {
