@@ -144,6 +144,8 @@ enum
     CORE_REST_WORDS_PER_THREAD  =  (CORE_RESTORE_SIZE_PER_THREAD >> 2),
     TWO_MB_ALIGNMENT_CHECK      =   0x1FFFFF,
     SMF_BIT_CHECK               =   0x0001000000000000ull,
+    INST_VALUE_SC2              =   0x44400042,
+    SRESET_WORD_POS             =   0x40,
 };
 
 /**
@@ -4797,6 +4799,14 @@ fapi_try_exit:
 
 //---------------------------------------------------------------------------
 
+/**
+ * @brief       populates CME image header with base address of unsecure HOMER.
+ * @param[in]   i_procTgt   fapi2 target for P9 chip
+ * @param[in]   i_pHomer    points to HOMER
+ * @return      fapi2 return code
+ * @note:       initializes CME image header irrespective of SMF enable state for
+ * simplicity. It will be a behave as NOP for SMF disabled system.
+ */
 fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer )
 {
     uint64_t l_unsecureHomerAdd     =   0;
@@ -4809,6 +4819,7 @@ fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Hom
                            i_procTgt,
                            l_unsecureHomerAdd),
              "Error from FAPI_ATTR_GET for attribute ATTR_UNSECURE_HOMER_ADDRESS");
+
     FAPI_INF( "Atrribute ATTR_UNSECURE_HOMER_ADDRESS 0x%016lx", l_unsecureHomerAdd );
 
     if( l_unsecureHomerAdd & 0x1fffff )
@@ -4829,6 +4840,56 @@ fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Hom
 
     fapi_try_exit:
     FAPI_DBG( "<< populateUnsecureHomerAddress" );
+    return fapi2::current_err;
+}
+
+//--------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief       initializes temp buffer with special attn and sc2 instruction.
+ * @param[in]   i_pBuf2     points to temp buffer
+ * @param[in]   i_sizeBuf2  size of temp buffer
+ * @return      fapi2 return code
+ * @note:       initializes buffer irrespective of SMF enable state for simplicity.
+ * It will behave as NOP for SMF disabled systems.
+ */
+fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_sizeBuf2 )
+{
+    FAPI_DBG( ">> initUnsecureHomer" );
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint32_t l_unsecureHomerSize    =  ONE_KB;
+    uint32_t l_attr_unsecureHomerSize;
+    uint32_t * l_pWord              =  (uint32_t *) i_pBuf2;
+    uint32_t l_initInst             =  SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
+
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_UNSECURE_HOMER_SIZE,
+                           FAPI_SYSTEM,
+                           l_attr_unsecureHomerSize),
+              "Error from FAPI_ATTR_GET for attribute ATTR_UNSECURE_HOMER_SIZE" );
+
+    FAPI_ASSERT( ( i_sizeBuf2 >= l_unsecureHomerSize &&
+                   l_attr_unsecureHomerSize >= l_unsecureHomerSize ),
+                 fapi2::FAILED_TO_INIT_UNSECURE_HOMER()
+                 .set_UNSECURE_HOMER_MIN_SIZE( l_unsecureHomerSize )
+                 .set_UNSECURE_HOMER_ACTUAL_SIZE( l_attr_unsecureHomerSize )
+                 .set_TEMP_BUFFER_SIZE( i_sizeBuf2  ),
+                 "Bad size value for unsecure HOMER attr=0x%08x min=0x%08x buf=0x%08x",
+                           l_attr_unsecureHomerSize, l_unsecureHomerSize, i_sizeBuf2  );
+
+
+    l_unsecureHomerSize     =   (l_unsecureHomerSize >> 2);
+
+    for( size_t wordCnt = 0; wordCnt < l_unsecureHomerSize; wordCnt++ )
+    {
+       memcpy( l_pWord + wordCnt, &l_initInst, sizeof(uint32_t) );
+    }
+
+    l_initInst              =   INST_VALUE_SC2;
+    memcpy( l_pWord + SRESET_WORD_POS, &l_initInst, sizeof(uint32_t) );
+
+    fapi_try_exit:
+    FAPI_DBG( "<< initUnsecureHomer" );
     return fapi2::current_err;
 }
 
@@ -5067,6 +5128,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( verifySprSelfSave( i_pHomerImage, fuseModeState, l_chipFuncModel ),
               "Failed to create SPR self save restore entry" );
+
+    FAPI_TRY( initUnsecureHomer( i_pBuf2, i_sizeBuf2 ),
+              "Failed to initialize unsecure HOMER" );
 
 fapi_try_exit:
     FAPI_IMP("<< p9_hcode_image_build" );

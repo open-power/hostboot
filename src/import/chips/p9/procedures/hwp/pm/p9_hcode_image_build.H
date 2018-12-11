@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,7 +182,13 @@ extern "C"
     * @param   i_sizeBuf3       size of work buffer3
     * @param   i_pBuf4          pointer to a work buffer4. Minimum size expected WORK_BUF_SIZE.
     * @param   i_sizeBuf4       size of work buffer4
-    * @note    needs attribute ATTR_EC
+    * @note    at the end of HWP, first 1KB(typically) of the buffer pointed to by i_pBuf2 is
+    * initialized with special attention instruction. At an offset of 0x100 bytes, SC2 instruction
+    * is populated. In an SMF enabled system, this region of buffer will be copied to a main store
+    * location known as unsecure HOMER. During STOP entry, CME will point core to that location of
+    * memory and do an SRESET. This will force core to execute SC2 instruction. It will cause core
+    * to transition from HV to UV state. This transition is necessary for enabling self-save of all
+    * supported SPRs.
     */
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                             void* const     i_pImageIn,
