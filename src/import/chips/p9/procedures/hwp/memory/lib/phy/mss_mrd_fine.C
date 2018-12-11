@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -94,6 +95,10 @@ fapi2::ReturnCode mrd_fine::post_workaround( const fapi2::Target<fapi2::TARGET_T
     // call function to force DQ capture in Read FIFO to support DDR4 LRDIMM calibration.
     FAPI_TRY( mss::dp16::write_force_dq_capture(i_target, mss::states::OFF),
               "%s failed to write exit dq capture", mss::c_str(i_target) );
+
+    // Clears the FIR's that can get set by training
+    // They're not real, so we want to clear them and move on
+    FAPI_TRY(mss::training::lrdimm::workarounds::clear_firs(i_target), "%s failed to clear FIRs", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -494,6 +494,35 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace workarounds
+{
+
+///
+/// @brief Clears error firs
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode clear_firs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    //Initialize
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    fapi2::ReturnCode l_mcbist_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_mca_rc = fapi2::FAPI2_RC_SUCCESS;
+    fir::reg<MCBIST_MCBISTFIRQ> l_mcbist_fir(l_mcbist, l_mcbist_rc);
+    fir::reg<MCA_FIR> l_mca_fir(i_target, l_mca_rc);
+
+    // Checks the return codes from creating the FIR classes
+    FAPI_TRY(l_mcbist_rc, "%s failed to create MCBIST FIR class", mss::c_str(l_mcbist) );
+    FAPI_TRY(l_mca_rc, "%s failed to create MCA FIR class", mss::c_str(i_target) );
+
+    //Clear Error Firs
+    FAPI_TRY(l_mca_fir.clear<MCA_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>());
+    FAPI_TRY(l_mcbist_fir.clear<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>());
+
+fapi_try_exit :
+    return fapi2::current_err;
+}
+} // ns workarounds
 } // ns training
 
 } // ns lrdimm

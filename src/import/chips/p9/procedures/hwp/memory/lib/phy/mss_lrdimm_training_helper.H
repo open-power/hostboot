@@ -49,6 +49,7 @@
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/rosetta_map/rosetta_map.H>
+#include <lib/fir/fir.H>
 
 namespace mss
 {
@@ -660,6 +661,18 @@ fapi_try_exit:
 }
 
 } // ns callout
+
+namespace workarounds
+{
+
+///
+/// @brief Clears error firs
+/// @param[in] i_target The MCA Target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode clear_firs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+} // ns workarounds
 
 } // ns training
 
