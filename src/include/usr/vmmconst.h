@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,7 +285,5 @@ enum BlockPriority
 /** PreVerifiedLidMgr test space */
 #define PREVERLIDMGR_TEST_ADDR  (512*MEGABYTE)
 #define PREVERLIDMGR_TEST_SIZE  (64*MEGABYTE)
-
-
 
 #endif /* _VMMCONST_H */

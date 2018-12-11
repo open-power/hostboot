@@ -63,6 +63,8 @@
 
 #include <runtime/interface.h>
 #include <secureboot/service.H>
+#include <secureboot/smf_utils.H>
+#include <secureboot/smf.H>
 
 // Procedures
 #include <p9_pm_pba_bar_config.H>
@@ -99,10 +101,12 @@
 #define HBPM_UNMAP     mm_block_unmap
 #define HBPM_MAP       mm_block_map
 #define HBPM_PHYS_ADDR (reinterpret_cast<void*>(i_phys_addr))
+#define UNSEC_HOMER_PHYS_ADDR (reinterpret_cast<void*>(l_unsecureHomerAddr))
 #else
 #define HBPM_UNMAP     g_hostInterfaces->unmap_phys_mem
 #define HBPM_MAP       g_hostInterfaces->map_phys_mem
 #define HBPM_PHYS_ADDR i_phys_addr
+#define UNSEC_HOMER_PHYS_ADDR l_unsecureHomerAddr
 #endif
 
 
@@ -264,10 +268,10 @@ namespace HBPM
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapiTarg(i_target);
 
-        void *l_buffer0 = (void*)malloc(HW_IMG_RING_SIZE);
-        void *l_buffer1 = (void*)malloc(MAX_RING_BUF_SIZE);
+        void *l_buffer1 = (void*)malloc(HW_IMG_RING_SIZE);
         void *l_buffer2 = (void*)malloc(MAX_RING_BUF_SIZE);
         void *l_buffer3 = (void*)malloc(MAX_RING_BUF_SIZE);
+        void *l_buffer4 = (void*)malloc(MAX_RING_BUF_SIZE);
 
         do
         {
@@ -355,13 +359,13 @@ namespace HBPM
                              (PM_LOAD == i_mode)
                                  ? PHASE_IPL : PHASE_REBUILD,
                              l_imgType,
-                             l_buffer0,
-                             HW_IMG_RING_SIZE,
                              l_buffer1,
-                             MAX_RING_BUF_SIZE,
+                             HW_IMG_RING_SIZE,
                              l_buffer2,
                              MAX_RING_BUF_SIZE,
                              l_buffer3,
+                             MAX_RING_BUF_SIZE,
+                             l_buffer4,
                              MAX_RING_BUF_SIZE);
 
             if (l_errl)
@@ -378,6 +382,65 @@ namespace HBPM
 
                 break;
             }
+
+            // If SMF is enabled, need to copy the information contained within
+            // l_buffer2 into the unsecure HOMER memory area
+            if(SECUREBOOT::SMF::isSmfEnabled())
+            {
+                TARGETING::Target* l_sys = nullptr;
+                TARGETING::targetService().getTopLevelTarget(l_sys);
+                assert(l_sys, "Top level target is nullptr!");
+                auto l_unsecureHomerSize =
+                          l_sys->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
+                auto l_unsecureHomerAddr = i_target->
+                          getAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "loadHcode: Unsecure HOMER addr: 0x%.16llx; unsecure HOMER size: 0x%x",
+                          l_unsecureHomerAddr, l_unsecureHomerSize);
+
+                assert(l_unsecureHomerSize <= MAX_RING_BUF_SIZE,
+                       "loadHcode: unsecure HOMER is bigger than the output buffer");
+                assert(l_unsecureHomerSize <= MAX_UNSECURE_HOMER_SIZE,
+                       "loadHcode: the size of unsecure HOMER is more than 0x%x", MAX_UNSECURE_HOMER_SIZE);
+                assert(l_unsecureHomerAddr,
+                       "loadHcode: the unsecure HOMER addr is 0");
+
+                void* l_unsecureHomerVAddr = HBPM_MAP(
+                                   UNSEC_HOMER_PHYS_ADDR,
+                                   l_unsecureHomerSize);
+                assert(l_unsecureHomerVAddr,
+                       "loadHcode: could not map unsecure HOMER phys addr");
+                memcpy(l_unsecureHomerVAddr, l_buffer2, l_unsecureHomerSize);
+
+                int l_rc = HBPM_UNMAP(l_unsecureHomerVAddr);
+                if(l_rc)
+                {
+                    /*@
+                    * @errortype
+                    * @reasoncode ISTEP::RC_MM_UNMAP_FAILED
+                    * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                    * @moduleid   ISTEP::MOD_LOAD_HCODE
+                    * @userdata1  Unsecure HOMER addr
+                    * @userdata2  RC from HBPM_UNMAP
+                    * @devdesc    Could not unmap unsecure HOMER's virtual
+                    *             address
+                    * @custdesc   A problem occurred during the IPL of the
+                    *             system
+                    */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           ISTEP::MOD_LOAD_HCODE,
+                                           ISTEP::RC_MM_UNMAP_FAILED,
+                                           reinterpret_cast<uint64_t>(
+                                                      l_unsecureHomerVAddr),
+                                           l_rc,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(ISTEP_COMP_NAME);
+                    break;
+                }
+
+            }
+
 
             // Log some info about Homer
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -455,10 +518,10 @@ namespace HBPM
 
         } while(0);
 
-        free(l_buffer0);
         free(l_buffer1);
         free(l_buffer2);
         free(l_buffer3);
+        free(l_buffer4);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadHcode: RC=0x%X, PLID=0x%lX",

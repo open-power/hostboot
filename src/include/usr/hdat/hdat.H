@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -225,6 +225,7 @@ enum hdatMsVpdRhbAddrRangeType : uint8_t
     RHB_TYPE_SECUREBOOT      = 3,
     RHB_TYPE_HOMER_OCC       = 4,
     RHB_TYPE_VERIFIED_PNOR   = 5,
+    RHB_TYPE_UNSECURE_HOMER  = 6,
 
     RHB_TYPE_INVALID         = 0xFF
 };

@@ -70,7 +70,11 @@
 #include    <p9n2_quad_scom_addresses_fld.H>
 
 #include    <secureboot/smf_utils.H>
+#include    <secureboot/smf.H>
 #include    <isteps/mem_utils.H>
+#include    <util/align.H>
+
+#include    <limits.h>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -405,10 +409,10 @@ void* host_build_stop_image (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
     // allocate four temporary work buffers
-    void* l_temp_buffer0 = malloc(HW_IMG_RING_SIZE);
-    void* l_temp_buffer1 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer1 = malloc(HW_IMG_RING_SIZE);
     void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer3 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer4 = malloc(MAX_RING_BUF_SIZE);
 
     do  {
         //Determine top-level system target
@@ -444,10 +448,11 @@ void* host_build_stop_image (void *io_pArgs)
             l_memBase = get_top_homer_mem_addr();
             assert (l_memBase != 0,
                     "host_build_stop_image: Top of memory was 0!");
+
             l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
         }
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "HOMER base = %.16X", l_memBase);
+                   "HOMER base = 0x%.16llX", l_memBase);
         l_pRealMemBase = reinterpret_cast<void * const>(l_memBase );
 
         //Convert the real memory pointer to a pointer in virtual memory
@@ -496,6 +501,9 @@ void* host_build_stop_image (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Found %d functional procs in system",
                    l_procChips.size()   );
+
+        auto l_unsecureHomerSize =
+                          l_sys->getAttr<TARGETING::ATTR_UNSECURE_HOMER_SIZE>();
 
         for (const auto & l_procChip: l_procChips)
         {
@@ -555,6 +563,23 @@ void* host_build_stop_image (void *io_pArgs)
                     break;
                 }
 
+                if(SECUREBOOT::SMF::isSmfEnabled())
+                {
+                    // In SMF mode, unsecure HOMER goes to the top of unsecure
+                    // memory (2MB aligned); we need to subtract the size of the
+                    // unsecure HOMER and align the resulting address to arrive
+                    // at the correct location.
+                    uint64_t l_unsecureHomerAddr = ALIGN_DOWN_X(
+                                                      ISTEP::get_top_mem_addr()
+                                                      - MAX_UNSECURE_HOMER_SIZE,
+                                                      2 * MEGABYTE);
+                    l_procChip->setAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>
+                                    (l_unsecureHomerAddr);
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "host_build_stop_image: unsecure HOMER addr = 0x%.16llX",
+                              l_unsecureHomerAddr);
+                }
+
                 //Call p9_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
                                  p9_hcode_image_build,
@@ -564,13 +589,13 @@ void* host_build_stop_image (void *io_pArgs)
                                  l_ringOverrides,
                                  PHASE_IPL,
                                  img_type,
-                                 l_temp_buffer0,
-                                 HW_IMG_RING_SIZE,
                                  l_temp_buffer1,
-                                 MAX_RING_BUF_SIZE,
+                                 HW_IMG_RING_SIZE,
                                  l_temp_buffer2,
                                  MAX_RING_BUF_SIZE,
                                  l_temp_buffer3,
+                                 MAX_RING_BUF_SIZE,
+                                 l_temp_buffer4,
                                  MAX_RING_BUF_SIZE);
 
                 if ( l_errl )
@@ -581,6 +606,58 @@ void* host_build_stop_image (void *io_pArgs)
 
                     //  drop out of block with errorlog.
                     break;
+                }
+
+                // We now need to copy the data that was put in l_temp_buffer2
+                // by the p9_hcode_image_build procedure into the unsecure
+                // HOMER memory
+                if(SECUREBOOT::SMF::isSmfEnabled())
+                {
+                    auto l_unsecureHomerAddr = l_procChip->
+                              getAttr<TARGETING::ATTR_UNSECURE_HOMER_ADDRESS>();
+
+
+                    assert(l_unsecureHomerSize <= MAX_RING_BUF_SIZE,
+                           "host_build_stop_image: unsecure HOMER is bigger than the output buffer");
+                    assert(l_unsecureHomerSize <= MAX_UNSECURE_HOMER_SIZE,
+                           "host_build_stop_image: the size of unsecure HOMER is more than 0x%x", MAX_UNSECURE_HOMER_SIZE);
+                    assert(l_unsecureHomerAddr,
+                           "host_build_stop_image: the unsecure HOMER addr is 0");
+
+                    void* l_unsecureHomerVAddr = mm_block_map(
+                                   reinterpret_cast<void*>(l_unsecureHomerAddr),
+                                   l_unsecureHomerSize);
+                    assert(l_unsecureHomerVAddr,
+                           "host_build_stop_image: could not map unsecure HOMER phys addr");
+                    memcpy(l_unsecureHomerVAddr,
+                           l_temp_buffer2,
+                           l_unsecureHomerSize);
+                    int l_rc = mm_block_unmap(l_unsecureHomerVAddr);
+                    if(l_rc)
+                    {
+                        /*@
+                        * @errortype
+                        * @reasoncode ISTEP::RC_MM_UNMAP_FAILED
+                        * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                        * @moduleid   ISTEP::MOD_BUILD_HCODE_IMAGES
+                        * @userdata1  Unsecure HOMER addr
+                        * @userdata2  RC from mm_block_unmap
+                        * @devdesc    Could not unmap unsecure HOMER's virtual
+                        *             address
+                        * @custdesc   A problem occurred during the IPL of the
+                        *             system
+                        */
+                        l_errl = new ERRORLOG::ErrlEntry(
+                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               ISTEP::MOD_BUILD_HCODE_IMAGES,
+                                               ISTEP::RC_MM_UNMAP_FAILED,
+                                               reinterpret_cast<uint64_t>(
+                                                          l_unsecureHomerVAddr),
+                                               l_rc,
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        l_errl->collectTrace(ISTEP_COMP_NAME);
+                        break;
+                    }
                 }
 
                 l_errl = applyHcodeGenCpuRegs( l_procChip,
@@ -654,10 +731,10 @@ void* host_build_stop_image (void *io_pArgs)
     }
 
     // delete working buffers
-    if( l_temp_buffer0 ) { free(l_temp_buffer0); }
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
     if( l_temp_buffer2 ) { free(l_temp_buffer2); }
     if( l_temp_buffer3 ) { free(l_temp_buffer3); }
+    if( l_temp_buffer4 ) { free(l_temp_buffer4); }
 
 #ifdef CONFIG_SECUREBOOT
     // securely unload HCODE PNOR section, if necessary

@@ -159,6 +159,7 @@ enum MemoryError_t
 #define HBRT_RSVD_MEM__SECUREBOOT         "ibm,secure-crypt-algo-code"
 #define HBRT_RSVD_MEM__DATA               "ibm,hbrt-data"
 #define HBRT_RSVD_MEM__ARCH_REG           "ibm,arch-reg-data"
+#define HBRT_RSVD_MEM__UNSEC_HOMER        "ibm,unsecure-homer"
 
 /* Aligned reserved memory size for Opal */
 #define HBRT_RSVD_MEM_OPAL_ALIGN  64*KILOBYTE
