@@ -168,7 +168,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
         l_procToMemVec.push_back(l_pToM);
     }
 
-    TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: distributing 0x%x requested memory.", i_requestedSmfMemAmtInBytes);
+    TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: distributing 0x%.16llx requested memory.", i_requestedSmfMemAmtInBytes);
 
     int64_t l_remainingAmtToAllocate = i_requestedSmfMemAmtInBytes;
     uint64_t l_currChunkSize = MIN_SMF_MEMORY_AMT;
@@ -270,7 +270,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
     uint64_t l_totMemOnSystem = 0; // For error handling below
     for(const auto l_proc : l_procList)
     {
-        TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: proc 0x%x SMF_BAR_SIZE = 0x%x",
+        TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: proc 0x%x SMF_BAR_SIZE = 0x%.16llx",
                   TARGETING::get_huid(l_proc),
                   l_proc->getAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>());
         l_totMemOnSystem += getTotalProcMemSize(l_proc);
@@ -311,7 +311,7 @@ errlHndl_t distributeSmfMem(uint64_t i_requestedSmfMemAmtInBytes)
     // that could be allocated.
     if(i_requestedSmfMemAmtInBytes != l_totalAllocated)
     {
-        TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: could not allocate exactly 0x%x SMF mem, allocated 0x%x instead.", i_requestedSmfMemAmtInBytes, l_totalAllocated);
+        TRACFCOMP(SMF_TRACE::g_trac_smf, "distributeSmfMem: could not allocate exactly 0x%.16llx SMF mem, allocated 0x%.16llx instead.", i_requestedSmfMemAmtInBytes, l_totalAllocated);
         /*@
         * @reasoncode SECUREBOOT::RC_ALLOCATED_NE_REQUESTED
         * @moduleid   SECUREBOOT::MOD_SMF_SPLIT_SMF_MEM

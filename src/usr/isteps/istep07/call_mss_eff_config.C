@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,10 @@
 #include    <p9c_mss_eff_config_thermal.H>
 
 #include    <hbotcompid.H>
+
+#include    <nvram/nvram_interface.H>
+#include    <secureboot/smf.H>
+#include    <stdlib.h>
 
 namespace   ISTEP_07
 {
@@ -434,6 +438,40 @@ void*    call_mss_eff_config( void *io_pArgs )
             errlCommit( l_err, HWPF_COMP_ID );
         }
     }
+
+#ifndef CONFIG_FSP_BUILD
+    if(l_StepError.isNull())
+    {
+        const char* l_smfMemAmtStr = nullptr;
+        l_err = NVRAM::nvramRead(NVRAM::SMF_MEM_AMT_KEY, l_smfMemAmtStr);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"NVRAM read failed. Will not attempt to distribute any SMF memory.");
+            // Do not propagate the error - we don't care if NVRAM read fails
+            delete l_err;
+            l_err = nullptr;
+            break;
+        }
+
+        // l_smfMemAmtStr will be nullptr if the SMF_MEM_AMT_KEY doesn't exist
+        if(l_smfMemAmtStr)
+        {
+            uint64_t l_smfMemAmt = strtoul(l_smfMemAmtStr, nullptr, 16);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"Distributing 0x%.16llx SMF memory among the procs on the system", l_smfMemAmt);
+            l_err = SECUREBOOT::SMF::distributeSmfMem(l_smfMemAmt);
+            if(l_err)
+            {
+                // Do not propagate or break on error - distributeSmfMem will
+                // not return unrecoverable errors.
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; no SMF memory was distributed.");
+        }
+    }
+#endif
 
     } while (0);
 

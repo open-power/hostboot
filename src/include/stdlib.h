@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,17 @@ void* malloc(size_t) __attribute__((malloc));
 void free(void*);
 void* realloc(void*, size_t);
 void* calloc(size_t, size_t) __attribute__((malloc));
+
+/**
+ * @brief converts a given char string to uint64_t
+ *
+ * @param[in] nptr input string in the form of pointer to char
+ * @param[in] endptr UNUSED
+ * @param[in] base UNUSED (always base 16)
+ * @return the uint64_t representation of the input string or 0
+ *         if the function failed to convert
+ */
+uint64_t strtoul(const char *nptr, char **endptr, int base);
 
 #ifdef __cplusplus
 };
