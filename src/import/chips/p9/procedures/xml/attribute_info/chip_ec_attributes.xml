@@ -7600,13 +7600,14 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Enable extended addressing mode to workaround MCD
-      coherency issue HW423589
+      coherency issue HW423589.  EC update will prevent application on
+      any system.
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x21</value>
+          <value>0xAF</value>
           <test>EQUAL</test>
         </ec>
       </chip>
@@ -7615,7 +7616,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW423589_OPTION1</id>
-    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Disable MCD to workaround coherency issue HW423589
     </description>
@@ -7624,13 +7625,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x22</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>

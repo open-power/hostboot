@@ -168,29 +168,29 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0xFC );
             l_scom_buffer.insert<28, 8, 56, uint64_t>(literal_0xFC );
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x23)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_G_WR_ON = 0x1;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_G_WR_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x23)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_G_RD_ON = 0x1;
                 l_scom_buffer.insert<5, 1, 63, uint64_t>(l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_G_RD_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x23)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_VG_WR_ON = 0x1;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_VG_WR_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x23)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_VG_RD_ON = 0x1;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_VA_VA_SOUTH_VA_EG_EG_SCF_DISABLE_VG_RD_ON );
