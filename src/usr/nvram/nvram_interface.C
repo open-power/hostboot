@@ -39,6 +39,9 @@ namespace NVRAM_TRACE
 namespace NVRAM
 {
 
+const char TEST_KEY[]        = "test";
+const char SMF_MEM_AMT_KEY[] = "smf_mem_amt";
+
 /*
  * @brief Searches NVRAM partition for the i_key and puts the value in
  *        o_val. An error is returned if NVRAM can't be loaded or if

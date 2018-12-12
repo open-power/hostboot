@@ -35,7 +35,8 @@ namespace NVRAM_TRACE
 namespace NVRAM
 {
 
-const char TEST_KEY[] = "test";
+extern const char TEST_KEY[];
+extern const char SMF_MEM_AMT_KEY[];
 
 /**
  * @brief Utility function to read the i_key from the NVRAM PNOR partition.
