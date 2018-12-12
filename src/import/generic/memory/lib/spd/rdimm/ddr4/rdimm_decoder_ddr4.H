@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -434,7 +434,6 @@ class decoder<DDR4, RDIMM_MODULE, R > : public dimm_module_decoder
         fapi_try_exit:
             return fapi2::current_err;
         }
-
 
 };// decoder
 

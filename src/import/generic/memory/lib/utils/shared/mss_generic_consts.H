@@ -136,6 +136,9 @@ enum generic_ffdc_codes
     SET_HYBRID_MEDIA = 0x1028,
     SET_MRANKS = 0x1029,
     SET_DIMM_RANKS_CNFG = 0x1039,
+
+    // SPD fields function codes
+    DDIMM_RAWCARD_DECODE = 0x103a,
 };
 
 ///
@@ -193,6 +196,7 @@ namespace spd
 ///
 enum rev : uint8_t
 {
+    V0_0 = 0x00, ///< represents Rev 0.0
     V1_0 = 0x10, ///< represents Rev 1.0
     V1_1 = 0x11, ///< represents Rev 1.1
     V1_2 = 0x12, ///< represents Rev 1.2
@@ -202,6 +206,7 @@ enum rev : uint8_t
     GEN_SEC_MAX = V1_1,
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
+    DDIMM_MAX = V1_0,
 };
 
 ///
@@ -215,6 +220,7 @@ enum parameters
     RDIMM_MODULE,
     LRDIMM_MODULE,
     NVDIMM_MODULE,
+    DDIMM_MODULE,
 };
 
 ///
@@ -234,6 +240,7 @@ enum dimm_type
 {
     RDIMM = 0b0001,
     LRDIMM = 0b0100,
+    DDIMM = 0b1010,
 };
 
 enum guard_band : uint16_t

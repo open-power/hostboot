@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -762,7 +762,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
         virtual fapi2::ReturnCode base_module( uint8_t& o_value ) const override
         {
             // Sparsed reserved bits within valid SPD field range
-            static const std::vector<uint8_t> l_reserved_bits{0b0111, 0b1010, 0b1011, 0b1110, 0b1111};
+            static const std::vector<uint8_t> l_reserved_bits{0b0111, 0b1011, 0b1110, 0b1111};
             FAPI_TRY( (mss::spd::reader<fields_t::BASE_MODULE, R>(iv_target, iv_data, o_value)) );
             FAPI_TRY( check::reserved_values(iv_target, l_reserved_bits, BASE_MODULE_TYPE, o_value) );
 

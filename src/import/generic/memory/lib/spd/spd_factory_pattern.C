@@ -302,6 +302,10 @@ fapi2::ReturnCode factories::dimm_module_select_param(parameters& o_param) const
             o_param = LRDIMM_MODULE;
             break;
 
+        case DDIMM:
+            o_param = DDIMM_MODULE;
+            break;
+
         default:
             FAPI_ASSERT(false,
                         fapi2::MSS_INVALID_DIMM_TYPE()
