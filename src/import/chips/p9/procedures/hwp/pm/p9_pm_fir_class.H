@@ -773,7 +773,7 @@ fapi2::ReturnCode PMFir<Ftype>::saveMask()
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::saveMask()
 {
-    uint64_t l_mask;
+    uint64_t l_mask = 0;
     iv_mask.extract<0, 64>(l_mask);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save OCC LFIR");
@@ -791,7 +791,7 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::saveMask()
 {
-    uint64_t l_mask;
+    uint64_t l_mask = 0;
     iv_mask.extract<0, 64>(l_mask);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save PBA LFIR");
@@ -808,7 +808,7 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::saveMask()
 {
-    uint32_t l_mask;
+    uint32_t l_mask = 0;
     iv_mask.extract<0, 32>(l_mask);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CME_LOCAL_FIRMASK, iv_ex, l_mask),
              "ERROR: Failed to save CME LFIR");
@@ -825,7 +825,7 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::saveMask()
 {
-    uint32_t l_mask;
+    uint32_t l_mask = 0;
     iv_mask.extract<0, 32>(l_mask);
 
     if (iv_targetType == EQ_TARGET)
@@ -864,8 +864,8 @@ fapi2::ReturnCode PMFir<Ftype>::restoreSavedMask()
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
 {
-    uint64_t l_mask;
-    uint64_t l_tempMask;
+    uint64_t l_mask = 0;
+    uint64_t l_tempMask = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved OCC LFIR");
@@ -891,8 +891,8 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
 {
-    uint64_t l_mask;
-    uint64_t l_tempMask;
+    uint64_t l_mask = 0;
+    uint64_t l_tempMask = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved PBA LFIR");
@@ -918,8 +918,8 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::restoreSavedMask()
 {
-    uint32_t l_mask;
-    uint32_t l_tempMask;
+    uint32_t l_mask = 0;
+    uint32_t l_tempMask = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_LOCAL_FIRMASK, iv_ex, l_mask),
              "ERROR: Failed to retrieve saved CME LFIR mask");
@@ -945,8 +945,8 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::restoreSavedMask()
 {
-    uint32_t l_mask;
-    uint32_t l_tempMask;
+    uint32_t l_mask = 0;
+    uint32_t l_tempMask = 0;
 
     if (iv_targetType == EQ_TARGET)
     {
