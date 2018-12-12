@@ -712,7 +712,7 @@ namespace PARTIAL_GOOD
                     //                    here.
                     new PartialGoodRule
                     (
-                        {&PREDICATE_CUMULUS, &PREDICATE_NIMBUS},
+                        PREDICATE_P9,
                         MASK_NA,
                         MASK_NA,
                         INDEX_NA,
@@ -778,7 +778,7 @@ namespace PARTIAL_GOOD
                     //              present on Nimbus.
                     new PartialGoodRule
                     (
-                        {&PREDICATE_CUMULUS},
+                        {&PREDICATE_CUMULUS, &PREDICATE_AXONE},
                         XBUS_R1_PG_MASK,
                         ALL_OFF_AG_MASK,
                         USE_CHIPLET_ID,
