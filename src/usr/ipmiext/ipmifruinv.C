@@ -55,6 +55,9 @@ extern trace_desc_t * g_trac_ipmi;
 #define JEDEC_DRAM_WIDTH_MIN_VALUE           4
 #define JEDEC_RANKS_MASK                     3
 #define JEDEC_RANKS_MIN_VALUE                1
+#define JEDEC_DIE_COUNT_MASK                 7
+#define JEDEC_DIE_COUNT_MIN_VALUE            1
+#define JEDEC_SIGNAL_LOADING_3DS_TYPE        2
 
 /**
  * @brief Structure described mapping between JEDEC identifiers
@@ -79,7 +82,6 @@ static const JedecNameMap jedecManufacturer[] =
     { 0x8004, "Fujitsu" },
     { 0x802C, "Micron Technology" },
     { 0x8054, "Hewlett-Packard" },
-    { 0x8089, "Intel" },
     { 0x8089, "Intel" },
     { 0x8096, "LG Semi" },
     { 0x80A4, "IBM" },
@@ -927,12 +929,26 @@ errlHndl_t isdimmIpmiFruInv::addSpdDetails(std::vector<uint8_t> &io_data)
                             DEVICE_SPD_ADDRESS(SPD::MODULE_RANKS));
         if (l_errl) { break; }
 
+        uint8_t l_signalLoading = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_signalLoading, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::SDRAM_DEVICE_TYPE_SIGNAL_LOADING));
+        if (l_errl) { break; }
+        uint8_t l_dieCount = 0;
+        if (l_signalLoading == JEDEC_SIGNAL_LOADING_3DS_TYPE)
+        {
+            l_dieCount = l_invalidValue;
+            l_errl = deviceRead(iv_target, &l_dieCount, l_fieldSize,
+                                DEVICE_SPD_ADDRESS(SPD::SDRAM_DIE_COUNT));
+            if (l_errl) { break; }
+        }
+
         // Calculate capacity of memory module
         uint16_t l_capacityGiB = 0;
         if (l_density <= JEDEC_DENSITY_MASK &&
             l_busWidthPri <= JEDEC_MEMORY_BUS_WIDTH_PRI_MASK &&
             l_dramWidth <= JEDEC_DRAM_WIDTH_MASK &&
-            l_ranks <= JEDEC_RANKS_MASK)
+            l_ranks <= JEDEC_RANKS_MASK &&
+            l_dieCount <= JEDEC_DIE_COUNT_MASK)
         {
             // Get density
             // JEDEC Standard No. 21-C. Page 4.1.2.12 – 9
@@ -949,10 +965,17 @@ errlHndl_t isdimmIpmiFruInv::addSpdDetails(std::vector<uint8_t> &io_data)
             // b00 - 4 bits ... b11 - 32 bits. All others reserved.
             const uint32_t l_realDevWidth = JEDEC_DRAM_WIDTH_MIN_VALUE << l_dramWidth;
 
+            // Calculate the Die Count. For non 3DS the Die Count = 1.
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 11
+            // b000 - 1 ... b111 - 8. All others reserved.
+            const uint32_t l_realDieCount = JEDEC_DIE_COUNT_MIN_VALUE + l_dieCount;
+
             // Calculate the Number of Package Ranks per DIMM
             // JEDEC Standard No. 21-C. Page 4.1.2.12 – 14
             // b00 - 1 package rank ... b11 - 4 package ranks. All others reserved.
-            const uint32_t l_realRanks = JEDEC_RANKS_MIN_VALUE + l_ranks;
+            // For 3DS total Logical Ranks per DIMM = (Logical Ranks per DIMM) * (Die Count)
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 15
+            const uint32_t l_realRanks = (JEDEC_RANKS_MIN_VALUE + l_ranks) * l_realDieCount;
 
             // Calculate the Module Capacity (in GiB >> 10) according to the formula
             // from the JEDEC Standard specification No. 21-C. Page 4.1.2.12 – 15
