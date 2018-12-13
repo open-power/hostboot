@@ -367,6 +367,12 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
       <id>FRU_ID</id>
     </attribute>
     <attribute>
@@ -386,9 +392,6 @@
   <targetType>
     <id>chip-ocmb-explorer</id>
     <parent>chip-ocmb</parent>
-    <attribute>
-      <id>FAPI_I2C_CONTROL_INFO</id>
-    </attribute>
     <attribute>
       <default>EXPLORER</default>
       <id>MODEL</id>
@@ -996,6 +999,9 @@
     </attribute>
     <attribute>
       <id>EEPROM_NV_INFO</id>
+    </attribute>
+    <attribute>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
     </attribute>
     <attribute>
       <id>FRU_ID</id>

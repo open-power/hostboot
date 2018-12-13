@@ -521,7 +521,7 @@
         <default>400,400,0,0,0,0,0,0,0,0,0,0,0,
                  400,400,400,400,0,0,0,0,0,0,0,0,0,
                  400,400,0,0,0,0,0,0,0,0,0,0,0,
-                 0,400,0,0,0,0,0,0,0,0,0,0,0</default>
+                 400,400,0,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -9403,7 +9403,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9412,6 +9412,23 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -9443,6 +9460,24 @@
         <id>VPD_REC_NUM</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9472,6 +9507,24 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -9503,6 +9556,24 @@
         <id>VPD_REC_NUM</id>
         <default>3</default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9532,6 +9603,24 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>4</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -9563,6 +9652,24 @@
         <id>VPD_REC_NUM</id>
         <default>5</default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9592,6 +9699,24 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>6</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -9623,6 +9748,24 @@
         <id>VPD_REC_NUM</id>
         <default>7</default>
     </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9652,6 +9795,24 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>8</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <!-- Valid Mux Bus Selections are 0x08-0x0F -->
+            <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
@@ -9683,6 +9844,8 @@
         <id>VPD_REC_NUM</id>
         <default>9</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9713,6 +9876,8 @@
         <id>VPD_REC_NUM</id>
         <default>10</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9743,6 +9908,8 @@
         <id>VPD_REC_NUM</id>
         <default>11</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9773,6 +9940,8 @@
         <id>VPD_REC_NUM</id>
         <default>12</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9803,6 +9972,8 @@
         <id>VPD_REC_NUM</id>
         <default>13</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9833,6 +10004,8 @@
         <id>VPD_REC_NUM</id>
         <default>14</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <targetInstance>
@@ -9863,6 +10036,8 @@
         <id>VPD_REC_NUM</id>
         <default>15</default>
     </attribute>
+    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
+         the simics model does not provide i2c address spaces for these targets-->
 </targetInstance>
 
 <!-- ===================================================================== -->
@@ -12746,6 +12921,52 @@
     <attribute>
         <id>TYPE</id>
         <default>PERV</default>
+    </attribute>
+</targetInstance>
+
+<!-- ===================================================================== -->
+<!-- I2C_MUX -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0i2cmux0</id>
+    <type>i2c_mux_pca9847</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004D0000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>I2C_MUX_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xE0</value></field>
+            <field><id>engine</id><value>3</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
