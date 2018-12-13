@@ -117,9 +117,6 @@
   <targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute>
-      <id>EEPROM_VPD_PRIMARY_INFO</id>
-    </attribute>
-    <attribute>
       <id>IPMI_SENSORS</id>
     </attribute>
   </targetTypeExtension>
