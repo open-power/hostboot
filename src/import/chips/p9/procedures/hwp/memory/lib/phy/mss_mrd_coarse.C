@@ -64,7 +64,7 @@ namespace lrdimm
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
 /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
@@ -86,7 +86,7 @@ fapi_try_exit:
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
 /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+/// @return FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode mrd_coarse::post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
@@ -105,7 +105,7 @@ fapi_try_exit:
 /// @param[in] i_target the DIMM target
 /// @param[in] i_rank the DIMM rank on which to set the delay
 /// @param[in] i_delay the indexed delay to set
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets up buffer control word F6BC4x to do compares on a per-bit level
 ///
 fapi2::ReturnCode mrd_coarse::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -167,7 +167,7 @@ fapi_try_exit:
 /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
 /// @param[in] i_delay the delay for this run
 /// @param[in,out] io_results the results
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::analyze_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
@@ -186,7 +186,7 @@ fapi2::ReturnCode mrd_coarse::analyze_results(const fapi2::Target<fapi2::TARGET_
     // Displays all of the data here - just.in.case.
     for(uint8_t l_buffer_loop = 0; l_buffer_loop < MAX_LRDIMM_BUFFERS; ++l_buffer_loop)
     {
-        for(uint8_t i = 0; i < 8; ++i)
+        for(uint8_t i = 0; i < data_response::MAX_NUM_BEATS; ++i)
         {
             FAPI_DBG("%s delay:0x%02x MRD_COARSE result buffer%u BEAT%u data:0x%02x",
                      mss::c_str(i_target), i_delay, l_buffer_loop, i, l_data.iv_buffer_beat[l_buffer_loop][i]);
@@ -374,7 +374,7 @@ fapi_try_exit:
 /// @param[in] i_target the MCA target
 /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
 /// @param[in,out] io_results the results
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::find_final_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
@@ -399,7 +399,7 @@ fapi_try_exit:
 /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
 /// @param[in] i_results the results
 /// @param[out] o_container the PBA commands structure
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::set_final_delays_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
@@ -431,7 +431,7 @@ fapi2::ReturnCode mrd_coarse::set_final_delays_helper(const fapi2::Target<fapi2:
                              l_result.first.iv_final_delay :
                              l_result.second.iv_final_delay;
 
-        FAPI_DBG("%s MRD coarse rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped nibble0:0x%02x nibble1:0x%02x",
+        FAPI_DBG("%s MRD_COARSE rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped nibble0:0x%02x nibble1:0x%02x",
                  mss::c_str(l_mca), i_dimm_rank, l_buffer, l_result.first.iv_final_delay, l_result.second.iv_final_delay,
                  l_are_nibbles_swapped ? "are" : "not", l_bcw_result0, l_bcw_result1);
 
@@ -462,7 +462,7 @@ fapi_try_exit:
 /// @param[in] i_target the DIMM target
 /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
 /// @param[in] i_results the results
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::set_final_delays(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
@@ -491,7 +491,7 @@ fapi_try_exit:
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
 /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                    const uint64_t i_rp,
@@ -499,7 +499,14 @@ fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 {
     constexpr uint8_t MPR_LOCATION0 = 0;
     std::vector<uint64_t> l_ranks;
+
+    // Use 0x2b for the pattern
+    // This pattern was determined experimentally, but has the following good qualities
+    // 1) it is not cyclic
+    // 2) it has all transitions (00, 01, 10, 11), making for a good SI test pattern
     constexpr uint8_t l_pattern_expected = 0x2B;
+    // We write to all of the MPR registers, so we clone the 2B pattern four times
+    // The patterns get split and written individually
     constexpr uint32_t l_pattern_set = 0x2B2B2B2B;
 
     // 1) Get our ranks within the configured rank pair

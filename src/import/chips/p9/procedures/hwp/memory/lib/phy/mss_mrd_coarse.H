@@ -59,6 +59,11 @@ class mrd_coarse : public step
         // From the LRDIMM spec - we only have 5 delays -2->+2
         static constexpr uint64_t NUM_DELAYS = 5;
 
+        // Default delay value 2 is for 0 nck
+        static constexpr uint8_t DEFAULT_DELAYS = 2;
+        static constexpr uint8_t DEFAULT_TO_FAIL = 0;
+        static constexpr uint64_t RANKS_PER_FUNCTION_SPACE = 2;
+
         mrd_coarse() :
             step("MRD_COARSE")
         {}
@@ -80,15 +85,18 @@ class mrd_coarse : public step
             /// @brief Default constructor
             ///
             recorder() :
-                iv_results(0),
-                iv_final_delay(2), // 2 is for 0 delay
+                iv_results(DEFAULT_TO_FAIL),
+                iv_final_delay(DEFAULT_DELAYS), // 2 is for 0 delay
                 iv_invalid_data_count(CLEAN)
             {}
 
             ///
             /// @brief constructor
+            /// @param[in] i_results results from the MRD_COARSE run
+            /// @param[in] i_final_delay final delay chosen by the MRD_COARSE run
+            /// @param[in] i_invalid_count number of invalid data results seen
             ///
-            recorder(const fapi2::buffer<uint8_t> i_results, const uint8_t i_final_delay, const uint64_t i_invalid_count = CLEAN) :
+            recorder(const fapi2::buffer<uint8_t>& i_results, const uint8_t i_final_delay, const uint64_t i_invalid_count = CLEAN) :
                 iv_results(i_results),
                 iv_final_delay(i_final_delay),
                 iv_invalid_data_count(i_invalid_count)
@@ -210,7 +218,7 @@ class mrd_coarse : public step
             // So, odd ranks are on function space 0
             // Even ranks are on function space 1
             // Just mod it by 2...
-            return (i_dimm_rank % 2) ? FUNC_SPACE_1 : FUNC_SPACE_0;
+            return (i_dimm_rank % RANKS_PER_FUNCTION_SPACE) ? FUNC_SPACE_1 : FUNC_SPACE_0;
         }
 
         ///
@@ -224,7 +232,9 @@ class mrd_coarse : public step
             // Taken from the spec ~page 60->64
             // Ranks 0/1: 0x0c
             // Ranks 2/3: 0x0e
-            return (i_dimm_rank < 2) ? 0x0c : 0x0e;
+            constexpr uint8_t RANK01 = 0x0c;
+            constexpr uint8_t RANK23 = 0x0e;
+            return (i_dimm_rank < RANKS_PER_FUNCTION_SPACE) ? RANK01 : RANK23;
         }
 
         ///

@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -476,12 +477,15 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                                    const uint8_t i_abort_on_error ) const
 {
     std::vector<uint64_t> l_ranks;
-    constexpr uint8_t l_pattern = 0x2B;
+    uint8_t l_patterns[NUM_LRDIMM_TRAINING_PATTERNS] = {};
 
     // Get ranks
     FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
-             "Failed get_ranks_in_pair in mwd::run %s",
+             "Failed get_ranks_in_pair in mwd_coarse::run %s",
              mss::c_str(i_target));
+
+    // Gets the patterns to use
+    FAPI_TRY(mss::lrdimm_training_pattern(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_patterns));
 
     // Loop through all ranks
     for(const auto l_rank : l_ranks)
@@ -510,16 +514,12 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         FAPI_TRY(mss::rank::get_dimm_target_from_rank(i_target, l_rank, l_dimm),
                  "%s failed to get DIMM from rank%u", mss::c_str(i_target), l_dimm_rank);
 
-        // 1) Setup data pattern in the buffer MPR regs
-        FAPI_TRY(lrdimm::set_expected_mpr_pattern(l_dimm, l_pattern), "%s failed set_expect_mpr_pattern rank%u, pattern%u",
-                 mss::c_str(l_dimm), l_dimm_rank, l_pattern);
-
         // Setup per-lane compare for MWD
-        // 2) Configure the compare output on a per-bit level (each bit returns 0/1, rather than each nibble)
+        // 1) Configure the compare output on a per-bit level (each bit returns 0/1, rather than each nibble)
         FAPI_TRY(lrdimm::set_training_level(l_dimm, lrdimm::training_level::BIT), "%s failed set_per_lane_level rank %u",
                  mss::c_str(l_dimm), l_dimm_rank);
 
-        // 3) Buffer into MWD mode
+        // 2) Buffer into MWD mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::MWD), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
@@ -527,22 +527,31 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         for(uint8_t l_delay = 0; l_delay < NUM_DELAYS; ++l_delay)
         {
             // Set delay (broadcast across rank)
-            // 4) Setup our delays across the buffer
+            // 3) Setup our delays across the buffer
             FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay), "%s rank%u failed set_delay delay:%u", mss::c_str(l_dimm),
                      l_dimm_rank, l_delay);
 
-            // Conduct a WR/RD
-            // Write sends data from the buffer MPR
-            // 5) Read reads back what was written and does a bitwise compare
-            FAPI_TRY(conduct_write_read(l_dimm, l_dimm_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
-                     l_dimm_rank);
+            // Loop over all patterns
+            for(uint8_t l_pattern_num = 0; l_pattern_num < NUM_LRDIMM_TRAINING_PATTERNS; ++l_pattern_num)
+            {
+                // 4) Setup data pattern in the buffer MPR regs
+                FAPI_TRY(lrdimm::set_expected_mpr_pattern(l_dimm, l_patterns[l_pattern_num]),
+                         "%s failed set_expect_mpr_pattern rank%u, pattern%u",
+                         mss::c_str(l_dimm), l_dimm_rank, l_patterns[l_pattern_num]);
 
-            // 6) Conduct an NTTM mode read
-            FAPI_TRY(execute_nttm_mode_read(i_target), "%s rank%u failed execute_nttm_mode_read", mss::c_str(l_dimm), l_dimm_rank);
+                // Conduct a WR/RD
+                // Write sends data from the buffer MPR
+                // 5) Read reads back what was written and does a bitwise compare
+                FAPI_TRY(conduct_write_read(l_dimm, l_dimm_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
+                         l_dimm_rank);
 
-            // 7) Analyze results
-            FAPI_TRY(analyze_results(l_dimm, l_dimm_rank, l_delay, l_results), "%s rank%u failed process_results",
-                     mss::c_str(i_target), l_dimm_rank);
+                // 6) Conduct an NTTM mode read
+                FAPI_TRY(execute_nttm_mode_read(i_target), "%s rank%u failed execute_nttm_mode_read", mss::c_str(l_dimm), l_dimm_rank);
+
+                // 7) Analyze results
+                FAPI_TRY(analyze_results(l_dimm, l_dimm_rank, l_delay, l_results), "%s rank%u failed process_results",
+                         mss::c_str(i_target), l_dimm_rank);
+            }
         }
 
         // 8) Buffer out of training mode

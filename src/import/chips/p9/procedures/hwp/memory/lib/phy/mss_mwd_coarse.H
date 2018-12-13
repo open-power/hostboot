@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -60,6 +61,9 @@ class mwd_coarse : public step
 
         // Default delay value 2 is for 0 nck
         static constexpr uint8_t DEFAULT_DELAYS = 2;
+        static constexpr uint8_t DEFAULT_TO_PASS = 0xF8;
+        static constexpr uint8_t PASSING_RESULT = 0x0f;
+        static constexpr uint8_t FAILING_RESULT = 0x00;
 
         mwd_coarse() :
             step("MWD_COARSE")
@@ -68,7 +72,9 @@ class mwd_coarse : public step
         ///
         /// @brief Default virtual destructor
         ///
-        ~mwd_coarse() = default;        ///
+        ~mwd_coarse() = default;
+
+        ///
         /// @class mwd_coarse::recorder
         /// @brief Records the results for a given nibble
         ///
@@ -78,9 +84,15 @@ class mwd_coarse : public step
             /// @brief Default constructor
             ///
             recorder() :
-                iv_results(0),
+                iv_results(DEFAULT_TO_PASS),
                 iv_final_delay(DEFAULT_DELAYS)
             {}
+
+            ///
+            /// @brief constructor
+            /// @param[in] i_results results from the MRD_COARSE run
+            /// @param[in] i_final final delay chosen by the MRD_COARSE run
+            ///
             recorder(fapi2::buffer<uint8_t> i_result, uint8_t i_delay)
             {
                 this->iv_results = i_result;
@@ -105,15 +117,15 @@ class mwd_coarse : public step
                 bool l_passed = false;
 
                 // 0 is not passed
-                if(i_result == 0x00)
+                if(i_result == FAILING_RESULT)
                 {
                     l_passed = false;
                 }
 
-                // F is passed
-                else if(i_result == 0x0f)
+                // F is passed - only if we had already passed at this location
+                else if(i_result == PASSING_RESULT)
                 {
-                    l_passed = true;
+                    l_passed = iv_results.getBit(i_delay);
                 }
 
                 // Anything else is an error case just call it not passed for now
