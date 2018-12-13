@@ -100,6 +100,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         FAPI_INF("Setting up ODIC and ODT attributes on %s", mss::c_str(l_dimm) );
 
+        FAPI_TRY(  l_eff_dimm->lrdimm_training_pattern(),
+                   "Failed lrdimm_training_pattern for %s", mss::c_str(l_dimm) );
         FAPI_TRY(  l_eff_dimm->dram_odic(),
                    "Failed dram_odic for %s", mss::c_str(l_dimm) );
         FAPI_TRY(  l_eff_dimm->odt_wr(),

@@ -71,6 +71,7 @@ enum sizes
     MAX_LRDIMM_BUFFERS = MAX_DRAMS_X8,
 
     NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
+    NUM_LRDIMM_TRAINING_PATTERNS = 5,             ///< Used for ATTR_MSS_LRDIMM_TRAINING_PATTERN
 
 
     BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array

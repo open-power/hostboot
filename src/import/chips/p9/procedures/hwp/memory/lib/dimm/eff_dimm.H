@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -873,6 +873,12 @@ class eff_dimm
         virtual fapi2::ReturnCode dram_rtt_park() = 0;
 
         ///
+        /// @brief Sets the LRDIMM training pattern
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode lrdimm_training_pattern() = 0;
+
+        ///
         /// @brief Determines and sets DIMM BC00
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
@@ -1121,6 +1127,12 @@ class eff_lrdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode dram_odic() final;
+
+        ///
+        /// @brief Sets the LRDIMM training pattern
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode lrdimm_training_pattern() final;
 
         ///
         /// @brief Determines and sets DIMM BC00
@@ -1435,6 +1447,15 @@ class eff_rdimm : public eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode dram_odic() final;
+
+        ///
+        /// @brief Sets the LRDIMM training pattern
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode lrdimm_training_pattern()
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         ///
         /// @brief Determines and sets DIMM BC00

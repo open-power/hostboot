@@ -3033,6 +3033,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_LRDIMM_TRAINING_PATTERN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+	    Patterns for LRDIMM training steps
+        </description>
+        <initToZero></initToZero>
+        <writeable/>
+        <valueType>uint8</valueType>
+        <array> 5 </array>
+        <mssAccessorName>lrdimm_training_pattern</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_EFF_ODT_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>

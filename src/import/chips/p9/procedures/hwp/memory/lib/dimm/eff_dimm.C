@@ -4578,7 +4578,30 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-// TK:LRDIMM Update and/or verify all bc## steps below
+///
+/// @brief Sets the LRDIMM training pattern
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_lrdimm::lrdimm_training_pattern()
+{
+    // Default patterns are taken from experiments
+    // Patterns were selected for having a good balance of transitions
+    // We need the temporary variable due to how FAPI_ATTR_SET works
+    uint8_t l_default_patterns[NUM_LRDIMM_TRAINING_PATTERNS] =
+    {
+        0x2b,
+        0x3c,
+        0x96,
+        0x35,
+        0x6a,
+    };
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_LRDIMM_TRAINING_PATTERN, iv_mcs, l_default_patterns) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Determines & sets effective config for DIMM BC00
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
