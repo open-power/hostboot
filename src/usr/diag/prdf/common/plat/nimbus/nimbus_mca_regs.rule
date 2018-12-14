@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -239,6 +239,17 @@
     {
         name        "P9 MCA target address translation register";
         scomaddr    0x05010820;
+        capture     group default;
+    };
+
+    ############################################################################
+    # ECC Debug/WAT Control Register
+    ############################################################################
+
+    register DBGR
+    {
+        name        "ECC Debug/WAT Control Register";
+        scomaddr    0x07010A0B;
         capture     group default;
     };
 
