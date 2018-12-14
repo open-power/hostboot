@@ -532,6 +532,16 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                     {
                         TRACFCOMP(g_trac_lpc, "LpcDD::hwReset> Writing LPCHC_RESET_REG to reset LPCHC Logic");
 
+                        // Clear FIR register
+                        scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
+                        l_err = deviceOp(
+                             DeviceFW::WRITE,
+                             iv_proc,
+                             &(scom_data_64),
+                             scom_size,
+                             DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
+                        if (l_err) { break; }
+
                         size_t opsize = sizeof(uint32_t);
                         uint32_t lpc_data = 0x0;
                         l_err = _writeLPC( LPC::TRANS_REG,
@@ -543,16 +553,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                         // sleep 1ms for LPCHC to execute internal
                         // reset+init sequence
                         nanosleep( 0, NS_PER_MSEC );
-
-                        // Clear FIR register
-                        scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
-                        l_err = deviceOp(
-                             DeviceFW::WRITE,
-                             iv_proc,
-                             &(scom_data_64),
-                             scom_size,
-                             DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
-                        if (l_err) { break; }
 
                         break;
                     }
