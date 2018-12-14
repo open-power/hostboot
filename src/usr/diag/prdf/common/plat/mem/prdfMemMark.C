@@ -294,6 +294,24 @@ uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
                   msName, i_chip->getHuid() );
     }
 
+    // Nimbus symbol mark performance workaround
+    // When a symbol mark is placed at runtime
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // Trigger WAT logic to 'disable bypass'
+    // Get the ECC Debug/WAT Control register
+    SCAN_COMM_REGISTER_CLASS * dbgr = i_chip->getRegister( "DBGR" );
+
+    // Set DBGR[8] = 0b1
+    dbgr->SetBit( 8 );
+    o_rc = dbgr->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on DBGR: mca=0x%08x",
+                  i_chip->getHuid() );
+    }
+    #endif
+
     return o_rc;
 
     #undef PRDF_FUNC
