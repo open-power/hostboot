@@ -5,9 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Maxim Polyakov                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -443,6 +444,7 @@ void add_i2c_info( const TARGETING::Target* i_targ,
     } atmel_ids[] = {
         { "atmel,24c128", 16*KILOBYTE, 2 },
         { "atmel,24c256", 32*KILOBYTE, 2 },
+        { "atmel,24c512", 64*KILOBYTE, 2 },
         { "atmel,24c02",  256,         1 },
 
         //Currently our minimum is 1KB, even for the 256 byte SPD
@@ -629,7 +631,7 @@ void add_i2c_info( const TARGETING::Target* i_targ,
                      a++ )
                 {
                     if( (atmel_ids[a].byteSize == (KILOBYTE*eep2->sizeKB))
-                        || (atmel_ids[a].addrBytes == eep2->addrBytes) )
+                        && (atmel_ids[a].addrBytes == eep2->addrBytes) )
                     {
                         l_compat = atmel_ids[a].name;
                         l_foundit = true;
