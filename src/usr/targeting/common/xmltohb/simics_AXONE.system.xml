@@ -9416,6 +9416,36 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0dimm1</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030001</default></attribute>
+    <attribute><id>POSITION</id><default>1</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0dimm2</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030002</default></attribute>
@@ -9433,7 +9463,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9442,6 +9472,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm3</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030003</default></attribute>
+    <attribute><id>POSITION</id><default>3</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>3</default>
     </attribute>
 </targetInstance>
 
@@ -9463,7 +9523,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9472,6 +9532,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm5</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030005</default></attribute>
+    <attribute><id>POSITION</id><default>5</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-5</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>5</default>
     </attribute>
 </targetInstance>
 
@@ -9493,7 +9583,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9502,6 +9592,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm7</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030007</default></attribute>
+    <attribute><id>POSITION</id><default>7</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p07</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-7</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>7</default>
     </attribute>
 </targetInstance>
 
@@ -9523,7 +9643,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9532,6 +9652,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm9</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030009</default></attribute>
+    <attribute><id>POSITION</id><default>9</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-9</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>9</default>
     </attribute>
 </targetInstance>
 
@@ -9553,7 +9703,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9562,6 +9712,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm11</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000B</default></attribute>
+    <attribute><id>POSITION</id><default>11</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-11</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>11</default>
     </attribute>
 </targetInstance>
 
@@ -9583,7 +9763,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9592,6 +9772,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm13</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000D</default></attribute>
+    <attribute><id>POSITION</id><default>13</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-13</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>13</default>
     </attribute>
 </targetInstance>
 
@@ -9613,7 +9823,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -9622,6 +9832,36 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm15</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000F</default></attribute>
+    <attribute><id>POSITION</id><default>15</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-15</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>15</default>
     </attribute>
 </targetInstance>
 
