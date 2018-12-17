@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -77,5 +77,22 @@
         <writeable/>
         <mssAccessorName>mem_2n_mode</mssAccessorName>
     </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_VPD_DQ_MAP</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      [Dimm DQ PIN]  The map from the Dual Inline Memory Module
+      (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssUnits></mssUnits>
+    <mssBlobStart>0</mssBlobStart>
+    <mssBlobLength>72</mssBlobLength>
+    <mssAccessorName>mem_vpd_dq_map</mssAccessorName>
+    <array>72</array>
+  </attribute>
 
 </attributes>

@@ -23,4 +23,19 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes> 
+  <attribute>
+    <id>ATTR_MEM_MRW_IS_PLANAR</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+          Indicates if the DIMM connected to this controller
+          are in a planar configuration
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <platInit/>
+    <default>FALSE</default>
+    <initToZero/>
+    <mssAccessorName>mem_mrw_is_planar</mssAccessorName>
+  </attribute>
+
 </attributes>
