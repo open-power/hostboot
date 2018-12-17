@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -155,6 +155,8 @@ enum vpdReasonCode
     VPD_CANNOT_WRITE_OVERRIDDEN_VPD     = VPD_COMP_ID | 0x3c,
     VPD_FAILED_TO_RESOLVE_NODE_TARGET   = VPD_COMP_ID | 0x3d,
     VPD_BAD_REC_NUM                     = VPD_COMP_ID | 0x3e,
+    VPD_INVALID_MASTER_I2C_PATH         = VPD_COMP_ID | 0x3f,
+    VPD_NULL_I2C_MASTER                 = VPD_COMP_ID | 0x40,
 };
 
 

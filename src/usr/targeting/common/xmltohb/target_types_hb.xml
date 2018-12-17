@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -89,6 +89,9 @@
     <attribute>
       <default>0</default>
       <id>MMIO_VM_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>VPD_SWITCHES</id>
     </attribute>
   </targetTypeExtension>
 
