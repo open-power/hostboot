@@ -647,6 +647,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_DIMM_SPARE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+            Array indexes are [DIMM][RANK]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
+        <writeable/>
+        <array> 2 4</array>
+        <mssAccessorName>dimm_spare</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_DRAM_CL</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
