@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@ enum i2cModuleId
     FAPI_I2C_PERFORM_OP                 = 0x0F,
     READ_I2C_ATTRIBUTES                 = 0x10,
     I2C_ACCESS_MUX                      = 0x11,
+    I2C_GENERIC_PRES_DETECT             = 0x12,
 };
 
 
@@ -98,6 +99,8 @@ enum i2cReasonCode
     INVALID_MASTER_TARGET                = I2C_COMP_ID | 0x13,   // Master I2C target not valid
     I2C_MUX_TARGET_NOT_FOUND             = I2C_COMP_ID | 0x14,   // The MUX target is not valid (null)
     I2C_MUX_TARGET_NON_FUNCTIONAL        = I2C_COMP_ID | 0x15,   // The MUX target is non functional
+    I2C_INVALID_LENGTH                   = I2C_COMP_ID | 0x16,   // Invalid data buffer length passed to function
+    I2C_NULL_MASTER_TARGET               = I2C_COMP_ID | 0x17,   // Target Service's toPath() returned nullptr for target
 };
 
 

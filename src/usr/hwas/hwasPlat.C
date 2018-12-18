@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -48,6 +48,8 @@
 #include <fsi/fsiif.H>
 #include <config.h>
 #include <targeting/common/targetservice.H>
+
+#include <chipids.H>
 
 namespace HWAS
 {
@@ -226,6 +228,31 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       DeviceFW::IDEC,
                       TARGETING::TYPE_MEMBUF,
                       cfamIDEC);
+
+errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
+                    TARGETING::Target* i_target,
+                    void* io_buffer,
+                    size_t& io_buflen,
+                    int64_t i_accessType,
+                    va_list i_args)
+{
+    // for now just hardcode the answer to something explicitly invalid
+    uint8_t l_ec = INVALID__ATTR_EC;
+    i_target->setAttr<TARGETING::ATTR_EC>(l_ec);
+    i_target->setAttr<TARGETING::ATTR_HDAT_EC>(l_ec);
+
+    // we can assume this is an Explorer chip though
+    uint32_t l_id = POWER_CHIPID::EXPLORER_16;
+    i_target->setAttr<TARGETING::ATTR_CHIP_ID>(l_id);
+
+    return nullptr;
+}
+
+// Register the presence detect function with the device framework
+DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
+                      DeviceFW::IDEC,
+                      TARGETING::TYPE_OCMB_CHIP,
+                      ocmbIDEC);
 
 //******************************************************************************
 // platIsMinHwCheckingAllowed function

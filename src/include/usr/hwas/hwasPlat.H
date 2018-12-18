@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,9 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
 #else
     {};
 #endif
+
+// default unknown EC level
+constexpr TARGETING::ATTR_EC_type INVALID__ATTR_EC = 0xFF;
 
 } // namespace HWAS
 

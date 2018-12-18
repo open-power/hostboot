@@ -94,10 +94,6 @@ enum vpdModuleId
     VPD_MOD_XXX                             = 0x84,
     VPD_SEND_I2C_LOCK_MSG                   = 0x85,
     VPD_FILL_I2C_LOCK_MSG                   = 0x86,
-
-    // DDIMM VPD
-    MOD_OCMBPRESENCEDETECT                  = 0x90,
-
     // Centaur FRU VPD
 
 

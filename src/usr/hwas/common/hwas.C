@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -701,9 +701,12 @@ errlHndl_t discoverTargets()
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
         PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
+        // We can ignore chips of TYPE_I2C_MUX because they
+        // were already detected above in discoverMuxTargetsAndEnable
+        PredicateCTM predMux(CLASS_CHIP, TYPE_I2C_MUX);
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
-                  push(&predMcs).Or();
+                  push(&predMcs).Or().push(&predMux).Not().And();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
@@ -764,8 +767,7 @@ errlHndl_t discoverTargets()
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
                 (l_targetType != TYPE_TPM) &&
                 (l_targetType != TYPE_SP) &&
-                (l_targetType != TYPE_BMC) &&
-                (l_targetType != TYPE_I2C_MUX) )
+                (l_targetType != TYPE_BMC) )
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
