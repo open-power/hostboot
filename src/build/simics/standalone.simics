@@ -96,29 +96,22 @@ try {
       run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
 } except { echo "ERROR: Failed to load IPMIresponder." }
 
-# Setup fabric ID for master proc
-($hb_masterproc_cecchip).invoke parallel_store SCOM 0x1000008 "00000000_00000000" 64 #group=0, chip=0
-
-###################################
-#Enable SBE
-###################################
-echo "Enable the SBE"
-# Set mailbox scratch registers so that the SBE starts in plck mode
-# Set Boot Freq valid bit (bit 3) and valid data bit (bit 7)
-($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003F "31000000_00000000" 64
-($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
-
-
 #Cumulus/Nimbus
 if ($hb_mode == 1) {
+    # Setup fabric ID for master proc
+    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x1000008 "00000000_00000000" 64 #group=0, chip=0
+
+    ###################################
+    #Enable SBE
+    ###################################
+    echo "Enable the SBE"
+    # Set mailbox scratch registers so that the SBE starts in plck mode
+    # Set Boot Freq valid bit (bit 3) and valid data bit (bit 7)
+    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003F "31000000_00000000" 64
+    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
+
     # Set the Nest PLL Bucket ID to 5 in the 4th byte of Mbox Scratch Reg 4
     ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003B "00000005_00000000" 64
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x01 "80000000" 32
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x08 "00080000" 32
-} else { #Axone
-    # Set the Nest PLL Bucket ID to 3 in the 4th byte of Mbox Scratch Reg 4
-    ($hb_masterproc_cecchip).invoke parallel_store SCOM 0x5003B "00000003_00000000" 64
-    ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x01 "80000000" 32
-    ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x08 "00080000" 32
 }
-
