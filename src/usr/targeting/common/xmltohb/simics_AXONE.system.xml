@@ -13306,6 +13306,15 @@
             <field><id>engine</id><value>3</value></field>
         </default>
     </attribute>
+    <attribute>
+    <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xE0</value></field>
+            <field><id>engine</id><value>3</value></field>
+        </default>
+  </attribute>
 </targetInstance>
 
 </attributes>

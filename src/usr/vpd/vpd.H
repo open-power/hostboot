@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -300,10 +300,6 @@ void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
 // default invalid value for ATTR_VPD_REC_NUM
 constexpr TARGETING::ATTR_VPD_REC_NUM_type INVALID__ATTR_VPD_REC_NUM = 0xFFFF;
-
-// default unknown EC level
-constexpr TARGETING::ATTR_EC_type INVALID__ATTR_EC = 0xFF;
-
 
 }; //end VPD namespace
 #endif

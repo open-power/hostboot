@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ include i2c.mk
 OBJS += i2c.o
 OBJS += $(if $(CONFIG_TPMDD),tpmdd.o,)
 OBJS += fapi_i2c_dd.o
+OBJS += i2cTargetPres.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d
