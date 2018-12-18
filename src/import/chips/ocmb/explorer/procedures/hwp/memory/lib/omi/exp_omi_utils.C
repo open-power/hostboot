@@ -36,6 +36,7 @@
 #include <lib/omi/exp_omi_utils.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/i2c/exp_i2c_fields.H>
+#include <mss_explorer_attribute_getters.H>
 
 namespace mss
 {
@@ -65,40 +66,19 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     uint8_t l_serdes_freq = 0;
 
     // Read the EXP_FW_BOOT_CONFIG from the attributes
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE,
-                           i_target,
-                           l_fw_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_fw_mode(i_target, l_fw_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST,
-                           i_target,
-                           l_loopback_test),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_opencapi_loopback_test(i_target, l_loopback_test));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER,
-                           i_target,
-                           l_transport_layer),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_transport_layer(i_target, l_transport_layer));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE,
-                           i_target,
-                           l_dl_layer_boot_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_dl_layer_boot_mode(i_target, l_dl_layer_boot_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE,
-                           i_target,
-                           l_boot_mode),
-             "%s Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_boot_mode(i_target, l_boot_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE,
-                           i_target,
-                           l_lane_mode),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_lane_mode(i_target, l_lane_mode));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY,
-                           i_target,
-                           l_serdes_freq),
-             "Error from FAPI_ATTR_GET (ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY) on %s", mss::c_str(i_target));
+    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_serdes_frequency(i_target, l_serdes_freq));
 
 
     // Clears o_data, just in case
