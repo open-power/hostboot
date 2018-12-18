@@ -183,6 +183,7 @@
   <default>0x3</default>
   <writeable/>
   <platInit/>
+  <mssAccessorName>omi_oc_major_ver</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -195,6 +196,7 @@
   <default>0x1</default>
   <writeable/>
   <platInit/>
+  <mssAccessorName>omi_oc_minor_ver</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
