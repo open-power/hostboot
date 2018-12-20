@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,12 @@ HCD_HDR_UINT32( coreScomLength, 0);
 HCD_HDR_UINT32( coreSelfRestoreOffset, 0);
 HCD_HDR_UINT32( coreSelfRestoreLength, 0);
 HCD_HDR_UINT32( coreMaxScomEntry, 0);
+HCD_HDR_UINT32( quad0PstateOffset, 0);
+HCD_HDR_UINT32( quad1PstateOffset, 0);
+HCD_HDR_UINT32( quad2PstateOffset, 0);
+HCD_HDR_UINT32( quad3PstateOffset, 0);
+HCD_HDR_UINT32( quad4PstateOffset, 0);
+HCD_HDR_UINT32( quad5PstateOffset, 0);
 HCD_HDR_PAD(CPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm
@@ -305,6 +311,8 @@ HCD_HDR_UINT16(g_cme_qm_mode_flags, 0);
 HCD_HDR_UINT32(g_cme_timebase_hz, 0); //Retain next field at 8B boundary
 HCD_HDR_UINT64(g_cme_cpmr_PhyAddr, 0);
 HCD_HDR_UINT64(g_cme_unsec_cpmr_PhyAddr, 0);
+HCD_HDR_UINT32(g_cme_pstate_offset, 0);
+HCD_HDR_UINT32(g_cme_custom_length, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
