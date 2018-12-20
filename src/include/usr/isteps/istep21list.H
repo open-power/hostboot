@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -131,6 +131,9 @@ const DepModInfo  g_istep21Dependancies = {
 #endif
 #ifndef CONFIG_FSP_BUILD
         DEP_LIB(libnvram.so),
+#endif
+#ifdef CONFIG_NVDIMM
+        DEP_LIB(libnvdimm.so),
 #endif
         NULL
     }

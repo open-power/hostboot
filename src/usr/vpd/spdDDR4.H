@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,7 @@ const KeywordData ddr4Data[] =
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, NA },
     { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, NA },
     { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, NA },
+    { NVM_INIT_TIME,                    0xCB,   0x01,   0x00,   0x00, false, false, NA },
     // Module Specific fields supported on both DDR3 and DDR4
     { MODSPEC_COM_NOM_HEIGHT_MAX,       0x80,   0x01,   0x1f,   0x00, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_BACK,       0x81,   0x01,   0xf0,   0x04, false, false, ALL },

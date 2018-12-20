@@ -231,50 +231,6 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
     return l_err;
 }
 
-
-bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
-{
-    bool o_arm_successful = true;
-
-    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArm() %d",
-        i_nvdimmTargetList.size());
-
-    errlHndl_t l_err = nullptr;
-
-    for (auto const l_nvdimm : i_nvdimmTargetList)
-    {
-        // skip if the nvdimm is in error state
-        if (NVDIMM::nvdimmInErrorState(l_nvdimm))
-        {
-            // error state means arming not successful
-            o_arm_successful = false;
-            continue;
-        }
-
-        l_err = NVDIMM::nvdimmArmResetN(l_nvdimm);
-        // If we run into any error here we will just
-        // commit the error log and move on. Let the
-        // system continue to boot and let the user
-        // salvage the data
-        if (l_err)
-        {
-            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
-            // Committing the error as we don't want this to interrupt
-            // the boot. This will notify the user that action is needed
-            // on this module
-            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            o_arm_successful = false;
-            continue;
-        }
-    }
-
-    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",
-              o_arm_successful);
-    return o_arm_successful;
-}
-
 /**
  * @brief This function polls the command status register for arm completion
  *        (does not indicate success or fail)
@@ -364,49 +320,77 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
     return l_err;
 }
 
-/**
- * @brief This function arms the trigger to enable backup in the event
- *        of power loss (DDR Reset_n goes low) in conjunction with
- *        ATOMIC_SAVE_AND_ERASE. A separate erase command is not required
- *        as the image will get erased immediately before backup on the
- *        next catastrophic event.
- *
- * @param[in] i_nvdimm - nvdimm target with NV controller
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm)
+bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
 {
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArmResetN() nvdimm[%X]",
-                        TARGETING::get_huid(i_nvdimm));
+    bool o_arm_successful = true;
+
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArm() %d",
+        i_nvdimmTargetList.size());
 
     errlHndl_t l_err = nullptr;
 
-    // Setting ATOMIC_SAVE_AND_ERASE in conjunction with ARM_RESETN. With this,
-    // the content of the persistent data is not erased until immediately after
-    // the next catastrophic event has occurred.
-    l_err = nvdimmWriteReg(i_nvdimm, ARM_CMD, ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE);
+    for (auto const l_nvdimm : i_nvdimmTargetList)
+    {
+        // skip if the nvdimm is in error state
+        if (NVDIMM::nvdimmInErrorState(l_nvdimm))
+        {
+            // error state means arming not successful
+            o_arm_successful = false;
+            continue;
+        }
 
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmResetN() nvdimm[%X] error arming nvdimm!!",
-                  TARGETING::get_huid(i_nvdimm));
-    }
-    else
-    {
+        l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, ARM_TRIGGER);
+        // If we run into any error here we will just
+        // commit the error log and move on. Let the
+        // system continue to boot and let the user
+        // salvage the data
+        if (l_err)
+        {
+            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            o_arm_successful = false;
+            continue;
+        }
+
         // Arm happens one module at a time. No need to set any offset on the counter
         uint32_t l_poll = 0;
-        l_err = nvdimmPollArmDone(i_nvdimm, l_poll);
-        if (!l_err)
+        l_err = nvdimmPollArmDone(l_nvdimm, l_poll);
+        if (l_err)
         {
-            l_err = nvdimmCheckArmSuccess(i_nvdimm);
+            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            o_arm_successful = false;
+            continue;
+        }
+
+        l_err = nvdimmCheckArmSuccess(l_nvdimm);
+        if (l_err)
+        {
+            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            o_arm_successful = false;
+            continue;
         }
     }
 
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArmResetN() nvdimm[%X]",
-                        TARGETING::get_huid(i_nvdimm));
-    return l_err;
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",
+              o_arm_successful);
+    return o_arm_successful;
 }
 
 /**

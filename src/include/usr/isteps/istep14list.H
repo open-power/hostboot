@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,7 +169,11 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(14,04,"mss_power_cleanup"),
                 ISTEP_14::call_mss_power_cleanup,
+#ifdef CONFIG_NVDIMM
+                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, true }
+#else
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+#endif
         },
         {
                 ISTEPNAME(14,05,"proc_setup_bars"),
