@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,11 @@
 #include  <fapi2.H>
 #include  <p9_mss_draminit.H>
 #include  <p9c_mss_draminit.H>
+
+#ifdef CONFIG_NVDIMM
+// NVDIMM support
+#include    <isteps/nvdimm/nvdimm.H>
+#endif
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -161,6 +166,19 @@ void* call_mss_draminit (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
 
+        // Initialize the NVDIMMs before hitting draminit
+#ifdef CONFIG_NVDIMM
+        TARGETING::TargetHandleList l_dimmTargetList;
+        getChildAffinityTargets(l_dimmTargetList, l_mcbist_target, CLASS_NA, TYPE_DIMM);
+
+        for (const auto & l_dimm : l_dimmTargetList)
+        {
+            if (isNVDIMM(l_dimm))
+            {
+                NVDIMM::nvdimm_init(l_dimm);
+            }
+        }
+#endif
         FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
 
         if (l_err)

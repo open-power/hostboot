@@ -47,8 +47,6 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/targetservice.H>
 
-#include <isteps/nvdimm/nvdimm.H>
-
 #include <scom/scomif.H>
 #include <scom/wakeup.H>
 

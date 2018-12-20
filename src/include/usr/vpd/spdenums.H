@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,7 +142,8 @@ enum
     MODULE_REVISION_CODE_DDR4        = MODULE_REVISION_CODE,
     DRAM_STEPPING                    = SPD_FIRST_NORM_KEYWORD | 0x57,
     MANUFACTURING_SECTION_CRC        = SPD_FIRST_NORM_KEYWORD | 0x58,
-    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x58,
+    NVM_INIT_TIME                    = SPD_FIRST_NORM_KEYWORD | 0x59,
+    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x59,
 
     // ==============================================================
     // Module Specific Keywords (Available for both DDR3 and DDR4 DIMMs)

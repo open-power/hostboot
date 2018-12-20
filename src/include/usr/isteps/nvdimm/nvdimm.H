@@ -29,7 +29,7 @@
 
 namespace NVDIMM
 {
-enum
+enum nvdimm_err_status
 {
     NSTD_VAL_NOPRSV      = 0x08, // memory valid, contents not preserved (genesis)
     NSTD_VAL_NOPRSV_MASK = 0xF7,
@@ -41,6 +41,7 @@ enum
     NSTD_ERR_NOBKUP_MASK = 0xFE,
     NSTD_ERR             = 0x03, // NSTD_ERR_NOPRSV+NSTD_ERR_NOBKUP
 };
+
 #ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief Entry function to NVDIMM management
@@ -76,7 +77,6 @@ errlHndl_t nvdimmEraseNF(TARGETING::Target *i_nvdimm);
  */
 void nvdimmSetStatusFlag(TARGETING::Target *i_nvdimm, const uint8_t i_status_flag);
 
-
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
@@ -89,15 +89,16 @@ void nvdimmSetStatusFlag(TARGETING::Target *i_nvdimm, const uint8_t i_status_fla
 bool nvdimmInErrorState(TARGETING::Target *i_nvdimm);
 
 /**
- * @brief This function arms the trigger to enable backup in the event
- *        of power loss (DDR Reset_n goes low)
+ * @brief This function arms/disarms the trigger based on i_state
  *
  * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @param[in] i_state - true to arm, false to disarm
  *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm);
+errlHndl_t nvdimmChangeArmState(TARGETING::Target *i_nvdimm, bool i_state);
 
 /**
  * @brief  Arms the trigger to enable backup in the event of a power loss
@@ -112,7 +113,6 @@ errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm);
  * @return true if no errors logged, else false
  */
 bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
-
 
 /**
  * @brief NVDIMM protection state
@@ -139,6 +139,14 @@ enum nvdimm_protection_t
 errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
                                   const nvdimm_protection_t i_state);
 #endif
+/**
+ * @brief Entry function to NVDIMM initialization
+ *        - Checks for ready state
+ *        - Waits for the ongoing backup to complete
+ *        - Disarms the trigger for draminit
+ * @param i_target     nvdimm target
+ */
+void nvdimm_init(TARGETING::Target *i_nvdimm);
 
 }
 

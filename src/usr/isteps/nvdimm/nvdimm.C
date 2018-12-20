@@ -39,6 +39,7 @@
 #include <lib/mc/port.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>
+#include <vpd/spdenums.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -48,8 +49,8 @@ trace_desc_t* g_trac_nvdimm = NULL;
 TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 
 // Easy macro replace for unit testing
-// #define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
 
 
 namespace NVDIMM
@@ -61,29 +62,29 @@ namespace NVDIMM
 #define NVDIMM_SET_USER_DATA_2_TIMEOUT(left_32_polled, right_32_timeout) \
             NVDIMM_SET_USER_DATA_1(left_32_polled, right_32_timeout)
 
+#define ADDRESS(uint16_address) \
+            uint16_address & 0x00FF
+
+#define PAGE(uint16_address) \
+            (uint16_address >> 8) & 0x000F
+
 typedef struct ops_timeoutInfo{
     const char * desc;
-    uint8_t page;
-    uint8_t offset[2];
+    uint16_t offset[2];
     uint8_t idx;
-    uint8_t status_reg_offset;
+    uint16_t status_reg_offset;
     uint8_t status_progress;
 } ops_timeoutInfo_t;
-
-#ifndef __HOSTBOOT_RUNTIME
-// Init flag to be used upon initial entry to initialize NV_OPS_TIMEOUT_MSEC
-static bool init_nv_timeout = true;
-#endif
 
 // Table containing register info on the timeout registers for different ops
 constexpr ops_timeoutInfo_t timeoutInfoTable[] =
 {
-    {"SAVE",        0, {0x19, 0x18}, SAVE       , NVDIMM_CMD_STATUS0, SAVE_IN_PROGRESS},
-    {"RESTORE",     0, {0x1D, 0x1C}, RESTORE    , NVDIMM_CMD_STATUS0, RSTR_IN_PROGRESS},
-    {"ERASE",       0, {0x1F, 0x1E}, ERASE      , NVDIMM_CMD_STATUS0, ERASE_IN_PROGRESS},
-    {"ARM",         0, {0x21, 0x20}, ARM        , NVDIMM_CMD_STATUS0, ARM_IN_PROGRESS},
-    {"PAGE_SWITCH", 0, {0x1B, 0x1A}, PAGE_SWITCH, 0xff, 0xff},
-    {"CHARGE",      1, {0x11, 0x10}, CHARGE     , MODULE_HEALTH_STATUS1, CHARGE_IN_PROGRESS},
+    {"SAVE",         {CSAVE_TIMEOUT1, CSAVE_TIMEOUT0},             SAVE       , NVDIMM_CMD_STATUS0, SAVE_IN_PROGRESS},
+    {"RESTORE",      {RESTORE_TIMEOUT1, RESTORE_TIMEOUT0},         RESTORE    , NVDIMM_CMD_STATUS0, RSTR_IN_PROGRESS},
+    {"ERASE",        {ERASE_TIMEOUT1, ERASE_TIMEOUT0},             ERASE      , NVDIMM_CMD_STATUS0, ERASE_IN_PROGRESS},
+    {"ARM",          {ARM_TIMEOUT1, ARM_TIMEOUT0},                 ARM        , NVDIMM_CMD_STATUS0, ARM_IN_PROGRESS},
+    {"PAGE_SWITCH",  {PAGE_SWITCH_LATENCY1, PAGE_SWITCH_LATENCY0}, PAGE_SWITCH, 0xff, 0xff},
+    {"CHARGE",       {ES_CHARGE_TIMEOUT1, ES_CHARGE_TIMEOUT0},     CHARGE     , MODULE_HEALTH_STATUS1, CHARGE_IN_PROGRESS},
 };
 
 /**
@@ -95,27 +96,63 @@ constexpr ops_timeoutInfo_t timeoutInfoTable[] =
  *
  * @param[out] o_data - returned data from read
  *
+ * @param[in] page_verify - read and verify the page associated to the given address.
+ *                          Change if needed. Default to true
+ *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t nvdimmReadReg(Target* i_nvdimm,
-                         uint8_t i_addr,
-                         uint8_t & o_data )
+                         uint16_t i_addr,
+                         uint8_t & o_data,
+                         const bool page_verify)
 {
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"NVDIMM Read HUID %X, addr 0x%X",
                   TARGETING::get_huid(i_nvdimm), i_addr);
 
     errlHndl_t l_err = nullptr;
     size_t l_numBytes = 1;
+    uint8_t l_reg_addr = ADDRESS(i_addr);
+    uint8_t l_reg_page = PAGE(i_addr);
 
-    l_err = DeviceFW::deviceOp( DeviceFW::READ,
-                                i_nvdimm,
-                                &o_data,
-                                l_numBytes,
-                                DEVICE_NVDIMM_ADDRESS(i_addr));
+    do
+    {
+        // If page_verify is true, make sure the current page is set to the page
+        // where i_addr is in and change if needed
+        if (page_verify)
+        {
+            uint8_t l_data = 0;
+            l_err = nvdimmReadReg(i_nvdimm, OPEN_PAGE, l_data, NO_PAGE_VERIFY);
 
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Read HUID %X, addr 0x%X = %X",
-                  TARGETING::get_huid(i_nvdimm), i_addr, o_data);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadReg() nvdimm[%X] - failed to read the current page",
+                          TARGETING::get_huid(i_nvdimm));
+                break;
+            }
+
+            if (l_data != l_reg_page)
+            {
+                l_err = nvdimmOpenPage(i_nvdimm, l_reg_page);
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReadReg() nvdimm[%X] - failed to verify page",
+                              TARGETING::get_huid(i_nvdimm));
+                    break;
+                }
+            }
+        }
+
+        l_err = DeviceFW::deviceOp( DeviceFW::READ,
+                                    i_nvdimm,
+                                    &o_data,
+                                    l_numBytes,
+                                    DEVICE_NVDIMM_ADDRESS(l_reg_addr));
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Read HUID %X, page 0x%X, addr 0x%X = %X",
+                  TARGETING::get_huid(i_nvdimm), l_reg_page, l_reg_addr, o_data);
 
     return l_err;
 }
@@ -129,28 +166,63 @@ errlHndl_t nvdimmReadReg(Target* i_nvdimm,
  *
  * @param[in] i_data - data to be written to register @ i_addr
  *
+ * @param[in] page_verify - read and verify the page associated to the given address.
+ *                          Change if needed. Default to true
+ *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t nvdimmWriteReg(Target* i_nvdimm,
-                         uint8_t i_addr,
-                         uint8_t i_data )
+                         uint16_t i_addr,
+                         uint8_t i_data,
+                         const bool page_verify)
 {
-    errlHndl_t l_err = nullptr;
-    size_t l_numBytes = 1;
-
     TRACUCOMP(g_trac_nvdimm, ENTER_MRK"NVDIMM Write HUID %X, addr 0x%X = %X",
                   TARGETING::get_huid(i_nvdimm), i_addr, i_data);
 
-    // Need to write directly from target's EEPROM.
-    l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
-                                i_nvdimm,
-                                &i_data,
-                                l_numBytes,
-                                DEVICE_NVDIMM_ADDRESS(i_addr));
+    errlHndl_t l_err = nullptr;
+    size_t l_numBytes = 1;
+    uint8_t l_reg_addr = ADDRESS(i_addr);
+    uint8_t l_reg_page = PAGE(i_addr);
 
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Write HUID %X, addr 0x%X = %X",
-                  TARGETING::get_huid(i_nvdimm), i_addr, i_data);
+    do
+    {
+        // If page_verify is true, make sure the current page is set to the page
+        // where i_addr is in and change if needed
+        if (page_verify)
+        {
+            uint8_t l_data = 0;
+            l_err = nvdimmReadReg(i_nvdimm, OPEN_PAGE, l_data, NO_PAGE_VERIFY);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmWriteReg() nvdimm[%X] - failed to read the current page",
+                          TARGETING::get_huid(i_nvdimm));
+                break;
+            }
+
+            if (l_data != l_reg_page)
+            {
+                l_err = nvdimmOpenPage(i_nvdimm, l_reg_page);
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmWriteReg() nvdimm[%X] - failed to verify page",
+                              TARGETING::get_huid(i_nvdimm));
+                    break;
+                }
+            }
+        }
+
+        l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
+                                    i_nvdimm,
+                                    &i_data,
+                                    l_numBytes,
+                                    DEVICE_NVDIMM_ADDRESS(l_reg_addr));
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"NVDIMM Write HUID %X, page = 0x%X, addr 0x%X = %X",
+                  TARGETING::get_huid(i_nvdimm), l_reg_page, l_reg_addr, i_data);
 
     return l_err;
 }
@@ -220,45 +292,125 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
 
     errlHndl_t l_err = nullptr;
     uint8_t l_data = 0x0;
+    uint8_t l_nvm_init_time = 0;
+    size_t l_numBytes = 1;
 
-    l_err = nvdimmReadReg(i_nvdimm, NVDIMM_READY, l_data);
-
-    if (l_err)
+    do
     {
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReady() nvdimm[%X] - error getting ready status[%d]",
-                  TARGETING::get_huid(i_nvdimm), l_data);
-    }
-    else if (l_data != NV_READY)
-    {
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReady() nvdimm[%X] - nvdimm not ready[%d]",
-                  TARGETING::get_huid(i_nvdimm), l_data);
-        /*@
-         *@errortype
-         *@reasoncode       NVDIMM_NOT_READY
-         *@severity         ERRORLOG_SEV_UNRECOVERABLE
-         *@moduleid         NVDIMM_CHECK_READY
-         *@userdata1[0:31]  Ret value from ready register
-         *@userdata1[32:63] Target Huid
-         *@userdata2        <UNUSED>
-         *@devdesc          Failed to read ready status or NVDIMM not ready
-         *                   for host access. (userdata1 != 0xA5)
-         *@custdesc         NVDIMM not ready
-         */
-        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       NVDIMM_POLL_STATUS,
-                                       NVDIMM_STATUS_TIMEOUT,
-                                       NVDIMM_SET_USER_DATA_1(l_data, TARGETING::get_huid(i_nvdimm)),
-                                       0x0,
-                                       ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+        // Read the maximum NVM init time in seconds from the SPD
+        l_err = deviceRead(i_nvdimm,
+                           &l_nvm_init_time,
+                           l_numBytes,
+                           DEVICE_SPD_ADDRESS(SPD::NVM_INIT_TIME));
 
-        l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-        //@TODO RTC 199645 - add HW callout on dimm target.
-        //if nvdimm is not ready for access by now, this is
-        //a failing indication on the NV controller
-    }
+        TRACUCOMP(g_trac_nvdimm, "nvdimmReady() HUID[%X] l_nvm_init_time = %u",
+                    TARGETING::get_huid(i_nvdimm), l_nvm_init_time);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReady() nvdimm[%X] - failed to retrieve NVM_INIT_TIME from SPD",
+                      TARGETING::get_huid(i_nvdimm));
+            break;
+        }
+
+        // Convert to ms for polling
+        uint32_t l_nvm_init_time_ms = l_nvm_init_time * MS_PER_SEC;
+        uint32_t l_poll = 0;
+
+        do
+        {
+            l_err = nvdimmReadReg(i_nvdimm, NVDIMM_READY, l_data);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReady() nvdimm[%X] - error getting ready status[%d]",
+                          TARGETING::get_huid(i_nvdimm), l_data);
+                break;
+            }
+
+            if (l_data == NV_READY)
+            {
+                break;
+            }
+
+            nanosleep(0, NV_READY_POLL_TIME_MS*NS_PER_MSEC);
+            l_poll += NV_READY_POLL_TIME_MS;
+
+        }while(l_poll < l_nvm_init_time_ms);
+
+        if ((l_data != NV_READY) && !l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmReady() nvdimm[%X] - nvdimm not ready[%d]",
+                      TARGETING::get_huid(i_nvdimm), l_data);
+            /*@
+             *@errortype
+             *@reasoncode       NVDIMM_NOT_READY
+             *@severity         ERRORLOG_SEV_UNRECOVERABLE
+             *@moduleid         NVDIMM_CHECK_READY
+             *@userdata1[0:31]  Ret value from ready register
+             *@userdata1[32:63] Target Huid
+             *@userdata2        <UNUSED>
+             *@devdesc          Failed to read ready status or NVDIMM not ready
+             *                   for host access. (userdata1 != 0xA5)
+             *@custdesc         NVDIMM not ready
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           NVDIMM_CHECK_READY,
+                                           NVDIMM_NOT_READY,
+                                           NVDIMM_SET_USER_DATA_1(l_data, TARGETING::get_huid(i_nvdimm)),
+                                           0x0,
+                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
+            //@TODO RTC 199645 - add HW callout on dimm target.
+            //if nvdimm is not ready for access by now, this is
+            //a failing indication on the NV controller
+        }
+
+    }while(0);
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmReady() HUID[%X] ready[%X]",
                 TARGETING::get_huid(i_nvdimm), l_data);
+
+    return l_err;
+}
+
+/**
+ * @brief Reset the NV controller. This operation does not interfere
+ *        with the DRAM operation but will introduce loss of protection
+ *        if NVDIMM was armed
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmResetController(Target *i_nvdimm)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmResetController() HUID[%X]",TARGETING::get_huid(i_nvdimm));
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+
+        l_err = nvdimmWriteReg(i_nvdimm, NVDIMM_MGT_CMD0, RESET_CONTROLLER);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmResetController() nvdimm[%X] - error reseting the controller",
+                      TARGETING::get_huid(i_nvdimm));
+            break;
+        }
+
+        l_err = nvdimmReady(i_nvdimm);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmResetController() nvdimm[%X] - not ready after reset.",
+                      TARGETING::get_huid(i_nvdimm));
+        }
+
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmResetController() HUID[%X]",TARGETING::get_huid(i_nvdimm));
 
     return l_err;
 }
@@ -336,7 +488,7 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
                                        NVDIMM_SET_USER_DATA_2_TIMEOUT(o_poll, l_timeout),
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT  );
 
-        l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+        l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
         //@TODO RTC 199645 - add HW callout on dimm target.
         //may have to move the error handling to the caller
         //as different op could have different error severity
@@ -552,7 +704,7 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
                                            0x0,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
-            l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
             //@TODO RTC 199645 - add procedure callout on backup power source.
             //Failure setting the energy source policy could mean error on the
             //battery or even the cabling
@@ -565,8 +717,40 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
     return l_err;
 }
 
+/**
+ * @brief This function arms/disarms the trigger based on i_state
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @param[in] i_state - true to arm, false to disarm
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmChangeArmState(Target *i_nvdimm, bool i_state)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmChangeArmState() nvdimm[%X]",
+                        TARGETING::get_huid(i_nvdimm));
 
+    errlHndl_t l_err = nullptr;
 
+    // If i_state is true, arm the nvdimm in conjunction with ATOMIC_SAVE_AND_ERASE
+    // feature. A separate erase command is not requred as the image will get erased
+    // before backup on the next catastrophic event
+    uint8_t l_data = i_state ? ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE : DISARM_RESETN;
+
+    l_err = nvdimmWriteReg(i_nvdimm, ARM_CMD, l_data);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmChangeArmState() nvdimm[%X] error %s nvdimm!!",
+                  TARGETING::get_huid(i_nvdimm), i_state? "arming" : "disarming");
+    }
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmChangeArmState() nvdimm[%X]",
+                        TARGETING::get_huid(i_nvdimm));
+    return l_err;
+}
 
 /**
  * @brief This function checks for valid image on the given target
@@ -612,17 +796,17 @@ errlHndl_t nvdimmValidImage(Target *i_nvdimm, bool &o_imgValid)
  *
  * @param[in] i_nvdimmList - list of nvdimms
  *
+ * @param[in] i_mpipl - MPIPL mode
+ *
  * @return errlHndl_t - Null if successful, otherwise a pointer to
  *      the error log.
  */
-errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
+errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
 {
     errlHndl_t l_err = nullptr;
     bool l_imgValid;
     uint8_t l_rstrValid;
     uint32_t l_poll = 0;
-    TARGETING::Target* l_sys = NULL;
-    targetService().getTopLevelTarget(l_sys);
 
     do
     {
@@ -652,6 +836,25 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
             assert(l_mcaList.size(), "nvdimmRestore() failed to find parent MCA.");
 
             fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca(l_mcaList[0]);
+
+            // Before we do anything, check if we are in mpipl. If we are, make sure ddr_resetn
+            // is de-asserted before kicking off the restore
+            if (i_mpipl)
+            {
+                FAPI_INVOKE_HWP(l_err, mss::ddr_resetn, l_fapi_mca, HIGH);
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore() HUID[%X] i_mpipl[%u] failed to de-assert resetn!",
+                              TARGETING::get_huid(*it), i_mpipl);
+
+                    nvdimmSetStatusFlag(*it, NSTD_ERR_NOPRSV);
+                    //@TODO RTC 199645 - add HW callout on dimm target
+                    //If we failed to de-assert reset_n, the dimm is pretty much useless.
+                    //Let's not restore if that happens
+                    break;
+                }
+            }
 
             // Self-refresh is done at the port level
             FAPI_INVOKE_HWP(l_err, mss::nvdimm::self_refresh_entry, l_fapi_mca);
@@ -761,7 +964,7 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList)
                                                0x0,
                                                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
 
-                l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+                l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
                 //@TODO RTC 199645 - add HW callout on dimm target
                 //Invalid restore could be due to dram not in self-refresh
@@ -861,7 +1064,7 @@ errlHndl_t nvdimmCheckEraseSuccess(Target *i_nvdimm)
                                        0x0,
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
-        l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
+        l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
         errlCommit( l_err, NVDIMM_COMP_ID );
         //@TODO RTC 199645 - add HW callout on dimm target.
         //failure to erase could mean internal NV controller error and/or
@@ -936,7 +1139,6 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
     bool l_success = false;
     uint8_t l_data;
     uint32_t l_poll = 0;
-
     uint32_t l_target_timeout_values[6];
     assert(i_nvdimm->tryGetAttr<TARGETING::ATTR_NV_OPS_TIMEOUT_MSEC>(l_target_timeout_values),
            "nvdimmOpenPage() HUID[%X], failed reading ATTR_NV_OPS_TIMEOUT_MSEC!", TARGETING::get_huid(i_nvdimm));
@@ -946,7 +1148,8 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
     do
     {
 
-        l_err = nvdimmWriteReg(i_nvdimm, OPEN_PAGE, i_page);
+        // Open page reg is at the same address of every page
+        l_err = nvdimmWriteReg(i_nvdimm, OPEN_PAGE, i_page, NO_PAGE_VERIFY);
 
         if (l_err)
         {
@@ -960,7 +1163,7 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
         // Not using the nvdimmPollStatus since this is polled differently
         do
         {
-            l_err = nvdimmReadReg(i_nvdimm, OPEN_PAGE, l_data);
+            l_err = nvdimmReadReg(i_nvdimm, OPEN_PAGE, l_data, NO_PAGE_VERIFY);
             if (l_err){
                 break;
             }
@@ -989,7 +1192,7 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
             /*@
              *@errortype
              *@reasoncode       NVDIMM_OPEN_PAGE_TIMEOUT
-             *@severity         ERRORLOG_SEV_PREDICTIVE
+             *@severity         ERRORLOG_SEV_UNRECOVERABLE
              *@moduleid         NVDIMM_OPEN_PAGE
              *@userdata1[0:31]  Related ops (0xff = NA)
              *@userdata1[32:63] Target Huid
@@ -999,7 +1202,7 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
              *@custdesc         Encountered error performing internal operaiton
              *                   on NVDIMM
              */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            NVDIMM_POLL_STATUS,
                                            NVDIMM_STATUS_TIMEOUT,
                                            NVDIMM_SET_USER_DATA_1(PAGE_SWITCH, TARGETING::get_huid(i_nvdimm)),
@@ -1039,17 +1242,8 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
     i_nvdimm->tryGetAttr<TARGETING::ATTR_NV_OPS_TIMEOUT_MSEC>(timeout_map);
 
     //Get the 6 main timeout values
-    for (uint8_t i = SAVE; i <= CHARGE; i++){
-
-        // Some timeout value maybe in different page
-        l_err = nvdimmOpenPage(i_nvdimm, timeoutInfoTable[i].page);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmGetTimeoutVal() HUID[%X] "
-                        "failing on nvdimmOpenPage()",TARGETING::get_huid(i_nvdimm));
-            break;
-        }
-
+    for (uint8_t i = SAVE; i <= CHARGE; i++)
+    {
         // Need to loop thru both offsets to get the full timeout value
         // The first offset contains the MSByte of the timeout value
         // with the MSB indicating ms or sec
@@ -1083,7 +1277,7 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
             timeout_map[i] = timeout_map[i] * MS_PER_SEC;
         }
 
-        TRACFCOMP(g_trac_nvdimm, "nvdimmGetTimeoutVal() HUID[%X], timeout_idx[%d], timeout_ms[%d]"
+        TRACUCOMP(g_trac_nvdimm, "nvdimmGetTimeoutVal() HUID[%X], timeout_idx[%d], timeout_ms[%d]"
                 ,TARGETING::get_huid(i_nvdimm), timeoutInfoTable[i].idx, timeout_map[i]);
     }
 
@@ -1100,73 +1294,27 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
 
 #ifndef __HOSTBOOT_RUNTIME
 /**
- * @brief Entry function to NVDIMM management
+ * @brief Entry function to NVDIMM restore
  *        - Restore image from NVDIMM NAND flash to DRAM
- *        - Arms the backup trigger to ddr_reset_n once the restore
- *          is completed
- *        - Erase image
+ *        - Set up the ES policy
  *
  * @param[in] i_nvdimmList - list of nvdimm targets
  *
  */
 void nvdimm_restore(TargetHandleList &i_nvdimmList)
 {
-    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_restore()");
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_restore()");
     errlHndl_t l_err = nullptr;
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( l_sys );
+    assert(l_sys, "nvdimm_restore: no TopLevelTarget");
+    uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
 
     do
     {
-        // Typically during init the NV controller defaults the page
-        // to 0, but it doesn't in warmboot because the controller
-        // doesn't get power cycled. So, let's change it to page 0
-        // anyway right at the beginning.
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
-            l_err = nvdimmOpenPage(l_nvdimm, ZERO);
-            if (l_err)
-            {
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR);
-                break;
-            }
-
-        }
-
-        if (l_err)
-        {
-            // @TODO-RTC:200275-Make logic generic for all system configs
-            // Because of interleaving, if one is garded the other one
-            // in the pair should be garded by association. So, let's
-            // move on since there is nothing else to do.
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing open page");
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            break;
-        }
-
-        // Before proceeding, make sure the NV controller
-        // is in ready state.
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
-            l_err = nvdimmReady(l_nvdimm);
-            if (l_err)
-            {
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR);
-                break;
-            }
-        }
-
-        if (l_err)
-        {
-            // If this failing right off the bat,
-            // something isn't quite right with
-            // the module
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmReady()");
-            errlCommit(l_err, NVDIMM_COMP_ID);
-            break;
-        }
-
         // Set the energy policy to device-managed
         // Don't think this is needed for the supercaps to start charging
-        // but on some devices this is needed to get the charge timeout value
+        // but do it anyway to get the charging going
         for (const auto & l_nvdimm : i_nvdimmList)
         {
             l_err = nvdimmSetESPolicy(l_nvdimm);
@@ -1181,48 +1329,30 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
             }
         }
 
-        // Get the timeout values for the major ops at init
-        if (init_nv_timeout){
-            for (const auto & l_nvdimm : i_nvdimmList){
-                l_err = nvdimmGetTimeoutVal(l_nvdimm);
+        if (l_mpipl)
+        {
+            // During MPIPL, make sure any in-progress save is completed before proceeding
+            uint32_t l_poll = 0;
+            for (const auto & l_nvdimm : i_nvdimmList)
+            {
+                //Check save progress
+                l_err = nvdimmPollBackupDone(l_nvdimm, l_poll);
+
                 if (l_err)
                 {
-                    nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR);
+                    //@TODO RTC 199645 - add HW callout on dimm target
+                    //Backup is taking longer than the allotted time here.
+                    nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
+                    TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X], error backing up the DRAM!",
+                              TARGETING::get_huid(l_nvdimm));
+                    errlCommit(l_err, NVDIMM_COMP_ID);
                     break;
                 }
             }
-            init_nv_timeout = false;
-        }
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmGetTimeoutVal()");
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            break;
-        }
-
-        // Change back to page 0 just in case, as all of the remaining
-        // operations will be using offsets in page 0
-        for (const auto & l_nvdimm : i_nvdimmList)
-        {
-            l_err = nvdimmOpenPage(l_nvdimm, ZERO);
-            if (l_err)
-            {
-                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR);
-                break;
-            }
-
-        }
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing open page");
-            errlCommit( l_err, NVDIMM_COMP_ID );
-            break;
         }
 
         // Start the restore
-        l_err = nvdimmRestore(i_nvdimmList);
+        l_err = nvdimmRestore(i_nvdimmList, l_mpipl);
 
         if (l_err)
         {
@@ -1247,7 +1377,85 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
     }while(0);
 
-    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
+}
+
+/**
+ * @brief NVDIMM initialization
+ *        - Checks for ready state
+ *        - Gathers timeout values
+ *        - Waits for the ongoing backup to complete
+ *        - Disarms the trigger for draminit
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ */
+void nvdimm_init(Target *i_nvdimm)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_init() nvdimm[%X]",
+                TARGETING::get_huid(i_nvdimm));
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        l_err = nvdimmReady(i_nvdimm);
+
+        if (l_err)
+        {
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], controller not ready",
+                      TARGETING::get_huid(i_nvdimm));
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            break;
+        }
+
+        // Get the timeout values for the major ops at init
+        l_err = nvdimmGetTimeoutVal(i_nvdimm);
+        if (l_err)
+        {
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], error retrieving timeout values",
+                      TARGETING::get_huid(i_nvdimm));
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            break;
+        }
+
+        //Check save progress
+        uint32_t l_poll = 0;
+        l_err = nvdimmPollBackupDone(i_nvdimm, l_poll);
+
+        if (l_err)
+        {
+            //@TODO RTC 199645 - add HW callout on dimm target
+            //Backup is taking longer than the allotted time here.
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_NOPRSV);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], error backing up the DRAM!",
+                      TARGETING::get_huid(i_nvdimm));
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            break;
+        }
+
+        // Disarm the ddr_resetn here in case it came in armed. When the nvdimm is
+        // armed the reset_n is masked off from the host, meaning the drams won't
+        // be able to get reset properly later, causing training to fail.
+        l_err = nvdimmChangeArmState(i_nvdimm, DISARM_TRIGGER);
+
+        if (l_err)
+        {
+            //@TODO RTC 199645 - add HW callout on dimm target
+            //Failed to disarm the reset_n trigger
+            nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_NOPRSV);
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], error disarming the nvdimm!",
+                      TARGETING::get_huid(i_nvdimm));
+            errlCommit(l_err, NVDIMM_COMP_ID);
+            break;
+        }
+
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_init() nvdimm[%X]",
+                TARGETING::get_huid(i_nvdimm));
 }
 #endif
 

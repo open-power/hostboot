@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -296,6 +296,9 @@ const DepModInfo g_istep13Dependancies = {
         DEP_LIB(libistep13.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libcen.so),
+#ifdef CONFIG_NVDIMM
+        DEP_LIB(libnvdimm.so),
+#endif
         NULL
     }
 };
