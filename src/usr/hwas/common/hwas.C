@@ -758,12 +758,35 @@ errlHndl_t discoverTargets()
 
             bool chipPresent = true;
             bool chipFunctional = true;
+            bool createInfoLog = false;
             uint32_t errlEid = 0;
             uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
             bzero(pgData, sizeof(pgData));
 
             // Cache the target type
             auto l_targetType = pTarget->getAttr<ATTR_TYPE>();
+
+            // This error is created preemptively to capture any targets that
+            // were deemed non-functional for partial good reasons. If there are
+            // no issues, then this error log is deleted.
+            /*@
+             * @errortype
+             * @severity        ERRL_SEV_INFORMATIONAL
+             * @moduleid        MOD_DISCOVER_TARGETS
+             * @reasoncode      RC_PARTIAL_GOOD_INFORMATION
+             * @devdesc         Partial Good (PG) issues are present within the
+             *                  system and this error log contains information
+             *                  about which targets, procs, and entries in the
+             *                  PG vector are problematic.
+             * @custdesc        An issue occured during IPL of the system:
+             *                  Internal Firmware Error
+             * @userdata1       None
+             * @userdata2       None
+             */
+            errlHndl_t infoErrl = hwasError(ERRL_SEV_INFORMATIONAL,
+                                            MOD_DISCOVER_TARGETS,
+                                            RC_PARTIAL_GOOD_INFORMATION);
+
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
                 (l_targetType != TYPE_TPM) &&
                 (l_targetType != TYPE_SP) &&
@@ -810,6 +833,19 @@ errlHndl_t discoverTargets()
                         chipFunctional =
                             isChipFunctional(pTarget,
                                              pgData);
+
+                        if(!chipFunctional)
+                        {
+                            // Add this proc to the informational error log.
+                            platHwasErrorAddHWCallout(infoErrl,
+                                                      pTarget,
+                                                      SRCI_PRIORITY_HIGH,
+                                                      NO_DECONFIG,
+                                                      GARD_NULL);
+
+                            createInfoLog = true;
+                        }
+
 
                         // Fill in a dummy restrict list
                         l_procEntry.target = pTarget;
@@ -879,6 +915,12 @@ errlHndl_t discoverTargets()
                     descFunctional = isDescFunctional(pDesc,
                                                       pgData,
                                                       targetStates);
+                    if(!descFunctional)
+                    {
+                        // Add this descendant to the error log.
+                        hwasErrorAddTargetInfo(infoErrl, *pDesc_it);
+                        createInfoLog = true;
+                    }
                 }
 
                 if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
@@ -907,6 +949,48 @@ errlHndl_t discoverTargets()
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
+
+            // If there were partial good issues with the chip or its
+            // descendents then create an info error log. Otherwise, delete
+            // and move on.
+            if (createInfoLog)
+            {
+                TargetHandle_t l_masterProc = nullptr;
+
+                //Get master proc
+                errl =
+                    targetService()
+                        .queryMasterProcChipTargetHandle(l_masterProc);
+                if (errl)
+                {
+                    HWAS_ERR("discoverTargets: unable to get master proc");
+                    errlCommit(errl, HWAS_COMP_ID);
+                    errlCommit(infoErrl, HWAS_COMP_ID);
+                    break;
+                }
+
+                auto l_model = l_masterProc->getAttr<ATTR_MODEL>();
+
+                // Setup model dependent all good data
+                uint16_t l_modelPgData[MODEL_PG_DATA_ENTRIES] = {0};
+
+                l_modelPgData[0] = (MODEL_NIMBUS == l_model)
+                    ? (VPD_CP00_PG_XBUS_GOOD_NIMBUS
+                            | VPD_CP00_PG_XBUS_IOX[0])
+                    : VPD_CP00_PG_XBUS_GOOD_CUMULUS;
+
+                l_modelPgData[1] = (TARGETING::MODEL_NIMBUS == l_model)
+                    ? VPD_CP00_PG_RESERVED_GOOD
+                    : VPD_CP00_PG_OBUS_GOOD;
+
+                hwasErrorAddPartialGoodFFDC(infoErrl, l_modelPgData, pgData);
+                errlCommit(infoErrl, HWAS_COMP_ID);
+            }
+            else
+            {
+                delete infoErrl;
+                infoErrl = nullptr;
+            }
 
         } // for pTarget_it
 
@@ -991,6 +1075,8 @@ errlHndl_t discoverTargets()
         }
 #endif
     } while (0);
+
+
 
     if (errl)
     {
@@ -1186,42 +1272,15 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         // errors of omission, the lookup must return at least one pg logic
         // struct. If a target has no associated rules then an NA rule will be
         // returned that was created by the default constructor which will cause
-        // the next for loop to succeed.
-        PARTIAL_GOOD::pgLogic_t descPgLogic = PARTIAL_GOOD::pgTable
-            .findRulesForTarget(i_desc);
+        // the next for loop to function as a no-op.
+        PARTIAL_GOOD::pgLogic_t descPgLogic;
+        errlHndl_t l_returnErrl = PARTIAL_GOOD::pgTable
+            .findRulesForTarget(i_desc, descPgLogic);
 
-        if (descPgLogic.size() == 0)
+        if (l_returnErrl != nullptr)
         {
-            // If descPgLogic is empty then the PgTable was not updated when a
-            // new target was added. This is not allowed. So create an error.
-            HWAS_ERR("isDescFunctional: No rules for target type 0x%X were"
-                     " found in the PG rules table. At least one must exist."
-                     " HUID 0x%X",
-                     i_desc->getAttr<ATTR_TYPE>(), get_huid(i_desc));
-
-            /*@
-             * @errortype
-             * @severity        ERRL_SEV_UNRECOVERABLE
-             * @moduleid        MOD_IS_DESCENDANT_FUNCTIONAL
-             * @reasoncode      RC_NO_PG_LOGIC
-             * @devdesc         To enforce all target types have partial good
-             *                  rules and logic, all targets must be included in
-             *                  the PartialGoodRulesTable. A combination of
-             *                  target type, chip type, and chip unit produced
-             *                  an empty set of logic for the target.
-             * @custdesc        A problem occured during IPL of the system:
-             *                  Internal Firmware Error
-             * @userdata1       target type attribute
-             * @userdata2       HUID of the target
-             */
-            errlHndl_t l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
-                                          MOD_IS_DESCENDANT_FUNCTIONAL,
-                                          RC_NO_PG_LOGIC,
-                                          i_desc->getAttr<ATTR_TYPE>(),
-                                          get_huid(i_desc));
-
-            errlCommit(l_errl, HWAS_COMP_ID);
-
+            errlCommit(l_returnErrl, HWAS_COMP_ID);
+            break;
         }
 
         // Iterate through the list of partial good logic for this target. If

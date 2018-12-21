@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/hwasPlatReasonCodes.H $                  */
+/* $Source: src/usr/hwas/plugins/hwasUdParserFactory.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,38 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWASPLATREASONCODES_H
-#define HWASPLATREASONCODES_H
+#ifndef HWAS_UD_PARSER_FACTORY_H
+#define HWAS_UD_PARSER_FACTORY_H
+
+#include "errludparserfactory.H"
+#include "errludParser_pgData.H"
+#include "../hwas/common/hwas_reasoncodes.H"
 
 namespace HWAS
 {
-    enum HwasPlatModuleID
+    class UserDetailsParserFactory :
+        public ERRORLOG::ErrlUserDetailsParserFactory
     {
-        //
-        // Code to identify discrete error locations/events
-        //
-        //  @note Must always start @ 0x80, since common module IDs occupy
-        //      0x00 -> 0x7F range
-        MOD_HOST_DISCOVER_TARGETS = 0x80,
-        MOD_PLAT_DECONFIG_GARD    = 0x81,
-        MOD_PLAT_READIDEC         = 0x82,
-        MOD_PLAT_READLX           = 0x83,
+    public:
+        UserDetailsParserFactory()
+        {
+            registerParser<UdParserPartialGoodIssue>
+                (HWAS_UDT_PARTIAL_GOOD_DATA);
+        }
+    private:
+        // Parser isn't compiled with c++11 in all environments, and
+        // therefore "delete" of unused interfaces (like below) is not
+        // supported, nor are functions with move semantics
+        // Disable compiler provided default functions
+        UserDetailsParserFactory(const UserDetailsParserFactory &);
+        UserDetailsParserFactory& operator=(const UserDetailsParserFactory &);
     };
-
-    enum HwasPlatReasonCode
-    {
-        //  @note Must always start @ 0x80, since common reason codes occupy
-        //      0x00 -> 0x7F range
-        RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
-        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
-        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
-        RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
-        RC_BAD_LX                           = HWAS_COMP_ID | 0x84,
-        RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
-        RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
-        RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
-    };
-
-};
+}
 
 #endif

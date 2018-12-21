@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/hwasPlatReasonCodes.H $                  */
+/* $Source: src/usr/hwas/plugins/HWAS_COMP_ID_Parse.C $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,38 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWASPLATREASONCODES_H
-#define HWASPLATREASONCODES_H
+#include "errludparser.H"
+#include "hwasUdParserFactory.H"
 
-namespace HWAS
-{
-    enum HwasPlatModuleID
-    {
-        //
-        // Code to identify discrete error locations/events
-        //
-        //  @note Must always start @ 0x80, since common module IDs occupy
-        //      0x00 -> 0x7F range
-        MOD_HOST_DISCOVER_TARGETS = 0x80,
-        MOD_PLAT_DECONFIG_GARD    = 0x81,
-        MOD_PLAT_READIDEC         = 0x82,
-        MOD_PLAT_READLX           = 0x83,
-    };
-
-    enum HwasPlatReasonCode
-    {
-        //  @note Must always start @ 0x80, since common reason codes occupy
-        //      0x00 -> 0x7F range
-        RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
-        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
-        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
-        RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
-        RC_BAD_LX                           = HWAS_COMP_ID | 0x84,
-        RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
-        RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
-        RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
-    };
-
-};
-
-#endif
+ERRL_MAKE_UD_PARSER(HWAS::UserDetailsParserFactory, hbfw::HWAS_COMP_ID)

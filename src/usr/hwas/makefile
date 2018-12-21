@@ -55,6 +55,7 @@ OBJS += hwasPlat.o
 OBJS += hwasPlatError.o
 OBJS += hwasPlatCallout.o
 OBJS += hwasPlatDeconfigGard.o
+OBJS += errlud_pgData.o
 
 SUBDIRS = test.d
 
