@@ -85,6 +85,10 @@ use constant {
         "ATTR_MEM_VPD_DQ_MAP" => 1,
     },
 
+    # Special attributes which are multi-demensional but the second dimension doesn't represent the PORT but
+    # rather the data on the port group
+    PER_PORT_GROUP_ATTRIBUTES => { "ATTR_MSS_MEM_MVPD_FWMS" => 1, },
+
     # Constants for code generation subroutines
     NO_TARGET           => 0,
     ARRAY_DATA          => 1,
@@ -525,7 +529,7 @@ sub generate_mc_port_params
     }
 
     # Array per DIMM elements with PORT target
-    if (   ( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT} )
+    elsif (( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT} )
         && ( scalar(@dims) > $port_dimensions ) )
     {
         #
@@ -585,7 +589,7 @@ sub generate_mc_port_params
     }
 
     # Per Port elements with PORT_GROUP target
-    if (   ( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT_GROUP} )
+    elsif (( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT_GROUP} )
         && ( scalar(@dims) == $port_dimensions ) )
     {
         # Canary to tell us if we have a per-controller attribute we're not handling
@@ -595,41 +599,52 @@ sub generate_mc_port_params
         # Per Port
         #
         {
-            my %g_parameter = ();
-            my %s_parameter = ();
-            my $parent_type = ${ +TARGET_TYPES }{$system}{PORT_GROUP};
+            # There are some attributes which are multidimensional arrays, but aren't [port][dimm] but rather
+            # [data], meaning they're 'per port group' attributes. MVPD_FWMS is one example; it doesn't make
+            # sense to map FWMS different for different ports.
+            # So check to see if we have one of those attributes, as we force the caller to ask for the attribute
+            # per-port group as that's what the attribute represents.
+            if ( !${ +PER_PORT_GROUP_ATTRIBUTES }{ $attr->{id} } )
+            {
+                my %g_parameter = ();
+                my %s_parameter = ();
+                my $parent_type = ${ +TARGET_TYPES }{$system}{PORT_GROUP};
 
-            create_params_doxy( $attr, ${ +TARGET_TYPES }{$system}{PORT},
-                SCALAR_DATA, "generate_mc_port_params", \%g_parameter, \%s_parameter );
-            create_attr_access_code(
-                $attr, "i_target.getParent<fapi2::$parent_type>()",
-                SCALAR_DATA, "l_value[mss::index(i_target)]",
-                \%g_parameter, \%s_parameter
-            );
-            create_execute_code( SCALAR_DATA, 0, "l_value[mss::index(i_target)]", \%g_parameter, \%s_parameter );
-            create_locals_code( $system, NO_LOCALS, \%g_parameter, \%s_parameter );
+                create_params_doxy( $attr, ${ +TARGET_TYPES }{$system}{PORT},
+                    SCALAR_DATA, "generate_mc_port_params", \%g_parameter, \%s_parameter );
+                create_attr_access_code(
+                    $attr, "i_target.getParent<fapi2::$parent_type>()",
+                    SCALAR_DATA, "l_value[mss::index(i_target)]",
+                    \%g_parameter, \%s_parameter
+                );
+                create_execute_code( SCALAR_DATA, 0, "l_value[mss::index(i_target)]", \%g_parameter, \%s_parameter );
+                create_locals_code( $system, NO_LOCALS, \%g_parameter, \%s_parameter );
 
-            push @{$g_parameters}, \%g_parameter;
-            push @{$s_parameters}, \%s_parameter;
+                push @{$g_parameters}, \%g_parameter;
+                push @{$s_parameters}, \%s_parameter;
+            }
         }
 
         #
         # Per DIMM (just return the value set for my port)
         #
         {
-            my %g_parameter = ();
-            my %s_parameter = ();
-            my $parent_type = ${ +TARGET_TYPES }{$system}{PORT_GROUP};
+            if ( !${ +PER_PORT_GROUP_ATTRIBUTES }{ $attr->{id} } )
+            {
+                my %g_parameter = ();
+                my %s_parameter = ();
+                my $parent_type = ${ +TARGET_TYPES }{$system}{PORT_GROUP};
 
-            create_params_doxy( $attr, ${ +TARGET_TYPES }{$system}{DIMM},
-                SCALAR_DATA, "generate_mc_port_params", \%g_parameter, \%s_parameter );
-            create_attr_access_code( $attr, "l_port.getParent<fapi2::$parent_type>()",
-                SCALAR_DATA, "l_value[mss::index(l_port)]", \%g_parameter, \%s_parameter );
-            create_execute_code( SCALAR_DATA, 0, "l_value[mss::index(l_port)]", \%g_parameter, \%s_parameter );
-            create_locals_code( $system, PORT, \%g_parameter, \%s_parameter );
+                create_params_doxy( $attr, ${ +TARGET_TYPES }{$system}{DIMM},
+                    SCALAR_DATA, "generate_mc_port_params", \%g_parameter, \%s_parameter );
+                create_attr_access_code( $attr, "l_port.getParent<fapi2::$parent_type>()",
+                    SCALAR_DATA, "l_value[mss::index(l_port)]", \%g_parameter, \%s_parameter );
+                create_execute_code( SCALAR_DATA, 0, "l_value[mss::index(l_port)]", \%g_parameter, \%s_parameter );
+                create_locals_code( $system, PORT, \%g_parameter, \%s_parameter );
 
-            push @{$g_parameters}, \%g_parameter;
-            push @{$s_parameters}, \%s_parameter;
+                push @{$g_parameters}, \%g_parameter;
+                push @{$s_parameters}, \%s_parameter;
+            }
         }
 
         #
@@ -662,7 +677,7 @@ sub generate_mc_port_params
     }
 
     # Per dimm elements with PORT_GROUP target
-    if (   ( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT_GROUP} )
+    elsif (( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT_GROUP} )
         && ( scalar(@dims) == $port_group_dimensions ) )
     {
         #
@@ -750,7 +765,7 @@ sub generate_mc_port_params
     }
 
     # Per dimm elements with PORT target
-    if (   ( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT} )
+    elsif (( $attr->{targetType} eq ${ +TARGET_TYPES }{$system}{PORT} )
         && ( scalar(@dims) == $port_dimensions ) )
     {
         #
