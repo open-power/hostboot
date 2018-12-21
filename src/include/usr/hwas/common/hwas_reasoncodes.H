@@ -37,7 +37,9 @@ namespace HWAS
         MOD_RUNTIME_DECONFIG              = 0x06,
         MOD_DISABLE_OBUS                  = 0x07,
         MOD_UPDATE_PROC_MEM_TO_USE        = 0x08,
-        MOD_IS_DESCENDANT_FUNCTIONAL      = 0x09
+        MOD_IS_DESCENDANT_FUNCTIONAL      = 0x09,
+        MOD_FIND_RULES_FOR_TARGET         = 0x0A,
+        MOD_DISCOVER_TARGETS              = 0x0B,
     };
 
     enum HwasReasonCode
@@ -70,7 +72,20 @@ namespace HWAS
         RC_NO_PG_LOGIC                          = HWAS_COMP_ID | 0x16,
         RC_SYSAVAIL_NO_OCMBS_FUNC               = HWAS_COMP_ID | 0x17,
         RC_SYSAVAIL_NO_MEMORY_PRESENT           = HWAS_COMP_ID | 0x18,
+        RC_PG_INDEX_INVALID                     = HWAS_COMP_ID | 0x19,
+        RC_PARTIAL_GOOD_INFORMATION             = HWAS_COMP_ID | 0x1A,
     };
+
+    enum HwasPlatUserDetailsTypes
+    {
+        HWAS_UDT_PARTIAL_GOOD_DATA = 0x01
+    };
+
+    enum HwasPlatUserDetailsVersions
+    {
+        HWAS_UDT_VERSION_1 = 0x01
+    };
+
 };
 
 #endif

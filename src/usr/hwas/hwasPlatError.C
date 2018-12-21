@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/hwasPlatError.H>
+#include "errlud_pgData.H"
+#include <errl/errludtarget.H>
 
 namespace HWAS
 {
@@ -67,5 +69,19 @@ void hwasErrorUpdatePlid(errlHndl_t & io_errl,
     }
 }
 
+void hwasErrorAddPartialGoodFFDC(errlHndl_t & io_errl,
+                        const uint16_t (&i_modelPgData)[MODEL_PG_DATA_ENTRIES],
+                        const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES])
+{
+    ErrlUdPartialGoodData ffdc(i_modelPgData, i_pgData);
+    ffdc.addToLog(io_errl);
+}
+
+void hwasErrorAddTargetInfo(errlHndl_t & io_errl,
+                            const TARGETING::ConstTargetHandle_t i_target)
+{
+    ERRORLOG::ErrlUserDetailsTarget ffdc(i_target);
+    ffdc.addToLog(io_errl);
+}
 
 } // namespace HWAS

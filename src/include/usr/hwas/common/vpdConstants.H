@@ -29,6 +29,11 @@
 namespace HWAS
 {
 
+// NOTE: Many of the VPD_CP00_PG_X constants are used to construct an "All Good"
+//       vector to compare against the PG vector of a system. Changes to
+//       constants in this file should be reflected in
+//       src/usr/hwas/plugins/errludParser_pgData.H
+
 // constants the platReadPartialGood will use for looking at the VPD data
 const uint32_t VPD_CP00_PG_DATA_LENGTH      = 128;
 const uint32_t VPD_CP00_PG_HDR_LENGTH       = 1;

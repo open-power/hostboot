@@ -23,9 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <hwas/common/pgLogic.H>
+#include <hwas/common/hwasCommon.H>
+#include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/hwasPlatTrace.H>
 #include <hwas/hwasPlatAssert.H>
 #include <targeting/common/utilFilter.H>
+#include <hwas/common/hwasError.H>
+
+using namespace HWAS::COMMON;
 
 namespace PARTIAL_GOOD
 {
@@ -216,10 +221,11 @@ namespace PARTIAL_GOOD
         }
     }
 
-    pgLogic_t PartialGoodRulesTable::findRulesForTarget(
-            const TARGETING::TargetHandle_t &i_target) const
+    errlHndl_t PartialGoodRulesTable::findRulesForTarget(
+            const TARGETING::TargetHandle_t &i_target,
+            pgLogic_t &o_targetPgLogic) const
     {
-        pgLogic_t l_targetPgLogic;
+        errlHndl_t l_errl = nullptr;
 
         // Lookup the Target in the PG Rules Table
         auto rulesIterator =
@@ -268,18 +274,87 @@ namespace PARTIAL_GOOD
                     // for this rule.
                     if ((*pgRule)->useChipletIdAsIndex())
                     {
-                        pgLogic.iv_pgIndex =
+                        auto l_targetChipletId =
                             i_target->getAttr<TARGETING::ATTR_CHIPLET_ID>();
+
+                        // The index must be within range of the vector.
+                        // Otherwise we'll go out-of-bounds.
+                        if (l_targetChipletId < HWAS::VPD_CP00_PG_DATA_ENTRIES)
+                        {
+                            // The target's Chiplet Id is a valid index for this
+                            // rule and is within range.
+                            pgLogic.iv_pgIndex = l_targetChipletId;
+                        }
+                        else
+                        {
+                            /*@
+                             * @errortype
+                             * @severity        ERRL_SEV_UNRECOVERABLE
+                             * @moduleid        HWAS::MOD_FIND_RULES_FOR_TARGET
+                             * @reasoncode      HWAS::RC_PG_INDEX_INVALID
+                             * @devdesc         A rule called for the use of the
+                             *                  MRW's supplied CHIPLET_ID for an
+                             *                  index into the PG vector. That
+                             *                  value has gone unexpectedly
+                             *                  out-of-range.
+                             * @custdesc        A problem occured during IPL of
+                             *                  the system:
+                             *                  Internal Firmware Error
+                             * @userdata1       PG Index value
+                             * @userdata2       HUID of the target
+                             */
+                            l_errl = HWAS::hwasError(
+                                              ERRL_SEV_UNRECOVERABLE,
+                                              HWAS::MOD_FIND_RULES_FOR_TARGET,
+                                              HWAS::RC_PG_INDEX_INVALID,
+                                              l_targetChipletId,
+                                              get_huid(i_target));
+
+                            break;
+                        }
                     }
 
                     // Add it to list of pg logic for this target.
-                    l_targetPgLogic.push_back(pgLogic);
+                    o_targetPgLogic.push_back(pgLogic);
                 }
+            }
+
+            // If o_targetPgLogic has no entries then that means that there
+            // doesn't exist any PG rules for the given target or another error
+            // was encountered. If no other error occurred then return the
+            // the following error if applicable.
+            if ((l_errl == nullptr) && (o_targetPgLogic.size() == 0))
+            {
+                /*@
+                * @errortype
+                * @severity        ERRL_SEV_UNRECOVERABLE
+                * @moduleid        HWAS::MOD_IS_DESCENDANT_FUNCTIONAL
+                * @reasoncode      HWAS::RC_NO_PG_LOGIC
+                * @devdesc         To enforce all target types have partial good
+                *                  rules and logic, all targets must be included
+                *                  in the PartialGoodRulesTable. A combination
+                *                  of target type, chip type, and chip unit
+                *                  produced an empty set of logic for the
+                *                  target.
+                *
+                * @custdesc        A problem occured during IPL of the system:
+                *                  Internal Firmware Error
+                * @userdata1       target type attribute
+                * @userdata2       HUID of the target
+                */
+                l_errl = hwasError(
+                                   ERRL_SEV_UNRECOVERABLE,
+                                   HWAS::MOD_IS_DESCENDANT_FUNCTIONAL,
+                                   HWAS::RC_NO_PG_LOGIC,
+                                   i_target->getAttr<TARGETING::ATTR_TYPE>(),
+                                   get_huid(i_target));
+
+                break;
             }
 
         } while(0);
 
-        return l_targetPgLogic;
+        return l_errl;
     }
 
 

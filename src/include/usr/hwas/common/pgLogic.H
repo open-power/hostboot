@@ -421,19 +421,23 @@ namespace PARTIAL_GOOD
         /**
          * @brief This function will lookup the list of applicable rules for the
          *        given target and return them as a vector of PartialGoodLogic.
-         *        This function should always return a vector of size >= 1. An
-         *        empty vector indicates that the target isn't represented in
-         *        the rules table which is an error of omission.
+         *        This function should always return a vector of size >= 1. If
+         *        that isn't the case then an error will be returned by this
+         *        function.
          *
-         * @param[in] i_target         The target to find pg rules for.
+         * @param[in]  i_target        The target to find pg rules for.
          *
-         * @return vector_pgLogic_t    A vector of PartialGoodLogic structs
+         * @param[out] o_pgLogic       A vector of PartialGoodLogic structs
          *                             representing the list of applicable rules
          *                             used to verify if a target is functional
          *                             or not.
+         *
+         * @return errlHndl_t          An error that occured while getting pg
+         *                             logic or nullptr.
          */
-        pgLogic_t
-            findRulesForTarget(const TARGETING::TargetHandle_t &i_target) const;
+        errlHndl_t
+            findRulesForTarget(const TARGETING::TargetHandle_t &i_target,
+                               pgLogic_t &o_pgLogic) const;
 
     private:
         // A map that will hold all of the PG rules for all targets. If a target
