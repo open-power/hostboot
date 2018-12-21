@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,13 +47,18 @@ namespace SPD
 */
 enum
 {
-    // Memory Type address/size/constants for both DDR3 and DDR4
+    // Memory Type address/size/constants for DDRx (DDR3, DDR4, etc)
+    MEM_TYPE_INVALID = 0x0,
     MEM_TYPE_ADDR = 0x2,
     MEM_TYPE_SZ = 0x1,
-    SPD_DDR3 = 0xB,
-    SPD_DDR4 = 0xC,
+    SPD_DDR3_TYPE = 0xB,    // SPD type for DDR3 as found in SPD byte 2
+    SPD_DDR4_TYPE = 0xC,    // SPD type for DDR4 as found in SPD byte 2
+    SPD_DDR5_TYPE = 0x12,   // SPD type for DDR5 as found in SPD byte 2
+    SPD_DDR3_SIZE = 256,    // SPD size for DDR3, 256 bytes
+    SPD_DDR4_SIZE = 512,    // SPD size for DDR4, 512 bytes
+    SPD_DDR5_SIZE = 1024,   // SPD size for DDR5, 1024 bytes
 
-    // Module Type address/size/mask/constants for both DDR3 and DDR4
+    // Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc)
     MOD_TYPE_ADDR            = 0x03,
     MOD_TYPE_SZ              = 0x01,
     MOD_TYPE_MASK            = 0x0f,
@@ -75,6 +80,7 @@ enum
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
+
 };
 
 /**
