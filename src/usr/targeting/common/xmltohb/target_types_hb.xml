@@ -234,6 +234,9 @@
   <targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute>
+      <id>DIMM_SPD_BYTE_SIZE</id>
+    </attribute>
+    <attribute>
       <id>PART_NUMBER</id>
     </attribute>
     <attribute>

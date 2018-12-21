@@ -85,6 +85,7 @@ enum vpdModuleId
     VPD_SPD_WRITE_DATA                      = 0x6D,
     VPD_SPD_GET_MOD_TYPE                    = 0x6E,
     VPD_SPD_FETCH_DATA                      = 0x6F,
+    VPD_SPD_SET_DIMM_SIZE                   = 0x70,
 
     // Runtime VPD
     VPD_RT_GET_ADDR                         = 0x80,
