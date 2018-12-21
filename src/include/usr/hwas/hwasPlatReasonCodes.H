@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/hwasplatreasoncodes.H $                  */
+/* $Source: src/include/usr/hwas/hwasPlatReasonCodes.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,17 @@ namespace HWAS
         RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
         RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
         RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
+        RC_PARTIAL_GOOD_INFORMATION         = HWAS_COMP_ID | 0x88,
+    };
+
+    enum HwasPlatUserDetailsTypes
+    {
+        HWAS_UDT_PARTIAL_GOOD_DATA          = 0x01,
+    };
+
+    enum HwasPlatUserDetailsVersions
+    {
+        HWAS_UDT_VERSION_1        = 0x01,
     };
 };
 
