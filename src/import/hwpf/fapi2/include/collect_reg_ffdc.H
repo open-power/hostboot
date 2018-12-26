@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,9 +417,9 @@ ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reade
     {
         fapi2::buffer<T> l_buf;
 
-        T l_address = address + i_offset;
+        l_addr  =   address + i_offset;
 
-        l_rc = i_reader.read_register(l_address, l_buf);
+        l_rc    =   i_reader.read_register(l_addr, l_buf);
 
         if(l_rc)
         {
@@ -434,9 +434,7 @@ ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reade
             l_data = l_buf();
         }
 
-        l_address = htobe64(l_address);
-        l_data = htobe64(l_data);
-        l_addr = l_address >> 32;
+        l_data    =     htobe64(l_data);
 
         memcpy(o_pData, &l_addr, sizeof(uint32_t));
         o_pData += sizeof(uint32_t);
