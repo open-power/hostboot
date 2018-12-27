@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -605,8 +605,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
                                 TARGETING::TYPE_I2C_MUX);
                     }
 
-                    TARGETING::I2cMuxInfo l_i2cMuxInfo =
-                          l_targetList->getAttr<TARGETING::ATTR_I2C_MUX_INFO>();
+                    TARGETING::FapiI2cControlInfo l_i2cMuxInfo =
+                          l_targetList->getAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>();
 
                     if (TARGETING::EntityPath::PATH_PHYSICAL !=
                             l_i2cMuxInfo.i2cMasterPath.type())

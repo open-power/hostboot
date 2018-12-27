@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1053,9 +1053,9 @@ errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
             break;
         }
 
-        TARGETING::I2cMuxInfo l_muxData;
+        TARGETING::FapiI2cControlInfo l_muxData;
 
-        if (! (l_i2cMuxTarget->tryGetAttr<TARGETING::ATTR_I2C_MUX_INFO>(l_muxData)) )
+        if (! (l_i2cMuxTarget->tryGetAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>(l_muxData)) )
         {
             TRACFCOMP(g_trac_i2c,
             "i2cAccessMux(): get attributes failed");

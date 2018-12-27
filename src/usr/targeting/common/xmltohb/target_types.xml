@@ -973,9 +973,6 @@
       <id>FAPI_I2C_CONTROL_INFO</id>
     </attribute>
     <attribute>
-      <id>I2C_MUX_INFO</id>
-    </attribute>
-    <attribute>
       <id>MODEL</id>
       <default>PCA9847</default>
     </attribute>
