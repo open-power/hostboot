@@ -2493,51 +2493,6 @@
 
   <attribute>
     <complexType>
-      <description>Structure to define the addressing for
-                 an I2C mux target. </description>
-      <!-- Master Target Definition -->
-      <field>
-        <!--- NOTE: default physical sys-0 is not a valid entity path,
-                  this must be populated with a valid entity path.    -->
-        <default>physical:sys-0</default>
-        <description>Entity path to the chip that contains the I2C
-                   master.</description>
-        <name>i2cMasterPath</name>
-        <type>EntityPath</type>
-      </field>
-      <!-- Port Definition -->
-      <field>
-        <default>0x00</default>
-        <description>Port from the I2C Master device. This is a
-                   6-bit value. </description>
-        <name>port</name>
-        <type>uint8_t</type>
-      </field>
-      <!-- Device Address Definition -->
-      <field>
-        <default>0x00</default>
-        <description>Device address on the I2C bus. This is a 7-bit
-                   value, but then shifted 1 bit left. </description>
-        <name>devAddr</name>
-        <type>uint8_t</type>
-      </field>
-      <!-- Engine Definition -->
-      <field>
-        <default>0x00</default>
-        <description>I2C master engine. This is a 2-bit value. </description>
-        <name>engine</name>
-        <type>uint8_t</type>
-      </field>
-    </complexType>
-    <description>Information used to control a specific i2c mux device,
-               to select a particular target bus. </description>
-    <id>I2C_MUX_INFO</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-  </attribute>
-
-  <attribute>
-    <complexType>
       <description>Structure which defines which I2C access method to use at
         a point in time.  Only applicable if target supports one or more I2C
         types.  Only one bit (of the first two) can ever be set at any one time.
