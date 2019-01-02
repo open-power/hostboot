@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,9 @@ namespace HWAS
         RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
         RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED   = HWAS_COMP_ID | 0x14,
         RC_NO_UPDATE_WHEN_MEM_MISSING           = HWAS_COMP_ID | 0x15,
-        RC_NO_PG_LOGIC                          = HWAS_COMP_ID | 0x16
+        RC_NO_PG_LOGIC                          = HWAS_COMP_ID | 0x16,
+        RC_SYSAVAIL_NO_OCMBS_FUNC               = HWAS_COMP_ID | 0x17,
+        RC_SYSAVAIL_NO_MEMORY_PRESENT           = HWAS_COMP_ID | 0x18,
     };
 };
 

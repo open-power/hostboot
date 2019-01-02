@@ -159,13 +159,15 @@ public:
         DECONFIGURED_BY_NO_CHILD_DIMM,          // BASE | 0x0A
 
         // set by presentByAssoc() when a MEMBUF has no MCS
-        DECONFIGURED_BY_NO_PARENT_DMI,   // BASE | 0x0B
+        DECONFIGURED_BY_NO_PARENT_DMI,          // BASE | 0x0B
         DECONFIGURED_BY_NO_PARENT_MCS =
             DECONFIGURED_BY_NO_PARENT_DMI,
         // set by presentByAssoc() when a MEMBUF has no MBAs
         DECONFIGURED_BY_NO_CHILD_MBA,           // BASE | 0x0C
 
-        // set by presentByAssoc() when a DIMM has no MBA or MCA
+        // set by presentByAssoc() when a DIMM has no MBA or MCA or MEMPORT
+        //@TODO RTC 196804: Rename to
+        //                  DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA_OR_MEMPORT
         DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA,   // BASE | 0x0D
         // TODO RTC 149367 Remove deprecated enumeration once hwsv is not using
         DECONFIGURED_BY_NO_PARENT_MBA =         //Deprecated
@@ -183,6 +185,7 @@ public:
         DECONFIGURED_BY_DISABLED_PORT,          // BASE | 0x16
 
         DECONFIGURED_BY_NO_CHILD_MI,            // BASE | 0x17
+        //@TODO RTC 196804: Rename to DECONFIGURED_BY_NO_CHILD_DMI_OR_MCC
         DECONFIGURED_BY_NO_CHILD_DMI,           // BASE | 0x18
         DECONFIGURED_BY_NO_PARENT_MC,           // BASE | 0x19
         DECONFIGURED_BY_NO_PARENT_MI,           // BASE | 0x1A
@@ -190,6 +193,12 @@ public:
         DECONFIGURED_BY_NO_MATCHING_LINK_SET,   // BASE | 0x1B
         //used when we deconfigure unused children of OBUS
         DECONFIGURED_BY_OBUS_MODE,              // BASE | 0x1C
+        DECONFIGURED_BY_NO_CHILD_OMI,           // BASE | 0x1D
+        DECONFIGURED_BY_NO_PARENT_MCC,          // BASE | 0x1E
+        DECONFIGURED_BY_NO_CHILD_MEM_PORT,      // BASE | 0x1F
+        DECONFIGURED_BY_NO_PARENT_OMI,          // BASE | 0x20
+        DECONFIGURED_BY_NO_CHILD_OCMB_CHIP,     // BASE | 0x21
+        DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,    // BASE | 0x22
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
