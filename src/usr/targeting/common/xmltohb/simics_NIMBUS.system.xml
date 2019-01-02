@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2060,6 +2060,10 @@
         <default>0x07</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
@@ -2095,6 +2099,10 @@
     <attribute>
         <id>CHIPLET_ID</id>
         <default>0x08</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2142,6 +2150,10 @@
         <default>0x0003E58000000000</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
@@ -2185,6 +2197,10 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E5A000000000</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2232,6 +2248,10 @@
         <default>0x0003E5C000000000</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
@@ -2277,6 +2297,10 @@
         <default>0x0003E5E000000000</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
@@ -2316,6 +2340,10 @@
         <default>0x07</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
@@ -2351,6 +2379,10 @@
     <attribute>
         <id>CHIPLET_ID</id>
         <default>0x07</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2391,6 +2423,10 @@
         <default>0x07</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
@@ -2426,6 +2462,10 @@
     <attribute>
         <id>CHIPLET_ID</id>
         <default>0x07</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2466,6 +2506,10 @@
         <default>0x08</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
@@ -2501,6 +2545,10 @@
     <attribute>
         <id>CHIPLET_ID</id>
         <default>0x08</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2541,6 +2589,10 @@
         <default>0x08</default>
     </attribute>
     <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
@@ -2576,6 +2628,10 @@
     <attribute>
         <id>CHIPLET_ID</id>
         <default>0x08</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -11140,6 +11196,10 @@
         <id>VPD_REC_NUM</id>
         <default>1</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p0 -->
@@ -11171,6 +11231,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11204,6 +11268,10 @@
         <id>VPD_REC_NUM</id>
         <default>3</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p2 -->
@@ -11235,6 +11303,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11268,6 +11340,10 @@
         <id>VPD_REC_NUM</id>
         <default>4</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p5 -->
@@ -11299,6 +11375,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11332,6 +11412,10 @@
         <id>VPD_REC_NUM</id>
         <default>7</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p6 -->
@@ -11363,6 +11447,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>6</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11396,6 +11484,10 @@
         <id>VPD_REC_NUM</id>
         <default>8</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p9 -->
@@ -11427,6 +11519,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11460,6 +11556,10 @@
         <id>VPD_REC_NUM</id>
         <default>10</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p11 -->
@@ -11491,6 +11591,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>11</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11524,6 +11628,10 @@
         <id>VPD_REC_NUM</id>
         <default>12</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p13 -->
@@ -11555,6 +11663,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>13</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11588,6 +11700,10 @@
         <id>VPD_REC_NUM</id>
         <default>15</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p14 -->
@@ -11619,6 +11735,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>14</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11652,6 +11772,10 @@
         <id>VPD_REC_NUM</id>
         <default>17</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p16 -->
@@ -11683,6 +11807,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>16</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11716,6 +11844,10 @@
         <id>VPD_REC_NUM</id>
         <default>18</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p19 -->
@@ -11747,6 +11879,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>19</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11780,6 +11916,10 @@
         <id>VPD_REC_NUM</id>
         <default>20</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p21 -->
@@ -11811,6 +11951,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>21</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11844,6 +11988,10 @@
         <id>VPD_REC_NUM</id>
         <default>22</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p23 -->
@@ -11875,6 +12023,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>23</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11908,6 +12060,10 @@
         <id>VPD_REC_NUM</id>
         <default>24</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p25 -->
@@ -11939,6 +12095,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>25</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -11972,6 +12132,10 @@
         <id>VPD_REC_NUM</id>
         <default>26</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p27 -->
@@ -12003,6 +12167,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>27</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12036,6 +12204,10 @@
         <id>VPD_REC_NUM</id>
         <default>29</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p28 -->
@@ -12067,6 +12239,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>28</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -12100,6 +12276,10 @@
         <id>VPD_REC_NUM</id>
         <default>30</default>
     </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- DIMM n0:p31 -->
@@ -12131,6 +12311,10 @@
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>31</default>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+      <default>1</default>
     </attribute>
 </targetInstance>
 
