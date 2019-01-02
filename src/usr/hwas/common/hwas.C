@@ -767,7 +767,8 @@ errlHndl_t discoverTargets()
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
                 (l_targetType != TYPE_TPM) &&
                 (l_targetType != TYPE_SP) &&
-                (l_targetType != TYPE_BMC) )
+                (l_targetType != TYPE_BMC) &&
+                (l_targetType != TYPE_I2C_MUX))
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
@@ -2029,6 +2030,26 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         targetService().getAssociated( l_presMcaTargetList, pTop,
                 TargetService::CHILD, TargetService::ALL,
                 &l_checkExprPresMca);
+
+        PredicateCTM l_membuf(CLASS_CHIP, TYPE_MEMBUF);
+
+        TargetHandleList l_presMembufTargetList;
+        PredicatePostfixExpr l_checkExprPresMembufs;
+        l_checkExprPresMembufs.push(&l_membuf).push(&l_present).And();
+        targetService().getAssociated( l_presMembufTargetList, pTop,
+            TargetService::CHILD, TargetService::ALL,
+            &l_checkExprPresMembufs);
+
+
+        PredicateCTM l_ocmb(CLASS_CHIP, TYPE_OCMB_CHIP);
+
+        TargetHandleList l_presOcmbTargetList;
+        PredicatePostfixExpr l_checkExprPresOcmbs;
+        l_checkExprPresOcmbs.push(&l_ocmb).push(&l_present).And();
+        targetService().getAssociated( l_presOcmbTargetList, pTop,
+            TargetService::CHILD, TargetService::ALL,
+            &l_checkExprPresOcmbs);
+
         // If any MCAs are present, then some must be functional
         if (!l_presMcaTargetList.empty())
         {
@@ -2086,10 +2107,10 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 // errl is now NULL
             }
         }
-        else  // there were no MCAa. There must be functional membufs
+        // there were no MCAs. If there are present membufs then
+        // there must be some functional membufs
+        else if (!l_presMembufTargetList.empty())
         {
-            PredicateCTM l_membuf(CLASS_CHIP, TYPE_MEMBUF);
-
             TargetHandleList l_funcMembufTargetList;
             PredicatePostfixExpr l_checkExprFunctionalMembufs;
             l_checkExprFunctionalMembufs.push(&l_membuf).
@@ -2151,6 +2172,119 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 errlCommit(l_errl, HWAS_COMP_ID);
                 // errl is now NULL
             }
+        }
+        // No MCAs or membufs. If OMCBs are present, there must be some
+        // functional OCMBs
+        else if (!l_presOcmbTargetList.empty())
+        {
+
+            TargetHandleList l_funcOcmbTargetList;
+            PredicatePostfixExpr l_checkExprFuncOcmbs;
+            l_checkExprFuncOcmbs.push(&l_ocmb).push(&l_functional).And();
+            targetService().getAssociated( l_funcOcmbTargetList, pTop,
+                TargetService::CHILD, TargetService::ALL,
+                &l_checkExprFuncOcmbs);
+
+            HWAS_DBG( "checkMinimumHardware: %d functional OCMBs",
+                l_funcOcmbTargetList.size());
+
+            if (l_funcOcmbTargetList.empty())
+            {
+                 HWAS_ERR( "Insufficient hardware to continue IPL"
+                           " (func OCMBs)");
+                if(o_bootable)
+                {
+                    *o_bootable = false;
+                    break;
+                }
+                TargetHandleList l_presentOcmbTargetList;
+
+                PredicatePostfixExpr l_checkExprPresentOcmbs;
+                l_checkExprPresentOcmbs.push(&l_ocmb).push(&l_present).And();
+
+                targetService().getAssociated( l_presentOcmbTargetList, pTop,
+                                    TargetService::CHILD, TargetService::ALL,
+                                    &l_checkExprPresentOcmbs);
+
+                uint32_t ocmbs_present = l_presentOcmbTargetList.size();
+
+                /*@
+                 * @errortype
+                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid           MOD_CHECK_MIN_HW
+                 * @reasoncode         RC_SYSAVAIL_NO_OCMBS_FUNC
+                 * @devdesc            checkMinimumHardware found no
+                 *                     functional ocmbs
+                 * @custdesc           A problem occurred during the IPL of the
+                 *                     system: Found no functional dimm cards.
+                 * @userdata1[00:31]   HUID of node
+                 * @userdata2[00:31]   number of present nonfunctional ocmbs
+                 */
+                const uint64_t userdata1 =
+                        (static_cast<uint64_t>(get_huid(pTop)) << 32);
+                const uint64_t userdata2 =
+                        (static_cast<uint64_t>(ocmbs_present) << 32);
+
+                l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                             MOD_CHECK_MIN_HW,
+                             RC_SYSAVAIL_NO_OCMBS_FUNC,
+                             userdata1, userdata2);
+
+                //  call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout( l_errl,
+                             EPUB_PRC_FIND_DECONFIGURED_PART,
+                             SRCI_PRIORITY_HIGH );
+
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid( l_errl, l_commonPlid );
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // errl is now NULL
+            }
+        }
+        else // No MCAs, membufs, or OCMB chips present. Cannot continue IPL.
+        {
+            HWAS_DBG("checkMinimumHardware: No present MCAs, membufs, "
+                     "or OCMBs.");
+
+            HWAS_ERR( "Insufficient hardware to continue IPL"
+                       " (0 present MCAs, Membufs, OCMBs)");
+
+            if(o_bootable)
+            {
+                *o_bootable = false;
+                break;
+            }
+
+            /*@
+             * @errortype
+             * @severity           ERRL_SEV_UNRECOVERABLE
+             * @moduleid           MOD_CHECK_MIN_HW
+             * @reasoncode         RC_SYSAVAIL_NO_MEMORY_PRESENT
+             * @devdesc            checkMinimumHardware found no present MCAs,
+             *                     Membufs, or OCMB chips.
+             * @custdesc           A problem occurred during the IPL of the
+             *                     system: Found no functional dimm cards.
+             * @userdata1[00:31]   HUID of node
+             */
+            const uint64_t userdata1 =
+                    (static_cast<uint64_t>(get_huid(pTop)) << 32);
+
+            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                               MOD_CHECK_MIN_HW,
+                               RC_SYSAVAIL_NO_MEMORY_PRESENT,
+                               userdata1);
+
+            //  call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout( l_errl,
+                         EPUB_PRC_FIND_DECONFIGURED_PART,
+                         SRCI_PRIORITY_HIGH );
+
+            //  if we already have an error, link this one to the earlier;
+            //  if not, set the common plid
+            hwasErrorUpdatePlid( l_errl, l_commonPlid );
+            errlCommit(l_errl, HWAS_COMP_ID);
+            // errl is now NULL
         }
 
         // check for functional NX chiplets
@@ -2279,6 +2413,7 @@ bool isSameSubPath(TargetInfo i_t1, TargetInfo i_t2)
 {
     size_t l_size = std::min(i_t1.affinityPath.size(),
                              i_t2.affinityPath.size());
+
     return i_t1.affinityPath.equals(i_t2.affinityPath, l_size);
 }
 
@@ -2419,13 +2554,33 @@ void invokePresentByAssoc()
     }
 #endif
 
+    PredicateCTM mccPred(CLASS_NA, TYPE_MCC),
+                 omiPred(CLASS_NA, TYPE_OMI),
+                 ocmbPred(CLASS_CHIP, TYPE_OCMB_CHIP),
+                 memportPred(CLASS_NA, TYPE_MEM_PORT);
+    PredicateHwas functionalPred;
+    functionalPred.functional(true);
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+    PredicatePostfixExpr l_funcAxoneMemoryUnits;
+    l_funcAxoneMemoryUnits.push(&mccPred).push(&omiPred).Or().push(&ocmbPred)
+        .Or().push(&memportPred).Or().push(&functionalPred).And();
+
+    TargetHandleList l_funcAxoneTargetList;
+    targetService().getAssociated(l_funcAxoneTargetList, pSys,
+            TargetService::CHILD, TargetService::ALL, &l_funcAxoneMemoryUnits);
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                            l_funcAxoneTargetList.begin(),
+                            l_funcAxoneTargetList.end());
+
+
     // get the functional membufs
-    // note: do not expect membufs for NIMBUS
+    // note: do not expect membufs for NIMBUS and AXONE
     TargetHandleList l_funcMembufTargetList;
     getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
-    l_funcTargetList.insert(l_funcTargetList.begin(),
-                               l_funcMembufTargetList.begin(),
-                               l_funcMembufTargetList.end());
+                l_funcTargetList.insert(l_funcTargetList.begin(),
+                l_funcMembufTargetList.begin(),
+                l_funcMembufTargetList.end());
 
 // If VPO, dump targets (MEMBUF) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
@@ -2536,9 +2691,17 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
     //   MEMBUF has parent DMI and child MBA
     //   MBA has parent MEMBUF and child DIMM
     //   DIMM has parent MBA.
+    // for AXONE
+    //   MC has child MI and child OMIC
+    //   MI has parent MC and child MCC
+    //   OMIC has parent MC and child OMI
+    //   MCC has parent MC and child OMI
+    //   OMI has parent MCC and OMIC and child OCMB
+    //   OCMB has parent OMI and child MEM_PORT
+    //   MEM_PORT has parent OCMB and child DIMM
+    //   DIMM has parent MEM_PORT
     std::sort(io_funcTargets.begin(), io_funcTargets.end(),
               compareAffinity);
-
 
     // Keep track of the most recently seen MCBIST, MCS & MCA for NIMBUS
     //  MC, MI, DMI, MEMBUF and MBA for CUMULUS. This allows the
@@ -2550,8 +2713,12 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
     size_t l_MCIndex = __INT_MAX__;
     size_t l_MIIndex = __INT_MAX__;
     size_t l_DMIIndex = __INT_MAX__;
+    size_t l_MCCIndex = __INT_MAX__;
     size_t l_MEMBUFIndex = __INT_MAX__;
+    size_t l_MEMPORTIndex = __INT_MAX__;
     size_t l_MBAIndex = __INT_MAX__;
+    size_t l_OMIIndex = __INT_MAX__;
+    size_t l_OCMBIndex = __INT_MAX__;
     size_t i = 0;
 
     // Perform presentByAssoc algorithm
@@ -2659,7 +2826,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             break;
         } // MCS
 
-        case TYPE_MC:    //CUMULUS
+        case TYPE_MC:    //CUMULUS and AXONE
         {
             // No Child MIs
             // If next is not a MI sharing the same MC, deconfig MC
@@ -2678,28 +2845,32 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 //Just erased current MC, so MI/DMI index invalid
                 l_MIIndex = __INT_MAX__;
                 l_DMIIndex = __INT_MAX__;
+                l_MCCIndex = __INT_MAX__;
             }
+            //@TODO RTC 196804: Add checks for OMIC
             // Update MC Index
             else
             {
                 l_MCIndex = i;
                 l_MIIndex = __INT_MAX__; //New MC,so MI index invalid
                 l_DMIIndex = __INT_MAX__; //New MC,so DMI index invalid
+                l_MCCIndex = __INT_MAX__; //New MC,so MCC index invalid
                 i++;
                 continue;
             }
             break;
         }// MC
 
-        case TYPE_MI:    //CUMULUS
+        case TYPE_MI:    //CUMULUS and AXONE
         {
-            // No Child DMIs
-            // If next is not a DMI sharing the same MI, deconfig MI
-            if ( (l_nextTargetInfo == NULL) ||
-                 ( l_nextTargetInfo->type != TYPE_DMI) ||
-                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            // No Child DMIs (for CUMULUS) or MCCs (for AXONE)
+            // If next is not a DMI/MCC sharing the same MI, deconfig MI
+            if ( (l_nextTargetInfo == NULL)
+                || ((l_nextTargetInfo->type != TYPE_DMI) &&
+                   (l_nextTargetInfo->type != TYPE_MCC))
+                || !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
             {
-                // Disable MI - NO_CHILD_DMI
+                // Disable MI - NO_CHILD_DMI_OR_MCC
                 l_curTargetInfo.reason =
                         DeconfigGard::DECONFIGURED_BY_NO_CHILD_DMI;
 
@@ -2718,6 +2889,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             {
                 l_MIIndex = i;
                 l_DMIIndex = __INT_MAX__; //New MI, so DMI index invalid
+                l_MCCIndex = __INT_MAX__; //New MI, so MCC index invalid
                 i++;
                 continue;
             }
@@ -2732,6 +2904,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 i = l_MCIndex;
                 l_MIIndex = __INT_MAX__; //New MC, MI index invalid
                 l_DMIIndex = __INT_MAX__; //New MC, DMI index invalid
+                l_MCCIndex = __INT_MAX__; //New MC, MCC index invalid
             }
             // Backtrack to beginning if no MC has been seen yet
             else
@@ -2795,6 +2968,259 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             break;
         } // DMI
 
+        case TYPE_MCC:      // AXONE
+        {
+            // No Child OMIs
+            // If next is not a OMI sharing the same MCC, deconfig MCC
+            if ( (l_nextTargetInfo == NULL) ||
+                 ( l_nextTargetInfo->type != TYPE_OMI) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MCC - NO_CHILD_OMI
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_OMI;
+
+            }
+            // No Parent MI
+            // If MCC doesn't share the same MI as MCCIndex, deconfig MCC
+            else if ( (l_MIIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MIIndex]))
+            {
+                // Disable MCC - NO_PARENT_MI
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MI;
+            }
+            // Update MCC Index
+            else
+            {
+                l_MCCIndex = i;
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MI
+            if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+                l_MCCIndex = __INT_MAX__; //New MI, MCC index invalid
+            }
+            //Backtrack to last MC, if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_MCCIndex = __INT_MAX__; //New MC, MCC index invalid
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // MCC
+
+        case TYPE_OMI:      // AXONE
+        {
+            // No Child OCMBs
+            // If next is not a OCMB sharing the same OMI, deconfig OMI
+            if ( (l_nextTargetInfo == NULL) ||
+                 ( l_nextTargetInfo->type != TYPE_OCMB_CHIP) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable OMI - NO_CHILD_OCMB_CHIP
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_OCMB_CHIP;
+
+            }
+            // No Parent MCC
+            // If OMI doesn't share the same MCC as OMIIndex, deconfig OMI
+            else if ( (l_MCCIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCCIndex]))
+            {
+                // Disable OMI - NO_PARENT_MCC
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCC;
+            }
+            // Update OMI Index
+            else
+            {
+                l_OMIIndex = i;
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MCC
+            if ( l_MCCIndex != __INT_MAX__ )
+            {
+                i = l_MCCIndex;
+                l_OMIIndex = __INT_MAX__; //New MCC, OMI index invalid
+            }
+            //Backtrack to last MI, if no MCC has been seen yet
+            else if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+                l_OMIIndex = __INT_MAX__; //New MI, OMI index invalid
+            }
+            //Backtrack to last MC, if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_OMIIndex = __INT_MAX__; //New MC, OMI index invalid
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // OMI
+
+        case TYPE_OCMB_CHIP:      // AXONE
+        {
+            // No Child MEMPORTs
+            // If next is not a MEMPORT sharing the same OCMB, deconfig OCMB
+            if ( (l_nextTargetInfo == NULL) ||
+                 (l_nextTargetInfo->type != TYPE_MEM_PORT) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
+            {
+                // Disable OCMB - NO_CHILD_MEM_PORT
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEM_PORT;
+
+            }
+            // No Parent OMI
+            // If OCMB doesn't share the same OMI as OCMBIndex, deconfig OCMB
+            else if ( (l_OMIIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_OMIIndex]))
+            {
+                // Disable OCMB - NO_PARENT_OMI
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_OMI;
+            }
+            // Update OCMB Index
+            else
+            {
+                l_OCMBIndex = i;
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last OMI
+            if ( l_OMIIndex != __INT_MAX__ )
+            {
+                i = l_OMIIndex;
+                l_OCMBIndex = __INT_MAX__; //New OMI, OCMB index invalid
+            }
+            // Backtrack to last MCC, if no OMI has been seen yet
+            else if ( l_MCCIndex != __INT_MAX__ )
+            {
+                i = l_MCCIndex;
+                l_OCMBIndex = __INT_MAX__; //New MCC, OCMB index invalid
+            }
+            //Backtrack to last MI, if no MCC has been seen yet
+            else if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+                l_OCMBIndex = __INT_MAX__; //New MI, OCMB index invalid
+            }
+            //Backtrack to last MC, if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_OCMBIndex = __INT_MAX__; //New MC, OCMB index invalid
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // OCMB
+
+        case TYPE_MEM_PORT:      // AXONE
+        {
+            // No Child DIMMs
+            // If next is not a DIMM sharing the same MEMPORT, deconfig MEMPORT
+            if ( (l_nextTargetInfo == NULL) ||
+                 (l_nextTargetInfo->type != TYPE_DIMM) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
+            {
+                // Disable MEMPORT - NO_CHILD_DIMM
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM;
+
+            }
+            // No Parent OCMB
+            // If MEMPORT doesn't share the same OCMB as MEMPORTIndex,
+            // deconfig MEMPORT
+            else if ( (l_OCMBIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_OCMBIndex]))
+            {
+                // Disable MEMPORT - NO_PARENT_OCMB_CHIP
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP;
+            }
+            // Update MEMPORT Index
+            else
+            {
+                l_MEMPORTIndex = i;
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last OCMB
+            if ( l_OCMBIndex != __INT_MAX__ )
+            {
+                i = l_OCMBIndex;
+                l_MEMPORTIndex = __INT_MAX__; //New OCMB, MEMPORT index invalid
+            }
+            // Backtrack to last OMI, if no OCMB has been seen yet
+            else if ( l_OMIIndex != __INT_MAX__ )
+            {
+                i = l_OMIIndex;
+                l_MEMPORTIndex = __INT_MAX__; //New OMI, MEMPORT index invalid
+            }
+            // Backtrack to last MCC, if no OMI has been seen yet
+            else if ( l_MCCIndex != __INT_MAX__ )
+            {
+                i = l_MCCIndex;
+                l_MEMPORTIndex = __INT_MAX__; //New MCC, MEMPORT index invalid
+            }
+            //Backtrack to last MI, if no MCC has been seen yet
+            else if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+                l_MEMPORTIndex = __INT_MAX__; //New MI, MEMPORT index invalid
+            }
+            //Backtrack to last MC, if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_MEMPORTIndex = __INT_MAX__; //New MC, MEMPORT index invalid
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // MEMPORT
+
         case TYPE_MEMBUF:   // CUMULUS
         {
             // No Child MBAs
@@ -2808,10 +3234,11 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                         DeconfigGard::DECONFIGURED_BY_NO_CHILD_MBA;
             }
             // No Parent DMI (CUMULUS)
-            // If MEMBUF doesn't share the same same DMI as DMIIndex (for CUMULUS),
-            // deconfig MEMBUF
+            // If MEMBUF doesn't share the same same DMI as DMIIndex
+            // (for CUMULUS), deconfig MEMBUF
             else if ((l_DMIIndex == __INT_MAX__) ||
-                       !isSameSubPath(l_curTargetInfo, io_funcTargets[l_DMIIndex]))
+                       !isSameSubPath(l_curTargetInfo,
+                           io_funcTargets[l_DMIIndex]))
             {
                 // Disable MEMBUF - NO_PARENT_MCS_OR_DMI
                 l_curTargetInfo.reason =
@@ -2869,7 +3296,8 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             // No Parent MEMBUF
             // If MBA doesn't share the same MEMBUF as MEMBUFIndex, deconfig MBA
             else if ( (l_MEMBUFIndex == __INT_MAX__) ||
-                    !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MEMBUFIndex]))
+                    !isSameSubPath(l_curTargetInfo,
+                        io_funcTargets[l_MEMBUFIndex]))
             {
                 // Disable MBA - NO_PARENT_MEMBUF
                 l_curTargetInfo.reason =
@@ -2971,25 +3399,51 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         case TYPE_DIMM:
         {
-            // No Parent MBA or MCA
+            // No Parent MBA or MCA or MEMPORT
             // If DIMM does not share the same MBA as MBAIndex,
             // or if DIMM does not share the same MCA as MCAIndex,
+            // or if DIMM does not share the same MEMPORT as MEMPORTIndex,
             // deconfig DIMM
             if ( ((l_MBAIndex == __INT_MAX__) ||
                  !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MBAIndex])) &&
                  ((l_MCAIndex == __INT_MAX__) ||
-                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCAIndex])) )
+                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCAIndex])) &&
+                 ((l_MEMPORTIndex == __INT_MAX__) ||
+                 !isSameSubPath(l_curTargetInfo,
+                     io_funcTargets[l_MEMPORTIndex])))
             {
                 // Disable DIMM
                 l_curTargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA;
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA;
 
                 // Add target to deconfig vector to be deconfigured later
                 o_targToDeconfig.push_back(l_curTargetInfo);
                 // Remove target from funcTargets
                 io_funcTargets.erase(it);
-                // Backtrack to last MBA
-                if ( l_MBAIndex != __INT_MAX__ )
+
+                // Backtrack to last MEMPORT (AXONE)
+                if ( l_MEMPORTIndex != __INT_MAX__ )
+                {
+                    i = l_MEMPORTIndex;
+                }
+                // Backtrack to last OCMB (AXONE) if no MEMPORT has been
+                // seen yet
+                else if ( l_OCMBIndex != __INT_MAX__ )
+                {
+                    i = l_OCMBIndex;
+                }
+                // Backtrack to last OMI (AXONE) if no OCMB has been seen yet
+                else if ( l_OMIIndex != __INT_MAX__ )
+                {
+                    i = l_OMIIndex;
+                }
+                // Backtrack to last MCC (AXONE) if no OMI has been seen yet
+                else if ( l_MCCIndex != __INT_MAX__ )
+                {
+                    i = l_MCCIndex;
+                }
+                // Backtrack to last MBA (CUMULUS)
+                else if ( l_MBAIndex != __INT_MAX__ )
                 {
                     i = l_MBAIndex;
                 }
@@ -3008,22 +3462,26 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 {
                     i = l_MCBISTIndex;
                 }
-                // Backtrack to last MEMBUF (CUMULUS) if no MBA has been seen yet
+                // Backtrack to last MEMBUF (CUMULUS) if no MBA has been
+                // seen yet
                 else if ( l_MEMBUFIndex != __INT_MAX__)
                 {
                     i = l_MEMBUFIndex;
                 }
-                //Backtrack to last DMI (CUMULUS),if no MEMBUF has been seen yet
+                // Backtrack to last DMI (CUMULUS),if no MEMBUF has been
+                // seen yet
                 else if ( l_DMIIndex != __INT_MAX__ )
                 {
                     i = l_DMIIndex;
                 }
-                //Backtrack to last MI (CUMULUS), if no DMI has been seen yet
+                // Backtrack to last MI (CUMULUS and AXONE), if no DMI has been
+                // seen yet
                 else if ( l_MIIndex != __INT_MAX__ )
                 {
                     i = l_MIIndex;
                 }
-                //Backtrack to last MC (CUMULUS), if no MI has been seen yet
+                // Backtrack to last MC (CUMULUS and AXONE), if no MI has been
+                // seen yet
                 else if ( l_MCIndex != __INT_MAX__ )
                 {
                     i = l_MCIndex;
