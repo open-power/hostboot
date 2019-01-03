@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -87,7 +88,7 @@ enum {
     INT_BMC_HWRST      = (1 << 7),
 
     // How long to sychronously wait for the device to change state (in ns)
-    WAIT_TIME = 100000000,
+    WAIT_TIME = (1*NS_PER_MSEC),
 };
 
 /**
