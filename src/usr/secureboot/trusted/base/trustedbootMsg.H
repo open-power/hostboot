@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,8 @@ namespace TRUSTEDBOOT
     struct GetRandomMsgData
     {
         TARGETING::Target* i_pTpm; // the TPM to obtain random data from
-        uint64_t o_randNum;        // the random data is populated here
+        size_t i_randNumSize;      // the size (in bytes) of the rand number
+        uint8_t* o_randNum;        // the random data is populated here
     };
 
     // Trustedboot message class

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -905,7 +905,9 @@ class TrustedBootTest: public CxxTest::TestSuite
         for (auto pTpm: tpmList)
         {
             uint64_t randNum = 0;
-            err = TRUSTEDBOOT::GetRandom(pTpm, randNum);
+            err = TRUSTEDBOOT::GetRandom(pTpm,
+                                         reinterpret_cast<uint8_t*>(&randNum),
+                                         sizeof(randNum));
             num_ops ++;
             if(err)
             {

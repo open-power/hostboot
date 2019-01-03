@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -245,16 +245,22 @@ namespace TRUSTEDBOOT
     /**
      *  @brief Generate random numbers via TPM hardware.
      *
-     *  @parm[in] i_pTpm Pointer to TPM target. In order to succeed, it cannot
+     *  @param[in] i_pTpm Pointer to TPM target. In order to succeed, it cannot
      *            be null and must be a TPM target pointer. The TPM target must
      *            be functional. All of these conditions must be met or an error
      *            log will result.
      *
-     *  @parm[out] o_randNum A uint64_t reference to be filled with random bits.
+     *  @param[out] o_randNum A pointer to the array to be filled with random
+     *              bits
+     *
+     *  @param[in] i_randNumSize The desired size (bytes) of the random number
+     *             to be requested from the TPM
      *
      *  @return errlHndl_t nullptr on success or an error log pointer on failure
      */
-    errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum);
+    errlHndl_t GetRandom(const TpmTarget* i_pTpm,
+                         uint8_t* o_randNum,
+                         size_t i_randNumSize);
     #endif
 
     /**
