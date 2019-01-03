@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,6 +170,25 @@ fapi2::ReturnCode str_non_tsv_parity(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 
     // Disables the parity
     FAPI_TRY(disable_cid_parity(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Disable bypass on port with symbol mark placed
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The workaround for HW474117 applies to all EC versions, so no switch is necessary
+///
+fapi2::ReturnCode disable_bypass( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    fapi2::buffer<uint64_t> l_mca_dbgr_buffer;
+
+    // Trigger WAT logic to 'disable bypass' for the given port: set DBGR[8]
+    FAPI_TRY( mss::getScom(i_target, MCA_DBGR, l_mca_dbgr_buffer) );
+    l_mca_dbgr_buffer.setBit<MCA_DBGR_ECC_WAT_ENABLE>();
+    FAPI_TRY( mss::putScom(i_target, MCA_DBGR, l_mca_dbgr_buffer) );
 
 fapi_try_exit:
     return fapi2::current_err;

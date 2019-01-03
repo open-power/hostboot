@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,13 @@ fapi2::ReturnCode disable_cid_parity(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode str_non_tsv_parity(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Disable bypass on port with symbol mark placed
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode disable_bypass( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 } // ns workarounds
 
