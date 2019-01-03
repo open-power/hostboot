@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,8 @@ extern "C"
 {
 
 fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     TARGETING::TargetHandle_t & o_dimmTrgt,
@@ -67,68 +68,33 @@ fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
             break;
         }
 
-        // Get the proc model
-        TARGETING::Target * l_masterProc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
-        TARGETING::ATTR_MODEL_type l_procModel =
-            l_masterProc->getAttr<TARGETING::ATTR_MODEL>();
-
         // Get all functional DIMMs
         TargetHandleList l_dimmList;
         getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM );
 
-        // If Cumulus, assume MBA
-        if ( TARGETING::MODEL_CUMULUS == l_procModel )
+        // Find the DIMM with the correct port/dimm slct
+        uint8_t l_port = 0;
+        uint8_t l_dimm = 0;
+
+        for ( auto &dimmTrgt : l_dimmList )
         {
-            // Find the DIMM with the correct MBA port/dimm
-            uint8_t l_port = 0;
-            uint8_t l_dimm = 0;
+            // Get and compare the port
+            l_port = dimmTrgt->getAttr<ATTR_MEM_PORT>();
 
-            for ( auto &dimmTrgt : l_dimmList )
+            if ( l_port == i_port )
             {
-                // Get and compare the port
-                l_port = dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
+                // Get and compare the dimm
+                l_dimm = dimmTrgt->getAttr<ATTR_POS_ON_MEM_PORT>();
 
-                if ( l_port == i_port )
-                {
-                    // Get and compare the dimm
-                    l_dimm = dimmTrgt->getAttr<ATTR_CEN_MBA_DIMM>();
-
-                    if ( l_dimm == i_dimm )
-                    {
-                        o_dimmTrgt = dimmTrgt;
-                        // Port and dimm are correct, get the Row Repair Data
-                        l_rc = FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_DATA,
-                                              dimmTrgt, o_data );
-                        break;
-                    }
-                }
-            }
-        }
-        // If Nimbus, assume MCA
-        else if ( TARGETING::MODEL_NIMBUS == l_procModel )
-        {
-            for ( auto &dimmTrgt : l_dimmList )
-            {
-                uint32_t l_pos = dimmTrgt->getAttr<ATTR_FAPI_POS>() %
-                                 mss::MAX_DIMM_PER_PORT;
-                if ( l_pos == i_dimm )
+                if ( l_dimm == i_dimm )
                 {
                     o_dimmTrgt = dimmTrgt;
-                    // Get the Row Repair Data by querying ATTR_ROW_REPAIR_DATA.
-                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_DATA,
-                                          o_dimmTrgt, o_data );
-                    break;
+                    // Port and dimm are correct, get the row repair data
+                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_DATA, dimmTrgt,
+                                          o_data );
+                    if ( l_rc ) break;
                 }
             }
-
-        }
-        else
-        {
-            // Invalid target.
-            FAPI_ERR( "__getDimmRepairData: Invalid proc model" );
-            l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
-            break;
         }
 
     }while(0);
@@ -143,7 +109,8 @@ fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode getRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::ROW_REPAIR_BYTE_COUNT],
@@ -180,7 +147,8 @@ fapi2::ReturnCode getRowRepair( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode setRowRepair( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
+    & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&i_data)[mss::ROW_REPAIR_BYTE_COUNT],
