@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1027,6 +1027,7 @@
     <enum>OFF=0, ON=1</enum>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1050,6 +1051,7 @@
     <enum>OFF=0, ON=1</enum>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1073,6 +1075,7 @@
     <enum>OFF=0, ON=1</enum>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1080,7 +1083,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Disables IVRM enablement in the system
 
-    Producer: Override
+    Producer: MRW
 
     Consumers: p9_build_pstate_datablock ->
                       Pstate Parameter Block (PSPB) for PGPE/OCC
@@ -1151,7 +1154,6 @@
       <valueType>uint32</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -1167,7 +1169,6 @@
       <valueType>uint32</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
   </attribute>
  <!-- ********************************************************************* -->
   <attribute>
@@ -1187,7 +1188,6 @@
       <valueType>uint16</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1209,7 +1209,6 @@
       <enum>UNDERV_VMIN=0, UNDERV_LIMIT=1, TURBO=2, NOMINAL=3 </enum>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
   </attribute>
  <!-- ********************************************************************* -->
   <attribute>
@@ -1225,7 +1224,7 @@
       <valueType>uint16</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
+      <overrideOnly/>
   </attribute>
  <!-- ********************************************************************* -->
   <attribute>
@@ -1242,7 +1241,7 @@
       <valueType>uint8</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
+      <overrideOnly/>
   </attribute>
  <!-- ********************************************************************* -->
   <attribute>
@@ -1258,7 +1257,7 @@
       <valueType>uint16</valueType>
       <platInit/>
       <initToZero/>
-    <overrideOnly/>
+      <overrideOnly/>
   </attribute>
 
   <!-- ********************************************************************* -->
