@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1547,6 +1547,34 @@ void* tpmDaemon(void* unused)
                   assert(msgData != nullptr,
                       "Trusted boot message data pointer is null");
                   auto l_pTpm = msgData->i_pTpm;
+                  size_t l_randNumSize = msgData->i_randNumSize;
+
+                  if(l_randNumSize > sizeof(TPM2B_DIGEST))
+                  {
+                      TRACFCOMP( g_trac_trustedboot,
+                        ERR_MRK"TPM GetRandom: The size of the requested random number (%d) is larger than max size the TPM can return (%d).", l_randNumSize, sizeof(TPM2B_DIGEST));
+                      /*@
+                       * @errortype  ERRL_SEV_UNRECOVERABLE
+                       * @moduleid   MOD_TPM_TPMDAEMON
+                       * @reasoncode RC_RAND_NUM_TOO_BIG
+                       * @userdata1  The size of requested random number
+                       * @userdata2  The maximum random number size
+                       * @devdesc    Attempted to request a random number that
+                       *             is bigger than the max a TPM can provide
+                       * @custdesc   Trusted boot failure
+                       */
+                      err = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_TPM_TPMDAEMON,
+                                           RC_RAND_NUM_TOO_BIG,
+                                           l_randNumSize,
+                                           sizeof(TPM2B_DIGEST),
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                      tb_msg->iv_errl = err;
+                      err = nullptr;
+                      break;
+                  }
 
                   err = validateTpmHandle(l_pTpm);
                   if (err)
@@ -1559,11 +1587,10 @@ void* tpmDaemon(void* unused)
                   size_t dataSize = sizeof(dataBuf);
                   auto cmd = reinterpret_cast<TPM2_GetRandomIn*>(dataBuf);
                   auto resp = reinterpret_cast<TPM2_GetRandomOut*>(dataBuf);
-                  uint64_t randNum = 0;
 
                   cmd->base.tag = TPM_ST_NO_SESSIONS;
                   cmd->base.commandCode = TPM_CC_GetRandom;
-                  cmd->bytesRequested = sizeof(randNum);
+                  cmd->bytesRequested = l_randNumSize;
 
                   err = tpmTransmitCommand(l_pTpm, dataBuf, dataSize,
                                            TPM_LOCALITY_0);
@@ -1588,15 +1615,16 @@ void* tpmDaemon(void* unused)
                                           RC_UNREACHABLE_TPM,
                                           TARGETING::get_huid(l_pTpm),
                                           0,
-                                          true);
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                       err->plid(l_errPlid);
                       tb_msg->iv_errl = err;
                       err = nullptr;
                   }
                   else
                   {
-                      memcpy(&randNum, resp->randomBytes.buffer,sizeof(randNum));
-                      msgData->o_randNum = randNum;
+                      memcpy(msgData->o_randNum,
+                             resp->randomBytes.buffer,
+                             l_randNumSize);
                   }
               }
               break;
@@ -1669,7 +1697,7 @@ errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm)
         i_pTpm->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_TPM)
     {
         TRACFCOMP(g_trac_trustedboot,
-            ERR_MRK"Invalid TPM handle passed to GetRandom() huid = 0x%08X",
+            ERR_MRK"Invalid TPM handle passed to validateTpmHandle: huid = 0x%08X",
             TARGETING::get_huid(i_pTpm));
         /*@
          * @errortype       ERRL_SEV_UNRECOVERABLE
@@ -1694,7 +1722,7 @@ errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm)
     if (!l_tpmHwasState.functional)
     {
         TRACFCOMP(g_trac_trustedboot,
-            ERR_MRK"Non functional TPM handle passed to GetRandom() huid = 0x%08X",
+            ERR_MRK"Non functional TPM handle passed to validateTpmHandle: huid = 0x%08X",
             TARGETING::get_huid(i_pTpm));
        /*@
          * @errortype       ERRL_SEV_UNRECOVERABLE
@@ -1870,17 +1898,22 @@ errlHndl_t tpmDrtmReset(TpmTarget* const i_pTpm)
 #endif
 
 #ifdef CONFIG_TPMDD
-errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
+errlHndl_t GetRandom(const TpmTarget* i_pTpm,
+                     uint8_t* o_randNum,
+                     const size_t i_randNumSize)
 {
     errlHndl_t err = nullptr;
     Message* msg = nullptr;
 
+    auto pData = new struct GetRandomMsgData;
+
     do {
 
-    auto pData = new struct GetRandomMsgData;
     memset(pData, 0, sizeof(*pData));
-
     pData->i_pTpm = const_cast<TpmTarget*>(i_pTpm);
+    pData->i_randNumSize = i_randNumSize;
+    pData->o_randNum = new uint8_t[i_randNumSize];
+    memset(pData->o_randNum, 0, i_randNumSize);
 
     msg = Message::factory(MSG_TYPE_GETRANDOM, sizeof(*pData),
                            reinterpret_cast<uint8_t*>(pData), MSG_MODE_SYNC);
@@ -1914,7 +1947,7 @@ errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
                                       RC_SENDRECV_FAIL,
                                       rc,
                                       TARGETING::get_huid(i_pTpm),
-                                      true);
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         break;
     }
 
@@ -1922,9 +1955,22 @@ errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
     assert(pData != nullptr,
         "BUG! Completed send/recv to random num generator has null data ptr!");
 
-    o_randNum = pData->o_randNum;
+    memcpy(o_randNum, pData->o_randNum, pData->i_randNumSize);
 
     } while (0);
+
+    // If an error occurs before the reponse is written, then pData
+    // will be nullptr and dereferencing o_randNum will cause crashes.
+    // So, we need to check for pData before attempting to delete the
+    // o_randNum.
+    if(pData)
+    {
+        if(pData->o_randNum)
+        {
+            delete[](pData->o_randNum);
+            pData->o_randNum = nullptr;
+        }
+    }
 
     if (msg != nullptr)
     {
@@ -1953,7 +1999,9 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
 
     // Note: GetRandom validates the TPM handle internally and returns an
     // error log if invalid
-    l_errl = GetRandom(i_pTpm, l_randNum);
+    l_errl = GetRandom(i_pTpm,
+                       reinterpret_cast<uint8_t*>(&l_randNum),
+                       sizeof(l_randNum));
 
     if (l_errl)
     {

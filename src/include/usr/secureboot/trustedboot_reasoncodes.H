@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,7 @@ namespace TRUSTEDBOOT
         RC_INVALID_TPM_HANDLE            = TRBOOT_COMP_ID | 0xB8,
         RC_NON_FUNCTIONAL_TPM_HANDLE     = TRBOOT_COMP_ID | 0xB9,
         RC_UNREACHABLE_TPM               = TRBOOT_COMP_ID | 0xBA,
+        RC_RAND_NUM_TOO_BIG              = TRBOOT_COMP_ID | 0xBB,
     };
 #ifdef __cplusplus
 }
