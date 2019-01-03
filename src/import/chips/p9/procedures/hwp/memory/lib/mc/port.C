@@ -38,6 +38,7 @@
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/ecc/ecc.H>
+#include <lib/workarounds/mca_workarounds.H>
 
 namespace mss
 {
@@ -357,6 +358,9 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
              mss::c_str(i_target), i_rank, i_dq, l_galois);
     FAPI_TRY( mss::ecc::set_fwms(l_mca, i_rank, l_galois, mss::ecc::fwms::mark_type::SYMBOL,
                                  mss::ecc::fwms::mark_region::MRANK, l_addr) );
+
+    // Apply workaround for HW474117 if we place a symbol mark
+    FAPI_TRY( mss::workarounds::disable_bypass(l_mca) );
 
 fapi_try_exit:
     return fapi2::current_err;
