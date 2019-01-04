@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -1377,6 +1377,16 @@ sub processMcs
     $targetObj->setAttribute( $target, "MEMVPD_POS",
                              $chip_unit + ($proc_num * MAX_MCS_PER_PROC) );
 
+    # CHIPLET_ID is relative to the CHIP_UNIT of the MCS. To prevent invalid
+    # CHIPLET_ID's set them here. There are 4 MCS units ranging from 0-3. To
+    # generate the correct CHIPLET_ID we take the base offset and add 0 or 1
+    # to arrive at the correct value for that MCS unit. Units 0 and 1 add 0
+    # and units 2 and 3 add 1.
+    {
+        use integer;
+        $targetObj->setAttribute( $target, "CHIPLET_ID",
+        Targets::PERVASIVE_PARENT_MCS_OFFSET + ($chip_unit / 2) );
+    }
 }
 
 
