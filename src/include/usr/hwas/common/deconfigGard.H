@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -785,6 +785,23 @@ private:
                   TARGETING::Target & i_parent,
                   TARGETING::TargetService::ASSOCIATION_TYPE i_type =
                       TARGETING::TargetService::CHILD );
+
+    /**
+     *  @brief Return if any functional child matching the type and class
+     *         of the passed in child target is present
+     *
+     *  Called by _deconfigureByAssoc().
+     *  This function gets list of all children. if state of any
+     *  child is functional then returns true.
+     *
+     *  @param[in] i_my_parent - parent target
+     *  @param[in] i_child     - child target to match its class/type
+     *
+     *  @return true if any child state is functional.
+     *
+     */
+    bool anyFunctionalChildLikeMe( const TARGETING::Target * i_my_parent,
+                                   const TARGETING::Target * i_child );
 
     /**
      *  @brief Return FCO state of children

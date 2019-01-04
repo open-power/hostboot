@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1809,6 +1809,10 @@
     <attribute>
       <default>CENTAUR</default>
       <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
   </targetType>
 

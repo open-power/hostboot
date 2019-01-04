@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1614,14 +1614,19 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
         if ((l_parent != NULL) && isFunctional(l_parent))
         {
             // Now check if parent has any functional affinity children
-            if ( !anyChildFunctional(*l_parent,
-                                     TargetService::CHILD_BY_AFFINITY) )
+            // that match the same type/class as the child
+            if ( !anyFunctionalChildLikeMe(l_parent, &i_child) )
             {
                 bool isDeconfigured = false;
+                HWAS_INF("_deconfigAffinityParent: deconfig functional parent 0x%.8X, EID 0x%.8X",
+                    get_huid(l_parent), i_errlEid);
                 _deconfigureTarget(*l_parent, i_errlEid,
                                    &isDeconfigured, i_deconfigRule);
                 if (isDeconfigured)
                 {
+                    HWAS_INF("_deconfigAffinityParent: roll-up parent 0x%.8X deconfig, EID 0x%.8X",
+                        get_huid(l_parent), i_errlEid);
+
                     // Just need to rollup the deconfig
                     // (all children already marked as non-functional)
                     // Roll up deconfigure to parent's parent,
@@ -1629,7 +1634,26 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
                     _deconfigParentAssoc(*l_parent, i_errlEid, i_deconfigRule);
                 }
             }
+            else
+            {
+                HWAS_INF("_deconfigAffinityParent: functional child found for parent 0x%.8X, EID 0x%.8X",
+                    get_huid(l_parent), i_errlEid);
+
+            }
         }
+        else
+        {
+            if (l_parent != NULL)
+            {
+                HWAS_INF("_deconfigAffinityParent: non-functional parent 0x%.8X of 0x%.8X, EID 0x%.8X",
+                    get_huid(l_parent), get_huid(&i_child), i_errlEid);
+            }
+        }
+    }
+    else
+    {
+       HWAS_INF("_deconfigAffinityParent: PARENT_DECONFIG_DISABLED for child 0x%.8X, EID 0x%.8X",
+            get_huid(&i_child), i_errlEid);
     }
 }
 
@@ -2810,6 +2834,42 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
 //******************************************************************************
 #endif // __HOSTBOOT_RUNTIME
 
+bool DeconfigGard::anyFunctionalChildLikeMe(const Target * i_my_parent,
+                                            const Target * i_child)
+{
+    bool retVal = false;
+    TargetHandleList pChildList;
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+
+    if (isFunctional(i_my_parent))
+    {
+        // target type and class as predicate
+        auto l_childType = i_child->getAttr<ATTR_TYPE>();
+        auto l_childClass = i_child->getAttr<ATTR_CLASS>();
+
+        PredicateCTM predChildMatch(l_childClass, l_childType);
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predChildMatch).push(&isFunctional).And();
+
+        // find all CHILD_BY_AFFINITY targets, that match the predicate
+        // if any of them are functional return true
+        // if all of them are non-functional return false
+        targetService().getAssociated(pChildList, i_my_parent,
+                                      TargetService::CHILD_BY_AFFINITY,
+                                      TargetService::ALL,
+                                      &checkExpr);
+        if (pChildList.size() >= 1)
+        {
+            retVal = true;
+            HWAS_INF("anyFunctionalChildLikeMe: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
+                    pChildList.size(), get_huid(i_my_parent), get_huid(pChildList[0]));
+        }
+    }
+    return retVal;
+}
+
+
 bool DeconfigGard::anyChildFunctional(Target & i_parent,
                             TargetService::ASSOCIATION_TYPE i_type)
 {
@@ -2828,6 +2888,11 @@ bool DeconfigGard::anyChildFunctional(Target & i_parent,
         if (pChildList.size() >= 1)
         {
             retVal = true;
+            if (i_type == TargetService::CHILD_BY_AFFINITY)
+            {
+                HWAS_INF("anyChildFunctional: found %d functional children of 0x%.8X (child 0: 0x%.8X)",
+                    pChildList.size(), get_huid(&i_parent), get_huid(pChildList[0]));
+            }
         }
     }
     return retVal;
