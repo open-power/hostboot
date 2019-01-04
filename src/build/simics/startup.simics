@@ -1,10 +1,21 @@
 
-# Initialize HB search paths.
-$sandbox_base = (shell "printenv SANDBOXBASE")
-$script_dir = $sandbox_base + "/obj/ppc/simu/scripts"
-add-directory $script_dir
+# $hb_script_to_run is only set in Axone Standalone and onwards
+# we need to add the script directory in the Axone standalone model
+# for the older models the directory is already in the path
+if defined hb_script_to_run {
+    $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_script_to_run+"\"[1:].split('/')[0:-1]))")
+    $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
+    add-directory $script_dir
+}
+
 $hb_startup_path = (lookup-file hbfw/startup.simics)
-$hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
+
+# if we are in older simics models (before Axone standalone)
+# we must now set $hb_script_location as it is not above
+if not defined hb_script_location {
+    $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
+}
+
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
 $machine_name = (shell "printenv MACHINE")
