@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -303,6 +303,10 @@ hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
                                      ATTR_PROC_PCIE_LANE_MASK_type& o_laneMask,
                                      uint8_t i_pec_num)
 {
+    return KEYWORD_NOT_SET;
+// @todo SW453106 - reenable when a workaround for bad vpd is figured out
+//       Keep seeing an invalid HX Keyword: 01029090
+#if 0
 
     size_t l_keywordSize =
         sizeof(ATTR_PEC_PCIE_HX_KEYWORD_DATA_type);
@@ -404,6 +408,8 @@ hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
         }
     }while(0);
     return l_rc;
+#endif
+
 }
 
 errlHndl_t createElogFromHxKeywordRc( hxKeywordRc i_rc,
