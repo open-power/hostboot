@@ -577,6 +577,7 @@ union wiringData
 {
     uint8_t nimbus[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
     uint8_t cumulus[MAX_PORTS_PER_CEN][DIMM_BAD_DQ_NUM_BYTES];
+    uint8_t memport[mss::MAX_DQ_BITS];
 };
 
 //******************************************************************************
@@ -636,9 +637,9 @@ ReturnCode __getTranslationPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
-        FAPI_ERR( "__getTranslationPortSlct: Invalid procType" );
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        // In the generic case, the translation attribute exists on the MEM_PORT
+        // trgt so there's no need to know the port slct, so just set it to 0.
+        o_ps = 0;
     }
 
 
@@ -715,10 +716,16 @@ ReturnCode __badDqBitmapGetHelperAttrs(
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
+        // memset to avoid known syntax issue with previous compiler
+        // versions and ensure zero initialized array.
+        memset( o_wiringData.memport, 0, sizeof(o_wiringData.memport) );
 
-        FAPI_ERR( "__badDqBitmapGetHelperAttrs: Invalid procType" );
-        assert(false);
+        // Get the MEM_PORT target
+        Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
+            i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_VPD_DQ_MAP, l_fapiMemPort,
+                                o_wiringData.memport) );
     }
 
 
@@ -850,10 +857,15 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
+        // Get the MEM_PORT target
+        Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
+            i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
-        FAPI_ERR( "__dimmGetDqBitmapSpareByte: Invalid procType" );
-        assert(false);
+        // The attribute exists on the MEM_PORT so we don't need to worry about
+        // the port slct, just set the attribute in the space for port slct 0.
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SPARE, l_fapiMemPort,
+                                l_dramSpare[0]) );
+        l_ps = 0;
     }
 
     // Iterate through each rank of this DIMM
@@ -1084,10 +1096,18 @@ ReturnCode __mcLogicalToDimmDqHelper(
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
-
-        FAPI_ERR( "__mcLogicalToDimmDqHelper: Invalid procType" );
-        assert(false);
+        // use wiring data to translate mc pin to dimm dq format
+        // Note: the wiring data maps from dimm dq format to mc format
+        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
+        {
+            // Check to see which bit in the wiring data corresponds to our
+            // DIMM DQ format pin.
+            if ( i_wiringData.memport[bit] == i_mcPin )
+            {
+                o_dimm_dq = bit;
+                break;
+            }
+        }
     }
 
 fapi_try_exit:
@@ -1134,10 +1154,9 @@ ReturnCode __dimmDqToMcLogicalHelper(
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
-
-        FAPI_ERR( "__dimmDqToMcLogicalHelper: Invalid procType" );
-        assert(false);
+        // Translate from DIMM DQ format to MC using wiring data
+        // Note: the wiring data maps from dimm dq format to mc logical format
+        o_mcPin = i_wiringData.memport[i_dimm_dq];
     }
 
 fapi_try_exit:
@@ -1591,9 +1610,29 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     }
     else
     {
-        // TODO RTC 201603 - generic/axone case
-        FAPI_ERR( "__isX4Dram: Invalid procType" );
-        assert(false);
+        // Get the MEM_PORT target
+        Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
+            i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
+
+        // Get the dram width attr and the dimm slct
+        uint8_t l_dramWidth[2];
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_fapiMemPort,
+                                l_dramWidth) );
+
+        TARGETING::TargetHandle_t l_dimmTrgt;
+        errlHndl_t l_errl = getTargetingTarget( i_fapiDimm, l_dimmTrgt );
+        if ( l_errl )
+        {
+            FAPI_ERR("__isX4Dram: Error getting dimm from getTargetingTarget");
+            fapi2::ReturnCode l_rc;
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            return l_rc;
+        }
+        uint8_t l_dimmSlct =
+            l_dimmTrgt->getAttr<TARGETING::ATTR_POS_ON_MEM_PORT>();
+
+        o_isX4Dram = ( fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ==
+                       l_dramWidth[l_dimmSlct] );
     }
 
 fapi_try_exit:
