@@ -198,7 +198,7 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
         if( max_targets == INVALID_TARGET_COUNT )
         {
             FAPI_ERR("Unable to determine the target count "
-                     "for target type = 0x%x and instance 0x%d "
+                     "for target type = 0x%.16lX and instance 0x%d "
                      "associated with proc position %d",
                      i_targType, i_instance, l_procPosition);
         }
@@ -209,7 +209,7 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
         }
     }
 
-    FAPI_INF("Returning FAPI_POS= %d for target type 0x%x", fapi_pos, i_targType);
+    FAPI_INF("Returning FAPI_POS= %d for target type 0x%.16lX", fapi_pos, i_targType);
 
     return fapi_pos;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -368,7 +368,7 @@ void ErrorInfoEntryChildrenCDG::addErrorInfo(
         iv_childNumber);
 
     FAPI_DBG("addErrorInfo: Adding children cdg (%d:%d:%d), type:"
-             " 0x%08x, pri: %d",
+             " 0x%16lX, pri: %d",
              ei->iv_callout, ei->iv_deconfigure, ei->iv_gard,
              ei->iv_childType, ei->iv_calloutPriority);
 

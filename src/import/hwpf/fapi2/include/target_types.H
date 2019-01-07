@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,71 +47,81 @@ namespace fapi2
 ///
 
 /// Target Kind
-enum TargetType
+enum TargetType : uint64_t
 {
-    TARGET_TYPE_NONE          = 0x00000000, ///< No type
-    TARGET_TYPE_SYSTEM        = 0x00000001, ///< System type
-    TARGET_TYPE_DIMM          = 0x00000002, ///< DIMM type
-    TARGET_TYPE_PROC_CHIP     = 0x00000004, ///< Processor type
-    TARGET_TYPE_MEMBUF_CHIP   = 0x00000008, ///< Membuf type
-    TARGET_TYPE_EX            = 0x00000010, ///< EX - 2x Core, L2, L3 - can be deconfigured
-    TARGET_TYPE_MBA           = 0x00000020, ///< MBA type
-    TARGET_TYPE_MCS           = 0x00000040, ///< MCS type
-    TARGET_TYPE_XBUS          = 0x00000080, ///< XBUS type
-    TARGET_TYPE_ABUS          = 0x00000100, ///< ABUS type
-    TARGET_TYPE_L4            = 0x00000200, ///< L4 type
-    TARGET_TYPE_CORE          = 0x00000400, ///< Core - 4x threads(?) - can be deconfigured
-    TARGET_TYPE_EQ            = 0x00000800, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
-    TARGET_TYPE_MCA           = 0x00001000, ///< MCA type
-    TARGET_TYPE_MCBIST        = 0x00002000, ///< MCBIST type
-    TARGET_TYPE_MI            = 0x00004000, ///< MI Memory Interface (Cumulus)
-    TARGET_TYPE_CAPP          = 0x00008000, ///< CAPP target
-    TARGET_TYPE_DMI           = 0x00010000, ///< DMI type
-    TARGET_TYPE_OBUS          = 0x00020000, ///< OBUS type
-    TARGET_TYPE_OBUS_BRICK    = 0x00040000, ///< OBUS BRICK type
-    TARGET_TYPE_SBE           = 0x00080000, ///< SBE type
-    TARGET_TYPE_PPE           = 0x00100000, ///< PPE type
-    TARGET_TYPE_PERV          = 0x00200000, ///< Pervasive type
-    TARGET_TYPE_PEC           = 0x00400000, ///< PEC type
-    TARGET_TYPE_PHB           = 0x00800000, ///< PHB type
-    TARGET_TYPE_MC            = 0x01000000, ///< MC type
-    TARGET_TYPE_OMI           = 0x02000000, ///< OMI type
-    TARGET_TYPE_OMIC          = 0x04000000, ///< OMIC type
-    TARGET_TYPE_MCC           = 0x08000000, ///< MCC type
-    TARGET_TYPE_OCMB_CHIP     = 0x10000000, ///< OCMB type
-    TARGET_TYPE_MEM_PORT      = 0x20000000, ///< MEM_PORT type
-
-    TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
+    TARGET_TYPE_NONE          = 0x0000000000000000, ///< No type
+    TARGET_TYPE_SYSTEM        = 0x0000000000000001, ///< System type
+    TARGET_TYPE_DIMM          = 0x0000000000000002, ///< DIMM type
+    TARGET_TYPE_PROC_CHIP     = 0x0000000000000004, ///< Processor type
+    TARGET_TYPE_MEMBUF_CHIP   = 0x0000000000000008, ///< Membuf type
+    TARGET_TYPE_EX            = 0x0000000000000010, ///< EX - 2x Core, L2, L3 - can be deconfigured
+    TARGET_TYPE_MBA           = 0x0000000000000020, ///< MBA type
+    TARGET_TYPE_MCS           = 0x0000000000000040, ///< MCS type
+    TARGET_TYPE_XBUS          = 0x0000000000000080, ///< XBUS type
+    TARGET_TYPE_ABUS          = 0x0000000000000100, ///< ABUS type
+    TARGET_TYPE_L4            = 0x0000000000000200, ///< L4 type
+    TARGET_TYPE_CORE          = 0x0000000000000400, ///< Core
+    TARGET_TYPE_EQ            = 0x0000000000000800, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
+    TARGET_TYPE_MCA           = 0x0000000000001000, ///< MCA type
+    TARGET_TYPE_MCBIST        = 0x0000000000002000, ///< MCBIST type
+    TARGET_TYPE_MI            = 0x0000000000004000, ///< MI Memory Interface (Cumulus)
+    TARGET_TYPE_CAPP          = 0x0000000000008000, ///< CAPP target
+    TARGET_TYPE_DMI           = 0x0000000000010000, ///< DMI type
+    TARGET_TYPE_OBUS          = 0x0000000000020000, ///< OBUS type
+    TARGET_TYPE_OBUS_BRICK    = 0x0000000000040000, ///< OBUS BRICK type
+    TARGET_TYPE_SBE           = 0x0000000000080000, ///< SBE type
+    TARGET_TYPE_PPE           = 0x0000000000100000, ///< PPE type
+    TARGET_TYPE_PERV          = 0x0000000000200000, ///< Pervasive type
+    TARGET_TYPE_PEC           = 0x0000000000400000, ///< PEC type
+    TARGET_TYPE_PHB           = 0x0000000000800000, ///< PHB type
+    TARGET_TYPE_MC            = 0x0000000001000000, ///< MC type
+    TARGET_TYPE_OMI           = 0x0000000002000000, ///< OMI type
+    TARGET_TYPE_OMIC          = 0x0000000004000000, ///< OMIC type
+    TARGET_TYPE_MCC           = 0x0000000008000000, ///< MCC type
+    TARGET_TYPE_OCMB_CHIP     = 0x0000000010000000, ///< OCMB type
+    TARGET_TYPE_MEM_PORT      = 0x0000000020000000, ///< MEM_PORT type
+    TARGET_TYPE_NMMU          = 0x0000000040000000, ///< NEST MMU type
+    TARGET_TYPE_RESERVED      = 0x0000000080000000, ///< Reserved for Cronus (Z)
+    TARGET_TYPE_PAU           = 0x0000000100000000, ///< PAU type
+    TARGET_TYPE_IOHS          = 0x0000000200000000, ///< IOHS type
+    TARGET_TYPE_FC            = 0x0000000400000000, ///< Fused Core type
+    TARGET_TYPE_MULTICAST     = 0x8000000000000000, ///< MULTICAST type
+    TARGET_TYPE_ALL           = 0x7FFFFFFFFFFFFFFF, ///< Any/All types
+    TARGET_TYPE_ALL_MC        = 0xFFFFFFFFFFFFFFFF, ///< Any/All types + Multicast
 
     // Compound target types
     TARGET_TYPE_CHIPS         = TARGET_TYPE_PROC_CHIP |
                                 TARGET_TYPE_MEMBUF_CHIP |
                                 TARGET_TYPE_OCMB_CHIP,
 
-    TARGET_TYPE_CHIPLETS      = TARGET_TYPE_EX     |
-                                TARGET_TYPE_MBA    |
-                                TARGET_TYPE_MCS    |
-                                TARGET_TYPE_XBUS   |
-                                TARGET_TYPE_ABUS   |
-                                TARGET_TYPE_L4     |
-                                TARGET_TYPE_CORE   |
-                                TARGET_TYPE_EQ     |
-                                TARGET_TYPE_MCA    |
-                                TARGET_TYPE_MCBIST |
-                                TARGET_TYPE_MI     |
-                                TARGET_TYPE_DMI    |
-                                TARGET_TYPE_OBUS   |
-                                TARGET_TYPE_OBUS_BRICK     |
-                                TARGET_TYPE_SBE    |
-                                TARGET_TYPE_PPE    |
-                                TARGET_TYPE_PERV   |
-                                TARGET_TYPE_PEC    |
-                                TARGET_TYPE_PHB    |
-                                TARGET_TYPE_MC     |
-                                TARGET_TYPE_OMI    |
-                                TARGET_TYPE_OMIC   |
-                                TARGET_TYPE_MCC    |
-                                TARGET_TYPE_MEM_PORT,
+    TARGET_TYPE_CHIPLETS      = TARGET_TYPE_EX            |
+                                TARGET_TYPE_MBA           |
+                                TARGET_TYPE_MCS           |
+                                TARGET_TYPE_XBUS          |
+                                TARGET_TYPE_ABUS          |
+                                TARGET_TYPE_L4            |
+                                TARGET_TYPE_CORE          |
+                                TARGET_TYPE_EQ            |
+                                TARGET_TYPE_MCA           |
+                                TARGET_TYPE_MCBIST        |
+                                TARGET_TYPE_MI            |
+                                TARGET_TYPE_DMI           |
+                                TARGET_TYPE_OBUS          |
+                                TARGET_TYPE_OBUS_BRICK    |
+                                TARGET_TYPE_SBE           |
+                                TARGET_TYPE_PPE           |
+                                TARGET_TYPE_PERV          |
+                                TARGET_TYPE_PEC           |
+                                TARGET_TYPE_PHB           |
+                                TARGET_TYPE_MC            |
+                                TARGET_TYPE_OMI           |
+                                TARGET_TYPE_OMIC          |
+                                TARGET_TYPE_MCC           |
+                                TARGET_TYPE_MEM_PORT      |
+                                TARGET_TYPE_NMMU          |
+                                TARGET_TYPE_PAU           |
+                                TARGET_TYPE_IOHS          |
+                                TARGET_TYPE_FC,
 
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
@@ -266,8 +276,8 @@ enum TargetFilter : uint64_t
 /// @cond
 constexpr TargetType operator|(TargetType x, TargetType y)
 {
-    return static_cast<TargetType>(static_cast<int>(x) |
-                                   static_cast<int>(y));
+    return static_cast<TargetType>(static_cast<uint64_t>(x) |
+                                   static_cast<uint64_t>(y));
 }
 #endif
 
