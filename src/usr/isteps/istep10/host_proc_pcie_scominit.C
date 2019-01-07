@@ -292,7 +292,7 @@ bool compareChipUnits(TARGETING::Target *l_t1,
 enum hxKeywordRc
 {
    KEYWORD_VALID   = 0,
-   KEYWORD_NOT_SET,
+   VERSION_IGNORE_DATA,
    VERSION_NOT_SUPPORTED,
    TOO_MANY_LANE_SETS,
    INVALID_DEVICE_NUMBER
@@ -303,11 +303,6 @@ hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
                                      ATTR_PROC_PCIE_LANE_MASK_type& o_laneMask,
                                      uint8_t i_pec_num)
 {
-    return KEYWORD_NOT_SET;
-// @todo SW453106 - reenable when a workaround for bad vpd is figured out
-//       Keep seeing an invalid HX Keyword: 01029090
-#if 0
-
     size_t l_keywordSize =
         sizeof(ATTR_PEC_PCIE_HX_KEYWORD_DATA_type);
 
@@ -320,16 +315,17 @@ hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
 
     do
     {
-        // Version 0 means HX Keyword is not set, so use defaults
         // This is the most likely case
-        if( l_keyword.version == 0 )
+        // Version 0 means HX Keyword is not set, so use defaults
+        // Version 1 is incorrectly set on Bearpaw cards (skip using HX keyword)
+        if( l_keyword.version < 2 )
         {
-            l_rc = KEYWORD_NOT_SET;
+            l_rc = VERSION_IGNORE_DATA;
             break;
         }
 
-        // Currently only version 1 is defined for firmware support
-        if( l_keyword.version != 1 )
+        // Currently only version 2 is defined for firmware support
+        if( l_keyword.version != 2 )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "HX keyword version %d is not supported yet, "
@@ -408,8 +404,6 @@ hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
         }
     }while(0);
     return l_rc;
-#endif
-
 }
 
 errlHndl_t createElogFromHxKeywordRc( hxKeywordRc i_rc,
@@ -528,17 +522,17 @@ errlHndl_t calculateEffectiveLaneMask(
             // overwrite the default mask we setup earlier
             memcpy(o_effectiveLaneMask,l_laneMask,sizeof(l_laneMask));
         }
-        else if (l_rc == KEYWORD_NOT_SET )
+        else if ( l_rc == VERSION_IGNORE_DATA )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "HX keyword is not set, using default lane mask");
+                    "HX keyword is ignored version, using default lane mask");
         }
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "ERR>>calculateEffectiveLaneMask()> "
-            "an error occurred while parsing the HX keyword, return "
-            "the error and use default lane mask");
+                    "ERR>>calculateEffectiveLaneMask()> "
+                    "an error occurred while parsing the HX keyword, return "
+                    "the error and use default lane mask");
             // create an elog from the rc here
             pError = createElogFromHxKeywordRc(l_rc,
                                                i_pecTarget,
