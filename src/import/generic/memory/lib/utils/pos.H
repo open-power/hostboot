@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,9 @@
 #define _MSS_POS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+// TODO Add mc_type template on mss::pos API"
 
 ///
 /// @brief Trait classes for the mss::pos functions
@@ -49,17 +52,6 @@ class posTraits
         // uint8_t and some attr_pos, uint32_t. We don't really care
         // but the type checking in the macros sure does ...
         typedef uint8_t pos_type;
-
-        enum
-        {
-            MC_PER_MODULE = 2,
-            MCS_PER_MC = 2,
-            PORTS_PER_MCBIST = 4,
-            PORTS_PER_MCS = 2,
-            DIMMS_PER_PORT = 2,
-            DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
-            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
-        };
 };
 
 ///
@@ -70,18 +62,6 @@ class posTraits<fapi2::TARGET_TYPE_DIMM>
 {
     public:
         typedef uint32_t pos_type;
-
-        enum
-        {
-            MC_PER_MODULE = 2,
-            MCS_PER_MC = 2,
-            PORTS_PER_MCBIST = 4,
-            PORTS_PER_MCS = 2,
-            DIMMS_PER_PORT = 2,
-            DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
-            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
-            DIMMS_PER_MCBIST = PORTS_PER_MCBIST * DIMMS_PER_PORT,
-        };
 };
 
 ///
@@ -92,13 +72,6 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 {
     public:
         typedef uint32_t pos_type;
-
-        enum
-        {
-            MC_PER_MODULE = 2,
-            MCS_PER_MC = 2,
-            MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
-        };
 };
 
 namespace mss
@@ -161,16 +134,18 @@ fapi_try_exit:
 /// @brief Return a DIMM's position from a fapi2 target
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to the chip
+/// @warning Nimbus implementation only
 ///
 template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
 pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
     typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    typedef procTraits<proc_type::NIMBUS> T;
 
     // Proc 0 is DIMM 0-15, proc 2 is 64-79 - 64 is the stride between processors
     constexpr uint64_t DIMM_STRIDE_PER_PROC = 64;
-    constexpr uint64_t TOTAL_DIMM = TT::MC_PER_MODULE * TT::MCS_PER_MC * TT::PORTS_PER_MCS * TT::DIMMS_PER_PORT;
+    constexpr uint64_t TOTAL_DIMM = T::MC_PER_MODULE * T::MCS_PER_MC * T::PORTS_PER_MCS * T::DIMMS_PER_PORT;
 
     TT::pos_type l_pos = 0;
 
@@ -214,7 +189,8 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::PORTS_PER_MCBIST;
 }
 
@@ -227,7 +203,7 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::DIMMS_PER_MCS;
 }
 
@@ -240,7 +216,7 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCA>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::DIMMS_PER_PORT;
 }
 
@@ -253,7 +229,7 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::DIMMS_PER_MCBIST;
 }
 
@@ -266,7 +242,7 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCS>::pos_type
 relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_MCS> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::MCS_PER_PROC;
 }
 
@@ -279,7 +255,7 @@ template<>
 inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    typedef posTraits<fapi2::TARGET_TYPE_MCA> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return pos(i_target) % TT::PORTS_PER_MCS;
 }
 

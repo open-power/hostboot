@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,27 +37,13 @@
 #define _MSS_INDEX_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/pos.H>
-
-///
-/// @brief Trait classes for the mss::index functions
-///
-template<fapi2::TargetType T>
-class indexTraits
-{
-    public:
-        enum
-        {
-            MCS_PER_MC = 2,
-            PORTS_PER_MCBIST = 4,
-            PORTS_PER_MCS = 2,
-            DIMMS_PER_PORT = 2,
-            MBA_PER_MC = 2,
-        };
-};
 
 namespace mss
 {
+
+// TODO Add mc_type template on mss::index API"
 
 ///
 /// @brief Return an attribute array index from a fapi2 target
@@ -76,7 +62,7 @@ inline size_t index(const fapi2::Target<T>& i_target);
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
-    typedef indexTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return mss::pos(i_target) % TT::DIMMS_PER_PORT;
 }
 
@@ -88,7 +74,7 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    typedef indexTraits<fapi2::TARGET_TYPE_MCA> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return mss::pos(i_target) % TT::PORTS_PER_MCS;
 }
 
@@ -100,7 +86,7 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    typedef indexTraits<fapi2::TARGET_TYPE_MCS> TT;
+    typedef procTraits<proc_type::NIMBUS> TT;
     return mss::pos(i_target) % TT::MCS_PER_MC;
 }
 
