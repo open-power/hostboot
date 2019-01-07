@@ -22,3 +22,48 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file data_engine_traits_def.H
+/// @brief Class to set preliminary eff_config attributes
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
+#ifndef _MSS_DATA_ENGINE_TRAITS_DEF_H_
+#define _MSS_DATA_ENGINE_TRAITS_DEF_H_
+
+#include <cstring>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+///
+/// @brief enum list of preliminary data fields
+///
+enum pre_data_init_fields
+{
+    DIMM_TYPE,
+    DRAM_GEN,
+    HYBRID,
+    HYBRID_MEDIA,
+    MRANKS,
+    DIMM_RANKS_CNFG,
+};
+
+///
+/// @brief Forward declartion of traits for pre_data_engine
+/// @class preDataInitTraits
+/// @tparam T proc_type (e.g. Nimbus, Axone, etc.)
+/// @tparam TT pre_data_init_fields (e.g. DIMM_TYPE, MRANK, etc.)
+///
+template< proc_type T, pre_data_init_fields TT >
+class preDataInitTraits;
+
+}// mss
+
+#endif
