@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -36,8 +36,9 @@ SKIP_CONFIG_FILE_LOAD = 1
 IMAGE_PASS_POST += $(GENDIR)/hwp_id.html
 CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
 
-# Name of file to indicate if hostboot is building an fsp release.
+# Name of file to indicate which release Hostboot is building for
 HB_FSP_RELEASE = $(GENDIR)/hb_fsp_release
+HB_AXONE_RELEASE = $(GENDIR)/hb_simics_axone_release
 
 ifndef BUILD_MINIMAL
 IMAGE_PASS_POST += cscope ctags
@@ -74,6 +75,7 @@ check_istep_modules: $(OBJS)
 GENCONFIG_TOOL = src/build/tools/hbGenConfig
 
 # At end of rule, create HB_FSP_RELEASE file if compiling with fsprelease.config
+# or create HB_AXONE_RELEASE if compiling with simics_axone.config
 $(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
     $(shell find -name HBconfig) \
     $(filter-out $(GENDIR)/.$(notdir $(CONFIG_FILE)).config,\
@@ -88,6 +90,10 @@ $(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
 	@rm -f $(wildcard $(GENDIR)/.*.config)
 	@touch $@
 	@rm -f $(HB_FSP_RELEASE)
+	@rm -f $(HB_AXONE_RELEASE)
     ifneq (,$(findstring fsprelease.config, $(strip $(CONFIG_FILE))))
 	    @touch $(HB_FSP_RELEASE)
+    endif
+    ifneq (,$(findstring simics_axone.config, $(strip $(CONFIG_FILE))))
+	    @touch $(HB_AXONE_RELEASE)
     endif

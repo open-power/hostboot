@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -449,6 +449,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
         "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
+        "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
 #endif
     };
 
