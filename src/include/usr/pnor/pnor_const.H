@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ enum SectionId
     TESTLOAD,       /**< Secureboot test load */
     CENTAUR_HW_IMG, /**< Centaur HCODE Reference image */
     HDAT,           /**< HDAT data */
+    EECACHE,
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

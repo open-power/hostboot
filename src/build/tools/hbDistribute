@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -210,9 +210,16 @@ fi
 # Note this file is generated in the hb config file rule in top level makefile
 if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
     echo "FSP build, using fsp pnor xml layout"
+    # PNOR_LAYOUT_SELECTED == 0 is FSP XML
+    export PNOR_LAYOUT_SELECTED=0
+elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_axone_release ]]; then
+    echo "Axone build, using axone pnor xml layout"
+    # PNOR_LAYOUT_SELECTED == 2 is AXONE XML
+    export PNOR_LAYOUT_SELECTED=2
 else
+    # PNOR_LAYOUT_SELECTED == 1 is DEFAULT XML
     echo "Non FSP build, using default pnor xml layout"
-    export DEFAULT_PNOR=1
+    export PNOR_LAYOUT_SELECTED=1
 fi
 
 # Clean up preivous rand files. Should only be needed if a previous call failed.

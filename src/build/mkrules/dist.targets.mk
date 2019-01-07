@@ -305,6 +305,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/imprintHwKeyHash \
     src/build/buildpnor/defaultPnorLayout.xml \
     src/build/buildpnor/pnorLayoutFSP.xml \
+    src/build/buildpnor/pnorLayoutAxone.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.protected, ) \
