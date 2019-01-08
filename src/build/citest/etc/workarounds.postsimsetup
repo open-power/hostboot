@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -33,9 +33,11 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
-#echo "+++ Adding reg 501081D to p9c.chip +++"
-mkdir -p $sb/simu/data/cec-chip/
-sbex -t 1067370 -f aix@auscmvc1.austin.ibm.com@2035 -r fips921 -d $sb/../
+
+# Bump NIMBUS up to DD2.2
+mkdir -p $sb/simu/configs/
+grep -v PROC_EC $BACKING_BUILD/src/simu/configs/P9_NIMBUS.config > $sb/simu/configs/P9_NIMBUS.config
+echo "SETENV PROC_EC                22" >> $sb/simu/configs/P9_NIMBUS.config
 
 
 ##########################################################################
