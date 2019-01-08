@@ -958,6 +958,45 @@ void __addCallout( ExtensibleChip * i_chip, const MemRank & i_rank,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
+uint32_t __addRowRepairCallout( ExtensibleChip * i_chip,
+                                const MemRank & i_rank,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[__addRowRepairCallout] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get the dimms on this rank on either port.
+    TargetHandleList dimmList = getConnectedDimms( i_chip->getTrgt(), i_rank );
+
+    // Check for row repairs on each dimm.
+    for ( auto const & dimm : dimmList )
+    {
+        MemRowRepair rowRepair;
+        o_rc = getRowRepairData<T>( dimm, i_rank, rowRepair );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getRowRepairData(0x%08x, 0x%02x)",
+                      PlatServices::getHuid(dimm), i_rank.getKey() );
+            break;
+        }
+
+        // If the row repair is valid, add it to the callout list.
+        if ( rowRepair.isValid() )
+        {
+            io_sc.service_data->SetCallout( dimm );
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
 uint32_t __applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
                              STEP_CODE_DATA_STRUCT & io_sc,
                              const MemMark & i_chipMark,
@@ -1032,6 +1071,16 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
             __addCallout( i_chip, i_rank, sp0, io_sc );
             __addCallout( i_chip, i_rank, sp1, io_sc );
             __addCallout( i_chip, i_rank, ecc, io_sc );
+
+            // Add the row repairs to the callout list if they exist
+            o_rc = __addRowRepairCallout<TARGETING::TYPE_MBA>( i_chip, i_rank,
+                                                               io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__addRowRepairCallout(0x%08x,0x%02x) "
+                          "failed.", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
 
             // If the chip mark is on a spare then the spare is bad and hardware
             // can not steer it to another DRAM even if one is available (e.g.
