@@ -276,6 +276,7 @@ CUMULUS_SBE_IMG = p9c.SbePartition.bin
 P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
 P9N_EC21_BIN = ${SBEI_OBJPATH:Fp9n_21.sbe_seeprom.hdr.bin}
 P9N_EC22_BIN = ${SBEI_OBJPATH:Fp9n_22.sbe_seeprom.hdr.bin}
+P9N_EC23_BIN = ${SBEI_OBJPATH:Fp9n_23.sbe_seeprom.hdr.bin}
 P9C_EC13_BIN = ${SBEI_OBJPATH:Fp9c_13.sbe_seeprom.hdr.bin}
 P9C_EC11_BIN = ${SBEI_OBJPATH:Fp9c_11.sbe_seeprom.hdr.bin}
 P9C_EC12_BIN = ${SBEI_OBJPATH:Fp9c_12.sbe_seeprom.hdr.bin}
@@ -283,7 +284,7 @@ P9C_EC12_BIN = ${SBEI_OBJPATH:Fp9c_12.sbe_seeprom.hdr.bin}
 #P9A_EC10_BIN = ${SBEI_OBJPATH:Fp9a_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  ${NIMBUS_SBE_IMG}:20=${P9N_EC20_BIN},21=${P9N_EC21_BIN},22=${P9N_EC22_BIN} \
+  ${NIMBUS_SBE_IMG}:21=${P9N_EC21_BIN},22=${P9N_EC22_BIN},23=${P9N_EC23_BIN} \
   ${CUMULUS_SBE_IMG}:13=${P9C_EC13_BIN},11=${P9C_EC11_BIN},12=${P9C_EC12_BIN}
 # TODO RTC 197497 -   ${AXONE_SBE_IMG}:10=${P9A_EC10_BIN}
 
