@@ -445,11 +445,13 @@
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>chipCount</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>1</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x80</value></field>
+            <!-- Note: that there is actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
             <field><id>port</id><value>2</value></field>
             <field><id>writeCycleTime</id><value>0x0A</value></field>
             <field><id>writePageSize</id><value>0x80</value></field>
@@ -459,11 +461,13 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>chipCount</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>1</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x80</value></field>
+            <!-- Note: that there is actually two 64KB chips associated with the MVPD SEEPROM
+                 but Hostboot should never access the second chip -->
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
             <field><id>port</id><value>0</value></field>
             <field><id>writeCycleTime</id><value>0x0A</value></field>
             <field><id>writePageSize</id><value>0x80</value></field>
