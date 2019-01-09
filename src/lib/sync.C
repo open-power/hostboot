@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -243,7 +243,7 @@ void mutex_unlock(mutex_t * i_mutex)
 
     uint64_t l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val), 1);
 
-    if(unlikely(l_lockStatus == 2))
+    if(unlikely(l_lockStatus >= 2))
     {
         // Fully release the lock and let another task grab it.
         i_mutex->iv_val = 0;
@@ -351,7 +351,7 @@ void recursive_mutex_unlock(mutex_t * i_mutex)
         // to l_lockStatus.
         l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val),1);
 
-        if(unlikely(l_lockStatus == 2))
+        if(unlikely(l_lockStatus >= 2))
         {
             // Fully release the lock to allow the next task to grab it.
             i_mutex->iv_val = 0;
