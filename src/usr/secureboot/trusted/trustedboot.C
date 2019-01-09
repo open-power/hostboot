@@ -180,9 +180,11 @@ bool functionalPrimaryTpmExists()
     TARGETING::TargetHandleList tpmList;
     getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
 
-    TARGETING::PredicateHwas presentAndFunctional;
-    presentAndFunctional.present(true);
-    presentAndFunctional.functional(true);
+    TARGETING::PredicateHwas present;
+    present.present(true);
+
+    TARGETING::PredicateHwas functional;
+    functional.functional(true);
 
     TARGETING::PredicateAttrVal<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>
         initialized(true);
@@ -192,11 +194,23 @@ bool functionalPrimaryTpmExists()
                     isPrimaryTpm(TARGETING::TPM_ROLE_TPM_PRIMARY);
 
     auto itr = std::find_if(tpmList.begin(),tpmList.end(),
-        [&presentAndFunctional, &initialized, &isPrimaryTpm](
+        [&present,&functional, &initialized, &isPrimaryTpm](
             const TARGETING::Target* const i_pTpm)
         {
-            return (isPrimaryTpm(i_pTpm) &&
-                    (presentAndFunctional(i_pTpm) || !initialized(i_pTpm)));
+            const auto isPresent = present(i_pTpm);
+            const auto isFunctional = functional(i_pTpm);
+            const auto isInitialized = initialized(i_pTpm);
+            const auto isPrimary = isPrimaryTpm(i_pTpm);
+
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "functionalPrimaryTpmExists(): TPM HUID 0x%08X's state = "
+                "{present=%d,functional=%d,initialized=%d,primary=%d}",
+                TARGETING::get_huid(i_pTpm),
+                isPresent,isFunctional,isInitialized,isPrimary);
+
+            return (   isPrimaryTpm(i_pTpm)
+                    && (   (present(i_pTpm) && functional(i_pTpm))
+                        || !initialized(i_pTpm)));
         });
 
     exists = (itr!=tpmList.end()) ? true : false;
@@ -209,10 +223,8 @@ void* host_update_master_tpm( void *io_pArgs )
     errlHndl_t err = nullptr;
     bool unlock = false;
 
-    TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"host_update_master_tpm()" );
-    TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"host_update_master_tpm()");
+    TRACFCOMP(g_trac_trustedboot,ENTER_MRK
+        "host_update_master_tpm()");
 
     // Get all TPMs to setup our array
     TARGETING::TargetHandleList tpmList;
@@ -221,12 +233,16 @@ void* host_update_master_tpm( void *io_pArgs )
     // Currently we only support a MAX of two TPMS per node
     assert(tpmList.size() <= MAX_TPMS_PER_NODE, "Too many TPMs found");
 
+    TRACFCOMP(g_trac_trustedboot,INFO_MRK
+        "host_update_master_tpm: Found %d TPM(s) in blueprint",
+        tpmList.size());
+
     do
     {
         if (tpmList.empty())
         {
-            TRACFCOMP( g_trac_trustedboot,
-                       "No TPM Targets found");
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "No TPM targets found");
             break;
         }
 
@@ -236,6 +252,8 @@ void* host_update_master_tpm( void *io_pArgs )
         err = tS.queryMasterProcChipTargetHandle( procTarget );
         if (nullptr != err)
         {
+            TRACFCOMP(g_trac_trustedboot,ERR_MRK
+                "Failed to find master processor target");
             break;
         }
 
@@ -263,6 +281,9 @@ void* host_update_master_tpm( void *io_pArgs )
             }
             else
             {
+                const auto originalTpmRole =
+                    tpm->getAttr<TARGETING::ATTR_TPM_ROLE>();
+
                 // If TPM connected to acting master processor, it is
                 // primary; otherwise it is backup
                 TARGETING::TPM_ROLE tpmRole =
@@ -270,6 +291,11 @@ void* host_update_master_tpm( void *io_pArgs )
                           TARGETING::TPM_ROLE_TPM_PRIMARY
                         : TARGETING::TPM_ROLE_TPM_BACKUP;
                 tpm->setAttr<TARGETING::ATTR_TPM_ROLE>(tpmRole);
+
+                TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                    "TPM HUID 0x%08X's original role: %d, new role: %d",
+                    TARGETING::get_huid(tpm),
+                    originalTpmRole,tpmRole);
             }
         }
 
@@ -279,6 +305,12 @@ void* host_update_master_tpm( void *io_pArgs )
         if(pPrimaryTpm)
         {
             auto hwasState = pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "Prior to init, TPM HUID 0x%08X has state of {present=%d, "
+                "functional=%d}",
+                TARGETING::get_huid(pPrimaryTpm),
+                hwasState.present,hwasState.functional);
+
             if(   hwasState.present
                && hwasState.functional)
             {
@@ -291,11 +323,20 @@ void* host_update_master_tpm( void *io_pArgs )
                     TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
             }
 
-            // Allocate TPM log if it hasn't been already
+            // Allocate TPM log if it hasn't been already; note that
+            // during MPIPL, the targeting init will attempt to re-use old
+            // values, but then has logic to set the log manager pointer back to
+            // 0.
             auto pTpmLogMgr = getTpmLogMgr(pPrimaryTpm);
             // Need to grab state again, as it could have changed
             hwasState = pPrimaryTpm->getAttr<
                 TARGETING::ATTR_HWAS_STATE>();
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "Prior to log init, TPM HUID 0x%08X has state of {present=%d, "
+                "functional=%d}.  Log pointer is %p",
+                TARGETING::get_huid(pPrimaryTpm),
+                hwasState.present,hwasState.functional,pTpmLogMgr);
+
             if(   hwasState.present
                && hwasState.functional
                && nullptr == pTpmLogMgr)
@@ -316,18 +357,33 @@ void* host_update_master_tpm( void *io_pArgs )
                 }
             }
         }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "No primary TPM found");
+        }
 
         bool primaryTpmAvail = (pPrimaryTpm != nullptr);
         if(primaryTpmAvail)
         {
             auto primaryHwasState = pPrimaryTpm->getAttr<
                 TARGETING::ATTR_HWAS_STATE>();
+
+            TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                "Prior to usability determination, Primary TPM HUID 0x%08X has state "
+                "of {present=%d, functional=%d}",
+                TARGETING::get_huid(pPrimaryTpm),
+                primaryHwasState.present,primaryHwasState.functional);
+
             if (!primaryHwasState.functional ||
                 !primaryHwasState.present)
             {
                 primaryTpmAvail = false;
                 if(isTpmRequired())
                 {
+                    TRACFCOMP(g_trac_trustedboot,ERR_MRK
+                        "Marking Primary TPM HUID 0x%08X as unusable",
+                        TARGETING::get_huid(pPrimaryTpm));
                     pPrimaryTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
                 }
             }
@@ -336,7 +392,7 @@ void* host_update_master_tpm( void *io_pArgs )
         if(!primaryTpmAvail)
         {
             // Primary TPM not available
-            TRACFCOMP( g_trac_trustedboot,
+            TRACFCOMP( g_trac_trustedboot,INFO_MRK
                        "Primary TPM Existence Fail");
         }
 
@@ -344,7 +400,7 @@ void* host_update_master_tpm( void *io_pArgs )
         getBackupTpm(pBackupTpm);
         if(pBackupTpm == nullptr)
         {
-            TRACFCOMP( g_trac_trustedboot,
+            TRACFCOMP( g_trac_trustedboot,INFO_MRK
                        "host_update_master_tpm() "
                        "Backup TPM unavailable "
                        "since it's not in the system blueprint.");
@@ -364,9 +420,10 @@ void* host_update_master_tpm( void *io_pArgs )
             // If the backup state is functional and present then we are
             // in MPIPL scenario and we need to reset the states
             {
-                TRACUCOMP( g_trac_trustedboot,
+                TRACFCOMP( g_trac_trustedboot,INFO_MRK
                            "host_update_master_tpm() "
-                           "Marking backup TPM unavailable");
+                           "Marking backup TPM unavailable until "
+                           "powerbus is available.");
 
                 l_backupHwasState.present = false;
                 l_backupHwasState.functional = false;
@@ -449,9 +506,10 @@ void* host_update_master_tpm( void *io_pArgs )
                    !(pPrimaryTpm->getAttr<TARGETING::ATTR_TPM_UNUSABLE>()));
     }
 
-    TRACDCOMP( g_trac_trustedboot,
-               EXIT_MRK"host_update_master_tpm() - %s",
-               ((nullptr == err) ? "No Error" : "With Error") );
+    TRACFCOMP( g_trac_trustedboot,EXIT_MRK
+        "host_update_master_tpm() - %s",
+        ((nullptr == err) ? "No Error" : "With Error") );
+
     return err;
 }
 
@@ -464,10 +522,8 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 
     errlHndl_t err = nullptr;
 
-    TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmInitialize()" );
-    TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmInitialize() tgt=0x%08X",
+    TRACFCOMP( g_trac_trustedboot,
+               ENTER_MRK"tpmInitialize() TPM HUID = 0x%08X",
                TARGETING::get_huid(i_pTpm));
 
     do
@@ -552,7 +608,7 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         tpmMarkFailed(i_pTpm, err);
     }
 
-    TRACDCOMP( g_trac_trustedboot,
+    TRACFCOMP( g_trac_trustedboot,
                EXIT_MRK"tpmInitialize()");
 }
 
@@ -1264,10 +1320,10 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 // Add low priority HB SW callout
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_LOW);
-                err->collectTrace( SECURE_COMP_NAME );
                 err->collectTrace(TRBOOT_COMP_NAME);
-                err->collectTrace( I2C_COMP_NAME );
-                err->collectTrace( TPMDD_COMP_NAME );
+                err->collectTrace(TPMDD_COMP_NAME );
+                err->collectTrace(I2C_COMP_NAME );
+                err->collectTrace(SECURE_COMP_NAME );
                 const auto reasonCode = err->reasonCode();
 
                 // Add Security Registers to the error log
