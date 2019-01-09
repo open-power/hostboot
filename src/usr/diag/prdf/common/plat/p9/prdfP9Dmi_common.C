@@ -88,63 +88,6 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( cumulus_dmi, PostAnalysis );
 
-//##############################################################################
-//
-//                                  CHIFIR
-//
-//##############################################################################
-/**
- * @brief  Checks if we have a legitimate CHIFIR[61] channel timeout or if its
- *         a side effect of a MBSFIR[4] internal timeout.
- * @param  i_dmiChip DMI chip.
- * @param  io_sc     Step code data struct
- * @return SUCCESS if MBSFIR[4] is set but MBSFIR[3] is not.
- *         PRD_SCAN_COMM_REGISTER_ZERO otherwise.
-
- */
-int32_t dsffChannelTimeoutCheck( ExtensibleChip * i_dmiChip,
-                                  STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[dsffChannelTimeoutCheck] "
-
-    int32_t o_rc = SUCCESS;
-
-    ExtensibleChip * membChip = getConnectedChild( i_dmiChip, TYPE_MEMBUF, 0 );
-    PRDF_ASSERT( nullptr != membChip );
-
-    do
-    {
-        // Get MBSFIR
-        SCAN_COMM_REGISTER_CLASS * mbsFir = membChip->getRegister("MBSFIR");
-
-        o_rc = mbsFir->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MBSFIR read failed for 0x%08x",
-                    membChip->getHuid() );
-            break;
-        }
-
-        // If MBSFIR[4] is set and MBSFIR[3] is not set
-        if( mbsFir->IsBitSet(4) && !mbsFir->IsBitSet(3) )
-        {
-            // MBSFIR[4] internal timeout, predictive centaur callout
-            io_sc.service_data->SetCallout( membChip->getTrgt() );
-        }
-        else
-        {
-            // CHIFIR[61] channel timeout, predictive DMI callout
-            io_sc.service_data->SetCallout( i_dmiChip->getTrgt() );
-        }
-
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( cumulus_dmi, dsffChannelTimeoutCheck );
-
 //------------------------------------------------------------------------------
 
 } // end namespace cumulus_dmi

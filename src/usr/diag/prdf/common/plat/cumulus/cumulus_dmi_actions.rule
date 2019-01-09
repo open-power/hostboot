@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -49,8 +49,7 @@ actionclass dmi_bus_th_1_UERE
 actionclass dsffChannelTimeout_UERE
 {
     SueSource;
-    threshold1;
-    funccall("dsffChannelTimeoutCheck");
+    self_th_1;
 };
 
 ################################################################################
