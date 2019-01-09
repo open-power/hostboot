@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
 #include <prdfCenMembufDataBundle.H>
+#include <prdfCenMembufExtraSig.H>
 #include <prdfMemSymbol.H>
 #include <prdfParserUtils.H>
 #include <prdfPlatServices.H>
@@ -917,6 +918,69 @@ bool __analyzeRcdParityError<TYPE_MEMBUF>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+// Channel failure analysis is designed to only look for UNIT_CS attentions and
+// not associate any recoverables as the root cause. Of course, now we have yet
+// another special case. An internal timeout is a recoverable attention that
+// could cause unit CS attentions as a side effect. Therefore, we must analyze
+// it first before looking for any UNIT_CS attentions.
+
+template<TARGETING::TYPE T>
+bool __analyzeInternalTimeout( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+bool __analyzeInternalTimeout<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::__analyzeInternalTimeout] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    uint32_t o_analyzed = false;
+
+    SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister( "MBSFIR"      );
+    SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister( "MBSFIR_MASK" );
+
+    do
+    {
+        if ( SUCCESS != (fir->Read() | mask->Read()) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read MBSFIRs on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // If there is an internal timeout that is not masked and there is not
+        // an external timeout (note external timeout is always masked), then
+        // there is a legit internal timeout attention.
+        if ( fir->IsBitSet(4) && !mask->IsBitSet(4) && !fir->IsBitSet(3) )
+        {
+            // We are not going to analyze the MEMBUF chip like we do with some
+            // of the other helper functions in this file because the rule code
+            // priority will put the MBSFIR after the MBIFIR and DMIFIR.
+            // Therefore, there is no way to guarantee this attention will be
+            // analyzed. Since we do know there is a channel failure we can
+            // simply make a predictive callout because the channel failure code
+            // will eventually mask the entire Centaur.
+
+            io_sc.service_data->SetCallout( i_chip->getTrgt() );
+
+            io_sc.service_data->setSignature( i_chip->getHuid(),
+                                              PRDFSIG_InternalTimeout );
+
+            o_analyzed = true; break; // analysis complete
+        }
+
+    } while (0);
+
+    return o_analyzed;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 // Handling channel failures from more than one channel at a time:
 // Say we were called to handle a recoverable attention on a Centaur, but the
 // channel containing that Centaur has a unit checkstop attention in the
@@ -965,8 +1029,16 @@ bool __analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
         }
 
         // First, check for RCD parity errors. They are recoverable attentions
-        // that could has a channel failure attention as a side effect.
+        // that could have a channel failure attention as a side effect.
         if ( __analyzeRcdParityError<TYPE_MEMBUF>(membChip, io_sc) )
+        {
+            o_analyzed = true; break; // analysis complete
+        }
+
+        // Now, check for an internal timeout error. This is a recoverable
+        // attention that could have a channel failure attention as a side
+        // effect.
+        if ( __analyzeInternalTimeout<TYPE_MEMBUF>(membChip, io_sc) )
         {
             o_analyzed = true; break; // analysis complete
         }
