@@ -26,10 +26,9 @@
 /// @file p10_scom_addr.H
 /// @brief P10 SCOM address class
 ///
-/// HWP Owner: thi@us.ibm.com
-/// HWP Team: NEST
-/// HWP Level: 1
-/// HWP Consumed by: FSP/HB
+/// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
+/// HWP FW Maintainer:
+/// HWP Consumed by: CRONUS, HOSTBOOT, HWSV
 ///
 
 #ifndef P10_SCOM_ADDR_H
@@ -150,6 +149,8 @@ extern "C"
     typedef enum
     {
         AXONE_PERV_RING_ID = 0x1,
+        AXONE_ODL_RING_ID  = 0x3,
+        AXONE_NDL_RING_ID  = 0x4,
         AXONE_PDL_RING_ID  = 0x5,
     } p10_AXONE_RingId_t;
 

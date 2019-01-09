@@ -26,15 +26,15 @@
 /// @file p10_scominfo.C
 /// @brief P10 chip unit SCOM address platform translation code
 ///
-/// HWP Owner: thi@us.ibm.com
-/// HWP Team: NEST
-/// HWP Level: 1
-/// HWP Consumed by: FSP/HB
+/// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
+/// HWP FW Maintainer:
+/// HWP Consumed by: CRONUS, HOSTBOOT, HWSV
 ///
 
 // includes
-#include "p10_scominfo.H"
-#include "p10_scom_addr.H"
+#include <p10_scominfo.H>
+#include <p10_scom_addr.H>
+#include <p10_cu_utils.H>
 
 #define P10_SCOMINFO_C
 
@@ -47,6 +47,7 @@ extern "C"
     // Internal functions
     // ---------------------------
 
+    //################################################################################
     /// @brief Calculate the region select (core ID) value for given core
     ///        instance
     /// @param[in] i_coreInstance   Core instance number (0-31)
@@ -75,72 +76,119 @@ extern "C"
         return l_regionSel;
     }
 
-    /// @brief Validate the chip unit number to be within range
-    ///        of a chip unit type.
-    /// @param[in] i_chipUnitNum   Value of chip unit number (instance)
+    //################################################################################
+    /// @brief Get the chiplet ID for a chip unit instance based on given
+    ///        address and chip unit type
+    /// @param[in] i_addr          SCOM address
+    /// @param[in] i_chipUnitNum   Instance number
     /// @param[in] i_chipUnitType  Chip unit type
     /// @retval Non-zero if error
-    uint8_t validateChipUnitNum(const uint8_t i_chipUnitNum,
-                                const p10ChipUnits_t i_chipUnitType)
+    uint8_t getChipletId(const uint64_t i_addr,
+                         const uint8_t i_chipUnitNum,
+                         const p10ChipUnits_t i_chipUnitType,
+                         uint8_t& o_chipletId)
     {
         uint8_t l_rc = 0;
-        uint8_t l_index;
 
-        for (l_index = 0;
-             l_index < (sizeof(ChipUnitDescriptionTable) / sizeof(p10_chipUnitDescription_t));
-             l_index++)
+        do
         {
-            // Looking for input chip unit type in table
-            if (i_chipUnitType == ChipUnitDescriptionTable[l_index].enumVal)
+
+            p10_scom_addr l_scom(i_addr);
+
+            switch (i_chipUnitType)
             {
-                // Found a match, check input i_chipUnitNum to be <= max chip unit num
-                // for this unit type
-                if (i_chipUnitNum > ChipUnitDescriptionTable[l_index].maxChipUnitNum)
-                {
+                case PU_EQ_CHIPUNIT:
+                    o_chipletId = EQ0_CHIPLET_ID + i_chipUnitNum;
+                    break;
+
+                case PU_C_CHIPUNIT:
+                    o_chipletId = EQ0_CHIPLET_ID + (i_chipUnitNum / NUM_CORES_PER_EQ);
+                    break;
+
+                case PU_PEC_CHIPUNIT:
+
+                    // If input address is of Nest chiplets
+                    if ( (l_scom.getChipletId() >= N0_CHIPLET_ID) &&
+                         (l_scom.getChipletId() <= N1_CHIPLET_ID) )
+                    {
+                        o_chipletId = N0_CHIPLET_ID + i_chipUnitNum;
+                    }
+                    // If input address is of PCI chiplets
+                    else
+                    {
+                        o_chipletId = PCI0_CHIPLET_ID + i_chipUnitNum;
+                    }
+
+                    break;
+
+                case PU_PHB_CHIPUNIT:
+                    o_chipletId = (i_chipUnitNum / 3) + PCI0_CHIPLET_ID;
+                    break;
+
+                case PU_NMMU_CHIPUNIT:
+                    o_chipletId = i_chipUnitNum + N0_CHIPLET_ID;
+                    break;
+
+                case PU_PERV_CHIPUNIT:
+                    o_chipletId = i_chipUnitNum;
+                    break;
+
+                case PU_IOHS_CHIPUNIT:
+
+                    // If input address is of AXON chiplets
+                    if ( (l_scom.getChipletId() >= AXON0_CHIPLET_ID) &&      // 0x18
+                         (l_scom.getChipletId() <= AXON7_CHIPLET_ID) )       // 0x1F
+                    {
+                        o_chipletId = AXON0_CHIPLET_ID + i_chipUnitNum;
+                    }
+                    else // input address is of PAU chiplets
+                    {
+                        o_chipletId = (i_chipUnitNum / 2) + PAU0_CHIPLET_ID;
+                    }
+
+                    break;
+
+                case PU_MI_CHIPUNIT:
+                case PU_MC_CHIPUNIT:
+                    o_chipletId = i_chipUnitNum + MC0_CHIPLET_ID;
+                    break;
+
+                case PU_MCC_CHIPUNIT:
+                case PU_OMIC_CHIPUNIT:
+                    o_chipletId = (i_chipUnitNum / 2) + MC0_CHIPLET_ID;
+                    break;
+
+                case PU_OMI_CHIPUNIT:
+                    o_chipletId = (i_chipUnitNum / 4) + MC0_CHIPLET_ID;
+                    break;
+
+                case PU_PPE_CHIPUNIT:
+
+                    // Look for i_chipUnitNum in table
+                    for (uint8_t l_index = 0;
+                         l_index < sizeof(PpeTargetInfoTable) / sizeof(PpeTargetInfo_t);
+                         l_index++)
+                    {
+                        if (i_chipUnitNum == PpeTargetInfoTable[l_index].targetInstance)
+                        {
+                            o_chipletId = PpeTargetInfoTable[l_index].chipletId;
+                            break;
+                        }
+                    }
+
+                    break;
+
+                case PU_PAU_CHIPUNIT:
+                    o_chipletId = (i_chipUnitNum / 2) + PAU0_CHIPLET_ID;
+                    break;
+
+                default:
                     l_rc = 1;
-                }
+                    break;
+            };
 
-                // Additional check for PERV targets, where there are gaps between instances
-                else if (i_chipUnitType == PU_PERV_CHIPUNIT)
-                {
-                    if ( (i_chipUnitNum == 0) ||
-                         ((i_chipUnitNum > 3) && (i_chipUnitNum < 8)) ||
-                         ((i_chipUnitNum > 9) && (i_chipUnitNum < 12)) ||
-                         ((i_chipUnitNum > 19) && (i_chipUnitNum < 24)) )
-                    {
-                        l_rc = 1;
-                    }
-                }
-
-                // Additional check for PPE targets, where there are gaps between instances
-                else if (i_chipUnitType == PU_PPE_CHIPUNIT)
-                {
-                    if ( ((i_chipUnitNum > 0) && (i_chipUnitNum < 4))   ||
-                         ((i_chipUnitNum > 7) && (i_chipUnitNum < 16))  ||
-                         ((i_chipUnitNum > 19) && (i_chipUnitNum < 32)) )
-                    {
-                        l_rc = 1;
-                    }
-                }
-
-                // Additional check for PAU targets, where instance 1 and 2 are not valid
-                else if (i_chipUnitType == PU_PAU_CHIPUNIT)
-                {
-                    if ( (i_chipUnitNum == 1) || (i_chipUnitNum == 2) )
-                    {
-                        l_rc = 1;
-                    }
-                }
-
-                break;
-            }
         }
-
-        // Can't find i_chipUnitType in table
-        if ( l_index >= (sizeof(ChipUnitDescriptionTable) / sizeof(p10_chipUnitDescription_t)) )
-        {
-            l_rc = 1;
-        }
+        while (0);
 
         return (l_rc);
     }
@@ -155,6 +203,7 @@ extern "C"
         uint8_t l_rc = 0;
         p10_scom_addr l_scom(i_scomAddr);
         uint8_t l_index = 0;
+        uint8_t l_chipletId = 0;
 
         do
         {
@@ -174,94 +223,40 @@ extern "C"
                 break;
             }
 
+            // Set the chiplet ID
+            l_rc = getChipletId(i_scomAddr, i_chipUnitNum, i_p10CU, l_chipletId);
+
+            if (l_rc)
+            {
+                break;
+            }
+
+            l_scom.setChipletId(l_chipletId);
+
+            // Set other address fields (ringId, satId, etc...)
+            // for Chip unit types that are needed.
             switch (i_p10CU)
             {
-                case PU_EQ_CHIPUNIT:
-                    l_scom.setChipletId(EQ0_CHIPLET_ID + i_chipUnitNum);
-                    break;
-
                 case PU_C_CHIPUNIT:
-                    // Set the EQ chiplet ID for this core's unit num
-                    l_scom.setChipletId(EQ0_CHIPLET_ID + (i_chipUnitNum / NUM_CORES_PER_EQ));
-
                     // Set the core's region select (core ID)
                     l_scom.setRegionSelect(calcRegionSelect(i_chipUnitNum));
                     break;
 
-                case PU_PEC_CHIPUNIT:
-
-                    // PEC (Nest)
-                    if ( (l_scom.getChipletId() >= N0_CHIPLET_ID) &&
-                         (l_scom.getChipletId() <= N1_CHIPLET_ID) )
-                    {
-                        l_scom.setChipletId(N0_CHIPLET_ID + i_chipUnitNum);
-                    }
-                    // PEC (PCIe)
-                    else if ( (l_scom.getChipletId() >= PCI0_CHIPLET_ID) &&
-                              (l_scom.getChipletId() <= PCI1_CHIPLET_ID) )
-                    {
-                        l_scom.setChipletId(PCI0_CHIPLET_ID + i_chipUnitNum);
-                    }
-
-                    break;
-
                 case PU_PHB_CHIPUNIT:
 
-                    // phb 0-2 use PCI0 chiplet ID
-                    // ring id = 3-5
-                    if ( i_chipUnitNum < 3 )
+                    // Set ringId
+                    if ( i_chipUnitNum < 3 ) // PHB 0-2
                     {
-                        l_scom.setChipletId(PCI0_CHIPLET_ID);
                         l_scom.setRingId(i_chipUnitNum + 3);
                     }
-                    // phb 3-5 use PCI1 chiplet ID
-                    // ring id = 3-5
-                    else
+                    else  // PHB 3-5
                     {
-                        l_scom.setChipletId(PCI1_CHIPLET_ID);
                         l_scom.setRingId(i_chipUnitNum);
                     }
 
                     break;
 
-                case PU_NMMU_CHIPUNIT:
-                    if ( i_chipUnitNum == 0)
-                    {
-                        l_scom.setChipletId(N0_CHIPLET_ID);
-                    }
-                    else
-                    {
-                        l_scom.setChipletId(N1_CHIPLET_ID);
-                    }
-
-                    break;
-
-                case PU_PERV_CHIPUNIT:
-                    l_scom.setChipletId(i_chipUnitNum);
-                    break;
-
-                case PU_IOHS_CHIPUNIT:
-
-                    // If chiplet ID is of AXON chiplets
-                    if ( (l_scom.getChipletId() >= AXON0_CHIPLET_ID) &&      // 0x18
-                         (l_scom.getChipletId() <= AXON7_CHIPLET_ID) )       // 0x1F
-                    {
-                        l_scom.setChipletId(AXON0_CHIPLET_ID + i_chipUnitNum);
-                    }
-                    else // chiplet ID is of PAU chiplets
-                    {
-                        l_scom.setChipletId(PAU0_CHIPLET_ID + (i_chipUnitNum / 2));
-                    }
-
-                    break;
-
-                case PU_MI_CHIPUNIT:
-                case PU_MC_CHIPUNIT:
-                    l_scom.setChipletId(MC0_CHIPLET_ID + i_chipUnitNum);
-                    break;
-
                 case PU_MCC_CHIPUNIT:
-                    l_scom.setChipletId(MC0_CHIPLET_ID + (i_chipUnitNum / 2));
 
                     // Set Sat ID
                     if (i_chipUnitNum % 2)
@@ -302,7 +297,6 @@ extern "C"
                     break;
 
                 case PU_OMI_CHIPUNIT:
-                    l_scom.setChipletId(MC0_CHIPLET_ID + (i_chipUnitNum / 4));
 
                     // Set Ring ID
                     if ( (i_chipUnitNum / 2) % 2 )
@@ -339,8 +333,6 @@ extern "C"
                     break;
 
                 case PU_OMIC_CHIPUNIT:
-                    l_scom.setChipletId(MC0_CHIPLET_ID + (i_chipUnitNum / 2));
-
                     if (i_chipUnitNum % 2)
                     {
                         // For odd OMIC instance, RingId is to be set to 4, or 6
@@ -388,7 +380,6 @@ extern "C"
                     {
                         if (i_chipUnitNum == PpeTargetInfoTable[l_index].targetInstance)
                         {
-                            l_scom.setChipletId(PpeTargetInfoTable[l_index].chipletId);
                             l_scom.setEndpoint(PpeTargetInfoTable[l_index].endpointId);
                             l_scom.setRingId(PpeTargetInfoTable[l_index].ringId);
                             l_scom.setSatId(PpeTargetInfoTable[l_index].satId);
@@ -398,7 +389,6 @@ extern "C"
                     break;
 
                 case PU_PAU_CHIPUNIT:
-                    l_scom.setChipletId( PAU0_CHIPLET_ID + (i_chipUnitNum / 2) );
 
                     // Setting RingId for instances 0, 3, 4, and 6
                     // If input address has:
@@ -463,7 +453,6 @@ extern "C"
                     break;
 
                 default:
-                    l_scom.setAddr(FAILED_TRANSLATION);
                     break;
             }
 
