@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,20 @@ enum tpm_locality_t
 };
 
 /**
+ * @brief TPM Models that are supported
+ *
+ * @note  Must stay in sync with TPM_MODEL in attribute_types_hb.xml
+ * @note  Not using Attribute Enums since FSP does not currently support
+ *        overriding enum values
+ */
+enum tpm_model_t : uint8_t
+{
+    TPM_MODEL_UNDETERMINED = 0x00,
+    TPM_MODEL_65x          = 0x01,
+    TPM_MODEL_75x          = 0x02,
+};
+
+/**
  * @brief Structure of common parameters needed by different parts of
  *      the code.
  */
@@ -84,6 +98,15 @@ struct tpm_info_t
     uint8_t i2cMuxBusSelector;  ///< The Selector for the I2C MUX
     TARGETING::EntityPath i2cMuxPath;  ///< I2C MUX path
 
+    uint8_t model;              ///< TPM Model
+    uint8_t sts;                ///< STS
+    uint8_t burstCount;         ///< burstCount
+    uint8_t tpmHash;            ///< TPM Hash
+    uint8_t wrFifo;             ///< Write FIFO
+    uint8_t rdFifo;             ///< Read FIFO
+    uint8_t vendorIdOffset;     ///< Vendor ID Offset
+    uint32_t vendorId;          ///< Vendor ID
+
     /**
      *  @brief Construct a default tpm_info_t
      */
@@ -100,7 +123,15 @@ struct tpm_info_t
           offset(0),
           addrSize(LAST_DEVICE_TYPE),
           i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
-          i2cMuxPath()
+          i2cMuxPath(),
+          model(TPM_MODEL_UNDETERMINED),
+          sts(0),
+          burstCount(0),
+          tpmHash(0),
+          wrFifo(0),
+          rdFifo(0),
+          vendorIdOffset(0),
+          vendorId(0)
     {
     }
 };

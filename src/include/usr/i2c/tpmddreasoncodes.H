@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,8 @@ enum tpmReasonCode
     TPM_RC_TPM_NOT_DETECTED              = TPMDD_COMP_ID | 0x0D,
     TPM_RC_UNEXPECTED_VENDOR_ID          = TPMDD_COMP_ID | 0x0E,
     TPM_RC_UNEXPECTED_FAMILY_ID          = TPMDD_COMP_ID | 0x0F,
+    TPM_ATTR_MODEL_NOT_FOUND             = TPMDD_COMP_ID | 0x10,
+    TPM_ATTR_INVALID_MODEL               = TPMDD_COMP_ID | 0x11,
 };
 
 };  // end TPMDD

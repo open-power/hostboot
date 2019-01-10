@@ -1189,6 +1189,23 @@
     <hbOnly/>
   </attribute>
 
+  <attribute>
+    <id>TPM_MODEL</id>
+    <description>
+        Indicates TPM Model (or family) for a TPM Target
+            0x00 = Undetermined (reserved if actively detected in the future)
+            0x01 = Nuvoton 65x (default)
+            0x02 = Nuvoton 75x
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
   <enumerationType>
     <id>TPM_ROLE</id>
     <description>

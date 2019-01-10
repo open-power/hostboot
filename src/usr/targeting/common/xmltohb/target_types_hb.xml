@@ -211,6 +211,9 @@
       <id>HB_TPM_MUTEX</id>
     </attribute>
     <attribute>
+      <id>TPM_MODEL</id>
+    </attribute>
+    <attribute>
       <id>TPM_ROLE</id>
     </attribute>
   </targetTypeExtension>
