@@ -2404,17 +2404,53 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
 
 /**
  * @brief Checks if both targets have the same paths up to a certain number
- *        of path elements, determined by the smaller affinity path.
+ *        of path elements, determined by the smaller affinity path. For Axone,
+ *        if an OMIC and OMI target are given as the parameters then it will use
+ *        the OMI's special OMIC_PARENT relation and compare that to the OMIC
+ *        target. Otherwise, affinity path comparison between OMI and OMIC
+ *        targets will always fail erroneously.
  *
  * @param[in] i_t1 TargetInfo containing the first target's affinity path
  * @param[in] i_t2 TargetInfo containing the second target's affinity path
  */
 bool isSameSubPath(TargetInfo i_t1, TargetInfo i_t2)
 {
-    size_t l_size = std::min(i_t1.affinityPath.size(),
-                             i_t2.affinityPath.size());
 
-    return i_t1.affinityPath.equals(i_t2.affinityPath, l_size);
+    PredicateCTM isOmic(CLASS_NA, TYPE_OMIC), isOmi(CLASS_NA, TYPE_OMI);
+
+    EntityPath l_t1Path = i_t1.affinityPath,
+               l_t2Path = i_t2.affinityPath;
+
+    // Due to the special OMIC_PARENT relation between OMI and OMIC targets
+    // this function will only work correctly if we use the OMIC_PARENT path
+    // instead of the OMI affinity path when comparing OMI and OMIC targets.
+    if (((i_t1.pThisTarget != nullptr) && (i_t2.pThisTarget != nullptr))
+       && ((isOmi(i_t1.pThisTarget) && isOmic(i_t2.pThisTarget)) ||
+           (isOmi(i_t2.pThisTarget) && isOmic(i_t1.pThisTarget))))
+    {
+        TargetHandleList l_pOmicParent;
+        if (i_t1.type == TYPE_OMI)
+        {
+            targetService().getAssociated(l_pOmicParent, i_t1.pThisTarget,
+                                          TargetService::OMIC_PARENT,
+                                          TargetService::ALL);
+
+            l_t1Path = l_pOmicParent[0]->getAttr<ATTR_AFFINITY_PATH>();
+        }
+        else
+        {
+            targetService().getAssociated(l_pOmicParent, i_t2.pThisTarget,
+                                          TargetService::OMIC_PARENT,
+                                          TargetService::ALL);
+
+            l_t2Path = l_pOmicParent[0]->getAttr<ATTR_AFFINITY_PATH>();
+        }
+    }
+
+    size_t l_size = std::min(l_t1Path.size(),
+                             l_t2Path.size());
+
+    return l_t1Path.equals(l_t2Path, l_size);
 }
 
 /**
@@ -2556,15 +2592,19 @@ void invokePresentByAssoc()
 
     PredicateCTM mccPred(CLASS_NA, TYPE_MCC),
                  omiPred(CLASS_NA, TYPE_OMI),
+                 omicPred(CLASS_NA, TYPE_OMIC),
                  ocmbPred(CLASS_CHIP, TYPE_OCMB_CHIP),
                  memportPred(CLASS_NA, TYPE_MEM_PORT);
     PredicateHwas functionalPred;
     functionalPred.functional(true);
+
     Target *pSys;
     targetService().getTopLevelTarget(pSys);
+
     PredicatePostfixExpr l_funcAxoneMemoryUnits;
-    l_funcAxoneMemoryUnits.push(&mccPred).push(&omiPred).Or().push(&ocmbPred)
-        .Or().push(&memportPred).Or().push(&functionalPred).And();
+    l_funcAxoneMemoryUnits.push(&mccPred).push(&omiPred).Or()
+        .push(&omicPred).Or().push(&ocmbPred).Or().push(&memportPred)
+        .Or().push(&functionalPred).And();
 
     TargetHandleList l_funcAxoneTargetList;
     targetService().getAssociated(l_funcAxoneTargetList, pSys,
@@ -2828,15 +2868,54 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         case TYPE_MC:    //CUMULUS and AXONE
         {
-            // No Child MIs
+
+            // No child MIs and (Axone) no child OMICs
+
+            // (Axone) Since OMIC targets are always sorted after the DIMMs
+            //         of the current MC, we need to look for them instead
+            //         of following the main algorithm's procedure of
+            //         checking the next target in the vector.
+            std::vector<TargetInfo>::iterator searchIt = it;
+            if (searchIt != io_funcTargets.end())
+            {
+                std::advance(searchIt, 1);
+            }
+
+            while (searchIt != io_funcTargets.end())
+            {
+                TargetInfo& searchTargetInfo = *searchIt;
+
+                // Stop searching for an OMIC if we encounter another MC
+                // target since that would mean we have finished searching
+                // all descendants of the current target. If we find an OMIC
+                // target then stop also, since only one child is required.
+                if ((searchTargetInfo.type == TYPE_MC)
+                    || ((searchTargetInfo.type == TYPE_OMIC) &&
+                        isSameSubPath(l_curTargetInfo, searchTargetInfo)))
+                {
+                    break;
+                }
+
+                std::advance(searchIt, 1);
+            }
+
             // If next is not a MI sharing the same MC, deconfig MC
-            if ( (l_nextTargetInfo == NULL) ||
-                (l_nextTargetInfo->type != TYPE_MI) ||
-                !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            // (Axone) And if we encountered another MC or reached the end of
+            //         the vector then there are no child OMIC targets for this
+            //         MC and it should be deconfigured.
+            // Note: LHS (Non-Axone) && RHS (Axone)
+            //       For Non-Axone, RHS is always true and for Axone LHS is
+            //       always true.
+            if (((l_nextTargetInfo == NULL)
+                    || (l_nextTargetInfo->type != TYPE_MI)
+                    || !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo))
+                && ((searchIt == io_funcTargets.end())
+                    || ((*searchIt).type == TYPE_MC)))
             {
                 // Disable MC - NO_CHILD_MI
                 l_curTargetInfo.reason =
                 DeconfigGard::DECONFIGURED_BY_NO_CHILD_MI;
+
                 // Add target to Deconfig vector to be deconfigured later
                 o_targToDeconfig.push_back(l_curTargetInfo);
                 // Remove target from funcTargets
@@ -2847,10 +2926,9 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 l_DMIIndex = __INT_MAX__;
                 l_MCCIndex = __INT_MAX__;
             }
-            //@TODO RTC 196804: Add checks for OMIC
-            // Update MC Index
             else
             {
+                // Update MC Index
                 l_MCIndex = i;
                 l_MIIndex = __INT_MAX__; //New MC,so MI index invalid
                 l_DMIIndex = __INT_MAX__; //New MC,so DMI index invalid
@@ -2858,6 +2936,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 i++;
                 continue;
             }
+
             break;
         }// MC
 
@@ -2913,6 +2992,80 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             }
             break;
         } // MI
+
+        case TYPE_OMIC:
+        {
+            // No Child OMIs
+            // Since OMIC targets are sorted after all of the rest of the
+            // targets in the same subpath, we must do a backward search for
+            // the correct OMI child. The l_OMIIndex is unreliable because it
+            // may be pointing at an OMI that isn't this OMICs child.
+            std::vector<TargetInfo>::iterator searchIt = it;
+            if (searchIt != io_funcTargets.begin())
+            {
+                std::advance(searchIt, -1);
+            }
+
+            while (searchIt != io_funcTargets.begin())
+            {
+                TargetInfo& searchTargetInfo = *searchIt;
+
+                // Stop the search if we encounter an MC because, based on the
+                // sorting of the vector, there are no more OMIs to check for
+                // this subpath. Also, if a child of the OMIC is found stop.
+                if ((searchTargetInfo.type == TYPE_MC)
+                    || ((searchTargetInfo.type == TYPE_OMI) &&
+                        isSameSubPath(l_curTargetInfo, searchTargetInfo)))
+                {
+                    break;
+                }
+
+                std::advance(searchIt, -1);
+            }
+
+            // We encountered an MC target indicating that no OMIs were seen in
+            // the vector that are children of this OMIC or we backtracked all
+            // the way to the beginning and didn't find any children.
+            if (searchIt == io_funcTargets.begin()
+                || ((*searchIt).type == TYPE_MC))
+            {
+                // Disable OMIC - NO_CHILD_OMI
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_OMI;
+            }
+            // No Parent MC
+            // If OMIC doesn't share the same MC as MCIndex, deconfig OMIC
+            else if ( (l_MCIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCIndex]))
+            {
+                // Disable OMIC - NO_PARENT_MC
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MC;
+            }
+            else
+            {
+                // Advance to the next target in the vector.
+                i++;
+                continue;
+            }
+
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            //Backtrack to last MC
+            if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        }
 
         case TYPE_DMI:    //CUMULUS
         {
@@ -3036,7 +3189,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
             }
             // No Parent MCC
-            // If OMI doesn't share the same MCC as OMIIndex, deconfig OMI
+            // If OMI doesn't share the same MCC as MCCIndex, deconfig OMI
             else if ( (l_MCCIndex == __INT_MAX__) ||
                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCCIndex]))
             {
@@ -3044,13 +3197,58 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 l_curTargetInfo.reason =
                 DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCC;
             }
-            // Update OMI Index
+            // No Parent OMIC
+            // If OMI doesn't share the same OMIC as OMICIndex, deconfig OMI
             else
             {
-                l_OMIIndex = i;
-                i++;
-                continue;
+                // Since OMIC targets are always sorted after the DIMMs of
+                // the current MC, we need to look for them instead of
+                // following the main algorithm's procedure of checking the
+                // next target in the vector.
+                std::vector<TargetInfo>::iterator searchIt = it;
+                if (searchIt != io_funcTargets.end())
+                {
+                    std::advance(searchIt, 1);
+                }
+
+                while (searchIt != io_funcTargets.end())
+                {
+                    TargetInfo& searchTargetInfo = *searchIt;
+
+                    // Stop the search when we encounter an MC since that means
+                    // no parent OMICs were seen at the end of this sorted
+                    // subpath and also stop searching when we found the OMIC
+                    // parent.
+                    if ((searchTargetInfo.type == TYPE_MC)
+                        || ((searchTargetInfo.type == TYPE_OMIC) &&
+                            isSameSubPath(l_curTargetInfo, searchTargetInfo)))
+                    {
+                        break;
+                    }
+
+                    std::advance(searchIt, 1);
+                }
+
+                // Either an MC was encountered or the end of the vector was
+                // reached meaning that no parent OMIC was found. Deconfigure
+                // this OMI.
+                if (searchIt == io_funcTargets.end()
+                    || ((*searchIt).type == TYPE_MC))
+                {
+                    // Disable OMI - NO_PARENT_OMIC
+                    l_curTargetInfo.reason =
+                    DeconfigGard::DECONFIGURED_BY_NO_PARENT_OMIC;
+                }
+                // Update OMI Index
+                else
+                {
+                    l_OMIIndex = i;
+                    i++;
+                    continue;
+                }
+
             }
+
             // Add target to Deconfig vector to be deconfigured later
             o_targToDeconfig.push_back(l_curTargetInfo);
             // Remove target from funcTargets
@@ -3062,13 +3260,13 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 i = l_MCCIndex;
                 l_OMIIndex = __INT_MAX__; //New MCC, OMI index invalid
             }
-            //Backtrack to last MI, if no MCC has been seen yet
+            // Backtrack to last MI, if no MCC has been seen yet
             else if ( l_MIIndex != __INT_MAX__ )
             {
                 i = l_MIIndex;
                 l_OMIIndex = __INT_MAX__; //New MI, OMI index invalid
             }
-            //Backtrack to last MC, if no MI has been seen yet
+            // Backtrack to last MC, if no MI has been seen yet
             else if ( l_MCIndex != __INT_MAX__ )
             {
                 i = l_MCIndex;
