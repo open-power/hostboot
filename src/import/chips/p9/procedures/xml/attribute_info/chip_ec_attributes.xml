@@ -387,13 +387,15 @@
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW436858 - TM suspend WAT workaround
+      Note: This workaround is only needed for NDD22/CDD11, but this attribute
+            will also be true for NDD23 for its compatibility modes
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
@@ -4784,23 +4786,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CORE_CDDXX_SECURITY</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Security settings for Cumulus DD1.1, DD1.2, and DD1.3
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x11</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_CORE_CDD12_CDD13_SECURITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -4883,6 +4868,30 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_COMPATIBILITY_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      True if the chip supports a compatibility mode
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_CORE_CDD13_COMPATIBILITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -4911,6 +4920,86 @@
         <ec>
           <value>0x23</value>
           <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_SMF_SETUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Core inits for enabling secure memory facility
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_SMF_SETUP_RL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Core inits for enabling secure memory facility by risk level
+      Only enabled on risk level 4 and 5 for Nimbus 2.3 and Cumulus 1.3
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_NDD23_CDD11_LOGIC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Logic that only exist for NDD23+, CDD11+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
