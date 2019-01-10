@@ -199,6 +199,7 @@ public:
         DECONFIGURED_BY_NO_PARENT_OMI,          // BASE | 0x20
         DECONFIGURED_BY_NO_CHILD_OCMB_CHIP,     // BASE | 0x21
         DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,    // BASE | 0x22
+        DECONFIGURED_BY_NO_PARENT_OMIC,         // BASE | 0x23
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
