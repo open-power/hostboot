@@ -2314,6 +2314,10 @@
       <id>OBUS_SLOT_INDEX</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2398,6 +2402,10 @@
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
       <default>0x00000001</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>PEER_PATH</id>
