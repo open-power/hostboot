@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,8 +237,7 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 
 
             // Set the offset for the vendor reg
-            tpmInfo.offset = TPMDD::I2C_REG_VENDOR;
-
+            tpmInfo.offset = tpmInfo.vendorIdOffset;
 
             err = tpmRead( io_buffer,
                            io_buflen,
@@ -427,7 +426,9 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
         // comparing the vendor ID
         uint32_t vendorId = 0;
         const size_t vendorIdSize = sizeof(vendorId);
-        tpmInfo.offset = TPMDD::I2C_REG_VENDOR;
+
+        // Set the offset for the vendor reg
+        tpmInfo.offset = tpmInfo.vendorIdOffset;
 
         pError = tpmRead(&vendorId,
                          vendorIdSize,
@@ -450,8 +451,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             break;
 
         }
-        else if (   (TPMDD::TPM_VENDORID_MASK & vendorId)
-                 != (TPMDD::TPM_VENDORID))
+        else if ((TPMDD::TPM_VENDORID_MASK & vendorId)
+                       != tpmInfo.vendorId)
         {
             if(verbose)
             {
@@ -465,7 +466,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     tpmInfo.port,
                     static_cast<uint64_t>(tpmInfo.devAddr),
                     vendorId,
-                    TPMDD::TPM_VENDORID);
+                    tpmInfo.vendorId);
 
                 // Printing mux info separately, if combined, nothing is displayed
                 char* l_muxPath = tpmInfo.i2cMuxPath.toString();
@@ -492,109 +493,27 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 TPMDD_TPMPRESENCE,
                 TPM_RC_UNEXPECTED_VENDOR_ID,
-                TWO_UINT32_TO_UINT64(TPMDD::TPM_VENDORID,vendorId),
+                TWO_UINT32_TO_UINT64(tpmInfo.vendorId,vendorId),
                 get_huid(i_pTpm),
                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
             break;
         }
 
-        // Verify the TPM is supported by this driver by reading and
-        // comparing the family ID
-        uint8_t familyId = 0;
-        const size_t familyIdSize = sizeof(familyId);
-        tpmInfo.offset = TPMDD::I2C_REG_FAMILYID;
 
-        pError = tpmRead(&familyId,
-                         familyIdSize,
-                         tpmInfo,
-                         true /* silent */);
-        if (pError)
-        {
-            if(verbose)
-            {
-                TRACFCOMP(g_trac_tpmdd,ERR_MRK
-                    "tpmPresence: tpmRead: Failed to read TPM family ID! "
-                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X",
-                    TRACE_ERR_FMT,
-                    TARGETING::get_huid(i_pTpm),
-                    tpmInfo.engine,
-                    tpmInfo.port,
-                    static_cast<uint64_t>(tpmInfo.devAddr),
-                    TRACE_ERR_ARGS(pError));
 
-                // Printing mux info separately, if combined, nothing is displayed
-                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
-                TRACFCOMP(g_trac_tpmdd,
-                          ERR_MRK"tpmPresence: "
-                          "muxSelector=0x%X, muxPath=%s",
-                          tpmInfo.i2cMuxBusSelector,
-                          l_muxPath);
-                free(l_muxPath);
-                l_muxPath = nullptr;
-            }
-            break;
-
-        }
-        else if (   (TPMDD::TPM_FAMILYID_MASK & familyId)
-                 != (TPMDD::TPM_FAMILYID))
-        {
-            if(verbose)
-            {
-                TRACFCOMP(g_trac_tpmdd,ERR_MRK
-                    "tpmPresence: Sampled family ID did not match expected "
-                    "family ID! "
-                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
-                    "actual family ID=0x%02X, expected family ID=0x%02X.",
-                    TARGETING::get_huid(i_pTpm),
-                    tpmInfo.engine,
-                    tpmInfo.port,
-                    static_cast<uint64_t>(tpmInfo.devAddr),
-                    familyId,
-                    TPMDD::TPM_FAMILYID);
-
-                // Printing mux info separately, if combined, nothing is displayed
-                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
-                TRACFCOMP(g_trac_tpmdd,
-                          ERR_MRK"tpmPresence: "
-                          "muxSelector=0x%X, muxPath=%s",
-                          tpmInfo.i2cMuxBusSelector,
-                          l_muxPath);
-                free(l_muxPath);
-                l_muxPath = nullptr;
-            }
-
-            /*@
-             * @errortype
-             * @moduleid         TPMDD_TPMPRESENCE
-             * @reasoncode       TPM_RC_UNEXPECTED_FAMILY_ID
-             * @userdata1[24:31] Expected family ID
-             * @userdata1[56:63] Actual family ID
-             * @userdata2        TPM HUID
-             * @devdesc          Unexpected family ID read from TPM
-             * @custdesc         Trusted boot problem detected
-             */
-            pError = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                TPMDD_TPMPRESENCE,
-                TPM_RC_UNEXPECTED_FAMILY_ID,
-                TWO_UINT32_TO_UINT64(TPMDD::TPM_FAMILYID,familyId),
-                get_huid(i_pTpm),
-                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-
-            break;
-        }
-        else
+        // TPM Nuvoton Model 75x does not support the familyId, and requires
+        // some additional setup for locality
+        if (tpmInfo.model == TPM_MODEL_75x)
         {
             TRACFCOMP(g_trac_tpmdd,INFO_MRK
                 "tpmPresence: TPM Detected! "
                 "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
-                "vendor ID=0x%08X, family ID=0x%02X.",
+                "vendor ID=0x%08X (no family ID for model 75x)",
                 TARGETING::get_huid(i_pTpm),
                 tpmInfo.engine,
                 tpmInfo.port,
                 static_cast<uint64_t>(tpmInfo.devAddr),
-                vendorId,
-                familyId);
+                vendorId);
 
             // Printing mux info separately, if combined, nothing is displayed
             char* l_muxPath = tpmInfo.i2cMuxPath.toString();
@@ -606,7 +525,156 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             free(l_muxPath);
             l_muxPath = nullptr;
 
+             // Commands to enable locality 0
+            uint8_t locality = 0;
+            size_t  locSize = 1;
+            // Set the offset for the loc_sel reg
+            tpmInfo.offset = TPM_REG_75x_LOC_SEL;
+            pError = tpmWrite( &locality,
+                               locSize,
+                               tpmInfo);
+            if (pError)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: Error on 1st cmd to set up Locality for 75x "
+                    "TPM HUID=0x%08X. Treat TPM as not present",
+                    TARGETING::get_huid(i_pTpm));
+                break;
+            }
+
+            uint8_t val = 0x02;
+            size_t  valSize = 1;
+            // Set the offset for the loc_sel reg
+            tpmInfo.offset = TPM_REG_75x_TPM_ACCESS;
+            pError = tpmWrite( &val,
+                               valSize,
+                               tpmInfo);
+            if (pError)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: Error on 2nd cmd to set up Locality for 75x "
+                    "TPM HUID=0x%08X. Treat TPM as not present",
+                    TARGETING::get_huid(i_pTpm));
+                break;
+            }
+
             present = true;
+        }
+        else
+        {
+            // Verify the TPM is supported by this driver by reading and
+            // comparing the family ID
+            uint8_t familyId = 0;
+            const size_t familyIdSize = sizeof(familyId);
+            tpmInfo.offset = TPM_REG_65x_FAMILYID_OFFSET;
+
+            pError = tpmRead(&familyId,
+                             familyIdSize,
+                             tpmInfo,
+                             true /* silent */);
+            if (pError)
+            {
+                if(verbose)
+                {
+                    TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                        "tpmPresence: tpmRead: Failed to read TPM family ID! "
+                        "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X"
+                        TRACE_ERR_FMT,
+                        TARGETING::get_huid(i_pTpm),
+                        tpmInfo.engine,
+                        tpmInfo.port,
+                        static_cast<uint64_t>(tpmInfo.devAddr),
+                        TRACE_ERR_ARGS(pError));
+
+                    // Printing mux info separately, if combined,
+                    //  nothing is displayed
+                    char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmPresence: "
+                              "muxSelector=0x%X, muxPath=%s",
+                              tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+                }
+                break;
+
+            }
+            else if (   (TPMDD::TPM_FAMILYID_MASK & familyId)
+                     != (TPMDD::TPM_FAMILYID_65x))
+            {
+                if(verbose)
+                {
+                    TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                        "tpmPresence: Sampled family ID did not match expected "
+                        "family ID! "
+                        "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                        "actual family ID=0x%02X, expected family ID=0x%02X.",
+                        TARGETING::get_huid(i_pTpm),
+                        tpmInfo.engine,
+                        tpmInfo.port,
+                        static_cast<uint64_t>(tpmInfo.devAddr),
+                        familyId,
+                        TPMDD::TPM_FAMILYID_65x);
+
+                    // Printing mux info separately, if combined,
+                    // nothing is displayed
+                    char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                    TRACFCOMP(g_trac_tpmdd,
+                              ERR_MRK"tpmPresence: "
+                              "muxSelector=0x%X, muxPath=%s",
+                              tpmInfo.i2cMuxBusSelector,
+                              l_muxPath);
+                    free(l_muxPath);
+                    l_muxPath = nullptr;
+                }
+
+                /*@
+                 * @errortype
+                 * @moduleid         TPMDD_TPMPRESENCE
+                 * @reasoncode       TPM_RC_UNEXPECTED_FAMILY_ID
+                 * @userdata1[24:31] Expected family ID
+                 * @userdata1[56:63] Actual family ID
+                 * @userdata2        TPM HUID
+                 * @devdesc          Unexpected family ID read from TPM
+                 * @custdesc         Trusted boot problem detected
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    TPMDD_TPMPRESENCE,
+                    TPM_RC_UNEXPECTED_FAMILY_ID,
+                    TWO_UINT32_TO_UINT64(TPMDD::TPM_FAMILYID_65x,familyId),
+                    get_huid(i_pTpm),
+                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                    "tpmPresence: TPM Detected! "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                    "vendor ID=0x%08X, family ID=0x%02X.",
+                    TARGETING::get_huid(i_pTpm),
+                    tpmInfo.engine,
+                    tpmInfo.port,
+                    static_cast<uint64_t>(tpmInfo.devAddr),
+                    vendorId,
+                    familyId);
+
+                // Printing mux info separately, if combined,
+                // nothing is displayed
+                char* l_muxPath = tpmInfo.i2cMuxPath.toString();
+                TRACFCOMP(g_trac_tpmdd,
+                       INFO_MRK"tpmPresence: "
+                       "muxSelector=0x%X, muxPath=%s",
+                       tpmInfo.i2cMuxBusSelector,
+                       l_muxPath);
+                free(l_muxPath);
+                l_muxPath = nullptr;
+
+                present = true;
+            }
         }
 
     } while( 0 );
@@ -1383,7 +1451,7 @@ errlHndl_t tpmDrtmReset (tpm_info_t i_tpmInfo)
                ENTER_MRK"tpmDrtmReset()" );
     do
     {
-        i_tpmInfo.offset = I2C_REG_TPM_HASH;
+        i_tpmInfo.offset = TPM_REG_TPM_HASH;
 
         regData = TPM_HASH_START;
         err =  tpmWrite ( &regData,
@@ -1498,6 +1566,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     // These variables will be used to hold the TPM attribute data
     TARGETING::TpmInfo tpmData;
+    uint8_t tpmModel = TPM_MODEL_UNDETERMINED;
 
     do
     {
@@ -1507,8 +1576,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                ( tpmData ) ) )
 
         {
-            const auto type = i_target ?
-                i_target->getAttr<TARGETING::ATTR_TYPE>() : 0;
+            const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
             TRACFCOMP(g_trac_tpmdd,ERR_MRK
                 "tpmReadAttributes: Failed to read TPM_INFO "
@@ -1546,7 +1614,111 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
         }
 
-        // Successful reading of Attribute, so extract the data
+
+        if( !( i_target->
+               tryGetAttr<TARGETING::ATTR_TPM_MODEL>
+               ( tpmModel ) ) )
+
+        {
+            const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+            TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                "tpmReadAttributes: Failed to read TPM_MODEL "
+                "attribute from target HUID=0x%08X of type=0x%08X.",
+                TARGETING::get_huid(i_target),
+                type);
+
+                /*@
+                 * @errortype
+                 * @reasoncode TPM_ATTR_MODEL_NOT_FOUND
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   TPMDD_READATTRIBUTES
+                 * @userdata1  HUID of target
+                 * @userdata2  Type of target
+                 * @devdesc    TPM_MODEL attribute was not found for the
+                 *     requested target
+                 * @custdesc   Unexpected trusted boot related failure
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              TPMDD_READATTRIBUTES,
+                                              TPM_ATTR_MODEL_NOT_FOUND,
+                                              TARGETING::get_huid(i_target),
+                                              type);
+
+                // Could be FSP or HB code's fault
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED);
+                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                err->collectTrace( TPMDD_COMP_NAME );
+
+                break;
+        }
+
+        // Hostboot code only supports Nuvoton 65x and 75x Models at this time
+        // so set model-specific attributes appropriately
+        if (tpmModel == TPM_MODEL_65x)
+        {
+            io_tpmInfo.model          = tpmModel;
+            io_tpmInfo.sts            = TPM_REG_65x_STS;
+            io_tpmInfo.burstCount     = TPM_REG_65x_BURSTCOUNT;
+            io_tpmInfo.tpmHash        = TPM_REG_65x_TPM_HASH;
+            io_tpmInfo.wrFifo         = TPM_REG_65x_WR_FIFO;
+            io_tpmInfo.rdFifo         = TPM_REG_65x_RD_FIFO;
+            io_tpmInfo.vendorIdOffset = TPM_REG_65x_VENDOR_ID_OFFSET;
+            io_tpmInfo.vendorId       = TPM_VENDORID_65x;
+        }
+        else if (tpmModel == TPM_MODEL_75x)
+        {
+            io_tpmInfo.model          = tpmModel;
+            io_tpmInfo.sts            = TPM_REG_75x_STS;
+            io_tpmInfo.burstCount     = TPM_REG_75x_BURSTCOUNT;
+            io_tpmInfo.tpmHash        = TPM_REG_75x_TPM_HASH;
+            io_tpmInfo.wrFifo         = TPM_REG_75x_WR_FIFO;
+            io_tpmInfo.rdFifo         = TPM_REG_75x_RD_FIFO;
+            io_tpmInfo.vendorIdOffset = TPM_REG_75x_VENDOR_ID_OFFSET;
+            io_tpmInfo.vendorId       = TPM_VENDORID_75x;
+        }
+        else
+        {
+            // Fail since invalid/unsupported TPM model is found
+            TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                "tpmReadAttributes: Invalid TPM_MODEL %d from "
+                "attribute from target HUID=0x%08X",
+                tpmModel, TARGETING::get_huid(i_target));
+
+                /*@
+                 * @errortype
+                 * @reasoncode TPM_ATTR_INVALID_MODEL
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   TPMDD_READATTRIBUTES
+                 * @userdata1  TPM Model of target
+                 * @userdata2  HUID of target
+                 * @devdesc    TPM_MODEL attribute was set to a value that
+                 *             is not currently supported
+                 * @custdesc   Unexpected trusted boot related failure
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              TPMDD_READATTRIBUTES,
+                                              TPM_ATTR_INVALID_MODEL,
+                                              tpmModel,
+                                              TARGETING::get_huid(i_target));
+
+                // Could be FSP or HB code's fault
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_MED);
+                err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+
+                err->collectTrace( TPMDD_COMP_NAME );
+
+                break;
+        }
+
+        // Successful reading of the Attributes, so extract the data
         io_tpmInfo.port          = tpmData.port;
         switch(i_locality)
         {
@@ -1562,6 +1734,13 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
             default:
                 assert(false, "BUG! Locality %d is not supported.",
                     i_locality);
+        }
+
+        // Nuvoton 75x only supports one locality i2c address
+        // (i.e. locality is handled differently)
+        if (tpmModel == TPM_MODEL_75x)
+        {
+            io_tpmInfo.devAddr = tpmData.devAddrLocality0;
         }
 
         io_tpmInfo.engine        = tpmData.engine;
@@ -1645,7 +1824,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                  * @moduleid         TPMDD_READATTRIBUTES
                  * @userdata1        HUID of target
                  * @userdata2        Address Offset Size
-                 * @devdesc          Invalid address offset size
+                 * @devdesc          Can't find TPM in ATTR_I2C_BUS_SPEED_ARRAY
                  */
                 err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1851,7 +2030,8 @@ errlHndl_t tpmReadReg ( tpm_info_t i_tpmInfo,
 errlHndl_t tpmReadSTSReg ( tpm_info_t i_tpmInfo,
                            tpm_sts_reg_t & o_stsReg)
 {
-    i_tpmInfo.offset = TPMDD::I2C_REG_STS;
+    i_tpmInfo.offset = i_tpmInfo.sts;
+
     return tpmRead(reinterpret_cast<void*>(&o_stsReg),
                    1,
                    i_tpmInfo);
@@ -1862,7 +2042,8 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
 {
     errlHndl_t err = NULL;
 
-    i_tpmInfo.offset = TPMDD::I2C_REG_STS;
+    i_tpmInfo.offset = i_tpmInfo.sts;
+
     size_t polls = 0;
     do
     {
@@ -2158,7 +2339,7 @@ errlHndl_t tpmReadBurstCount( const tpm_info_t & i_tpmInfo,
     if (NULL == err)
     {
         err = tpmReadReg(i_tpmInfo,
-                         TPMDD::I2C_REG_BURSTCOUNT,
+                         i_tpmInfo.burstCount,
                          2,
                          reinterpret_cast<void*>(&burstCount));
     }
@@ -2186,7 +2367,7 @@ errlHndl_t tpmWriteCommandReady( const tpm_info_t & i_tpmInfo)
     stsReg.isCommandReady = 1;
 
     return tpmWriteReg(i_tpmInfo,
-                       TPMDD::I2C_REG_STS,
+                       i_tpmInfo.sts,
                        1,
                        reinterpret_cast<void*>(&stsReg));
 
@@ -2199,7 +2380,7 @@ errlHndl_t tpmWriteTpmGo( const tpm_info_t & i_tpmInfo)
     stsReg.tpmGo = 1;
 
     return tpmWriteReg(i_tpmInfo,
-                       TPMDD::I2C_REG_STS,
+                       i_tpmInfo.sts,
                        1,
                        reinterpret_cast<void*>(&stsReg));
 
@@ -2212,7 +2393,7 @@ errlHndl_t tpmWriteResponseRetry( const tpm_info_t & i_tpmInfo)
     stsReg.responseRetry = 1;
 
     return tpmWriteReg(i_tpmInfo,
-                       TPMDD::I2C_REG_STS,
+                       i_tpmInfo.sts,
                        1,
                        reinterpret_cast<void*>(&stsReg));
 
@@ -2259,7 +2440,7 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
                   (length - curByte) :
                   burstCount);
         err = tpmWriteReg(i_tpmInfo,
-                          TPMDD::I2C_REG_WR_FIFO,
+                          i_tpmInfo.wrFifo,
                           tx_len,
                           curBytePtr);
         if (err)
@@ -2356,7 +2537,7 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             delay = 0;
             curBytePtr = &(bytePtr[curByte]);
             err = tpmWriteReg(i_tpmInfo,
-                              TPMDD::I2C_REG_WR_FIFO,
+                              i_tpmInfo.wrFifo,
                               1,
                               curBytePtr);
             // done
@@ -2556,7 +2737,7 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
             delay = 0;
             curBytePtr = &(bytePtr[curByte]);
             err = tpmReadReg(i_tpmInfo,
-                             TPMDD::I2C_REG_RD_FIFO,
+                             i_tpmInfo.rdFifo,
                              burstCount,
                              curBytePtr);
             if (err)

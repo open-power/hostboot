@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,7 +142,8 @@ class TPMDDTest: public CxxTest::TestSuite
                     continue;
                 }
                 else if ((data & TPMDD::TPM_VENDORID_MASK)
-                         != TPMDD::TPM_VENDORID)
+                         // Only 65x supported in simics for now:
+                           != TPMDD::TPM_VENDORID_65x)
                 {
                     fails++;
                     TS_FAIL( "testTPMReadVendorID - Failed to read "

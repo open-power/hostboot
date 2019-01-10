@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,20 +67,35 @@ enum
  */
 enum nuvo_20_defs_t
 {
-    I2C_REG_STS        = 0x0,
-    I2C_REG_BURSTCOUNT = 0x1,
-    I2C_REG_BURSTCOUNT_HIGH = 0x2,
-    I2C_REG_FAMILYID   = 0x3,
-    I2C_REG_TPM_HASH   = 0x4,
-    I2C_REG_WR_FIFO    = 0x20,
-    I2C_REG_RD_FIFO    = 0x40,
-    I2C_REG_VENDOR     = 0x60,
+    // Values for Nuvoton 65x Support
+    TPM_REG_65x_STS              = 0x0,
+    TPM_REG_65x_BURSTCOUNT       = 0x1,
+    TPM_REG_65x_BURSTCOUNT_HIGH  = 0x2,
+    TPM_REG_65x_FAMILYID_OFFSET  = 0x3,
+    TPM_REG_65x_TPM_HASH         = 0x4,
+    TPM_REG_65x_WR_FIFO          = 0x20,
+    TPM_REG_65x_RD_FIFO          = 0x40,
+    TPM_REG_65x_VENDOR_ID_OFFSET = 0x60,
+    TPM_VENDORID_65x             = 0x5010FE00,
+    TPM_FAMILYID_65x             = 0x04,
 
-    TPM_VENDORID       = 0x5010FE00,
+    // Values for Nuvoton 75x Support
+    TPM_REG_75x_LOC_SEL          = 0x00,
+    TPM_REG_75x_TPM_ACCESS       = 0x04,
+    TPM_REG_75x_STS              = 0x18,
+    TPM_REG_75x_BURSTCOUNT       = 0x19,
+    // BUSTCOUNT_HIGH - unused
+    TPM_REG_75x_TPM_HASH         = 0x4,
+    TPM_REG_75x_WR_FIFO          = 0x24,
+    TPM_REG_75x_RD_FIFO          = 0x24,
+    TPM_REG_75x_VENDOR_ID_OFFSET = 0x48,
+    TPM_VENDORID_75x             = 0x5010FC00,
+    // 75X does not use a Family ID
+
+    // Common values
     TPM_VENDORID_MASK  = 0xFFFFFF00,
-    TPM_MAXBURSTSIZE   = 0xFFFF,
-    TPM_FAMILYID       = 0x04,
     TPM_FAMILYID_MASK  = 0x0C,
+    TPM_MAXBURSTSIZE   = 0xFFFF,
     TPM_HASH_START     = 0x01,
     TPM_HASH_END       = 0x02,
 };
