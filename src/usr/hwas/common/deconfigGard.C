@@ -1783,7 +1783,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
         // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
         // chip  (TYPE_EQ, TYPE_EX, TYPE_CORE)
-        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP)
+        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP, TYPE_OBUS_BRICK)
         // deconfigureByAssociation rules
         switch (l_targetType)
         {
@@ -1928,6 +1928,39 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 }
                 break;
             }
+
+            case TYPE_OBUS_BRICK:
+            {
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
+                TargetHandleList pParentObusList;
+                getParentAffinityTargetsByState(pParentObusList, &i_target,
+                                                CLASS_UNIT, TYPE_OBUS,
+                                                UTIL_FILTER_ALL);
+                HWAS_ASSERT((pParentObusList.size() == 1),
+                            "HWAS _deconfigParentAssoc: pParentObusList != 1");
+
+                // Still allow for Parent OBUS deconfig if
+                // no more functional children
+                // (i.e. Don't knock it out if functional SMPGROUP child found)
+
+                // Need this because HWSV will knock out all OBUS_BRICKS,
+                // but leave the SMPGROUP children under OBUS targets
+                Target *l_parentObus = pParentObusList[0];
+
+                // General predicate to determine if target is functional
+                PredicateIsFunctional isFunctional;
+                if ((isFunctional(l_parentObus)) &&
+                   (!anyChildFunctional(*l_parentObus)))
+                {
+
+                    _deconfigureTarget(*l_parentObus,
+                                       i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(*l_parentObus,
+                                       i_errlEid,i_deconfigRule);
+                }
+                break;
+            } // TYPE_OBUS_BRICK
 
             case TYPE_NPU:
             {
