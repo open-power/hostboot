@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -68,9 +68,9 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_SBE_PIB_REGION_FENCE_ERROR</rc>
+    <rc>RC_EXTRACT_SBE_RC_PIB_REGION_FENCE_ERROR</rc>
     <description>
-    PIB or SBE region fence is set to 1, So scoms cant be performed
+    PIB region fence is set to 1, So scoms cant be performed
     Action:Switch seeprom [REIPL_BKP_SEEPROM]
     </description>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>

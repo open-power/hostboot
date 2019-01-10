@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,15 +289,15 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
         }
 
-        //-- Check Perv Cplt_ctrl1 [pib(bit6) and sbe(bit9)] region fences should not be 1
+        //-- Check Perv Cplt_ctrl1 PIB(bit6) region fences should not be 1
         FAPI_DBG("p9_extract_sbe_rc: Reading TP Chiplet Control 1 register");
         FAPI_TRY(getScom(i_target_chip, PERV_TP_CPLT_CTRL1, l_data64));
 
-        if(l_data64.getBit<PERV_1_CPLT_CTRL1_UNUSED_9B>() || l_data64.getBit<PERV_1_CPLT_CTRL1_UNUSED_6B>())
+        if(l_data64.getBit<PERV_1_CPLT_CTRL1_UNUSED_6B>())
         {
             o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_PIB_REGION_FENCE_ERROR() .set_TARGET_CHIP(i_target_chip),
-                        "PIB or SBE region fence is set to 1");
+            FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_PIB_REGION_FENCE_ERROR() .set_TARGET_CHIP(i_target_chip),
+                        "PIB region fence is set to 1");
         }
     }
     else
