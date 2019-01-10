@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -91,6 +91,7 @@ my $errlTypes = $compIncPath."/errl/hberrltypes.H";
 #------------------------------------------------------------------------------
 my @reasonCodeFiles;
 my @filesToParse;
+my @prdfFilesToParse;
 my @pluginDirsToParse;
 getReasonCodeFiles($compIncPath);
 getReasonCodeFiles($compBlIncPath);
@@ -782,6 +783,178 @@ foreach my $file (@filesToParse)
     close(PARSE_FILE);
 }
 
+# For PRDF files we only need to get the SRC list
+foreach my $prdfFile (@prdfFilesToParse)
+{
+    open(PRDF_PARSE_FILE, $prdfFile) or die("Cannot open: $prdfFile: $!");
+
+    my @namespaces;
+    push(@namespaces, "NO_NS");
+    while (my $line = <PRDF_PARSE_FILE>)
+    {
+
+        if ($line =~ /namespace\s+(\w+)/)
+        {
+            # Found a namespace, record it to be used when searching for
+            # moduleid and reasoncode values
+            push(@namespaces, $1);
+            next;
+        }
+
+        if ($line =~ /\/\*\@/)
+        {
+            # Found the start of an error log tag
+            my $desc = "";
+            my $cdesc = "";
+            my $rc = "";
+            my $rcValue = "";
+
+            # Read the entire error log tag into an array
+            my @tag;
+
+            while ($line = <PRDF_PARSE_FILE>)
+            {
+                if ($line =~ /\*\//)
+                {
+                    # Found the end of an error log tag
+                    last;
+                }
+                push(@tag, $line);
+            }
+
+            # Process the error log tag
+            my $numLines = scalar (@tag);
+
+            for (my $lineNum = 0; $lineNum < $numLines; $lineNum++)
+            {
+                $line = $tag[$lineNum];
+
+                if ($line =~ /\@reasoncode\s+(\S+)/i)
+                {
+                    # Found a reasoncode, figure out the value
+                    $rc = $1;
+
+                    if ($rc =~ /(\w+)::(\w+)/)
+                    {
+                        # The namespace was provided
+                        if ((exists $rcToValueHash{$1}) &&
+                            (exists ${rcToValueHash{$1}->{$2}}))
+                        {
+                            $rcValue = ${rcToValueHash{$1}->{$2}};
+                        }
+                    }
+                    else
+                    {
+                        # The namespace was not provided, look through all
+                        # namespaces mentioned in the file
+                        foreach my $namespace(@namespaces)
+                        {
+                            if ((exists $rcToValueHash{$namespace}) &&
+                                (exists ${rcToValueHash{$namespace}->{$rc}}))
+                            {
+                                $rcValue = ${rcToValueHash{$namespace}->{$rc}};
+                                last;
+                            }
+                        }
+                    }
+
+                    if ($rcValue eq "")
+                    {
+                        print ("$0: Error finding reasoncode value for '$prdfFile:$line'\n");
+                        exit(1);
+                    }
+                }
+                elsif ($line =~ /\@devdesc\s+(\S+.*)/i)
+                {
+                    # Found a description, strip out any double-quotes and
+                    # trailing whitespace
+                    $desc = $1;
+                    $desc =~ s/\"//g;
+                    $desc =~ s/\s+$//;
+
+                    # Look for follow-on lines
+                    for ($lineNum++; $lineNum < $numLines; $lineNum++)
+                    {
+                        $line = $tag[$lineNum];
+
+                        if ($line =~ /\@/)
+                        {
+                            # Found the next element, rewind
+                            $lineNum--;
+                            last;
+                        }
+
+                        # Continuation of description, strip out any double-
+                        # quotes and leading / trailing whitespace
+                        $line =~ s/^.+\*\s+//;
+                        $line =~ s/\"//g;
+                        $line =~ s/\s+$//;
+
+                        if ($line ne "")
+                        {
+                            $desc = $desc . " " . $line;
+                        }
+                    }
+                }
+                elsif ($line =~ /\@custdesc\s+(\S+.*)/i)
+                {
+                    # Found a customer description. Strip out any
+                    # double-quotes and trailing whitespace
+                    $cdesc = $1;
+                    $cdesc =~ s/\"//g;
+                    $cdesc =~ s/\s+$//;
+
+                    # Look for follow-on lines
+                    for ($lineNum++; $lineNum < $numLines; $lineNum++)
+                    {
+                        $line = $tag[$lineNum];
+
+                        if ($line =~ /\@/)
+                        {
+                            # Found the next element, rewind
+                            $lineNum--;
+                            last;
+                        }
+
+                        # Continuation of description, strip out any
+                        # double-quotes and leading / trailing
+                        # whitespace
+                        $line =~ s/^.+\*\s+//;
+                        $line =~ s/\"//g;
+                        $line =~ s/\s+$//;
+
+                        if ($line ne "")
+                        {
+                            $cdesc = $cdesc . " " . $line;
+                        }
+                    }
+                }
+            }
+
+            # if no customer desc is provided, then use $desc
+            if ($cdesc eq "")
+            {
+                $cdesc =
+                "During processor/memory subsystem initialization,"
+                . " an error was encountered: $desc";
+            }
+
+            # SRC list - Don't add testcase SRCs
+            if(not $prdfFile =~ /\/test\//)
+            {
+                my $srcText = sprintf("%04X", hex($rcValue));
+                # eliminate dups
+                if($srcList{$srcText} eq "")
+                {
+                    $srcList{$srcText} .= $cdesc;
+                }
+            }
+        }
+    }
+
+    close(PRDF_PARSE_FILE);
+}
+
 #------------------------------------------------------------------
 # Load the sybsystem values for the System Reference Codes (SRCs)
 #------------------------------------------------------------------
@@ -1217,12 +1390,8 @@ sub getReasonCodeFiles
 
         if (-d $dirEntryPath)
         {
-            # Exclude PRD directory
-            if ( !($dirEntryPath =~ /prdf/) )
-            {
-                # Recursively call this function
-                getReasonCodeFiles($dirEntryPath);
-            }
+            # Recursively call this function
+            getReasonCodeFiles($dirEntryPath);
         }
         elsif( (($dirEntry =~ /reasoncodes/i) ||
                 ($dirEntry =~ /service_codes/i) ||
@@ -1255,17 +1424,20 @@ sub getFilesToParse
 
         if (-d $dirEntryPath)
         {
-            # Exclude PRD directory
-            if ( !($dirEntryPath =~ /prdf/) )
-            {
-                # Recursively call this function
-                getFilesToParse($dirEntryPath);
-            }
+            # Recursively call this function
+            getFilesToParse($dirEntryPath);
         }
-        elsif($dirEntry =~ /\.[H|C]$/)
+        elsif($dirEntry =~ /\.[H|C]$/ && !($dirEntryPath =~ /prdf/) )
         {
             # Found file to parse
             push(@filesToParse, $dirEntryPath);
+        }
+        # We will keep the prdf files separate from the rest of the list as we
+        # only want to get the SRC listing from them and nothing else.
+        elsif($dirEntry =~ /\.[H|C]$/ && $dirEntryPath =~ /prdf/ )
+        {
+            # Found prdf file to parse
+            push(@prdfFilesToParse, $dirEntryPath);
         }
     }
 }
