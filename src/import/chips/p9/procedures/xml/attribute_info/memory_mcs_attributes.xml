@@ -93,7 +93,8 @@
           MT2133 = 2133,
           MT2400 = 2400,
           MT2666 = 2666,
-          MT2933 = 2933
+          MT2933 = 2933,
+          MT3200 = 3200
         </enum>
         <writeable/>
         <mssUnits> MT/s </mssUnits>

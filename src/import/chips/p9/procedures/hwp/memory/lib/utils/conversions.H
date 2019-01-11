@@ -106,10 +106,10 @@ inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
             o_tCK_in_ps = 833;
             break;
 
-        // Default 2933 to 2666
-        // TODO:RTC192461
+        // Default 2933/3200 to 2666
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2933:
-            FAPI_INF("2933 speed grade detected. Setting o_tCK_in_ps to match 2666");
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT3200:
+            FAPI_INF("%u speed grade detected. Setting o_tCK_in_ps to match 2666", i_speed_grade);
 
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
             o_tCK_in_ps = 750;
@@ -137,10 +137,10 @@ fapi2::ReturnCode ps_to_freq(const T i_time_in_ps, OT& o_speed_grade)
 {
     switch(i_time_in_ps)
     {
-        // Default 682ps (2933MT/s) to 750ps (2666MT/s)
-        // TODO:RTC192461
+        // Default 682ps (2933MT/s) or 625ps (3200MT/s) to 750ps (2666MT/s)
+        case 625:
         case 682:
-            FAPI_INF("682ps detected (2933 speed bin). Setting o_speed_grade to match 2666.");
+            FAPI_INF("%u ps detected (2933 or 3200 speed bin). Setting o_speed_grade to match 2666.", i_time_in_ps);
 
         case 750:
             o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
