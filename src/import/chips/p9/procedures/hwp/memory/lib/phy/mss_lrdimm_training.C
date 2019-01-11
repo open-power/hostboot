@@ -684,57 +684,90 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
         //Loop through all of our delays multiple times to reduce noise issues
         std::vector<mrep_dwl_result> l_loop_results(MREP_DWL_LOOP_TIMES);
 
-        // 1) Put the buffer in MREP mode -> host issues BCW's
-        FAPI_TRY(set_buffer_training(l_dimm, ddr4::MREP), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // 2) Gets the ranks on which to put DRAM into MPR mode
+        // 1) Gets the ranks on which to put DRAM into MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_rank), "%s failed mpr_load rank%u",
                   mss::c_str(l_dimm), l_rank);
+
+#ifdef LRDIMM_CAPABLE
+        // 2) set the rank presence
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 3) put buffer, dram into read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::ON, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::ON), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+#endif
+
+        // 4) Put the buffer in MREP mode -> host issues BCW's
+        FAPI_TRY(set_buffer_training(l_dimm, ddr4::MREP), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
         // Loop through all of our delays
         for(auto& l_loop_result : l_loop_results)
         {
             for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
             {
-                // 3) Set the MREP l_delay -> host issues BCW's
+                // 5) Set the MREP l_delay -> host issues BCW's
                 FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
-                // 4) Do an MPR read -> host issues RD command to the DRAM
+                // 6) Do an MPR read -> host issues RD command to the DRAM
                 FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u", mss::c_str(l_dimm),
                           l_rank, l_delay);
 
-                // 4.1) Do an NTTM mode read -> forces the logic to read out the data
+                // 6.1) Do an NTTM mode read -> forces the logic to read out the data
                 FAPI_TRY(execute_nttm_mode_read(i_target));
 
                 FAPI_TRY(get_result(l_dimm, mss::cal_steps::MREP, l_delay, l_loop_result, l_results_recorder));
             } //l_delay loop
         }
 
-        // 5) Analyze the results -> host/FW read from CCS results and go
+        // 7) Analyze the results -> host/FW read from CCS results and go
         FAPI_TRY( analyze_result(l_dimm, mss::cal_steps::MREP, l_loop_results, l_results_recorder),
                   "%s failed analyze_mrep_result rank%u",
                   mss::c_str(l_dimm), l_rank);
 
-        // 6) Error check -> if we had stuck 1 or stuck 0 (never saw a 0 to 1 or a 1 to 0 transition) exit out with an error
+        // 8) Error check -> if we had stuck 1 or stuck 0 (never saw a 0 to 1 or a 1 to 0 transition) exit out with an error
         FAPI_TRY(error_check(l_dimm, l_rank, l_results_recorder), "%s failed error_check rank:%u", mss::c_str(l_dimm), l_rank);
 
-        // 7) Apply MREP offset to ranks based upon tCK RD preamble mode
+        // 9) Apply MREP offset to ranks based upon tCK RD preamble mode
         FAPI_TRY(apply_final_offset(l_dimm, l_results_recorder), "%s failed apply_final_offset rank%u", mss::c_str(l_dimm),
                  l_rank);
 
-        // 8) take DRAM out of MPR -> host issues MRS
+        // 10) take the buffer out of MREP mode -> host issues BCW's
+        FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
+
+#ifdef LRDIMM_CAPABLE
+        // 11) take buffer, dram out of read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::OFF, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::OFF), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+#endif
+
+        // 12) take DRAM out of MPR -> host issues MRS
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 9) take the buffer out of MREP mode -> host issues BCW's
-        FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
-
-        // 10) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
+        // 13) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
         FAPI_TRY( write_result_to_buffers(l_dimm, l_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
                   mss::c_str(l_dimm), l_rank);
 
         l_rank_index++;
     }//l_rank loop
+
+#ifdef LRDIMM_CAPABLE
+
+    // 14) set for two or four rank dimms
+    for (const auto& l_dimm : l_dimms)
+    {
+        uint8_t l_rank_num = 0;
+        FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_rank_num) );
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence_value(l_rank_num)));
+    }
+
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
