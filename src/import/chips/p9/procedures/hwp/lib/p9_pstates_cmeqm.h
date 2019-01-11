@@ -36,32 +36,6 @@
 
 #include <p9_pstates_common.h>
 
-/// \defgroup QM Flags
-///
-/// These are flag bits for the \a Quad Manager field.
-///
-/// @{
-
-/// qmflag() - Disable Resonant Clock use.
-#define PSTATE_RESCLK_DISABLE               0x8000
-
-/// qmflag() - Disable IVRM use.
-#define PSTATE_IVRMS_DISABLE                0x4000
-
-/// qmflag() - Disable VDM use.
-#define PSTATE_VDM_DISABLE                  0x2000
-
-/// qmflag() - Disable WOF.
-#define PSTATE_WOF_DISABLE                  0x1000
-
-/// qmflag() - dpll_dynamic_fmax_enable
-#define PSTATE_DPLL_DYNAMIC_FMAX_ENABLE     0x0800
-
-/// qmflag() - dpll_dynamic_fmin_enable
-#define PSTATE_DPLL_DYNAMIC_FMIN_ENABLE     0x0400
-
-/// qmflag() - dpll_droop_protect_enable
-#define PSTATE_DPLL_DROOP_PROTECT_ENABLE    0x0200
 
 /// @}
 

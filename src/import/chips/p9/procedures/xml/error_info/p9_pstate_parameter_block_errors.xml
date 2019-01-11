@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -459,6 +459,18 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_ATTRIBUTE_ACCESS_ERROR</rc>
+    <description> Pstate attribute access failure.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_NEST_FREQ_EQ_ZERO</rc>

@@ -43,44 +43,6 @@
 /// decreasing frequency)
 #define PSTATE_MIN 0
 
-/// The minimum \e legal DPLL frequency code
-///
-/// This is ~1GHz with a 16.6MHz tick frequency.
-/// @todo  Check this and the maximum
-#define DPLL_MIN 0x03c
-
-/// The maximum DPLL frequency code
-#define DPLL_MAX 0x1ff
-
-/// The minimum \a legal (non-power-off) AVS VID code
-/// @todo Need to check with J. Kuesmann if there is a limit.  May want this
-/// to be an attribute.
-#define AVS_MIN 0x0000
-
-/// The maximum \a legal (non-power-off) AVS VID code
-/// @todo Need to check with J. Kuesmann if there is a limit.  May want this
-/// to be an attribute.
-#define AVS_MAX 0xFFFF
-
-/// The AVS VID base voltage in micro-Volts
-#define AVS_BASE_UV 1612500
-
-/// The AVS VID step as an unsigned number (micro-Volts)
-#define AVS_STEP_UV 1000
-
-//ssrivath, Is this the same as IVID_BASE_UV and IVID_STEP_UV below
-/// The VRM-11 VID base voltage in micro-Volts
-#define VRM11_BASE_UV 1612500
-
-/// The VRM-11 VID step as an unsigned number (micro-Volts)
-#define VRM11_STEP_UV 6250
-
-// ssrivath, iVID values based on Section 2.8.7 of spec
-/// The iVID base voltage in micro-Volts
-#define IVID_BASE_UV 512000
-
-/// The iVID step as an unsigned number (micro-Volts)
-#define IVID_STEP_UV 4000
 
 /// Maximum number of Quads (4 cores plus associated caches)
 #define MAXIMUM_QUADS 6
@@ -121,7 +83,6 @@ typedef enum
 #endif
 
 #define NUM_OP_POINTS      4
-#define NUM_PV_POINTS      5
 #define VPD_PV_POWERSAVE   1
 #define VPD_PV_NOMINAL     0
 #define VPD_PV_TURBO       2
@@ -174,11 +135,12 @@ typedef enum
 #define VDM_DROOP_OP_POINTS         5
 
 
+#define PSTATE_LT_PSTATE_MIN 0x00778a03
+#define PSTATE_GT_PSTATE_MAX 0x00778a04
+#define ACTIVE_QUADS 6
 
 /// IDDQ readings,
 #define IDDQ_MEASUREMENTS 6
-#define MEASUREMENT_ELEMENTS  6    // Number of Quads for P9
-#define IDDQ_READINGS_PER_IQ 2
 #define IDDQ_ARRAY_VOLTAGES     { 0.60 ,  0.70 ,  0.80 ,  0.90 ,  1.00 ,  1.10}
 #define IDDQ_ARRAY_VOLTAGES_STR {"0.60", "0.70", "0.80", "0.90", "1.00", "1.10"}
 
@@ -186,39 +148,7 @@ typedef enum
 #define NUM_ACTIVE_CORES 24
 #define MAX_UT_PSTATES   64     // Oversized
 
-//ssrivath, Temporary definition
-#define PGP_NCORES 24
 
-/// Error/Panic codes for support routines
-/// @todo Review the necessary error codes. This are really PGPE functions now
-/// and many below elsewhere.  However, the error code plumbing from PGPE to
-/// OCC for error logging purposes is an action.
-
-#define VRM11_INVALID_VOLTAGE 0x00876101
-
-#define PSTATE_OVERFLOW  0x00778a01
-#define PSTATE_UNDERFLOW 0x00778a02
-
-#define PSTATE_LT_PSTATE_MIN 0x00778a03
-#define PSTATE_GT_PSTATE_MAX 0x00778a04
-
-#define DPLL_OVERFLOW  0x00d75501
-#define DPLL_UNDERFLOW 0x00d75502
-
-#define AVSVID_OVERFLOW  0x00843101
-#define AVSVID_UNDERFLOW 0x00843102
-
-#define GPST_INVALID_OBJECT      0x00477801
-#define GPST_INVALID_ARGUMENT    0x00477802
-#define GPST_INVALID_ENTRY       0x00477803
-#define GPST_PSTATE_CLIPPED_LOW  0x00477804
-#define GPST_PSTATE_CLIPPED_HIGH 0x00477805
-#define GPST_BUG                 0x00477806
-#define GPST_PSTATE_GT_GPST_PMAX 0x00477807
-
-#define LPST_INVALID_OBJECT      0x00477901
-#define LPST_GPST_WARNING        0x00477902
-#define LPST_INCR_CLIP_ERROR     0x00477903
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
@@ -240,7 +170,6 @@ typedef uint16_t DpllCode;
 /// An AVS VID code
 typedef uint16_t VidAVS;
 
-// ssrivath, Modified units for vdd/vcs/idd/ics as per P9 VPD spec
 /// A VPD operating point
 ///
 /// VPD operating points are stored without load-line correction.  Frequencies
@@ -258,6 +187,15 @@ typedef struct
     uint8_t  pad[3];        // Alignment padding
 } VpdOperatingPoint;
 
+//Defined same as #V vpd points used to validate
+typedef struct
+{
+    uint32_t frequency_mhz;
+    uint32_t vdd_mv;
+    uint32_t idd_100ma;
+    uint32_t vcs_mv;
+    uint32_t ics_100ma;
+} VpdPoint;
 /// VPD Biases.
 ///
 /// Percent bias applied to VPD operating points prior to interolation
@@ -457,9 +395,6 @@ typedef struct __attribute__((packed, aligned(128))) WofTablesHeader
 
 } WofTablesHeader_t;
 
-#define CEF_VDN_INDEX 8
-#define CEF_VDD_INDEX 21
-#define ACTIVE_QUADS 6
 
 // Data is provided in 1/24ths granularity with adjustments for integer
 // representation
@@ -468,12 +403,6 @@ typedef struct __attribute__((packed, aligned(128))) WofTablesHeader
 // 5 steps down from 100% is Fratio_step sizes
 #define VFRT_FRATIO_SIZE 5
 
-// System VFRT layout
-typedef struct __attribute__((packed, aligned(128))) HomerSysVFRTLayout
-{
-    VFRTHeaderLayout_t vfrtHeader;
-    uint8_t vfrt_data[VFRT_FRATIO_SIZE][VFRT_VRATIO_SIZE];
-} HomerSysVFRTLayout_t;
 
 // HOMER VFRT Layout
 typedef struct __attribute__((packed, aligned(256))) HomerVFRTLayout
@@ -483,18 +412,6 @@ typedef struct __attribute__((packed, aligned(256))) HomerVFRTLayout
     uint8_t padding[128];
 } HomerVFRTLayout_t;
 
-// HOMER WOF layout
-typedef struct __attribute__((packed)) HomerWOFLayout
-{
-    WofTablesHeader_t wof_header_data;
-    HomerVFRTLayout_t homer_vfrt_data[CEF_VDN_INDEX][CEF_VDD_INDEX][ACTIVE_QUADS];
-} HomerWOFLayout_t;
-
-typedef uint8_t VFRT_Circuit_t;
-typedef Pstate  VFRT_Hcode_t;
-
-extern VFRT_Circuit_t VFRTCircuitTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
-extern VFRT_Hcode_t   VFRTInputTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
 
 #ifdef __cplusplus
 } // end extern C

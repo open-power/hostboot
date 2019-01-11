@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,12 +63,6 @@ extern "C"
 /// enum of the two actions this hwp can perform
 /// it can either compute default voltage settings
 /// otherwise it can apply voltage setting to the system
-    typedef enum
-    {
-        COMPUTE_VOLTAGE_SETTINGS,
-        APPLY_VOLTAGE_SETTINGS
-    } VoltageConfigActions_t;
-
 /// @typedef p9_setup_evid_FP_t
 /// function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode (*p9_setup_evid_FP_t) (

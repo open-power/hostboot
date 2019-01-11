@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
 
+using namespace pm_pstate_parameter_block;
 
 //-----------------------------------------------------------------------------
 // Procedure
@@ -93,307 +94,26 @@ struct avsbus_attrs_t
     uint32_t freq_proc_refclock_khz;
     uint32_t proc_dpll_divider;
 };
-
-//##############################################################################
-//@brief Compute the boot and safe frequencies and voltages
-//@param[in] i_target       Proc Chip target
-//@param[in] attrs          Attributes
-//@param[in] l_globalppb    Global Pstate Parameter Block
-//@param[in] i_action       Voltage Config action
-//@return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
-//##############################################################################
-fapi2::ReturnCode
-compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                  AttributeList* attrs,
-                  GlobalPstateParmBlock* l_globalppb,
-                  const VoltageConfigActions_t i_action)
-{
-    fapi2::ReturnCode l_rc;
-
-    uint32_t attr_mvpd_poundv[PV_D][PV_W];
-    uint32_t attr_mvpd_poundv_biased[PV_D][PV_W];
-    uint32_t valid_pdv_points;
-    uint8_t present_chiplets;
-
-    PSTATE_attribute_state l_state;
-    l_state.iv_pstates_enabled = true;
-    l_state.iv_resclk_enabled  = true;
-    l_state.iv_vdm_enabled     = true;
-    l_state.iv_ivrm_enabled    = true;
-    l_state.iv_wof_enabled     = true;
-
-    do
-    {
-
-        //We only wish to compute voltage setting defaults if the action
-        //inputed to the HWP tells us to
-        if(i_action == COMPUTE_VOLTAGE_SETTINGS)
-        {
-
-            // query VPD if any of the voltage attributes are zero
-            if (!attrs->vdd_voltage_mv ||
-                !attrs->vcs_voltage_mv ||
-                !attrs->vdn_voltage_mv)
-            {
-
-                uint8_t l_poundv_bucketId = 0;
-                fapi2::voltageBucketData_t l_poundv_data;
-                LP_VDMParmBlock   l_lp_vdmpb;
-
-                PoundW_data l_poundw_data;
-                memset (&l_poundw_data, 0, sizeof(PoundW_data));
-
-                LocalPstateParmBlock l_localppb;
-                memset(&l_localppb, 0, sizeof(LocalPstateParmBlock));
-
-                Safe_mode_parameters l_safe_mode_values;
-
-                uint8_t l_ps_pstate = 0xFF;
-
-                VpdBias l_vpdbias[NUM_OP_POINTS];
-                memset (l_vpdbias, 0, sizeof(VpdBias));
-
-                // Get #V data from MVPD for VDD/VDN and VCS voltage values
-                FAPI_TRY(proc_get_mvpd_data(i_target,
-                                            attr_mvpd_poundv,
-                                            &valid_pdv_points,
-                                            &present_chiplets,
-                                            l_poundv_bucketId,
-                                            &l_poundv_data,
-                                            &l_state          ));
-
-                if (!present_chiplets)
-                {
-                    FAPI_IMP("**** WARNING : There are no EQ chiplets present which means there is no valid #V VPD");
-                    break;
-                }
-
-                //set to default value if dpll divider is 0
-                if (!attrs->proc_dpll_divider)
-                {
-                    attrs->proc_dpll_divider = 8;
-                }
-
-                FAPI_DBG("Copy to Bias array");
-
-                for (int i = 0; i < NUM_OP_POINTS; i++)
-                {
-                    for (int d = 0; d < PV_D; ++d)
-                    {
-                        for (int w = 0; w < PV_W; ++w)
-                        {
-                            attr_mvpd_poundv_biased[d][w] = attr_mvpd_poundv[d][w];
-                        }
-                    }
-                }
-
-                // Apply Bias values
-                FAPI_TRY(proc_get_extint_bias(attr_mvpd_poundv_biased,
-                                              attrs, l_vpdbias),
-                         "Bias application function failed");
-
-                VpdOperatingPoint l_raw_operating_points[NUM_OP_POINTS];
-                FAPI_INF("Load RAW VPD");
-                FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv,
-                                                   l_raw_operating_points,
-                                                   revle32(l_globalppb->frequency_step_khz)),
-                         "Loading MVPD operating points failed");
-
-                // Put raw operating points into the Global Parameter Block
-                FAPI_INF("Place Raw VPD into GPPB");
-                FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv,
-                                                   l_globalppb->operating_points,
-                                                   revle32(l_globalppb->frequency_step_khz)),
-                         "Putting MVPD into GPPB operating points failed");
-
-                // Compute the VPD operating points
-                VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS];
-                p9_pstate_compute_vpd_pts(l_operating_points,
-                                          l_globalppb,
-                                          l_raw_operating_points);
-
-                uint32_t l_ps_freq_khz = l_operating_points[VPD_PT_SET_BIASED][POWERSAVE].frequency_mhz * 1000;
-                freq2pState(l_globalppb, l_ps_freq_khz, &l_ps_pstate);
-
-                FAPI_INF ("l_frequency_step_khz %08x", revle32(l_globalppb->frequency_step_khz));
-                FAPI_INF ("l_ref_freq_khz %08X", revle32(l_globalppb->reference_frequency_khz));
-                FAPI_INF ("l_ps_pstate %x", l_ps_pstate);
-
-                l_rc = proc_get_mvpd_poundw(i_target,
-                                            l_poundv_bucketId,
-                                            &l_lp_vdmpb,
-                                            &l_poundw_data,
-                                            l_poundv_data,
-                                            &l_state);
-
-                if (l_rc)
-                {
-                    FAPI_ASSERT_NOEXIT(false,
-                                       fapi2::PSTATE_PB_POUND_W_ACCESS_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                       .set_CHIP_TARGET(i_target)
-                                       .set_FAPI_RC(l_rc),
-                                       "Pstate Parameter Block proc_get_mvpd_poundw function failed");
-                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                }
-
-                //Compute safe mode values
-                FAPI_TRY(p9_pstate_safe_mode_computation (
-                             i_target,
-                             l_operating_points,
-                             revle32(l_globalppb->reference_frequency_khz),
-                             revle32(l_globalppb->frequency_step_khz),
-                             l_ps_pstate,
-                             &l_safe_mode_values,
-                             l_poundw_data),
-                         "Error from p9_pstate_safe_mode_computation function");
-
-
-                // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
-                if (attrs->vdd_voltage_mv)
-                {
-                    FAPI_INF("VDD boot voltage override set.");
-                }
-                else
-                {
-                    attrs->vdd_voltage_mv = l_safe_mode_values.boot_mode_mv;
-                    FAPI_INF("VDD boot voltage set to %d mV.", attrs->vdd_voltage_mv);
-                }
-
-
-
-                // set VCS voltage to UltraTurbo Voltage from MVPD data (if no override)
-                if (attrs->vcs_voltage_mv)
-                {
-                    FAPI_INF("VCS boot voltage override set.");
-                }
-                else
-                {
-                    FAPI_INF("VCS boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vcs_mv = (attr_mvpd_poundv_biased[POWERSAVE][VPD_PV_VCS_MV]);
-                    uint32_t l_ics_ma = (attr_mvpd_poundv_biased[POWERSAVE][VPD_PV_ICS_100MA]) * 100;
-
-                    uint32_t l_ext_vcs_mv = sysparm_uplift(l_int_vcs_mv,
-                                                           l_ics_ma,
-                                                           attrs->r_loadline_vcs_uohm,
-                                                           attrs->r_distloss_vcs_uohm,
-                                                           attrs->vrm_voffset_vcs_uv);
-
-
-                    FAPI_INF("VCS VPD voltage %d mV; Corrected voltage: %d mV; ICS: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                             l_int_vcs_mv,
-                             revle32(l_ext_vcs_mv),
-                             l_ics_ma,
-                             attrs->r_loadline_vcs_uohm,
-                             attrs->r_distloss_vcs_uohm,
-                             attrs->vrm_voffset_vcs_uv);
-
-
-                    attrs->vcs_voltage_mv = revle32(l_ext_vcs_mv);
-
-                }
-
-                // set VDN voltage to PowerSave Voltage from MVPD data (if no override)
-                if (attrs->vdn_voltage_mv)
-                {
-                    FAPI_INF("VDN boot voltage override set");
-                }
-                else
-                {
-                    FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vdn_mv = (attr_mvpd_poundv_biased[POWERBUS][VPD_PV_VDN_MV]);
-                    uint32_t l_idn_ma = (attr_mvpd_poundv_biased[POWERBUS][VPD_PV_IDN_100MA]) * 100;
-                    // Returns revle32
-                    uint32_t l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
-                                                           l_idn_ma,
-                                                           attrs->r_loadline_vdn_uohm,
-                                                           attrs->r_distloss_vdn_uohm,
-                                                           attrs->vrm_voffset_vdn_uv);
-
-                    FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                             l_int_vdn_mv,
-                             revle32(l_ext_vdn_mv),
-                             l_idn_ma,
-                             attrs->r_loadline_vdn_uohm,
-                             attrs->r_distloss_vdn_uohm,
-                             attrs->vrm_voffset_vdn_uv);
-
-                    attrs->vdn_voltage_mv = revle32(l_ext_vdn_mv);
-                }
-            }
-            else
-            {
-                FAPI_INF("Using overrides for all boot voltages (VDD/VCS/VDN) and core frequency");
-
-                // Set safe frequency to the default BOOT_FREQ_MULT
-                fapi2::ATTR_BOOT_FREQ_MULT_Type l_boot_freq_mult;
-                FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_BOOT_FREQ_MULT,
-                                        i_target,
-                                        l_boot_freq_mult));
-
-                uint32_t l_boot_freq_mhz =
-                    ((l_boot_freq_mult * attrs->freq_proc_refclock_khz ) /
-                     attrs->proc_dpll_divider )
-                    / 1000;
-
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
-                                       i_target,
-                                       l_boot_freq_mhz));
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
-                                       i_target,
-                                       attrs->vdd_voltage_mv));
-                FAPI_INF("Safe mode Frequency = %d MHz (0x%x), Safe mode voltage = %d mV (0x%x)",
-                         l_boot_freq_mhz, l_boot_freq_mhz,
-                         attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-            }
-
-            FAPI_INF("Setting Boot Voltage attributes: VDD = %dmV; VCS = %dmV; VDN = %dmV",
-                     attrs->vdd_voltage_mv, attrs->vcs_voltage_mv, attrs->vdn_voltage_mv);
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, attrs->vdd_voltage_mv),
-                     "Error from FAPI_ATTR_SET (ATTR_VDD_BOOT_VOLTAGE)");
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target, attrs->vcs_voltage_mv),
-                     "Error from FAPI_ATTR_SET (ATTR_VCS_BOOT_VOLTAGE)");
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target, attrs->vdn_voltage_mv),
-                     "Error from FAPI_ATTR_SET (ATTR_VDN_BOOT_VOLTAGE)");
-        }  // COMPUTE_VOLTAGE_SETTINGS
-    }
-    while(0);
-
-    // trace values to be used
-    FAPI_INF("VDD boot voltage = %d mV (0x%x)",
-             attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-    FAPI_INF("VCS boot voltage = %d mV (0x%x)",
-             attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
-    FAPI_INF("VDN boot voltage = %d mV (0x%x)",
-             attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
-
-fapi_try_exit:
-    return fapi2::current_err;
-} // compute_boot_safe
+// compute_boot_safe
 
 
 fapi2::ReturnCode
-p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const VoltageConfigActions_t i_action)
+p9_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+               const VoltageConfigActions_t i_action)
 {
 
+    pm_pstate_parameter_block::AttributeList attrs;
 
-
-    AttributeList attrs;
-    GlobalPstateParmBlock l_globalppb;
-    memset (&l_globalppb, 0, sizeof(GlobalPstateParmBlock));
-
-    // Load the attributes
-    FAPI_TRY(proc_get_attributes(i_target, &attrs),
-             "Get attributes function failed");
-
-    // Create Global Parameter Block from attribute structure
-    load_gppb_attrs(&attrs, &l_globalppb);
+    //Instantiate PPB object
+    PlatPmPPB l_pmPPB(i_target);
 
     // Compute the boot/safe values
-    FAPI_TRY(compute_boot_safe(i_target, &attrs, &l_globalppb, i_action));
+    FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
 
     //We only wish to apply settings if i_action says to
     if(i_action == APPLY_VOLTAGE_SETTINGS)
     {
+        l_pmPPB.get_pstate_attrs(&attrs);
         // Set the DPLL frequency values to safe mode values
         FAPI_TRY (p9_setup_dpll_values(i_target,
                                        attrs.freq_proc_refclock_khz,
