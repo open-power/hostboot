@@ -1747,10 +1747,18 @@ fapi_try_exit:
 double
 calc_bias(const int8_t i_value)
 {
-    double temp = 1.0 + ((BIAS_PCT_UNIT/100) * (double)i_value);
-    FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; percent = %4.1f%% biased multiplier = %6.3f",
+    if (i_value)
+    {
+        double temp = 1.0 + ((BIAS_PCT_UNIT/100) * (double)i_value);
+        FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; percent = %4.1f%% biased multiplier = %6.3f",
                 i_value, (i_value*BIAS_PCT_UNIT), temp);
-    return temp;
+        return temp;
+    }
+    else
+    {
+        return 1;
+    }
+
 }
 
 
@@ -3644,7 +3652,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     uint8_t    bucket_id        = 0;
     uint8_t    version_id       = 0;
     const uint16_t VDM_VOLTAGE_IN_MV = 512;
+    const uint16_t MIN_VDM_VOLTAGE_IN_MV = 576;
     const uint16_t VDM_GRANULARITY = 4;
+    uint32_t l_vdm_compare_raw_mv[NUM_OP_POINTS];
+    uint32_t l_vdm_compare_biased_mv[NUM_OP_POINTS];
 
     const char*     pv_op_str[NUM_OP_POINTS] = PV_OP_ORDER_STR;
 
@@ -3845,11 +3856,11 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         for (int i = 0; i < NUM_OP_POINTS; ++i)
         {
-            uint32_t l_mv = 512 + (o_data->poundw[i].vdm_vid_compare_ivid << 2);
+            l_vdm_compare_raw_mv[i] = VDM_VOLTAGE_IN_MV + (o_data->poundw[i].vdm_vid_compare_ivid << 2);
             FAPI_INF("%10s vdm_vid_compare_ivid %3d  => %d mv",
                 pv_op_str[i],
                 o_data->poundw[i].vdm_vid_compare_ivid,
-                l_mv);
+                l_vdm_compare_raw_mv[i]);
         }
 
         //Validation of VPD Data
@@ -3993,8 +4004,15 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
         {
             l_pound_w_points[i]  = calc_bias(l_bias_value[i]);
-            o_data->poundw[i].vdm_vid_compare_ivid =
-                    (uint32_t)(o_data->poundw[i].vdm_vid_compare_ivid * l_pound_w_points[i]);
+
+            l_vdm_compare_biased_mv[i] = internal_ceil( (l_vdm_compare_raw_mv[i] * l_pound_w_points[i]));
+
+            if (l_vdm_compare_biased_mv[i] < MIN_VDM_VOLTAGE_IN_MV)
+            {
+                l_vdm_compare_biased_mv[i] = MIN_VDM_VOLTAGE_IN_MV;
+            }
+
+            o_data->poundw[i].vdm_vid_compare_ivid = (l_vdm_compare_biased_mv[i] - VDM_VOLTAGE_IN_MV) >> 2;
 
             FAPI_INF("vdm_vid_compare_ivid %x %x, %x",
                         o_data->poundw[i].vdm_vid_compare_ivid,
