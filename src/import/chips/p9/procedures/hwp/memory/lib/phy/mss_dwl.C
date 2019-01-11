@@ -51,6 +51,7 @@
 #include <lib/rosetta_map/rosetta_map.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/ddr4/pba.H>
+#include <lib/phy/mss_lrdimm_training_helper.H>
 
 namespace mss
 {
@@ -528,10 +529,14 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
         FAPI_TRY(dram_wr_lvl(l_dimm, l_rank, mss::states::ON), "%s failed set_buffer_training",
                  mss::c_str(l_dimm));
 
-        // 2) Selects the rank to calibrate on the buffer
+        // 2) set the rank presence
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 3) Selects the rank to calibrate on the buffer
         FAPI_TRY(set_rank(l_dimm, l_rank), "%s failed to set_rank", mss::c_str(l_dimm));
 
-        // 3) Puts the buffer into WR LVL mode
+        // 4) Puts the buffer into WR LVL mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::DWL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
         for(auto& l_loop_result : l_loop_results)
@@ -539,39 +544,47 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
             // Loop through all of our delays
             for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
             {
-                // 4) Set the DWL l_delay -> host issues BCW's
+                // 5) Set the DWL l_delay -> host issues BCW's
                 FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
-                // 5) Do an NTTM mode read -> forces the logic to read out the data
+                // 6) Do an NTTM mode read -> forces the logic to read out the data
                 FAPI_TRY(execute_nttm_mode_read(i_target));
 
-                // 6) Get the results for this delay and updates result and the recorder
+                // 7) Get the results for this delay and updates result and the recorder
                 FAPI_TRY(get_result(l_dimm, mss::cal_steps::DWL, l_delay, l_loop_result, l_results_recorder),
                          "%s failed get_result rank%u delay%u",
                          mss::c_str(l_dimm), l_rank, l_delay);
             } //l_delay loop
         }
 
-        // 7) Takes the buffer out of WR LVL mode
+        // 8) Takes the buffer out of WR LVL mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
-        // 8) Takes the DRAM out of WR LVL mode
+        // 9) Takes the DRAM out of WR LVL mode
         FAPI_TRY(dram_wr_lvl(l_dimm, l_rank, mss::states::OFF), "%s failed set_buffer_training",
                  mss::c_str(l_dimm));
 
-        // 9) Analyze loop results
+        // 10) Analyze loop results
         FAPI_TRY( analyze_result(l_dimm, mss::cal_steps::DWL, l_loop_results, l_results_recorder),
                   "%s failed analyze_dwl_result rank%u",
                   mss::c_str(l_dimm), l_rank);
 
-        // 10) Checks for errors
+        // 11) Checks for errors
         FAPI_TRY(check_errors(l_dimm, l_rank, l_results_recorder), "%s failed error_check rank:%u", mss::c_str(l_dimm),
                  l_rank);
 
-        // 11) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
+        // 12) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
         FAPI_TRY( write_result_to_buffers(l_dimm, l_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
                   mss::c_str(l_dimm), l_rank);
     }//l_rank loop
+
+    // 13) set for two or four rank dimms
+    for (const auto& l_dimm : l_dimms)
+    {
+        uint8_t l_rank_num = 0;
+        FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_rank_num) );
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence_value(l_rank_num)));
+    }
 
 fapi_try_exit:
     // If we are here then we FAPI_ASSERT'ed out

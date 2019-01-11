@@ -513,6 +513,8 @@ fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     // The patterns get split and written individually
     constexpr uint32_t l_pattern_set = 0x2B2B2B2B;
 
+    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+
     // 1) Get our ranks within the configured rank pair
     FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
              "Failed get_ranks_in_pair in mrd::run %s",
@@ -551,57 +553,79 @@ fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_dimm_rank), "%s failed mpr_load rank%u",
                   mss::c_str(l_dimm), l_dimm_rank);
 
-        // 4) Setup the expected pattern in our buffer
+        // 4) set the rank presence
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 5) put buffer, dram into read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::ON, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::ON), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 6) Setup the expected pattern in our buffer
         FAPI_TRY(lrdimm::set_expected_mpr_pattern(l_dimm, l_pattern_expected),
                  "%s failed set_expect_mpr_pattern rank%u, pattern%u",
                  mss::c_str(l_dimm), l_dimm_rank, l_pattern_expected);
 
-        // 5) Setup the buffer to latch results across the nibble
+        // 7) Setup the buffer to latch results across the nibble
         // coarse delays are based upon the per-clock offset, which is needed on the per-nibble basis
         FAPI_TRY(lrdimm::set_training_level(l_dimm, lrdimm::training_level::NIBBLE), "%s failed set_per_nibble_level rank%u",
                  mss::c_str(l_dimm), l_dimm_rank);
 
-        // 6) Buffer into MRD training mode
+        // 8) Buffer into MRD training mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::MRD), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
         // Loop through all of our possible coarse delays
         for(uint8_t l_delay = 0; l_delay < NUM_DELAYS; ++l_delay)
         {
-            // 7) Setup our delays across the buffer
+            // 9) Setup our delays across the buffer
             FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay), "%s rank%u failed set_delay delay:%u", mss::c_str(l_dimm),
                      l_dimm_rank, l_delay);
 
-            // 8) Conduct a read
+            // 10) Conduct a read
             FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u",
                       mss::c_str(l_dimm), l_rank, l_delay);
 
-            // 8.1) Conduct an NTTM mode read
+            // 11.1) Conduct an NTTM mode read
             FAPI_TRY(execute_nttm_mode_read(i_target), "%s rank%u failed execute_nttm_mode_read", mss::c_str(l_dimm), l_dimm_rank);
 
-            // 9) Process the results
+            // 12) Process the results
             FAPI_TRY(analyze_results(l_dimm, l_dimm_rank, l_delay, l_results), "%s rank%u failed process_results",
                      mss::c_str(i_target), l_dimm_rank);
         }
 
-        // 10) DRAM out of MPR mode
-        FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load rank%u",
-                  mss::c_str(l_dimm), l_rank);
-
-        // 11) Buffer out of training mode
+        // 13) Buffer out of training mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 12) Analyze the results across the whole buffer
+        // 14) take buffer, dram out of read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::OFF, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::OFF), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 15) DRAM out of MPR mode
+        FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load rank%u",
+                  mss::c_str(l_dimm), l_rank);
+
+        // 16) Analyze the results across the whole buffer
         FAPI_TRY(find_final_results(l_dimm, l_dimm_rank, l_results), "%s rank%u failed find_final_results", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 13) Write the results into the DRAM on a per-buffer basis
+        // 17) Write the results into the DRAM on a per-buffer basis
         FAPI_TRY(set_final_delays(l_dimm, l_dimm_rank, l_results), "%s rank%u failed set_final_delays", mss::c_str(l_dimm),
                  l_dimm_rank);
     }
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    // 18) set for two or four rank dimms
+    for (const auto& l_dimm : l_dimms)
+    {
+        uint8_t l_rank_num = 0;
+        FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_rank_num) );
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence_value(l_rank_num)));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

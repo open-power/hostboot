@@ -109,6 +109,155 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Sets preamble mode enable or disable
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode preamble mode enable or disable
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note Sets up buffer control word F0BC1x to do preamble mode enable or disable
+///
+fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const bool i_mode)
+{
+    // Values taken from the JEDEC spec
+    constexpr uint64_t PREAMBLE_MODE_POS = 3;
+    constexpr uint64_t PREAMBLE_MODE_LEN = 1;
+
+    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    fapi2::buffer<uint8_t> l_bcw_value;
+    std::vector<cw_info> l_bcws;
+    uint8_t l_sim = 0;
+
+    // Gets the BCW value for the buffer training control word
+    FAPI_TRY(eff_dimm_ddr4_f0bc1x(i_target, l_bcw_value));
+
+    // Modifies the BCW value accordingly
+    l_bcw_value.insertFromRight<PREAMBLE_MODE_POS, PREAMBLE_MODE_LEN>(i_mode);
+    l_bcws.push_back(cw_info(FUNC_SPACE_0, BUFF_CONFIG_CW, l_bcw_value, mss::tmrc(), mss::CW8_DATA_LEN,
+                             cw_info::BCW));
+
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Ensure our CKE's are powered on
+    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+
+    // Inserts the function space selects
+    FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
+
+    // Sets up the CCS instructions
+    FAPI_TRY(control_word_engine(i_target,
+                                 l_bcws,
+                                 l_sim,
+                                 l_program.iv_instructions));
+
+    // Make sure we leave everything powered on
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
+
+    // Issue CCS
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           l_mca) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enter read preamble training mode
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode mode value 0/1
+/// @param[in,out] io_inst the instruction to fixup
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Sets MR4 A10 for read preamble training mode
+///
+fapi2::ReturnCode set_dram_rd_preamble_mode_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_mode,
+        const uint64_t i_rank,
+        std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst)
+{
+    // Enter rank into read preamble training mode
+    fapi2::ReturnCode l_rc;
+    mss::ddr4::mrs04_data l_data(i_target, l_rc);
+    FAPI_TRY(l_rc, "%s. Failed to initialize mrs04_data for mpr_load", mss::c_str(i_target) );
+
+    l_data.iv_rd_pre_train_mode = i_mode;
+
+    FAPI_TRY( mrs_engine(i_target, l_data, i_rank, mss::tmod(i_target), io_inst),
+              "Failed to send MRS04 on %s, rank: %d, delay (in cycles): %d",
+              mss::c_str(i_target), i_rank, mss::tmod(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Enter read preamble training mode
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode mode value 0/1
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Sets MR4 A10 for read preamble training mode
+///
+fapi2::ReturnCode set_dram_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_mode,
+        const uint64_t i_rank)
+{
+
+    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    set_dram_rd_preamble_mode_helper(i_target, i_mode, i_rank, l_program.iv_instructions);
+
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           l_mca));
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform the set_rank_presence operations
+/// @param[in] i_target a DIMM target
+/// @param[in] i_rank the rank target on which to operate
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_rank)
+{
+    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    uint8_t l_sim = 0;
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    static const std::vector< cw_info > l_bcw_info =
+    {
+
+        { FUNC_SPACE_0,  RANK_PRESENCE_CW, i_rank,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
+    };
+
+    // DES first - make sure those CKE go high and stay there
+    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+
+    // Issues the CW's
+    FAPI_TRY( control_word_engine(i_target, l_bcw_info, l_sim, l_program.iv_instructions),
+              "%s Failed control_word_engine", mss::c_str(i_target) );
+
+    // Now, hold the CKE's high, so we don't power down the RCD and re power it back up
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
+
+    // Issue CCS
+    FAPI_TRY( ccs::execute(l_mcbist,
+                           l_program,
+                           l_mca) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Creates the control words to set the expected MPR pattern into the buffer
 /// @param[in] i_pattern the pattern to program into the buffer
 /// @return cw_info vector containing the control words used to setup the MPR pattern into the buffer

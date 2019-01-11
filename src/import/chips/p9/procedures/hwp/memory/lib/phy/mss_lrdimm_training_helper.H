@@ -63,6 +63,9 @@ namespace lrdimm
 static constexpr uint8_t MREP_DWL_MAX_DELAY = 64;
 static constexpr uint8_t MREP_DWL_LOOP_TIMES = 0x05;
 static constexpr uint8_t MREP_DWL_THRESHOLD = 0x05;
+static constexpr uint8_t RANK_PRESENCE_BIT = 1;
+static constexpr uint8_t RANK_PRESENCE_MASK = 0xf;
+
 ///
 /// @brief Records the results for a given nibble
 ///
@@ -590,6 +593,80 @@ fapi2::ReturnCode analyze_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 ///
 fapi2::ReturnCode set_training_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                      const uint64_t i_training_level);
+
+///
+/// @brief Sets preamble mode enable or disable
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode preamble mode enable or disable
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note Sets up buffer control word F0BC1x to do preamble mode enable or disable
+///
+fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const bool i_mode);
+
+///
+/// @brief Enter read preamble training mode
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode mode value 0/1
+/// @param[in,out] io_inst the instruction to fixup
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Sets MR4 A10 for read preamble training mode
+///
+fapi2::ReturnCode set_dram_rd_preamble_mode_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_mode,
+        const uint64_t i_rank,
+        std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst);
+
+///
+/// @brief Enter read preamble training mode
+/// @param[in] i_target the DIMM target
+/// @param[in] i_mode mode value 0/1
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Sets MR4 A10 for read preamble training mode
+///
+fapi2::ReturnCode set_dram_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_mode,
+        const uint64_t i_rank);
+
+///
+/// @brief Perform the bcw_load_ddr4 operations
+/// @param[in] i_target a DIMM target
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_rank);
+
+///
+/// @brief Converts the rank to the final rank presence value
+/// @param[in] i_dimm_rank the DIMM rank to convert
+/// @return the final presence value for the dimm rank
+///
+inline uint8_t generate_rank_presence_value(const uint8_t i_dimm_rank)
+{
+    // The spec says that need to set BC07 to the final value according to dimm rank
+    // one rank dimm  : 0x0e
+    // Two rank dimm  : 0x0c
+    // four rank dimm : 0x00
+    constexpr uint8_t ONE_RANK = 0x01;
+    constexpr uint8_t TWO_RANK = 0x02;
+    constexpr uint8_t ONE_RANK_PRESENCE_VALUE = 0x0e;
+    constexpr uint8_t TWO_RANK_PRESENCE_VALUE = 0x0c;
+    constexpr uint8_t FOUR_RANK_PRESENCE_VALUE = 0x00;
+
+    if (i_dimm_rank == ONE_RANK)
+    {
+        return ONE_RANK_PRESENCE_VALUE;
+    }
+    else if (i_dimm_rank == TWO_RANK)
+    {
+        return TWO_RANK_PRESENCE_VALUE;
+    }
+    else
+    {
+        return FOUR_RANK_PRESENCE_VALUE;
+    }
+}
 
 ///
 /// @brief Creates the control words to set the expected MPR pattern into the buffer

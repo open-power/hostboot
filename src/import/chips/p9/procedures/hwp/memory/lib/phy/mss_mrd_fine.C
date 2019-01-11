@@ -739,55 +739,75 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         FAPI_TRY(lrdimm::set_training_level(l_dimm, lrdimm::training_level::BIT), "%s failed set_per_lane_level rank%u",
                  mss::c_str(l_dimm), l_rank);
 
-        // 5) Put the buffer into MRD_FINE training mode - host issues BCW commands
-        FAPI_TRY(set_buffer_training(l_dimm, ddr4::MRD), "%s failed set_buffer_training", mss::c_str(l_dimm));
-
-        // 6) Puts this DIMM rank into MPR mode
+        // 5) Puts this DIMM rank into MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_rank), "%s failed mpr_load rank%u",
                   mss::c_str(l_dimm), l_rank);
+
+        // 6) set the rank presence
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 7) put buffer, dram into read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::ON, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::ON), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 8) Put the buffer into MRD_FINE training mode - host issues BCW commands
+        FAPI_TRY(set_buffer_training(l_dimm, ddr4::MRD), "%s failed set_buffer_training", mss::c_str(l_dimm));
 
         // Loop across all delays
         // Note: I think it will be easier if we have a conversion from this loop to the buffer value delays and back
         // So, 0 for this loop corresponds to -15/64 while +31 corresponds to 15/64
         for(uint8_t l_delay = 0; l_delay < MRD_MAX_DELAY; l_delay++)
         {
-            // 7) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
+            // 9) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
             FAPI_TRY(set_delay(l_dimm, l_rank, l_delay),
                      "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
-            // 8) Issues the MPR read
+            // 10) Issues the MPR read
             FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u",
                       mss::c_str(l_dimm), l_rank, l_delay);
 
-            // 8.1) add in NTTM mode read here - >forces the logic to read out the data
+            // 10.1) add in NTTM mode read here - >forces the logic to read out the data
             FAPI_TRY(execute_nttm_mode_read(i_target));
 
-            // 9) Analyzes the results
+            // 11) Analyzes the results
             FAPI_TRY(mrd_fine::analyze_mrd_result(i_target, l_delay, l_recorder), "%s failed analyze_mrd_result rank%u delay%u",
                      mss::c_str(l_dimm), l_rank, l_delay);
         }
 
-        // 10) Finds the best delay for each bit
+        // 12) Finds the best delay for each bit
         // Note: also updates the minimum eye size vector here
         FAPI_TRY( find_best_delay_for_each_dq(i_target, l_rank, l_recorder, l_eye_sizes_dq, l_final_nibble_delays_buffer),
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 11) Takes this rank out of MPR mode
+        // 13) Takes the buffer out of MRD_FINE and sets it into mainline mode
+        FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
+
+        // 14) take buffer, dram out of read preamble training mode
+        FAPI_TRY(set_dram_rd_preamble_mode(l_dimm, mss::states::OFF, l_rank), "%s failed set_dram_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+        FAPI_TRY(set_buffer_rd_preamble_mode(l_dimm, mss::states::OFF), "%s failed set_buffer_rd_preamble_mode rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 15) Takes this rank out of MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 12) Takes the buffer out of MRD_FINE and sets it into mainline mode
-        FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training", mss::c_str(l_dimm));
-
-        // 13) check errors
-        FAPI_TRY( check_errors(l_dimm, l_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u", mss::c_str(l_dimm),
-                  l_rank);
-
-        // 14) Writes the best delays to the buffers using PBA
+        // 16) Writes the best delays to the buffers using PBA
         FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
 
     }//rank loop
+
+    // 17) set for two or four rank dimms
+    for (const auto& l_dimm : l_dimms)
+    {
+        uint8_t l_rank_num = 0;
+        FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_rank_num) );
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence_value(l_rank_num)));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

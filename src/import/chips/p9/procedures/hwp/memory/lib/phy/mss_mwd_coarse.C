@@ -627,6 +627,7 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     std::vector<uint64_t> l_ranks;
     uint8_t l_patterns[NUM_LRDIMM_TRAINING_PATTERNS] = {};
 
+    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
     // Get ranks
     FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
              "Failed get_ranks_in_pair in mwd_coarse::run %s",
@@ -667,7 +668,11 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         FAPI_TRY(lrdimm::set_training_level(l_dimm, lrdimm::training_level::BIT), "%s failed set_per_lane_level rank %u",
                  mss::c_str(l_dimm), l_dimm_rank);
 
-        // 2) Buffer into MWD mode
+        // 2) set the rank presence
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+                 mss::c_str(l_dimm), l_rank);
+
+        // 3) Buffer into MWD mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::MWD), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
@@ -675,44 +680,52 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         for(uint8_t l_delay = 0; l_delay < NUM_DELAYS; ++l_delay)
         {
             // Set delay (broadcast across rank)
-            // 3) Setup our delays across the buffer
+            // 4) Setup our delays across the buffer
             FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay), "%s rank%u failed set_delay delay:%u", mss::c_str(l_dimm),
                      l_dimm_rank, l_delay);
 
             // Loop over all patterns
             for(uint8_t l_pattern_num = 0; l_pattern_num < NUM_LRDIMM_TRAINING_PATTERNS; ++l_pattern_num)
             {
-                // 4) Setup data pattern in the buffer MPR regs
+                // 5) Setup data pattern in the buffer MPR regs
                 FAPI_TRY(lrdimm::set_expected_mpr_pattern(l_dimm, l_patterns[l_pattern_num]),
                          "%s failed set_expect_mpr_pattern rank%u, pattern%u",
                          mss::c_str(l_dimm), l_dimm_rank, l_patterns[l_pattern_num]);
 
                 // Conduct a WR/RD
                 // Write sends data from the buffer MPR
-                // 5) Read reads back what was written and does a bitwise compare
+                // 6) Read reads back what was written and does a bitwise compare
                 FAPI_TRY(conduct_write_read(l_dimm, l_dimm_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
                          l_dimm_rank);
 
-                // 6) Conduct an NTTM mode read
+                // 7) Conduct an NTTM mode read
                 FAPI_TRY(execute_nttm_mode_read(i_target), "%s rank%u failed execute_nttm_mode_read", mss::c_str(l_dimm), l_dimm_rank);
 
-                // 7) Analyze results
+                // 8) Analyze results
                 FAPI_TRY(analyze_results(l_dimm, l_dimm_rank, l_delay, l_results), "%s rank%u failed process_results",
                          mss::c_str(i_target), l_dimm_rank);
             }
         }
 
-        // 8) Buffer out of training mode
+        // 9) Buffer out of training mode
         FAPI_TRY(set_buffer_training(l_dimm, ddr4::NORMAL), "%s failed set_buffer_training rank%u", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 9) Analyze the results across the whole buffer
+        // 10) Analyze the results across the whole buffer
         FAPI_TRY(find_final_results(l_dimm, l_dimm_rank, l_results), "%s rank%u failed find_final_results", mss::c_str(l_dimm),
                  l_dimm_rank);
 
-        // 10) Write the results into the buffer on a per-buffer basis
+        // 11) Write the results into the buffer on a per-buffer basis
         FAPI_TRY(set_final_delays(l_dimm, l_dimm_rank, l_results), "%s rank%u failed set_final_delays", mss::c_str(l_dimm),
                  l_dimm_rank);
+    }
+
+    // 12) set for two or four rank dimms
+    for (const auto& l_dimm : l_dimms)
+    {
+        uint8_t l_rank_num = 0;
+        FAPI_TRY( eff_num_master_ranks_per_dimm(l_dimm, l_rank_num) );
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence_value(l_rank_num)));
     }
 
 fapi_try_exit:
