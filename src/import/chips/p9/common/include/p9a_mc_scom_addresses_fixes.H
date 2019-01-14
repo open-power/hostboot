@@ -22,3 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mc_scom_addresses_fixed.H
+/// @brief  Defines constants for scom addresses
+///
+// *HWP HWP Owner: Ben Gass <bgass@us.ibm.com>
+// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
+// *HWP Team: SOA
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB:HS:OCC:SBE:CME:SGPE:PGPE:FPPE:IPPE
+
+
+#ifndef __P9A_MC_SCOM_ADDRESSES_FIXES_H
+#define __P9A_MC_SCOM_ADDRESSES_FIXES_H
+
+static const uint64_t P9A_MC_REG2_DL0_ERROR_ACTION                           = 0x070133DDull;
+
+static const uint64_t P9A_MC_REG2_DL0_RMT_CONFIG                              = 0x070133D8ull;
+
+static const uint64_t P9A_MC_REG0_CMN_CONFIG                                  = 0x0701334Eull;
+
+static const uint64_t P9A_MC_REG1_CMN_CONFIG                                  = 0x0701338Eull;
+
+static const uint64_t P9A_MC_REG2_CMN_CONFIG                                  = 0x070133CEull;
+
+#endif

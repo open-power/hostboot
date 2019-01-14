@@ -22,3 +22,84 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_omi_train_check.C
+/// @brief Check the omi status
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: Memory
+
+#include <p9a_omi_train_check.H>
+
+#include <fapi2.H>
+#include <p9a_mc_scom_addresses.H>
+#include <p9a_mc_scom_addresses_fld.H>
+#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/buffer_ops.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/mc/omi.H>
+
+///
+/// @brief Check the omi status in Axone side
+/// @param[in] i_target the OMIC target to operate on
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
+{
+    FAPI_INF("%s Start p9a_omi_train_check", mss::c_str(i_target));
+
+    // Const
+    constexpr uint8_t STATE_MACHINE_SUCCESS = 0b111;  // This value is from Lonny Lambrecht
+    constexpr uint8_t MAX_LOOP_COUNT = 20;  // Retry times
+
+    // Declares variables
+    fapi2::buffer<uint64_t> l_omi_status;
+    fapi2::buffer<uint64_t> l_omi_training_status;
+    uint8_t l_state_machine_state = 0;
+    uint8_t l_tries = 0;
+
+    FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
+
+    while (l_tries < MAX_LOOP_COUNT && l_state_machine_state != STATE_MACHINE_SUCCESS)
+    {
+        // Delay
+        fapi2::delay(mss::DELAY_100US, 10 * mss::DELAY_1MS);
+
+        // Check OMI training status
+        FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
+        // Note: this is very useful debug information while trying to debug training during polling
+        FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
+        l_tries++;
+    }
+
+    FAPI_TRY(mss::getScom(i_target, P9A_MC_REG2_DL0_TRAINING_STATUS, l_omi_training_status));
+    FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
+                fapi2::P9A_OMI_TRAIN_ERR()
+                .set_TARGET(i_target)
+                .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
+                .set_ACTUAL_SM_STATE(l_state_machine_state)
+                .set_DL0_STATUS(l_omi_status)
+                .set_DL0_TRAINING_STATUS(l_omi_training_status),
+                "%s OMI Training Failure, expected state:%d/actual state:%d",
+                mss::c_str(i_target),
+                STATE_MACHINE_SUCCESS,
+                l_state_machine_state
+               );
+
+    FAPI_INF("%s End p9a_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
+             mss::c_str(i_target),
+             STATE_MACHINE_SUCCESS,
+             l_state_machine_state,
+             l_omi_status,
+             l_omi_training_status);
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}// p9a_omi_train_check

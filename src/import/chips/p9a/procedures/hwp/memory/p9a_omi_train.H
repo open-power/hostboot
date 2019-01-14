@@ -26,7 +26,7 @@
 
 ///
 /// @file p9a_omi_train.H
-/// @brief Check the omi status
+/// @brief Train the omi
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
@@ -40,18 +40,16 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*p9a_omi_train_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&);
+typedef fapi2::ReturnCode (*p9a_omi_train_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
 
 extern "C"
 {
-
     ///
-    /// @brief Check the omi status in Axone side
-    /// @param[in] i_target the OMIC target to operate on
+    /// @brief Turn on Axone config regs to enable training
+    /// @param[in] i_target the MC target to operate on
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target );
+    fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target );
 
 }
-
 #endif

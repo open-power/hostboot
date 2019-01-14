@@ -4059,8 +4059,8 @@ static const uint8_t P9A_MC_REG2_DL0_CONFIG0_CFG_RETRAIN                     = 6
 static const uint8_t P9A_MC_REG2_DL0_CONFIG0_CFG_RESET                       = 63  ;
 
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_CFG1_SPARE                  = 0   ;
-static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_CFG1_SPARE_LEN              = 6   ;
-static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_LANE_WIDTH                  = 6   ;
+static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_CFG1_SPARE_LEN              = 2   ;
+static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_LANE_WIDTH                  = 2   ;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_LANE_WIDTH_LEN              = 2   ;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_B_HYSTERESIS                = 8   ;
 static const uint8_t P9A_MC_REG2_DL0_CONFIG1_CFG_B_HYSTERESIS_LEN            = 4   ;

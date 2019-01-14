@@ -22,3 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
+///
+/// @file p9a_omi_train_check.H
+/// @brief Check the omi status
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef P9A_OMI_TRAIN_CHECK_H_
+#define P9A_OMI_TRAIN_CHECK_H_
+
+#include <fapi2.H>
+
+
+typedef fapi2::ReturnCode (*p9a_omi_train_check_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OMI>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Check the omi status in Axone side
+    /// @param[in] i_target the OMIC target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target );
+
+}
+
+#endif

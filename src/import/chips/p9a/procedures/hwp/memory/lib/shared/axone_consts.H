@@ -22,3 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
+///
+/// @file axone_consts.H
+/// @brief Constants for axone
+///
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
+#ifndef _AXONE_CONSTS_H_
+#define _AXONE_CONSTS_H_
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+constexpr mss::proc_type DEFAULT_PROC_TYPE = mss::proc_type::AXONE;
+
+}// mss
+
+#endif
