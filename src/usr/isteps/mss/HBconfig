@@ -1,0 +1,4 @@
+config LRDIMM_CAPABLE
+    default n
+    help
+        Enable the use of LRDIMM code
