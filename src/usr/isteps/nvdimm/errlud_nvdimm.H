@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/errlud_i2c.H $                                    */
+/* $Source: src/usr/isteps/nvdimm/errlud_nvdimm.H $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,68 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef ERRL_UD_I2C_H
-#define ERRL_UD_I2C_H
-
 /**
- *  @file errlud_i2c.H
+ *  @file errlud_nvdimm.H
  *
- *  Defines the classes that logs and parses various I2C and EEPROM data
+ *  @brief Defines the class that logs and parses NVDIMM data
  */
+#ifndef ERRL_UD_NVDIMM_H
+#define ERRL_UD_NVDIMM_H
 
 #include <errl/errluserdetails.H>
-#include <devicefw/driverif.H>
-#include "i2c_common.H"
-#include "eepromdd.H"
+#include "nvdimmdd.H"
 
-
-namespace I2C
-{
-
-/**
- * @class UdI2CParms
- *
- * Adds I2C information to an error log as user detail data
- */
-class UdI2CParms : public ERRORLOG::ErrlUserDetails
-{
-  public:
-    /**
-     *  @brief Constructor
-     *
-     *  @param i_opType       Operation Type
-     *  @param i_target       Chip being detected/acted upon
-     *  @param i_buflen       Length of In/Out Buffer
-     *  @param i_accessType   Access Type
-     *  @param i_args         Miscellaneous Parameters
-     */
-    UdI2CParms( uint8_t i_opType,
-               TARGETING::Target * i_target,
-               uint64_t i_buflen,
-               int64_t i_accessType,
-               misc_args_t i_args  );
-
-    /**
-     *  @brief Destructor
-     */
-    virtual ~UdI2CParms();
-
-  private:
-    // Disabled
-    UdI2CParms(UdI2CParms &);
-    UdI2CParms & operator=(UdI2CParms &);
-};
-
-} // end I2C namespace
-
-namespace EEPROM
+namespace NVDIMM
 {
 /**
- * @class UdEepromParms
+ * @class UdNvdimmParms
  *
- * Adds EEPROM information to an error log as user detail data
+ * Adds NVDIMM information to an error log as user detail data
  */
-class UdEepromParms : public ERRORLOG::ErrlUserDetails
+class UdNvdimmParms : public ERRORLOG::ErrlUserDetails
 {
   public:
     /**
@@ -94,22 +51,22 @@ class UdEepromParms : public ERRORLOG::ErrlUserDetails
      *  @param i_buflen       Length of In/Out Buffer
      *  @param i_i2cInfo      Miscellaneous Parameters
      */
-    UdEepromParms( uint8_t i_opType,
+    UdNvdimmParms( uint8_t i_opType,
                    TARGETING::Target * i_target,
                    uint64_t i_buflen,
-                   eeprom_addr_t i_i2cInfo );
+                   nvdimm_addr_t &i_i2cInfo );
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdEepromParms();
+    virtual ~UdNvdimmParms();
 
   private:
     // Disabled
-    UdEepromParms(UdEepromParms &);
-    UdEepromParms & operator=(UdEepromParms &);
+    UdNvdimmParms(UdNvdimmParms &);
+    UdNvdimmParms & operator=(UdNvdimmParms &);
 };
 
-} // end EEPROM namespace
+} // end NVDIMM namespace
 
 #endif

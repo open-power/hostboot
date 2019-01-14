@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,7 +51,6 @@
 #include <i2c/i2cif.H>
 #include "eepromdd.H"
 #include "errlud_i2c.H"
-#include <i2c/nvdimmif.H>
 
 // ----------------------------------------------
 // Globals

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/nvdimmdd.C $                                      */
+/* $Source: src/usr/isteps/nvdimm/nvdimmdd.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,13 +45,14 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 #include <devicefw/driverif.H>
-#include <i2c/nvdimmddreasoncodes.H>
-#include <i2c/nvdimmif.H>
 #include <i2c/eepromif.H>
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
+#include <isteps/nvdimm/nvdimmreasoncodes.H>
+#include <isteps/nvdimm/nvdimmif.H>
 #include "nvdimmdd.H"
-#include "errlud_i2c.H"
+#include "nvdimm.H"
+#include "errlud_nvdimm.H"
 
 // ----------------------------------------------
 // Globals
@@ -61,11 +62,9 @@ mutex_t g_nvdimmMutex = MUTEX_INITIALIZER;
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
-trace_desc_t* g_trac_nvdimm = nullptr;
-TRAC_INIT( & g_trac_nvdimm, NVDIMM_COMP_NAME, KILOBYTE );
-
 trace_desc_t* g_trac_nvdimmr = nullptr;
 TRAC_INIT( & g_trac_nvdimmr, "NVDIMMR", KILOBYTE );
+
 
 // Easy macro replace for unit testing
 #define TRACUCOMP(args...)  TRACFCOMP(args)

@@ -8,8 +8,3 @@ config TPM_NUVOTON
     default y
     help
         Enable Nuvoton TPM I2C driver
-
-config NVDIMM
-    default n
-    help
-        Enable NVDIMM I2C support

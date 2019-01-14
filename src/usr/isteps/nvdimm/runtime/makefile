@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/pm/runtime/makefile $
+# $Source: src/usr/isteps/nvdimm/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,20 +22,13 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
 HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../../..
 
 VPATH += ../
 
-MODULE = pm_rt
+MODULE = nvdimm_rt
 
-## Objects unique to HBRT
-OBJS += rt_pm.o
-
-SUBDIRS += test.d
-
-## Objects common to HBRT and HB IPL
-include ../pm.mk
+include ../nvdimm.mk
 include ${ROOTPATH}/config.mk
