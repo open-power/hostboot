@@ -2617,4 +2617,23 @@
     <mrwHide/>
     <default>1024</default>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PMCR_MOST_RECENT_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Enables the platform mode where the most recent PMCR update
+    will be the controlling value for Pstate changes. If disabled, 
+    the legacy "fastest one wins" algorithm is used.
+
+    Producer: p9_build_pstate_datablock
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
 </attributes>
