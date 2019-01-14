@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/nvdimmdd.H $                                      */
+/* $Source: src/usr/isteps/nvdimm/nvdimmdd.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __NVDIMM_H
-#define __NVDIMM_H
+#ifndef __NVDIMMDD_H
+#define __NVDIMMDD_H
 
 /**
  * @file nvdimmdd.H
@@ -36,6 +36,7 @@
 // Includes
 // ----------------------------------------------
 #include <errl/errlentry.H>
+#include <usr/devicefw/driverif.H>  // I2C_MUX::NOT_APPLICABLE
 
 namespace NVDIMM
 {
@@ -320,4 +321,4 @@ errlHndl_t nvdimmGetI2CMasterTarget ( TARGETING::Target * i_target,
 
 }; // end NVDIMM namespace
 
-#endif  // __NVDIMM_H
+#endif  // __NVDIMMDD_H

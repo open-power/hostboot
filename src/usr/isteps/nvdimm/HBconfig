@@ -1,0 +1,4 @@
+config NVDIMM
+    default n
+    help
+        Enable NVDIMM support

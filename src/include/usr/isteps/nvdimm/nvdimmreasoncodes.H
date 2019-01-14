@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/i2c/nvdimmddreasoncodes.H $                   */
+/* $Source: src/include/usr/isteps/nvdimm/nvdimmreasoncodes.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,13 +23,13 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file nvdimmddreasoncodes.H
+ * @file nvdimmreasoncodes.H
  *
- * @brief Reason codes and module ids for the NVDIMM device driver
+ * @brief Reason codes and module ids for the NVDIMM
  *
  */
-#ifndef __NVDIMMDDREASONCODES_H
-#define __NVDIMMDDREASONCODES_H
+#ifndef __NVDIMMREASONCODES_H
+#define __NVDIMMREASONCODES_H
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------

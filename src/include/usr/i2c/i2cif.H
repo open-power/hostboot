@@ -26,6 +26,11 @@
 #define __I2CIF_H
 #include <list>
 
+// Handy macros to check i2c ranges
+//  Pass in an instance of a TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type
+#define I2C_BUS_MAX_ENGINE(var) (sizeof(var)/sizeof(var[0]))
+#define I2C_BUS_MAX_PORT(var)   (sizeof(var[0])/sizeof(var[0][0]))
+
 namespace I2C
 {
 

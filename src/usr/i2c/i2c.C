@@ -57,8 +57,11 @@
 #include <secureboot/service.H>
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
-#include <i2c/nvdimmif.H>
 #include <hwas/common/hwas.H>  // HwasState
+
+#ifdef CONFIG_NVDIMM
+#include <isteps/nvdimm/nvdimmif.H>
+#endif
 
 // ----------------------------------------------
 // Globals

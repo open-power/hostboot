@@ -42,5 +42,7 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/ffdc/
 
 OBJS += nvdimm.o
+OBJS += nvdimmdd.o
+OBJS += errlud_nvdimm.o
 
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/

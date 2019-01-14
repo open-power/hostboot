@@ -35,6 +35,9 @@
 
 using namespace EEPROM;
 
+// Trace definition
+extern trace_desc_t* g_trac_nvdimm;
+
 namespace NVDIMM
 {
 
@@ -75,7 +78,7 @@ enum page : uint8_t
 // Enums for inputs/expected output to/from the i2c registers
 enum i2c_in_values : uint8_t
 {
-    ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE        = 0x84, 
+    ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE        = 0x84,
     ARM_RESETN                                  = 0x04,
     ES_DEV_MANAGE                               = 0x01, //0x01 for device manage
     ERASE_IMAGE                                 = 0x08,

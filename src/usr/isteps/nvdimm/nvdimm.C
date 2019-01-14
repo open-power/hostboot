@@ -28,7 +28,6 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
-#include <i2c/nvdimmddreasoncodes.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -38,6 +37,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <lib/mc/port.H>
+#include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>
 
 using namespace TARGETING;

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/i2c/nvdimmif.H $                              */
+/* $Source: src/include/usr/isteps/nvdimm/nvdimmif.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
 #define __NVDIMMIF_H
 
 #include <list>
-#include "eepromif.H"
+#include <i2c/eepromif.H>
 
 namespace NVDIMM
 {

@@ -194,7 +194,7 @@ COPY_RENAME_FILES = \
     hbplugins/prdf/p9_hcd_memmap_base.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_memmap_base.H:errltool \
     hbplugins/prdf/p9_hcd_header_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_header_defs.H:errltool \
     hbplugins/prdf/p9_ppe_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_ppe_defs.H:errltool
-    
+
 #
 # Symbolic links created in the target.
 #
@@ -363,6 +363,8 @@ fsp.tar_CONTENTS = \
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/secureboot/common/plugins/*)) \
+    $(addsuffix :plugins/,\
+        $(call ROOTPATH_WILDCARD,src/usr/isteps/nvdimm/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
     obj/genfiles/srcListing \
