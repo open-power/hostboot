@@ -104,7 +104,7 @@ errlHndl_t call_mss_eff_grouping(IStepError & io_istepErr)
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_cpu_target).addToLog(l_err);
             io_istepErr.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            errlCommit(l_err, ISTEP_COMP_ID);
         }
         else
         {
@@ -179,7 +179,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
         // Create istep error and link it to PLID of original error
         l_StepError.addErrorDetails(l_err);
-        errlCommit(l_err, HWPF_COMP_ID);
+        errlCommit(l_err, ISTEP_COMP_ID);
         break;
     }
     memdLoaded = true;
@@ -292,7 +292,7 @@ void*    call_mss_eff_config( void *io_pArgs )
             l_err->collectTrace(EEPROM_COMP_NAME);
             l_err->collectTrace(I2C_COMP_NAME);
             l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            errlCommit(l_err, ISTEP_COMP_ID);
             continue;
         }
 
@@ -308,7 +308,7 @@ void*    call_mss_eff_config( void *io_pArgs )
         {
             // Ensure istep error created and has same plid as this error
             l_StepError.addErrorDetails( l_err );
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID);
         }
         else
         {
@@ -415,7 +415,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
                 // Ensure istep error created and has same plid as this error
                 l_StepError.addErrorDetails(l_err);
-                errlCommit(l_err, HWPF_COMP_ID);
+                errlCommit(l_err, ISTEP_COMP_ID);
             }
             else
             {
@@ -435,7 +435,7 @@ void*    call_mss_eff_config( void *io_pArgs )
         {
             // Ensure istep error created and has same plid as this error
             l_StepError.addErrorDetails( l_err );
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID);
         }
     }
 
@@ -463,7 +463,7 @@ void*    call_mss_eff_config( void *io_pArgs )
             {
                 // Do not propagate or break on error - distributeSmfMem will
                 // not return unrecoverable errors.
-                errlCommit(l_err, HWPF_COMP_ID);
+                errlCommit(l_err, ISTEP_COMP_ID);
             }
         }
         else
@@ -487,7 +487,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
             // Create istep error and link it to PLID of original error
             l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            errlCommit(l_err, ISTEP_COMP_ID);
         }
         else
         {
