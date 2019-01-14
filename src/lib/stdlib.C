@@ -29,6 +29,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/console.H>
 #include <config.h>
+#include <assert.h>
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
 #include <arch/ppc.H>
@@ -165,6 +166,9 @@ uint64_t strtoul(const char *nptr, char **endptr, int base)
 {
     uint64_t l_data = 0;
     size_t i = 0;
+
+    crit_assert(base == 16);
+
     while( nptr[i] != '\0' )
     {
         uint64_t l_nib = 0;
