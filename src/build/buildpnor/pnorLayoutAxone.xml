@@ -330,7 +330,15 @@ Layout Description
         <physicalOffset>0x3E14000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
-        <sha512Version/>
         <ecc/>
+    </section>
+    <section>
+        <description>Ultravisor XSCOM White/Blacklist (64K)</description>
+        <eyeCatch>UVBWLIST</eyeCatch>
+        <physicalOffset>0x3E94000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <side>sideless</side>
+        <sha512Version/>
+        <readOnly/>
     </section>
 </pnor>
