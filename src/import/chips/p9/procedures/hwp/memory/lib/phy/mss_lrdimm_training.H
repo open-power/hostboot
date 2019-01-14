@@ -54,6 +54,10 @@
 
 // Disables LRDIMM support for HB
 #ifndef __HOSTBOOT_MODULE
+    #define CONFIG_LRDIMM_CAPABLE 1
+#endif
+
+#ifdef CONFIG_LRDIMM_CAPABLE
     #define LRDIMM_CAPABLE 1
 #endif
 
