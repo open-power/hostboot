@@ -62,7 +62,8 @@ namespace TRUSTEDBOOT
         MSG_TYPE_READ_AK_CERT,
         MSG_TYPE_GEN_QUOTE,
         MSG_TYPE_FLUSH_CONTEXT,
-        MSG_TYPE_LAST = MSG_TYPE_FLUSH_CONTEXT,
+        MSG_TYPE_PCR_READ,
+        MSG_TYPE_LAST = MSG_TYPE_PCR_READ,
     };
 
     /// PCREXTEND message data
@@ -103,8 +104,8 @@ namespace TRUSTEDBOOT
     struct ReadAKCertData
     {
         TpmTarget* tpm;
-        AKCertificate_t* data; // The output of NVRAM read
-        ReadAKCertData(TpmTarget* i_tpm, AKCertificate_t* i_data) :
+        TPM2B_MAX_NV_BUFFER* data; // The output of NVRAM read
+        ReadAKCertData(TpmTarget* i_tpm, TPM2B_MAX_NV_BUFFER* i_data) :
             tpm(i_tpm), data(i_data)
         {
         }
@@ -114,14 +115,36 @@ namespace TRUSTEDBOOT
     struct GenQuoteData
     {
         TpmTarget* tpm;
-        MasterTpmNonce_t* masterNonce; // 32-byte nonce value
+        const MasterTpmNonce_t* const masterNonce; // 32-byte nonce value
         QuoteDataOut* data; // Output - the quote and signature fields
         GenQuoteData(TpmTarget* i_tpm,
-                     MasterTpmNonce_t* i_masterNonce,
+                     const MasterTpmNonce_t* const i_masterNonce,
                      QuoteDataOut* o_data) :
                      tpm(i_tpm),
                      masterNonce(i_masterNonce),
                      data(o_data)
+        {
+        }
+    };
+
+    // The struct used to read a PCR from TPM
+    struct PcrReadData
+    {
+        TpmTarget* tpm; // TPM target whose PCRs are to be read
+        TPM_Pcr pcr; // The PCR to read
+        TPM_Alg_Id alg; // The PCR bank to read
+        uint8_t* digest; // The buffer to hold the PCR contents
+        size_t digestSize; // The size of the digest buffer
+        PcrReadData(TpmTarget* i_tpm,
+                    TPM_Pcr i_pcr,
+                    TPM_Alg_Id i_alg,
+                    uint8_t* o_digest,
+                    size_t i_digestSize) :
+                    tpm(i_tpm),
+                    pcr(i_pcr),
+                    alg(i_alg),
+                    digest(o_digest),
+                    digestSize(i_digestSize)
         {
         }
     };

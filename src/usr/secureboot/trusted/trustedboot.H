@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ extern trace_desc_t* g_trac_trustedboot;
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...) TRACDCOMP(args)
 //#define TRACUBIN(args...)  TRACFBIN(args)
 #define TRACUBIN(args...)
 

@@ -59,14 +59,6 @@ namespace TRUSTEDBOOT
         MAX_TRANSMIT_SIZE = 1024, ///< Maximum send/receive transmit size
     };
 
-    /// TPM Algorithm defines
-    typedef enum
-    {
-        TPM_ALG_SHA1      = 0x0004,   ///< SHA1 Id
-        TPM_ALG_SHA256    = 0x000B,   ///< SHA256 Id
-        TPM_ALG_INVALID_ID          ///< Used for error checking
-    } TPM_Alg_Id;
-
     typedef enum
     {
         TPM_ALG_SHA1_SIZE     = 20,      ///< SHA1 digest byte size
@@ -163,6 +155,39 @@ namespace TRUSTEDBOOT
 
     // Command structures taken from Trusted Platform Module Library Part 3:
     //    Commands Family "2.0"
+
+    /* TPM data structures naming conventions
+    (taken from the TCG TPM spec v2)
+
+    _TPM_   an indication/signal from the TPM’s system interface
+    TPM_    a constant or an enumerated type
+    TPM2_   a command defined by this specification
+    TPM2B_  a structure that is a sized buffer where the size of the buffer is
+            contained in a 16-bit, unsigned value. The first parameter is the
+            size in octets of the second parameter. The second parameter may be
+            any type.
+    TPMA_   a structure where each of the fields defines an attribute and each
+            field is usually a single bit. All the attributes in an attribute
+            structure are packed with the overall size of the structure
+            indicated in the heading of the attribute description
+            (UINT8, UINT16, or UINT32).
+    TPM_ALG_ an enumerated type that indicates an algorithm
+    A TPM_ALG_ is often used as a selector for a union.
+    TPMI_   an interface type. The value is specified for purposes of dynamic
+            type checking when unmarshaled.
+    TPML_   a list length followed by the indicated number of entries of the
+            indicated type. This is an array with a length field.
+    TPMS_   a structure that is not a size buffer or a tagged buffer or a
+            list
+    TPMT_   a structure with the first parameter being a structure tag,
+            indicating the type of the structure that follows. A structure tag
+            may be either a TPMT_ST_ or TPM_ALG_ depending on context.
+    TPMU_   a union of structures, lists, or unions. If a union exists, there
+            will normally be a companion TPMT_ that is the expression of the
+            union in a tagged structure, where the tag is the selector
+            indicating which member of the union is present.
+    */
+
 
     /// TPM capability response structure
     struct _TPMS_TAGGED_PROPERTY
@@ -419,8 +444,9 @@ namespace TRUSTEDBOOT
 
     struct _TPM2B_DIGEST
     {
-        uint16_t size;
-        uint8_t  buffer[sizeof(TPMU_HA)];
+        uint16_t size; // size in octets of the buffer field; may be 0
+        uint8_t  buffer[sizeof(TPMU_HA)]; // the buffer area that can be no
+                                          // larger than a digest
     } PACKED;
     typedef struct _TPM2B_DIGEST TPM2B_DIGEST;
     const uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
@@ -439,8 +465,9 @@ namespace TRUSTEDBOOT
 
     struct _TPML_PCR_SELECTION
     {
-        uint32_t     count;
-        TPMS_PCR_SELECTION pcrSelections[HASH_COUNT];
+        uint32_t     count; //number of selection structures;
+                            // a value of zero is allowed.
+        TPMS_PCR_SELECTION pcrSelections[HASH_COUNT]; // list of selections
     } PACKED;
     typedef struct _TPML_PCR_SELECTION TPML_PCR_SELECTION;
     uint8_t* TPML_PCR_SELECTION_marshal(const TPML_PCR_SELECTION* val,
@@ -541,7 +568,7 @@ namespace TRUSTEDBOOT
     struct _TPM2_NVReadOut
     {
         TPM2_BaseOut base;
-        uint8_t NVData[TPM_NV_DATA_SIZE];
+        TPM2B_MAX_NV_BUFFER data;
     } PACKED;
     typedef struct _TPM2_NVReadOut TPM2_NVReadOut;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -378,7 +378,7 @@ namespace TRUSTEDBOOT
             sizeof(TPMU_HA) < val->size)
         {
             TRACUCOMP( g_trac_trustedboot,
-                       "TPM2B_DIGEST::unmarshal invalid size");
+                       "TPM2B_DIGEST::unmarshal invalid size (%d)", val->size);
             return NULL;
         }
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
@@ -393,7 +393,7 @@ namespace TRUSTEDBOOT
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
                                   &(val->count), sizeof(val->count));
-        if (NULL != i_tpmBuf && HASH_COUNT < val->count)
+        if (NULL != i_tpmBuf && FW_USED_PCR_COUNT < val->count)
         {
             TRACUCOMP( g_trac_trustedboot,
                        "TPML_DIGEST::unmarshal invalid count %d", val->count);
