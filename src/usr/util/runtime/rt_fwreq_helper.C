@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,6 +250,34 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                 }
             break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
 
+            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+                {
+                    TRACFCOMP(g_trac_runtime,
+                              ERR_MRK"FSP is doing a reset/reload, "
+                                     "Send NVDIMM state to PHYP failed. "
+                                     "retry:%d/%d, rc:%d, procId:0x%.8X, "
+                                     "state:%d - %s",
+                              i,
+                              HBRT_FW_REQUEST_RETRIES,
+                              rc,
+                              l_req_fw_msg->sbe_state.i_procId,
+                              l_req_fw_msg->sbe_state.i_state,
+                              l_req_fw_msg->sbe_state.i_state?
+                              "protected":"not protected");
+
+                    // Pack user data 1 with Hypervisor return code and
+                    // firmware request message type
+                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                       l_req_fw_msg->io_type);
+
+                    // Pack user data 2 with processor ID of NVDIMM
+                    // and state of the NVDIMM
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                l_req_fw_msg->nvdimm_protection_state.i_procId,
+                                l_req_fw_msg->nvdimm_protection_state.i_state);
+                }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+
             default:
             break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -270,7 +298,8 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  chipID
              * @userdata2[32:63] SCOM data (HCODE Update) ||
                                  Message Type (FSP MSG) ||
-                                 SBE state
+                                 SBE state ||
+                                 NVDIMM protection
              * @devdesc          The Firmware Request call failed
              */
             l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
@@ -439,6 +468,30 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                  }
             break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
 
+            case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+                {
+                    TRACFCOMP(g_trac_runtime,
+                        ERR_MRK"Failed sending NVDIMM protection state to PHYP."
+                        " rc:0x%X, procId:0x%.8X, state:%d - %s",
+                        rc,
+                        l_req_fw_msg->sbe_state.i_procId,
+                        l_req_fw_msg->sbe_state.i_state,
+                        l_req_fw_msg->sbe_state.i_state?
+                        "protected":"not protected");
+
+                    // Pack user data 1 with Hypervisor return code and
+                    // firmware request message type
+                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                       l_req_fw_msg->io_type);
+
+                    // Pack user data 2 with processor ID of NVDIMM
+                    // and state of the NVDIMM
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                l_req_fw_msg->nvdimm_protection_state.i_procId,
+                                l_req_fw_msg->nvdimm_protection_state.i_state);
+                }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION:
+
             default:
                break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -459,7 +512,8 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  chipId
              * @userdata2[32:63] SCOM data (HCODE Update) ||
                                  Message Type (FSP MSG)  ||
-                                 SBE state
+                                 SBE state ||
+                                 NVDIMM protection state
              * @devdesc          The Firmware Request call failed
              */
             l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,

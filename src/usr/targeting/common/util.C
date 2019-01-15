@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,6 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
-
-#define MCA_PER_MCS 2
-#define DIMM_PER_MCA 2
 
 namespace TARGETING
 {
@@ -284,18 +281,12 @@ uint8_t  is_fused_mode( )
 
 } // end is_fused_mode
 
-/**
- * @brief Determine if the given dimm target is an NVDIMM
- *
- * @param[in] i_target : dimm target to check
- *
- * @return bool - True if the given target is an NVDIMM
- */
+
 bool isNVDIMM( TARGETING::Target * i_target )
 {
     // Not the most elegant way of doing it but the hybrid attributes
     // are at the MCS level. Need to find my way up to MCS and check
-    // if the dimm is hybrid 
+    // if the dimm is hybrid
     TARGETING::TargetHandleList l_mcaList;
     getParentAffinityTargets(l_mcaList, i_target, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
 
@@ -313,9 +304,16 @@ bool isNVDIMM( TARGETING::Target * i_target )
             if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
                 l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
             {
-                //Using relative position to lookup the hybrid attribute for the current dimm 
+                //Using relative position to lookup the hybrid attribute for the current dimm
                 TARGETING::ATTR_REL_POS_type l_dimm_rel_pos = i_target->getAttr<ATTR_REL_POS>();
                 TARGETING::ATTR_REL_POS_type l_mca_rel_pos = l_mcaList[0]->getAttr<ATTR_REL_POS>();
+
+                // Verify code is not accessing outside of the array boundaries
+                // Check if l_dimm_rel_pos is outside of l_hybrid column boundary
+                assert(l_dimm_rel_pos < sizeof(l_hybrid[0]));
+
+                // Check if l_mca_rel_pos is outside of l_hybrid row boundary
+                assert(l_mca_rel_pos < (sizeof(l_hybrid)/sizeof(l_hybrid[0])));
 
                 return (l_hybrid[l_mca_rel_pos][l_dimm_rel_pos] == TARGETING::EFF_HYBRID_IS_HYBRID &&
                         l_hybrid_type[l_mca_rel_pos][l_dimm_rel_pos] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM);
@@ -324,6 +322,27 @@ bool isNVDIMM( TARGETING::Target * i_target )
     }
 
     return false;
+}
+
+
+TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc )
+{
+    TargetHandleList o_nvdimmList;
+
+    TargetHandleList l_dimmTargetList;
+    getChildAffinityTargets( l_dimmTargetList, i_proc, CLASS_NA, TYPE_DIMM );
+
+    for (TargetHandleList::iterator it = l_dimmTargetList.begin();
+             it != l_dimmTargetList.end(); ++it)
+    {
+        TARGETING::Target* l_dimm = *it;
+        if (TARGETING::isNVDIMM(l_dimm))
+        {
+            // Found a valid NVDIMM
+            o_nvdimmList.push_back(l_dimm);
+        }
+    }
+    return o_nvdimmList;
 }
 
 } // end namespace TARGETING

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -583,6 +583,13 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
                 l_chip->setAttr<ATTR_HB_INITIATED_PM_RESET>
                   (HB_INITIATED_PM_RESET_INACTIVE);
+
+                // clear the NVDIMM arming status so it gets redone when OCC is active
+                ATTR_NVDIMM_ARMED_type l_nvdimms_armed_state =
+                                        l_chip->getAttr<ATTR_NVDIMM_ARMED>();
+                // Only force rearming (error setting should persist)
+                l_nvdimms_armed_state.armed = 0;
+                l_chip->setAttr<ATTR_NVDIMM_ARMED>(l_nvdimms_armed_state);
 
                 if (l_chip == l_pMasterProcChip)
                 {

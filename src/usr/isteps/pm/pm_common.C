@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,10 @@
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
+#endif
+
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
+#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif
 
 // Easy macro replace for unit testing
@@ -935,6 +939,20 @@ namespace HBPM
                 break;
             }
 
+#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
+            // Notify PHYP that NVDIMMs are not protected from power off event
+            l_errl = NVDIMM::notifyNvdimmProtectionChange(i_target, NVDIMM::NOT_PROTECTED);
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"resetPMComplex: unable to notify PHYP that NVDIMM"
+                  " is not protected for HUID=0x%.8X", get_huid(i_target) );
+
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+                errlCommit(l_errl, ISTEP_COMP_ID);
+            }
+#endif
+
             // Reset path
             // p9_pm_init.C enum: PM_RESET
             FAPI_INVOKE_HWP( l_errl,
@@ -999,7 +1017,7 @@ namespace HBPM
                        "resetPMComplex:" "unmap, RC=0x%X" ,
                            lRc );
         }
-        
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"resetPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );

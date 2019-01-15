@@ -4925,6 +4925,41 @@
   </attribute>
 
   <attribute>
+    <description>
+      NVDIMM(s) are armed for backup incase of power loss (DDR Reset_n goes low)
+      This keeps track of the armed state
+    </description>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <complexType>
+      <description>Armed State</description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Is NVDIMM armed</description>
+        <name>armed</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>NVDIMM controller error detected</description>
+        <name>error_detected</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>6</bits>
+        <default>0</default>
+        <description>Reserved for future use</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <id>NVDIMM_ARMED</id>
+  </attribute>
+
+  <attribute>
     <id>NV_OPS_TIMEOUT_MSEC</id>
     <description>
         NVDIMM timeout value for 6 main operations
