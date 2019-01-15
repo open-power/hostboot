@@ -22,3 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file efd_decoder.H
+/// @brief DDIMM Extended Functional Data (EFD) decoder
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _EFD_FACTORY_H_
+#define _EFD_FACTORY_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/spd/ddimm/ddr4/efd_ddr4_custom_microchip_decoder.H>
+
+namespace mss
+{
+
+namespace efd
+{
+
+///
+/// @brief Generates the EFD decoder based upon the EFD type
+/// @param[in] i_target DIMM target
+/// @param[in] i_data SPD data
+/// @param[out] o_decoder shared pointer to the decoder in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+// TODO:update this for other types of EFD
+inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const std::vector<uint8_t>& i_data,
+                                 std::shared_ptr<base_decoder>& o_decoder_ptr)
+{
+    o_decoder_ptr =
+        std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, mss::spd::rev::V0_0>>(i_target,
+                i_data);
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+} // ns efd
+} // ns mss
+
+#endif
