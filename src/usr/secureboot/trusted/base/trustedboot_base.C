@@ -902,7 +902,7 @@ errlHndl_t createAttestationKeys(TpmTarget* i_target)
     return l_errl;
 }
 
-errlHndl_t readAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
+errlHndl_t readAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_data)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
@@ -955,7 +955,7 @@ errlHndl_t readAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
 }
 
 errlHndl_t generateQuote(TpmTarget* i_target,
-                         MasterTpmNonce_t* i_masterNonce,
+                         const MasterTpmNonce_t* const i_masterNonce,
                          QuoteDataOut* o_data)
 {
     errlHndl_t l_errl = nullptr;
@@ -1037,6 +1037,66 @@ errlHndl_t flushContext(TpmTarget* i_target)
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_FLUSH_CONTEXT,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
+
+#endif
+    return l_errl;
+}
+
+errlHndl_t pcrRead(TpmTarget* i_target,
+                   const TPM_Pcr i_pcr,
+                   const TPM_Alg_Id i_algId,
+                   const size_t i_digestSize,
+                   uint8_t* const o_digest)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    PcrReadData* l_data = new PcrReadData{i_target,
+                                          i_pcr,
+                                          i_algId,
+                                          o_digest,
+                                          i_digestSize};
+
+    l_msg = Message::factory(MSG_TYPE_PCR_READ,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg != nullptr, "pcrRead: l_msg is nullptr");
+    l_data = nullptr; //l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /*@
+         * @errortype   ERRL_SEV_UNRECOVERABLE
+         * @moduleid    MOD_PCR_READ
+         * @reasoncode  RC_SENDRECV_FAIL
+         * @userdata1   rc from msg_sendrecv
+         * @userdata2   TPM HUID
+         * @devdesc     msg_sendrecv failed for pcrRead
+         * @custdesc    trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_PCR_READ,
                                          RC_SENDRECV_FAIL,
                                          l_rc,
                                          TARGETING::get_huid(i_target),

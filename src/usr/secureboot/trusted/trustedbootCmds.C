@@ -411,9 +411,9 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                     reinterpret_cast<TPM2_NVReadOut*>(o_outBuf);
                   TPM2_NVReadOut* l_tpmRespData =
                                    reinterpret_cast<TPM2_NVReadOut*>(i_respBuf);
-                  memcpy(l_tpmRespData->NVData,
-                         l_respPtr->NVData,
-                         TPM_NV_DATA_SIZE);
+                  memcpy(reinterpret_cast<uint8_t*>(&l_tpmRespData->data),
+                         reinterpret_cast<uint8_t*>(&l_respPtr->data),
+                         sizeof(l_tpmRespData->data));
               }
               break;
 
@@ -1346,7 +1346,7 @@ errlHndl_t tpmCmdCreateAttestationKeys(TpmTarget* i_target)
     return l_errl;
 }
 
-errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
+errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_data)
 {
     TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdReadAKCertificate()");
     errlHndl_t l_errl = nullptr;
@@ -1413,8 +1413,10 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
     }
 
     TPM2_NVReadOut* l_read = reinterpret_cast<TPM2_NVReadOut*>(l_resp);
-    // NVRAM holds the AK certificate. Copy out a fixed size of 500 bytes
-    memcpy(*o_data, l_read->NVData, TPM_NV_DATA_SIZE);
+    // NVRAM holds the AK certificate. Copy out the size and the certificate
+    memcpy(reinterpret_cast<uint8_t*>(o_data),
+           reinterpret_cast<uint8_t*>(&l_read->data),
+           sizeof(*o_data));
 
     }while(0);
 
@@ -1423,7 +1425,7 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, AKCertificate_t* o_data)
 }
 
 errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
-                               MasterTpmNonce_t* i_masterNonce,
+                               const MasterTpmNonce_t* const i_masterNonce,
                                QuoteDataOut* o_data)
 {
     TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdGenerateQuote()");
@@ -1457,9 +1459,12 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
     l_cmd->quoteData.pcrSelection.pcrSelections[0].algorithmId = TPM_ALG_SHA256;
     l_cmd->quoteData.pcrSelection.pcrSelections[0].sizeOfSelect =PCR_SELECT_MAX;
 
-    for(size_t i = PCR_0; i <= PCR_7 ; ++i)
+    memset(l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect, 0,
+           sizeof(l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect));
+
+    for(size_t i = PCR_0; i <= FW_USED_PCR_COUNT; ++i)
     {
-        l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect[i/8] =
+        l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect[i/8] |=
             0x01 << (i % 8);
     }
 

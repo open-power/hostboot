@@ -77,6 +77,7 @@ namespace TRUSTEDBOOT
         MOD_GEN_QUOTE                       = 0x1F,
         MOD_TPM_CMD_FLUSH_CONTEXT           = 0x20,
         MOD_FLUSH_CONTEXT                   = 0x21,
+        MOD_PCR_READ                        = 0x22,
    };
 
     enum TRUSTEDReasonCode

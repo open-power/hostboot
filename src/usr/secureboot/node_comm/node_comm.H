@@ -34,14 +34,13 @@
 #include <trace/interface.H>
 #include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include <secureboot/nodecommif.H>
+#include "../trusted/trustedboot.H"
+
 // ----------------------------------------------
 // Defines
 // ----------------------------------------------
 #define NODECOMM_TRACE_NAME "NODECOMM"
 extern trace_desc_t* g_trac_nc;
-
-// Easy macro replace for unit testing - TRACD vs TRACF
-#define TRACUCOMP(args...) TRACDCOMP(args)
 
 namespace SECUREBOOT
 {

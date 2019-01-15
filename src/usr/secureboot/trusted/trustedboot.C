@@ -1501,7 +1501,7 @@ errlHndl_t doCreateAttKeys(TpmTarget* i_tpm)
     return l_errl;
 }
 
-errlHndl_t doReadAKCert(TpmTarget* i_tpm, AKCertificate_t* o_data)
+errlHndl_t doReadAKCert(TpmTarget* i_tpm, TPM2B_MAX_NV_BUFFER* o_data)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -1523,7 +1523,7 @@ errlHndl_t doReadAKCert(TpmTarget* i_tpm, AKCertificate_t* o_data)
 }
 
 errlHndl_t doGenQuote(TpmTarget* i_tpm,
-                      MasterTpmNonce_t* i_masterNonce,
+                      const MasterTpmNonce_t* const i_masterNonce,
                       QuoteDataOut* o_data)
 {
     errlHndl_t l_errl = nullptr;
@@ -1563,6 +1563,35 @@ errlHndl_t doFlushContext(TpmTarget* i_tpm)
     }
     } while(0);
 
+    return l_errl;
+}
+
+errlHndl_t doPcrRead(TpmTarget* i_target,
+                     const TPM_Pcr i_pcr,
+                     const TPM_Alg_Id i_algId,
+                     const size_t i_digestSize,
+                     uint8_t* const o_digest)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_target);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdPcrRead(i_target,
+                           i_pcr,
+                           i_algId,
+                           o_digest,
+                           i_digestSize);
+    if(l_errl)
+    {
+        break;
+    }
+
+    } while(0);
     return l_errl;
 }
 
@@ -1812,6 +1841,19 @@ void* tpmDaemon(void* unused)
                   TpmTargetData* l_data =
                               reinterpret_cast<TpmTargetData*>(tb_msg->iv_data);
                   tb_msg->iv_errl = doFlushContext(l_data->tpm);
+              }
+              break;
+
+          case TRUSTEDBOOT::MSG_TYPE_PCR_READ:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  PcrReadData* l_data =
+                                reinterpret_cast<PcrReadData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doPcrRead(l_data->tpm,
+                                              l_data->pcr,
+                                              l_data->alg,
+                                              l_data->digestSize,
+                                              l_data->digest);
               }
               break;
 
@@ -2215,6 +2257,28 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
     TRACFCOMP(g_trac_trustedboot, "%ssuccessfully poisoned TPM with huid 0x%X",
               l_errl? "Un":"", TARGETING::get_huid(i_pTpm));
 
+#endif
+    return l_errl;
+}
+
+errlHndl_t poisonAllTpms()
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    do {
+
+    TARGETING::TargetHandleList l_tpms;
+    getTPMs(l_tpms, TRUSTEDBOOT::TPM_FILTER::ALL_FUNCTIONAL);
+    for(auto l_tpm : l_tpms)
+    {
+        l_errl = poisonTpm(l_tpm);
+        if(l_errl)
+        {
+            break;
+        }
+    }
+
+    } while(0);
 #endif
     return l_errl;
 }

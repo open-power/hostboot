@@ -175,7 +175,6 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
                          uint8_t* o_digest,
                          size_t  i_digestSize);
 
-
 /**
  * @brief Send the TPM_CC_Create to the TPM
  * @param[in] i_target the target TPM (must not be nullptr)
@@ -192,7 +191,7 @@ errlHndl_t tpmCmdCreateAttestationKeys(TpmTarget* i_target);
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target,
-                                   AKCertificate_t* o_data);
+                                   TPM2B_MAX_NV_BUFFER* o_data);
 
 /**
  * @brief Send the TPM_CC_Quote command to the given TPM to generate quote
@@ -204,7 +203,7 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target,
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
-                               MasterTpmNonce_t* i_masterNonce,
+                               const MasterTpmNonce_t* i_masterNonce,
                                QuoteDataOut* o_data);
 
 /**

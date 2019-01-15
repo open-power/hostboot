@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@ namespace SECUREBOOT
         MOD_NCEX_SLAVE                      = 0x28,
         MOD_NCEX_GET_RANDOM                 = 0x29,
         MOD_NC_RECV                         = 0x2A,
+        MOD_NC_GEN_SLAVE_RESPONSE           = 0x2B,
    };
 
     enum SECUREReasonCode
@@ -108,6 +109,9 @@ namespace SECUREBOOT
         RC_NCEX_INVALID_PHYS_PATH          = SECURE_COMP_ID | 0x29,
         RC_NCEX_INVALID_INSTANCE_COUNT     = SECURE_COMP_ID | 0x2A,
         RC_NC_WAITING_TIMEOUT              = SECURE_COMP_ID | 0x2B,
+        RC_NC_BAD_MASTER_TPM               = SECURE_COMP_ID | 0x2C,
+        RC_NC_NO_PRIMARY_TPM_LOG           = SECURE_COMP_ID | 0x2D,
+        RC_NC_BAD_MASTER_EYE_CATCH         = SECURE_COMP_ID | 0x2E,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

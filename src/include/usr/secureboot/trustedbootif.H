@@ -55,6 +55,9 @@ namespace TRUSTEDBOOT
     {
         size_t size; // the size (bytes) of the data pointer
         uint8_t* data; // the actual quote data
+        _QuoteDataOut() : size(0), data(nullptr)
+        {
+        }
     } PACKED;
     typedef struct _QuoteDataOut QuoteDataOut;
 
@@ -90,22 +93,23 @@ namespace TRUSTEDBOOT
     /// TPM PCR designations
     typedef enum
     {
-        PCR_0     = 0,
-        PCR_1     = 1,
-        PCR_2     = 2,
-        PCR_3     = 3,
-        PCR_4     = 4,
-        PCR_5     = 5,
-        PCR_6     = 6,
-        PCR_7     = 7,
-        PCR_DEBUG = 16,
-        PCR_DRTM_17 = 17,
-        PCR_DRTM_18 = 18,
-        PCR_DRTM_19 = 19,
-        PCR_DRTM_20 = 20,
-        PCR_DRTM_21 = 21,
-        PCR_DRTM_22 = 22,
-        PLATFORM_PCR = 24, ///< The number of PCR required by the platform spec
+        PCR_0              = 0,
+        PCR_1              = 1,
+        PCR_2              = 2,
+        PCR_3              = 3,
+        PCR_4              = 4,
+        PCR_5              = 5,
+        PCR_6              = 6,
+        PCR_7              = 7,
+        FW_USED_PCR_COUNT  = 8,
+        PCR_DEBUG          = 16,
+        PCR_DRTM_17        = 17,
+        PCR_DRTM_18        = 18,
+        PCR_DRTM_19        = 19,
+        PCR_DRTM_20        = 20,
+        PCR_DRTM_21        = 21,
+        PCR_DRTM_22        = 22,
+        PLATFORM_PCR       = 24, ///< The number of PCR required by the platform spec
         IMPLEMENTATION_PCR = 24, ///< The number of PCRs implemented by TPM
     } TPM_Pcr;
 
@@ -147,6 +151,21 @@ namespace TRUSTEDBOOT
         TPM_TEST_DIGEST_MISMATCH      = 0x05,
     } BackupTpmTestFailures;
 
+    // The structure to hold the Authentication Key certificate and its size
+    struct _TPM2B_MAX_NV_BUFFER
+    {
+        uint16_t size; //size of the buffer
+        AKCertificate_t buffer;
+    } PACKED;
+    typedef struct _TPM2B_MAX_NV_BUFFER TPM2B_MAX_NV_BUFFER;
+
+    /// TPM Algorithm defines
+    typedef enum
+    {
+        TPM_ALG_SHA1      = 0x0004,   ///< SHA1 Id
+        TPM_ALG_SHA256    = 0x000B,   ///< SHA256 Id
+        TPM_ALG_INVALID_ID          ///< Used for error checking
+    } TPM_Alg_Id;
 
     /**
      * @brief Initialize trusted boot/TPM components for the master TPM
@@ -304,6 +323,14 @@ namespace TRUSTEDBOOT
     errlHndl_t poisonTpm(const TpmTarget* i_pTpm);
 
     /**
+     * @brief Poison all functional TPMs on the node. Calls poisonTpm for
+     *        each functional TPM.
+     *
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t poisonAllTpms();
+
+    /**
      *  @brief Helper function for validating TPM handles. Returns an error log
      *         if the supplied TPM is null, not a TPM target, or not functional.
      *
@@ -397,7 +424,7 @@ namespace TRUSTEDBOOT
      * @return nullptr if success; non-nullptr on error
      */
     errlHndl_t readAKCertificate(TpmTarget* i_target,
-                                 AKCertificate_t* o_data);
+                                 TPM2B_MAX_NV_BUFFER* o_data);
 
     /**
      * @brief Send the command to the given TPM to generate the quote
@@ -409,7 +436,7 @@ namespace TRUSTEDBOOT
      * @return nullptr if success; non-nullptr on error
      */
     errlHndl_t generateQuote(TpmTarget* i_target,
-                             MasterTpmNonce_t* i_masterNonce,
+                             const MasterTpmNonce_t* i_masterNonce,
                              QuoteDataOut* o_data);
 
     /**
@@ -421,6 +448,22 @@ namespace TRUSTEDBOOT
      */
     errlHndl_t flushContext(TpmTarget* i_target);
 
+    /**
+     * @brief Send the command to the given TPM to read the contents of the
+     *        given bank of the given PCR
+     * @param[in] i_target the pointer to the TPM target; must not be nullptr
+     * @param[in] i_pcr the PCR to read
+     * @param[in] i_algId the PCR bank to read
+     * @param[in] i_digestSize the size of the digest contained in the PCR
+     * @param[out] o_digest the data contained in the requested PCR
+     *
+     * @return nullptr if success; non-nullptr on error
+     */
+    errlHndl_t pcrRead(TpmTarget* i_target,
+                       TPM_Pcr i_pcr,
+                       TPM_Alg_Id i_algId,
+                       size_t i_digestSize,
+                       uint8_t* o_digest);
 
 } // end TRUSTEDBOOT namespace
 
