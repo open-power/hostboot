@@ -39,6 +39,7 @@
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/targetservice.H>
 
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
@@ -1611,6 +1612,7 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
         PredicateIsFunctional isFunctional;
 
         l_parent = getImmediateParentByAffinity(&i_child);
+
         if ((l_parent != NULL) && isFunctional(l_parent))
         {
             // Now check if parent has any functional affinity children
@@ -1690,6 +1692,17 @@ void DeconfigGard::_deconfigureByAssoc(
     // find all CHILD targets and deconfigure them
     targetService().getAssociated(pChildList, &i_target,
         TargetService::CHILD, TargetService::ALL, &funcOrFco);
+
+    // Since OMICs and OMIs share special relations OMI_CHILD and OMIC_PARENT,
+    // they will only show up if those relations are used and not the regular
+    // CHILD and PARENT relations.
+    if (i_target.getAttr<ATTR_TYPE>() == TYPE_OMIC)
+    {
+        // Append OMI targets to the child list.
+        getChildOmiTargetsByState(pChildList, &i_target, CLASS_NA,
+                                  TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
+    }
+
     for (TargetHandleList::iterator pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
@@ -2026,6 +2039,26 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 break;
             } // TYPE_SMPGROUP
+            case TYPE_OMI:
+            {
+                TargetHandleList pOmicParentList;
+                getParentOmicTargetsByState(pOmicParentList,
+                        &i_target, CLASS_NA, TYPE_OMIC,
+                        UTIL_FILTER_ALL);
+
+                TargetHandle_t parentOmic = pOmicParentList[0];
+
+                HWAS_ASSERT((pOmicParentList.size() == 1),
+                    "HWAS _deconfigParentAssoc: pOmicParentList != 1");
+
+                if (!anyChildFunctional(*parentOmic, TargetService::OMI_CHILD))
+                {
+                    _deconfigureTarget(*parentOmic, i_errlEid, NULL,
+                                       i_deconfigRule);
+                }
+
+                break;
+            }
             default:
             {
               // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MI, TYPE_DMI,
