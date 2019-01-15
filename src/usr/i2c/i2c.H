@@ -959,7 +959,6 @@ void setLogicalFsiEnginePort(size_t &io_logical_engine,
 void addHwCalloutsI2c(errlHndl_t i_err,
                       TARGETING::Target * i_target,
                       const misc_args_t & i_args);
-
 }; // end I2C namespace
 
 #endif  // __I2C_H

@@ -48,8 +48,11 @@
 #include <fsi/fsiif.H>
 #include <config.h>
 #include <targeting/common/targetservice.H>
-
 #include <chipids.H>
+
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+#include <i2c/eepromif.H>
+#endif
 
 namespace HWAS
 {
@@ -615,6 +618,18 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             // erase this target, and 'increment' to next
             pTarget_it = io_targets.erase(pTarget_it);
         }
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+        TARGETING::EepromVpdPrimaryInfo eepromData;
+        if (pTarget->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromData))
+        {
+            HWAS_INF( "Reading EEPROMs for target, eeprom type = %d , target present = %d , eeprom type = %d",
+                      DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
+            errl = deviceRead(pTarget, &present, presentSize,
+                            DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
+            errlCommit(errl, HWAS_COMP_ID);
+            // errl is now null, move on to next target
+        }
+#endif
     } // for pTarget_it
 
     return errl;
