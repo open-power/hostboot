@@ -22,3 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9a_mss_utils_to_throttle.C
+/// @brief Sets throttles and power attributes for a given utilization value
+/// @note TMGT will call this procedure to set the N address operations (commands)
+/// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
+//// If input utilization is zero, then safemode values from MRW will be used
+///
+
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+#include <p9a_mss_utils_to_throttle.H>
+
+// fapi2
+#include <fapi2.H>
+
+///
+/// @brief Determines throttle and power values for a given port databus utilization.
+/// @param[in] i_targets vector of OCMB_CHIPs to set throttle and power attributes on
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT will be set to worst case of all slots passed in
+/// @note input ATTR_MSS_DATABUS_UTIL and ATTR_MSS_MEM_WATT_TARGET
+/// @note output ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, and ATTR_MSS_PORT_MAXPOWER
+/// @note Does not set runtime throttles or set registers to throttle values`
+///
+fapi2::ReturnCode p9a_mss_utils_to_throttle( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&
+        i_targets )
+{
+    FAPI_INF("Entering p9a_mss_utils_to_throttle");
+    return fapi2::FAPI2_RC_SUCCESS;
+}

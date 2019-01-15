@@ -310,6 +310,15 @@ enum nibble_mask
     MASK_NIBBLE1 = 0x0f,
 };
 
+///
+/// @brief throttle_type used to set bulk_pwr_throttls to run POWER or THERMAL throttling
+/// @note OCC will be using the POWER option
+///
+enum class throttle_type
+{
+    POWER = 0,
+    THERMAL = 1,
+};
 
 ///
 /// @brief Trait classes for proc_type
