@@ -240,6 +240,21 @@ typedef struct
 
 } SysPowerDistParms;
 
+/// AVSBUS Topology
+///
+/// AVS Bus and Rail numbers for VDD, VDN, VCS, and VIO
+///
+typedef struct
+{
+    uint8_t vdd_avsbus_num;
+    uint8_t vdd_avsbus_rail;
+    uint8_t vdn_avsbus_num;
+    uint8_t vdn_avsbus_rail;
+    uint8_t vcs_avsbus_num;
+    uint8_t vcs_avsbus_rail;
+    uint8_t vio_avsbus_num;
+    uint8_t vio_avsbus_rail;
+} AvsBusTopology_t;
 
 //
 // WOF Voltage, Frequency Ratio Tables

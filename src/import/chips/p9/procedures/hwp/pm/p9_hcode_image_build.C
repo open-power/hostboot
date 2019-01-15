@@ -2482,6 +2482,7 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     pPgpeHdr->g_pgpe_beacon_addr                  =     0;
     pPgpeHdr->g_quad_status_addr                  =     0;
     pPgpeHdr->g_pgpe_wof_state_address            =     0;
+    pPgpeHdr->g_pgpe_wof_values_address           =     0;
     pPgpeHdr->g_pgpe_req_active_quad_address      =     0;
     pPgpeHdr->g_wof_table_addr                    =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_offset);
     pPgpeHdr->g_wof_table_length                  =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_length);

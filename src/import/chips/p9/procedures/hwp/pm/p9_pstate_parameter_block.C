@@ -952,6 +952,13 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv));
         }
 
+        //Avs Bus topplogy
+        io_globalppb->avs_bus_topology.vdd_avsbus_num  = iv_attrs.vdd_bus_num;
+        io_globalppb->avs_bus_topology.vdd_avsbus_rail = iv_attrs.vdd_rail_select;
+        io_globalppb->avs_bus_topology.vdn_avsbus_num  = iv_attrs.vdn_bus_num;
+        io_globalppb->avs_bus_topology.vdn_avsbus_rail = iv_attrs.vdn_rail_select;
+        io_globalppb->avs_bus_topology.vcs_avsbus_num  = iv_attrs.vcs_bus_num;
+        io_globalppb->avs_bus_topology.vcs_avsbus_rail = iv_attrs.vcs_rail_select;
 
     } while (0);
 

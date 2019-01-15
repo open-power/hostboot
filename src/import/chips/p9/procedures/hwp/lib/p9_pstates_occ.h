@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,6 +204,8 @@ typedef struct
 
     // AC tdp vdd nominal
     uint16_t lac_tdp_vdd_nominal_10ma;
+
+    AvsBusTopology_t avs_bus_topology;
 
 } __attribute__((aligned(128))) OCCPstateParmBlock;
 

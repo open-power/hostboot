@@ -350,6 +350,10 @@ typedef struct
     //Jump-value slopes
     int16_t PsVDMJumpSlopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
 
+    uint8_t pad2[2];
+
+    //AvsBusTopology
+    AvsBusTopology_t avs_bus_topology;
 
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 

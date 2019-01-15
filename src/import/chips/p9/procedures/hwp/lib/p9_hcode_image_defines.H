@@ -374,8 +374,10 @@ HCD_HDR_UINT32(g_wof_table_length,              0 );        // WOF Table length 
 HCD_HDR_UINT32(g_pgpe_core_throttle_assert_cnt, 0 );        // Core throttle assert count
 HCD_HDR_UINT32(g_pgpe_core_throttle_deassert_cnt, 0 );      // Core throttle de-aasert count
 HCD_HDR_UINT32(g_pgpe_aux_controls,             0 );        // Auxiliary Controls
+HCD_HDR_UINT32(g_pgpe_optrace_pointer,          0 );        // Operational Trace OCC SRAM Pointer
 HCD_HDR_UINT32(g_pgpe_doptrace_offset,          0 );        // Deep Operational Trace Main Memory Buffer Offset
 HCD_HDR_UINT32(g_pgpe_doptrace_length,          0 );        // Deep Opeartional Trace Main Memory Buffer Length
+HCD_HDR_UINT32(g_pgpe_wof_values_address,       0 );        // SRAM address where PGPE Produced WOF values are located
 #ifdef __ASSEMBLER__
 .endm
 #else

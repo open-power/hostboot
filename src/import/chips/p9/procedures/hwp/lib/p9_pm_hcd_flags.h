@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@ enum PM_GPE_OCCFLG_DEFS
     PIB_I2C_MASTER_ENGINE_2_LOCK_BIT1       = 19, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_3_LOCK_BIT0       = 20, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_3_LOCK_BIT1       = 21, //BIT0 ored BIT1 gives the field
+    PGPE_OCS_DIRTY                          = 26,
     PGPE_PM_RESET_SUPPRESS                  = 27,
     WOF_HCODE_MODE_BIT0                     = 28,
     WOF_HCODE_MODE_BIT1                     = 29,
@@ -77,6 +78,7 @@ enum PM_GPE_OCCFLG2_DEFS
 {
     OCCFLG2_DEAD_CORES_START                = 0,
     OCCFLG2_DEAD_CORES_LENGTH               = 24,
+    OCCFLG2_ENABLE_PRODUCE_WOF_VALUES       = 24,
     OCCFLG2_PGPE_HCODE_FIT_ERR_INJ          = 27,
     PM_CALLOUT_ACTIVE                       = 28,
     STOP_RECOVERY_TRIGGER_ENABLE            = 29,
