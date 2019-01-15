@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@ namespace TARGETING
 {
 
 class Target;
+typedef  Target* TargetHandle_t;
+typedef std::vector<TargetHandle_t> TargetHandleList;
 
 /**
  *  @brief Macro which indicates whether to translate addresses or not
@@ -172,6 +174,7 @@ bool orderByNodeAndPosition(  Target* i_firstProc,
  */
 uint8_t  is_fused_mode( );
 
+
 /**
  * @brief Determine if the given dimm target is an NVDIMM
  *
@@ -181,6 +184,15 @@ uint8_t  is_fused_mode( );
  */
 bool isNVDIMM( TARGETING::Target * i_target );
 
-}
+/**
+ * @brief Grab list of NVDIMMs under the processor
+ *
+ * @param[in] i_proc : processor under which to search for NVDIMMs
+ *
+ * @return List of DIMM targets that are NVDIMMs
+ */
+TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc );
+
+} // TARGETING
 
 #endif // __TARGETING_COMMON_UTIL_H

@@ -55,16 +55,6 @@ enum
 void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 #endif
 
-/**
- * @brief This function arms the trigger to enable backup in the event
- *        of power loss (DDR Reset_n goes low)
- *
- * @param[in] i_nvdimm - nvdimm target with NV controller
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm);
 
 /**
  * @brief This function erases image on the nvdimm target
@@ -77,6 +67,19 @@ errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm);
 errlHndl_t nvdimmEraseNF(TARGETING::Target *i_nvdimm);
 
 /**
+ * @brief Set the status flag
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_status_flag - status flag to set for each nvdimm
+ *
+ */
+void nvdimmSetStatusFlag(TARGETING::Target *i_nvdimm, const uint8_t i_status_flag);
+
+
+#ifdef __HOSTBOOT_RUNTIME
+
+/**
  * @brief Check nvdimm error state
  *
  * @param[in] i_nvdimm - nvdimm target
@@ -86,14 +89,57 @@ errlHndl_t nvdimmEraseNF(TARGETING::Target *i_nvdimm);
 bool nvdimmInErrorState(TARGETING::Target *i_nvdimm);
 
 /**
- * @brief Set the status flag
+ * @brief This function arms the trigger to enable backup in the event
+ *        of power loss (DDR Reset_n goes low)
  *
- * @param[in] i_nvdimm - nvdimm target
+ * @param[in] i_nvdimm - nvdimm target with NV controller
  *
- * @param[in] i_status_flag - status flag to set for each nvdimm
- *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
  */
-void nvdimmSetStatusFlag(TARGETING::Target *i_nvdimm, const uint8_t i_status_flag);
+errlHndl_t nvdimmArmResetN(TARGETING::Target *i_nvdimm);
+
+/**
+ * @brief  Arms the trigger to enable backup in the event of a power loss
+ *         on each NVDIMM
+ *
+ *    The trigger (DDR_RESETN to the DIMM) is used to tell the NVDIMM
+ *    that we have an EPOW event, so the NV controller can backup the
+ *    data from the DRAM to flash.  This will enable the NV controller
+ *    to react when it sees the trigger toggles.
+ *
+ * @param[in] i_nvdimmTargetList : list of dimms that are NVDIMMs
+ * @return true if no errors logged, else false
+ */
+bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
+
+
+/**
+ * @brief NVDIMM protection state
+ *
+ *        NOT_PROTECTED - default state
+ *        PROTECTED - switches to this when armed & OCC is in control
+ *        UNPROTECTED_BECAUSE_ERROR - PRD detected error on NV controller
+ *          Note: error will stay with target preventing PROTECTED status
+ *                until power is cycled again
+ */
+enum nvdimm_protection_t
+{
+    NOT_PROTECTED             = 0,
+    PROTECTED                 = 1,
+    UNPROTECTED_BECAUSE_ERROR = 2
+};
+
+/**
+ * @brief Notify PHYP of NVDIMM protection status
+ *
+ * @param i_target     Processor with NVDIMM
+ * @param i_state      Protection state of NVDIMM
+ */
+errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
+                                  const nvdimm_protection_t i_state);
+#endif
+
 }
 
 #endif  // NVDIMM_EXT_H__

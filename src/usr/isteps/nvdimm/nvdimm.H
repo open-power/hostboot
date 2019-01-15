@@ -149,6 +149,19 @@ errlHndl_t nvdimmReadReg(TARGETING::Target* i_nvdimm, uint8_t i_addr, uint8_t & 
  */
 errlHndl_t nvdimmWriteReg(TARGETING::Target* i_nvdimm, uint8_t i_addr, uint8_t  i_data );
 
+/**
+ * @brief This function polls the status register for the given ops_id
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @param[in] i_ops_id - id assigned to each operation in nvdimm.H
+ *
+ * @param[out] o_poll - total polled time in ms
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmPollStatus(TARGETING::Target *i_nvdimm, ops_id i_ops_id, uint32_t &o_poll);
 } //End NVDIMM namespace
 
 

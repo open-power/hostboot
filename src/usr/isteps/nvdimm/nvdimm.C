@@ -205,26 +205,6 @@ void nvdimmSetStatusFlag(Target *i_nvdimm, const uint8_t i_status_flag)
                 ,TARGETING::get_huid(i_nvdimm), i_status_flag);
 }
 
-/**
- * @brief Check nvdimm error state
- *
- * @param[in] i_nvdimm - nvdimm target
- *
- * @return bool - true if nvdimm is in any error state, false otherwise
- */
-bool nvdimmInErrorState(Target *i_nvdimm)
-{
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmInErrorState() HUID[%X]",TARGETING::get_huid(i_nvdimm));
-
-    uint8_t l_statusFlag = i_nvdimm->getAttr<TARGETING::ATTR_NV_STATUS_FLAG>();
-    bool l_ret = true;
-
-    if ((l_statusFlag & NSTD_ERR) == 0)
-        l_ret = false;
-
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmInErrorState() HUID[%X]",TARGETING::get_huid(i_nvdimm));
-    return l_ret;
-}
 
 /**
  * @brief Check NV controller ready state
@@ -447,31 +427,6 @@ errlHndl_t nvdimmPollEraseDone(Target* i_nvdimm,
     return l_err;
 }
 
-/**
- * @brief This function polls the command status register for arm completion
- *        (does not indicate success or fail)
- *
- * @param[in] i_nvdimm - nvdimm target with NV controller
- *
- * @param[out] o_poll - total polled time in ms
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t nvdimmPollArmDone(Target* i_nvdimm,
-                             uint32_t &o_poll)
-{
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmPollArmDone() nvdimm[%X]", TARGETING::get_huid(i_nvdimm) );
-
-    errlHndl_t l_err = nullptr;
-
-    l_err = nvdimmPollStatus ( i_nvdimm, ARM, o_poll);
-
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmPollArmDone() nvdimm[%X]",
-              TARGETING::get_huid(i_nvdimm));
-
-    return l_err;
-}
 
 /**
  * @brief This function polls the command status register for backup power
@@ -611,113 +566,7 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
 }
 
 
-/**
- * @brief This function checks the arm status register to make sure
- *        the trigger has been armed to ddr_reset_n
- *
- * @param[in] i_nvdimm - nvdimm target with NV controller
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t nvdimmCheckArmSuccess(Target *i_nvdimm)
-{
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmCheckArmSuccess() nvdimm[%X]",
-                TARGETING::get_huid(i_nvdimm));
 
-    errlHndl_t l_err = nullptr;
-    uint8_t l_data = 0;
-
-    l_err = nvdimmReadReg(i_nvdimm, ARM_STATUS, l_data);
-
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmCheckArmSuccess() nvdimm[%X]"
-                  "failed to read arm status reg!",TARGETING::get_huid(i_nvdimm));
-    }
-    else if ((l_data & ARM_SUCCESS) != ARM_SUCCESS)
-    {
-
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmCheckArmSuccess() nvdimm[%X]"
-                                 "failed to arm!",TARGETING::get_huid(i_nvdimm));
-        /*@
-         *@errortype
-         *@reasoncode       NVDIMM_ARM_FAILED
-         *@severity         ERRORLOG_SEV_PREDICTIVE
-         *@moduleid         NVDIMM_SET_ARM
-         *@userdata1[0:31]  Related ops (0xff = NA)
-         *@userdata1[32:63] Target Huid
-         *@userdata2        <UNUSED>
-         *@devdesc          Encountered error arming the catastrophic save
-         *                   trigger on NVDIMM. Make sure an energy source
-         *                   is connected to the NVDIMM and the ES policy
-         *                   is set properly
-         *@custdesc         NVDIMM encountered error arming save trigger
-         */
-        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       NVDIMM_SET_ARM,
-                                       NVDIMM_ARM_FAILED,
-                                       NVDIMM_SET_USER_DATA_1(ARM, TARGETING::get_huid(i_nvdimm)),
-                                       0x0,
-                                       ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-
-        l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-        //@TODO RTC 199645 - add HW callout on dimm target
-        //failure to arm could mean internal NV controller error or
-        //even error on the battery pack. NVDIMM will lose persistency
-        //if failed to arm trigger
-    }
-
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmCheckArmSuccess() nvdimm[%X] ret[%X]",
-                TARGETING::get_huid(i_nvdimm), l_data);
-
-    return l_err;
-}
-
-/**
- * @brief This function arms the trigger to enable backup in the event
- *        of power loss (DDR Reset_n goes low) in conjunction with
- *        ATOMIC_SAVE_AND_ERASE. A separate erase command is not required
- *        as the image will get erased immediately before backup on the
- *        next catastrophic event.
- *
- * @param[in] i_nvdimm - nvdimm target with NV controller
- *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t nvdimmArmResetN(Target *i_nvdimm)
-{
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmArmResetN() nvdimm[%X]",
-                        TARGETING::get_huid(i_nvdimm));
-
-    errlHndl_t l_err = nullptr;
-
-    // Setting ATOMIC_SAVE_AND_ERASE in conjunction with ARM_RESETN. With this,
-    // the content of the persistent data is not erased until immediately after
-    // the next catastrophic event has occurred.
-    l_err = nvdimmWriteReg(i_nvdimm, ARM_CMD, ARM_RESETN_AND_ATOMIC_SAVE_AND_ERASE);
-
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArmResetN() nvdimm[%X] error arming nvdimm!!",
-                  TARGETING::get_huid(i_nvdimm));
-    }
-    else
-    {
-        // Arm happens one module at a time. No need to set any offset on the counter
-        uint32_t l_poll = 0;
-        l_err = nvdimmPollArmDone(i_nvdimm, l_poll);
-        if (!l_err)
-        {
-            l_err = nvdimmCheckArmSuccess(i_nvdimm);
-        }
-    }
-
-    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArmResetN() nvdimm[%X]",
-                        TARGETING::get_huid(i_nvdimm));
-    return l_err;
-}
 
 /**
  * @brief This function checks for valid image on the given target

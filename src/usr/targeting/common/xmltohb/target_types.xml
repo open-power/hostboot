@@ -538,6 +538,9 @@
       <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
+      <id>NVDIMM_ARMED</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>reserved</id>

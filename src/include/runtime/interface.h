@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,7 @@ enum MemoryError_t
 #define HBRT_RC_NEXT_OPEN_RC           ((int)(0x0u - 0x1009u))  /* 0xFFFF_EFF7 */
 
 /** End return codes for scom_read, scom_write. */
- 
+
 
 /**
  * I2C Master Description: chip, engine and port packed into
@@ -551,6 +551,14 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_HBRT_FSP_RESP = 6,
        HBRT_FW_MSG_TYPE_I2C_LOCK = 7,
        HBRT_FW_MSG_TYPE_SBE_STATE = 8,
+       HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION = 9,
+    };
+
+    // NVDIMM protection state enum
+    enum
+    {
+        HBRT_FW_NVDIMM_NOT_PROTECTED = 0,
+        HBRT_FW_NVDIMM_PROTECTED     = 1
     };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -614,6 +622,14 @@ typedef struct hostInterfaces
              uint64_t i_procId; // processor ID of the SBE that is disabled/enabled
              uint64_t i_state;  // state of the SBE; 0 = disabled, 1 = enabled
           } __attribute__ ((packed)) sbe_state;
+
+          // This struct is sent from HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_NVDIMM_PROTECTION
+          struct
+          {
+             uint64_t i_procId; // processor ID of the NVDIMM with/without OCC protection
+             uint64_t i_state;  // NVDIMM protection state enum
+          } __attribute__ ((packed)) nvdimm_protection_state;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
