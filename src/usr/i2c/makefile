@@ -33,6 +33,7 @@ OBJS += i2c.o
 OBJS += $(if $(CONFIG_TPMDD),tpmdd.o,)
 OBJS += fapi_i2c_dd.o
 OBJS += i2cTargetPres.o
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),eepromCache.o)
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

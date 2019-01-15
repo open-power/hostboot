@@ -66,6 +66,8 @@ enum i2cModuleId
     READ_I2C_ATTRIBUTES                 = 0x10,
     I2C_ACCESS_MUX                      = 0x11,
     I2C_GENERIC_PRES_DETECT             = 0x12,
+    I2C_CACHE_EEPROM                    = 0x13,
+    I2C_CLEAR_EECACHE                   = 0x14,
 };
 
 
@@ -101,7 +103,11 @@ enum i2cReasonCode
     I2C_MUX_TARGET_NON_FUNCTIONAL        = I2C_COMP_ID | 0x15,   // The MUX target is non functional
     I2C_INVALID_LENGTH                   = I2C_COMP_ID | 0x16,   // Invalid data buffer length passed to function
     I2C_NULL_MASTER_TARGET               = I2C_COMP_ID | 0x17,   // Target Service's toPath() returned nullptr for target
-};
+    I2C_FAILED_TO_FLUSH_CONTENTS         = I2C_COMP_ID | 0x18,   // Error occured while trying to flush the mmio pages out
+                                                                 // containing contents of an EEPROM's cached data in the EECACHE
+                                                                 // PNOR section
+    I2C_FAILED_TO_FLUSH_HEADER           = I2C_COMP_ID | 0x19,   // Error occured while trying to flush the mmio page out
+};                                                               // containing EECACHE header the to pnor
 
 
 enum UserDetailsTypes

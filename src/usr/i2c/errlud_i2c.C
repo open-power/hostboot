@@ -262,7 +262,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
-    tmp64 = i_i2cInfo.chip;
+    tmp64 = i_i2cInfo.eepromRole;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 

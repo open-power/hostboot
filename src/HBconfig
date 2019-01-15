@@ -54,7 +54,14 @@ config SUPPORT_PARTIAL_CACHE
         Support chips that do not have full cache --
         intended for early bringup of hardware
 
+
 config AXONE_BRING_UP
     default n
     help
         Only enable for Axone bringup, will be removed eventually
+
+config SUPPORT_EEPROM_CACHING
+    default n
+    help
+        If enabled will read data off eeproms and cache in PNOR's
+        EECACHE section.

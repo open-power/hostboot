@@ -445,12 +445,12 @@
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>1</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <!-- Note: that there is actually two 64KB chips associated with the MVPD SEEPROM
                  but Hostboot should never access the second chip -->
             <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
             <field><id>port</id><value>2</value></field>
             <field><id>writeCycleTime</id><value>0x0A</value></field>
@@ -461,12 +461,12 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>1</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <!-- Note: that there is actually two 64KB chips associated with the MVPD SEEPROM
                  but Hostboot should never access the second chip -->
             <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x40</value></field>
             <field><id>port</id><value>0</value></field>
             <field><id>writeCycleTime</id><value>0x0A</value></field>
@@ -9151,8 +9151,18 @@
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9190,8 +9200,18 @@
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9229,8 +9249,18 @@
         <id>FAPI_POS</id>
         <default>11</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9268,8 +9298,18 @@
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9307,8 +9347,18 @@
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9346,8 +9396,18 @@
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -9385,8 +9445,18 @@
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
-    <!-- No valid I2C connections to OCMB 9-15 in the Axone simics model
-         Skip setting EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
@@ -10254,8 +10324,18 @@
         <id>VPD_REC_NUM</id>
         <default>9</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10286,8 +10366,18 @@
         <id>VPD_REC_NUM</id>
         <default>10</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10318,8 +10408,18 @@
         <id>VPD_REC_NUM</id>
         <default>11</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10350,8 +10450,18 @@
         <id>VPD_REC_NUM</id>
         <default>12</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10382,8 +10492,18 @@
         <id>VPD_REC_NUM</id>
         <default>13</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10414,8 +10534,18 @@
         <id>VPD_REC_NUM</id>
         <default>14</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10446,8 +10576,18 @@
         <id>VPD_REC_NUM</id>
         <default>15</default>
     </attribute>
-    <!-- EEPROM_VPD_PRIMARY_INFO does not get set for dimms 9-15 in the axone simics model because
-         the simics model does not provide i2c address spaces for these targets-->
+    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
+         are invalid. The port value is invalid, info is just here to fully test
+         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->

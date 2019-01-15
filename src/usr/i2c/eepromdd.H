@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ struct eeprom_addr_t
     uint64_t port;
     uint64_t engine;
     uint64_t devAddr;
-    int64_t  chip;
+    int64_t  eepromRole;
     uint64_t offset;
     eeprom_addr_size_t addrSize;
     TARGETING::EntityPath i2cMasterPath;
@@ -80,7 +80,7 @@ struct eeprom_addr_t
         : port(0),
           engine(0),
           devAddr(0),
-          chip(0),
+          eepromRole(0),
           offset(0),
           addrSize(LAST_DEVICE_TYPE),
           i2cMasterPath(),

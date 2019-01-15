@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,29 +49,30 @@ namespace DeviceFW
 
     enum AccessType
     {
-        SCOM = 0,  // SCOM registers
-        PNOR,      // PNOR flash
-        MAILBOX,   // FSP mailbox
-        PRESENT,   // Presence detection
-        FSI,       // FSI/CFAM registers
-        SPD,       // Serial Presence Detect Data for JEDEC DIMMs
-        MVPD,      // Module (processor) VPD
-        CVPD,      // Centaur (memory buffer) VPD
-        SCAN,      // Scan rings
-        EEPROM,    // Standard EEPROM/SEEPROM over i2c
-        GPIO,      // GPIO registers
-        LPC,       // Low Pin Count bus
-        IPMIBT,    // As opposed to other phy's
-        PVPD,      // Planar VPD
-        TPM,       // Trusted Platform Module
-        SIO,       // BMC Super I/O registers
-        AHB_SIO,   // AST Hostbridge via SIO
-        DVPD,      // Direct access memory VPD
-        NODECOMM,  // Internode communication
-        NVDIMM,    // Non-volatile DIMM controller access
-        FAPI_I2C,  // FAPI2-triggered i2c accesses
-        MMIO,      // Memory Mapped I/O
-        IDEC,      // Read and set EC and CHIPID values
+        SCOM = 0,     // SCOM registers
+        PNOR,         // PNOR flash
+        MAILBOX,      // FSP mailbox
+        PRESENT,      // Presence detection
+        FSI,          // FSI/CFAM registers
+        SPD,          // Serial Presence Detect Data for JEDEC DIMMs
+        MVPD,         // Module (processor) VPD
+        CVPD,         // Centaur (memory buffer) VPD
+        SCAN,         // Scan rings
+        EEPROM,       // Standard EEPROM/SEEPROM over i2c
+        GPIO,         // GPIO registers
+        LPC,          // Low Pin Count bus
+        IPMIBT,       // As opposed to other phy's
+        PVPD,         // Planar VPD
+        TPM,          // Trusted Platform Module
+        SIO,          // BMC Super I/O registers
+        AHB_SIO,      // AST Hostbridge via SIO
+        DVPD,         // Direct access memory VPD
+        NODECOMM,     // Internode communication
+        NVDIMM,       // Non-volatile DIMM controller access
+        FAPI_I2C,     // FAPI2-triggered i2c accesses
+        MMIO,         // Memory Mapped I/O
+        IDEC,         // Read and set EC and CHIPID values
+        EEPROM_CACHE, // Read EEPROM over I2C and write to PNOR
         LAST_ACCESS_TYPE,
     };
 
@@ -123,6 +124,13 @@ namespace DeviceFW
     */
     #define DEVICE_PRESENT_ADDRESS() \
         DeviceFW::PRESENT
+
+    /** Construct the device addressing parameters for the EEPROM_CACHE device ops.
+    *  @param[in] i_present indicates if target is present or not.
+    *  @param[in] i_eepromType indicates which EEPROM we wish to cache (PRIMARY/BACKUP etc)
+    */
+    #define DEVICE_CACHE_EEPROM_ADDRESS(i_present, i_eepromType) \
+        DeviceFW::EEPROM_CACHE, static_cast<uint64_t>((i_present)), static_cast<uint64_t>((i_eepromType))
 
     /**
      * Construct a PNOR DD address

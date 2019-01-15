@@ -119,9 +119,16 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_NODE,
                        eepromPerformOp );
 
+// Register the perform Op with the routing code for MCS chiplets.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::EEPROM,
                        TARGETING::TYPE_MCS,
+                       eepromPerformOp );
+
+// Register the perform Op with the routing code for Open-Capi Memory Buffer Chips.
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::EEPROM,
+                       TARGETING::TYPE_OCMB_CHIP,
                        eepromPerformOp );
 
 
@@ -197,7 +204,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     TARGETING::Target * i2cMasterTarget = NULL;
     eeprom_addr_t i2cInfo;
 
-    i2cInfo.chip = va_arg( i_args, uint64_t );
+    i2cInfo.eepromRole = va_arg( i_args, uint64_t );
     i2cInfo.offset = va_arg( i_args, uint64_t );
 
     TRACDCOMP( g_trac_eeprom,
@@ -205,7 +212,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 
     TRACUCOMP (g_trac_eeprom, ENTER_MRK"eepromPerformOp(): "
                "i_opType=%d, chip=%d, offset=%x, len=%d",
-               (uint64_t) i_opType, i2cInfo.chip, i2cInfo.offset, io_buflen);
+               (uint64_t) i_opType, i2cInfo.eepromRole, i2cInfo.offset, io_buflen);
 
 #ifdef __HOSTBOOT_RUNTIME
     // At runtime the OCC sensor cache will need to be diabled to avoid I2C
@@ -250,7 +257,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromPerformOp(): Device Overflow! "
                        "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X "
-                       "devSizeKB=0x%X", i2cInfo.chip, i2cInfo.engine,
+                       "devSizeKB=0x%X", i2cInfo.eepromRole, i2cInfo.engine,
                        i2cInfo.port, i2cInfo.devAddr, i2cInfo.offset,
                        io_buflen, i2cInfo.devSize_KB);
 
@@ -296,11 +303,13 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 
         TRACFCOMP( g_trac_eeprom,
                    "eepromPerformOp():  i_opType=%d "
-                   "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, "
-                   "snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X", i_opType,
-                   i2cInfo.chip, i2cInfo.engine, i2cInfo.port, i2cInfo.devAddr,
-                   i2cInfo.offset, io_buflen, l_snglChipSize,
-                   i2cInfo.chipCount, i2cInfo.devSize_KB);
+                   "C-e/p/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, ",
+                   i_opType, i2cInfo.eepromRole, i2cInfo.engine,
+                   i2cInfo.port, i2cInfo.devAddr, i2cInfo.offset, io_buflen)
+
+        TRACFCOMP (g_trac_eeprom,
+                   "eepromPerformOp(): snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X",
+                   l_snglChipSize, i2cInfo.chipCount, i2cInfo.devSize_KB);
 
         // Printing mux info separately, if combined, nothing is displayed
         char* l_muxPath = i2cInfo.i2cMuxPath.toString();
@@ -360,7 +369,7 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
                                                EEPROM_PERFORM_OP,
                                                EEPROM_INVALID_OPERATION,
                                                i_opType,
-                                               i2cInfo.chip,
+                                               i2cInfo.eepromRole,
                                                true /*Add HB SW Callout*/ );
 
                 err->collectTrace( EEPROM_COMP_NAME );
@@ -453,7 +462,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
 
     eeprom_addr_t i2cInfo;
 
-    i2cInfo.chip = EEPROM::VPD_PRIMARY;
+    i2cInfo.eepromRole = EEPROM::VPD_PRIMARY;
     i2cInfo.offset = 0;
     do
     {
@@ -657,88 +666,49 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
                    "EEPROM READ  START : Chip: %02d : Offset %.2X : Len %d",
                    i_i2cInfo.chip, i_i2cInfo.offset, i_buflen );
 
-
-        // Check to see if the Read operation straddles the EEPROM page
-        //boundary
-        l_boundaryCrossed = crossesEepromPageBoundary( i_i2cInfo.offset,
-                                                       i_buflen,
-                                                       l_readBuflen,
-                                                       l_pageTwoBuflen,
-                                                       i_i2cInfo );
-
-        // Set addressing parameters
-        err = eepromPrepareAddress( i_target,
-                                    &byteAddr,
-                                    byteAddrSize,
-                                    l_desiredPage,
-                                    i_i2cInfo);
-
-        if( err )
-        {
-            TRACFCOMP(g_trac_eeprom,
-                    ERR_MRK"eepromRead()::eepromPrepareAddress()");
-            break;
-        }
-
-
-        // Attempt to lock page mutex
-        bool l_switchPage = true;
-        bool l_lockMutex = true;
-        err = eepromPageOp( i_target,
-                            l_switchPage,
-                            l_lockMutex,
-                            l_pageLocked,
-                            l_desiredPage,
-                            i_i2cInfo );
-
-        if( err )
-        {
-            TRACFCOMP(g_trac_eeprom,
-                    "eepromRead()::eepromPageOp()::failed locking page");
-            break;
-        }
+        // At maximum we want to do 1 KB reads at a time. The largest that
+        // the scom byte range will support is 64 KB - 1 but we will do 1
+        // KB at a time to catch fails faster. This is useful when we do big
+        // reads when caching the eeprom to pnor.
+        size_t l_readLenRemaining = i_buflen;
+        size_t l_currentReadLen;
 
         // Lock to sequence operations
         mutex_lock( &g_eepromMutex );
-
-        // First Read. If Second read is necessary, this call will read
-        // everything from the original offset up to the 256th byte
-        err = eepromReadData( i_target,
-                              o_buffer,
-                              l_readBuflen,
-                              &byteAddr,
-                              byteAddrSize,
-                              i_i2cInfo );
-        if( err )
+        
+        while( l_readLenRemaining > 0 )
         {
-            TRACFCOMP(g_trac_eeprom,
-                    "Failed reading data: original read");
-            break;
-        }
+            l_currentReadLen = l_readLenRemaining < KILOBYTE ? l_readLenRemaining : KILOBYTE;
 
+            // Check to see if the Read operation straddles the EEPROM page
+            // boundary.Note this is only required for systems w/ DDR4 industry
+            // standard dimms. DDR4 ISDIMMS have a max of 512 bytes so we will 
+            // never loop through this multiple times on those systems
+            l_boundaryCrossed = crossesEepromPageBoundary( i_i2cInfo.offset,
+                                                          l_currentReadLen,
+                                                          l_readBuflen,
+                                                          l_pageTwoBuflen,
+                                                          i_i2cInfo );
 
-        // Perform the second Read if necessary. Read starts at
-        // begining of EEPROM page 1 (offset=0x100) and reads the
-        // rest of the required data.
-        if( l_boundaryCrossed )
-        {
-            //Prepare the address to read at the start of EEPROM page one
-            i_i2cInfo.offset = EEPROM_PAGE_SIZE; // 0x100
+            // Set addressing parameters
             err = eepromPrepareAddress( i_target,
                                         &byteAddr,
                                         byteAddrSize,
                                         l_desiredPage,
-                                        i_i2cInfo );
+                                        i_i2cInfo);
+
             if( err )
             {
                 TRACFCOMP(g_trac_eeprom,
-                        "Error preparing address: second eeprom read");
+                        ERR_MRK"eepromRead()::eepromPrepareAddress()");
                 break;
             }
 
-            // Switch to the second EEPROM page
-            l_switchPage = true;
-            l_lockMutex = false;
+
+            // Attempt to lock page mutex
+            // (only important in DDR4 IS-DIMM systems)
+            bool l_switchPage = true;
+            bool l_lockMutex = true;
             err = eepromPageOp( i_target,
                                 l_switchPage,
                                 l_lockMutex,
@@ -748,32 +718,89 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
 
             if( err )
             {
-                TRACFCOMP( g_trac_eeprom,
-                        "Failed switching to EEPROM page 1 for second read op");
+                TRACFCOMP(g_trac_eeprom,
+                        "eepromRead()::eepromPageOp()::failed locking page");
                 break;
             }
 
-            // Perform the second read operation
-            err = eepromReadData(
-                           i_target,
-                           &(reinterpret_cast<uint8_t*>(o_buffer)[l_readBuflen]),
-                           l_pageTwoBuflen,
-                           &byteAddr,
-                           byteAddrSize,
-                           i_i2cInfo );
+            // First Read. If Second read is necessary, this call will read
+            // everything from the original offset up to the 256th byte
+            err = eepromReadData( i_target,
+                                  &(reinterpret_cast<uint8_t*>(o_buffer)[i_buflen - l_readLenRemaining]),
+                                  l_readBuflen,
+                                  &byteAddr,
+                                  byteAddrSize,
+                                  i_i2cInfo );
+
+            i_i2cInfo.offset += l_currentReadLen;
+            l_readLenRemaining -= l_currentReadLen;
 
             if( err )
             {
-                TRACFCOMP( g_trac_eeprom,
-                         "Failed reading data: second read");
+                TRACFCOMP(g_trac_eeprom,
+                        "Failed reading data: original read");
                 break;
+            }
+
+
+            // Perform the second Read if necessary. Read starts at
+            // begining of EEPROM page 1 (offset=0x100) and reads the
+            // rest of the required data.
+            if( l_boundaryCrossed )
+            {
+                //Prepare the address to read at the start of EEPROM page one
+                i_i2cInfo.offset = EEPROM_PAGE_SIZE; // 0x100
+                err = eepromPrepareAddress( i_target,
+                                            &byteAddr,
+                                            byteAddrSize,
+                                            l_desiredPage,
+                                            i_i2cInfo );
+                if( err )
+                {
+                    TRACFCOMP(g_trac_eeprom,
+                            "Error preparing address: second eeprom read");
+                    break;
+                }
+
+                // Switch to the second EEPROM page
+                l_switchPage = true;
+                l_lockMutex = false;
+                err = eepromPageOp( i_target,
+                                    l_switchPage,
+                                    l_lockMutex,
+                                    l_pageLocked,
+                                    l_desiredPage,
+                                    i_i2cInfo );
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_eeprom,
+                            "Failed switching to EEPROM page 1 for second read op");
+                    break;
+                }
+
+                // Perform the second read operation
+                err = eepromReadData(
+                              i_target,
+                              &(reinterpret_cast<uint8_t*>(o_buffer)[l_readBuflen]),
+                              l_pageTwoBuflen,
+                              &byteAddr,
+                              byteAddrSize,
+                              i_i2cInfo );
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_eeprom,
+                            "Failed reading data: second read");
+                    break;
+                }
             }
         }
 
 
         TRACUCOMP( g_trac_eepromr,
-                   "EEPROM READ  END   : Chip: %02d : Offset %.2X : Len %d : %016llx",
-                   i_i2cInfo.chip, i_i2cInfo.offset, i_buflen,
+                   "EEPROM READ  END   : Eeprom Role: %02d : Offset %.2X : Len %d : %016llx",
+                   i_i2cInfo.eepromRole, i_i2cInfo.offset, i_buflen,
                    *((uint64_t*)o_buffer) );
 
     } while( 0 );
@@ -1035,8 +1062,8 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
     do
     {
         TRACUCOMP( g_trac_eeprom,
-                   "EEPROM WRITE START : Chip: %02d : Offset %.2X : Len %d : %016llx",
-                   i_i2cInfo.chip, i_i2cInfo.offset, io_buflen,
+                   "EEPROM WRITE START : Eeprom Role : %02d : Offset %.2X : Len %d : %016llx",
+                   i_i2cInfo.eepromRole, i_i2cInfo.offset, io_buflen,
                    *((uint64_t*)io_buffer) );
 
 
@@ -1094,7 +1121,7 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                                            EEPROM_WRITE,
                                            EEPROM_I2C_WRITE_PAGE_SIZE_ZERO,
                                            TARGETING::get_huid(i_target),
-                                           i_i2cInfo.chip,
+                                           i_i2cInfo.eepromRole,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( EEPROM_COMP_NAME );
@@ -1237,8 +1264,8 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
 
 
         TRACSCOMP( g_trac_eepromr,
-                   "EEPROM WRITE END   : Chip: %02d : Offset %.2X : Len %d",
-                   i_i2cInfo.chip, i_i2cInfo.offset, io_buflen );
+                   "EEPROM WRITE END   : Eeprom Role : %02d : Offset %.2X : Len %d",
+                   i_i2cInfo.eepromRole, i_i2cInfo.offset, io_buflen );
     } while( 0 );
 
     // Free memory
@@ -1541,7 +1568,7 @@ errlHndl_t eepromPrepareAddress ( TARGETING::Target * i_target,
                                                EEPROM_PREPAREADDRESS,
                                                EEPROM_INVALID_DEVICE_TYPE,
                                                i_i2cInfo.addrSize,
-                                               i_i2cInfo.chip,
+                                               i_i2cInfo.eepromRole,
                                                true /*Add HB SW Callout*/ );
 
                 err->collectTrace( EEPROM_COMP_NAME );
@@ -1579,7 +1606,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     do
     {
 
-        switch (o_i2cInfo.chip )
+        switch (o_i2cInfo.eepromRole )
         {
             case VPD_PRIMARY:
                 if( !( i_target->
@@ -1628,7 +1655,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
             default:
                 TRACFCOMP( g_trac_eeprom,ERR_MRK"eepromReadAttributes() - "
                            "Invalid chip (%d) to read attributes from!",
-                            o_i2cInfo.chip );
+                            o_i2cInfo.eepromRole );
 
                 /*@
                  * @errortype
@@ -1642,7 +1669,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            EEPROM_READATTRIBUTES,
                                            EEPROM_INVALID_CHIP,
-                                           o_i2cInfo.chip,
+                                           o_i2cInfo.eepromRole,
                                            TARGETING::get_huid(i_target),
                                            true /*Add HB SW Callout*/ );
 
@@ -1656,8 +1683,8 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         {
             TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromReadAttributes() - ERROR reading "
-                       "attributes for chip %d!",
-                       o_i2cInfo.chip );
+                       "attributes for eeprom role %d!",
+                       o_i2cInfo.eepromRole );
 
                 /*@
                  * @errortype
@@ -1673,7 +1700,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                                     EEPROM_READATTRIBUTES,
                                     EEPROM_ATTR_INFO_NOT_FOUND,
                                     TARGETING::get_huid(i_target),
-                                    o_i2cInfo.chip);
+                                    o_i2cInfo.eepromRole);
 
                 // Could be FSP or HB code's fault
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1749,12 +1776,14 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() tgt=0x%X, %d/%d/0x%X "
-              "wpw=0x%X, dsKb=0x%X, chpCnt=%d, aS=%d (%d), wct=%d",
+              "wpw=0x%X, dsKb=0x%X, chpCnt=%d, aS=%d (%d)",
               TARGETING::get_huid(i_target),
               o_i2cInfo.port, o_i2cInfo.engine, o_i2cInfo.devAddr,
               o_i2cInfo.writePageSize, o_i2cInfo.devSize_KB,
               o_i2cInfo.chipCount, o_i2cInfo.addrSize,
-              eepromData.byteAddrOffset, o_i2cInfo.writeCycleTime);
+              eepromData.byteAddrOffset);
+
+
 
     // Printing mux info separately, if combined, nothing is displayed
     char* l_muxPath = o_i2cInfo.i2cMuxPath.toString();
@@ -1836,7 +1865,7 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                                 EEPROM_GETI2CMASTERTARGET,
                                 EEPROM_I2C_MASTER_PATH_ERROR,
                                 TWO_UINT32_TO_UINT64(
-                                    i_i2cInfo.chip,
+                                    i_i2cInfo.eepromRole,
                                     TARGETING::get_huid(i_target) ),
                                 l_epCompressed,
                                 true /*Add HB SW Callout*/ );
@@ -1891,7 +1920,7 @@ errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
                                            EEPROM_GETI2CMASTERTARGET,
                                            EEPROM_TARGET_NULL,
                                            TWO_UINT32_TO_UINT64(
-                                               i_i2cInfo.chip,
+                                               i_i2cInfo.eepromRole,
                                                TARGETING::get_huid(i_target) ),
                                            l_epCompressed,
                                            true /*Add HB SW Callout*/ );
