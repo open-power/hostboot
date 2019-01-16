@@ -2636,4 +2636,19 @@
     <writeable/>
     <initToZero/>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_ENABLED_OBUS_BRICKS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Bitstring that describes the enabled OBUS Bricks on this processor.
+    The first brick is position bit0, etc
+
+    Producer: Initialized by Hostboot firmware based on platform support
+    Consumers: Read by p9_check_proc_config.C
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
