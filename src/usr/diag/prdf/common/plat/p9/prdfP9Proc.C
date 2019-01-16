@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,20 +309,14 @@ PRDF_PLUGIN_DEFINE_NS( nimbus_proc, Proc, checkNotNimbusDD10 );
 
 int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 {
-    o_isOkToAccess = false;
-
     // Host Processor side can always access the 'host' attn reg
     // The FSP can not access it during IPL steps 15 thru 16.2
     // Host attn is only needed for MS diag and runtime case.
+    o_isOkToAccess = atRuntime();
 
-    if ( (true == atRuntime())
 #ifdef __HOSTBOOT_MODULE
-          || (true == isInMdiaMode())
+    o_isOkToAccess = true;
 #endif
-       )
-    {
-        o_isOkToAccess = true;
-    }
 
     return SUCCESS;
 }
@@ -337,7 +331,6 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
     // Host Processor side can always access the 'unitCS' reg
     // The FSP can not access it during IPL steps 15 thru 16.2
     o_isOkToAccess = atRuntime();
-
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
     if (false == o_isOkToAccess)
@@ -360,6 +353,14 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
             o_isOkToAccess = true;
         }
     }
+
+#else
+
+#ifdef __HOSTBOOT_MODULE
+    // Can read this reg at anytime from hostboot side
+    o_isOkToAccess = true;
+#endif
+
 #endif  // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 
