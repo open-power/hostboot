@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,10 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
 
     switch ( o_targetType )
     {
+        case TYPE_SYS:
+            snprintf( o_chipName, i_sz_chipName, "sys()" );
+            break;
+
         case TYPE_PROC:
             snprintf( o_chipName, i_sz_chipName, "pu(n%dp%d)",
                       l_node, l_chip );
@@ -364,40 +368,36 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 
     uint32_t byteIndex = 0; // Capture Data buffer index in bytes
 
-    uint8_t * l_uncompBuffer = new uint8_t[CaptureDataSize];
-    size_t l_uncompBufSize = CaptureDataSize;
+    size_t sz_uncompBuffer = sizeof(CaptureDataClass);
+    uint8_t * uncompBuffer = new uint8_t[sz_uncompBuffer];
     CaptureDataClass * l_capData;
-    memset( l_uncompBuffer, 0xFF, CaptureDataSize );
+    memset( uncompBuffer, 0xFF, sz_uncompBuffer );
 
     if ( 2 <= i_ver ) // version 2 and above are compressed.
     {
         PrdfCompressBuffer::uncompressBuffer( ((uint8_t *) i_buffer),
                                               ((size_t) i_buflen),
-                                              l_uncompBuffer,
-                                              l_uncompBufSize );
+                                              uncompBuffer,
+                                              sz_uncompBuffer );
         //fix up the buffer length now that uncompressed
-        i_buflen = l_uncompBufSize;
-        l_capData = (CaptureDataClass *) l_uncompBuffer;
+        i_buflen = sz_uncompBuffer;
+        l_capData = (CaptureDataClass *) uncompBuffer;
     }
     else // version 1 is uncompressed.
     {
         l_capData = (CaptureDataClass *) i_buffer;
     }
 
-    // Fix endianness on size field.
-    l_capData->PfaCaptureDataSize = ntohl(l_capData->PfaCaptureDataSize);
-    if( l_capData->PfaCaptureDataSize < i_buflen )
-    {
-        i_buflen = l_capData->PfaCaptureDataSize;
-    }
+    // Get the capture data size and adjust buffer length accordingly.
+    size_t sz_capData = ntohl( l_capData->PfaCaptureDataSize );
+    if ( sz_capData < i_buflen ) i_buflen = sz_capData;
 
     i_parser.PrintBlank();
     i_parser.PrintHeading("PRD Capture Data");
     i_parser.PrintBlank();
 
     char sigHeaderString[72], sigDataString[100];
-    UtilMem lCapDataBS( l_capData->CaptureData,
-                        l_capData->PfaCaptureDataSize * 8 ); // pw06
+    UtilMem lCapDataBS( l_capData->CaptureData, sz_capData * 8 );
 
     do
     {
@@ -462,13 +462,18 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 i_parser.PrintString( sigHeaderString, "No Data Found" );
             }
+            else if ( Util::hashString("ATTN_DATA") == sigId )
+            {
+                i_parser.PrintString( " ATTN_DEBUG", "" );
+                i_parser.PrintHexDump( sigData, sigDataSize );
+            }
             else if ( Util::hashString("MEM_UE_TABLE") == sigId )
             {
-                 parseMemUeTable( sigData, sigDataSize, i_parser );
+                parseMemUeTable( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("MEM_CE_TABLE") == sigId )
             {
-                 parseMemCeTable( sigData, sigDataSize, i_parser );
+                parseMemCeTable( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("IUE_COUNTS") == sigId )
             {
@@ -476,30 +481,30 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             }
             else if ( Util::hashString("MEM_RCE_TABLE") == sigId )
             {
-                 parseMemRceTable( sigData, sigDataSize, i_parser );
+                parseMemRceTable( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("DRAM_REPAIRS_DATA") == sigId )
             {
-                 parseDramRepairsData( sigData, sigDataSize, i_parser );
+                parseDramRepairsData( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("DRAM_REPAIRS_VPD") == sigId )
             {
-                 parseDramRepairsVpd( sigData, sigDataSize, i_parser,
-                                      l_targetType );
+                parseDramRepairsVpd( sigData, sigDataSize, i_parser,
+                                     l_targetType );
             }
             else if ( Util::hashString("BAD_DQ_BITMAP") == sigId )
             {
-                 parseBadDqBitmap( sigData, sigDataSize, i_parser,
-                                   l_targetType );
+                parseBadDqBitmap( sigData, sigDataSize, i_parser,
+                                  l_targetType );
             }
             else if ( Util::hashString("ROW_REPAIR_VPD") == sigId )
             {
-                 parseRowRepairVpd( sigData, sigDataSize, i_parser );
+                parseRowRepairVpd( sigData, sigDataSize, i_parser );
             }
             else if ( (Util::hashString(TD_CTLR_DATA::START) == sigId) ||
                       (Util::hashString(TD_CTLR_DATA::END)   == sigId) )
             {
-                 parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
+                parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }
             else if ( Util::hashString("TOD_ERROR_DATA") == sigId)
             {
@@ -513,11 +518,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 */
             else if ( Util::hashString(LD_CR_FFDC::L2TITLE) == sigId )
             {
-                 parseL2LdCrFfdc( sigData, sigDataSize, i_parser );
+                parseL2LdCrFfdc( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString(LD_CR_FFDC::L3TITLE) == sigId )
             {
-                 parseL3LdCrFfdc( sigData, sigDataSize, i_parser );
+                parseL3LdCrFfdc( sigData, sigDataSize, i_parser );
             }
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
@@ -562,7 +567,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
     {
         i_parser.PrintHeading("Uncompressed Capture Buffer");
         i_parser.PrintBlank();
-        i_parser.PrintHexDump( l_uncompBuffer, l_uncompBufSize );
+        i_parser.PrintHexDump( uncompBuffer, sz_uncompBuffer );
         i_parser.PrintBlank();
 
         if ( false == rc )
@@ -577,7 +582,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
         rc = false; // force raw hex dump
     }
 
-    delete [] l_uncompBuffer;
+    delete [] uncompBuffer;
 
     return rc;
 }

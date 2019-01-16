@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #include <iipSystem.h>
 #include <prdfPluginDef.H>
 #include <algorithm>
+#include <UtilHash.H>
 
 #undef xspprdsdbug_C
 
@@ -347,7 +348,8 @@ void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(
         AttnData ad(*i);
         BitString cbs(sizeof(AttnData)*8,(CPU_WORD *)&ad);
 
-        capture.Add(PlatServices::getSystemTarget(),0,cbs);
+        capture.Add( PlatServices::getSystemTarget(),
+                     Util::hashString("ATTN_DATA"), cbs );
     }
 
     sdc->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);

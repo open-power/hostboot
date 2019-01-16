@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -247,19 +247,18 @@ public:
 void Drop(RegType type);  //@jl04a
 // end @jl04a
 
-  /**
-   Copy caputre data to buffer
-   <ul>
-   <br><b>Parameter:  ptr to buffer to place capture data
-   <br><b>Parameter:  maxsize of buffer area
-   <br><b>Returns:   Returns the number of bytes copied
-   <br><b>Requirements: None
-   <br><b>Promises:  bytes copied <= bufferSize
-   <br><b>Notes:     Caputure data is placed in the buffer in the order it exists
-                     in the vector until done or buffer is full
-   <ul><br>
-   */
-  unsigned int Copy(uint8_t * buffer, unsigned int bufferSize) const;
+    /**
+     * @brief  Copies the capture data to a buffer.
+     *
+     * The capture data is copied to the buffer in the order it exists in the
+     * vector until all entries have been added or until the buffer is full.
+     *
+     * @param  i_buffer     Pointer to buffer.
+     * @param  i_bufferSize Maximum size of the buffer.
+     * @return The actual size of the data buffer. The value will always be less
+     *         than or equal to the maximum buffer size.
+     */
+    uint32_t Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const;
 
   // dg08a -->
   /**
