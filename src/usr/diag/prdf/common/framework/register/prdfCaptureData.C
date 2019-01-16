@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,104 +155,128 @@ void CaptureData::Drop(RegType i_type)
 
 //------------------------------------------------------------------------------
 
+template <class T>
+void __bufferAdd( uint8_t* & i_idx, T i_val )
+{
+    memcpy( i_idx, &i_val, sizeof(i_val) );
+    i_idx += sizeof(i_val);
+}
+
+bool __bufferFull( uint8_t * i_buf, size_t i_bufSize,
+                   uint8_t * i_idx, size_t i_idxSize )
+{
+    if ( (i_buf + i_bufSize) < (i_idx + i_idxSize) )
+    {
+        PRDF_ERR( "[CaptureData::Copy] Buffer is full. Some data may have "
+                  "been lost" );
+        return true;
+    }
+
+    return false;
+}
+
 /* CaptureData Format:
  *        capture data -> ( <chip header> <registers> )*
  *        chip header -> ( <chip id:32> <# registers:32> )
  *        registers -> ( <reg id:16> <reg byte len:16> <bytes>+ )
  */
-unsigned int CaptureData::Copy(uint8_t *i_buffer, unsigned int i_bufferSize) const
+uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
 {
-    TargetHandle_t  l_pcurrentChipHandle =NULL ;
-    uint8_t * l_entryCountPos = NULL;
-    uint32_t l_regEntries = 0;
+    TargetHandle_t curTrgt = nullptr;
 
-    uint32_t l_bytesWritten = 0;
-    for (ConstDataIterator i = data.begin(); i != data.end(); i++)
+    uint32_t * regCntPtr = nullptr;
+
+    uint8_t * curIdx = i_buffer;
+
+    for ( auto & entry : data )
     {
-        // Check for new chip.
-        if (i->chipHandle != l_pcurrentChipHandle)
-        {   // Update previous header, write new header.
-
-            if (NULL != l_entryCountPos) // Update previous entry count.
-            {
-                l_regEntries = htonl(l_regEntries);
-                memcpy(l_entryCountPos, &l_regEntries, sizeof(l_regEntries));
-                l_regEntries = 0;
-            }
-
-            // Update chip Handles....
-            TargetHandle_t l_ptempHandle = l_pcurrentChipHandle = i->chipHandle;
-            HUID l_chipHuid =PlatServices::getHuid(l_ptempHandle);
-            const size_t l_huidSize = sizeof(l_chipHuid);
-            l_chipHuid = htonl(l_chipHuid);
-
-            // Verify space.
-            if (i_bufferSize < l_bytesWritten + 2 * l_huidSize)
+        // We only need the target data when the target for this entry does not
+        // match the previous entry.
+        if ( entry.chipHandle != curTrgt )
+        {
+            // Ensure we have enough space for the entry header.
+            if ( __bufferFull( i_buffer, i_bufferSize, curIdx,
+                               (sizeof(HUID) + sizeof(uint32_t)) ) )
             {
                 break;
             }
-            // Write header.
-            memcpy(&i_buffer[l_bytesWritten],
-                   &l_chipHuid, l_huidSize);
-            l_bytesWritten += l_huidSize;
-            l_entryCountPos = &i_buffer[l_bytesWritten];
-            l_ptempHandle = NULL;
-            memcpy(l_entryCountPos, &l_chipHuid, l_huidSize);
-            l_bytesWritten += l_huidSize;
+
+            // Update current target.
+            curTrgt = entry.chipHandle;
+
+            // Add HUID to buffer.
+            __bufferAdd( curIdx, htonl(PlatServices::getHuid(curTrgt)) );
+
+            // Update the current count pointer.
+            regCntPtr = (uint32_t *)curIdx;
+
+            // Zero out the register count.
+            __bufferAdd( curIdx, htonl(0) );
         }
 
-        // Go to next entry if 0 data length.
-        if (0 == i->dataByteLength)
+        // Go to next entry if the data byte length is 0.
+        if ( 0 == entry.dataByteLength )
             continue;
 
-        // Check room.
-        if ((l_bytesWritten + 2*sizeof(uint16_t) + i->dataByteLength) >
-                i_bufferSize)
-            continue;
+        // Ensure we have enough space for the entry header.
+        if ( __bufferFull( i_buffer, i_bufferSize, curIdx,
+                           (2 * sizeof(uint16_t) + entry.dataByteLength) ) )
+        {
+            break;
+        }
 
         // Write register ID.
-        uint16_t l_regId = htons(i->address);
-        memcpy(&i_buffer[l_bytesWritten], &l_regId, sizeof(l_regId));
-        l_bytesWritten += sizeof(l_regId);
+        __bufferAdd( curIdx, htons(entry.address) );
 
-        // Write register length.
-        uint16_t l_regLen = htons(i->dataByteLength);
-        memcpy(&i_buffer[l_bytesWritten], &l_regLen, sizeof(l_regLen));
-        l_bytesWritten += sizeof(l_regLen);
+        // Write data length.
+        __bufferAdd( curIdx, htons(entry.dataByteLength) );
 
-        // Write register data.
+        // Write the data.
+        // >>> TODO: RTC 199045 The data should already be in network format.
+        //           However, that is not the case. Instead, the data is
+        //           converted here, which would be is fine if we were only
+        //           adding registers, but we have additional capture data,
+        //           especially in the memory subsytem, that are actually stored
+        //           in the network format, but swizzled before adding to the
+        //           capture data. Which means we are doing too much.
+        //           Unfortunately, it currently works and will take some time
+        //           to actually do it right. Therefore, we will leave this
+        //           as-is and try to make the appropriate fix later.
         uint32_t l_dataWritten = 0;
-        while ((l_dataWritten + 4) <= i->dataByteLength)
+        while ((l_dataWritten + 4) <= entry.dataByteLength)
         {
             uint32_t l_temp32;
-            memcpy(&l_temp32, &i->dataPtr[l_dataWritten], sizeof(l_temp32));
+            memcpy(&l_temp32, &entry.dataPtr[l_dataWritten], sizeof(l_temp32));
             l_temp32 = htonl(l_temp32);
-            memcpy(&i_buffer[l_bytesWritten], &l_temp32, 4);
-            l_dataWritten += 4; l_bytesWritten += 4;
+            memcpy(curIdx, &l_temp32, 4);
+            l_dataWritten += 4; curIdx += 4;
         }
-        if (l_dataWritten != i->dataByteLength)
+        if (l_dataWritten != entry.dataByteLength)
         {
+            // TODO: RTC 199045 This is actually pretty bad because it will read
+            //       four bytes of memory, sizzle the four bytes, then write
+            //       less than four bytes to the buffer. This could cause a
+            //       buffer overrun exception if we were at the end of memory.
+            //       Also, how can we trust the right most bytes to be correct
+            //       since they technically should not be part of the entry
+            //       data? Again, we don't seem to be hitting this bug and it
+            //       will take time to fix it (see note above). Therefore, we
+            //       will leave it for now and fix it when we have time.
             uint32_t l_temp32;
-            memcpy(&l_temp32, &i->dataPtr[l_dataWritten], sizeof(l_temp32));
+            memcpy(&l_temp32, &entry.dataPtr[l_dataWritten], sizeof(l_temp32));
             l_temp32 = htonl(l_temp32);
-            memcpy(&i_buffer[l_bytesWritten],
-                   &l_temp32, i->dataByteLength - l_dataWritten);
-            l_bytesWritten += i->dataByteLength - l_dataWritten;
+            memcpy(curIdx, &l_temp32, entry.dataByteLength - l_dataWritten);
+            curIdx += entry.dataByteLength - l_dataWritten;
         }
+        // <<< TODO: RTC 199045
 
-        // Update entry count.
-        l_regEntries++;
+        // Update entry count. It is important to update the buffer just in
+        // case we happen to run out of room in the buffer and need to exit
+        // early.
+        *regCntPtr = htonl( ntohl(*regCntPtr) + 1 );
     }
 
-    // Update previous entry count.
-    if (NULL != l_entryCountPos)
-    {
-        l_regEntries = htonl(l_regEntries);
-        memcpy(l_entryCountPos, &l_regEntries, sizeof(l_regEntries));
-        l_regEntries = 0;
-    }
-
-    return l_bytesWritten;
+    return curIdx - i_buffer;
 }
 
 // dg08a -->
