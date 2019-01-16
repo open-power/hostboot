@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -469,24 +469,6 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
             if( (l_chipPosition != l_memBus->device.proc_centaur_id) ||
                 (l_busNum       != l_memBus->device.memChannel) )
             {
-                FAPI_INF("Invalidate Centaur vpd record");
-
-                // Reset lane value to invalidate record and
-                // update number of records accordingly
-                l_memBus->failBit = 0;
-                l_vpdHeadPtr->availNumRecord--;
-
-                FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_mBufSize);
-
-                /*** Write the updated eRepair buffer back to Centaur FRU VPD ***/
-                FAPI_TRY( setMBvpdField(
-                              l_vpdRecord,
-                              fapi2::MBVPD_KEYWORD_PDI,
-                              i_target,
-                              i_buf,
-                              l_mBufSize),
-                          "Update erepair centaur data to VPD failed w/rc=0x%x",
-                          static_cast<uint64_t>(fapi2::current_err) );
                 continue;
             }
 
