@@ -44,6 +44,8 @@ enum MemVpdData
     MP, //! Memory Power related info
     DQ, //! DQ/DQS pin assignments
     CK, //! CKE pin assignments
+    EFD, //! Extended Function Descriptor data for OCMB
+    BUFFER, //! Buffer data for OCMB
 };
 
 typedef MemVpdData MemVpdData_t;
