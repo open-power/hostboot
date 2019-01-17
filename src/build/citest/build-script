@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2018
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ echo "SANDBOXROOT=$SANDBOXROOT"
 echo "SANDBOXNAME=$SANDBOXNAME"
 echo "CHIP=$CHIP"
 echo "PNOR=$PNOR"
+echo "CONFIG_FILE=$CONFIG_FILE"
 echo "#--------------------------------"
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
@@ -59,7 +60,7 @@ CREATESANDBOX_PID=$!
 my_date=$(date)
 # Build Hostboot.
 echo "#--------------------------------"
-printf "\n\n$(date): Starting \"make -j32\"\n\n"
+printf "\n\n$(date): STARTED running \"make -j32\"\n\n"
 echo "#--------------------------------"
 make -j32 || exit -1
 echo "#--------------------------------"
@@ -80,34 +81,46 @@ fi
 # Add Hostboot files to simics sandbox.
 my_date=$(date)
 echo "#--------------------------------"
-printf "\n\n$(date): Now running populate-sandbox....\n\n"
+printf "\n\n$(date): STARTED running populate-sandbox....\n\n"
 echo "#--------------------------------"
 populate-sandbox || exit -1
 echo "#--------------------------------"
 printf "\n\nrc=$?: $(date): FINISHED running (\"populate-sandbox\" was started at $my_date)\n\n"
 echo "#--------------------------------"
 
-#@fixme - Temp disable, RTC:170635
-# Start errl parser building.
-#build-errl-parsers > errl-parsers.log 2>&1 &
-#ERRLPARSERS_PID=$!
+if [ "$CHIP" == "FSPBUILD" ];
+then
+        # Start errl parser building.
+        my_date=$(date)
+        printf "\n\n$(date): STARTED running \"build-errl-parsers\"\n\n"
+        build-errl-parsers > errl-parsers.log 2>&1 &
+        ERRLPARSERS_PID=$!
 
-# Start CxxTest Simics execution.
-my_date=$(date)
-echo "#--------------------------------"
-printf "\n\n$(date): Now running cxxtest-start.sh....\n\n"
-echo "#--------------------------------"
-cxxtest-start.sh || exit -1
-echo "#--------------------------------"
-printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at $my_date)\n\n"
-echo "#--------------------------------"
+        # Check errl parser completion.
+        wait $ERRLPARSERS_PID
+        if [ $? -ne 0 ]; then
+            echo "----Error parsers failed."
+            cat errl-parsers.log
+            exit -1
+        else
+            printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $my_date)\n\n"
+        fi
 
-#@fixme - Temp disable, RTC:170635
-# Check errl parser completion.
-#wait $ERRLPARSERS_PID
-#if [ $? -ne 0 ]; then
-#    echo "----Error parsers failed."
-#    cat errl-parsers.log
-#    exit -1
-#fi
+
+else
+        printf "2) CHIP=$CHIP"
+        echo "CHIP3=$CHIP"
+
+
+        # Start CxxTest Simics execution.
+        my_date=$(date)
+        echo "#--------------------------------"
+        printf "\n\n$(date): STARTED running cxxtest-start.sh....\n\n"
+        echo "#--------------------------------"
+        cxxtest-start.sh || exit -1
+        echo "#--------------------------------"
+        printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at  $my_date)\n\n"
+        echo "#--------------------------------"
+
+fi
 

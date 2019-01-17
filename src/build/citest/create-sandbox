@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2017
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,7 +27,12 @@
 echo "Creating ODE sandbox..."
 
 export CMVC_FAMILY=aix@aix.austin.ibm.com@2035
-export CMVC_BECOME=hostboot
+if [ -z $LOCAL_CI_USER ]
+then
+    export CMVC_BECOME=hostboot
+else
+    export CMVC_BECOME=$LOCAL_CI_USER
+fi
 export CMVC_AUTH_METHOD=HOST
 
 # Ensure backing build is accessible.
