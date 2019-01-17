@@ -40,7 +40,9 @@ namespace fapi2
 {
 
 /// constants for VPD Info
-constexpr uint64_t VPD_INFO_INVALID  = 0xffffffffffffffff;
+constexpr uint64_t VPD_INFO_INVALID_64  = 0xffffffffffffffff;
+constexpr uint64_t VPD_INFO_INVALID_16  = 0xffff;
+constexpr uint64_t VPD_INFO_INVALID_8   = 0xff;
 
 /// @brief  Specialized class representing required VPDInfo to be used
 ///         in collecting VPD for the MCS target type.
@@ -49,13 +51,14 @@ template<>
 class VPDInfo<TARGET_TYPE_MCS>
 {
     public:
-        // @brief VPDInfo constructor
+        /// @brief VPDInfo constructor
+        /// @param[in]  Type of VPD data to return
         VPDInfo( const fapi2::MemVpdData& i_vpd_type)
             : iv_vpd_type(i_vpd_type),
-              iv_size(VPD_INFO_INVALID),
-              iv_freq_mhz(VPD_INFO_INVALID),
-              iv_rank_count_dimm_0(VPD_INFO_INVALID),
-              iv_rank_count_dimm_1(VPD_INFO_INVALID),
+              iv_size(VPD_INFO_INVALID_64),
+              iv_freq_mhz(VPD_INFO_INVALID_64),
+              iv_rank_count_dimm_0(VPD_INFO_INVALID_64),
+              iv_rank_count_dimm_1(VPD_INFO_INVALID_64),
               iv_is_config_ffdc_enabled(true)
         {};
         // type of vpd field to return
@@ -63,10 +66,64 @@ class VPDInfo<TARGET_TYPE_MCS>
 
         // size of the vpd data
         size_t   iv_size;
+
+        // frequency of memory bus
         uint64_t iv_freq_mhz;
+
+        // number of ranks per dimm position
         uint64_t iv_rank_count_dimm_0;
         uint64_t iv_rank_count_dimm_1;
+
+        // set to false to avoid collecting a real ReturnCode
         bool     iv_is_config_ffdc_enabled;
+};
+
+/// @brief  Specialized class representing required VPDInfo to be used
+///         in collecting VPD for the OCMB_CHIP target type.
+/// @tparam T fapi2::TARGET_TYPE_OCMB_CHIP
+template<>
+class VPDInfo<TARGET_TYPE_OCMB_CHIP>
+{
+    public:
+        /// @brief VPDInfo constructor
+        /// @param[in]  Type of VPD data to return
+        VPDInfo( const fapi2::MemVpdData& i_vpd_type)
+            : iv_vpd_type(i_vpd_type),
+              iv_size(VPD_INFO_INVALID_64),
+              iv_omi_freq_mhz(VPD_INFO_INVALID_64),
+              iv_rank_count(VPD_INFO_INVALID_64),
+              iv_is_config_ffdc_enabled(true),
+              iv_efd_type(VPD_INFO_INVALID_8),
+              iv_dmb_mfg_id(VPD_INFO_INVALID_16),
+              iv_dmb_revision(VPD_INFO_INVALID_8),
+              iv_ddr_mode(VPD_INFO_INVALID_8)
+        {};
+
+        // *** INPUT DATA ***
+
+        // type of vpd field to return
+        fapi2::MemVpdData_t iv_vpd_type;
+
+        // size of the vpd data in bytes
+        size_t   iv_size;
+
+        // frequency of attached OMI bus
+        uint64_t iv_omi_freq_mhz;
+
+        // number of master ranks
+        uint64_t iv_rank_count;
+
+        // set to false to avoid collecting a real ReturnCode
+        bool     iv_is_config_ffdc_enabled;
+
+
+        // *** OUTPUT DATA ***
+
+        // metadata describing the EFD data that was returned
+        uint8_t iv_efd_type;     // e.g. byte 288 of DDIMM SPD
+        uint16_t iv_dmb_mfg_id;  // buffer manufacturer
+        uint8_t iv_dmb_revision; // buffer revision
+        uint8_t iv_ddr_mode;     // DDR4 or DDR5
 };
 
 
