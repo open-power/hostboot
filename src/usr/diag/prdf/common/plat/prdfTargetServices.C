@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1229,7 +1229,6 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target )
             }
             break;
         }
-
         default:
             PRDF_ERR( "[getParentChip] Unsupported class: %d", l_class );
     }

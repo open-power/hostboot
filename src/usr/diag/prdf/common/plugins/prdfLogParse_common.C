@@ -298,6 +298,13 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
+        case TYPE_DIMM: // NVDIMM
+            l_chip    = l_chip / MAX_NVDIMM_PER_PROC;
+            l_chiplet = l_chiplet % MAX_NVDIMM_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "dimm(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         default:
             snprintf( o_chipName, i_sz_chipName, "????" );
     }

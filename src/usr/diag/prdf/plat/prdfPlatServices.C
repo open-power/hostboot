@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,19 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
     size_t bsize = (io_bs.getBitLen()+7)/8;
     CPU_WORD* buffer = io_bs.getBufAddr();
 
-    errl = deviceRead(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
+    // We also want to be able to read the NVDIMMs using this interface, so we
+    // will assume if we are trying to call this function with a DIMM target
+    // it is an NVDIMM and adjust the call to deviceRead accordingly.
+    if ( TYPE_DIMM == getTargetType(i_target) )
+    {
+        errl = deviceRead(i_target, buffer, bsize,
+                          DEVICE_NVDIMM_ADDRESS(i_address));
+    }
+    else
+    {
+        errl = deviceRead(i_target, buffer, bsize,
+                          DEVICE_SCOM_ADDRESS(i_address));
+    }
 
     if ( nullptr != errl )
     {
@@ -186,7 +198,19 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
     size_t bsize = (io_bs.getBitLen()+7)/8;
     CPU_WORD* buffer = io_bs.getBufAddr();
 
-    errl = deviceWrite(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
+    // We also want to be able to write to NVDIMMs using this interface, so we
+    // will assume if we are trying to call this function with a DIMM target
+    // it is an NVDIMM and adjust the call to deviceWrite accordingly.
+    if ( TYPE_DIMM == getTargetType(i_target) )
+    {
+        errl = deviceWrite(i_target, buffer, bsize,
+                           DEVICE_NVDIMM_ADDRESS(i_address));
+    }
+    else
+    {
+        errl = deviceWrite(i_target, buffer, bsize,
+                           DEVICE_SCOM_ADDRESS(i_address));
+    }
 
     if( NULL != errl )
     {

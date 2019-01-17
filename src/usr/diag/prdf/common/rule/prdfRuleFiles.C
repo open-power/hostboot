@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@ namespace PRDF
     const char * nimbus_mcbist  = "nimbus_mcbist";
     const char * nimbus_mcs     = "nimbus_mcs";
     const char * nimbus_mca     = "nimbus_mca";
+    const char * nimbus_nvdimm  = "nimbus_nvdimm";
 
     // P9 Cumulus Chip
     const char * cumulus_proc = "cumulus_proc";
