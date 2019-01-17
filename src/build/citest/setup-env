@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2018
+# Contributors Listed Below - COPYRIGHT 2014,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -37,12 +37,20 @@ echo "MACHINE IS $MACHINE"
 if [ "$CHIP" == "NIMBUS" ];
 then
     export PNOR=nimbus.pnor
+    export CONFIG_FILE=
 elif [ "$CHIP" == "CUMULUS" ];
 then
     export PNOR=cumulus.pnor
+    export CONFIG_FILE=
 elif [ "$CHIP" == "CUMULUS_CDIMM" ];
 then
     export PNOR=cumulus_cdimm.pnor
+    export CONFIG_FILE=
+elif [ "$CHIP" == "FSPBUILD" ];
+then
+    export PNOR=ZZ.pnor
+    export CONFIG_FILE=src/build/configs/fsprelease.config
+    export MACHINE=NIMBUS
 fi
 
 # If we are running under Jenkins we need to pick a random-ish sandbox name
