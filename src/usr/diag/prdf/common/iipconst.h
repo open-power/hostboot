@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,8 @@ enum DOMAIN_ID
     OMIC_DOMAIN   = 0x84,
     OMI_DOMAIN    = 0x85,
     OCMB_DOMAIN   = 0x86,
+
+    NVDIMM_DOMAIN = 0x87,
 
     CLOCK_DOMAIN_FAB          = 0x90,
     CLOCK_DOMAIN_MEMBUF       = 0x91,

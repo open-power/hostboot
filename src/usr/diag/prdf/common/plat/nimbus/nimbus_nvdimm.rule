@@ -1,0 +1,351 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/nimbus/nimbus_nvdimm.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2018,2019
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip nimbus_nvdimm
+{
+    name        "NIMBUS NVDIMM target";
+    targettype  TYPE_DIMM;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     8;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # NVDIMM Status Registers
+    ############################################################################
+
+    register MODULE_HEALTH_REG
+    {
+        name        "NVDIMM Module Health Register";
+        scomaddr    0xA0;
+        scomlen     8;
+        capture     group default;
+    };
+
+    register HEALTH_STATUS0_REG
+    {
+        name        "NVDIMM Health Status0 Register";
+        scomaddr    0xA1;
+        scomlen     8;
+        capture     group default;
+    };
+
+    register HEALTH_STATUS1_REG
+    {
+        name        "NVDIMM Health Status1 Register";
+        scomaddr    0xA2;
+        scomlen     8;
+        capture     group default;
+    };
+
+    register ERROR_THRESHOLD_STATUS_REG
+    {
+        name        "NVDIMM Error Threshold Status Register";
+        scomaddr    0xA5;
+        scomlen     8;
+        capture     group default;
+    };
+
+    register WARNING_THRESHOLD_STATUS_REG
+    {
+        name        "NVDIMM Warning Threshold Status Register";
+        scomaddr    0xA7;
+        scomlen     8;
+        capture     group default;
+    };
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+rule rPersistencyLost
+{
+    RECOVERABLE:
+      summary( 0, rHEALTH_STATUS0_REG ) |
+      summary( 1, rHEALTH_STATUS1_REG ) |
+      summary( 2, rERROR_THRESHOLD_STATUS_REG );
+};
+
+group gPersistencyLost filter singlebit
+{
+    (rPersistencyLost, bit(0)) ? analyzeHealthStatus0;
+    (rPersistencyLost, bit(1)) ? analyzeHealthStatus1;
+    (rPersistencyLost, bit(2)) ? analyzeErrorThrStatus;
+};
+
+################################################################################
+# P9 NVDIMM target MODULE_HEALTH_REG
+################################################################################
+
+rule rMODULE_HEALTH_REG
+{
+    RECOVERABLE:
+        MODULE_HEALTH_REG;
+};
+
+group gMODULE_HEALTH_REG attntype RECOVERABLE filter singlebit
+{
+    /** MODULE_HEALTH_REG[0]
+     *  Persistency Lost
+     */
+    (rMODULE_HEALTH_REG, bit(0)) ? analyzePersistencyLost;
+
+    /** MODULE_HEALTH_REG[1]
+     *  Warning Threshold Exceeded
+     */
+    (rMODULE_HEALTH_REG, bit(1)) ? analyzeWarningThrStatus;
+
+    /** MODULE_HEALTH_REG[2]
+     *  Persistency Restored
+     */
+    (rMODULE_HEALTH_REG, bit(2)) ? defaultMaskedError;
+
+    /** MODULE_HEALTH_REG[3]
+     *  Below Warning Threshold
+     */
+    (rMODULE_HEALTH_REG, bit(3)) ? defaultMaskedError;
+
+    /** MODULE_HEALTH_REG[4]
+     *  Hardware Failure
+     */
+    (rMODULE_HEALTH_REG, bit(4)) ? defaultMaskedError;
+
+    /** MODULE_HEALTH_REG[5]
+     *  EVENT_N_LOW
+     */
+    (rMODULE_HEALTH_REG, bit(5)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 NVDIMM target HEALTH_STATUS0_REG
+################################################################################
+
+rule rHEALTH_STATUS0_REG
+{
+    RECOVERABLE:
+        HEALTH_STATUS0_REG;
+};
+
+group gHEALTH_STATUS0_REG filter singlebit
+{
+    /** HEALTH_STATUS0_REG[0]
+     *  Voltage Regulator Fail
+     */
+    (rHEALTH_STATUS0_REG, bit(0)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[1]
+     *  VDD Lost
+     */
+    (rHEALTH_STATUS0_REG, bit(1)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[2]
+     *  VPP Lost
+     */
+    (rHEALTH_STATUS0_REG, bit(2)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[3]
+     *  VTT Lost
+     */
+    (rHEALTH_STATUS0_REG, bit(3)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[4]
+     *  DRAM no Self Refresh
+     */
+    (rHEALTH_STATUS0_REG, bit(4)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[5]
+     *  Controller HW Error
+     */
+    (rHEALTH_STATUS0_REG, bit(5)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[6]
+     *  NV Controller HW Error
+     */
+    (rHEALTH_STATUS0_REG, bit(6)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS0_REG[7]
+     *  NVM Lifetime Error
+     */
+    (rHEALTH_STATUS0_REG, bit(7)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 NVDIMM target HEALTH_STATUS1_REG
+################################################################################
+
+rule rHEALTH_STATUS1_REG
+{
+    RECOVERABLE:
+        HEALTH_STATUS1_REG;
+};
+
+group gHEALTH_STATUS1_REG filter singlebit
+{
+    /** HEALTH_STATUS1_REG[0]
+     *  Insufficient Energy
+     */
+    (rHEALTH_STATUS1_REG, bit(0)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[1]
+     *  Invalid Firmware
+     */
+    (rHEALTH_STATUS1_REG, bit(1)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[2]
+     *  Configuration Data Error
+     */
+    (rHEALTH_STATUS1_REG, bit(2)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[3]
+     *  No Energy Source
+     */
+    (rHEALTH_STATUS1_REG, bit(3)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[4]
+     *  Energy Policy Not Set
+     */
+    (rHEALTH_STATUS1_REG, bit(4)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[5]
+     *  Energy Source HW Error
+     */
+    (rHEALTH_STATUS1_REG, bit(5)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[6]
+     *  Energy Source Health Assessment Error
+     */
+    (rHEALTH_STATUS1_REG, bit(6)) ? defaultMaskedError;
+
+    /** HEALTH_STATUS1_REG[7]
+     *  Reserved
+     */
+    (rHEALTH_STATUS1_REG, bit(7)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 NVDIMM target ERROR_THRESHOLD_STATUS_REG
+################################################################################
+
+rule rERROR_THRESHOLD_STATUS_REG
+{
+    RECOVERABLE:
+        ERROR_THRESHOLD_STATUS_REG;
+};
+
+group gERROR_THRESHOLD_STATUS_REG filter singlebit
+{
+    /** ERROR_THRESHOLD_STATUS_REG[0]
+     *  NVM Lifetime Error
+     */
+    (rERROR_THRESHOLD_STATUS_REG, bit(0)) ? defaultMaskedError;
+
+    /** ERROR_THRESHOLD_STATUS_REG[1]
+     *  ES Lifetime Error
+     */
+    (rERROR_THRESHOLD_STATUS_REG, bit(1)) ? defaultMaskedError;
+
+    /** ERROR_THRESHOLD_STATUS_REG[2]
+     *  ES Temperature Error
+     */
+    (rERROR_THRESHOLD_STATUS_REG, bit(2)) ? defaultMaskedError;
+
+    /** ERROR_THRESHOLD_STATUS_REG[3]
+     *  Reserved
+     */
+    (rERROR_THRESHOLD_STATUS_REG, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 NVDIMM target WARNING_THRESHOLD_STATUS_REG
+################################################################################
+
+rule rWARNING_THRESHOLD_STATUS_REG
+{
+    RECOVERABLE:
+        WARNING_THRESHOLD_STATUS_REG;
+};
+
+group gWARNING_THRESHOLD_STATUS_REG filter singlebit
+{
+    /** WARNING_THRESHOLD_STATUS_REG[0]
+     *  NVM Lifetime Warning
+     */
+    (rWARNING_THRESHOLD_STATUS_REG, bit(0)) ? defaultMaskedError;
+
+    /** WARNING_THRESHOLD_STATUS_REG[1]
+     *  ES Lifetime Warning
+     */
+    (rWARNING_THRESHOLD_STATUS_REG, bit(1)) ? defaultMaskedError;
+
+    /** WARNING_THRESHOLD_STATUS_REG[2]
+     *  ES Temperature Warning
+     */
+    (rWARNING_THRESHOLD_STATUS_REG, bit(2)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "p9_common_actions.rule";
+
+actionclass analyzeHealthStatus0    { analyze(gHEALTH_STATUS0_REG); };
+actionclass analyzeHealthStatus1    { analyze(gHEALTH_STATUS1_REG); };
+actionclass analyzeErrorThrStatus   { analyze(gERROR_THRESHOLD_STATUS_REG); };
+actionclass analyzeWarningThrStatus { analyze(gWARNING_THRESHOLD_STATUS_REG); };
+actionclass analyzePersistencyLost  { analyze(gPersistencyLost); };
+

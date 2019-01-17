@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,7 @@ PRDF_PLUGIN_DEFINE_NS( nimbus_ec,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_eq,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mca,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( nimbus_nvdimm,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mcbist,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mcs,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    CommonPlugins, ClearServiceCallFlag );
