@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,7 @@ enum  BufLengths
 {
     BUF_LENGTH      =   120,
     LINE_LENGTH     =    80,
+    UPPER_BYTE_POS  =    10,
 };
 
 /**
@@ -349,6 +350,8 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
     {
         FfdcSummSubSectHdr* l_pSubSecHdr  =   (FfdcSummSubSectHdr*)i_buf;
         uint64_t* l_secBufPtr             =   (uint64_t*)( i_buf + sizeof( FfdcSummSubSectHdr ) );
+        uint32_t  l_tempWord              =   0;
+        uint64_t  l_tempDbWord            =   0;
 
         if( 0 == i_length )
         {
@@ -407,14 +410,18 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
             memset( l_lineStr, 0x00, BUF_LENGTH );
             memset( l_hdrStr, 0x00, BUF_LENGTH );
             snprintf( l_hdrStr, BUF_LENGTH, "%s", (*itRegList).c_str() );
+            l_tempDbWord    =   htobe64(*l_secBufPtr);
 
-            if( INVALID_DATA == htobe64(*l_secBufPtr) )
+            if( INVALID_DATA == l_tempDbWord )
             {
                 memcpy( l_lineStr, "--", BUF_LENGTH );
             }
             else
             {
-                snprintf( l_lineStr, BUF_LENGTH, "0x%016lx", htobe64(*l_secBufPtr) );
+                l_tempWord    =   (l_tempDbWord >> 32);
+                snprintf( l_lineStr, BUF_LENGTH, "0x%08x", l_tempWord );
+                l_tempWord    =   (uint32_t)l_tempDbWord;
+                snprintf( l_lineStr + UPPER_BYTE_POS, (BUF_LENGTH - UPPER_BYTE_POS), "%08x", l_tempWord );
             }
 
             i_parser.PrintString( l_hdrStr, l_lineStr );
