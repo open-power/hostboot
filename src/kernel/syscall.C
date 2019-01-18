@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,12 @@
 extern "C"
 void kernel_execute_hyp_doorbell()
 {
+    // Per POWER ISA Section 5.9.2, to avoid any weak consistency
+    //  issues we must use a msgsync instruction before consuming
+    //  any data set by a different thread following a doorbell
+    //  wakeup.
+    msgsync();
+
     task_t* t = TaskManager::getCurrentTask();
     task_t* l_task_post = nullptr;
     doorbell_clear();
