@@ -449,10 +449,11 @@ errlHndl_t createElogFromHxKeywordRc( hxKeywordRc i_rc,
     l_pError->addPartCallout(i_pecTarget,
                              HWAS::VPD_PART_TYPE,
                              HWAS::SRCI_PRIORITY_HIGH);
-
+    // hold off deconfigure so hwsv will create a dummy record which
+    // will persist and prevent an infinite reconfig loop
     l_pError->addHwCallout(i_pecTarget,
                            HWAS::SRCI_PRIORITY_LOW,
-                           HWAS::DECONFIG,
+                           HWAS::DELAYED_DECONFIG,
                            HWAS::GARD_NULL);
 
     ERRORLOG::ErrlUserDetailsTarget(i_pecTarget).addToLog(l_pError);
