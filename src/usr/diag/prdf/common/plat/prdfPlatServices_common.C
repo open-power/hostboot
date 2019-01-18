@@ -789,6 +789,42 @@ uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 }
 
 //------------------------------------------------------------------------------
+
+uint32_t clearBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::clearBadDqBitmap] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(i_trgt), i_rank.getKey() );
+            break;
+        }
+
+        dqBitmap.clearBitmap();
+
+        o_rc = setBadDqBitmap( i_trgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(i_trgt), i_rank.getKey() );
+            break;
+        }
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+
+//------------------------------------------------------------------------------
 template<>
 void getDimmDqAttr<TYPE_MCA>( TargetHandle_t i_target,
                               uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )

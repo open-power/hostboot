@@ -123,19 +123,11 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     std::vector<MemRank> ranks;
     getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
 
-    BitmapData data;
-    for ( uint8_t p = 0; p < MAX_MEM_PORT; p++ )
-    {
-        memset( data[p].bitmap, 0x00, sizeof(data) );
-    }
-
     for ( auto & rank : ranks )
     {
-        MemDqBitmap dqBitmap { i_portTrgt, rank, data };
-
-        if ( SUCCESS != setBadDqBitmap(i_portTrgt, rank, dqBitmap) )
+        if ( SUCCESS != clearBadDqBitmap(i_portTrgt, rank) )
         {
-            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x,0x%02x) failed",
+            PRDF_ERR( PRDF_FUNC "clearBadDqBitmap(0x%08x,0x%02x) failed",
                       getHuid(i_portTrgt), rank.getKey() );
             continue;
         }
