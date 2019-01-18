@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -224,6 +224,20 @@ inline void eieio()
 {
     asm volatile("eieio" ::: "memory");
 }
+
+ALWAYS_INLINE
+inline void msgsync()
+{
+    // See POWER ISA 5.9.2 for details
+    //asm volatile("msgsync" ::: "memory");
+    asm volatile(".long 0x7C0006EC"); // Our GCC doesn't support 'msgsync' yet
+    //  [011111 ///// ///// ///// 11011 10110/]
+
+    // There is a P9 DD2 workaround that a lwsync is also required
+    //  after a msgsync
+    asm volatile("lwsync" ::: "memory");
+}
+
 
 ALWAYS_INLINE
 inline uint64_t getHMER()
