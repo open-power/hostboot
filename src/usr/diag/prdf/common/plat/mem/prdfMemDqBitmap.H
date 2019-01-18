@@ -132,6 +132,11 @@ class MemDqBitmap
     uint32_t clearDram( const MemSymbol & i_symbol, uint8_t i_pins = 0xff );
 
     /**
+     * @brief Clears the entire bitmap.
+     */
+    void clearBitmap();
+
+    /**
      * @brief Adds the bitmaps for both ports to the capture data.
      * @param o_cd Capture data struct.
      */

@@ -252,6 +252,18 @@ uint32_t MemDqBitmap::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
+void MemDqBitmap::clearBitmap()
+{
+    size_t maxPorts = getNumPorts();
+
+    for ( uint32_t i = 0; i < maxPorts; i++ )
+    {
+        memset( iv_data[i].bitmap, 0x00, sizeof(iv_data[i].bitmap) );
+    }
+}
+
+//------------------------------------------------------------------------------
+
 void MemDqBitmap::getCaptureData( CaptureData & o_cd ) const
 {
     uint8_t rank   = iv_rank.getMaster();
