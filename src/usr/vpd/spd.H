@@ -73,10 +73,15 @@ enum
     MOD_TYPE_DDR3_SO_RDIMM   = 0x09,
     MOD_TYPE_DDR3_SO_CDIMM   = 0x0a,
     MOD_TYPE_DDR3_LRDIMM     = 0x0b,
+
     MOD_TYPE_DDR4_RDIMM      = 0x01,
     MOD_TYPE_DDR4_UDIMM      = 0x02,
     MOD_TYPE_DDR4_SO_DIMM    = 0x03,
     MOD_TYPE_DDR4_LRDIMM     = 0x04,
+    MOD_TYPE_DDR4_MINI_RDIMM = 0x05,
+    MOD_TYPE_DDR4_MINI_UDIMM = 0x06,
+    MOD_TYPE_DDR4_SO_RDIMM   = 0x08,
+    MOD_TYPE_DDR4_SO_UDIMM   = 0x09,
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
