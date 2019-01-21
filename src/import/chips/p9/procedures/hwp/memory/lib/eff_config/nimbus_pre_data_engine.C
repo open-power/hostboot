@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018                             */
+/* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -367,6 +368,11 @@ const std::vector< std::pair<uint8_t, uint8_t> > pre_data_engine<mss::proc_type:
     {1, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM},
     {2, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM},
     {4, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM},
+    {5, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM}, /* Mini RDIMM */
+    {6, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM}, /* Mini UDIMM */
+    /* 0x7: Reserved */
+    {8, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM}, /* SO RDIMM */
+    {9, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM}, /* SO UDIMM */
     // All others reserved or not supported
 };
 
