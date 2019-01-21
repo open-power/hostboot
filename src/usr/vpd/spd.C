@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2014,12 +2015,16 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
         }
         else if (SPD_DDR4_TYPE == i_memType)
         {
-            if ((MOD_TYPE_DDR4_UDIMM == modTypeVal) ||
-                (MOD_TYPE_DDR4_SO_DIMM == modTypeVal))
+            if ((MOD_TYPE_DDR4_UDIMM == modTypeVal)      ||
+                (MOD_TYPE_DDR4_SO_DIMM == modTypeVal)    ||
+                (MOD_TYPE_DDR4_MINI_UDIMM == modTypeVal) ||
+                (MOD_TYPE_DDR4_SO_UDIMM == modTypeVal))
             {
                 o_modType = UMM;
             }
-            else if (MOD_TYPE_DDR4_RDIMM == modTypeVal)
+            else if ((MOD_TYPE_DDR4_RDIMM == modTypeVal)      ||
+                     (MOD_TYPE_DDR4_MINI_RDIMM == modTypeVal) ||
+                     (MOD_TYPE_DDR4_SO_RDIMM == modTypeVal))
             {
                 o_modType = RMM;
             }
