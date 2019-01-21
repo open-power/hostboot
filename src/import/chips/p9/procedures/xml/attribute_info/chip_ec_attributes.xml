@@ -116,36 +116,11 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_ALINK</id>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Returns true if the chip has an A-Link
-      (Nimbus and Cumulus, not Axone)
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NOT_DD1_FBC_AND_ALINK</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       DD1 FBC setting differs from DD2, ex. lo_limit adjustment.
-      Axone does not have A-link support
+      Adding for Axone as it has A-link support
       True if Nimbus dd2 or greater or cumulus
     </description>
     <chipEcFeature>
@@ -163,9 +138,15 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
-
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NO_NPU2_FIR</id>
