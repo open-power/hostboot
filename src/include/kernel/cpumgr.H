@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,6 +184,15 @@ class CpuManager
          *  @param[in] i_threads - Bitstring of threads to enable (left-justified).
          */
         static void startCore(uint64_t pir,uint64_t i_threads);
+
+
+        /** @fn wakeupCore
+         *  Start the core, can only be run after startCore.
+         *
+         *  @param[in] pir - PIR value of first thread in core.
+         *  @param[in] i_threads - Bitstring of threads to enable (left-justified).
+         */
+        static void wakeupCore(uint64_t pir,uint64_t i_threads);
 
 
         /** @fn forceMemoryPeriodic()

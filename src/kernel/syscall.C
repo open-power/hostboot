@@ -52,6 +52,8 @@
 extern "C"
 void kernel_execute_hyp_doorbell()
 {
+    printkd("hyp_doorbell on %lx\n", getPIR());
+
     // Per POWER ISA Section 5.9.2, to avoid any weak consistency
     //  issues we must use a msgsync instruction before consuming
     //  any data set by a different thread following a doorbell
@@ -144,6 +146,7 @@ namespace Systemcalls
     void CpuSprSet(task_t *t);
     void CpuNap(task_t *t);
     void CpuWinkle(task_t *t);
+    void CpuWakeupCore(task_t *t);
     void MmAllocBlock(task_t *t);
     void MmRemovePages(task_t *t);
     void MmSetPermission(task_t *t);
@@ -189,6 +192,7 @@ namespace Systemcalls
         &CpuSprSet,   // MISC_CPUSPRSET
         &CpuNap, // MISC_CPUNAP
         &CpuWinkle,   // MISC_CPUWINKLE
+        &CpuWakeupCore,   // MISC_CPUWAKEUPCORE
 
         &MmAllocBlock, // MM_ALLOC_BLOCK
         &MmRemovePages, // MM_REMOVE_PAGES
@@ -857,6 +861,13 @@ namespace Systemcalls
             DeferredQueue::execute();
         }
     }
+
+    /** Force thread wakeup via doorbell. */
+    void CpuWakeupCore(task_t *t)
+    {
+        CpuManager::wakeupCore(static_cast<uint64_t>(TASK_GETARG0(t)),
+                               static_cast<uint64_t>(TASK_GETARG1(t)));
+    };
 
     /**
      * Allocate a block of virtual memory within the base segment

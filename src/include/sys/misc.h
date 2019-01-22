@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,6 +251,22 @@ int cpu_master_winkle(bool  i_fusedCores);
  *        process will unset any task affinity.  See task_affinity_unpin().
  */
 int cpu_all_winkle();
+
+/** @fn cpu_wakeup_core
+ *  @brief Have the kernel wakeup a core that was previously started.
+ *
+ *  @param[in] pir - PIR value of the first thread on the core.
+ *  @param[in] i_threads - Bitstring of threads to enable (left-justified).
+ *
+ *  @note The kernel will wakeup all threads on the requested core even
+ *        though the callee only requests with a single PIR value.
+ *
+ *  @return 0 or -(errno) on failure.
+ *
+ *  @retval -ENXIO - The core ID was outside of the range the kernel is
+ *                   prepared to support.
+ */
+int cpu_wakeup_core(uint64_t pir,uint64_t i_threads);
 
 /** @fn cpu_crit_assert
  *  @brief Forces a Terminate Immediate after a crit-assert is issued
