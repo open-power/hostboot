@@ -60,6 +60,7 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 
 EXTRAINCDIR += ${MSS_LIB}
 
