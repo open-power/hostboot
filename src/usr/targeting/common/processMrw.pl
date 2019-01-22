@@ -950,7 +950,10 @@ sub processProcessor
         {
             processMc($targetObj, $child);
         }
-
+        elsif ($child_type eq "EQ")
+        {
+            processEq($targetObj, $child);
+        }
         elsif ($child_type eq "OCC")
         {
             processOcc($targetObj, $child, $target);
@@ -1377,18 +1380,123 @@ sub processMcs
     $targetObj->setAttribute( $target, "MEMVPD_POS",
                              $chip_unit + ($proc_num * MAX_MCS_PER_PROC) );
 
-    # CHIPLET_ID is relative to the CHIP_UNIT of the MCS. To prevent invalid
-    # CHIPLET_ID's set them here. There are 4 MCS units ranging from 0-3. To
-    # generate the correct CHIPLET_ID we take the base offset and add 0 or 1
-    # to arrive at the correct value for that MCS unit. Units 0 and 1 add 0
-    # and units 2 and 3 add 1.
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing MCS child: $child Type: $child_type");
+
+        if ($child_type eq "MCA")
+        {
+            processMca($targetObj, $child);
+        }
+    }
+
     {
         use integer;
-        $targetObj->setAttribute( $target, "CHIPLET_ID",
-        Targets::PERVASIVE_PARENT_MCS_OFFSET + ($chip_unit / 2) );
+        # There are a total of two MCS units on an MCBIST unit. So, to
+        # determine which MCBIST an MCS belongs to, the CHIP_UNIT of the MCS can
+        # be divided by the number of units per MCBIST to arrive at the correct
+        # offset to add to the pervasive MCS parent offset.
+        my $numberOfMcsPerMcbist = 2;
+
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_MCS_OFFSET
+                            + ($chip_unit / $numberOfMcsPerMcbist));
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
     }
 }
 
+sub processMca
+{
+    use integer;
+    my $targetObj = shift;
+    my $target    = shift;
+
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+    # There are a total of four MCA units on an MCBIST unit. So, to determine
+    # which MCBIST an MCA belongs to, the CHIP_UNIT of the MCA can be divided by
+    # the number of units per MCBIST to arrive at the correct offset to add to
+    # the pervasive MCA parent offset.
+    my $numberOfMcaPerMcbist = 4;
+
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_MCA_OFFSET
+                        + ($chip_unit / $numberOfMcaPerMcbist));
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+}
+
+## EQ
+sub processEq
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing EQ child: $child Type: $child_type");
+
+        if ($child_type eq "EX")
+        {
+            processEx($targetObj, $child, $chip_unit);
+        }
+    }
+
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_EQ_OFFSET + $chip_unit);
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+}
+
+## EX
+sub processEx
+{
+    my $targetObj        = shift;
+    my $target           = shift;
+    my $parent_chip_unit = shift;
+
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing EX child: $child Type: $child_type");
+
+        if ($child_type eq "CORE")
+        {
+            processCore($targetObj, $child);
+        }
+    }
+
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_EQ_OFFSET
+                        + $parent_chip_unit);
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+}
+
+## CORE
+sub processCore
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_CORE_OFFSET + $chip_unit);
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+
+}
 
 ## MCBIST
 sub processMcbist
@@ -1417,6 +1525,17 @@ sub processMcbist
         }
     }
 
+    {
+        use integer;
+        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_MCBIST_OFFSET
+                            + $chip_unit);
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    }
+
+
 }
 
 
@@ -1440,6 +1559,16 @@ sub processMc
         {
             processMi($targetObj, $child);
         }
+    }
+
+    {
+        use integer;
+        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_MC_OFFSET
+                            + $chip_unit);
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
     }
 }
 
@@ -1465,6 +1594,23 @@ sub processMi
             processDmi($targetObj, $child);
         }
     }
+
+    {
+        use integer;
+        # There are a total of two MI units on an MC unit. So, to
+        # determine which MC an MI belongs to, the CHIP_UNIT of the MI can
+        # be divided by the number of units per MC to arrive at the correct
+        # offset to add to the pervasive MI parent offset.
+        my $numberOfMiPerMc = 2;
+        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_MI_OFFSET
+                            + ($chip_unit / $numberOfMiPerMc));
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    }
+
 }
 
 
@@ -1488,6 +1634,22 @@ sub processDmi
 
     $targetObj->setAttribute($target,"DMI_INBAND_BAR_BASE_ADDR_OFFSET",$value);
     $targetObj->deleteAttribute($target,"DMI_INBAND_BAR_ENABLE");
+
+    {
+        use integer;
+        # There are a total of four DMI units on an MC unit. So, to
+        # determine which MC an DMI belongs to, the CHIP_UNIT of the DMI can
+        # be divided by the number of units per MC to arrive at the correct
+        # offset to add to the pervasive DMI parent offset.
+        my $numberOfDmiPerMc = 4;
+        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_DMI_OFFSET
+                            + ($chip_unit / $numberOfDmiPerMc));
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    }
 }
 
 
@@ -1895,6 +2057,12 @@ sub processPec
     my $bitshift_const = 0;
     my $pec_num = $targetObj->getAttribute
                       ($target, "CHIP_UNIT");
+
+    my $chipletIdValue = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_PEC_OFFSET
+                        + $pec_num);
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $chipletIdValue);
 
     foreach my $pec_config_child (@{ $targetObj->getTargetChildren($target) })
     {
