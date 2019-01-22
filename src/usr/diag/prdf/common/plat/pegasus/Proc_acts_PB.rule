@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -2412,17 +2412,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[0]
      *  BAR_PE
      */
-    (PciNestFir_0, bit(0)) ? calloutConnPci0Th1NoGard;
+    (PciNestFir_0, bit(0)) ? SelfHighThr1;
 
     /** PCINESTFIR_1[0]
      *  BAR_PE
      */
-    (PciNestFir_1, bit(0)) ? calloutConnPci1Th1NoGard;
+    (PciNestFir_1, bit(0)) ? SelfHighThr1;
 
     /** PCINESTFIR_2[0]
      *  BAR_PE
      */
-    (PciNestFir_2, bit(0)) ? calloutConnPci2Th1NoGard;
+    (PciNestFir_2, bit(0)) ? SelfHighThr1;
 
     /** PCINESTFIR_0[1]
      *  NONBAR_PE
@@ -2532,32 +2532,32 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_0, bit(8)) ? calloutConnPci0Th1NoGard;
+    (PciNestFir_0, bit(8)) ? SelfHighThr1;
 
     /** PCINESTFIR_1[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_1, bit(8)) ? calloutConnPci1Th1NoGard;
+    (PciNestFir_1, bit(8)) ? SelfHighThr1;
 
     /** PCINESTFIR_2[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_2, bit(8)) ? calloutConnPci2Th1NoGard;
+    (PciNestFir_2, bit(8)) ? SelfHighThr1;
 
     /** PCINESTFIR_0[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_0, bit(9)) ? calloutConnPci0Th1NoGard;
+    (PciNestFir_0, bit(9)) ? SelfHighThr1;
 
     /** PCINESTFIR_1[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_1, bit(9)) ? calloutConnPci1Th1NoGard;
+    (PciNestFir_1, bit(9)) ? SelfHighThr1;
 
     /** PCINESTFIR_2[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_2, bit(9)) ? calloutConnPci2Th1NoGard;
+    (PciNestFir_2, bit(9)) ? SelfHighThr1;
 
     /** PCINESTFIR_0[10]
      *  PB_DATA_HANG_ERRORS
@@ -2676,17 +2676,17 @@ group gPciNestFir filter singlebit
     /** PCINESTFIR_0[17]
      *  HW_ERRORS
      */
-    (PciNestFir_0, bit(17)) ? calloutConnPci0Th1NoGard;
+    (PciNestFir_0, bit(17)) ? SelfHighThr1;
 
     /** PCINESTFIR_1[17]
      *  HW_ERRORS
      */
-    (PciNestFir_1, bit(17)) ? calloutConnPci1Th1NoGard;
+    (PciNestFir_1, bit(17)) ? SelfHighThr1;
 
     /** PCINESTFIR_2[17]
      *  HW_ERRORS
      */
-    (PciNestFir_2, bit(17)) ? calloutConnPci2Th1NoGard;
+    (PciNestFir_2, bit(17)) ? SelfHighThr1;
 
     /** PCINESTFIR_0[18]
      *  UNSOLICITIEDPBDATA
@@ -2898,7 +2898,7 @@ group gPciNestFir3 filter singlebit
     /** PCINESTFIR_3[0]
      *  BAR_PE
      */
-    (PciNestFir_3, bit(0)) ? calloutConnPci3Th1NoGard;
+    (PciNestFir_3, bit(0)) ? SelfHighThr1;
 
     /** PCINESTFIR_3[1]
      *  NONBAR_PE
@@ -2938,12 +2938,12 @@ group gPciNestFir3 filter singlebit
     /** PCINESTFIR_3[8]
      *  REGISTER_ARRAY_PE
      */
-    (PciNestFir_3, bit(8)) ? calloutConnPci3Th1NoGard;
+    (PciNestFir_3, bit(8)) ? SelfHighThr1;
 
     /** PCINESTFIR_3[9]
      *  PB_INTERFACE_PE
      */
-    (PciNestFir_3, bit(9)) ? calloutConnPci3Th1NoGard;
+    (PciNestFir_3, bit(9)) ? SelfHighThr1;
 
     /** PCINESTFIR_3[10]
      *  PB_DATA_HANG_ERRORS
@@ -2986,7 +2986,7 @@ group gPciNestFir3 filter singlebit
     /** PCINESTFIR_3[17]
      *  HW_ERRORS
      */
-    (PciNestFir_3, bit(17)) ? calloutConnPci3Th1NoGard;
+    (PciNestFir_3, bit(17)) ? SelfHighThr1;
 
     /** PCINESTFIR_3[18]
      *  UNSOLICITIEDPBDATA
@@ -3438,34 +3438,6 @@ actionclass calloutConnPci2NoGard
 actionclass calloutConnPci3NoGard
 {
     callout(connected(TYPE_PCI,3), MRU_MED, NO_GARD);
-};
-
-/** Callout the connected PCI 0 controller, threshold 1 , no garding */
-actionclass calloutConnPci0Th1NoGard
-{
-    calloutConnPci0NoGard;
-    threshold1;
-};
-
-/** Callout the connected PCI 1 controller, threshold 1, no garding */
-actionclass calloutConnPci1Th1NoGard
-{
-    callout(connected(TYPE_PCI,1), MRU_MED, NO_GARD);
-    threshold1;
-};
-
-/** Callout the connected PCI 2 controller, threshold 1, no garding */
-actionclass calloutConnPci2Th1NoGard
-{
-    calloutConnPci2NoGard;
-    threshold1;
-};
-
-/** Callout the connected PCI 3 controller, threshold 1, no garding */
-actionclass calloutConnPci3Th1NoGard
-{
-    calloutConnPci3NoGard;
-    threshold1;
 };
 
 /** Callout the connected PCI 0 controller, threshold 32 per day, no garding */
