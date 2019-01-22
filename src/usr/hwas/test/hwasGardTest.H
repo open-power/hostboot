@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,30 @@ bool compareAffinityCXX(const TargetInfo t1, const TargetInfo t2)
 class HwasGardTest: public CxxTest::TestSuite
 {
 public:
+    /**
+     *  @brief Test which verifies all targets have a valid deconfig rule
+     */
+    void testParentDeconfigRules()
+    {
+        TS_TRACE(INFO_MRK "testParentDeconfigRules: Started");
+        HWAS_INF("testParentDeconfigRules: Started");
+
+        TARGETING::TargetIterator l_pTarget;
+        for(    l_pTarget = TARGETING::targetService().begin();
+                l_pTarget != TARGETING::targetService().end();
+                ++l_pTarget
+           )
+        {
+            TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_rules =
+                l_pTarget->getAttr<ATTR_PARENT_DECONFIG_RULES>();
+            if (l_rules.valid == 0)
+            {
+                TS_FAIL("testParentDeconfigRules: 0x%.8X target has invalid ATTR_PARENT_DECONFIG_RULES",
+                  TARGETING::get_huid(*l_pTarget));
+            }
+        }
+        HWAS_INF("testParentDeconfigRules: Ended");
+    }
 
     /**
      *  @brief Test creating and getting a Deconfigure Record for a
@@ -4871,7 +4895,7 @@ public:
         l_targets.push_back(l_TargetInfo);
 
         presentByAssoc(l_targets, l_targToDeconfig);
-        
+
         // MI only
         l_ep[1].addLast(TYPE_MC, 0);
         l_ep[1].addLast(TYPE_MI, 0);
@@ -4881,7 +4905,7 @@ public:
         l_targets.push_back(l_TargetInfo);
 
         presentByAssoc(l_targets, l_targToDeconfig);
-        
+
         // DMI only
         l_ep[2].addLast(TYPE_MC, 0);
         l_ep[2].addLast(TYPE_MI, 0);
@@ -4980,7 +5004,7 @@ public:
 
         // Add MC Group 0
         //l_targets[0].pThisTarget = NULL;
-        l_targets[0].affinityPath.addLast(TYPE_MC, 0);        
+        l_targets[0].affinityPath.addLast(TYPE_MC, 0);
         l_ep[0] = l_targets[0].affinityPath; // SHOULD GET DECONFIGURED
         l_targets[0].type = TYPE_MC;
 
@@ -5020,7 +5044,7 @@ public:
         l_targets[4].affinityPath.addLast(TYPE_MI, 0);
         l_ep[4] = l_targets[4].affinityPath;
         l_targets[4].type = TYPE_MI;
-        
+
         // Add DMI Group 1
         //l_targets[5].pThisTarget = NULL;
         l_targets[5].affinityPath.addLast(TYPE_MC,1);
@@ -5154,7 +5178,7 @@ public:
         l_targets[7].affinityPath.addLast(TYPE_MC, 0);
         l_ep[7] = l_targets[7].affinityPath;
         l_targets[7].type = TYPE_MC;
-        
+
         // Add MI
         l_targets[8].pThisTarget = NULL;
         l_targets[8].affinityPath.addLast(TYPE_MC, 0);
@@ -5214,14 +5238,14 @@ public:
         l_targets[0].affinityPath.addLast(TYPE_MC, 0);
         l_ep[0] = l_targets[0].affinityPath; // SHOULD BE DECONFIGURED
         l_targets[0].type = TYPE_MC;
-        
+
         // Add MI Group 0
         l_targets[1].pThisTarget = NULL;
         l_targets[1].affinityPath.addLast(TYPE_MC, 0);
         l_targets[1].affinityPath.addLast(TYPE_MI, 0);
         l_ep[1] = l_targets[1].affinityPath; // SHOULD BE DECONFIGURED
         l_targets[1].type = TYPE_MI;
-        
+
         // Add DMI Group 0
         l_targets[2].pThisTarget = NULL;
         l_targets[2].affinityPath.addLast(TYPE_MC, 0);
@@ -5472,7 +5496,7 @@ public:
         l_targets[5].affinityPath.addLast(TYPE_MI, 0);
         l_ep[5] = l_targets[5].affinityPath;
         l_targets[5].type = TYPE_MI;
-        
+
         // Add MC  Group 0
         l_targets[6].pThisTarget = NULL;
         l_targets[6].affinityPath.addLast(TYPE_MC, 0);
@@ -5630,7 +5654,7 @@ public:
         l_targets[11].affinityPath.addLast(TYPE_MI, 0);
         l_ep[11] = l_targets[11].affinityPath;
         l_targets[11].type = TYPE_MI;  // SHOULD BE DECONFIGURED
-        
+
         // Add MI 1
         l_targets[12].pThisTarget = NULL;
         l_targets[12].affinityPath.addLast(TYPE_MC, 0);
