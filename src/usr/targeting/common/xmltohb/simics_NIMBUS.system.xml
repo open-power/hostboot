@@ -5383,7 +5383,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+        <default>affinity:sys-0/node-0/proc-0/nx-0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5736,7 +5736,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/nx-0</default>
+        <default>affinity:sys-0/node-0/proc-1/nx-0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>

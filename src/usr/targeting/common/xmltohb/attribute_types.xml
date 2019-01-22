@@ -5091,18 +5091,52 @@
 
   <attribute>
     <description>
-    Do not allow deconfiguration of this target to rollup to its parent
-      0x00 (false) = Allow parent deconfiguration rollup (default setting)
-      0x01 (true)  = Do not allow parent deconfiguration rollup
+      Rules on how to handle a deconfigure to parent level
     </description>
-    <id>PARENT_DECONFIG_DISABLED</id>
+    <id>PARENT_DECONFIG_RULES</id>
     <persistency>non-volatile</persistency>
     <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>0x0</default>
-      </uint8_t>
-    </simpleType>
+    <complexType>
+      <description>Structure which defines a target's deconfigure rules.
+        Structure is read-only.
+        </description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Are the rule bits set correctly?
+        </description>
+        <name>valid</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+            0b0: Target should NOT be deconfigured by child rollup
+            0b1: Target allowed to be deconfigured by child rollup
+            </description>
+        <name>childRollupAllowed</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>
+            0b0: Target should NOT rollup its deconfigure to its parent
+            0b1: Target should deconfigure its parent if no more functioning
+                 children of same type exist for its parent
+        </description>
+        <name>deconfigureParent</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>5</bits>
+        <default>0</default>
+        <description>Reserved for future use</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
     <no_export/>
   </attribute>
 

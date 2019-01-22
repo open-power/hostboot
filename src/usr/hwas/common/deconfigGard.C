@@ -1605,8 +1605,11 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
                                         const DeconfigureFlags i_deconfigRule )
 {
     Target * l_parent = NULL;
+    TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_child_rules =
+        i_child.getAttr<ATTR_PARENT_DECONFIG_RULES>();
 
-    if (!i_child.getAttr<ATTR_PARENT_DECONFIG_DISABLED>())
+    // Does this deconfigured child allow the deconfig to rollup to its parent
+    if (l_child_rules.deconfigureParent)
     {
         // General predicate to determine if target is functional
         PredicateIsFunctional isFunctional;
@@ -1615,32 +1618,40 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
 
         if ((l_parent != NULL) && isFunctional(l_parent))
         {
-            // Now check if parent has any functional affinity children
-            // that match the same type/class as the child
-            if ( !anyFunctionalChildLikeMe(l_parent, &i_child) )
+            TARGETING::ATTR_PARENT_DECONFIG_RULES_type l_parent_rules =
+                  l_parent->getAttr<ATTR_PARENT_DECONFIG_RULES>();
+            // Does the parent allow its deconfigured children to rollup their
+            // deconfigure to itself?  This is a safety check to prevent
+            // essential resources from being deconfigured via rollup.
+            if (l_parent_rules.childRollupAllowed)
             {
-                bool isDeconfigured = false;
-                HWAS_INF("_deconfigAffinityParent: deconfig functional parent 0x%.8X, EID 0x%.8X",
-                    get_huid(l_parent), i_errlEid);
-                _deconfigureTarget(*l_parent, i_errlEid,
-                                   &isDeconfigured, i_deconfigRule);
-                if (isDeconfigured)
+                // Now check if parent has any functional affinity children
+                // that match the same type/class as the child
+                if ( !anyFunctionalChildLikeMe(l_parent, &i_child) )
                 {
-                    HWAS_INF("_deconfigAffinityParent: roll-up parent 0x%.8X deconfig, EID 0x%.8X",
+                    bool isDeconfigured = false;
+                    HWAS_INF("_deconfigAffinityParent: deconfig functional parent 0x%.8X, EID 0x%.8X",
                         get_huid(l_parent), i_errlEid);
-
-                    // Just need to rollup the deconfig
-                    // (all children already marked as non-functional)
-                    // Roll up deconfigure to parent's parent,
-                    // call this to take care of special deconfig cases
-                    _deconfigParentAssoc(*l_parent, i_errlEid, i_deconfigRule);
+                    _deconfigureTarget(*l_parent, i_errlEid,
+                                       &isDeconfigured, i_deconfigRule);
+                    if (isDeconfigured)
+                    {
+                        HWAS_INF("_deconfigAffinityParent: roll-up/down parent 0x%.8X deconfig, EID 0x%.8X",
+                            get_huid(l_parent), i_errlEid);
+                        // need to account for possible non-like functional children
+                        _deconfigureByAssoc(*l_parent, i_errlEid, i_deconfigRule);
+                    }
+                }
+                else
+                {
+                    HWAS_INF("_deconfigAffinityParent: functional child found for parent 0x%.8X, EID 0x%.8X",
+                        get_huid(l_parent), i_errlEid);
                 }
             }
             else
             {
-                HWAS_INF("_deconfigAffinityParent: functional child found for parent 0x%.8X, EID 0x%.8X",
-                    get_huid(l_parent), i_errlEid);
-
+                HWAS_INF("_deconfigAffinityParent: parent 0x%.8X does NOT allow deconfig via child rollup",
+                  get_huid(l_parent));
             }
         }
         else
@@ -1654,7 +1665,7 @@ void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
     }
     else
     {
-       HWAS_INF("_deconfigAffinityParent: PARENT_DECONFIG_DISABLED for child 0x%.8X, EID 0x%.8X",
+       HWAS_INF("_deconfigAffinityParent: do not rollup deconfigured child 0x%.8X, EID 0x%.8X",
             get_huid(&i_child), i_errlEid);
     }
 }
@@ -1898,6 +1909,44 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 break;
             } // TYPE_EX
 
+            case TYPE_DIMM:
+            {
+                // Whenever a DIMM is deconfigured, we will also deconfigure
+                // the immediate parent target (e.g. MCA, MBA, etc) to ensure
+                // there is not an unbalanced load on the ports.
+
+                // General predicate to determine if target is functional
+                PredicateIsFunctional isFunctional;
+
+                //  get immediate parent (MCA/MBA/etc)
+                TargetHandleList pParentList;
+                PredicatePostfixExpr funcParent;
+                funcParent.push(&isFunctional);
+                targetService().getAssociated(pParentList,
+                        &i_target,
+                        TargetService::PARENT_BY_AFFINITY,
+                        TargetService::IMMEDIATE,
+                        &funcParent);
+
+                HWAS_ASSERT((pParentList.size() <= 1),
+                    "HWAS _deconfigParentAssoc: pParentList > 1");
+
+                // if parent hasn't already been deconfigured
+                //  then deconfigure it
+                if (!pParentList.empty())
+                {
+                    const Target *l_parentMba = pParentList[0];
+                    HWAS_INF("_deconfigParentAssoc DIMM parent: %.8X",
+                             get_huid(l_parentMba));
+                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
+                                       i_errlEid, NULL, i_deconfigRule);
+                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
+                                        i_errlEid, i_deconfigRule);
+                }
+
+                break;
+            } // TYPE_DIMM
+
             // If target is a bus endpoint, deconfigure its peer
             case TYPE_XBUS:
             case TYPE_ABUS:
@@ -1918,6 +1967,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 }
                 break;
             } // TYPE_XBUS, TYPE_ABUS, TYPE_PSI
+
             case TYPE_OBUS:
             {
                 // Only deconfigure peer endpoint if OBUS set to SMP mode
@@ -1940,7 +1990,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                     }
                 }
                 break;
-            }
+            } // TYPE_OBUS
 
             case TYPE_OBUS_BRICK:
             {
@@ -2061,8 +2111,8 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             }
             default:
             {
-              // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MI, TYPE_DMI,
-              // TYPE_MBA, TYPE_DIMM, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_PORE
+              // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
+              // TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
               _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
             }
             break;

@@ -58,7 +58,7 @@
       <id>ORDINAL_ID</id>
     </attribute>
     <attribute>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PHYS_PATH</id>
@@ -132,10 +132,6 @@
       <id>MRU_ID</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
-    </attribute>
-    <attribute>
       <id>POSITION</id>
     </attribute>
     <attribute>
@@ -192,8 +188,21 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PHYS_PATH</id>
@@ -290,6 +299,23 @@
     <attribute>
       <default>
         <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
           <id>reserved</id>
           <value>0</value>
         </field>
@@ -378,6 +404,23 @@
     <attribute>
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>OCMB_CHIP</default>
@@ -539,6 +582,23 @@
     </attribute>
     <attribute>
       <id>NVDIMM_ARMED</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>
@@ -755,6 +815,23 @@
       <id>NEST_VIO_ID</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PCI_BASE_ADDRS_32</id>
     </attribute>
     <attribute>
@@ -830,8 +907,21 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>TPM_INFO</id>
@@ -922,8 +1012,21 @@
       <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id>
@@ -951,6 +1054,23 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>ETH</default>
       <id>TYPE</id>
     </attribute>
@@ -962,6 +1082,23 @@
     <attribute>
       <default>UNIT</default>
       <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>FAN</default>
@@ -978,6 +1115,23 @@
     <attribute>
       <id>MODEL</id>
       <default>PCA9847</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>TYPE</id>
@@ -1029,6 +1183,23 @@
     </attribute>
     <attribute>
       <id>NV_STATUS_FLAG</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>POSITION</id>
@@ -1091,6 +1262,23 @@
       <id>OCC_MASTER_CAPABLE</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>OCC</default>
       <id>TYPE</id>
     </attribute>
@@ -1099,6 +1287,23 @@
   <targetType>
     <id>panel</id>
     <parent>unit</parent>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
     <attribute>
       <default>PANEL</default>
       <id>TYPE</id>
@@ -1111,6 +1316,23 @@
     <attribute>
       <default>UNIT</default>
       <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>PS</default>
@@ -1460,6 +1682,23 @@
       <id>O_EREPAIR_THRESHOLD_MNFG</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PAYLOAD_BASE</id>
     </attribute>
     <attribute>
@@ -1602,6 +1841,23 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>UART</default>
       <id>TYPE</id>
     </attribute>
@@ -1677,6 +1933,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -1701,6 +1974,23 @@
     <attribute>
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -1742,6 +2032,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -1769,8 +2076,21 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -1800,6 +2120,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>EX</default>
       <id>TYPE</id>
     </attribute>
@@ -1817,8 +2154,21 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
   </targetType>
 
@@ -1854,6 +2204,23 @@
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
       <default>0x00000033</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>TYPE</id>
@@ -1899,8 +2266,21 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <id>PARENT_DECONFIG_DISABLED</id>
-      <default>1</default>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -1938,6 +2318,23 @@
     <attribute>
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2006,8 +2403,21 @@
       <id>MSS_VOLT_VPP_OFFSET_MILLIVOLTS</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2059,6 +2469,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2106,6 +2533,23 @@
       <id>IBSCOM_MCS_BASE_ADDR</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2132,6 +2576,23 @@
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
       <default>0x00000033</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>TYPE</id>
@@ -2175,6 +2636,23 @@
     <attribute>
       <default>0x00000033</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2224,6 +2702,23 @@
       <id>HUID</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2246,6 +2741,23 @@
     <attribute>
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>NX</default>
@@ -2317,8 +2829,21 @@
       <id>OBUS_SLOT_INDEX</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2369,8 +2894,21 @@
       <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2407,8 +2945,21 @@
       <default>0x00000001</default>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PEER_PATH</id>
@@ -2464,6 +3015,23 @@
       <id>OCC_MASTER_CAPABLE</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>OCC</default>
       <id>TYPE</id>
     </attribute>
@@ -2503,6 +3071,23 @@
       <id>OMIC_PARENT</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2540,6 +3125,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2567,8 +3169,21 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2674,8 +3289,21 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>5</default>
@@ -2733,6 +3361,23 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2786,8 +3431,21 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>PPE</default>
@@ -2833,8 +3491,21 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>SBE</default>
@@ -2888,8 +3559,21 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2915,6 +3599,23 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
       <default>USB</default>
       <id>TYPE</id>
     </attribute>
@@ -2926,6 +3627,23 @@
     <attribute>
       <default>UNIT</default>
       <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
       <default>VRM</default>
