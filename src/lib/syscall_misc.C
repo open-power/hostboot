@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,6 +137,14 @@ int cpu_all_winkle()
     task_affinity_unpin();
 
     return rc;
+}
+
+int cpu_wakeup_core(uint64_t pir,uint64_t i_threads)
+{
+    return reinterpret_cast<int64_t>(
+        _syscall2(MISC_CPUWAKEUPCORE,
+                  reinterpret_cast<void*>(pir),
+                  reinterpret_cast<void*>(i_threads)));
 }
 
 

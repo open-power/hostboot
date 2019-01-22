@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -454,9 +454,42 @@ void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
         // Only wakeup the threads we were told to wakeup
         if( i_threads & (0x8000000000000000 >> i) )
         {
-            printk("Dbell pir 0x%lx\n", pir + i);
+            printk("Dbell:0x%lx\n", pir + i);
             //Initiate the Doorbell for this core/pir
             send_doorbell_wakeup(pir + i);
+        }
+    }
+
+    return;
+};
+
+void CpuManager::wakeupCore(uint64_t pir,uint64_t i_threads)
+{
+    size_t threads = getThreadCount();
+    pir = pir & ~(threads-1);
+
+    if (pir >=
+        (KERNEL_MAX_SUPPORTED_NODES * KERNEL_MAX_SUPPORTED_CPUS_PER_NODE))
+    {
+        TASK_SETRTN(TaskManager::getCurrentTask(), -ENXIO);
+        return;
+    }
+
+    //Send a message to userspace that a core with this base pir is being added
+    // userspace will know which threads on the core to expect already
+    InterruptMsgHdlr::addCpuCore(pir);
+
+    // Physically wakeup the threads with doorbells
+    //  Assumption is that startCore has already run so all
+    //  internal structures are setup
+    for(size_t i = 0; i < threads; i++)
+    {
+        // Only wakeup the threads we were told to wakeup
+        if( i_threads & (0x8000000000000000 >> i) )
+        {
+            printk("Dbell2:0x%lx\n", pir + i);
+            //Initiate the Doorbell for this core/pir
+            doorbell_send(pir + i);
         }
     }
 
