@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -78,7 +78,6 @@ OBJS += p9c_mss_thermal_init.o
 OBJS += p9c_mss_unmask_errors.o
 OBJS += p9c_mss_power_cleanup.o
 OBJS += p9c_cen_stopclocks.o
-# TODO: RTC 184860 Remove MCS acker workaround
 OBJS += p9_revert_sbe_mcs_setup.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk

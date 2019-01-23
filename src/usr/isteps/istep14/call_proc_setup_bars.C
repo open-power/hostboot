@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 #include <p9_mss_setup_bars.H>
 #include <p9c_mss_secure_boot.H>
 
-// TODO: RTC 184860 Remove MCS acker workaround
 #include <initservice/initserviceif.H>
 #include <p9_revert_sbe_mcs_setup.H>
 
@@ -68,10 +67,11 @@ void* call_proc_setup_bars (void *io_pArgs)
                "call_proc_setup_bars entry" );
 
 
-    // *******************************
-    // Start MCS acker workaround
-    // TODO: RTC 184860 Remove MCS acker workaround
-    // *******************************
+    // ***************************
+    // Start MCS reset
+    // Reset memory controller configuration written by SBE
+    // Close the MCS acker before enabling the real memory bars
+    // ***************************
     TARGETING::Target * l_masterProc;
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
@@ -102,9 +102,9 @@ void* call_proc_setup_bars (void *io_pArgs)
         // Commit error
         errlCommit(l_errl,SBE_COMP_ID);
     }
-    // *******************************
-    // End MCS acker workaround
-    // *******************************
+    // ***************************
+    // End MCS reset
+    // ***************************
 
 
     // Get all processor targets
