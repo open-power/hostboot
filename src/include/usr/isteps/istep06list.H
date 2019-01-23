@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@
  *  06.9    host_gard
  *      :   Do Gard
  *  06.10   host_revert_sbe_mcs_setup
- *      :   Clean up MCS extent regs
+ *      :   Clean up MCS extent regs (moved to istep14)
  *  06.11   host_start_occ_xstop_handler
  *      :   Start OpenPOWER xstop
  *  06.12   host_voltage_config
@@ -128,13 +128,9 @@ void* call_host_update_master_tpm( void *io_pArgs );
 void* host_gard( void *io_pArgs );
 
 /**
- * @brief   host_revert_sbe_mcs_setup (istep 6.10)
- *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
- *  return  any error logs to istep
+ * host_revert_sbe_mcs_setup (istep 6.10)
+ *    Moved to istep14 call_proc_setup_bars.C
  */
-void* call_host_revert_sbe_mcs_setup (void * io_pArgs);
 
 /**
  * @brief   host_start_occ_xstop_handler (istep 6.11)
@@ -213,9 +209,9 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,10,"host_revert_sbe_mcs_setup"),
-                ISTEP_06::call_host_revert_sbe_mcs_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                ISTEPNAME(06,10,""),        // not used. moved to istep14
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(06,11,"host_start_occ_xstop_handler"),
