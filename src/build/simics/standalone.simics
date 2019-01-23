@@ -40,26 +40,41 @@ if ($hb_skip_vpd_preload == 0) {
 
 # If Axone and Beyond, load VPD into DDIMM VPD
 if ($hb_mode == 0){
-            $dimmSpd = $hb_script_location + "/dimmspd.dat"
+            $dimmSpd  = $hb_script_location + "/dimmspd.dat"
+            $procMvpd = "/gsa/rchgsa/home/c/r/crgeddes/documents/hbBuild/procvpd.dat"
+
+            proc_hb0.seeprom0_image.load-file $procMvpd
+            echo "    - loaded MVPD to seeprom0"
+
+            proc_hb0.seeprom2_image.load-file $procMvpd
+            echo "    - loaded MVPD to seeprom2"
 
             ddimm0.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM0"
+            echo "    - loaded SPD to DDIMM0"
+
             ddimm1.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM1"
+            echo "    - loaded SPD to DDIMM1"
+
             ddimm2.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM2"
+            echo "    - loaded SPD to DDIMM2"
+
             ddimm3.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM3"
+            echo "    - loaded SPD to DDIMM3"
+
             ddimm4.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM4"
+            echo "    - loaded SPD to DDIMM4"
+
             ddimm5.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM5"
+            echo "    - loaded SPD to DDIMM5"
+
             ddimm6.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM6"
+            echo "    - loaded SPD to DDIMM6"
+
             ddimm7.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM7"
+            echo "    - loaded SPD to DDIMM7"
+
             ddimm8.VPD_0_image.load-file $dimmSpd
-                        echo "    - loaded SPD to DDIMM8"
+            echo "    - loaded SPD to DDIMM8"
 }
 
 # Turn on all processor cec-chips

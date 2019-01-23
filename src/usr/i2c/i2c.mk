@@ -24,4 +24,7 @@
 # IBM_PROLOG_END_TAG
 # common objects with runtime
 OBJS += eepromdd.o
+OBJS += eepromdd_hardware.o
+OBJS += eeprom_utils.o
 OBJS += errlud_i2c.o
+OBJS += $(if $(CONFIG_SUPPORT_EEPROM_CACHING),eepromCache.o)

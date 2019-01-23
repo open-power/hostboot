@@ -32,7 +32,6 @@
 #include <i2c/i2creasoncodes.H>
 #include <i2c/eepromddreasoncodes.H>
 #include <devicefw/driverif.H>
-#include "eepromdd.H"
 #include "i2c.H"
 
 namespace I2C

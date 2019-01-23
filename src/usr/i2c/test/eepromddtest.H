@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,11 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromddreasoncodes.H>
+#include <i2c/eeprom_const.H>
+#include <i2c/eepromif.H>
 #include <targeting/common/commontargeting.H>
 #include <pnor/pnorif.H>
 #include "i2ctest.H"
-#include "../eepromdd.H"
 
 #include <secureboot/service.H>
 
@@ -183,7 +184,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                         testData[i].size,
                                         DEVICE_EEPROM_ADDRESS(
                                                       testData[i].chip,
-                                                      testData[i].offset));
+                                                      testData[i].offset,
+                                                      EEPROM::AUTOSELECT));
 
                         if( err )
                         {
@@ -367,7 +369,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                 testBuffer,
                                 testBufLen,
                                 DEVICE_EEPROM_ADDRESS(SBE_BACKUP,
-                                                      offset));
+                                                      offset,
+                                                      EEPROM::AUTOSELECT));
 
                         if( err )
                         {
@@ -503,7 +506,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                 &data,
                                 dataSize,
                                 DEVICE_EEPROM_ADDRESS( 0x0,
-                                                       0x0 ) );
+                                                       0x0 ,
+                                                       EEPROM::AUTOSELECT) );
 
                 if( NULL == err )
                 {
@@ -567,7 +571,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                 &data,
                                 dataSize,
                                 DEVICE_EEPROM_ADDRESS( 0x0,
-                                                       offset ) );
+                                                       offset,
+                                                       EEPROM::AUTOSELECT) );
 
                 if( NULL == err )
                 {
@@ -630,7 +635,8 @@ class EEPROMTest: public CxxTest::TestSuite
                                 &data,
                                 dataSize,
                                 DEVICE_EEPROM_ADDRESS( LAST_CHIP_TYPE,
-                                                       0x0 ) );
+                                                       0x0,
+                                                       EEPROM::AUTOSELECT) );
 
                 if( NULL == err )
                 {

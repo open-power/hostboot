@@ -326,12 +326,14 @@ namespace DeviceFW
     /**
      * Construct the device addressing parameters for the EEPROM device ops.
      * @param[in] i_eeprom_enum - The chip number of the EEPROM to access. See
-     *                            eeprom_chip_types_t in eepromif.H
+     *                            EEPROM_ROLE in eeprom_const.H
      * @param[in] i_offset - The internal offset of the EEPROM slave device.
+     * @param[in] i_deviceSelect - Choose which device you want to perform op on:
+     *                             AUTOSELECT , CACHE, or HARDWARE
      */
-    #define DEVICE_EEPROM_ADDRESS( i_eeprom_enum, i_offset )\
+    #define DEVICE_EEPROM_ADDRESS( i_eeprom_enum, i_offset, i_deviceSelect )\
         DeviceFW::EEPROM, static_cast<uint64_t>(( i_eeprom_enum )),\
-            static_cast<uint64_t>(( i_offset ))
+            static_cast<uint64_t>(( i_offset )), static_cast<uint64_t>((i_deviceSelect))
 
     /**
      * Construct the device addressing parameters for the TPM device ops.

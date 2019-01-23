@@ -515,7 +515,8 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                                       i_numBytes,
                                       DEVICE_EEPROM_ADDRESS(
                                           EEPROM::VPD_PRIMARY,
-                                          i_byteAddr ) );
+                                          i_byteAddr,
+                                          EEPROM::AUTOSELECT) );
             if( err )
             {
                 TRACFCOMP(g_trac_spd,
@@ -596,7 +597,8 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
                                           i_numBytes,
                                           DEVICE_EEPROM_ADDRESS(
                                               EEPROM::VPD_PRIMARY,
-                                              i_offset ) );
+                                              i_offset,
+                                              EEPROM::AUTOSELECT) );
                 if( err )
                 {
                     break;

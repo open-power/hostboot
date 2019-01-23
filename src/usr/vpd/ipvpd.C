@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1792,7 +1792,7 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom ( uint64_t i_byteAddr,
                                   i_numBytes,
                                   DEVICE_EEPROM_ADDRESS(
                                       EEPROM::VPD_PRIMARY,
-                                      i_byteAddr ) );
+                                      i_byteAddr, EEPROM::AUTOSELECT ) );
         if( err )
         {
             break;
@@ -2230,7 +2230,8 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                       keywordSize,
                                       DEVICE_EEPROM_ADDRESS(
                                           EEPROM::VPD_PRIMARY,
-                                          i_offset+byteAddr ) );
+                                          i_offset+byteAddr,
+                                          EEPROM::AUTOSELECT) );
             if( err )
             {
                 break;
