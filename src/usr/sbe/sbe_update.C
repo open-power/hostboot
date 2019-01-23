@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2543,7 +2543,7 @@ namespace SBE
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSeepromSideVersionViaI2c(TARGETING::Target* i_target,
-                                     EEPROM::eeprom_chip_types_t i_seepromSide,
+                                     EEPROM::EEPROM_ROLE i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail)
     {
@@ -2576,7 +2576,8 @@ namespace SBE
                               sbeInfoSize_ECC,
                               DEVICE_EEPROM_ADDRESS(
                                             i_seepromSide,
-                                            SBE_VERSION_SEEPROM_ADDRESS));
+                                            SBE_VERSION_SEEPROM_ADDRESS,
+                                            EEPROM::HARDWARE));
 
             if(err)
             {
@@ -2846,7 +2847,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                sbeInfoSize_ECC,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS));
+                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             EEPROM::HARDWARE));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
@@ -2871,7 +2873,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                   sbeInfoSize_ECC,
                                   DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS));
+                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             EEPROM::HARDWARE));
 
                 if(err)
                 {
@@ -3082,7 +3085,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                               sbeEccImgSize,
                               DEVICE_EEPROM_ADDRESS(
                                             io_sbeState.seeprom_side_to_update,
-                                            SBE_IMAGE_SEEPROM_ADDRESS));
+                                            SBE_IMAGE_SEEPROM_ADDRESS,
+                                            EEPROM::HARDWARE));
 
             if(err)
             {
@@ -3124,7 +3128,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                sbeInfoSize_ECC,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS));
+                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             EEPROM::HARDWARE));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
@@ -5654,7 +5659,7 @@ errlHndl_t sbeDoReboot( void )
 /////////////////////////////////////////////////////////////////////
 errlHndl_t getHwKeyHashFromSbeImage(
                            TARGETING::Target* const i_target,
-                           const EEPROM::eeprom_chip_types_t i_seeprom,
+                           const EEPROM::EEPROM_ROLE i_seeprom,
                            const sbeSeepromSide_t i_bootSide,
                            SHA512_t o_hash,
                            const void * i_image_ptr) // defaults to nullptr
@@ -5748,7 +5753,8 @@ errlHndl_t getHwKeyHashFromSbeImage(
                               tmp_data_ECC,
                               size,
                               DEVICE_EEPROM_ADDRESS(i_seeprom,
-                                                    seeprom_offset));
+                                                    seeprom_offset,
+                                                    EEPROM::HARDWARE));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeImage() "
@@ -5925,7 +5931,8 @@ errlHndl_t getHwKeyHashFromSbeImage(
                               size,
                               DEVICE_EEPROM_ADDRESS(
                                                 i_seeprom,
-                                                seeprom_offset));
+                                                seeprom_offset,
+                                                EEPROM::HARDWARE));
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeyHashFromSbeImage() "

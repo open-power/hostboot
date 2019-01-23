@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1672,7 +1672,9 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
                         i_target,
                         o_data,
                         io_dataSize,
-                        DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY, 0));
+                        DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                              0,
+                                              EEPROM::AUTOSELECT));
         if(err)
         {
             HDAT_ERR("Reading Full vpd from Eeprom failed");

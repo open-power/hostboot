@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,9 @@ enum eepromModuleId
     EEPROM_PREPAREADDRESS                   = 0x04,
     EEPROM_READATTRIBUTES                   = 0x05,
     EEPROM_GETI2CMASTERTARGET               = 0x06,
+    EEPROM_CACHE_EEPROM                     = 0x07,
+    EEPROM_CLEAR_EECACHE                    = 0x08,
+    EEPROM_CACHE_PERFORM_OP                 = 0x09,
 };
 
 /**
@@ -74,12 +77,22 @@ enum eepromReasonCode
     EEPROM_INVALID_ADDR_OFFSET_SIZE         = EEPROM_COMP_ID | 0x07,
     EEPROM_OVERFLOW_ERROR                   = EEPROM_COMP_ID | 0x08,
     EEPROM_I2C_WRITE_PAGE_SIZE_ZERO         = EEPROM_COMP_ID | 0x09,
+    EEPROM_FAILED_TO_FLUSH_CONTENTS         = EEPROM_COMP_ID | 0x0A,   // Error occured while trying to flush the mmio pages out
+                                                                       // containing contents of an EEPROM's cached data in the EECACHE
+                                                                       // PNOR section
+    EEPROM_FAILED_TO_FLUSH_HEADER           = EEPROM_COMP_ID | 0x0B,   // Error occured while trying to flush the mmio page out
+                                                                       // containing EECACHE header the to pnor
+    EEPROM_I2C_MUX_PATH_ERROR               = EEPROM_COMP_ID | 0x0C,
+    EEPROM_NOT_IN_CACHE                     = EEPROM_COMP_ID | 0x0D,
+    EEPROM_NEW_DEVICE_DETECTED              = EEPROM_COMP_ID | 0x0E,   // While looking up a part, found that current EEPROM size does not
+                                                                       // match what we have seen in previous IPLs indicating a new part has
+                                                                       // been installed on the system.
 };
 
 enum UserDetailsTypes
 {
-        EEPROM_UDT_NO_FORMAT       = 0x0,
-        EEPROM_UDT_PARAMETERS      = 0x1,
+    EEPROM_UDT_NO_FORMAT       = 0x0,
+    EEPROM_UDT_PARAMETERS      = 0x1,
 };
 
 };  // end EEPROM

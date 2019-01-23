@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,7 +146,7 @@ namespace SBE
      * @return errlHndl_t     Error log handle on failure; otherwise nullptr
      */
     errlHndl_t getHwKeyHashFromSbeImage(TARGETING::Target* i_target,
-                                        EEPROM::eeprom_chip_types_t i_seeprom,
+                                        EEPROM::EEPROM_ROLE i_seeprom,
                                         sbeSeepromSide_t i_bootSide,
                                         SHA512_t o_hash,
                                         const void * i_image_ptr = nullptr);

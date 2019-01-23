@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -3863,6 +3863,8 @@ sub writeTargetErrlHFile {
     print $outFile "\n";
     print $outFile "#ifndef ERRL_UDTARGET_H\n";
     print $outFile "#define ERRL_UDTARGET_H\n";
+    print $outFile "\n";
+    print $outFile "#include <string.h>\n";
     print $outFile "\n";
     print $outFile "namespace ERRORLOG\n";
     print $outFile "{\n";

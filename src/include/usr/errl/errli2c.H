@@ -62,7 +62,7 @@ struct I2cMatchingInfo_t
     uint8_t port;
     uint8_t devAddr;
     uint8_t chipCount;
-    EEPROM::eeprom_chip_types_t chipType;
+    EEPROM::EEPROM_ROLE chipType;
     const TARGETING::Target* tgt;
     uint8_t targetAncestryDepth;
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <errl/errlentry.H>           // errlHndl_t
 #include <errl/hberrltypes.H>         // ERRORLOG::errlSeverity_t
 #include <targeting/common/target.H>  // Target
-#include <i2c/eepromif.H>             // eeprom_chip_types_t
+#include <i2c/eepromif.H>             // EEPROM_ROLE
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
 #include <util/utilxipimage.H>        // Util::imageBuild_t
 #include <p9_infrastruct_help.H>      // MAX_RING_BUF_SIZE, etc
@@ -175,7 +175,7 @@ namespace SBE
 
         // Update Fields and New Fields to be Written to the Target
         sbeUpdateActions_t            update_actions;
-        EEPROM::eeprom_chip_types_t   seeprom_side_to_update;
+        EEPROM::EEPROM_ROLE   seeprom_side_to_update;
 
         sbeSeepromVersionInfo_t       new_seeprom_ver;
         bool                          new_readBack_check;
@@ -342,7 +342,7 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t getSeepromSideVersionViaI2c(TARGETING::Target* i_target,
-                                     EEPROM::eeprom_chip_types_t i_seepromSide,
+                                     EEPROM::EEPROM_ROLE i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail);
     /**

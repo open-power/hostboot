@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -842,12 +842,12 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             // Inputs
             uint8_t                      i_situation;
-            SBE::sbeSeepromSide_t       i_cur;     // current_seeprom_side
+            SBE::sbeSeepromSide_t        i_cur;     // current_seeprom_side
             uint8_t                      i_flags;   // mvpdSbKeyword.flags
 
             // Expected Output
             sbeUpdateActions_t            o_update_actions;
-            EEPROM::eeprom_chip_types_t   o_seeprom;
+            EEPROM::EEPROM_ROLE           o_seeprom;
             uint8_t                       o_flags;   // mvpdSbKeyword.flags
 
         }  testData[] =

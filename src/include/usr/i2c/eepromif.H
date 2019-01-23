@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,33 +26,10 @@
 #define __EEPROMIF_H
 
 #include <list>
+#include <i2c/eeprom_const.H>
 
 namespace EEPROM
 {
-
-/**
- * @brief Enumerations to link EEPROM types to EEPROM's chip number behind
- *        a device
-*/
-typedef enum
-{
-  VPD_PRIMARY   = 0,
-  VPD_BACKUP    = 1,
-  SBE_PRIMARY   = 2,
-  SBE_BACKUP    = 3,
-  LAST_CHIP_TYPE,
-  INVALID_CHIP_TYPE = LAST_CHIP_TYPE,
-  FIRST_CHIP_TYPE = VPD_PRIMARY
-} eeprom_chip_types_t;
-
-/*
- * @brief Miscellaneous enums for EEPROM
- */
-enum
-{
-    EEPROM_PAGE_SIZE = 0x100,
-    EEPROM_DEVADDR_INC = 2
-};
 
 /**
  * @brief This function tests to see if the VPD_PRIMARY eeprom is present
@@ -65,26 +42,49 @@ enum
 bool eepromPresence ( TARGETING::Target * i_target );
 
 /**
- * @brief Define a set of information about all EEPROMs in the
- *        system (primarily used to populate HDAT)
+ * @brief this function will read all of the associated attributes needed
+ *      to access the intended EEPROM.  These attributes will be used to
+ *      determine the type of I2C device as well as how to address it via
+ *      the I2C device driver.
+ *
+ * @param[in] i_target - Target device.
+ *
+ * @param[out] o_i2cInfo - The structure that will contain the attribute data
+ *      read from the target device.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
  */
-struct EepromInfo_t
-{
-    TARGETING::Target* i2cMaster; //< I2C Master chip
-    uint64_t engine; //< I2C engine (relative to master chip)
-    uint64_t port; //< I2C port (relative to engine)
-    uint64_t busFreq; //< Bus speed in Hz
-    uint64_t devAddr; //< I2C device address (relative to port)
-    uint64_t sizeKB; //< Total eeprom size in KB
-    uint64_t chipCount; //< Number of chips making up eeprom device
-    uint64_t addrBytes; //< Number of bytes required for addressing
-    eeprom_chip_types_t device; //< Identifies role of eeprom
-    TARGETING::Target* assocTarg; //< Target associated with this device
-};
+errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
+                                  eeprom_addr_t & o_i2cInfo );
+
+
+/**
+ * @brief This function determines whether or not the i2cMasterPath provided
+ *        along with i_i2cInfo points to a valid target. If it does not,
+ *        o_target will result as NULL. If the target is valid then the
+ *        o_target will point to the target pointer which i2cMasterPath
+ *        represents.
+ *
+ * @param[in] i_target - The current Target.
+ *
+ * @param[in] i_i2cInfo - Structure of I2C parameters needed to execute
+ *      the command to the I2C device driver.
+ *      NOTE: it is expected i2cMasterPath member is filled out
+ *
+ * @param[out] o_target - The "new" target that will be used for all operations
+ *      from this point on.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      error log.
+ */
+errlHndl_t eepromGetI2CMasterTarget ( TARGETING::Target * i_target,
+                                      const eeprom_addr_t & i_i2cInfo,
+                                      TARGETING::Target * &o_target );
 
 /**
  * @brief Return a set of information related to every unique
- *        EEPROM in the system
+ *        EEPROM in the system (currently used to build HDAT structure)
  *
  * @param[out] o_info - list of EEPROM Information
  *
@@ -92,6 +92,26 @@ struct EepromInfo_t
  *      the error log.
  */
 void getEEPROMs( std::list<EepromInfo_t>& o_info );
+
+/**
+ *
+ * @brief A useful utility to dump (trace out) the EepromVpdPrimaryInfo data.
+ *        Use as needed.
+ *
+ * @param [in] i_i2cInfo - The EepromVpdPrimaryInfo data to dump for user
+ *
+ */
+void dumpEepromData(const TARGETING::EepromVpdPrimaryInfo & i_i2cInfo);
+
+/**
+ *
+ * @brief A useful utility to dump (trace out) the eeprom_addr_t data.
+ *         Use as needed.
+ *
+ * @param [in] i_i2cInfo - The eeprom_addr_t data to dump for user
+ *
+ */
+void dumpEepromData(const eeprom_addr_t & i_i2cInfo);
 
 };  // end namespace EEPROM
 
