@@ -3998,6 +3998,10 @@
         <id>TPM_ROLE</id>
         <default>TPM_PRIMARY</default>
     </attribute>
+    <attribute>
+      <id>TPM_MODEL</id>
+      <default>2</default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
