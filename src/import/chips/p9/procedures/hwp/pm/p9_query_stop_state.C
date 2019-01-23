@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -369,12 +369,12 @@ query_stop_state(
             FAPI_INF( "Failed to read EQ_CLOCK_STAT_SL" );
             //We can't determine L2 and L3 clock state. So, let us prevent
             //read from ex in question to prevent any further error.
-            l_clk_pfet.l2_hasclocks         =    0;
-            l_clk_pfet.l3_hasclocks         =    0;
-            l_clk_pfet.c_exec_hasclocks[0]  =    0;
-            l_clk_pfet.c_exec_hasclocks[1]  =    0;
-            l_clk_pfet.c_pc_hasclocks[0]    =    0;
-            l_clk_pfet.c_pc_hasclocks[1]    =    0;
+            o_stop_attrs.l2_hasclocks       =    0;
+            o_stop_attrs.l3_hasclocks       =    0;
+            o_stop_attrs.c0_exec_hasclocks  =    0;
+            o_stop_attrs.c1_exec_hasclocks  =    0;
+            o_stop_attrs.c0_pc_hasclocks    =    0;
+            o_stop_attrs.c1_pc_hasclocks    =    0;
             fapi2::current_err              =    fapi2::RC_QUAD_CLOCK_STATUS_READ_FAIL;
             goto fapi_try_exit;
         }
@@ -408,9 +408,11 @@ query_stop_state(
             if( l_tempRc )
             {
                 FAPI_INF( "Error reading data from C_CLOCK_STAT_SL" );
-                l_clk_pfet.c_exec_hasclocks[l_pos]  =    0;
-                l_clk_pfet.c_pc_hasclocks[l_pos]    =    0;
-                fapi2::current_err                  =    fapi2::RC_CORE_CLOCK_STATUS_READ_FAIL;
+                o_stop_attrs.c0_exec_hasclocks  =    0;
+                o_stop_attrs.c1_exec_hasclocks  =    0;
+                o_stop_attrs.c0_pc_hasclocks    =    0;
+                o_stop_attrs.c1_pc_hasclocks    =    0;
+                fapi2::current_err              =    fapi2::RC_CORE_CLOCK_STATUS_READ_FAIL;
                 goto fapi_try_exit;
             }
 
