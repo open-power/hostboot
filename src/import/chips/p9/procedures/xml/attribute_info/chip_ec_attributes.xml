@@ -7827,13 +7827,15 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
      HW477626 Dangerous Elk: Enable L2 reservation protection for performance
+     Temporarily enable for CDD13 native modes only; will apply to all CDD12/13
+     in future change.
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x12</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <value>0x13</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
