@@ -145,7 +145,6 @@ class pre_data_engine
             return fapi2::current_err;
         }
 
-
         ///
         /// @brief Set ATTR_EFF_HYBRID
         /// @return FAPI2_RC_SUCCESS iff ok

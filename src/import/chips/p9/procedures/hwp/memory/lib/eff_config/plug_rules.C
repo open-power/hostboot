@@ -40,7 +40,7 @@
 #include <lib/mss_vpd_decoder.H>
 
 #include <lib/dimm/rank.H>
-#include <lib/utils/assert_noexit.H>
+#include <generic/memory/lib/utils/assert_noexit.H>
 #include <lib/eff_config/plug_rules.H>
 
 using fapi2::TARGET_TYPE_MCA;

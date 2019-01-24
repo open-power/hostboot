@@ -54,7 +54,6 @@ relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE
 
 ///
 /// @brief Return a DIMM's relative position from an OCMB
-/// @tparam MC the type of memory controller (defaults to DEFAULT_MC_TYPE)
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
 ///
@@ -68,7 +67,6 @@ relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 
 ///
 /// @brief Return an MEM_PORT's relative position from an OCMB
-/// @tparam MC the type of memory controller (defaults to DEFAULT_MC_TYPE)
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
 ///
@@ -78,6 +76,18 @@ relative_pos<fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYP
 {
     typedef mcTypeTraits<mc_type::EXPLORER> TT;
     return pos(i_target) % TT::PORTS_PER_OCMB;
+}
+
+///
+/// @brief Return an MEM_PORT's relative position from itself
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    return 0;
 }
 
 }// mss

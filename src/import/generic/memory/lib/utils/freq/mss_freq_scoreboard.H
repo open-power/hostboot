@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -574,7 +574,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
         FAPI_ASSERT( (l_dimms_on_port <= TT::MAX_DIMM_PER_PORT),
                      fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
                      .set_DIMM_COUNT(l_dimms_on_port)
-                     .set_MCA_TARGET(p),
+                     .set_PORT_TARGET(p),
                      "Seeing %d DIMM on port %s",
                      l_dimms_on_port,
                      mss::c_str(p));

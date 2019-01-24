@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,42 @@ inline int64_t round_half_away_from_zero( const double i_input )
     }
 
     return ( i_input < 0.0 ? static_cast<int64_t>(i_input - 0.5) :  static_cast<int64_t>(i_input + 0.5) );
+}
+
+///
+/// @brief Divide and round unsigned values
+/// @tparam T input and output types
+/// @param[in] i_divisor the divisor (number to be divided)
+/// @param[in] i_dividend the dividend (number to divide by)
+/// @param[out] o_quotient the quotient
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+template<typename T>
+inline fapi2::ReturnCode divide_and_round( const T i_divisor,
+        const T i_dividend,
+        T& o_quotient )
+{
+    o_quotient = 0;
+
+    // Zero dividend would cause a divide-by-zero, so prevent that
+    FAPI_ASSERT( (i_dividend != 0),
+                 fapi2::MSS_DIVIDE_BY_ZERO()
+                 .set_DIVISOR(i_divisor)
+                 .set_DIVIDEND(i_dividend),
+                 "Caught an attempt to divide by zero (%d / %d)",
+                 i_divisor, i_dividend );
+
+    {
+        const auto l_quotient_unrounded = i_divisor / i_dividend;
+        const auto l_remainder = i_divisor % i_dividend;
+
+        // Round the quotient up or down depending on the remainder
+        o_quotient = l_quotient_unrounded + ((l_remainder >= i_dividend / 2) ? 1 : 0);
+    }
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 

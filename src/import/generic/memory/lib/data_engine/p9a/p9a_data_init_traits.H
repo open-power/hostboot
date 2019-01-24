@@ -208,6 +208,84 @@ struct attrEngineTraits<pre_data_init_fields, DRAM_GEN>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
+/// @note pre_data_init_fields, HOST_TO_DDR_SPEED_RATIO specialization
+///
+template<>
+struct attrEngineTraits<pre_data_init_fields, HOST_TO_DDR_SPEED_RATIO>
+{
+    using attr_type = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_Type;
+    using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_HOST_TO_DDR_SPEED_RATIO;
+
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the attr target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return mss::attr::get_host_to_ddr_speed_ratio(i_target, o_setting);
+    }
+
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the attr target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return mss::attr::set_host_to_ddr_speed_ratio(i_target, i_setting);
+    }
+
+    ///
+    /// @brief Computes setting for attribute
+    /// @param[in] i_spd_data SPD data
+    /// @param[in] i_setting value we want to set attr with
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+            attr_integral_type& o_setting)
+    {
+        // =========================================================
+        // DDR4 SPD Document Release 4
+        // Byte 220 (0x0DC): Host Interface Speed to DDR Interface Speed Ratio
+        // =========================================================
+        static const std::vector< std::pair<uint8_t, uint8_t> > HOST_TO_DDR_SPEED_RATIO_MAP =
+        {
+            // {key byte, speed ratio}
+            {0, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_1_TO_1},
+            {1, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_2_TO_1},
+            {2, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_4_TO_1},
+            {3, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_8_TO_1},
+            {4, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_16_TO_1},
+            {5, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_32_TO_1},
+            {6, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_64_TO_1},
+            {7, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_128_TO_1},
+            // All others reserved or not supported
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_value = 0;
+        FAPI_TRY( i_spd_data.host_to_ddr_speed_ratio(l_value),
+                  "%s failed to get host to DDR speed ratio from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY( lookup_table_check(l_dimm, HOST_TO_DDR_SPEED_RATIO_MAP, FFDC_CODE, l_value, o_setting),
+                  "%s failed HOST_TO_DDR_SPEED_RATIO lookup check", spd::c_str(l_dimm) );
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+};
+
+///
+/// @brief Traits for pre_data_engine
+/// @class attrEngineTraits
 /// @note pre_data_init_fields, HYBRID specialization
 ///
 template<>

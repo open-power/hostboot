@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,8 +45,10 @@
 #include <fapi2.H>
 
 // mss lib
+#include <lib/freq/nimbus_freq_traits.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
+#include <generic/memory/lib/data_engine/pre_data_init.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -80,6 +82,9 @@ extern "C"
             FAPI_INF("Seeing no DIMM on %s, no freq to set", mss::c_str(l_mcbist));
             return FAPI2_RC_SUCCESS;
         }
+
+        // We will first set pre-eff_config attributes
+        FAPI_TRY(mss::set_pre_init_attrs<mss::proc_type::NIMBUS>(l_mcbist));
 
         FAPI_TRY(mss::generate_freq<mss::proc_type::NIMBUS>(l_mcbist));
 

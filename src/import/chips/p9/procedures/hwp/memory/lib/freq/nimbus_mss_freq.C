@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,14 +39,14 @@
 
 // Memory libraries
 #include <lib/mss_attribute_accessors.H>
-#include <lib/utils/assert_noexit.H>
 #include <lib/shared/mss_const.H>
+#include <lib/freq/nimbus_freq_traits.H>
 #include <lib/freq/sync.H>
 #include <lib/workarounds/freq_workarounds.H>
 
 // Generic libraries
+#include <generic/memory/lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 
@@ -94,7 +94,7 @@ fapi2::ReturnCode set_CL_attr<mss::proc_type::NIMBUS>(
     FAPI_ASSERT( l_temp[l_index] == i_cas_latency,
                  fapi2::MSS_BAD_CL_CAST()
                  .set_CL(i_cas_latency)
-                 .set_MCA_TARGET(i_target),
+                 .set_PORT_TARGET(i_target),
                  "%s bad cast for cas latency from %d to %d",
                  mss::c_str(i_target),
                  i_cas_latency,
@@ -169,6 +169,133 @@ fapi2::ReturnCode get_dimm_type<mss::proc_type::NIMBUS>(
 }
 
 ///
+/// @brief Calls out the code if we calculated a bad frequency for the domain - specialization for NIMBUS and MCBIST
+/// @param[in] i_target target on which to operate
+/// @param[in] i_final_freq frequency calculated for domain
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+    const uint64_t i_final_freq)
+{
+    using TT = mss::frequency_traits<mss::proc_type::NIMBUS>;
+
+    // Declaring temporary variables to avoid linker errors associated with FAPI_ASSERT
+    const auto FREQ0 = TT::SUPPORTED_FREQ0;
+    const auto FREQ1 = TT::SUPPORTED_FREQ1;
+    const auto FREQ2 = TT::SUPPORTED_FREQ2;
+    const auto FREQ3 = TT::SUPPORTED_FREQ3;
+
+    // If we don't find a valid frequency OR don't get a 0 (nothing configured on this clock domain), then error out
+    FAPI_ASSERT( std::binary_search(TT::SUPPORTED_FREQS.begin(), TT::SUPPORTED_FREQS.end(), i_final_freq) ||
+                 i_final_freq == 0,
+                 fapi2::MSS_BAD_FREQ_CALCULATED()
+                 .set_MSS_FREQ(i_final_freq)
+                 .set_TARGET(i_target)
+                 .set_PROC_TYPE(mss::proc_type::NIMBUS)
+                 .set_SUPPORTED_FREQ_0(FREQ0)
+                 .set_SUPPORTED_FREQ_1(FREQ1)
+                 .set_SUPPORTED_FREQ_2(FREQ2)
+                 .set_SUPPORTED_FREQ_3(FREQ3),
+                 "%s: Calculated FREQ (%d) isn't supported",
+                 mss::c_str(i_target),
+                 i_final_freq);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the number of ranks in the VPD accessor - specialization for Nimbus and MCBIST
+/// @param[in] i_target the target on which to set the frequency values
+/// @param[in,out] io_vpd_info VPD information that needs to be configured
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode configure_vpd_ranks<mss::proc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info)
+{
+    using TT = mss::frequency_traits<mss::proc_type::NIMBUS>;
+
+    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
+
+    // ATTR to update
+    // Note: this flat out assumes that we have two DIMM per port max.
+    // This goes against the directive to have arrays be dynamic in length and derived from ATTR's
+    FAPI_TRY( get_master_rank_per_dimm<mss::proc_type::NIMBUS>(i_target, &(l_rank_count_dimm[0])) );
+    FAPI_TRY( get_dimm_type<mss::proc_type::NIMBUS>(i_target, &(l_dimm_type[0])) );
+
+    // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
+    // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
+    // As such, they act as a single load, similar to a 1R DIMM would
+    // per the IBM signal integrity team, the 1R DIMM settings should be used for LRDIMM's
+    // So, if we are LRDIMM's and have ranks, we want to only note it as a 1R DIMM for purposes of querying the VPD
+    FAPI_DBG("%s for DIMM 0 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+    FAPI_DBG("%s for DIMM 1 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+
+    l_rank_count_dimm[0] = ((l_dimm_type[0] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[0] > 0)) ? 1 : l_rank_count_dimm[0];
+    l_rank_count_dimm[1] = ((l_dimm_type[1] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[1] > 0)) ? 1 : l_rank_count_dimm[1];
+
+    FAPI_DBG("after LR modification %s for DIMM 0 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+    FAPI_DBG("after LR modification %s for DIMM 1 rank count %u dimm type %u %s",
+             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
+
+    io_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
+    io_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+
+    FAPI_INF("%s. VPD info - rank count for dimm_0: %d, dimm_1: %d",
+             mss::c_str(i_target), io_vpd_info.iv_rank_count_dimm_0, io_vpd_info.iv_rank_count_dimm_1);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check VPD config for support of a given freq - specialization for NIMBUS
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_proposed_freq frequency to check for support
+/// @param[out] o_supported true if VPD supports the proposed frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    const uint64_t i_proposed_freq,
+    bool& o_supported)
+{
+    using TT = mss::frequency_traits<mss::proc_type::NIMBUS>;
+
+    o_supported = false;
+
+    fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
+
+    const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
+
+    // Configures the number of ranks for the VPD configuration
+    FAPI_TRY( configure_vpd_ranks<mss::proc_type::NIMBUS>(i_target, l_vpd_info),
+              "%s failed to configure VPD ranks", mss::c_str(i_target));
+    l_vpd_info.iv_is_config_ffdc_enabled = false;
+
+    l_vpd_info.iv_freq_mhz = i_proposed_freq;
+    FAPI_INF("VPD info - DDR frequency: %d MT/s", i_proposed_freq);
+
+    // Checks if this VPD configuration is supported
+    FAPI_TRY(is_vpd_config_supported<mss::proc_type::NIMBUS>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
+             "%s failed to determine if %u freq is supported", mss::c_str(i_target), i_proposed_freq);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Update supported frequency scoreboard according to processor limits - specialization for NIMBUS and MCBIST
 /// @param[in] i_target processor frequency domain
 /// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
@@ -211,10 +338,10 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::NIMBUS>(const fapi2:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode callout_no_common_freq<mss::proc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
-        i_target,
-        const bool l_supported_freq,
-        const uint64_t i_num_ports)
+fapi2::ReturnCode callout_no_common_freq<mss::proc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+    const bool l_supported_freq,
+    const uint64_t i_num_ports)
 {
     std::vector<uint32_t> l_max_mrw_freqs(NUM_MAX_FREQS, 0);
     uint8_t l_req_sync_mode = 0;

@@ -36,6 +36,7 @@
 #include <utility>
 
 // mss lib
+#include <lib/freq/nimbus_freq_traits.H>
 #include <lib/utils/fake_vpd.H>
 #include <lib/mss_vpd_decoder.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>

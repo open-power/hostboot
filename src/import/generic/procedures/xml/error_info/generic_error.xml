@@ -38,21 +38,15 @@
 <hwpErrors>
 
   <hwpError>
-    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
+    <rc>RC_MSS_DIVIDE_BY_ZERO</rc>
     <description>
-        No frequency found for MC Either bad mrw attribute or no DIMMS installed?
-        Should be a code bug if we get here
+      Attempt to divide by zero
     </description>
-    <ffdc>MSS_FREQ</ffdc>
-    <ffdc>SUPPORTED_FREQ_0</ffdc>
-    <ffdc>SUPPORTED_FREQ_1</ffdc>
-    <ffdc>SUPPORTED_FREQ_2</ffdc>
-    <ffdc>SUPPORTED_FREQ_3</ffdc>
-    <ffdc>TARGET</ffdc>
-    <ffdc>PROC_TYPE</ffdc>
+    <ffdc>DIVISOR</ffdc>
+    <ffdc>DIVIDEND</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
 

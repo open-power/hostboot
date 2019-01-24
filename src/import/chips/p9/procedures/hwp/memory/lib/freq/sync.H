@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -66,12 +67,6 @@ inline bool is_nest_freq_valid (const uint64_t i_proposed_freq)
 {
     return ( std::binary_search(NIMBUS_NEST_FREQS.begin(), NIMBUS_NEST_FREQS.end(), i_proposed_freq) );
 }
-
-enum class speed_equality : uint8_t
-{
-    NOT_EQUAL_DIMM_SPEEDS = 0, ///< denotes all DIMMs don't have the same speed
-    EQUAL_DIMM_SPEEDS = 1, ///< denotes all DIMMs have the same speed
-};
 
 ///
 /// @brief Retrieves a mapping of MSS frequency values per mcbist target

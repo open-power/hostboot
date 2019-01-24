@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <vpd_access.H>
 #include <mss_generic_attribute_getters.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
+#include <lib/freq/axone_freq_traits.H>
+#include <lib/freq/axone_sync.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -53,21 +55,15 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     // Workaround until DIMM level attrs work
     uint8_t l_ranks[mss::exp::MAX_DIMM_PER_PORT] = {};
 
-    // Get EFD size - should only need to do it once
-    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-    fapi2::MemVpdData_t l_vpd_type(fapi2::EFD);
-    fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
-    FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr) );
-
     FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_target, l_ranks) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         uint8_t l_dimm_index = 0;
         uint64_t l_freq = 0;
+        uint64_t l_omi_freq = 0;
         FAPI_TRY( mss::attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq) );
-
-        FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(dimm) );
+        FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq, l_omi_freq));
 
         // Quick hack to get the index until DIMM level attrs work
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_REL_POS, dimm, l_dimm_index) );
@@ -76,9 +72,15 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         {
             std::shared_ptr<mss::efd::base_decoder> l_efd_data;
 
-            // Get EFD data
+            // Get EFD size
+            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+            fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
+            fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
             l_vpd_info.iv_rank = rank;
-            l_vpd_info.iv_omi_freq_mhz = l_freq;
+            l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
+            FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
+
+            // Get EFD data
             std::vector<uint8_t> l_vpd_raw (l_vpd_info.iv_size, 0);
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
 

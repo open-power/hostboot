@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,14 +30,23 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+// fapi2
+#include <fapi2.H>
+
+// mss lib
 #include <p9a_mss_freq.H>
+
+#include <lib/freq/axone_freq_traits.H>
 #include <generic/memory/lib/data_engine/p9a/p9a_data_init_traits.H>
+#include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/spd/spd_facade.H>
+#include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -46,6 +55,13 @@
 ///
 fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
+    // If there are no DIMM, we can just get out.
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("Seeing no DIMM on %s, no freq to set", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // We will first set pre-eff_config attribes
     for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
@@ -60,12 +76,12 @@ fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
             FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
 
             FAPI_TRY( mss::attr_eff_engine<mss::pre_data_init_fields>::set(l_spd_decoder) );
+            FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(d) );
         }
 
-        // TK - Remove hard-code FREQ -- Should we have enums? Louis problem now
-        uint64_t HARDCODE_FREQ_LOUIS_REMOVE = 25600;
-        FAPI_TRY( mss::attr::set_freq(i_target, HARDCODE_FREQ_LOUIS_REMOVE) );
-    }// dimm
+    }
+
+    FAPI_TRY(mss::generate_freq<mss::proc_type::AXONE>(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

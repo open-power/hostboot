@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #define P9A_MSS_FREQ_H_
 
 #include <fapi2.H>
-#include <vector>
 
 typedef fapi2::ReturnCode (*p9a_mss_freq_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&);
 

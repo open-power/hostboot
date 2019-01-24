@@ -58,21 +58,9 @@ struct setTimingTraits< exp::attr_eff_engine_fields, exp::SPD_TAA_MIN >
 {
     static constexpr const char* TIMING_NAME = "tAAmin";
 
-    static spd_facade_fptr get_timing_in_mtb;
-    static spd_facade_fptr get_timing_in_ftb;
+    static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_taa;
+    static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_taa;
 };
-
-///
-/// @brief Alias for function pointer to spd_facade timing methods for SPD_TAA_MIN
-///
-spd_facade_fptr setTimingTraits<exp::attr_eff_engine_fields,
-                exp::SPD_TAA_MIN>::get_timing_in_mtb = &spd::facade::min_taa;
-
-///
-/// @brief Alias for function pointer to spd_facade timing methods for SPD_TAA_MIN
-///
-spd_facade_fptr setTimingTraits<exp::attr_eff_engine_fields,
-                exp::SPD_TAA_MIN>::get_timing_in_ftb =  &spd::facade::fine_offset_min_taa;
 
 ///
 /// @brief Traits for attr_engine

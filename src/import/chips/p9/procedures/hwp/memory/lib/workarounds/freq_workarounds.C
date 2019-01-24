@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 
 #include <mss.H>
 #include <lib/workarounds/freq_workarounds.H>
-#include <lib/utils/assert_noexit.H>
+#include <generic/memory/lib/utils/assert_noexit.H>
 
 namespace mss
 {

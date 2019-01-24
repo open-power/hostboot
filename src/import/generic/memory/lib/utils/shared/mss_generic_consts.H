@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -136,9 +136,11 @@ enum generic_ffdc_codes
     LIMIT_FREQ_BY_VPD = 0x1025,
     SET_DIMM_TYPE = 0x1026,
     SET_DRAM_GEN = 0x1027,
-    SET_HYBRID = 0x1027,
-    SET_HYBRID_MEDIA = 0x1028,
-    SET_MRANKS = 0x1029,
+    SET_HYBRID = 0x1028,
+    SET_HYBRID_MEDIA = 0x1029,
+    SET_MRANKS = 0x102A,
+    SET_HOST_TO_DDR_SPEED_RATIO = 0x102B,
+    SET_ATTR_HOST_TO_DDR_SPEED_RATIO = 0x102C,
     SET_DIMM_RANKS_CNFG = 0x1039,
     DDIMM_RAWCARD_DECODE = 0x103a,
     SET_DRAM_WIDTH = 0x1040,
@@ -240,6 +242,14 @@ enum states
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
 
+///
+/// @brief Supported DIMM speed equality deliberations
+///
+enum class speed_equality : uint8_t
+{
+    NOT_EQUAL_DIMM_SPEEDS = 0, ///< denotes all DIMMs don't have the same speed
+    EQUAL_DIMM_SPEEDS = 1, ///< denotes all DIMMs have the same speed
+};
 
 namespace spd
 {

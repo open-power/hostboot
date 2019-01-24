@@ -74,9 +74,10 @@ enum pre_data_init_fields
     HYBRID_MEDIA = 4,
     MRANKS = 5,
     DIMM_RANKS_CNFG = 6,
+    HOST_TO_DDR_SPEED_RATIO = 7,
 
     // Dispatcher set to last enum value
-    ATTR_PRE_DATA_ENG_DISPATCHER = DIMM_RANKS_CNFG,
+    ATTR_PRE_DATA_ENG_DISPATCHER = HOST_TO_DDR_SPEED_RATIO,
 };
 
 ///

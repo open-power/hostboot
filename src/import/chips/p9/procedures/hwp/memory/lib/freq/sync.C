@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,17 +40,17 @@
 #include <map>
 
 // Memory libraries
+#include <lib/freq/nimbus_freq_traits.H>
 #include <lib/freq/sync.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/utils/assert_noexit.H>
 
 // Generic libraries
+#include <generic/memory/lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/conversions.H>
-#include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 
@@ -97,7 +97,7 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<TARGET_TYPE_MC
     // Getting error cross initializing with the Assert
     // find_if should work if passed in an empty vector. begin() and end() will match and it'll exit without trying freq()
     FAPI_ASSERT( !i_targets.empty(),
-                 fapi2::MSS_EMPTY_MCBIST_VECTOR_PASSED(),
+                 fapi2::MSS_EMPTY_FREQ_TARGET_VECTOR_PASSED(),
                  "Empty MCBIST target vector found when constructing dimm speed mapping!" );
 
 
@@ -109,7 +109,7 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<TARGET_TYPE_MC
     // It has a valid freq
     // Thus, this shouldn't ever happen, but let's check anyways
     FAPI_ASSERT( l_found_comp != i_targets.end(),
-                 fapi2::MSS_ALL_MCBIST_HAVE_0_FREQ()
+                 fapi2::MSS_ALL_TARGETS_HAVE_0_FREQ()
                  .set_VECTOR_SIZE(i_targets.size()),
                  "All MCBIST have 0 MSS_FREQ, but there are dimms?");
 
@@ -178,10 +178,10 @@ bool deconfigure(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             l_is_hw_deconfigured = true;
 
             MSS_ASSERT_NOEXIT(false,
-                              fapi2::MSS_FREQ_NOT_EQUAL_NEST_FREQ()
+                              fapi2::MSS_FREQ_NOT_EQUAL_MAX_DOMAIN_FREQ()
                               .set_MSS_FREQ(i_dimm_speed)
-                              .set_NEST_FREQ(i_nest_freq)
-                              .set_MCS_TARGET(l_mcs),
+                              .set_DOMAIN_FREQ(i_nest_freq)
+                              .set_DOMAIN_TARGET(l_mcs),
                               "Deconfiguring %s due to unequal frequencies: mss: %d, nest: %d",
                               mss::c_str(l_mcs),
                               i_dimm_speed,

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -100,6 +100,23 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>hybrid</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      OMI to DDR frequency ratio
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum> 1_TO_1 = 1, 2_TO_1 = 2, 4_TO_1 = 4, 8_TO_1 = 8, 16_TO_1 = 16, 32_TO_1 = 32, 64_TO_1 = 64, 128_TO_1 = 128</enum>
+    <default>8</default>
+    <writeable/>
+    <array>2</array>
+    <mssUnit>ratio</mssUnit>
+    <mssAccessorName>host_to_ddr_speed_ratio</mssAccessorName>
   </attribute>
 
   <attribute>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,7 +47,7 @@
     </callout>
     <callout>
       <childTargets>
-          <parent>MCA_TARGET</parent>
+          <parent>PORT_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
@@ -55,27 +55,47 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_FREQ_NOT_EQUAL_NEST_FREQ</rc>
+    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
     <description>
-      Case when mss_freq speeds are different and sync mode is required,
-      and mss_freq is not equal to nest freq.
+        No frequency found for MC Either bad mrw attribute or no DIMMS installed?
+        Should be a code bug if we get here
     </description>
     <ffdc>MSS_FREQ</ffdc>
-    <ffdc>NEST_FREQ</ffdc>
+    <ffdc>SUPPORTED_FREQ_0</ffdc>
+    <ffdc>SUPPORTED_FREQ_1</ffdc>
+    <ffdc>SUPPORTED_FREQ_2</ffdc>
+    <ffdc>SUPPORTED_FREQ_3</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PROC_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_NOT_EQUAL_MAX_DOMAIN_FREQ</rc>
+    <description>
+      Case when mss_freq speeds are different and sync mode is required,
+      and mss_freq is not equal to max freq in domain.
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>DOMAIN_FREQ</ffdc>
+    <ffdc>DOMAIN_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
       <childTargets>
-        <parent>MCS_TARGET</parent>
+        <parent>DOMAIN_TARGET</parent>
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>MCS_TARGET</parent>
+        <parent>DOMAIN_TARGET</parent>
         <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </deconfigure>
@@ -96,9 +116,9 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EMPTY_MCBIST_VECTOR_PASSED</rc>
+    <rc>RC_MSS_EMPTY_FREQ_TARGET_VECTOR_PASSED</rc>
     <description>
-       Empty MCBIST target vector found when constructing dimm speed mapping
+       Empty freq target vector found when constructing dimm speed mapping
     </description>
     <callout>
       <procedure>CODE</procedure>
@@ -144,9 +164,9 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_ALL_MCBIST_HAVE_0_FREQ</rc>
+    <rc>RC_MSS_ALL_TARGETS_HAVE_0_FREQ</rc>
     <description>
-       All MCBIST have 0 MSS_FREQ, but there are dimms still configured?
+       All targets in the freq domain (MCBIST or port) have 0 MSS_FREQ, but there are dimms still configured?
     </description>
     <ffdc>VECTOR_SIZE</ffdc>
     <callout>
@@ -275,7 +295,7 @@
     </callout>
     <callout>
         <childTargets>
-          <parent>MCA_TARGET</parent>
+          <parent>PORT_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
         <priority>MEDIUM</priority>
