@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <p9_l2err_extract.H>
 #include <p9_pm_callout.H>
 #include <prdfMemAddress.H>
+#include <isteps/nvdimm/nvdimm.H>
 
 namespace PRDF
 {
@@ -63,6 +64,15 @@ void sendDynMemDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
  * @param i_eaddr The last address in the range.
  */
 void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
+
+/**
+ * @brief Notify PHYP of NVDIMM protection status
+ *
+ * @param i_target     Processor with NVDIMM
+ * @param i_state      Protection state of NVDIMM
+ */
+uint32_t nvdimmNotifyPhypProtChange( TARGETING::Target * i_target,
+    const NVDIMM::nvdimm_protection_t i_state );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -129,6 +129,12 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/
 prd_obj += prdfPlatServices_rt.o
+
+# nvdimm
+prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/
+prd_vpath += ${ROOTPATH}/src/usr/isteps/nvdimm/runtime
+prd_obj_no_sim += nvdimm.o
+prd_obj_no_sim += nvdimm_rt.o
 
 endif
 
