@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -193,6 +193,13 @@ extern "C"
      *  @param[in/out]  io_rRingBufsize
      *                   Size of ring buffer
      *
+     *  @param[in]  i_pTempBuf
+     *                   Pointer to temp buffer
+     *
+     *  @param[in]  i_TempBufsize
+     *                   Size of temp buffer, must be large enough to fit the
+     *                     largest vpd record that contains ring data
+     *
      *  @note:      io_rRingBufsize is only an 'output' for get function.
      *
      *  @return     fapi2::ReturnCode
@@ -206,7 +213,9 @@ extern "C"
                                     const uint8_t        i_evenOdd,
                                     const RingId_t       i_ringId,
                                     uint8_t*             o_pRingBuf,
-                                    uint32_t&            io_rRingBufsize )
+                                    uint32_t&            io_rRingBufsize,
+                                    uint8_t*             i_pTempBuf,
+                                    uint32_t             i_tempBufsize )
     {
         fapi2::ReturnCode       l_fapirc = fapi2::FAPI2_RC_SUCCESS;
         uint32_t                l_recordLen  = 0;
@@ -274,8 +283,29 @@ extern "C"
         FAPI_DBG( "mvpdRingFunc: getMvpdField returned record len=0x%x",
                   l_recordLen );
 
-        //  allocate buffer for the record. Always works
-        l_recordBuf =  static_cast<uint8_t*>(malloc((size_t)l_recordLen));
+        //  use already allocated buffer if available
+        if (i_pTempBuf != nullptr)
+        {
+            // Make sure the record fits into the temp buffer
+            FAPI_ASSERT(l_recordLen <= i_tempBufsize,
+                        fapi2::MVPD_INSUFFICIENT_RING_BUFFER_SPACE().
+                        set_CHIP_TARGET(i_fapiTarget).
+                        set_RING_ID(i_ringId).
+                        set_CHIPLET_ID(i_chipletId).
+                        set_BUFFER_SIZE(i_tempBufsize).
+                        set_RING_SIZE(l_recordLen).
+                        set_OCCURRENCE(1),
+                        "mvpdRingFuncFindHdr: Not enough temp buffer space to contain record: "
+                        "ringId=0x%x, chipletId=0x%x, bufferSize=0x%x, recordLen=0x%x",
+                        i_ringId, i_chipletId, i_tempBufsize, l_recordLen );
+
+            l_recordBuf = i_pTempBuf;
+        }
+        //  else allocate space for the record buffer
+        else
+        {
+            l_recordBuf = static_cast<uint8_t*>(malloc((size_t)l_recordLen));
+        }
 
         //  load ring from MVPD for this target
         FAPI_TRY(getMvpdField(i_record,
@@ -368,8 +398,8 @@ extern "C"
         // get current error
         l_fapirc = fapi2::current_err;
 
-        //  unload the repair ring if allocated
-        if(l_recordBuf)
+        // free the temp buffer if allocated
+        if((i_pTempBuf == nullptr) && l_recordBuf)
         {
             free(static_cast<void*>(l_recordBuf));
             l_recordBuf = NULL;

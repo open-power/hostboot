@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,9 @@ typedef ReturnCode (*getMvpdRing_FP_t) (
     const uint64_t,
     const RingId_t,
     uint8_t*,
-    uint32_t& );
+    uint32_t&,
+    uint8_t*,
+    uint32_t );
 
 extern "C"
 {
@@ -88,6 +90,11 @@ extern "C"
      *    byte x0  CompressedScanData structure (rs4 header)
      *    byte x0C compressed data (sizeof CompressedScanData is 0x0C)
      *    byte xNN last byte of compressed data
+     * Optional Parameters
+     * @param i_pTempBuf       -   pointer to a temp buffer allocated by the caller
+     *                             and must be large enough to fit the largest
+     *                             vpd record that contains ring data
+     * @param i_tempBufsize   -   size of temp buffer that caller has allocated
      *
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
      *                               relevant error code for failure.
@@ -100,7 +107,9 @@ extern "C"
                             const uint8_t  i_evenOdd,
                             const RingId_t i_ringId,
                             uint8_t*       o_pRingBuf,
-                            uint32_t&      io_rRingBufsize );
+                            uint32_t&      io_rRingBufsize,
+                            uint8_t*       i_pTempBuf = nullptr,
+                            uint32_t       i_tempBufsize = 0 );
 
 }
 }
