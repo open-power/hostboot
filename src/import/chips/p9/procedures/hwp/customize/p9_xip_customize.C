@@ -729,6 +729,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
     /////////////////////////////////////////////////////////////////////
     // Fetch rings from the MVPD:
+    // Use i_ringBuf2 as temp buffer space
     /////////////////////////////////////////////////////////////////////
     l_fapiRc = getMvpdRing( i_procTarget,
                             MVPD_RECORD_CP00,
@@ -737,7 +738,12 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             i_evenOdd,
                             i_ring.ringId,
                             (uint8_t*)i_vpdRing,
-                            l_vpdRingSize );
+                            l_vpdRingSize,
+                            (uint8_t*)i_ringBuf2,
+                            i_ringBufSize2);
+
+    // Reset the temp buffer that was used to gather ring data from vpd
+    memset(i_ringBuf2, 0, i_ringBufSize2);
 
     ///////////////////////////////////////////////////////////////////////
     // Append VPD ring to the ring section
