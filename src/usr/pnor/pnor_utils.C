@@ -344,6 +344,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HB_DATA ||
                i_section == SBE_IPL ||
                i_section == PAYLOAD ||
+               i_section == BOOTKERNEL ||
                i_section == SBKT ||
                i_section == OCC ||
                i_section == HCODE ||
@@ -426,6 +427,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
         "OCMBFW",      /**< PNOR::OCMBFW         : OCMB image */
+        "BOOTKERNEL",  /**< PNOR::BOOTKERNEL     : OPAL == petitboot,PHYP == PowerVM */
 #endif
     };
 

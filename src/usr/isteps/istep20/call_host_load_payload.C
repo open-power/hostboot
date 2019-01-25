@@ -120,7 +120,13 @@ void* call_host_load_payload (void *io_pArgs)
         // Load payload data in PHYP mode or in Sapphire mode
         if(is_sapphire_load() || is_phyp_load())
         {
-            l_err = load_pnor_section( PNOR::PAYLOAD, payloadBase );
+            PNOR::SectionId l_secID = PNOR::PAYLOAD;
+            if (is_phyp_load())
+            {
+                l_secID = PNOR::BOOTKERNEL;
+            }
+
+            l_err = load_pnor_section( l_secID, payloadBase );
             if ( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
