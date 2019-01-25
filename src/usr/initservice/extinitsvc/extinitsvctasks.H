@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -96,6 +96,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        /**
+         * @brief   HWAS,
+         * need the hwas module for errl dependency gard / deconfig
+         */
+        {
+            "libhwas.so" ,                                  // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended Module
+            }
+        },
 
         /**
          * @brief   FSI Device Driver
@@ -251,18 +263,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             {
                INIT_TASK,                         // task type
                EXT_IMAGE,                         // Extended Module
-            }
-        },
-        /**
-         * @brief   HWAS,
-         * need the hwas module for errl dependency gard / deconfig
-         */
-        {
-            "libhwas.so" ,                                  // taskname
-            NULL,                                           // no pointer to fn
-            {
-                INIT_TASK,                                  // task type
-                EXT_IMAGE,                                  // Extended Module
             }
         },
         /**
