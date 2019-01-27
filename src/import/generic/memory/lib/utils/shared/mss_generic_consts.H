@@ -230,6 +230,8 @@ enum dimm_type
 {
     RDIMM = 0b0001,
     LRDIMM = 0b0100,
+    SORDIMM = 0b1000,
+    MINIRDIMM = 0b1001,
 };
 
 enum guard_band : uint16_t

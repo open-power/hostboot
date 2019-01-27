@@ -185,6 +185,8 @@ static inline bool is_dimm_type_valid(const uint8_t i_dimm_type)
     {
         case RDIMM:
         case LRDIMM:
+        case SORDIMM:
+        case MINIRDIMM:
             l_result = true;
             break;
 

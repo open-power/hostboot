@@ -97,6 +97,8 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     switch(l_dimm_type)
     {
         case RDIMM:
+        case SORDIMM:
+        case MINIRDIMM:
 
             // TODO:RTC178807 - Update how NVDIMMs are handled once more are up and running in the lab
             // NVDIMM is currently considered differently than all other rdimm raw cards, due to settings differences
