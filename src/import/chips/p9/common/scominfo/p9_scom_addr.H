@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -430,6 +430,12 @@ extern "C"
         P9A_MC_DL_REG1_SAT_ID = 0xE,      ///< OMI reg1 (omi3..5)
         P9A_MC_DL_REG2_SAT_ID = 0xF,      ///< OMI reg2 (omi6..7)
     } p9a_mc_sat_id_t;
+
+    // P9A Ring 8 Sat id
+    typedef enum
+    {
+        P9A_MC_CHAN_SAT_ID = 0xD,
+    } p9a_mc_chan_sat_id_t;
 
     typedef enum
     {

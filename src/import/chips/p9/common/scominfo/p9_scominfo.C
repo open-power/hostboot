@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -322,14 +322,23 @@ extern "C"
                         //CHANX.DSTL.  Sat_id: 01 + port_id (4,5,6,7)
                         l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
 
-                        if (P9A_MC_DSTL_CHAN0_SAT_ID <= l_sat_id && l_sat_id <= P9A_MC_DSTL_CHAN3_SAT_ID)
+                        if (l_ring == P9A_MC_CHAN_RING_ID)
                         {
-                            l_scom.set_sat_id(P9A_MC_DSTL_CHAN0_SAT_ID + (i_chipUnitNum % 4));
+
+                            if (P9A_MC_DSTL_CHAN0_SAT_ID <= l_sat_id && l_sat_id <= P9A_MC_DSTL_CHAN3_SAT_ID)
+                            {
+                                l_scom.set_sat_id(P9A_MC_DSTL_CHAN0_SAT_ID + (i_chipUnitNum % 4));
+                            }
+
+                            if (P9A_MC_USTL_CHAN0_SAT_ID <= l_sat_id && l_sat_id <= P9A_MC_USTL_CHAN3_SAT_ID)
+                            {
+                                l_scom.set_sat_id(P9A_MC_USTL_CHAN0_SAT_ID + (i_chipUnitNum % 4));
+                            }
                         }
 
-                        if (P9A_MC_USTL_CHAN0_SAT_ID <= l_sat_id && l_sat_id <= P9A_MC_USTL_CHAN3_SAT_ID)
+                        if (l_ring == P9A_MC_MC01_RING_ID && l_sat_id == P9A_MC_CHAN_SAT_ID)
                         {
-                            l_scom.set_sat_id(P9A_MC_USTL_CHAN0_SAT_ID + (i_chipUnitNum % 4));
+                            l_scom.set_sat_offset((i_chipUnitNum * 16) + (l_sat_offset % 16));
                         }
                     }
 
@@ -1116,6 +1125,19 @@ extern "C"
                                                         ((l_chiplet_id - MC01_CHIPLET_ID) * 4) + (l_sat_id % 4)));
                         }
                     }
+
+                    // Ring 8, Sat 13,
+                    // chan0: reg 0  -> 13
+                    // chan1: reg 16 -> 29
+                    // chan2: reg 32 -> 45
+                    // chan3: reg 48 -> 61
+                    if (l_ring == P9A_MC_MC01_RING_ID && l_sat_id == P9A_MC_CHAN_SAT_ID &&
+                        l_port == UNIT_PORT_ID)
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_sat_offset / 16));
+                    }
+
 
                     //==== OMIC target =============================================
                     //tc_unit_scom_cch_out(9)  => tc_omippe00_0_scom_cch_int
