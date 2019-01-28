@@ -118,7 +118,21 @@ namespace ISTEP
         RC_FAILED_TO_BOOT_SBE                    = ISTEP_COMP_ID | 0x38,
         RC_REDISCOVERED_TARGETS                  = ISTEP_COMP_ID | 0x39,
         RC_P9N_LESS_THAN_DD22_NOT_SUPPORTED      = ISTEP_COMP_ID | 0x3A,
-        RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x3B,
+        RC_FREQ_ATTR_TIMER_EXPIRED               = ISTEP_COMP_ID | 0x40,
+        RC_FREQ_ATTR_TIMER_THREAD_FAIL           = ISTEP_COMP_ID | 0x41,
+        RC_FLOOR_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x42,
+        RC_CEIL_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x43,
+        RC_TURBO_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x44,
+        RC_ULTRA_TURBO_FREQ_MISMATCH             = ISTEP_COMP_ID | 0x45,
+        RC_NEST_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x46,
+        RC_NO_VALID_MEM_CONFIG                   = ISTEP_COMP_ID | 0x47,
+        RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL      = ISTEP_COMP_ID | 0x48,
+        RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL       = ISTEP_COMP_ID | 0x49,
+        RC_LINK_TRAIN_ERRORS_FROM_HWP            = ISTEP_COMP_ID | 0x4A,
+        RC_RISK_LEVEL_TOO_LOW                    = ISTEP_COMP_ID | 0x4B,
+        RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
+        RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
+        RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
     };
 
 };

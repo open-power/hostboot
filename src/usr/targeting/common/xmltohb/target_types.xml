@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1315,6 +1315,9 @@
   <attribute>
     <default>CPU</default>
     <id>CDM_DOMAIN</id>
+  </attribute>
+  <attribute>
+    <id>PREVIOUS_WAKEUP_FAIL</id>
   </attribute>
 </targetType>
 

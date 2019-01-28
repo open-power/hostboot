@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -6755,6 +6755,24 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <writeable/>
 </attribute>
 
+<attribute>
+  <description>
+     Tracks if a specific core has previously experienced a timeout during
+     initial activation.
+        0 = No previous errors reported; 
+        1 = Core failed on the last attempt to be started
+  </description>
+  <id>PREVIOUS_WAKEUP_FAIL</id>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/>
+  <simpleType>
+    <uint8_t>
+      <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <no_export/>
+</attribute>
 
 <attribute>
     <id>SLOT_NAME</id>
