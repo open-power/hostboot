@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,6 +351,10 @@ class AttrRP
             MSG_PRIME_ATTR_SYNC           = 0x00000003,
             // Invoke attribute synchronization
             MSG_INVOKE_ATTR_SYNC          = 0x00000004,
+            // Shutdown attribute synchronization
+            MSG_SHUTDOWN_ATTR_SYNC        = 0x00000005,
+            // Attribute overrides and syncs
+            MSG_ATTR_OVERRIDE_SYNC        = 0x00000006,
             // Sentinel value for when message type is not yet known
             MSG_INVALID                   = 0xFFFFFFFF,
         };
@@ -379,6 +383,13 @@ class AttrRP
          *  @see _syncAllAttributesToFsp for documentation
          */
         static errlHndl_t syncAllAttributesToFsp();
+
+        /**
+         *  @brief This is a static wrapper around _sendAttrOverridesAndSyncs
+         *
+         *  @see _sendAttrOverridesAndSyncs for documentation
+         */
+        static errlHndl_t sendAttrOverridesAndSyncs();
 
         /**
         *  @brief Modifies the memory R/W permissions on VMM pages for a
@@ -646,6 +657,16 @@ class AttrRP
          *      references valid error log
          */
         errlHndl_t _syncAllAttributesToFsp() const;
+
+        /**
+         *  @brief Send attribute overrides and sync down to FSP
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Send attribute overrides and sync successful
+         *  @retval !nullptr Send attribute overrides and sync failed; handle
+         *      references valid error log
+         */
+        errlHndl_t _sendAttrOverridesAndSyncs() const;
 
         /**
          *  @brief Sends message of the given type to the attribute resource

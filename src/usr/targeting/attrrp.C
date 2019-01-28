@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,9 +167,24 @@ namespace TARGETING
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK
                   "AttrRP::_syncAllAttributesToFsp");
-        auto pError = _sendAttrSyncMsg(MSG_INVOKE_ATTR_SYNC,true);
+        auto pError = _sendAttrSyncMsg(MSG_INVOKE_ATTR_SYNC, true);
         TRACFCOMP(g_trac_targeting, EXIT_MRK
                   "AttrRP::_syncAllAttributesToFsp");
+        return pError;
+    }
+
+    errlHndl_t AttrRP::sendAttrOverridesAndSyncs()
+    {
+        return Singleton<AttrRP>::instance()._sendAttrOverridesAndSyncs();
+    }
+
+    errlHndl_t AttrRP::_sendAttrOverridesAndSyncs() const
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK
+                  "AttrRP::_sendAttrOverridesAndSyncs");
+        auto pError = _sendAttrSyncMsg(MSG_ATTR_OVERRIDE_SYNC, true);
+        TRACFCOMP(g_trac_targeting, EXIT_MRK
+                  "AttrRP::_sendAttrOverridesAndSyncs");
         return pError;
     }
 
@@ -384,7 +399,9 @@ namespace TARGETING
         // Crash Hostboot if this task dies
         (void)task_detach();
 
-        errlHndl_t pError=nullptr;
+        errlHndl_t pError = nullptr;
+
+        bool shutdown_requested = false;
 
         TRACFCOMP(g_trac_targeting, ENTER_MRK "AttrRP::attrSyncTask.");
 
@@ -395,7 +412,7 @@ namespace TARGETING
         // registration happened already.
         INITSERVICE::registerShutdownEvent(TARG_COMP_ID,
                                            iv_attrSyncMsgQ,
-                                           MSG_INVOKE_ATTR_SYNC,
+                                           MSG_SHUTDOWN_ATTR_SYNC,
                                            INITSERVICE::NO_PRIORITY);
         while(1)
         {
@@ -414,38 +431,82 @@ namespace TARGETING
                 pMsg->type);
 
             do {
-
-            switch(pMsg->type)
+            if (!shutdown_requested)
             {
-                case MSG_PRIME_ATTR_SYNC:
-                    {
-                        iv_attrSyncPrimed=true;
-                        TRACFCOMP(g_trac_targeting, INFO_MRK
-                            "AttrRP: attrSyncTask: "
-                            "Attribute provider primed to synchronize "
-                            "attributes.");
-                    }
-                    break;
-                case MSG_INVOKE_ATTR_SYNC:
-                    {
-                        TRACFCOMP(g_trac_targeting, INFO_MRK
-                            "AttrRP: attrSyncTask: "
-                            "Invoking attribute sync.");
+                switch(pMsg->type)
+                {
+                    case MSG_PRIME_ATTR_SYNC:
+                        {
+                            iv_attrSyncPrimed=true;
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Attribute provider primed to synchronize "
+                                "attributes.");
+                        }
+                        break;
+                    case MSG_INVOKE_ATTR_SYNC:
+                        {
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Invoking attribute sync.");
 
-                        pError = _invokeAttrSync();
-                    }
-                    break;
-               default:
-                    {
-                        TRACFCOMP(g_trac_targeting,ERR_MRK
-                            "AttrRP: attrSyncTask: "
-                            "Unhandled message type = 0x%08X.",
-                            pMsg->type);
-                        rc = -EINVAL;
-                    }
-                    break;
+                            pError = _invokeAttrSync();
+                        }
+                        break;
+                    case MSG_ATTR_OVERRIDE_SYNC:
+                        {
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Attr sync and override.");
+
+                            fapi2::theAttrOverrideSync().
+                                sendAttrOverridesAndSyncsToFsp();
+                        }
+                        break;
+                    case MSG_SHUTDOWN_ATTR_SYNC:
+                        {
+                            TRACFCOMP(g_trac_targeting, INFO_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Shutdown attribute sync.");
+
+                            pError = _invokeAttrSync();
+                            shutdown_requested = true;
+                        }
+                        break;
+                    default:
+                        {
+                            TRACFCOMP(g_trac_targeting, ERR_MRK
+                                "AttrRP: attrSyncTask: "
+                                "Unhandled message type = 0x%08X.",
+                                pMsg->type);
+                            rc = -EINVAL;
+                        }
+                        break;
+                }
             }
-
+            else if (!msg_is_async(pMsg))
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK
+                       "AttrRP: attrSyncTask: "
+                       "Service is down so message can not be handled");
+                /*@
+                 * @errortype
+                 * @moduleid  TARG_ATTR_SYNC_TASK
+                 * @reasoncode TARG_RC_ATTR_SYNC_SERVICE_DOWN
+                 * @userdata1 Return code
+                 * @userdata2 Message type
+                 * @devdesc   Shutdown just occurred so the mailbox service
+                 *       is down. Messages can not be handled at this time.
+                 * @custdesc  Tolerated boot firmware error occurred
+                 */
+                pError = new ErrlEntry(
+                    ERRL_SEV_INFORMATIONAL,
+                    TARG_ATTR_SYNC_TASK,
+                    TARG_RC_ATTR_SYNC_SERVICE_DOWN,
+                    TO_UINT64(rc),
+                    TO_UINT64(pMsg->type),
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            }
             } while (0);
 
             if (rc != 0)
@@ -473,7 +534,7 @@ namespace TARGETING
             if(pError)
             {
                 plid = pError->plid();
-                errlCommit(pError,TARG_COMP_ID);
+                errlCommit(pError, TARG_COMP_ID);
             }
 
             if(msg_is_async(pMsg))
