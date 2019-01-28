@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -722,9 +722,9 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
  *
  * @return bool - True if valid mutex is found, False otherwise.
  */
-bool i2cGetEngineMutex( TARGETING::Target * i_target,
-                        misc_args_t & i_args,
-                        mutex_t *& i_engineLock );
+bool i2cGetEngineMutex( const TARGETING::Target * const i_target,
+                        const misc_args_t &  i_args,
+                              mutex_t *&     i_engineLock );
 
 
 /**

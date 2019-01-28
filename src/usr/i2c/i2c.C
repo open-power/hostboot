@@ -117,6 +117,72 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_MEMBUF,
                        i2cPerformOp );
 
+/**
+ *
+ * @brief A useful utility to dump (trace out) the TARGETING::FapiI2cControlInfo
+ *        data. Use as needed.
+ *
+ * @param [in] i_args - The TARGETING::FapiI2cControlInfo data to dump for
+ *                       consumption
+ *
+ */
+void dumpFapiI2cControlInfo(const TARGETING::FapiI2cControlInfo & i_args)
+{
+    char* l_masterTargetPath = i_args.i2cMasterPath.toString();
+    char* l_muxPath = i_args.i2cMuxPath.toString();
+
+    TRACFCOMP( g_trac_i2c,"dumpFapiI2cControlInfo: "
+               "port(%d), engine(%d), devAddr(0x%X), i2cMasterPath(%s), "
+               "i2cMuxBusSelector(%d), i2cMuxPath(%s)",
+               i_args.port, i_args.engine, i_args.devAddr, l_masterTargetPath,
+               i_args.i2cMuxBusSelector, l_muxPath);
+
+    free(l_masterTargetPath);
+    free(l_muxPath);
+    l_masterTargetPath = l_muxPath = nullptr;
+}
+
+
+/**
+ *
+ * @brief A useful utility to dump (trace out) the I2C::misc_args_t data.
+ *        Use as needed.
+ *
+ * @param [in] i_args - The I2C::misc_args_t data to dump for consumption
+ *
+ */
+void dumpMiscArgsData(const I2C::misc_args_t & i_args)
+{
+    char* l_muxPath{nullptr};
+    if (i_args.i2cMuxPath)
+    {
+        l_muxPath = i_args.i2cMuxPath->toString();
+    }
+
+    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData: "
+               "port(%d), engine(%d), devAddr(0x%X), skip_mode_step(%d), "
+               "with_stop(%d), read_not_write(%d), bus_speed(%d)",
+               i_args.port, i_args.engine, i_args.devAddr,
+               i_args.skip_mode_setup, i_args.with_stop,
+               i_args.read_not_write, i_args.bus_speed );
+
+    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData cont.: "
+               "bit_rate_divisor(%d), polling_interval_ns(%d), "
+               "timeout_count(%d), offset_length(%d), offset_buffer(%p/0x%X)",
+               i_args.bit_rate_divisor, i_args.polling_interval_ns,
+               i_args.timeout_count, i_args.offset_length,
+               i_args.offset_buffer,
+               (0x0 == i_args.offset_buffer ? 0 : *(i_args.offset_buffer) ) );
+
+    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData cont.: "
+               "i2cMuxBusSelector(%d), i2cMuxPath(%s)",
+               i_args.i2cMuxBusSelector,
+               ( (nullptr == l_muxPath) ? "NULL" : l_muxPath ) );
+
+    free(l_muxPath);
+    l_muxPath = nullptr;
+}
+
 // ------------------------------------------------------------------
 // i2cPerformOp
 // ------------------------------------------------------------------
@@ -879,20 +945,6 @@ void i2cSetSwitches( TARGETING::Target * i_target,
 }
 
 
-
-/**
-*
-* @brief Retrieves the I2C MUX target from the given Entity Path
-*
-* @param [in] i_i2cMuxPath - the Entity Path for the I2C MUX
-*
-* @param [out] o_target - The I2C MUX target if Entity Path is found, valid and
-*                         functional, else this is set to nullptr
-*
-* @return errlHndl_t - NULL if successful, otherwise a pointer to the
-*                      error log.
-*
-*/
 // ------------------------------------------------------------------
 // i2cGetI2cMuxTarget
 // ------------------------------------------------------------------
@@ -900,9 +952,14 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
                                 TARGETING::Target * &o_target )
 {
     errlHndl_t l_err(nullptr);
+
+    // Initially set outgoing target to NULL
     o_target = nullptr;
 
-    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cGetI2cMuxTarget()" );
+    //Get the string to MUX path and hold for future use, if needed, free at end
+    char* l_muxPath = i_i2cMuxPath.toString();
+    TRACUCOMP( g_trac_i2c, ENTER_MRK"i2cGetI2cMuxTarget() muxPath(%s)",
+               l_muxPath);
 
     do
     {
@@ -913,7 +970,6 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
 
         if ( nullptr == o_target )
         {
-            char* l_muxPath = i_i2cMuxPath.toString();
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX Entity Path (%s)"
                                " could not be converted to a target.",
@@ -938,10 +994,6 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
 
             // Collect the MUX entity path info
             ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
-
-            // Release the mux memory
-            free(l_muxPath);
-            l_muxPath = nullptr;
 
             l_err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -977,10 +1029,7 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
             // Collect the MUX entity path info
-            char* l_muxPath = i_i2cMuxPath.toString();
             ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
-            free(l_muxPath);
-            l_muxPath = nullptr;
 
             l_err->collectTrace( I2C_COMP_NAME, 256);
 
@@ -991,55 +1040,37 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
         }
     } while( 0 );
 
-    TRACUCOMP( g_trac_i2c, EXIT_MRK"i2cGetI2cMuxTarget() - %s",
-               ((NULL == l_err) ? "No Error" : "With Error") );
+
+    TRACUCOMP( g_trac_i2c, EXIT_MRK"i2cGetI2cMuxTarget() - %s%X",
+               ((nullptr == l_err) ? "No Error, target=0x" :
+                                     "With Error, target=0x"),
+               ((nullptr == o_target) ? 0x0 : TARGETING::get_huid(o_target) ) );
+
+    // Free the string to MUX path
+    free(l_muxPath);
+    l_muxPath = nullptr;
 
     return l_err;
 } // end i2cGetI2cMuxTarget
 
 
-/**
-*
-* @brief Retrieves the MUX target and sets the MUX to the given bus selector
-*
-* @param[in] i_masterTarget - I2C Master Target device
-*
-* @param[in] i_args - A copy of the structure containing arguments
-*                     needed for a command transaction.
-*
-* @pre i_masterTarget and i_args.i2cMuxPath must not be nullptrs;
-*      i_args.i2cMuxBusSelector must not be I2C_MUX::NOT_APPLICABLE
-*
-* @return errlHndl_t - NULL if successful, otherwise a pointer to the
-*       error log.
-*
-*/
 // ------------------------------------------------------------------
 // i2cAccessMux
 // ------------------------------------------------------------------
-errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
-                         misc_args_t i_args /* make a copy */ )
+errlHndl_t i2cAccessMux( TARGETING::Target*           i_masterTarget,
+                         uint8_t                      i_i2cMuxBusSelector,
+                         const TARGETING::EntityPath &i_i2cMuxPath)
 {
+    char* l_muxPath = i_i2cMuxPath.toString();
     TRACUCOMP( g_trac_i2c,
-               ENTER_MRK"i2cAccessMux(): "
-               "e/p/devAddr= %d/%d/0x%x, offset=0x%x/%p",
-               i_args.engine, i_args.port, i_args.devAddr,
-               i_args.offset_length, i_args.offset_buffer );
+               ENTER_MRK"i2cAccessMux(): masterTarget=0x%X, "
+               "muxSelector=0x%X, muxPath=%s",
+               TARGETING::get_huid(i_masterTarget),
+               i_i2cMuxBusSelector,
+               l_muxPath );
 
-    // Printing mux info separately, if combined, nothing is displayed
-    if (i_args.i2cMuxPath)
-    {
-        char* l_muxPath = i_args.i2cMuxPath->toString();
-        TRACUCOMP(g_trac_i2c, "i2cAccessMux(): muxSelector=0x%X, muxPath=%s",
-                  i_args.i2cMuxBusSelector, l_muxPath);
-        free(l_muxPath);
-        l_muxPath = nullptr;
-    }
-    else
-    {
-        TRACUCOMP(g_trac_i2c, "i2cAccessMux(): muxSelector=0x%X, muxPath=NULL",
-                  i_args.i2cMuxBusSelector);
-    }
+    free(l_muxPath);
+    l_muxPath = nullptr;
 
     errlHndl_t l_err{nullptr};
 
@@ -1047,8 +1078,8 @@ errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
     {
         TARGETING::TargetHandle_t l_i2cMuxTarget(nullptr);
 
-        l_err = i2cGetI2cMuxTarget(*(i_args.i2cMuxPath),
-                                   l_i2cMuxTarget);
+        l_err = i2cGetI2cMuxTarget( i_i2cMuxPath,
+                                    l_i2cMuxTarget);
 
         // If an issue getting the MUX target, then return error
         if (l_err)
@@ -1065,11 +1096,10 @@ errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
             break;
         }
 
-        uint8_t l_muxSelector = i_args.i2cMuxBusSelector;
+        uint8_t l_muxSelector = i_i2cMuxBusSelector;
         uint8_t *l_ptrMuxSelector = &l_muxSelector;
         size_t l_muxSelectorSize = sizeof(l_muxSelector);
 
-        i_args.i2cMuxBusSelector = I2C_MUX::NOT_APPLICABLE;
         l_err = DeviceFW::deviceOp(
                      DeviceFW::WRITE,
                      i_masterTarget,
@@ -1078,8 +1108,8 @@ errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
                      DEVICE_I2C_ADDRESS(l_muxData.port,
                                         l_muxData.engine,
                                         l_muxData.devAddr,
-                                        i_args.i2cMuxBusSelector,
-                                        i_args.i2cMuxPath));
+                                        I2C_MUX::NOT_APPLICABLE,
+                                        (&i_i2cMuxPath) ) );
     } while (0);
 
     TRACUCOMP( g_trac_i2c,
@@ -1087,7 +1117,7 @@ errlHndl_t i2cAccessMux( TARGETING::TargetHandle_t i_masterTarget,
                ((NULL == l_err) ? "No Error" : "With Error") );
 
     return l_err;
-}  // i2cAccessMux
+}  // end i2cAccessMux
 
 // ------------------------------------------------------------------
 // i2cCommonOp
@@ -1180,11 +1210,14 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         if ( (I2C_MUX::NOT_APPLICABLE != i_args.i2cMuxBusSelector) &&
              (nullptr != i_args.i2cMuxPath) )
         {
-            err = i2cAccessMux(i_target, i_args );
+            err = i2cAccessMux( i_target,
+                                i_args.i2cMuxBusSelector,
+                                *(i_args.i2cMuxPath));
         }
 
         if ( err )
         {
+
             TRACFCOMP(g_trac_i2c,
                       ERR_MRK"i2cCommonOp() - There is an issue accessing "
                        "the I2C MUX");
@@ -1393,14 +1426,15 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 // i2cPresence
 // ------------------------------------------------------------------
 bool i2cPresence( TARGETING::Target * i_target,
-                        uint64_t i_port,
-                        uint64_t i_engine,
-                        uint64_t i_devAddr )
+                  uint64_t            i_port,
+                  uint64_t            i_engine,
+                  uint64_t            i_devAddr,
+                  uint8_t             i_i2cMuxBusSelector,
+                  const TARGETING::EntityPath& i_i2cMuxPath )
 {
     TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPresence(): tgt=0x%X: e%d/p%d/"
               "devAddr=0x%X", TARGETING::get_huid(i_target), i_engine,
               i_port, i_devAddr );
-
 
     errlHndl_t err = NULL;
     bool l_mutex_success = false;
@@ -1420,7 +1454,6 @@ bool i2cPresence( TARGETING::Target * i_target,
     status_reg_t status;
     fifo_reg_t fifo;
 
-
     // Synchronization
     mutex_t * engineLock = NULL;
     bool mutex_needs_unlock = false;
@@ -1429,14 +1462,12 @@ bool i2cPresence( TARGETING::Target * i_target,
     uint64_t l_interval_ns;
     uint64_t l_timeoutCount;
 
-
     do
     {
-
         // Get the mutex for the requested engine
         l_mutex_success = i2cGetEngineMutex( i_target,
-                                         args,
-                                         engineLock );
+                                             args,
+                                             engineLock );
 
         if( !l_mutex_success )
         {
@@ -1456,6 +1487,22 @@ bool i2cPresence( TARGETING::Target * i_target,
         TRACUCOMP( g_trac_i2c,
                    INFO_MRK"Locked on engine: %d",
                    args.engine );
+
+        // Set the MUX selector (if there is one) for the MUX before continuing
+        if (I2C_MUX::NOT_APPLICABLE != i_i2cMuxBusSelector)
+        {
+            err = i2cAccessMux(i_target, i_i2cMuxBusSelector, i_i2cMuxPath );
+
+            if ( err )
+            {
+                TRACFCOMP(g_trac_i2c,
+                          ERR_MRK"i2cPresence() - There is an issue accessing "
+                          "the I2C MUX");
+
+                // Skip performing the presence detect operation
+                break;
+            }
+        }
 
         // Set I2C Mode (Host vs FSI) for the target
         args.switches.useHostI2C = 0;
@@ -1526,7 +1573,6 @@ bool i2cPresence( TARGETING::Target * i_target,
                       ERR_MRK"Error when waiting for Command Complete");
             break;
         }
-
 
         if( status.nack_received == 0 )
         {
@@ -2100,9 +2146,9 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 // i2cGetEngineMutex
 // ------------------------------------------------------------------
-bool i2cGetEngineMutex( TARGETING::Target * i_target,
-                        misc_args_t & i_args,
-                        mutex_t *& i_engineLock )
+bool i2cGetEngineMutex( const TARGETING::Target * const i_target,
+                        const misc_args_t &  i_args,
+                              mutex_t *&     i_engineLock )
 {
     bool success = true;
 

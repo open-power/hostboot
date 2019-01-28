@@ -30,6 +30,7 @@
 #include <i2c/i2creasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <errl/errlmanager.H>
+#include "i2c_common.H"
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -183,7 +184,9 @@ errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
         l_target_present = I2C::i2cPresence(l_i2cMasterTarget,
                                             l_i2cInfo.port,
                                             l_i2cInfo.engine,
-                                            l_i2cInfo.devAddr );
+                                            l_i2cInfo.devAddr,
+                                            l_i2cInfo.i2cMuxBusSelector,
+                                            l_i2cInfo.i2cMuxPath );
     }while(0);
 
     o_present = l_target_present;

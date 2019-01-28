@@ -123,6 +123,66 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::EEPROM,
                        TARGETING::TYPE_MCS,
                        eepromPerformOp );
+
+
+/**
+ *
+ * @brief A useful utility to dump (trace out) the EepromVpdPrimaryInfo data.
+ *        Use as needed.
+ *
+ * @param [in] i_i2cInfo - The EepromVpdPrimaryInfo data to dump for user
+ *
+ */
+void dumpEepromData(const TARGETING::EepromVpdPrimaryInfo & i_i2cInfo)
+{
+    TRACFCOMP (g_trac_eeprom, INFO_MRK"EepromVpdPrimaryInfo data: "
+               "engine=%d, port=%d, devAddr=0X%X, writePageSize=%d, "
+               "maxMemorySizeKB=0x%X, chipCount=%d, writeCycleTime=%d",
+               i_i2cInfo.engine, i_i2cInfo.port, i_i2cInfo.devAddr,
+               i_i2cInfo.writePageSize, i_i2cInfo.maxMemorySizeKB,
+               i_i2cInfo.chipCount, i_i2cInfo.writeCycleTime);
+
+    char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+    char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+    TRACFCOMP (g_trac_eeprom, INFO_MRK"EepromVpdPrimaryInfo data cont.: "
+              "masterPath=%s, muxSelector=0x%X, muxPath=%s",
+              l_masterPath, i_i2cInfo.i2cMuxBusSelector, l_muxPath);
+
+    free(l_masterPath);
+    free(l_muxPath);
+    l_masterPath = l_muxPath = nullptr;
+}
+
+
+/**
+ *
+ * @brief A useful utility to dump (trace out) the eeprom_addr_t data.
+ *         Use as needed.
+ *
+ * @param [in] i_i2cInfo - The eeprom_addr_t data to dump for user
+ *
+ */
+void dumpEepromData(const eeprom_addr_t & i_i2cInfo)
+{
+    TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data: \n"
+               "engine=%d, port=%d, devAddr=0X%X, writePageSize=%d, \n"
+               "devSize_KB=0x%X, chipCount=%d, writeCycleTime=%d \n",
+               i_i2cInfo.engine, i_i2cInfo.port, i_i2cInfo.devAddr,
+               i_i2cInfo.writePageSize, i_i2cInfo.devSize_KB,
+               i_i2cInfo.chipCount, i_i2cInfo.writeCycleTime);
+
+    char* l_masterPath = i_i2cInfo.i2cMasterPath.toString();
+    char* l_muxPath = i_i2cInfo.i2cMuxPath.toString();
+    TRACFCOMP (g_trac_eeprom, INFO_MRK"eeprom_addr_t data cont.: \n"
+              "masterPath=%s, muxSelector=0x%X, muxPath=%s \n",
+              l_masterPath, i_i2cInfo.i2cMuxBusSelector, l_muxPath);
+
+    free(l_masterPath);
+    free(l_muxPath);
+    l_masterPath = l_muxPath = nullptr;
+}
+
+
 // ------------------------------------------------------------------
 // eepromPerformOp
 // ------------------------------------------------------------------
@@ -424,9 +484,11 @@ bool eepromPresence ( TARGETING::Target * i_target )
 
         //Check for the target at the I2C level
         l_present = I2C::i2cPresence(i2cMasterTarget,
-                          i2cInfo.port,
-                          i2cInfo.engine,
-                          i2cInfo.devAddr );
+                                     i2cInfo.port,
+                                     i2cInfo.engine,
+                                     i2cInfo.devAddr,
+                                     i2cInfo.i2cMuxBusSelector,
+                                     i2cInfo.i2cMuxPath);
 
         if( !l_present )
         {
@@ -1506,7 +1568,8 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     bool fail_reading_attribute = false;
 
     TRACDCOMP( g_trac_eeprom,
-               ENTER_MRK"eepromReadAttributes()" );
+               ENTER_MRK"eepromReadAttributes() huid=0x%.8X",
+               TARGETING::get_huid(i_target) );
 
     // These variables will be used to hold the EEPROM attribute data
     // Note:  each 'EepromVpd' struct is kept the same via the attributes
