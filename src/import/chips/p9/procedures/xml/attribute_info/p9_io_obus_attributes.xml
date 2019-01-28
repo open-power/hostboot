@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -244,13 +244,30 @@
 <attribute>
   <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>i
+  <description>
     This attribute provides an a way to stress the SMP Abus Odd Lanes
     in Manufacturing. By applying a phase rotator offset we can further
     stress the phy.  This is a 6-bit 2's complement value that would be
     right justified in the 8 bit UINT attribute value.
   </description>
   <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_MNFG_ERROR_THRESHOLD</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    When in MNFG mode, we want to change the CRC/ECC thresholds and FIR
+    masks.  This is put into place for our longer manufacturing test runs.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE = 0x0,
+    CORNER_MODE = 0x1,
+    RELIABILITY_MODE = 0x2
+  </enum>
   <initToZero/>
   <platInit/>
 </attribute>

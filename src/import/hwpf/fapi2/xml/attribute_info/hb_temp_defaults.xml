@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -170,6 +170,10 @@
     </attribute>
     <attribute>
         <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_IO_O_MNFG_ERROR_THRESHOLD</id>
         <default>0x00</default>
     </attribute>
     <attribute>
