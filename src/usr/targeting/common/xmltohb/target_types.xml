@@ -1706,6 +1706,9 @@
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
+      <id>PREVIOUS_WAKEUP_FAIL</id>
+    </attribute>
+    <attribute>
       <default>CORE</default>
       <id>TYPE</id>
     </attribute>
