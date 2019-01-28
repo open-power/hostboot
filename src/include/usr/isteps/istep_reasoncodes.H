@@ -136,6 +136,7 @@ namespace ISTEP
         RC_RISK_LEVEL_TOO_LOW                    = ISTEP_COMP_ID | 0x4B,
         RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
         RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
+        RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
     };
 
 };

@@ -5808,6 +5808,25 @@
   </attribute>
 
   <attribute>
+    <description>
+       Tracks if a specific core has previously experienced a timeout during
+       initial activation.
+          0 = No previous errors reported; 
+          1 = Core failed on the last attempt to be started
+    </description>
+    <id>PREVIOUS_WAKEUP_FAIL</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>Structure which defines a target's primary capabilities.
         A target can only support at most FSI SCOM and one of the other two SCOM
