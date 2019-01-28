@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,7 @@ enum TargetingReasonCode
     TARG_RC_CONCURRENT_CODE_UPDATE_FAIL     = TARG_COMP_ID | 0x18,
     TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED = TARG_COMP_ID | 0x19,
     TARG_RC_UNSUPPORTED_ATTR_SYNC_MSG       = TARG_COMP_ID | 0x1A,
+    TARG_RC_ATTR_SYNC_SERVICE_DOWN          = TARG_COMP_ID | 0x1B,
 };
 
 }; // End TARGETING namespace

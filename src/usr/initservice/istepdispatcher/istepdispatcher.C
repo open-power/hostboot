@@ -2138,7 +2138,15 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
     // Send the potentially modified set of Attribute overrides and any
     // Attributes to sync (to Cronus) to the FSP
-    fapi2::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+    errlHndl_t l_errl = TARGETING::AttrRP::sendAttrOverridesAndSyncs();
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK
+                  "doIstep: send attr overrides and syncs to FSP"
+                  " failed, see 0x%08X for details", l_errl->eid());
+        errlCommit(l_errl, INITSVC_COMP_ID);
+    }
 
     // Transfer ownership of the message pointer back from iv_pIstepMsg
     mutex_lock(&iv_mutex);
