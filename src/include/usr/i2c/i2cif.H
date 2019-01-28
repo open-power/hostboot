@@ -167,13 +167,17 @@ errlHndl_t i2cSetupActiveMasters ( i2cProcessType i_setupType,
  * @param[in] i_port - The device's port
  * @param[in] i_engine - The device's engine number
  * @param[in] i_devAddr - The device's address
+ * @param[in] i_i2cMuxBusSelector - The Selector for the I2C MUX
+ * @param[in] i_i2cMuxPath - The entity path to the I2C MUX
  *
  * @return bool - True if chip is present, False otherwise.
  */
 bool i2cPresence( TARGETING::Target * i_target,
-                        uint64_t i_port,
-                        uint64_t i_engine,
-                        uint64_t i_devAddr );
+                  uint64_t      i_port,
+                  uint64_t      i_engine,
+                  uint64_t      i_devAddr,
+                  uint8_t       i_i2cMuxBusSelector,
+                  const TARGETING::EntityPath & i_i2cMuxPath );
 
 
 /**
