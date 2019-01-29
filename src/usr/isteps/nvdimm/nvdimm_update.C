@@ -337,13 +337,7 @@ bool NvdimmsUpdate::runUpdate(void)
                         Util::NVDIMM_16GB_LIDID,
                         ERRL_GETRC_SAFE(l_err),
                         ERRL_GETPLID_SAFE(l_err));
-
-                    // @todo RTC 201197 - enable when valid LIDs are present
-                    //commitPredictiveNvdimmError(l_err);
-                    delete l_err;
-                    l_err = nullptr;
-                    // -------------------------------- //
-
+                    commitPredictiveNvdimmError(l_err);
                     o_no_error_found = false;
                     // leaving pSmallLid object so don't continuously post the
                     // same error for each NVDIMM
@@ -366,12 +360,7 @@ bool NvdimmsUpdate::runUpdate(void)
                         Util::NVDIMM_32GB_LIDID,
                         ERRL_GETRC_SAFE(l_err),
                         ERRL_GETPLID_SAFE(l_err));
-
-                    // @todo RTC 201197 - enable when valid LIDs are present
-                    //commitPredictiveNvdimmError(l_err);
-                    delete l_err;
-                    l_err = nullptr;
-                    // -------------------------------- //
+                    commitPredictiveNvdimmError(l_err);
                     o_no_error_found = false;
                     // leaving pLargeLid object so don't continuously post the
                     // same error for each NVDIMM
@@ -413,6 +402,7 @@ bool NvdimmsUpdate::runUpdate(void)
             l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                         HWAS::SRCI_PRIORITY_LOW );
             ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+            o_no_error_found = false;
             pCurLid = nullptr;
             continue;
         }
