@@ -160,7 +160,8 @@ void pcrExtendSingleTpm(TpmTarget* i_pTpm,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
-                        const char* i_logMsg);
+                        const uint8_t* i_logMsg,
+                        size_t i_logMsgSize);
 
 /**
  *  @brief Extend a separator into a TPM and log

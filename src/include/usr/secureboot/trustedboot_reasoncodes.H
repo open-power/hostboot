@@ -78,6 +78,8 @@ namespace TRUSTEDBOOT
         MOD_TPM_CMD_FLUSH_CONTEXT           = 0x20,
         MOD_FLUSH_CONTEXT                   = 0x21,
         MOD_PCR_READ                        = 0x22,
+        MOD_EXPAND_TPM_LOG                  = 0x23,
+        MOD_TPM_CMD_EXPAND_TPM_LOG          = 0x24,
    };
 
     enum TRUSTEDReasonCode
@@ -114,6 +116,7 @@ namespace TRUSTEDBOOT
         RC_UNREACHABLE_TPM               = TRBOOT_COMP_ID | 0xBA,
         RC_RAND_NUM_TOO_BIG              = TRBOOT_COMP_ID | 0xBB,
         RC_TPM_BAD_RESP                  = TRBOOT_COMP_ID | 0xBC,
+        RC_NO_TPM_LOG_MGR                = TRBOOT_COMP_ID | 0xBD,
     };
 #ifdef __cplusplus
 }

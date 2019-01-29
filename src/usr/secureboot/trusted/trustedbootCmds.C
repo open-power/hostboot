@@ -49,6 +49,7 @@
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include <secureboot/trustedbootif.H>
+#include "tpmLogMgr.H"
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -411,6 +412,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                     reinterpret_cast<TPM2_NVReadOut*>(o_outBuf);
                   TPM2_NVReadOut* l_tpmRespData =
                                    reinterpret_cast<TPM2_NVReadOut*>(i_respBuf);
+                  l_respPtr->authSessionSize = l_tpmRespData->authSessionSize;
                   memcpy(reinterpret_cast<uint8_t*>(&l_tpmRespData->data),
                          reinterpret_cast<uint8_t*>(&l_respPtr->data),
                          sizeof(l_tpmRespData->data));
@@ -1593,6 +1595,52 @@ errlHndl_t tpmCmdFlushContext(TpmTarget* i_target)
     } while(0);
 
     TRACFCOMP(g_trac_trustedboot, EXIT_MRK"tpmCmdFlushContext()");
+    return l_errl;
+}
+
+errlHndl_t tpmCmdExpandTpmLog(TpmTarget* i_target)
+{
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmCmdExpandTpmLog()");
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    auto l_tpmLogMgr = getTpmLogMgr(i_target);
+    if(!l_tpmLogMgr)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"tpmCmdExpandTpmLog: could not fetch TPM log manager for TPM HUID 0x%x", TARGETING::get_huid(i_target));
+        /*@
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @reasoncode RC_NO_TPM_LOG_MGR
+         * @moduleid   MOD_TPM_CMD_EXPAND_TPM_LOG
+         * @userdata1  TPM HUID
+         * @devdesc    Could not fetch the TPM log manager
+         * @custdesc   trustedboot failure
+         */
+        l_errl = tpmCreateErrorLog(MOD_TPM_CMD_EXPAND_TPM_LOG,
+                                   RC_NO_TPM_LOG_MGR,
+                                   TARGETING::get_huid(i_target),
+                                   0);
+        break;
+    }
+
+    mutex_lock(&l_tpmLogMgr->logMutex);
+
+    assert(l_tpmLogMgr->eventLogInMem == nullptr, "tpmCmdExpandTpmLog: the TPM log manager has already been moved/expanded");
+    l_tpmLogMgr->eventLogInMem = new uint8_t[TPMLOG_DEVTREE_SIZE]();
+    l_tpmLogMgr->logMaxSize = TPMLOG_DEVTREE_SIZE;
+
+    memcpy(l_tpmLogMgr->eventLogInMem,
+           l_tpmLogMgr->eventLog,
+           l_tpmLogMgr->logSize);
+
+    l_tpmLogMgr->newEventPtr = l_tpmLogMgr->eventLogInMem +l_tpmLogMgr->logSize;
+
+    // Remove the old log
+    memset(l_tpmLogMgr->eventLog, 0, l_tpmLogMgr->logSize);
+
+    mutex_unlock(&l_tpmLogMgr->logMutex);
+    } while(0);
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"tpmCmdExpandTpmLog()");
     return l_errl;
 }
 

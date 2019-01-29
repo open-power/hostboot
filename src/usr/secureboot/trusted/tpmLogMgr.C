@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -465,7 +465,8 @@ namespace TRUSTEDBOOT
                                                   TPM_Alg_Id i_algId_2,
                                                   const uint8_t* i_digest_2,
                                                   size_t i_digestSize_2,
-                                                  const char* i_logMsg)
+                                                  const uint8_t* i_logMsg,
+                                                  const size_t i_logMsgSize)
     {
         TCG_PCR_EVENT2 eventLog;
         size_t fullDigestSize_1 = 0;
@@ -499,12 +500,11 @@ namespace TRUSTEDBOOT
                     i_digestSize_2 : fullDigestSize_2));
         }
         // Event field data
-        eventLog.event.eventSize = strlen(i_logMsg);
+        eventLog.event.eventSize = i_logMsgSize;
         memset(eventLog.event.event, 0, sizeof(eventLog.event.event));
         memcpy(eventLog.event.event, i_logMsg,
-               (strlen(i_logMsg) > MAX_TPM_LOG_MSG ?
-                MAX_TPM_LOG_MSG - 1 // Leave room for NULL termination
-                : strlen(i_logMsg)) );
+               (i_logMsgSize > MAX_TPM_LOG_MSG ?
+                MAX_TPM_LOG_MSG : i_logMsgSize));
 
         return eventLog;
     }
@@ -583,17 +583,28 @@ namespace TRUSTEDBOOT
                    i_val->logSize, i_maxSize);
 
         assert(i_newLog != NULL, "Bug! Log start address is nullptr");
-        assert(i_val->eventLogInMem == NULL,
-               "relocateTpmLog can only be called once");
         assert(i_val->logSize < i_maxSize,
                "Logsize is greater than maxsize");
 
-        // Point logMgr to new location
-        i_val->eventLogInMem = i_newLog;
+        if(i_val->eventLogInMem)
+        {
+            // The log had been expanded previously. Need to copy over the log
+            // memory to the new location and delete the pointer before
+            // reassigning
+            memcpy(i_newLog, i_val->eventLogInMem, i_val->logSize);
+            delete[](i_val->eventLogInMem);
+            i_val->eventLogInMem = i_newLog;
+        }
+        else
+        {
+            // Point logMgr to new location
+            i_val->eventLogInMem = i_newLog;
 
-        // Copy log into new location
-        memset(i_val->eventLogInMem, 0, i_maxSize);
-        memcpy(i_val->eventLogInMem, i_val->eventLog, i_val->logSize);
+            // Copy log into new location
+            memset(i_val->eventLogInMem, 0, i_maxSize);
+            memcpy(i_val->eventLogInMem, i_val->eventLog, i_val->logSize);
+        }
+
         i_val->newEventPtr = i_val->eventLogInMem + i_val->logSize;
         i_val->logMaxSize = i_maxSize;
 

@@ -73,6 +73,7 @@
 #include <util/misc.H>
 #include <hwas/common/hwasCommon.H>
 
+
 namespace TRUSTEDBOOT
 {
 
@@ -738,9 +739,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                                 l_securitySwitchValue);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_securitySwitchValue, sizeof(l_securitySwitchValue));
+        uint8_t l_sswitchesLogMsg[] = "Security Switches";
         l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
                           l_digest, sizeof(l_securitySwitchValue),
-                          "Security Switches");
+                          l_sswitchesLogMsg, sizeof(l_sswitchesLogMsg));
         if (l_err)
         {
             break;
@@ -760,8 +762,10 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         TRACDCOMP(g_trac_trustedboot, "PVR of chip = 0x%08X", l_pvr);
         // Extend to TPM - PCR_1
         memcpy(l_digest, &l_pvr, sizeof(l_pvr));
+        uint8_t l_pvrLogMsg[] = "PVR of Chip";
         l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
-                          l_digest, sizeof(l_pvr),"PVR of Chip");
+                          l_digest, sizeof(l_pvr), l_pvrLogMsg,
+                          sizeof(l_pvrLogMsg));
         if (l_err)
         {
             break;
@@ -782,10 +786,12 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         const TPM_Pcr l_pcrs[] = {PCR_1,PCR_4,PCR_5,PCR_6};
         for (size_t i = 0; i < (sizeof(l_pcrs)/sizeof(TPM_Pcr)) ; ++i)
         {
+            uint8_t l_nodeIdLogMsg[] = "Node id";
             l_err = pcrExtend(l_pcrs[i],
                               (l_pcrs[i] == PCR_1 ?
                                EV_PLATFORM_CONFIG_FLAGS : EV_COMPACT_HASH),
-                              l_digest, sizeof(l_nodeid),"Node id");
+                              l_digest, sizeof(l_nodeid), l_nodeIdLogMsg,
+                              sizeof(l_nodeIdLogMsg));
             if (l_err)
             {
                 break;
@@ -800,9 +806,11 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         memset(l_digest, 0, sizeof(uint64_t));
         bool l_tpmRequired = isTpmRequired();
         l_digest[0] = static_cast<uint8_t>(l_tpmRequired);
+        uint8_t l_tpmRequiredLogMsg[] = "Tpm Required";
         l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
                           l_digest, sizeof(l_tpmRequired),
-                          "Tpm Required");
+                          l_tpmRequiredLogMsg,
+                          sizeof(l_tpmRequiredLogMsg));
         if (l_err)
         {
             break;
@@ -811,9 +819,11 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         // HW Key Hash
         SHA512_t l_hw_key_hash;
         SECUREBOOT::getHwKeyHash(l_hw_key_hash);
+        uint8_t l_hwKeyHashLogMsg[] = "HW KEY HASH";
         l_err = pcrExtend(PCR_1, EV_PLATFORM_CONFIG_FLAGS,
                           l_hw_key_hash,
-                          sizeof(SHA512_t),"HW KEY HASH");
+                          sizeof(SHA512_t),l_hwKeyHashLogMsg,
+                          sizeof(l_hwKeyHashLogMsg));
         if (l_err)
         {
             break;
@@ -830,7 +840,8 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         TPM_Alg_Id i_algId,
                         const uint8_t* i_digest,
                         size_t  i_digestSize,
-                        const char* i_logMsg)
+                        const uint8_t* i_logMsg,
+                        const size_t i_logMsgSize)
 {
     assert(i_pTpm != nullptr,"pcrExtendSingleTpm: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
@@ -882,7 +893,8 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                                                           TPM_ALG_SHA1,
                                                           i_digest,
                                                           i_digestSize,
-                                                          i_logMsg);
+                                                          i_logMsg,
+                                                          i_logMsgSize);
                 if(useStaticLog)
                 {
                     auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
@@ -949,7 +961,7 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
         0xA6, 0xA9, 0xF7, 0x60, 0x79, 0xE4, 0x8B, 0xF0,
         0x90, 0xAC, 0xB7, 0xE8, 0x36, 0x7B, 0xFD, 0x0E};
     // The event message is 0xFFFFFFFF
-    const char logMsg[] = { 0xFF, 0xFF, 0xFF, 0xFF, '\0'};
+    const uint8_t logMsg[] = { 0xFF, 0xFF, 0xFF, 0xFF };
 
     memset(&eventLog, 0, sizeof(eventLog));
     do
@@ -995,7 +1007,8 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
                                                           TPM_ALG_SHA256,
                                                           sha256_digest,
                                                           sizeof(sha256_digest),
-                                                          logMsg);
+                                                          logMsg,
+                                                          sizeof(logMsg));
 
                 if(useStaticLog)
                 {
@@ -1595,6 +1608,26 @@ errlHndl_t doPcrRead(TpmTarget* i_target,
     return l_errl;
 }
 
+errlHndl_t doExpandTpmLog(TpmTarget* i_target)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    l_errl = validateTpmHandle(i_target);
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_errl = tpmCmdExpandTpmLog(i_target);
+    if(l_errl)
+    {
+        break;
+    }
+    } while(0);
+    return l_errl;
+}
+
 void* tpmDaemon(void* unused)
 {
     bool shutdownPending = false;
@@ -1671,7 +1704,9 @@ void* tpmDaemon(void* unused)
                                    msgData->mDigest,
                                    msgData->mDigestSize,
                                    msgData->mMirrorToLog? msgData->mLogMsg:
-                                                                      nullptr);
+                                                                      nullptr,
+                                   msgData->mMirrorToLog? msgData->mLogMsgSize:
+                                                                      0);
                   }
 
                   // Lastly make sure we are in a state
@@ -1854,6 +1889,14 @@ void* tpmDaemon(void* unused)
                                               l_data->alg,
                                               l_data->digestSize,
                                               l_data->digest);
+              }
+              break;
+          case TRUSTEDBOOT::MSG_TYPE_EXPAND_TPM_LOG:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  TpmTargetData* l_data =
+                              reinterpret_cast<TpmTargetData*>(tb_msg->iv_data);
+                  tb_msg->iv_errl = doExpandTpmLog(l_data->tpm);
               }
               break;
 
@@ -2242,6 +2285,7 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
                            reinterpret_cast<sha2_byte*>(&l_randNum),
                            sizeof(l_randNum),
                            nullptr, // log not needed for poison operation
+                           0,       // log size is 0
                            false,   // call synchronously to daemon
                            i_pTpm,  // only extend to pcr banks for this TPM
                            false);  // don't add PCR measurement to the log

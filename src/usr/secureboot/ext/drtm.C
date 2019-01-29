@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ const uint32_t DRTM_RIT_PAYLOAD_PHYS_ADDR_MB = 256-1;
 // RIT protection payload
 const char DRTM_RIT_PAYLOAD[] = {'D','R','T','M'};
 
-const char* const DRTM_RIT_LOG_TEXT = "DrtmPayload";
+const uint8_t const DRTM_RIT_LOG_TEXT[] = "DrtmPayload";
 
 #endif
 
@@ -411,7 +411,9 @@ errlHndl_t validateDrtmPayload()
             pError = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_DRTM_17,
                                             TRUSTEDBOOT::EV_COMPACT_HASH,
                                             hash,
-                                            sizeof(SHA512_t),DRTM_RIT_LOG_TEXT);
+                                            sizeof(SHA512_t),
+                                            DRTM_RIT_LOG_TEXT,
+                                            sizeof(DRTM_RIT_LOG_TEXT));
             if(pError)
             {
                 SB_ERR("validateDrtmPayload: Failed in pcrExtend() for PCR 17");

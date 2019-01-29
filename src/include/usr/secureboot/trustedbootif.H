@@ -183,7 +183,8 @@ namespace TRUSTEDBOOT
      * @param[in] i_eventType Event type to log
      * @param[in] i_digest Digest value to write to PCR
      * @param[in] i_digestSize Byte size of i_digest data
-     * @param[in] i_logMsg Null terminated log message, truncated at 128 chars
+     * @param[in] i_logMsg Log message in binary form
+     * @param[in] i_logMsgSize The size of the log message in bytes
      * @param[in] i_sendAsync Perform extension asynchronously, default true
      * @param[in] i_pTpm A specific TPM to singly extend a measurement into,
                   default is nullptr, which indicates all of the TPMs will be
@@ -199,7 +200,8 @@ namespace TRUSTEDBOOT
                          EventTypes i_eventType,
                          const uint8_t* i_digest,
                          size_t  i_digestSize,
-                         const char* i_logMsg,
+                         const uint8_t* i_logMsg,
+                         size_t i_logMsgSize,
                          bool i_sendAsync = true,
                          const TpmTarget* i_pTpm = nullptr,
                          bool i_mirrorToLog = true);
@@ -464,6 +466,15 @@ namespace TRUSTEDBOOT
                        TPM_Alg_Id i_algId,
                        size_t i_digestSize,
                        uint8_t* o_digest);
+
+    /**
+     * @brief Send the synchronous command to the given TPM to expand its log.
+     *        Expanding the log means increasing its size to accomodate larger
+     *        events in multinode communication protocol.
+     * @param[in] i_target the pointer to the TPM target; must not be nullptr
+     * @return nullptr on success; non-nullptr on error
+     */
+    errlHndl_t expandTpmLog(TpmTarget* i_target);
 
 } // end TRUSTEDBOOT namespace
 

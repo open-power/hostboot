@@ -35,6 +35,8 @@
 #include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include <secureboot/nodecommif.H>
 #include "../trusted/trustedboot.H"
+#include <secureboot/trustedbootif.H>
+#include "../trusted/trustedTypes.H"
 
 // ----------------------------------------------
 // Defines
@@ -98,6 +100,27 @@ enum node_comm_registers_t : uint64_t
    NCDD_REG_LINK_MBOX_71  =  0x501343B,
 */
 };
+
+// Each hex number is an encoding of the ascii string
+// corresponding to the name given below.
+typedef enum : uint64_t
+{
+    MSTNOTPM = 0x4d53544e4f54504d,
+    NDNOTPM_ = 0x4e444e4f54504d5f,
+    MASTERQ_ = 0x4d4153545245515f,
+    NODEQUOT = 0x4e4f444551554f54,
+    INVALID_ = 0x494e56414c49445f,
+} NCEyeCatcher_t;
+
+// Enhanced multinode comm master node request blob
+struct _MasterQuoteRequestBlob
+{
+    SECUREBOOT::NODECOMM::NCEyeCatcher_t EyeCatcher; // master node eye catcher
+    TRUSTEDBOOT::MasterTpmNonce_t MasterNonce; //32-byte nonce
+    TRUSTEDBOOT::TPML_PCR_SELECTION PcrSelect; // PCRs to read
+} PACKED;
+typedef struct _MasterQuoteRequestBlob MasterQuoteRequestBlob;
+
 
 /**
  *  @brief Convert Link Mailbox Register Address based on mode (XBUS or ABUS)

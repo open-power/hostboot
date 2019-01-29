@@ -792,6 +792,7 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             for (size_t i = 0; i < EXTEND_PCR_TESTS; ++i) {
 
+                uint8_t l_logMsg[] = "testExtendPCR: test";
                 num_ops++;
                 pcrExtendSingleTpm(pTpm,
                                    PCR_DEBUG,
@@ -799,7 +800,8 @@ class TrustedBootTest: public CxxTest::TestSuite
                                    TPM_ALG_SHA256,
                                    digest,
                                    TPM_ALG_SHA256_SIZE,
-                                   "testExtendPCR: test");
+                                   l_logMsg,
+                                   sizeof(l_logMsg));
 
                 auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
                 if(!hwasState.functional)

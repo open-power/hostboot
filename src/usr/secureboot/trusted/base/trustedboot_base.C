@@ -199,7 +199,8 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                      EventTypes i_eventType,
                      const uint8_t* i_digest,
                      size_t  i_digestSize,
-                     const char* i_logMsg,
+                     const uint8_t* i_logMsg,
+                     const size_t i_logMsgSize,
                      bool i_sendAsync,
                      const TpmTarget* i_pTpm,
                      const bool i_mirrorToLog)
@@ -210,8 +211,13 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend() pcr=%d msg='%s'",
-               i_pcr, i_logMsg? i_logMsg: "(null)");
+               ENTER_MRK"pcrExtend() pcr=%d",
+               i_pcr);
+    if(i_logMsg)
+    {
+        TRACUBIN(g_trac_trustedboot, "TPM log msg", i_logMsg, i_logMsgSize);
+    }
+
     TRACUBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
     // msgData will be freed when message is freed
@@ -233,10 +239,10 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     if (i_logMsg)
     {
         memcpy(msgData->mLogMsg, i_logMsg,
-           (strlen(i_logMsg) < sizeof(msgData->mLogMsg) ? strlen(i_logMsg) :
-            sizeof(msgData->mLogMsg)-1)  // Leave room for NULL termination
-           );
+            (i_logMsgSize < sizeof(msgData->mLogMsg) ?
+                i_logMsgSize : sizeof(msgData->mLogMsg)));
     }
+    msgData->mLogMsgSize = i_logMsgSize;
 
     if (!i_sendAsync)
     {
@@ -369,7 +375,8 @@ errlHndl_t extendPnorSectionHash(
               pnorHashEventType,
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
-              sectionInfo.name);
+              reinterpret_cast<const uint8_t*>(sectionInfo.name),
+              strlen(sectionInfo.name) + 1);
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -383,7 +390,8 @@ errlHndl_t extendPnorSectionHash(
                     swKeyHashEventType,
                     reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
                     sizeof(SHA512_t),
-                    swKeyMsg);
+                    reinterpret_cast<const uint8_t*>(swKeyMsg),
+                    strlen(swKeyMsg) + 1);
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -401,7 +409,8 @@ errlHndl_t extendPnorSectionHash(
                 pnorHashEventType,
                 hash,
                 sizeof(SHA512_t),
-                sectionInfo.name);
+                reinterpret_cast<const uint8_t*>(sectionInfo.name),
+                strlen(sectionInfo.name) + 1);
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
@@ -1116,6 +1125,57 @@ errlHndl_t pcrRead(TpmTarget* i_target,
         l_msg = nullptr;
     }
 
+#endif
+    return l_errl;
+}
+
+errlHndl_t expandTpmLog(TpmTarget* i_target)
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = nullptr;
+
+    TpmTargetData* l_data = new TpmTargetData(i_target);
+
+    l_msg = Message::factory(MSG_TYPE_EXPAND_TPM_LOG,
+                             sizeof(*l_data),
+                             reinterpret_cast<uint8_t*>(l_data),
+                             MSG_MODE_SYNC);
+    assert(l_msg, "expandTpmLog: l_msg is nullptr");
+    l_data = nullptr; // l_msg now owns l_data
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+        /**
+         * @errortype ERRL_SEV_UNRECOVERABLE
+         * @moduleid MOD_EXPAND_TPM_LOG
+         * @reasoncode RC_SENDRECV_FAIL
+         * @userdata1 rc from msg_sendrecv
+         * @userdata2 TPM HUID
+         * @devdesc msg_sendrecv failed for expandTpmLog
+         * @custdesc trustedboot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_EXPAND_TPM_LOG,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         TARGETING::get_huid(i_target),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    if(l_msg)
+    {
+        delete l_msg;
+        l_msg = nullptr;
+    }
 #endif
     return l_errl;
 }

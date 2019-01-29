@@ -47,6 +47,8 @@
 #define PACKED __attribute__((__packed__))
 #endif
 
+#include <limits.h>
+
 #ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
@@ -69,7 +71,7 @@ namespace TRUSTEDBOOT
     /// Common static values
     enum
     {
-        MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
+        MAX_TPM_LOG_MSG = PAGESIZE,    ///< Maximum log message size
 
         HASH_COUNT            = 2,       ///< Maximum # of digests
 
@@ -568,6 +570,7 @@ namespace TRUSTEDBOOT
     struct _TPM2_NVReadOut
     {
         TPM2_BaseOut base;
+        uint32_t authSessionSize;
         TPM2B_MAX_NV_BUFFER data;
     } PACKED;
     typedef struct _TPM2_NVReadOut TPM2_NVReadOut;

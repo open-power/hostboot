@@ -214,6 +214,15 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
  */
 errlHndl_t tpmCmdFlushContext(TpmTarget* i_target);
 
+/**
+ * @brief Send the command to the given TPM to increase its TPM log size.
+ *        The new TPM log is allocated on the heap, and the caller is
+ *        responsible for cleaning it up.
+ * @param[in] i_target the TPM target (must not be nullptr)
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t tpmCmdExpandTpmLog(TpmTarget* i_target);
+
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
