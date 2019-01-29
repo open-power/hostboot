@@ -22,3 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gen_mss_port_traits.H
+/// @brief Contains the port traits definition
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _GEN_MSS_PORT_TRAITS_H_
+#define _GEN_MSS_PORT_TRAITS_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+
+///
+/// @class Traits and policy class for port
+/// @tparam MC the memory controller type
+///
+template< mss::mc_type MC>
+class portTraits;
+
+} // ns mss
+
+#endif

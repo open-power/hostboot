@@ -36,8 +36,13 @@
 #ifndef EXP_CONSTS_H
 #define EXP_CONSTS_H
 
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
 namespace mss
 {
+
+constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
+
 namespace exp
 {
 

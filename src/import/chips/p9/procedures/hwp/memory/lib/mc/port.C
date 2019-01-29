@@ -72,7 +72,7 @@ constexpr uint64_t BIT_SPARE_7 = 15;        //       7: SPARE
 template<>
 fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
-    typedef portTraits<fapi2::TARGET_TYPE_MCA> TT;
+    typedef portTraits<mss::mc_type::NIMBUS> TT;
 
     uint32_t l_memcal_interval = 0;
     uint32_t l_zqcal_interval = 0;
