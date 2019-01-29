@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2017                             */
+/* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,6 +187,8 @@ static inline bool is_dimm_type_valid(const uint8_t i_dimm_type)
         case RDIMM:
         case LRDIMM:
         case DDIMM:
+        case SORDIMM:
+        case MINIRDIMM:
             l_result = true;
             break;
 

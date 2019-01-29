@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018                             */
+/* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -241,6 +242,8 @@ enum dimm_type
     RDIMM = 0b0001,
     LRDIMM = 0b0100,
     DDIMM = 0b1010,
+    SORDIMM = 0b1000,
+    MINIRDIMM = 0b0101,
 };
 
 enum guard_band : uint16_t

@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2018                             */
+/* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -295,6 +296,8 @@ fapi2::ReturnCode factories::dimm_module_select_param(parameters& o_param) const
     switch(iv_dimm_type)
     {
         case RDIMM:
+        case SORDIMM:
+        case MINIRDIMM:
             o_param = RDIMM_MODULE;
             break;
 
