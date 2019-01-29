@@ -97,6 +97,9 @@ enum vpdModuleId
     VPD_FILL_I2C_LOCK_MSG                   = 0x86,
     // Centaur FRU VPD
 
+    // OCMB SPD
+    VPD_OCMB_GET_SPD                        = 0x90,
+
 
 };
 

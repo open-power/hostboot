@@ -2202,7 +2202,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         uint8_t l_memType(MEM_TYPE_INVALID);
         l_err = getMemType( l_memType,
                             i_target,
-                            VPD::PNOR );
+                            VPD::AUTOSELECT );
         if( l_err )
         {
             TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after getMemType");
@@ -2249,7 +2249,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                              l_partDataSize,
                              i_target,
                              l_memType,
-                             VPD::PNOR );
+                             VPD::AUTOSELECT );
 
         if( l_err )
         {
@@ -2265,7 +2265,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                              l_serialDataSize,
                              i_target,
                              l_memType,
-                             VPD::PNOR );
+                             VPD::AUTOSELECT );
 
         if( l_err )
         {

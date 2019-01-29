@@ -40,6 +40,11 @@ enum
     SPD_FIRST_MOD_SPEC          = 0x8000,
 };
 
+enum
+{
+    OCMB_SPD_EFD_COMBINED_SIZE = 0x800 // 2 KB
+};
+
 /**
 * @brief Enumerations for fields that can be accessed in the SPD
 */

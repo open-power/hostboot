@@ -54,7 +54,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST     = 0x0B,
         MOD_FAPI2_GET_TARGETING_ATTR                = 0x0C,
         MOD_FAPI2_SET_TARGETING_ATTR                = 0x0D,
-        MOD_FAPI2_PLAT_GET_VPD                      = 0x0E,
+        MOD_FAPI2_PLAT_GET_VPD_MCS                  = 0x0E,
         MOD_FAPI2_PIB_ERR_MASK                      = 0x0F,
         MOD_FAPI2_PLAT_PARSE_WOF_TABLES             = 0x10,
         MOD_FAPI2_CVPD_ACCESS                       = 0x11,
@@ -67,6 +67,7 @@ namespace fapi2
         MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ             = 0x18,
         MOD_FAPI2_PLAT_GET_PROC_TEST                = 0x19,
         MOD_FAPI2_MONITOR_FOR_FSP_MSGS              = 0x1A,
+        MOD_FAPI2_PLAT_GET_VPD_OCMB                 = 0x1B,
     };
 
     /**
