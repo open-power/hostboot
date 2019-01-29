@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,7 +130,7 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         FAPI_TRY( mss::putScom(p, MCA_ACTION1, l_aue_buffer) );
 
         // Note: We also want to include the following setup RCD recovery and port fail
-        FAPI_TRY( mss::change_port_fail_disable(p, mss::LOW) );
+        FAPI_TRY( mss::change_port_fail_disable<mss::mc_type::NIMBUS>(p, mss::LOW) );
         FAPI_TRY( mss::change_rcd_recovery_disable(p, mss::LOW) );
     }
 

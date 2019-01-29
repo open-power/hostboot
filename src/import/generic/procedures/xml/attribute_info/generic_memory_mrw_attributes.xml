@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attributes> 
+<attributes>
   <attribute>
     <id>ATTR_MEM_MRW_IS_PLANAR</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -38,4 +38,18 @@
     <mssAccessorName>mem_mrw_is_planar</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Memory power control settings programmed during IPL
+        Used by OCC when exiting idle power-save mode
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
+    <platInit/>
+    <default>OFF</default>
+    <initToZero/>
+    <mssAccessorName>mrw_power_control_requested</mssAccessorName>
+  </attribute>
 </attributes>

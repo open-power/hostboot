@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,11 +114,11 @@ extern "C"
             // mode prior to running memory diagnostics. This step may be superfluous but not harmful.)
             // Note: addr_mux_sel is set low in p9_mss_draminit(), however that might be a work-around so we
             // set it low here kind of like belt-and-suspenders. BRS
-            FAPI_TRY( mss::change_addr_mux_sel(p, mss::LOW),
+            FAPI_TRY( mss::change_addr_mux_sel<mss::mc_type::NIMBUS>(p, mss::LOW),
                       "%s Failed to change_addr_mux_sel", mss::c_str(i_target) );
 
             // Re-enable port fails. Turned off in draminit_training
-            FAPI_TRY( mss::change_port_fail_disable(p, mss::OFF ),
+            FAPI_TRY( mss::change_port_fail_disable<mss::mc_type::NIMBUS>(p, mss::OFF ),
                       "%s Failed to change_port_fail_disable", mss::c_str(i_target) );
 
             // MC work around for OE bug (seen in periodics + PHY)
@@ -131,7 +131,8 @@ extern "C"
 
             // Start the refresh engines by setting MBAREF0Q(0) = “1”. Note that the remaining bits in
             // MBAREF0Q should retain their initialization values.
-            FAPI_TRY( mss::change_refresh_enable(p, mss::HIGH), "%s Failed change_refresh_enable", mss::c_str(i_target) );
+            FAPI_TRY( mss::change_refresh_enable<mss::mc_type::NIMBUS>(p, mss::HIGH), "%s Failed change_refresh_enable",
+                      mss::c_str(i_target) );
 
             // Power management is handled in the init file. (or should be BRS)
 
@@ -139,10 +140,10 @@ extern "C"
             FAPI_TRY( mss::enable_periodic_cal(p), "%s Failed enable_periodic_cal", mss::c_str(i_target) );
 
             // Step Six: Setup Control Bit ECC
-            FAPI_TRY( mss::enable_read_ecc(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+            FAPI_TRY( mss::enable_read_ecc<mss::mc_type::NIMBUS>(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
             // apply marks from MVPD
-            FAPI_TRY( mss::apply_mark_store(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+            FAPI_TRY( mss::apply_mark_store<mss::mc_type::NIMBUS>(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.

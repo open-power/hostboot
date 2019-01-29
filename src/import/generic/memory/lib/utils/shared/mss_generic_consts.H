@@ -82,6 +82,7 @@ enum conversions
 enum generic_sizes
 {
     NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
+    MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
 };
 
 ///
@@ -188,6 +189,30 @@ enum ddr_dimm_speeds
     DDR5_MAX_SPEED = 4800,
 };
 
+enum states
+{
+    LOW = 0,
+    HIGH = 1,
+    START = 1,
+    STOP = 0,
+    START_N = 0,
+    STOP_N = 1,
+    ON = 1,
+    OFF = 0,
+    ON_N = 0,
+    OFF_N = 1,
+    YES = 1,
+    NO = 0,
+    YES_N = 0,
+    NO_N = 1,
+    // Uses "_" in the name for INVALID as INVALID is defined as a macro in the
+    // FSP code. If we just use INVALID as an enum name, then the preprocessor
+    // compile phase changes it to be the macro.
+    _INVALID_ = 0xFF,
+    NO_CHIP_SELECT_ACTIVE = 0xFF,
+};
+
+
 namespace spd
 {
 
@@ -290,6 +315,20 @@ struct procTraits<proc_type::NIMBUS>
         DIMMS_PER_MCBIST = PORTS_PER_MCBIST * DIMMS_PER_PORT,
     };
 };
+
+///
+/// @brief Trait classes for proc_type - AXONE specialization
+///
+/// TODO: Need to add mc_type
+template< >
+struct procTraits<proc_type::AXONE>
+{
+    enum
+    {
+        EXP_PORTS_PER_OCMB = 1,
+    };
+};
+
 
 }// mss
 

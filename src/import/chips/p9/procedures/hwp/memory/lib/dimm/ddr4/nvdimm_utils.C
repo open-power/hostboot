@@ -268,13 +268,13 @@ fapi2::ReturnCode pda_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     }
 
     // Disable refresh
-    FAPI_TRY( mss::change_refresh_enable(l_mca, states::LOW) );
+    FAPI_TRY( mss::change_refresh_enable<mss::mc_type::NIMBUS>(l_mca, states::LOW) );
 
     // execute_wr_vref_latch(l_container)
     FAPI_TRY( mss::ddr4::pda::execute_wr_vref_latch(l_container) )
 
     // Enable refresh
-    FAPI_TRY( mss::change_refresh_enable(l_mca, states::HIGH) );
+    FAPI_TRY( mss::change_refresh_enable<mss::mc_type::NIMBUS>(l_mca, states::HIGH) );
 
 fapi_try_exit:
     return fapi2::current_err;

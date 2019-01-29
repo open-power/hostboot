@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     uint8_t l_pwr_cntrl = 0;
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mrw_power_control_requested(l_pwr_cntrl), "Error in set_pwr_cntrl_reg");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_pwr_cntrl), "Error in set_pwr_cntrl_reg");
     FAPI_TRY(read_mbarpc0(i_target, l_data));
 
     l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MINALL);
@@ -137,7 +138,8 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_tar
     uint8_t l_str_enable = 0;
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mrw_power_control_requested(l_str_enable), "Error in set_pwr_cntrl_reg");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_str_enable), "Error in set_pwr_cntrl_reg");
     FAPI_TRY(read_mbastr0(i_target, l_data));
 
     //Write bit if STR should be enabled

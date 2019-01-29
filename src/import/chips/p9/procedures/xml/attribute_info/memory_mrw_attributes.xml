@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -239,21 +239,6 @@
     <initToZero/>
     <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-        Memory power control settings programmed during IPL
-        Used by OCC when exiting idle power-save mode
-    </description>
-    <valueType>uint8</valueType>
-    <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
-    <platInit/>
-    <default>OFF</default>
-    <initToZero/>
-    <mssAccessorName>mrw_power_control_requested</mssAccessorName>
   </attribute>
 
   <attribute>

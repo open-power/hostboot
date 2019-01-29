@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,7 +156,8 @@ fapi2::ReturnCode str_non_tsv_parity(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     // STR can be enabled via two attributes - ATTR_MSS_MRW_POWER_CONTROL_REQUESTED or ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED
     uint8_t l_power_control = 0;
     uint8_t l_idle_power_control = 0;
-    FAPI_TRY( mss::mrw_power_control_requested(l_power_control) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_power_control) );
     FAPI_TRY( mss::mrw_idle_power_control_requested(l_idle_power_control) );
 
     // If the workaround is not needed, skip it
