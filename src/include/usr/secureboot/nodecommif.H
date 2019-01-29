@@ -58,17 +58,6 @@ enum node_comm_link_mbox_info_t
     NCDD_INVALID_LINK_MBOX = 0xFF,
 };
 
-// Each hex number is an encoding of the ascii string
-// corresponding to the name given below.
-typedef enum : uint64_t
-{
-    MSTNOTPM = 0x4d53544e4f54504d,
-    NDNOTPM_ = 0x4e444e4f54504d5f,
-    MASTERQ_ = 0x4d4153545245515f,
-    NODEQUOT = 0x4e4f444551554f54,
-    INVALID_ = 0x494e56414c49445f,
-} NCEyeCatcher_t;
-
 /**
  *  @brief Execute a single transmission from one proc to another
  *         over the XBUS Link Mailbox facility

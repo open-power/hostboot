@@ -63,7 +63,8 @@ namespace TRUSTEDBOOT
         MSG_TYPE_GEN_QUOTE,
         MSG_TYPE_FLUSH_CONTEXT,
         MSG_TYPE_PCR_READ,
-        MSG_TYPE_LAST = MSG_TYPE_PCR_READ,
+        MSG_TYPE_EXPAND_TPM_LOG,
+        MSG_TYPE_LAST = MSG_TYPE_EXPAND_TPM_LOG,
     };
 
     /// PCREXTEND message data
@@ -74,7 +75,8 @@ namespace TRUSTEDBOOT
         EventTypes       mEventType;
         size_t           mDigestSize;
         uint8_t          mDigest[TPM_ALG_SHA256_SIZE];
-        char             mLogMsg[MAX_TPM_LOG_MSG];
+        uint8_t          mLogMsg[MAX_TPM_LOG_MSG];
+        size_t           mLogMsgSize;
         const TpmTarget* mSingleTpm;
         bool             mMirrorToLog;
     };

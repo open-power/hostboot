@@ -755,15 +755,17 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
     errlHndl_t l_errl = nullptr;
 
     // PCR 4 Message <Component ID>
-    char pcr4Msg[sizeof(ComponentID)+1];
+    uint8_t pcr4Msg[sizeof(ComponentID)+1];
     memset(pcr4Msg, 0, sizeof(pcr4Msg));
     memcpy(pcr4Msg, &i_compId, sizeof(ComponentID));
 
     // PCR 5 Message <Component ID FW KEY HASH>
-    char pcr5Msg[sizeof(ComponentID)+strlen(TRUSTEDBOOT::FW_KEY_HASH_EXT)+1];
+    uint8_t pcr5Msg[sizeof(ComponentID)+strlen(TRUSTEDBOOT::FW_KEY_HASH_EXT)+1];
     memset(pcr5Msg, 0, sizeof(pcr5Msg));
-    strcat(pcr5Msg,pcr4Msg);
-    strcat(pcr5Msg,TRUSTEDBOOT::FW_KEY_HASH_EXT);
+    memcpy(pcr5Msg,pcr4Msg, sizeof(pcr4Msg));
+    memcpy(pcr5Msg+sizeof(pcr4Msg),
+           TRUSTEDBOOT::FW_KEY_HASH_EXT,
+           sizeof(TRUSTEDBOOT::FW_KEY_HASH_EXT));
 
     do {
 
@@ -772,7 +774,8 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
               TRUSTEDBOOT::EV_COMPACT_HASH,
               reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(SHA512_t),
-              pcr4Msg);
+              pcr4Msg,
+              sizeof(pcr4Msg));
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (payload text hash) failed for component %s",
@@ -785,7 +788,8 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
               TRUSTEDBOOT::EV_COMPACT_HASH,
               reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
               sizeof(SHA512_t),
-              pcr5Msg);
+              pcr5Msg,
+              sizeof(pcr5Msg));
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (FW key hash) failed for component %s",

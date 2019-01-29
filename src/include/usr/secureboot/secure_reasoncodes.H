@@ -66,6 +66,8 @@ namespace SECUREBOOT
         MOD_NCEX_GET_RANDOM                 = 0x29,
         MOD_NC_RECV                         = 0x2A,
         MOD_NC_GEN_SLAVE_RESPONSE           = 0x2B,
+        MOD_NC_GEN_MASTER_REQUEST           = 0x2C,
+        MOD_NC_PROCESS_SLAVE_QUOTE          = 0x2D,
    };
 
     enum SECUREReasonCode
@@ -112,6 +114,7 @@ namespace SECUREBOOT
         RC_NC_BAD_MASTER_TPM               = SECURE_COMP_ID | 0x2C,
         RC_NC_NO_PRIMARY_TPM_LOG           = SECURE_COMP_ID | 0x2D,
         RC_NC_BAD_MASTER_EYE_CATCH         = SECURE_COMP_ID | 0x2E,
+        RC_NC_BAD_SLAVE_QUOTE              = SECURE_COMP_ID | 0x2F,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

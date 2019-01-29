@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,7 +222,8 @@ namespace TRUSTEDBOOT
      * @param[in] i_algId_2 Algorithm to use
      * @param[in] i_digest_2 Digest value to write to PCR, NULL if not used
      * @param[in] i_digestSize_2 Byte size of i_digest array
-     * @param[in] i_logMsg Null terminated Log message
+     * @param[in] i_logMsg log message in binary form
+     * @param[in] i_logMsgSize the size of log message in bytes
      *
      * @return TCG_PCR_EVENT2   PCR event log
      */
@@ -234,7 +235,8 @@ namespace TRUSTEDBOOT
                                                   TPM_Alg_Id i_algId_2,
                                                   const uint8_t* i_digest_2,
                                                   size_t i_digestSize_2,
-                                                  const char* i_logMsg);
+                                                  const uint8_t* i_logMsg,
+                                                  size_t i_logMsgSize);
 
     /**
      * @brief Dump contents of log to a trace

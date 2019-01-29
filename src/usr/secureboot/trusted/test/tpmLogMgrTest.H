@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,7 +198,8 @@ class TPMLogMgrTest: public CxxTest::TestSuite
          * @brief Add generic test event to log and return the event added
          */
         TCG_PCR_EVENT2 addTestLogEvent(TpmLogMgr& i_logMgr,
-                                       const char* i_logMsg)
+                                       const uint8_t* i_logMsg,
+                                       size_t i_logMsgSize)
         {
             // Set components of TCG_PCR_EVENT2
             TPM_Pcr pcr = PCR_0;
@@ -215,14 +216,18 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                                         pcr, EV_NO_ACTION, algId,
                                         digest, digestSize,
                                         TPM_ALG_SHA1, digest,
-                                        digestSize, i_logMsg);
+                                        digestSize, i_logMsg,
+                                        i_logMsgSize);
 
             // Add event to log
             errlHndl_t err = TpmLogMgr_addEvent(&i_logMgr, &eventLog);
             if (err)
             {
-                TS_FAIL("addTestLogEvent - Failed to addEvent with message = %s",
-                        i_logMsg);
+                TS_FAIL("addTestLogEvent - Failed to addEvent with the following message");
+                TRACFBIN(g_trac_trustedboot,
+                         "TPM log message",
+                         i_logMsg,
+                         i_logMsgSize);
                 errlCommit( err, TRBOOT_COMP_ID );
                 delete err;
                 err = NULL;
@@ -244,8 +249,10 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                 getTestLogMgr(&logMgr);
 
                 // Add event to log
-                const char* logMsg = "testTpmLogReadSingleEntry";
-                TCG_PCR_EVENT2 eventLog = addTestLogEvent(logMgr, logMsg);
+                uint8_t logMsg[] = "testTpmLogReadSingleEntry";
+                TCG_PCR_EVENT2 eventLog = addTestLogEvent(logMgr,
+                                                          logMsg,
+                                                          sizeof(logMsg));
 
                 // Retrive event from log
                 TCG_PCR_EVENT2 resultEventLog;
@@ -330,8 +337,8 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                 getTestLogMgr(&logMgr);
 
                 // Add event to log
-                const char* logMsg = "testTpmLogReadPastValidLog";
-                addTestLogEvent(logMgr, logMsg);
+                uint8_t logMsg[] = "testTpmLogReadPastValidLog";
+                addTestLogEvent(logMgr, logMsg, sizeof(logMsg));
 
                 // Retrive event from log
                 TCG_PCR_EVENT2 resultEventLog;
@@ -389,9 +396,11 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                     break;
                 }
 
+                uint8_t logMsg[] = "CalcLog11";
                 // Add an event to log
                 TCG_PCR_EVENT2 eventLog = addTestLogEvent(logMgr,
-                                                          "CalcLog11");
+                                                          logMsg,
+                                                          sizeof(logMsg));
                 if (TpmLogMgr_calcLogSize(&logMgr) !=
                     TpmLogMgr_getLogSize(&logMgr) ||
                     ((firstEventSize +
@@ -405,11 +414,13 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                     break;
                 }
 
+                uint8_t logMsg1[] = "CalcLog3434";
                 // Add more events to log
                 for (int idx = 0; idx < 10; idx ++)
                 {
                     eventLog = addTestLogEvent(logMgr,
-                                               "CalcLog3434");
+                                               logMsg1,
+                                               sizeof(logMsg1));
                     if (TpmLogMgr_calcLogSize(&logMgr) !=
                         TpmLogMgr_getLogSize(&logMgr))
                     {
@@ -460,11 +471,13 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                 }
 
 
+                uint8_t logMsg[] = "CalcLog3434";
                 // Add more events to log
                 for (int idx = 0; idx < 10; idx ++)
                 {
                     eventLog = addTestLogEvent(logMgr,
-                                               "CalcLog3434");
+                                               logMsg,
+                                               sizeof(logMsg));
                 }
 
                 err = TpmLogMgr_initializeUsingExistingLog(&cloneMgr,
@@ -484,8 +497,9 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                     break;
                 }
 
+                uint8_t logMsg1[] = "Clone123 23434";
                 // Now try adding an event to the clone logMgr
-                eventLog = addTestLogEvent(cloneMgr, "Clone123 23434");
+                eventLog = addTestLogEvent(cloneMgr, logMsg1, sizeof(logMsg1));
                 if (TpmLogMgr_getLogSize(&logMgr) ==
                     TpmLogMgr_getLogSize(&cloneMgr))
                 {
