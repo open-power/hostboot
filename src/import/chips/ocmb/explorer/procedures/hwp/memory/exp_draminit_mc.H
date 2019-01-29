@@ -22,3 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_draminit_mc.H
+/// @brief Initialize the memory controller to take over the DRAM
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef EXP_DRAMINIT_MC_H_
+#define EXP_DRAMINIT_MC_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_draminit_mc_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Trains the OCMB link
+    /// @param[in] i_target the OCMB target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_draminit_mc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+}
+
+#endif
