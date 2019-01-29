@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,9 +33,11 @@
 #include <vpd_access_defs.H>
 #include <vpd_access.H>
 #include <p9_get_mem_vpd_keyword.H>
+#include <ddimm_get_efd.H>
 #include <attribute_service.H>
 #include <vpd/dvpdenums.H>
 #include <errl/errlmanager.H>
+#include <fapi2_spd_access.H>
 //The following can be uncommented for unit testing
 //#undef FAPI_DBG
 //#define FAPI_DBG(args...) FAPI_INF(args)
@@ -79,7 +81,7 @@ fapi2::ReturnCode platGetVPD(
                      VPD_KEYWORD_SIZE);
             /*@
             * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD
+            * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS
             * @reasoncode        fapi2::RC_BUFFER_TOO_SMALL
             * @userdata1         Buffer size
             * @userdata2         Expected size
@@ -88,7 +90,7 @@ fapi2::ReturnCode platGetVPD(
             */
             l_errl = new ERRORLOG::ErrlEntry(
                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             fapi2::MOD_FAPI2_PLAT_GET_VPD,
+                             fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS,
                              fapi2::RC_BUFFER_TOO_SMALL,
                              io_vpd_info.iv_size,
                              VPD_KEYWORD_SIZE,
@@ -184,7 +186,7 @@ fapi2::ReturnCode platGetVPD(
                      io_vpd_info.iv_vpd_type);
             /*@
             * @errortype
-            * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD
+            * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS
             * @reasoncode        fapi2::RC_INVALID_TYPE
             * @userdata1         Vpd type
             * @userdata2         HUID of MCS target
@@ -193,8 +195,8 @@ fapi2::ReturnCode platGetVPD(
             */
             l_errl = new ERRORLOG::ErrlEntry(
                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             fapi2::MOD_FAPI2_PLAT_GET_VPD,
-                             fapi2::RC_BUFFER_TOO_SMALL,
+                             fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS,
+                             fapi2::RC_INVALID_TYPE,
                              io_vpd_info.iv_vpd_type,
                              TARGETING::get_huid(l_pMcsTarget),
                              true); //software callout
@@ -298,7 +300,7 @@ fapi2::ReturnCode platGetVPD(
                          io_vpd_info.iv_size);
                 /*@
                 * @errortype
-                * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS
                 * @reasoncode        fapi2::RC_RETURNED_VPD_TOO_SMALL
                 * @userdata1[0:31]   Returned vpd in bytes
                 * @userdata1[32:64]  Expected number of vpd bytes
@@ -308,7 +310,7 @@ fapi2::ReturnCode platGetVPD(
                 */
                 l_errl = new ERRORLOG::ErrlEntry(
                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                 fapi2::MOD_FAPI2_PLAT_GET_VPD,
+                                 fapi2::MOD_FAPI2_PLAT_GET_VPD_MCS,
                                  fapi2::RC_RETURNED_VPD_TOO_SMALL,
                                  TWO_UINT32_TO_UINT64(
                                                       l_buffSize,
@@ -330,6 +332,110 @@ fapi2::ReturnCode platGetVPD(
         l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
     FAPI_DBG("platGetVPD: exit");
+
+    return l_rc;
+}
+
+fapi2::ReturnCode platGetVPD(
+   const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbFapi2Target,
+         VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>&       io_vpdInfo,
+         uint8_t* const o_blob)
+{
+    FAPI_DBG("platGetVPD(OCMB): enter");
+
+    fapi2::ReturnCode l_rc{fapi2::FAPI2_RC_SUCCESS};
+
+    errlHndl_t l_errl = nullptr;
+
+    // Set up buffer we will read first 2KB of OCMB's eeprom to
+    // 1st KB is SPD info, 2nd KB is EFD info. Both are needed.
+    size_t   l_spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+    uint8_t* l_spdBuffer = nullptr;
+
+    do
+    {
+        // Get targeting OCMB target
+        TARGETING::Target * l_ocmbTarget = nullptr;
+        l_errl = fapi2::platAttrSvc::getTargetingTarget(i_ocmbFapi2Target,
+                                                        l_ocmbTarget);
+        if (l_errl)
+        {
+            FAPI_ERR("platGetVPD(OCMB): Error from getTargetingTarget");
+            break; //return with error
+        }
+
+        // Retrieve the EFD data or the EFD data size if o_blob is NULL
+        if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
+        {
+            // Allocate buffer to hold SPD and init to 0
+            l_spdBuffer = new uint8_t[l_spdBufferSize];
+            memset(l_spdBuffer, 0, l_spdBufferSize);
+
+            // Get the SPD buffer, where the EFD data is to be extracted from
+            // "ENTIRE_SPD" for OCMB target is first 2 KB of EEPROM
+            l_errl = deviceRead(l_ocmbTarget,
+                                l_spdBuffer,
+                                l_spdBufferSize,
+                                DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+
+            // If unable to retrieve the SPD buffer then can't
+            // extract the EFD data, so return error.
+            if (l_errl)
+            {
+                FAPI_ERR("platGetVPD(OCMB): Error from trying to read ENTIRE SPD from 0x%.08X ",
+                         TARGETING::get_huid(l_ocmbTarget));
+                break;
+            }
+
+            // Retrieve the EFD data from the given SPD buffer.
+            // if o_blob is nullptr then size will be returned in io_vpdInfo.iv_size
+            FAPI_EXEC_HWP( l_rc,
+                           ddimm_get_efd,
+                           i_ocmbFapi2Target,
+                           io_vpdInfo,
+                           o_blob,
+                           l_spdBuffer,
+                           l_spdBufferSize );
+            if (l_rc)
+            {
+                FAPI_ERR("platGetVPD(OCMB): Error returned from ddimm_get_efd called on target 0x%.08X",
+                         TARGETING::get_huid(l_ocmbTarget));
+            }
+        }  // end if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
+        else
+        {
+            /*@
+            * @errortype
+            * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD_OCMB
+            * @reasoncode        fapi2::RC_INVALID_TYPE
+            * @userdata1         vpd_type attempted
+            * @userdata2         HUID of OCMB target
+            * @devdesc           Less than expected number of bytes returned.
+            * @custdesc          Firmware Error
+            */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                 fapi2::MOD_FAPI2_PLAT_GET_VPD_OCMB,
+                                 fapi2::RC_INVALID_TYPE,
+                                 io_vpdInfo.iv_vpd_type,
+                                 TARGETING::get_huid(l_ocmbTarget),
+                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        }
+    } while (0);
+
+    // Caller is not interested in the SPD buffer, so delete it.
+    if (l_spdBuffer)
+    {
+        delete []l_spdBuffer;
+        l_spdBuffer = nullptr;
+    }
+
+    if ( l_errl )
+    {
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+
+    FAPI_DBG("platGetVPD(OCMB): exit");
 
     return l_rc;
 }

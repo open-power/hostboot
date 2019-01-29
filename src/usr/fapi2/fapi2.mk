@@ -88,6 +88,7 @@ OBJS += plat_mmio_access.o
 include ${ROOTPATH}/procedure.rules.mk
 
 include ${HWP_PATH_1}/hwp/accessors/p9_get_mem_vpd_keyword.mk
+include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
