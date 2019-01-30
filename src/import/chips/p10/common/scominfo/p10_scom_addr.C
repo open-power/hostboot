@@ -49,22 +49,20 @@ extern "C"
     {
         bool l_eqTarget = false;
 
-        // Must have region select = 0 and EQ chiplet ID
-        if ( (getRegionSelect() == EQ_REGION_SEL) &&
-             (getChipletId() >= EQ0_CHIPLET_ID) &&
+        // Must have EQ chiplet ID
+        if ( (getChipletId() >= EQ0_CHIPLET_ID) &&
              (getChipletId() <= EQ7_CHIPLET_ID) )
         {
-            // If endpoint is QME (0xE), QME per core (bit 20) must be 0
-            if ( (getEndpoint() == QME_ENDPOINT) && (!getQMEPerCore()) )
+            // If endpoint is QME (0xE):
+            //  QME per core (bit 20) must be 0
+            //  region select (bits 16:19) must be 0
+            if ( (getEndpoint() == QME_ENDPOINT) && (!getQMEPerCore()) &&
+                 (getRegionSelect() == EQ_REGION_SEL) )
             {
                 l_eqTarget = true;
             }
-            // Other endpoints for EQ
-            else if ( (getEndpoint() == CHIPLET_CTRL_ENDPOINT) ||  // 0x0
-                      (getEndpoint() == CLOCK_CTRL_ENDPOINT)   ||  // 0x3
-                      (getEndpoint() == FIR_ENDPOINT)          ||  // 0x4
-                      (getEndpoint() == THERMAL_ENDPOINT)      ||  // 0x5
-                      (getEndpoint() == PCBSLV_ENDPOINT) )         // 0xF
+            // associate perv target resources with EQ
+            else if (isPervTarget())
             {
                 l_eqTarget = true;
             }
@@ -144,9 +142,16 @@ extern "C"
     {
         bool l_pecTarget = false;
 
+        // associate perv target resources with PCIE
+        if ( (getChipletId() >= PCI0_CHIPLET_ID) &&      // 0x8
+             (getChipletId() <= PCI1_CHIPLET_ID) )       // 0x9
+        {
+            l_pecTarget = isPervTarget();
+        }
+
         // Endpoint must be PSCOM (0x1) and Sat ID must be 0
-        if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
-             (getSatId() == PCI_SAT_ID) )          // 0
+        else if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
+                  (getSatId() == PCI_SAT_ID) )          // 0
         {
             // For PEC addresses via NEST regions, ring ID must be 0x6
             if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
@@ -309,8 +314,14 @@ extern "C"
     {
         bool l_iohsTarget = false;
 
+        // associate perv target resources with AXON
+        if ( (getChipletId() >= AXON0_CHIPLET_ID) &&       // 0x18
+             (getChipletId() <= AXON7_CHIPLET_ID) )        // 0x1F
+        {
+            l_iohsTarget = isPervTarget();
+        }
         // Endpoint must be PSCOM
-        if ( getEndpoint() == PSCOM_ENDPOINT)
+        else if ( getEndpoint() == PSCOM_ENDPOINT)
         {
             // If chiplet ID is of AXON chiplets, then RingId must be 1-5
             if ( (getChipletId() >= AXON0_CHIPLET_ID) &&      // 0x18
@@ -459,18 +470,25 @@ extern "C"
     {
         bool l_miTarget = false;
 
-        // Chiplet ID must belong to MCs, Endpoint = PSCOM_ENDPOINT,
-        // and ringID = MC_RING_ID
-        if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
-             (getChipletId() <= MC3_CHIPLET_ID) &&    // 0x0F
-             (getEndpoint() == PSCOM_ENDPOINT) &&     // 0x1
-             (getRingId() == MC_RING_ID) )            // 0x2
+        // Chiplet ID must belong to MCs
+        if ( (getChipletId() >= MC0_CHIPLET_ID)   &&    // 0x0C
+             (getChipletId() <= MC3_CHIPLET_ID) )       // 0x0F
         {
-            // Must have MI Sat ID
-            if ( (getSatId() == MC_SAT_ID0) ||  // 0x0
-                 (getSatId() == MC_SAT_ID12) )  // 0xC
+            // allow access to perv endpoints on MC chiplets
+            if (isPervTarget())
             {
                 l_miTarget = true;
+            }
+            // Endpoint = PSCOM_ENDPOINT, and ringID = MC_RING_ID
+            else if ( (getEndpoint() == PSCOM_ENDPOINT) &&     // 0x1
+                      (getRingId() == MC_RING_ID) )            // 0x2
+            {
+                // Must have MI Sat ID
+                if ( (getSatId() == MC_SAT_ID0) ||  // 0x0
+                     (getSatId() == MC_SAT_ID12) )  // 0xC
+                {
+                    l_miTarget = true;
+                }
             }
         }
 
