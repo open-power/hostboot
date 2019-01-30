@@ -53,3 +53,8 @@ config SUPPORT_PARTIAL_CACHE
     help
         Support chips that do not have full cache --
         intended for early bringup of hardware
+
+config AXONE_BRING_UP
+    default n
+    help
+        Only enable for Axone bringup, will be removed eventually
