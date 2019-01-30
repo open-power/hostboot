@@ -47,6 +47,12 @@
 #include    <sys/time.h>
 #include    <hwas/common/hwasCommon.H>
 
+// fapi2 HWP invoker
+#include    <fapi2/plat_hwp_invoker.H>
+
+#include    <fapi2.H>
+#include    <p9_sbe_lpc_init.H>
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -286,29 +292,60 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
         #endif
 
-        // Call to Validate any Alternative Master's connection to PNOR
-        // Only call this in MNFG mode
-        // Any error returned should not fail istep
+        // Run LPC Init on Alt Master Procs
+        // Get list of all processors
+        TARGETING::TargetHandleList l_procList;
+        TARGETING::getAllChips(l_procList,
+                               TARGETING::TYPE_PROC,
+                               true); // true: return functional targets
 
-        // Get target service and the system target
-        TargetService& tS = targetService();
-        TARGETING::Target* sys = NULL;
-        (void) tS.getTopLevelTarget( sys );
-        assert(sys, "call_host_slave_sbe_update() system target is NULL");
-
-        TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags;
-        mnfg_flags = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-        if ( mnfg_flags & MNFG_FLAG_THRESHOLDS )
+        // Loop through all processors
+        for (const auto & l_target : l_procList)
         {
-            l_errl = PNOR::validateAltMaster();
-            if (l_errl)
+            // Check if processor is MASTER_CANDIDATE
+            TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
+                       l_target->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
+
+            if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
             {
-                // Commit error
-                errlCommit( l_errl, HWPF_COMP_ID );
-                break;
+                // Initialize the LPC Bus by calling the p9_sbe_lpc_init hwp
+                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target (l_target);
+                FAPI_INVOKE_HWP(l_errl, p9_sbe_lpc_init, l_fapi_target);
+
+                if (l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               INFO_MRK"PNOR::validateAltMaster> p9_sbe_lpc_init returns error, rc=0x%X",
+                               l_errl->reasonCode());
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_target).addToLog(l_errl);
+                    //Remove any deconfigure information, we only need the PNOR Part callout and do not want
+                    // to deconfigure the entire proc because of a PNOR part problem
+                    l_errl->removeDeconfigure();
+                    // Commit error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS running p9_sbe_lpc_init HWP on "
+                           "target HUID %.8X", TARGETING::get_huid(l_target));
+                }
             }
         }
 
+        // Call to Validate any Alternative Master's connection to PNOR
+        // Any error returned should not fail istep
+        l_errl = PNOR::validateAltMaster();
+        if (l_errl)
+        {
+            //Remove any deconfigure information, we only need the PNOR Part callout and do not want
+            // to deconfigure the entire proc because of a PNOR part problem
+            l_errl->removeDeconfigure();
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor
         // this will be used later on by the sbe_retry code to determine
@@ -316,7 +353,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
         l_errl = SBE::querySbeSeepromVersions();
         if(l_errl)
         {
-            l_StepError.addErrorDetails( l_errl);
+            l_StepError.addErrorDetails(l_errl);
             errlCommit( l_errl, HWPF_COMP_ID);
         }
 
