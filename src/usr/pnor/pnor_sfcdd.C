@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -420,10 +420,16 @@ PnorSfcDD::PnorSfcDD( TARGETING::Target* i_target )
 
     if( l_err )
     {
-        TRACFCOMP( g_trac_pnor, "Failure to initialize the PNOR logic, shutting down :: RC=%.4X", ERRL_GETRC_SAFE(l_err) );
+        TRACFCOMP( g_trac_pnor, "Failure to initialize the PNOR logic :: RC=%.4X", ERRL_GETRC_SAFE(l_err) );
         l_err->collectTrace(PNOR_COMP_NAME);
         ERRORLOG::errlCommit(l_err,PNOR_COMP_ID);
-        INITSERVICE::doShutdown( PNOR::RC_PNOR_INIT_FAILURE );
+
+        //Only shutdown if this error occurs on the master proc
+        if (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == iv_target)
+        {
+            TRACFCOMP( g_trac_pnor, "PNOR Error on Master Proc, shutting down");
+            INITSERVICE::doShutdown( PNOR::RC_PNOR_INIT_FAILURE );
+        }
     }
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK "PnorSfcDD::PnorSfcDD()" );

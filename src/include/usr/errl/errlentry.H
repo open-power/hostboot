@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -508,13 +508,18 @@ public:
     void removeDuplicateTraces(void);
 
      /**
-     *  @brief Remove the back trace user detail data
-     *  When an error log is constructed, the back trace is automatically
-     *  captured. This function removes the backtrace. This should be used when
-     *  a caller knows that the backtrace is of no use and wants to limit the
-     *  size of the error log.
-     */
+      *  @brief Remove the back trace user detail data
+      *  When an error log is constructed, the back trace is automatically
+      *  captured. This function removes the backtrace. This should be used when
+      *  a caller knows that the backtrace is of no use and wants to limit the
+      *  size of the error log.
+      */
     void removeBackTrace();
+
+    /**
+     *  @brief remove all deconfigure elements from an errorlog
+     */
+    void removeDeconfigure(void);
 
     /**
      *  @brief Add a clock callout.

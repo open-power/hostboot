@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -191,6 +191,13 @@ errlHndl_t validateAltMaster( void )
                            TARGETING::get_huid(procList[i]), l_err->eid(),
                            l_err->reasonCode());
 
+                l_err->addPartCallout(
+                            procList[i],
+                            HWAS::PNOR_PART_TYPE,
+                            HWAS::SRCI_PRIORITY_LOW,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
+
                 l_err->collectTrace(PNOR_COMP_NAME);
 
                 // if there was an error, commit here and then proceed to
@@ -216,13 +223,12 @@ errlHndl_t validateAltMaster( void )
                            TARGETING::get_huid(procList[i]), l_err->eid(),
                            l_err->reasonCode());
 
-                // Limited in callout: no PNOR target, so calling out processor
-                l_err->addHwCallout(
-                                procList[i],
-                                HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::NO_DECONFIG,
-                                HWAS::GARD_NULL );
-
+                l_err->addPartCallout(
+                            procList[i],
+                            HWAS::PNOR_PART_TYPE,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
 
                 l_err->collectTrace(PNOR_COMP_NAME);
 
@@ -260,13 +266,12 @@ errlHndl_t validateAltMaster( void )
                                       TARGETING::get_huid(procList[i]),
                                       0);
 
-                // Limited in callout: no PNOR target, so calling out processor
-                l_err->addHwCallout(
-                                procList[i],
-                                HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::NO_DECONFIG,
-                                HWAS::GARD_NULL );
-
+                l_err->addPartCallout(
+                            procList[i],
+                            HWAS::PNOR_PART_TYPE,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
 
                 TRACFBIN(g_trac_pnor, "tocBuffer", tocBuffer, 0x20);
 

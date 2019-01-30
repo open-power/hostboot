@@ -100,6 +100,7 @@ include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp1_scom.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp2_scom.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp3_scom.mk
 include ${PERV_HWP_PATH}/p9_update_security_ctrl.mk
+include ${PERV_HWP_PATH}/p9_sbe_lpc_init.mk
 
 # Note that p9_int_scom.mk is included in fapi2.mk for
 # workaround reasons so we are not including it here

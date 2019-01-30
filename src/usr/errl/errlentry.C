@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2004,6 +2004,33 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
     return copy_vector;
 }
 
+void ErrlEntry::removeDeconfigure()
+{
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            //Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts have deconfigure entries,
+            //  so only update those to ensure the ErrorType is GARD_NULL
+            if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::HW_CALLOUT)
+            {
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->gardErrorType = HWAS::GARD_NULL;
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->deconfigState = HWAS::NO_DECONFIG;
+            }
+            else if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::CLOCK_CALLOUT)
+            {
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->clkGardErrorType = HWAS::GARD_NULL;
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->clkDeconfigState = HWAS::NO_DECONFIG;
+            }
+            else if (reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->type == HWAS::PART_CALLOUT)
+            {
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partGardErrorType = HWAS::GARD_NULL;
+                reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partDeconfigState = HWAS::NO_DECONFIG;
+            }
+        }
+    }
+}
 
 void ErrlEntry::removeDuplicateTraces()
 {
