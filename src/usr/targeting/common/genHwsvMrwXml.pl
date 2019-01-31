@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -5416,7 +5416,7 @@ sub generate_sbe
 sub generate_npu
 {
     my ($proc, $npu, $ordinalId, $ipath) = @_;
-    my $uidstr = sprintf("0x%02X44%04X",${node},$proc*MAX_NPU_PER_PROC + $npu);
+    my $uidstr = sprintf("0x%02X43%04X",${node},$proc*MAX_NPU_PER_PROC + $npu);
 
     my $fapi_name    = "NA";
     my $path = "sys-$sys/node-$node/proc-$proc/npu-$npu";
@@ -5446,6 +5446,10 @@ sub generate_npu
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$npu</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
