@@ -194,8 +194,6 @@ void mutex_lock(mutex_t * i_mutex)
     // 2: Lock is held by a task and there is contention.
     // Any other values indicates that outside influences have messed with the
     // mutex and we shouldn't continue.
-    crit_assert(i_mutex->iv_val <= 2);
-
     uint64_t l_lockStatus = __sync_val_compare_and_swap(&(i_mutex->iv_val),0,1);
 
     if(unlikely(l_lockStatus != 0))
@@ -239,8 +237,6 @@ void mutex_unlock(mutex_t * i_mutex)
     // 2: Lock is held by a task and there is contention.
     // Any other values indicates that outside influences have messed with the
     // mutex and we shouldn't continue.
-    crit_assert(i_mutex->iv_val <= 2);
-
     uint64_t l_lockStatus = __sync_fetch_and_sub(&(i_mutex->iv_val), 1);
 
     if(unlikely(l_lockStatus >= 2))
@@ -265,7 +261,6 @@ void recursive_mutex_lock(mutex_t * i_mutex)
     // 2: Lock is held by a task and there is contention.
     // Any other values indicates that outside influences have messed with the
     // mutex and we shouldn't continue.
-    crit_assert(i_mutex->iv_val <= 2);
 
     // Check the contents of the mutex's iv_val and if it's equal to 0, then
     // assign it the value of 1. l_lockStatus is initialized with the value of
@@ -337,8 +332,6 @@ void recursive_mutex_unlock(mutex_t * i_mutex)
     // 2: Lock is held by a task and there is contention.
     // Any other values indicates that outside influences have messed with the
     // mutex and we shouldn't continue.
-    crit_assert(i_mutex->iv_val <= 2);
-
     uint64_t l_lockStatus = 0;
 
     if (i_mutex->iv_ownerLockCount <= 1)
