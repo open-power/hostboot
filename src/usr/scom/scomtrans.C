@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -935,9 +935,24 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
             o_chipUnit = PU_CAPP_CHIPUNIT;
             break;
         }
-	case(TARGETING::TYPE_MC) :
+        case(TARGETING::TYPE_MC) :
         {
             o_chipUnit = PU_MC_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_MCC) :
+        {
+            o_chipUnit = PU_MCC_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_OMI) :
+        {
+            o_chipUnit = PU_OMI_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_OMIC) :
+        {
+            o_chipUnit = PU_OMIC_CHIPUNIT;
             break;
         }
         default:
