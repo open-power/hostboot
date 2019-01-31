@@ -74,6 +74,7 @@ enum sizes
     NUM_LRDIMM_TRAINING_PATTERNS = 5,             ///< Used for ATTR_MSS_LRDIMM_TRAINING_PATTERN
 
 
+    MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
     BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
     ROW_REPAIR_BYTE_COUNT = 4,     ///< Elements in a ROW_REPAIR_DATA attribute array.
 
@@ -213,6 +214,29 @@ enum ffdc_function_codes
     // LR training function
     DWL_CALL_OUT = 130,
     MREP_CALL_OUT = 131,
+};
+
+enum states
+{
+    LOW = 0,
+    HIGH = 1,
+    START = 1,
+    STOP = 0,
+    START_N = 0,
+    STOP_N = 1,
+    ON = 1,
+    OFF = 0,
+    ON_N = 0,
+    OFF_N = 1,
+    YES = 1,
+    NO = 0,
+    YES_N = 0,
+    NO_N = 1,
+    // Uses "_" in the name for INVALID as INVALID is defined as a macro in the
+    // FSP code. If we just use INVALID as an enum name, then the preprocessor
+    // compile phase changes it to be the macro.
+    _INVALID_ = 0xFF,
+    NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
 
 // Static consts describing the bits used in the cal_step_enable attribute

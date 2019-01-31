@@ -208,9 +208,9 @@ fapi2::ReturnCode broadcast_out_of_sync( const fapi2::Target<fapi2::TARGET_TYPE_
         fapi2::buffer<uint64_t> l_recr_buffer;
 
         // Set UE noise window for workaround
-        mss::read_recr_register<mss::mc_type::NIMBUS>(p, l_recr_buffer);
+        mss::read_recr_register(p, l_recr_buffer);
         mss::set_enable_ue_noise_window(l_recr_buffer, i_value);
-        mss::write_recr_register<mss::mc_type::NIMBUS>(p, l_recr_buffer);
+        mss::write_recr_register(p, l_recr_buffer);
     }
 
 fapi_try_exit:

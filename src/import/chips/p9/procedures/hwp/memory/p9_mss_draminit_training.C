@@ -144,7 +144,7 @@ extern "C"
 
             // Disable port fails as it doesn't appear the MC handles initial cal timeouts
             // correctly (cal_length.) BRS, see conversation with Brad Michael
-            FAPI_TRY( mss::change_port_fail_disable<mss::mc_type::NIMBUS>(p, mss::ON ), "Error in p9_mss_draminit_training" );
+            FAPI_TRY( mss::change_port_fail_disable(p, mss::ON ), "Error in p9_mss_draminit_training" );
 
             // The following registers must be configured to the correct operating environment:
 

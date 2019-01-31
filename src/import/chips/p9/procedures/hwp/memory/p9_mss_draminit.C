@@ -41,7 +41,6 @@
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/dimm/bcw_load.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
-#include <lib/mc/port.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -173,7 +172,7 @@ extern "C"
         // before the RCD/MRS CCSs
         for (const auto& p : l_mcas)
         {
-            FAPI_TRY( mss::change_addr_mux_sel<mss::mc_type::NIMBUS>(p, mss::LOW),
+            FAPI_TRY( change_addr_mux_sel(p, mss::LOW),
                       "%s Failed change_addr_mux_sel in p9_mss_draminit",
                       mss::c_str(i_target) );
         }

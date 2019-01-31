@@ -91,19 +91,6 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 }
 
 ///
-/// @brief Return an attribute array index from a OCMB target
-/// @param[in] i_target a MEM_PORT target representing the OCMB in question
-/// @return size_t the attribute array index.
-///
-template<>
-inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
-{
-    typedef procTraits<proc_type::AXONE> TT;
-    // We may need to revisit this later if we get an OCMB that has more than one port.
-    return mss::pos(i_target) % TT::EXP_PORTS_PER_OCMB;
-}
-
-///
 /// @brief Return an attribute array index from a rank number
 /// @param[in] i_rank uint64_t a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}
 /// @return size_t the attribute array index.
