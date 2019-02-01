@@ -30,7 +30,6 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_0b100 = 0b100;
-constexpr uint64_t literal_0b0111 = 0b0111;
 constexpr uint64_t literal_0b0011 = 0b0011;
 
 fapi2::ReturnCode p9a_omi_init_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT0,
@@ -80,7 +79,6 @@ fapi2::ReturnCode p9a_omi_init_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&
             FAPI_TRY(fapi2::getScom( TGT0, 0x7010a0bull, l_scom_buffer ));
 
             l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_0b100 );
-            l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0111 );
             l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_0b0011 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010a0bull, l_scom_buffer));
         }
