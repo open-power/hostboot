@@ -1,0 +1,2000 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/pm_plat_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AUX_FUNC_INVOCATION_TIME_MS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Time between invocations of auxiliary function on GPE1. The time (in is
+    as 2^ATTR_AUX_FUNC_INVOCATION_TIME_MS with 0 indicating the
+    is OFF.
+
+    Consumer: p10_hcode_image_build.c -> XGPE Header field
+
+    Provided by the Machine Readable Workbook to tune the collection.
+
+    Platform default:1
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>aux</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Frequency Bias - % of bias (signed twos complement in 0.5 percent steps) in
+    the frequency associated with a Pstate. Applies to all #V points,
+
+    Producer:Attribute Overrides by Lab/Mfg Characterization Team
+
+    Consumer: p10_pstate_parameter_block
+    </description>
+    <valueType>int8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>bias</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Voltage Bias - % of bias (signed twos complement in 0.5
+    that is applied to the respective rail's (VDD, VCS) #V VPD point used in
+    voltage values associated with Pstates..
+
+    Array[Rail][Point]
+
+    [Rail]->2 entries-:
+        0: VDD;
+        1: VCS
+
+    [Point] ->9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    Producer:Attribute Overrides by Lab/Mfg Characterization Team
+
+    Consumer: p10_pstate_parameter_block
+    </description>
+    <valueType>int8</valueType>
+    <array>2,8</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>bias</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_EXT_VDN_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    VDN Voltage Bias - % of bias (signed twos complement in 0.5 percent steps)
+    applied to the VDN value stored in the VPD for setting the VDN rail.
+
+    Producer: Attribute Overrides by Lab/Mfg Characterization Team
+
+    Consumer: p10_pstate_parameter_block
+
+    Platform default:0
+    </description>
+    <valueType>int8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>bias</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_DROOP_EXTREME_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Digital Droop Sensors (DDS) Extreme Threshold Select Value per VPD point.
+    a negative value below the DDS setting that will trigger droop event.  This
+    attibute overrides the
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <enum>
+        OFF= 0x00,
+        8mV= 0x01,
+        16mV = 0x02,
+        24mV = 0x03,
+        32mV = 0x04,
+        40mV = 0x05,
+        48mV = 0x06,
+        56mV = 0x07,
+        64mV = 0x08,
+        72mV = 0x09,
+        80mV = 0x0A,
+        88mV = 0x0B,
+        92mV = 0x0C,
+        96mV = 0x0D
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_DROOP_LARGE_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Digital Droop Sensors (DDS) Large Threshold Select Value per VPD point.
+    a negative value below the DDS setting that will trigger droop event.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <enum>
+        OFF= 0x00,
+        8mV= 0x01,
+        16mV = 0x02,
+        24mV = 0x03,
+        32mV = 0x04,
+        40mV = 0x05,
+        48mV = 0x06,
+        56mV = 0x07,
+        64mV = 0x08,
+        72mV = 0x09,
+        80mV = 0x0A,
+        88mV = 0x0B,
+        92mV = 0x0C,
+        96mV = 0x0D
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_DROOP_SMALL_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Digital Droop Sensors (DDS) Small Select Value per VPD point. Indicates a
+    value below the DDS setting that will trigger droop event.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <enum>
+        OFF= 0x00,
+        8mV= 0x01,
+        16mV = 0x02,
+        24mV = 0x03,
+        32mV = 0x04,
+        40mV = 0x05,
+        48mV = 0x06,
+        56mV = 0x07,
+        64mV = 0x08,
+        72mV = 0x09,
+        80mV = 0x0A,
+        88mV = 0x0B,
+        92mV = 0x0C,
+        96mV = 0x0D
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_EXTREME_THOTTLE_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Controls the enablement of Digital Droop Sensors (DDS) to throttle the core
+    extreme droop event.
+
+    Producer:Machine Readable Workbook
+
+    Consumers: QME attribute?
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <initToZero/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_FREQ_RETURN_L_S_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    DPLL response override of the respective #W VPD content for returning from a
+    Droop value to the Small value. Values are in 1/32ths with values being
+    N being less than or equal to 8.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_FREQ_RETURN_S_N_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    DPLL response override of the respective #W VPD content for returning from a
+    Droop value to the Normal value. Values are in 1/32ths with values being
+    N being less than or equal to 8.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_LARGE_FREQ_DROP_N_L_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    DPLL response override of the respective #W VPD content for a Voltage Droop
+    Large Frequency Drop (eg Normal to Large). Values are in 1/32ths legal
+    being of N being less than or equal to 8.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_OVERVOLT_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Digital Droop Sensor (DDS) OverVoltage Threshold Select Value per VPD. The
+    a positive value above the VDM setting that will an overvolt condition.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid.
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <enum>
+        FORCE = 0x00,
+        8mV = 0x01,
+        16mV= 0x02,
+        24mV= 0x03,
+        32mV= 0x04,
+        40mV= 0x05,
+        48mV= 0x06,
+        56mV= 0x07,
+        64mV= 0x08
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_SMALL_FREQ_DROP_N_S_OVERRIDE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    DPLL response override of the respective #W VPD content for a Digital Droop
+    (DDS) Small Frequency Drop (eg Normal to Small). Values are in 1/32ths
+    being of N being less than or equal to 8.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_VID_COMPARE_BIAS_0P5PCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    DDS Voltage Compare Bias - % of bias (signed twos complement in 0.5 percent
+    is applied to the #W DDS VID Compare before placement in the Pstate
+    Blocks that will be consumed by Hcode.
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax
+
+    Producer: Override
+    </description>
+    <valueType>int8</valueType>
+    <array>8</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_VID_COMPARE_OVERRIDE_MV</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Voltage Droop Monitor (VDM) Voltage Compare Voltage to expect when no droop
+    (binary in mV). A default value of 0 indicates no override
+
+    Array of 9 entries-:
+        0: PowerSave;
+        1: CF1;
+        2: CF2;
+        3: WOF Base;
+        4: CF3;
+        5: CF4;
+        6: UltraTurbo;
+        7: Fmax;
+        8: Enable
+
+    If index 8 is non-zero, the other entries are considered valid
+
+    Producer: Override
+    </description>
+    <valueType>uint8</valueType>
+    <array>9</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DPLL_DDS_RESPONSE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Indicates the response of the DPLL frequency upon DDS events if is not ON.
+
+    NONE -> DPLL Mode 2 DROOP_PROTECT -> DPLL Mode 3 DROOP_PROTECT_OVERVOLT ->
+    3.5 DYNAMIC -> DPLL Mode 4 DYNAMIC_PROTECT -> DPLL Mode 5
+
+    Producer: MRWB
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        DROOP_PROTECT = 0x00,
+        DROOP_PROTECT_OVERVOLT = 0x01,
+        DYNAMIC = 0x02,
+        DYNAMIC_PROTECT = 0x03,
+        NONE = 0x04
+    </enum>
+    <initToZero/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    if set to 1, p10_dump_stop_info output will be written to error logs
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    if set to 1, FAPI_ERR records are suppressed from being produced by
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables the PGPE Hcode to physically perform frequency and voltage based on
+    parameters (eg #V VPD, system parameters, biases, VFRTs. etc). If OFF,
+    PGPE provides an immedicate good response to Pstate/WOF IPC operations
+    the OCC for firmware integration testing
+
+    Consumer: p10_hcode_image_build.c -> PGPE Header field
+
+    Platform default: ON
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_GLOBAL_FIR_TRACE_EN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable Global FIR tracing through PM Complex Reset/Initialization
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <writeable/>
+    <overrideOnly/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUND_W_STATIC_DATA_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables pstate parameter block code to use the static #W data
+
+    Consumer: p10_pstate_parameter_block.C
+
+    Platform default:OFF
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUNDV_BUCKET_NUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute in place to allow override of which POUNDV bucket to use to set
+    data.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        BUCKETA = 1,
+        BUCKETB = 2,
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>vpd</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    1 if override of poundv bucket num is available. 0 if override is unavailable.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>vpd</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SKIP_WAKEUP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The PM_RESET hwp calls special wakeup enable on all EX targets, then will
+    wakeup bit on the core if special wakeup is done. In some hostboot does
+    want these steps of the PM_RESET. This attribute gives platform the
+    to decide if they want to enable special wakeup and autowakeup on the
+    during PM_RESET.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <writeable/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYS_VRT_STATIC_DATA_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables pstate parameter block code to use the static system vrt data
+
+    Consumer: p10_pstate_parameter_block.C -> PGPE Hcode
+
+    Platform default:OFF
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01,
+        VDN_STEP_OFF = 0x02
+    </enum>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the validity checking of #V VPD content from causing IPL failures.
+
+    OFF:Will enable PStates given all validity checks pass. If validity checks
+    a failure is log and error reaction will occur (eg IPL failure) ON: Will
+    #V validity checking of #V from causing IPL to halt. check failures will
+    error logs and Pstates (including other functions) will be disabled.
+
+    Producer: Override
+
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Debug modes supported for QME Scan layout in HOMER.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        SCAN_RING_NO_DEBUG = 0x00,
+        SCAN_RING_TRACE_DEBUG = 0x01,
+        SCAN_RING_DEEP_DEBUG = 0x02
+    </enum>
+    <initToZero/>
+    <group>debug</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_MALF_ALERT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Switch to enable or disable Power Management Malfunction Alert Handling on
+    platform support. e.g. True for PHYP based systems and False for based
+    depending on support available.
+
+    Producer: Initialized by Hostboot firmware based on platform support Read by
+    p10_pm_stop_gpe_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        FALSE = 0x00,
+        TRUE = 0x01
+    </enum>
+    <initToZero/>
+    <writeable/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_HALT_FFDC_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Switch to enable or disable Power Management Complex FFDC collection during
+    the PM Complex Halt flow to HOMER to assist with failure analysis and recovery.
+
+    Producer: HB must set or reset this based on the platform use-case and
+    p10_pm_halt.C, p10_pm_callout.C
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        FALSE = 0x00,
+        TRUE = 0x01
+    </enum>
+    <initToZero/>
+    <writeable/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_DDS_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the enablement of Digital Droop Sensors (DDS) in the system.
+
+    Producer:MRW
+
+    Consumers:p10_pstate_parameter_block ->
+    QME Pstate parameter block ????
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_PSTATES_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Controls the mode of Pstate Protocol for testing. ON: Boots the PGPE in "OCC
+    Mode" but does NOT start the Pstate protocol OFF: Does NOT boot the PGPE
+    Boots the PGPE and automatically starts the Pstate protocol. PMCR
+    to move Pstates are honored.
+
+    Producer:Override
+
+    Consumers: p10_pstate_parameter_block and p10_pm_pstate_gpe_init
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        ON = 0x00,
+        OFF = 0x01,
+        AUTO = 0x02
+    </enum>
+    <default>ON</default>
+    <initToZero/>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the enablement of resonant clocking in the system.
+
+    Producer: Override Consumers: p10_pstate_parameter_block to clear the flag
+    CME QuadManager
+    reaction
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_RVRM_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables RVRM enablement in the system
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOF_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables Work Load Optimized Frequency (WOF) algorithms to modify frequency
+    active core count and other inputs.
+
+    OFF:Will enable WOF given all validity check pass. If validity checks fail,
+    be disabled for the present IPL.
+
+    ON: Will disable WOF OFF_SKIP_DD: as but skips any validity checking of the
+    design level (lab use
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB) for
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1,
+        OFF_SKIP_DD=2
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOV_OVERV_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables Workload Optimized Voltage (WOV) undervolting algorithms which
+    voltage below the value calculated from VPD.
+
+    OFF: Will enable WOV overvolting given all validity check pass. If validity
+    WOV overvolting will be disabled for the present IPL.
+
+    ON:Will disable overvolting
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOV_UNDERV_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables Workload Optimized Voltage (WOV) undervolting algorithms which
+    voltage below the value calculated from VPD.
+
+    OFF:Will enable WOV undervolting given all validity check pass. If validity
+    WOV undervolting will be disabled for the present IPL.
+
+    ON: Will disable undervolting
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_OCS_DISABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Disables Over Current Sensor functions
+
+    OFF:Will enable Over Current Sensor (OCS) given all validity check pass. If
+    checks fail,
+    WOV undervolting will be disabled for the present IPL.
+
+    ON: Will disable OCS and WOF (TBD on the this phase in of validity)
+
+    Producer: Override
+
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC with
+    decoded PMISC pbax_chipid value. If the bit in this vector at decoded
+    location is a 1, then this receive engine will participate the broadcast
+
+    Override attribute. Platform value of 0 indiates the OCC firmware will this
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>pbax</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_CHIPID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within the
+    Is matched to pbax_chipid of the Address phase if
+
+    Provided by the Machine Readable Workbook.
+
+    Platform default:Nimbus systems - set so value in ATTR_FABRIC_GROUP_ID
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>pbax</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_GROUPID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Receive PBAX Groupid. Value that indicates this PBA's PBAX Group affinity.
+    matched to pbax_groupid of the PMISC Address phase.
+
+    Provided by the Machine Readable Workbook.
+
+    Platform default:Nimbus systems = 0
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>pbax</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPIPSS_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    SPIPSS Clock Frequency (binary in KHz)
+
+    Valid range: 500KHz to 2500KHz
+
+    Consumer: p10_pss_init
+
+    Overridden by the Machine Readable Workbook.
+
+    If default of 0 is read, HWP will set SPIPSS frequency to 10MHz.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <group>pss</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPIPSS_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Defines which of the PSS chip selects (0 or 1) that the APSS is connected
+
+    Producer:  Machine Readable Workbook
+    Consumer: p10_pm_pss_init
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        NONE = 0xFF,
+        CS0 = 0x00,
+        CS1 = 0x01
+    </enum>
+    <initToZero/>
+    <group>pss</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS_UOHM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Impedance (binary in microOhms) of the distribution loss sense point to the
+    value is applied to each processor instance.
+
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO
+
+    Producer: Machine Readable Workbook (per the power subsystem design)
+
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <platinit/>
+    <initToZero/>
+    <group>sysparms</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE_UOHM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Impedance (binary microOhms) of the load line from a processor VRM to the
+    pins. This value is applied to each processor instance.
+
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO
+
+    Note:no loadline may be present in the system; thus, a value of 0 is legal.
+
+    Producer: Machine Readable Workbook (per the power subsystem design)
+
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <platinit/>
+    <initToZero/>
+    <group>sysparms</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET_UV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Offset voltage (binary in microvolts) to apply to the VDD VRM distribution
+    processor module. This value is applied to each processor instance.
+
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO
+
+    Producer: Machine Readable Workbook (per the power subsystem design)
+
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <platinit/>
+    <initToZero/>
+    <group>sysparms</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_THROTTLE_ASSERT_COUNT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The number of XGPE Fixed Timer Interrupts (see Hcode documentation for to
+    a core throttle when OCC Flag 3[Core Throttle Continuous Enable] is set.
+
+    A value of 0 when Continuous Change Enable is set will deassert throttle.
+
+    Producer:Override/Lab
+
+    Consumers:p10_hcode_image_build.c -> XGPE Header field
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>didt</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_THROTTLE_DEASSERT_COUNT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The number of XGPE Fixed Timer Interrupts (see Hcode documentation for
+    durations) to deassert core throttle when OCC Flag 3[Core Continuous
+    Enable] is set.
+
+    A value of 0 when Continuous Change Enable is set and is non-0, throttling
+    always on.
+
+    Producer:Override/Lab
+
+    Consumers:p10_hcode_image_build.c -> PGPE Header field
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>didt</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUNDV_BUCKET_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Power Management data for Quad targets. Stored as an array of bytes. The
+    is read
+    directly from #V VPD and stored in this attribute without being altered.
+
+    NOTE: you may need to handle correcting endianness if you are using this
+    </description>
+    <valueType>uint8</valueType>
+    <array>210</array>
+    <platinit/>
+    <initToZero/>
+    <group>vpd</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUNDW_BUCKET_DATA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Power Management data for Quad targets. Stored as an array of bytes. The
+    is read
+    directly from #W VPD and stored in this attribute without being altered.
+
+    NOTE: you may need to handle correcting endianness if you are using this
+    </description>
+    <valueType>uint8</valueType>
+    <array>2560</array>
+    <platinit/>
+    <initToZero/>
+    <group>vpd</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AVSBUS_BUSNUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Defines the AVSBus (0, 1 or 2) which has the indicated rail VRM
+
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO
+
+    Producer:Machine Readable Workbook
+
+    Consumers: p10_set_evid; p10_set_voltage (tool) ->
+    Global Pstate Parameter Block (GPPB) for PGPE;  OCC Pstate Parameter Block
+    OCC
+
+    *MOST* systems use Bus 0 for VDD, Bus 1 for VCS, Bus 2 for VIO and VDN. If
+    is not the case, the value must be appropriately set by the platform (eg MRW
+    or equivalent)
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platinit/>
+    <default>0</default>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AVSBUS_FREQUENCY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    AVSBus Clock Frequency (binary in KHz)
+
+    Consumer: p10_ocb_init.C
+
+    Overridden by the Machine Readable Workbook.
+
+    If default of 0 is read, HWP will set AVSBus frequency to 1MHz.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AVSBUS_RAIL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Defines the AVSBus rail selector number (0 - 15) for the VRM on the bus
+    by ATTR_AVSBUS_BUSNUM[x].
+
+    [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO
+
+    Producer:Machine Readable Workbook
+
+    Consumers: p10_set_evid; p10_set_voltage (tool) ->
+    Global Pstate Parameter Block (GPPB) for PGPE OCC Pstate Parameter Block
+    OCC
+
+    *MOST* systems use Bus 0 for VDD, Bus 1 for VCS, Bus 2 for VIO and VDN. If
+    is not the case, the value must be appropriately set by the platform (eg
+    or equivalent)
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platinit/>
+    <default>0</default>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Step size (binary in microvolts) to take upon external VRM voltage. This
+    provide a limit of the external VRMs steps.
+
+    Consumer: p10_pstate_parameter_block -> p10_setup_evid Pstate Parameter
+    (PSPB) for PGPE
+
+    Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Transition rate (binary in microVolts per microsecond) of the VRM for an
+    transition.This is used as part of the overall voltage time calculation
+    provides a default value of 10000 uV/us (eg if this attribute is zero.
+    the fastest possible rate is limited to
+
+    Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
+
+    Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Transition rate (binary in microVolts per microsecond) of the VRM for an
+    transition.This is used as part of the overall voltage time calculation
+    provides a default value of 10000 uV/us (eg if this attribute is zero.
+    the fastest possible rate is limited to
+
+    Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
+
+    Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Time (binary in nanoseconds) to allow the voltage rail to stabilize before
+    transition to be fully complete. This value is used for both and
+    transitions as part of the overall voltage transition calculation.
+    provides a default value of 5000ns (5us) if this is zero. Note: the
+    delay is limited to 1ns.
+
+    Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
+
+    Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_TRANSITION_START_NS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Delay (binary in nanoseconds) from the time the VRM receives the write
+    until the voltage actually moves.This value is used for both and
+    transitions as part of the overall voltage transition calculation.
+    provides a default value of 8000ns (eg 8us)) if attribute is zero. Note:
+    smallest possible delay is limited to 1ns.
+
+    Consumer: p10_pstate_parameter_block -> Pstate Parameter Block (PSPB) for PGPE
+
+    Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_TABLE_DATA</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    WOF data from SEEPROM which contains WOF header data + VRT data (vrt +
+    for 6 Vcs, 30 Vdd and 8 IO)
+
+    Consumer: p10_pstate_parameter_block
+    </description>
+    <valueType>uint8</valueType>
+    <array>23168</array>
+    <platinit/>
+    <initToZero/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_MAX_DROOP_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting and/or WOF overvolting is enabled, then this is used to
+    a check for maximum frequency loss. If frequency in tenths of is below
+    value, then an error is logged and WOV is disabled.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_MAX_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV overvolting is enabled, then this specifies the maximum amount of
+    The value is specified in tenths of percentage(0.1%).
+
+    If, 0, then default value of 10(1%) is used.
+
+    Value can range from 1(0.1%) to 100(10%). Values greater than 100 are to
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_STEP_DECR_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV overvolting is enabled, then this specifies the amount by which to
+    of overvolt amount. The value is specified in tenths of
+
+    If 0, then default value of 0.5%(5) is used.
+
+    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_STEP_INCR_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV overvolting is enabled, then this specifies the amount by which to
+    of overvolt amount. The value is specified in tenths of
+
+    If 0, then default value of 0.5%(5) is used.
+
+    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_VMAX_SETPOINT_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Maximum regulator voltage allowed without exceeding the technology Vmax at
+    pins.
+
+    If, 0, then default value of 1150(1.15V)
+    </description>
+    <valueType>uint16</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_SAMPLE_125US</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting and/or WOF overvolting is enabled, then this determines
+    which the undervolting and/or overvolting is run. For P9, the minimum is
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_MAX_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting is enabled, then this specifies the maximum amount of
+    The value is specified in tenths of percentage(0.1%).
+
+    If, 0, then default value of 6%(60) is used.
+
+    Value can range from 10(1%) to 255(25.5%). For values between 1(0.1%) and
+    of 10(1%) will be used.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_PERF_LOSS_THRESH_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting is enabled, then this specifies the maximum amount of
+    at which undervolting increments are stopped(and may be reduced). value
+    specified in tenths of percentage(0.1%).
+
+    If, 0, then default value of 0.5%(5) is used.
+
+    Value can range from 1(0.1%) to 20(2%). All other values will be clipped to
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_STEP_DECR_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting is enabled, then this specifies the amount by which to
+    of overvolt amount. The value is specified in tenths of
+
+    If 0, then default value of 0.5%(5) is used.
+
+    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_STEP_INCR_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If WOV undervolting is enabled, then this specifies the amount by which to
+    of overvolt amount. The value is specified in tenths of
+
+    If 0, then default value of 0.5%(5) is used.
+
+    Value can range from 1(0.1%) to 20(2%). Values greater than 20 are clipped
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_VMIN_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Maximum regulator voltage allowed without exceeding the technology Vmax at
+    pins.
+
+    If, 0, then default value of 1150(1.15V)
+    </description>
+    <valueType>uint16</valueType>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_FMAX_OVERRIDE_KHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    ?????
+
+    Producer: Override
+    </description>
+    <valueType>uint16</valueType>
+    <array>5</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_FMIN_OVERRIDE_KHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    ?????
+
+    Producer: Override
+    </description>
+    <valueType>uint16</valueType>
+    <array>5</array>
+    <platinit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    The powerbus frequency that should be used to locate a valid #V bucket in
+    Module VPD if the actual ATTR_FREQ_PB_MHZ value isn't present.
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <enum>
+        NO_FALLBACK = 0,
+        1600 = 1600,
+        1866 = 1866,
+        2000 = 2000,
+        2133 = 2133,
+        2400 = 2400
+    </enum>
+    <default>NO_FALLBACK</default>
+    <writeable/>
+    <group>vpd</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAFE_MODE_FREQUENCY_MHZ</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Safe mode frequency in MHZ. This attribute is used within the hwp to update
+    DPLL frequency register.
+
+    Consumer: p10_setup_evid.C
+
+    Modified by p10_pstate_parameter_block
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <writeable/>
+    <group>safe</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAFE_MODE_VOLTAGE_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Safe mode voltages for VDD and VCS in mV.  If not overridden,  computed
+    from #V PowerSave voltages uplifted by ATTR_BOOT_VOLTAGE_BIAS_0P5PCT.
+
+    [index] ->0: VDD; 1: VCS;
+
+    Consumer: p10_setup_evid.C
+
+    Modified in p10_pstate_parameter_block
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platinit/>
+    <initToZero/>
+    <writeable/>
+    <group>safe</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PMCR_MOST_RECENT_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Enables the platform mode where the most recent PMCR update
+    will be the controlling value for Pstate changes. If disabled,
+    the legacy "fastest one wins" algorithm is used.
+
+    Producer: p10_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header
+    QME attribute
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        FALSE=0,
+        TRUE=1
+    </enum>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Address is allocated by hostboot and HBRT and is populated
+    by p10_hcode_image_build with sc2 instruction. It enables CME to invoke
+    a transition from HV to UV during STOP entry on an SMF enabled system.
+    Address value should be aligned with 2MB boundary.
+
+    Producer: Initialized by Hostboot firmware based on platform support
+    Consumers: Read by p10_hcode_image_build.C
+    </description>
+    <valueType>uint64</valueType>
+    <platinit/>
+    <initToZero/>
+    <group>smf</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_UNSECURE_HOMER_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Size of memory which hostboot must copy from a temp buffer to
+    an unsecure region of main store memory. Once HOMER is built, hostboot reads
+    the attribute and copies the amount of memory specified in this attribute from
+    a temp buffer to an unsecure region of main memory specifed in an attribute
+    ATTR_UNSECURE_HOMER_ADDRESS
+
+    Producer: Initialized by hostboot firmware based on platform support
+
+    Consumers: Read by p10_hcode_image_build.C
+    </description>
+    <valueType>uint32</valueType>
+    <platinit/>
+    <initToZero/>
+    <writeable/>
+    <group>smf</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_MMA_POWEROFF_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the MMA power-off function within the QME.
+
+    OFF: Enables the QME MMA power-off funtion as further controlled by
+
+    ON: Disables the dynamic MMA power-off function within the QME The MMA will
+    be on if the core is powered on.
+
+    Producer: Override
+
+    Consumers: QME Hcode
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>mma</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_MMA_POWERON_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables the MMA power-on function within the QME. This can be use for
+    that will NEVER have MMA based applications running so as to save the MMA
+
+    OFF: Enables the QME MMA power-on funtion. This will have the MMA powered on
+    istep 16 and then controlled by ATTR_SYSTEM_MMA_POWEROFF_DISABLE and
+    thereafter.
+
+    ON: Disables the MMA power-on function and leaves the MMA permenantly off.
+    core will hang on MMA instruction that are dispatched.
+
+    Producer: Override
+
+    Consumers: QME Hcode
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <initToZero/>
+    <overrideOnly/>
+    <group>mma</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Time to delay before powering off the MMA due to the lack of MMA instructions.
+
+    Time = 1ms * 2**ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS.
+
+    Valid values of  0x00 - 0x17 to yield times from 1ms to 2.3 hours -:
+        0x00 - 1ms
+        ...
+        0x01 - 1 second (default)
+        ...
+        0x17 - 1 day
+        0x18 - 0xFD - Reserved (maps as 0x17)
+        0xFE - every QME FIT timer interrupt (~250us)
+        0xFF - no power off of MMA (QME Hcode still runs; different behavior
+    ATTR_SYSTEM_MMA_POWEROFF_DISABLE)
+
+    Producer:  Machine Readable Workbook
+
+    Consumer: QME Hcode
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <default>0xA</default>
+    <overrideOnly/>
+    <group>mma</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RVRM_VID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Retention Voltage ID to be applied to STOP 5 cores.
+
+    Valid values (8mV granularity) -:
+        0x00 - 000mV
+        ...
+        0x38 - 448mV (minimum circuit value)
+        0x39 - 456mV
+        ...
+        0x4B - 600mV (default)
+        ...
+        0x6A - 848mV (maximum circuit value)
+        ...
+        0x7F - 1016mV
+        All others reserved and flagged as errors.
+
+    The Retention Voltage circuit has usable range of 448mV to 848mV. Values
+    below 448mv (0x38) will be clipped to 448mV and values above 848mV (0x6A)
+    will be clipped to 848mV.
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <default>0x4B</default>
+    <overrideOnly/>
+    <group>rvrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP_LEVELS_SUPPORTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Defines the STOP levels supported by the Hcode in the present driver.
+
+    Represented as bit vector where bit 0 = STOP0; bit 1 = STOP 1, ...,
+    bit 15 = STOP15.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <platInit/>
+    <!-- Levels supported:  0, 2, 5, 11 -->
+    <default>0xA410</default>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP_LEVELS_DISABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Disables STOP Level operat?ions in the Power Management complex by mapping
+    the respective level to the next lower supported level in a additive
+    manner.
+
+    Represented as bit vector where bit 0 = STOP0; bit 1 = STOP 1, ...,
+    bit 15 = STOP15.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <!-- ********************************************************************* -->=
+  <attribute>
+    <id>ATTR_BOOT_VOLTAGE_BIAS_0P5PCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Boot bias applied to uplift the PowerSave #V VDD and VCS Voltages to boot the
+    chip - % of bias (signed twos complement in 0.5 percent).
+
+    Producer: Override
+
+    Consumer: p10_setup_evid (first pass)
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <default>12</default>
+    <overrideOnly/>
+    <group>bias</group>
+  </attribute>
+  <attribute>
+    <id>ATTR_WOF_OMI_FORCE_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Core Frequency at or above which the OMI buses are forced to full width 
+    independent of what link reduction may attempt.  When the core frequency is 
+    below this value.
+
+    Producer:  Override/Lab
+    Consumers: p10_build_pstate_datablock
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <platInit/>
+    <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+    <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_SRAM_WRITE_ASSIST_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    This attribute helps to indicate PGPE to turn off write assist even at high voltage
+    when it is not used.
+    Producer:  Override/Lab
+    Consumers: p10_build_pstate_datablock
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <overrideOnly/>
+    <default>0x0</default>
+    <group>wof</group>
+  </attribute>
+  <!-- *********************************************************************-->
+</attributes>
