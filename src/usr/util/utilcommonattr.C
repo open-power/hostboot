@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,22 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
                 break;
             default:
                 TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for CUMULUS",
+                    l_chipECLevel);
+                break;
+        }
+    }
+    else if(l_chipModel == TARGETING::MODEL_AXONE)
+    {
+        switch (l_chipECLevel)
+        {
+            case 0x10:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9A_10;
+                break;
+            case 0x11:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9A_11;
+                break;
+            default:
+                TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for AXONE",
                     l_chipECLevel);
                 break;
         }
