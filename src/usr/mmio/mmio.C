@@ -739,7 +739,7 @@ TARGETING::TargetHandle_t getParentProc(TARGETING::TargetHandle_t i_target)
     TARGETING::PredicateCTM     pred(TARGETING::CLASS_CHIP,
                                      TARGETING::TYPE_PROC);
 
-    TARGETING::TargetService().getAssociated(
+    TARGETING::targetService().getAssociated(
                                    list,
                                    i_target,
                                    TARGETING::TargetService::PARENT_BY_AFFINITY,
