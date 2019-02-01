@@ -47,6 +47,7 @@ const ComponentID g_MclCompId {"MSTCONT"};
 const ComponentID g_PowervmCompId {"POWERVM"};
 const ComponentID g_OpalCompId {"OPAL"};
 const ComponentID g_UcdCompId {"UCD9090"};
+const ComponentID g_NvdimmCompId {"NVDIMM"};
 
 void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr)
 {

@@ -72,6 +72,7 @@ extern const ComponentID g_MclCompId;
 extern const ComponentID g_PowervmCompId;
 extern const ComponentID g_OpalCompId;
 extern const ComponentID g_UcdCompId;
+extern const ComponentID g_NvdimmCompId;
 
 // @enum Permission Types for MCL Component
 enum class CompFlags : uint16_t

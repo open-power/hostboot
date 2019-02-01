@@ -74,6 +74,16 @@ enum nvdimmModuleId
     NVDIMM_CHECK_READY                      = 0x18,
     NOTIFY_NVDIMM_PROTECTION_CHG            = 0x19,
     NVDIMM_RUN_UPDATE                       = 0x1A,
+    UPDATE_IMAGE                            = 0x1B,
+    UPDATE_IMAGE_DATA                       = 0x1C,
+    CHANGE_FW_UPDATE_MODE                   = 0x1D,
+    WAIT_FW_OPS_COMPLETE                    = 0x1E,
+    BYTE_REGION_BLOCK_TRANSFER              = 0x1F,
+    VALIDATE_FW_HEADER                      = 0x20,
+    COMMIT_FW_REGION                        = 0x21,
+    CLEAR_FW_DATA_BLOCK                     = 0x22,
+    VALIDATE_FW_IMAGE                       = 0x23,
+    WAIT_FW_OPS_BLOCK_RECEIVED              = 0x24,
 };
 
 /**
@@ -114,6 +124,16 @@ enum nvdimmReasonCode
     NVDIMM_NOT_READY                        = NVDIMM_COMP_ID | 0x1B,   // NVDIMM not ready for host to access
     NVDIMM_NULL_FIRMWARE_REQUEST_PTR        = NVDIMM_COMP_ID | 0x1C,   // Firmware request is NULL
     NVDIMM_UNSUPPORTED_NVDIMM_TYPE          = NVDIMM_COMP_ID | 0x1D,   // Unsupported NVDIMM type for update
+    NVDIMM_OPERATION_IN_PROGRESS            = NVDIMM_COMP_ID | 0x1E,   // NV controller is busy
+    NVDIMM_CHECKSUM_ERROR                   = NVDIMM_COMP_ID | 0x1F,   // Checksum error between host and nv calculated
+    NVDIMM_ZERO_TOTAL_REGIONS               = NVDIMM_COMP_ID | 0x20,   // Zero write regions calculated
+    NVDIMM_UPDATE_MODE_UNCHANGED            = NVDIMM_COMP_ID | 0x21,   // Unable to change update mode
+    NVDIMM_FW_OPS_IN_PROGRESS_TIMEOUT       = NVDIMM_COMP_ID | 0x22,   // Operations In Progress timeout
+    NVDIMM_DATA_SIZE_TOO_LARGE              = NVDIMM_COMP_ID | 0x23,   // Trying to write too much data
+    NVDIMM_DATA_SIZE_INVALID                = NVDIMM_COMP_ID | 0x24,   // Data size is invalid
+    NVDIMM_BLOCK_NOT_RECEIVED               = NVDIMM_COMP_ID | 0x25,   // Block data not received
+    NVDIMM_FW_OPS_NOT_SUCCESSFUL            = NVDIMM_COMP_ID | 0x26,   // Unsuccessful Firmware Operation
+    NVDIMM_BASE_SERVICES_NOT_READY          = NVDIMM_COMP_ID | 0x27,   // spBaseServices not ready for LID access
 };
 
 enum UserDetailsTypes

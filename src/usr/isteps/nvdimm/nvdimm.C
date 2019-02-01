@@ -62,11 +62,6 @@ namespace NVDIMM
 #define NVDIMM_SET_USER_DATA_2_TIMEOUT(left_32_polled, right_32_timeout) \
             NVDIMM_SET_USER_DATA_1(left_32_polled, right_32_timeout)
 
-#define ADDRESS(uint16_address) \
-            uint16_address & 0x00FF
-
-#define PAGE(uint16_address) \
-            (uint16_address >> 8) & 0x000F
 
 typedef struct ops_timeoutInfo{
     const char * desc;
