@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -114,8 +114,11 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_scomoverride_chiplets.mk
 # HWP not ready - p9_trigger_rng_bist.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 
-#p9_cen_ref_clk_enable : Centaur Ref Clock Enable
+# p9_cen_ref_clk_enable : Centaur Ref Clock Enable
 include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
+
+# p9a_ocmb_enable
+include ${PERV_HWP_PATH}/p9a_ocmb_enable.mk
 
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,7 @@
 
 //HWP
 #include <p9_update_security_ctrl.H>
+#include <p9a_ocmb_enable.H>
 
 // secureboot
 #include <secureboot/service.H>
@@ -988,8 +989,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         // Cumulus only
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiProcTarget( *l_proc_iter );
 
-        // Invoke the HWP passing in the proc target and
-        // a bit mask indicating connected centaurs
+        // Invoke the HWP passing in the proc target
         // Cumulus only
         FAPI_INVOKE_HWP(l_errl,
                         p9_cen_ref_clk_enable,
@@ -1016,6 +1016,36 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                     "SUCCESS : proc_cen_ref_clk_enable",
                     "completed ok");
         }
+
+
+        // Invoke the HWP passing in the proc target
+        // HWP loops on child OCMB targets
+        FAPI_INVOKE_HWP(l_errl,
+                        p9a_ocmb_enable,
+                        l_fapiProcTarget);
+
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : p9a_ocmb_enable",
+                    "failed, returning errorlog" );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget( *l_proc_iter ).addToLog( l_errl );
+
+            // Create IStep error log and cross ref error that occurred
+            l_stepError.addErrorDetails( l_errl );
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS : p9a_ocmb_enable",
+                    "completed ok");
+        }
+
     }   // endfor
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
