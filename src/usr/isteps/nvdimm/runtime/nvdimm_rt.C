@@ -345,6 +345,21 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             continue;
         }
 
+        l_err = nvdimmSetESPolicy(l_nvdimm);
+        if (l_err)
+        {
+            o_arm_successful = false;
+            nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            continue;
+        }
+
         l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, ARM_TRIGGER);
         // If we run into any error here we will just
         // commit the error log and move on. Let the

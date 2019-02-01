@@ -33,33 +33,46 @@
 
 #include <cstdint>
 #include <errl/errlentry.H>
-#include <util/utillidmgr.H>
+
 
 namespace NVDIMM
 {
 // Some invalid constants
 const uint16_t INVALID_ID       = 0xFFFF;
 const uint16_t INVALID_VERSION  = 0xFFFF;
+const uint16_t INVALID_TIMEOUT  = 0xFFFF;
 const uint32_t INVALID_TYPE     = 0xFFFFFFFF;
 
 // Type is combination of manufacturer id and product id
-const uint32_t JEDEC_NVDIMM_16GB_TYPE = 0x01945377;
-const uint32_t JEDEC_NVDIMM_32GB_TYPE = 0x01945378;
+const uint32_t SMART_NVDIMM_16GB_TYPE = 0x01945377;
+const uint32_t SMART_NVDIMM_32GB_TYPE = 0x01945378;
+
+// LID IDs for each NV controller type
+const uint32_t NVDIMM_SIGNATURE_LIDID = 0x80D00025; // ignore this one
+
+// These LIDs are created from these two binaries supplied by SMART
+// 16GB image -> src/extucode/NVDIDMM_SRN7A2G4IBM26MP1SC.bin --> 81e00640.lid
+// 32GB image -> src/extucode/NVDIDMM_SRN7A4G4IBM24KP2SB.bin --> 81e00641.lid
+const uint32_t NVDIMM_16GB_LIDID = 0x81e00640;
+const uint32_t NVDIMM_32GB_LIDID = 0x81e00641;
+
+
+// Firmware Update Mode settings for FIRMWARE_OPS_CMD
+enum fw_update_mode : uint8_t
+{
+    FW_UPDATE_MODE_DISABLED = 0x00,
+    FW_UPDATE_MODE_ENABLED = 0x01,
+};
 
 class NvdimmLidImage
 {
   public:
     /**
      * @brief Constructor that sets access to LID information
-     * @param i_lidId - NVDIMM_16GB_LIDID or NVDIMM_32GB_LIDID
-     * @param io_errHndl - error filled in if lid not loadable
+     * @param i_lidImageAddr - virtual address where LID was loaded
+     * @param i_size - size of the loaded LID
      */
-    explicit NvdimmLidImage(Util::LidId i_lidId, errlHndl_t& io_errHdl);
-
-    /**
-     *  @brief Cleanup any allocated memory holding the lid image
-     */
-    ~NvdimmLidImage();
+    explicit NvdimmLidImage(const void * i_lidImageAddr, size_t i_size);
 
     /**
      * @brief Grab the type of the image
@@ -79,19 +92,13 @@ class NvdimmLidImage
      *  @brief Get the actual NVDIMM flash image to load on the NVDIMM
      *  @return Pointer to the start of the flash image
      */
-    void * getFlashImage();
+    const void * getFlashImage();
 
     /**
      * @brief  Get the size of the actual flash image
      * @return Image size
      */
     size_t getFlashImageSize();
-
-    /**
-     * @brief Check if the image was loaded into memory
-     * @return true, if image was loaded into memory
-     */
-    bool isImageLoaded();
 
 
     //-----------------------------------------------------------//
@@ -103,9 +110,9 @@ class NvdimmLidImage
     // Header of NVDIMM lid image
     typedef struct nvdimm_image_header
     {
-      // Byte 0-1
+      // Byte 0-1 - 1st part of type
       uint16_t module_mnfg_id_code;
-      // Byte 2-3
+      // Byte 2-3 - 2nd part of type
       uint16_t module_product_id;
       // Byte 4-5
       uint16_t nv_memory_subsys_cntrlr_mnfg_id_code;
@@ -115,7 +122,7 @@ class NvdimmLidImage
       uint8_t  module_revision_code;
       // Byte 9
       uint8_t  nv_memory_subsys_cntrlr_revision_code;
-      // Byte 10-11
+      // Byte 10-11 - this version of code for update
       uint16_t controller_firmware_revision;
       // Byte 12-13
       uint16_t energy_source_firmware_revision;
@@ -126,7 +133,7 @@ class NvdimmLidImage
       // Byte 16-17
       uint16_t SMART_digital_signature_size;
       // Byte 18
-      uint8_t  SMART_digital_signature;
+      uint8_t  SMART_digital_signature_type;
       // Byte 19
       union
       {
@@ -160,32 +167,24 @@ class NvdimmLidImage
     // (size: firmware_image_size bytes - 32-byte header)
     //-----------------------------------------------------------//
 
+    /**
+     * @brief Get a pointer to the header and smart digital signature
+     * @param o_size Byte size of the data being returned
+     * @return Pointer to 32-byte header + digital signature
+     */
+    const uint8_t * getHeaderAndSmartSignature(uint16_t & o_size);
+
   private:
-    /**
-     *  @brief Load the lid image into memory
-     */
-    errlHndl_t loadImage();
-
-    /**
-     *  @brief Unload the lid image from memory
-     */
-    errlHndl_t unloadImage();
-
-    // force user to supply lid_id
+    // force user to supply loaded image addr/size
     NvdimmLidImage();
 
-    // status of whether or not the image was loaded into memory
-    bool iv_ImageLoaded;
-
     // pointer to lid image
-    // note: memory allocated/deallocated by iv_lidMgr
-    void * iv_lidImage;
+    // note: memory is allocated outside of this class,
+    // should be left alone
+    const void * iv_lidImage;
 
     // size of lid image
     size_t iv_lidImageSize;
-
-    // lid manager for nvdimm lid image
-    UtilLidMgr* iv_lidMgr;
 };
 
 
@@ -208,10 +207,12 @@ class NvdimmInstalledImage
 
     /**
      * @brief Grab the installed NVDIMM's version
-     * @param o_version - version of installed NVDIMM image
+     * @param o_version - version of installed NVDIMM image (little-endian format)
+     * @param i_force_recollect - force hw calls to recollect version
      * @return error if read operation fails
      */
-    errlHndl_t getVersion(uint16_t & o_version);
+    errlHndl_t getVersion(uint16_t & o_version,
+                          const bool i_force_recollect = false);
 
     /**
      * @brief Accessor to grab the current NVDIMM target
@@ -221,6 +222,13 @@ class NvdimmInstalledImage
     {
         return iv_dimm;
     }
+
+    /**
+     * @brief Update the current NV Controller
+     * @param Update using this image
+     * @return error pointer if failure to update, else nullptr
+     */
+    errlHndl_t updateImage(NvdimmLidImage * i_lidImage);
 
   private:
       // nvdimm target
@@ -232,6 +240,137 @@ class NvdimmInstalledImage
       // Type contains these two concatentated little-endian IDs
       uint16_t iv_manufacturer_id;
       uint16_t iv_product_id;
+
+      // timeout value (in seconds) for FIRMWARE_OPS_TIMEOUT0/1
+      uint16_t iv_timeout;
+
+      // constant for invalid setting
+      const uint8_t INVALID_REGION_BLOCK_SIZE = 0x00;
+
+      // maximum blocks allowed per region (REGION_BLOCK_SIZE)
+      uint8_t iv_max_blocks_per_region;
+
+      // Helper functions for updating the installed lid
+      /**
+       * @brief Transfer a region of bytes in multiple 32-byte blocks
+       * @param i_data - data to transfer
+       * @param i_data_size - size of the data to transfer
+       * @param i_use_region_block_size - use the register REGION_BLOCK_SIZE
+       *                                  as number of blocks to send
+       * @return error if transfer fails, else nullptr
+       */
+      errlHndl_t byteRegionBlockTransfer(const uint8_t * i_data,
+                                         const uint16_t i_data_size,
+                                         bool i_use_region_block_size = true);
+
+      /**
+       * @brief NV controller calculate checksum of region of data bytes
+       * @param o_nvCksm - NV calculated checksum
+       * @return error if unable to get checksum, else nullptr
+       */
+      errlHndl_t calcAndGetCksm(uint16_t & o_nvCksm);
+
+      /**
+       * @brief Change the Firmware Update Mode
+       * @param i_mode - enable or disable mode
+       * @return error if unable to change mode, else nullptr
+       */
+      errlHndl_t changeFwUpdateMode(fw_update_mode i_mode);
+
+      /**
+       * @brief Clear the Firmware Data Block
+       * @return error if unable to clear data block, else nullptr
+       */
+      errlHndl_t clearFwDataBlock();
+
+      /**
+       * @brief Clear the Firmware Operations Status
+       * @return error if unable to clear status, else nullptr
+       */
+      errlHndl_t clearFwOpsStatus();
+
+      /**
+       * @brief Commit the Firmware Region Operation
+       * @return error if unable commit, else nullptr
+       */
+      errlHndl_t commitFwRegion();
+
+      /**
+       * @brief Get the number of blocks per region
+       * @param io_blocks_per_region - value of REGION_BLOCK_SIZE register
+       * @return error if unable to get value, else nullptr
+       */
+      errlHndl_t getBlocksPerRegion(uint8_t & io_blocks_per_region);
+
+      /**
+       * @brief Get the Firmware Operations Timeout
+       * @param o_timeout - timeout in seconds for a Firmware Operation
+       *                    to complete
+       * @return error if unable to get timeout value, else nullptr
+       */
+      errlHndl_t getFwOpsTimeout(uint16_t & o_timeout);
+
+      /**
+       * @brief Is the Firmware Operation successful?
+       * @param o_success - true if FIRMWARE_OPS_STATUS reporting success
+       * @return error if unable to read register, else nullptr
+       */
+      errlHndl_t isFwOpsSuccess(bool & o_success);
+
+      /**
+       * @brief Reset NV controller. Resets controller and waits for it to
+       *        come back online
+       * @return error if reset failed, else nullptr
+       */
+      errlHndl_t resetController();
+
+      /**
+       * @brief Updates the NV controller with the lid's image data
+       *        (minus header and signature)
+       * @param i_lidImage - lid object with image data
+       * @return error if unable to update, else nullptr
+       */
+      errlHndl_t updateImageData(NvdimmLidImage * i_lidImage);
+
+      /**
+       * @brief Run FW operation to validate the header and verify
+       *        it was a successful operation
+       * @return error if unable to validate, else nullptr
+       */
+      errlHndl_t validateFwHeader();
+
+      /**
+       * @brief Run FW operation to validate the firmware image and verify
+       *        it was a successful operation
+       * @return error if unable to validate, else nullptr
+       */
+      errlHndl_t validateFwImage();
+
+      /**
+       * @brief Wait until FW operation is no longer in progress
+       * @return error if failed i2c operation getting status or if
+       *         timeout happened before status indicated operation completion,
+       *         else nullptr
+       */
+      errlHndl_t waitFwOpsComplete();
+
+      /**
+       * @brief Wait until FW operation reports data block was received
+       *        Polls FIRMWARE_OPS_STATUS offset for FIRMWARE_BLOCK_RECEIVED
+       * @return error if failed i2c operation getting status or if
+       *         timeout happened before status indicated operation completion,
+       *         else nullptr
+       */
+      errlHndl_t waitFwOpsBlockReceived();
+
+      /**
+       * @brief Checksum calculation
+       *        See JESD245B for documentation of this checksum
+       * @param i_data - pointer to data
+       * @param i_data_size - size of data being pointed too
+       * @return checksum
+       */
+      uint16_t crc16(const uint8_t * i_data, int i_data_size);
 };
 
 
@@ -255,15 +394,25 @@ class NvdimmsUpdate
   protected:
     /**
      *  @brief Checks if an update is needed for an individual nvdimm
-     *  @param[out] o_update_needed - true if lid image is good to
-     *                                update current image, else false
+     *  @param[out] o_update_needed -
+     *      true -  lid image is good to update current image
+     *      false - update not needed
      *  @param[in] i_lid_image - lid image that is appropriate for nvdimm update
      *  @param[in] i_cur_image - current installed image on the nvdimm
-
+     *  @return error if failure during check, else false
      */
     errlHndl_t isUpdateNeeded(bool & o_update_needed,
                               NvdimmLidImage * i_lid_image,
                               NvdimmInstalledImage * i_cur_image);
+
+    /**
+     * @brief Update the list of NVDIMMs with the supplied LID image
+     * @param[in] i_lidImage - LID image for update
+     * @param[in] i_list - List of installed NVDIMMs to update
+     * @return true if no errors reported, else false
+     */
+    bool runUpdateUsingLid(NvdimmLidImage * i_lidImage,
+                           std::vector<NvdimmInstalledImage *> &i_list);
 
   private:
     // Force user to supply NVDIMM list

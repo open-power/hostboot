@@ -276,6 +276,13 @@ enum i2cReg : uint16_t
     TYPED_BLOCK_DATA_OFFSET = 0x3E0,
 };
 
+// i2cReg macros
+#define ADDRESS(uint16_address) \
+            uint16_address & 0x00FF
+
+#define PAGE(uint16_address) \
+            (uint16_address >> 8) & 0x000F
+
 // Up to 10 pages per BAEBI Spec,
 // but use page 0 mostly
 enum page : uint8_t
@@ -416,6 +423,17 @@ errlHndl_t nvdimmOpenPage(TARGETING::Target *i_nvdimm, uint8_t i_page);
  *      the error log.
  */
 errlHndl_t nvdimmPollStatus(TARGETING::Target *i_nvdimm, ops_id i_ops_id, uint32_t &o_poll);
+
+
+/**
+ * @brief This function sets the energy supply policy to device-managed
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmSetESPolicy(TARGETING::Target* i_nvdimm);
 } //End NVDIMM namespace
 
 

@@ -820,7 +820,8 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
 
             // Wait for NVDIMM to write data to its internal memory
             // i_i2cInfo.writeCycleTime value in milliseconds
-            nanosleep( 0, i_i2cInfo.writeCycleTime * NS_PER_MSEC );
+            //nanosleep( 0, i_i2cInfo.writeCycleTime * NS_PER_MSEC );
+            nanosleep( 0, 10000 );  // 10 microseconds (needed for nvdimm update)
 
             // Update how much data was written
             total_bytes_written += newBufLen;
