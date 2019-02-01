@@ -1,0 +1,459 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/pm_hwp_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_DPLL_DIVIDER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The product of the DPLL internal prescalar divide (CD_DIV124_DC) and the
+        divider(CD_DPLLOUT124_DC). This estalishes the step size of the DPLL in
+        of this number divided into the processor reference clock.
+
+    if 0, consuming procedures will assume a default of 8.
+
+    Provided to override default value
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_XGPE_BOOT_COPIER_IVPR_OFFSET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Set by proc_hcode_image build with the offset value from the HOMER base
+        the XGPE Boot Copier interrupt vectors reside. This value must be 512B
+        The HOMER base address will be pre-establish in PBABAR0 so the address
+        to be off the form 0x8XXXXX00. The XGPE will be Sreset after this value
+        established.
+    </description>
+    <valueType>uint32</valueType>
+    <group>boot</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PGPE_BOOT_COPIER_IVPR_OFFSET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Set by proc_hcode_image build with the offset value from the HOMER base
+        the PGPE Boot Copier interrupt vectors reside. This value must be 512B
+        The HOMER base address will be pre-establish in PBABAR0 so the address
+        to be off the form 0x8XXXXX00. The PGPE will be Sreset after this value
+        established
+    </description>
+    <valueType>uint32</valueType>
+    <group>boot</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_QME_BOOT_COPIER_IVPR_OFFSET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Set by proc_hcode_image build with the offset value from the HOMER base
+        the QME Boot Copier interrupt vectors reside. This value must be 512B
+        The HOMER base address will be pre-establish in PBABAR0 so the address
+        to be off the form 0x8XXXXX00. The QME will be Sreset after this value
+        established
+    </description>
+    <valueType>uint32</valueType>
+    <group>boot</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Flag storage to have the Special Wakeup procedure ignore a checkstop condition.
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <group>boot</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_OCC_LFIR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The attribute stores the Local FIR value of OCC taken during the halt phase.
+    </description>
+    <valueType>uint64</valueType>
+    <group>fir</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBA_LFIR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The attribute stores the Local FIR value of PBA taken during the halt phase.
+    </description>
+    <valueType>uint64</valueType>
+    <group>fir</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_QME_LFIR</id>
+    <targetType>TARGET_TYPE_EQ</targetType>
+    <description>
+    The attribute stores the Local FIR value of QME taken during the halt phase.
+    </description>
+    <valueType>uint64</valueType>
+    <group>fir</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    0 = OCC has never been loaded and FIR Masks have never been initialized,
+    1 = FIR masks have been initialized and the hardware should reflect correct
+    2 = FIR masks have been initialized but the current hardware state is the
+        value
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          NO_INIT=0,
+          FIRS_INITED=1,
+          FIRS_INITED_IN_RESET=2,
+          FIRS_RESET_IN_HB = 3
+    </enum>
+    <initToZero/>
+    <group>fir</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_HASCLOCKS</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+    Indicates the L3 region has clocks running and scommable
+    </description>
+    <valueType>uint8</valueType>
+    <group>status</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_HASCLOCKS</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+    Indicates the execution units in core 0 have clocks running and scommable
+    </description>
+    <valueType>uint8</valueType>
+    <group>status</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_L3_HASPOWER</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+    Indicates L3 has power and has valid latch state that could be scanned
+    </description>
+    <valueType>uint8</valueType>
+    <group>status</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_HASPOWER</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+    Indicates core 0 has power and has valid latch state that could be scanned
+    </description>
+    <valueType>uint8</valueType>
+    <group>status</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PSTATES_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Indicator that all relevant attributes and required data for Pstates to be
+        is present and valid
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: proc_pm_pstate_gpe_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RESCLK_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Indicator that all relevant attributes and required data for Resonant
+        to be enabled is present and valid
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Indicator that all relevant attributes and required data for Digital Droop
+        (DDS) to be enabled is present and valid
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header QME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_RVRM_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Indicator that all relevant attributes and required data for Retention
+        Regulator Macros (RVRMs) to be enabled is present and valid
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header QME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_ENABLED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Indicator that all relevent attributes and required data for WOF to be
+        is present and valid
+
+    Producer: proc_build_pstate_datablock
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_XGPE_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable debug halt function upon XGPE Phantom interrupts
+
+    Consumers: p10_hcode_image_build ->
+    XGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PGPE_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable debug halt function upon PGPE Phantom interrupts
+
+    Consumers: p10_hcode_image_build ->
+    PGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_QME_STOP_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable debug halt function upon QME Stop Phantom stop interrupts
+
+    Consumers: p10_hcode_image_build ->
+    QME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_INSIDE_SPECIAL_WAKEUP</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+    Indicates that a special wakeup is in progress for a core.
+
+    Producer: proc_cpu_special_wakeup_core.C
+
+    Consumers: proc_cpu_special_wakeup_core.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          FALSE=0,
+          TRUE=1
+    </enum>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_INITIATED_PM_HALT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute is set at the start of PM halt and cleared at the end. It act as a
+        for FFDC collection utility to behave differently during PM restart
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          INACTIVE = 0x00,
+          ACTIVE = 0x01
+    </enum>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESTART_PHASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute to indicate the progress in the PM Complex Restart flow.
+
+    Producer: proc_pm_reset.C Consumers: proc_pm_reset.C proc_pm_recovery_ffdc_*.C
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_MALF_CYCLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute is set in PM Reset and cleared in the immediate subsequent PM
+        when handling a PM Malfunction related PM Complex restart cycle.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+          INACTIVE = 0x00,
+          ACTIVE = 0x01
+    </enum>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Voltage (binary in 1mV units) used to boot the chip.  Value
+    chosen is system dependent and is a combination of the part's Vital Product
+    Data (VPD) (the PowerSave values for VDD and VCS uplifted by
+    ATTR_BOOT_VOLTAGE_BIAS_0P5PCT) and the minimum allowed for correct operation
+    of the fabric bus.
+
+    Index 0: VDD
+    Index 1: VCS
+    Index 2: VDN
+    Index 3: VIO
+
+    Producer: p10_setup_evid (first pass)
+
+    Consumer: p10_setup_evid (second pass)
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
+    <group>state</group>
+  </attribute>
+
+</attributes>
