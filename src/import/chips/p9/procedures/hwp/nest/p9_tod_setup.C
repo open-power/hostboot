@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 //--------------------------------------------------------------------------
 #include <p9_tod_setup.H>
 
+const uint64_t M_PATH_CTRL_REG_CLEAR_VALUE = 0x0000003F00000000;
+const uint64_t S_PATH_CTRL_REG_CLEAR_VALUE = 0x0000003F00000000;
 
 /// @brief MPIPL specific steps to clear the previous topology, this should be
 //  called only during MPIPL
@@ -66,8 +68,8 @@ fapi2::ReturnCode mpipl_clear_tod_node(
     fapi2::buffer<uint64_t> l_rx_ttype_ctrl_reg = 0;
     fapi2::buffer<uint64_t> l_tx_ttype5_reg = 0;
     fapi2::buffer<uint64_t> l_tod_load_reg = 0;
-    fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
-    fapi2::buffer<uint64_t> l_s_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_m_path_ctrl_reg = M_PATH_CTRL_REG_CLEAR_VALUE;
+    fapi2::buffer<uint64_t> l_s_path_ctrl_reg = S_PATH_CTRL_REG_CLEAR_VALUE;
 
     FAPI_INF("MPIPL: stop step checkers");
     //Stop step checkers
@@ -169,6 +171,13 @@ fapi2::ReturnCode clear_tod_node(
     FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
                             l_port_ctrl_check_reg,
                             0x0ULL),
+             "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
+
+    // Workaround for HW480181: Init remote sync checker tolerance to maximum;
+    // will be closed down by tod_init later.
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_S_PATH_CTRL_REG,
+                            S_PATH_CTRL_REG_CLEAR_VALUE),
              "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
 
 
