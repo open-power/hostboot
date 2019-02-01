@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,79 +62,88 @@ void* call_dmi_io_dccal (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal entry" );
 
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal: %d proc chips found",
-            l_procTargetList.size());
-
-    for (const auto & l_proc_target : l_procTargetList)
+    do
     {
-        // a. p9_io_dmi_dccal.C (DMI target)
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9_io_dmi_dccal HWP target HUID %.8x",
-            TARGETING::get_huid(l_proc_target));
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
 
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
-                (l_proc_target);
-
-        FAPI_INVOKE_HWP(l_err, p9_io_dmi_dccal, l_fapi_proc_target);
-
-        //  process return code.
-        if ( l_err )
+        if(l_procTargetList[0]->getAttr<TARGETING::ATTR_MODEL>() != TARGETING::MODEL_CUMULUS)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9_io_dmi_dccal HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
+                "p9_io_dmi_dccal Proccessor model is not CUMULUS , skipping this step");
+            break;
         }
-        else
+
+        for (const auto & l_proc_target : l_procTargetList)
         {
+            // a. p9_io_dmi_dccal.C (DMI target)
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  p9_io_dmi_dccal HWP");
+                "p9_io_dmi_dccal HWP target HUID %.8x",
+                TARGETING::get_huid(l_proc_target));
+
+            //  call the HWP with each target
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
+                    (l_proc_target);
+
+            FAPI_INVOKE_HWP(l_err, p9_io_dmi_dccal, l_fapi_proc_target);
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  p9_io_dmi_dccal HWP on target HUID %.8x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  p9_io_dmi_dccal HWP");
+            }
+
+            // b. p9_io_cen_dccal.C (Centaur target)
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "p9_io_cen_dccal HWP target HUID %.8x",
+                TARGETING::get_huid(l_proc_target));
+
+            FAPI_INVOKE_HWP(l_err, p9_io_cen_dccal, l_fapi_proc_target);
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  p9_io_cen_dccal HWP on target HUID %.8x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  p9_io_cen_dccal HWP");
+            }
+
         }
 
-        // b. p9_io_cen_dccal.C (Centaur target)
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9_io_cen_dccal HWP target HUID %.8x",
-            TARGETING::get_huid(l_proc_target));
-
-        FAPI_INVOKE_HWP(l_err, p9_io_cen_dccal, l_fapi_proc_target);
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9_io_cen_dccal HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
-
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  p9_io_cen_dccal HWP");
-        }
-
-    }
+    }while(0);
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_dccal exit" );
