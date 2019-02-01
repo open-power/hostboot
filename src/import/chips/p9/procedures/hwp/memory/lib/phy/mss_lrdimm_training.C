@@ -250,12 +250,18 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode execute_nttm_mode_read(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
+    using TT = ccsTraits<fapi2::TARGET_TYPE_MCBIST>;
+
+    // A hardware bug requires us to increase our delay significanlty for NTTM mode reads
+    constexpr uint64_t SAFE_NTTM_READ_DELAY = 0x40;
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Note: CKE are enabled by default in the NTTM mode read command, so we should be good to go
     // set the NTTM read mode
-    l_program.iv_instructions.push_back(mss::ccs::nttm_read_command<fapi2::TARGET_TYPE_MCBIST>());
+    auto l_nttm_read = mss::ccs::nttm_read_command<fapi2::TARGET_TYPE_MCBIST>();
+    l_nttm_read.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(SAFE_NTTM_READ_DELAY);
+    l_program.iv_instructions.push_back(l_nttm_read);
 
     // turn on NTTM mode
     FAPI_TRY( mss::ccs::configure_nttm(l_mcbist, mss::states::ON),
