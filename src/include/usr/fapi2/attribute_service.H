@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,7 @@ bool getTargetingAttrHelper(TARGETING::Target * l_pTargTarget,
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 ReturnCode getTargetingAttr(const Target<TARGET_TYPE_ALL,
+                                        MULTICAST_OR,
                                         plat_target_handle_t >& i_pFapiTarget,
                             const TARGETING::ATTRIBUTE_ID i_targAttrId,
                             const uint32_t i_attrSize,

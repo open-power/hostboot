@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,7 +192,8 @@ bool getTargetingAttrHelper(TARGETING::Target * l_pTargTarget,
 ///        See doxygen in H file.
 ///
 ReturnCode getTargetingAttr(
-           const Target< TARGET_TYPE_ALL, plat_target_handle_t >& i_pFapiTarget,
+           const Target< TARGET_TYPE_ALL, MULTICAST_OR,
+                plat_target_handle_t >& i_pFapiTarget,
            const TARGETING::ATTRIBUTE_ID i_targAttrId,
            const uint32_t i_attrSize,
            void * o_pAttr)
@@ -264,7 +265,8 @@ bool setTargetingAttrHelper(TARGETING::Target * l_pTargTarget,
 ///        See doxygen in H file
 ///
 ReturnCode setTargetingAttr(
-           const Target<TARGET_TYPE_ALL, plat_target_handle_t >& i_pFapiTarget,
+           const Target<TARGET_TYPE_ALL, MULTICAST_OR,
+                plat_target_handle_t >& i_pFapiTarget,
            const TARGETING::ATTRIBUTE_ID i_targAttrId,
            const uint32_t i_attrSize,
            void * i_pAttr)
