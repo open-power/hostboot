@@ -72,17 +72,19 @@ namespace NODECOMM
  *         ABUS from a processor on another node.
  */
 errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
-                                   uint64_t & o_data,
-                                   uint8_t & o_linkId,
-                                   uint8_t & o_mboxId)
+                                   const uint8_t i_linkId,
+                                   const uint8_t i_mboxId,
+                                   uint64_t & o_data)
 {
     errlHndl_t err = nullptr;
     bool attn_found = false;
+    uint8_t actual_linkId = 0;
+    uint8_t actual_mboxId = 0;
 
     const uint64_t interval_ns = NODE_COMM_POLL_DELAY_NS;
     uint64_t time_polled_ns = 0;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusRecvMessage: pProc=0x%.08X",
+    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusRecvMessage: pProc=0x%.08X",
               get_huid(i_pProc));
 
     do
@@ -94,8 +96,8 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         err = nodeCommMapAttn(i_pProc,
                               NCDD_MODE_ABUS,
                               attn_found,
-                              o_linkId,
-                              o_mboxId);
+                              actual_linkId,
+                              actual_mboxId);
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: Error Back "
@@ -107,10 +109,10 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
         }
         if (attn_found == true)
         {
-            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
+            TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
               "nodeCommMapAttn attn_found (%d) for Tgt=0x%.08X, link=%d, "
               "mbox=%d",
-              attn_found, get_huid(i_pProc), o_linkId, o_mboxId);
+              attn_found, get_huid(i_pProc), actual_linkId, actual_mboxId);
             break;
         }
 
@@ -131,7 +133,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
              * @userdata2[32:63] Time Interval Between Polls in ns
              * @devdesc          Timed out waiting to receive message over
              *                   ABUS Link Mailbox
-             * @custdesc         Secure Boot failure
+             * @custdesc         Trusted Boot failure
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            MOD_NC_RECV,
@@ -143,8 +145,11 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                              NODE_COMM_POLL_DELAY_TOTAL_NS,
                                              interval_ns));
 
-            // Bus Callout will be handled by caller since
-            // it should know expected peer target
+            // Since we know what bus we expected the message on, call it out
+            addNodeCommBusCallout(NCDD_MODE_ABUS,
+                                  i_pProc,
+                                  i_linkId,
+                                  err);
 
             // Or HB code failed to do the procedure correctly
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -172,6 +177,59 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
     if (attn_found == true)
     {
+        // Verify that actual receive link/mboxIds were the same as the
+        // expected ones
+        if ((actual_linkId != i_linkId) ||
+            (actual_mboxId != i_mboxId))
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: "
+                      "Expected Link (%d) Mbox (%d) IDs DO NOT Match the "
+                      "Actual Link (%d) Mbox (%d) IDs the message was "
+                      "received on",
+                       i_linkId, i_mboxId,
+                       actual_linkId, actual_mboxId);
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCEX_MISMATCH_RECV_LINKS
+             * @moduleid         MOD_NC_RECV
+             * @userdata1        Master Proc Target HUID
+             * @userdata2[0:15]  Expected Link Id to receive message on
+             * @userdata2[16:31] Expected Mailbox Id to receive message on
+             * @userdata2[32:47] Actual Link Id message was received on
+             * @userdata2[48:63] Actual Mailbox Id message was receiveed on
+             * @devdesc          Mismatch between expected and actual Link Mbox
+             *                   Ids a secure ABUS message was received on
+             * @custdesc         Trusted Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_NC_RECV,
+                                           RC_NCEX_MISMATCH_RECV_LINKS,
+                                           get_huid(i_pProc),
+                                           FOUR_UINT16_TO_UINT64(
+                                             i_linkId,
+                                             i_mboxId,
+                                             actual_linkId,
+                                             actual_mboxId));
+
+            // Since we know what bus we expected the message on, call it out
+            addNodeCommBusCallout(NCDD_MODE_ABUS,
+                                  i_pProc,
+                                  i_linkId,
+                                  err);
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+
+            // Grab FFDC from the target
+            getNodeCommFFDC(NCDD_MODE_ABUS,
+                            i_pProc,
+                            err);
+
+            break;
+        }
+
         //  Read message on proc with Link Mailbox found above
         o_data = 0;
         size_t expSize = sizeof(o_data);
@@ -180,15 +238,15 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
                                    &o_data,
                                    reqSize,
                                    DEVICE_NODECOMM_ADDRESS(NCDD_MODE_ABUS,
-                                                           o_linkId,
-                                                           o_mboxId));
+                                                           actual_linkId,
+                                                           actual_mboxId));
 
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back From "
                       "Abus MBox Read: Tgt=0x%.08X, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_pProc), o_linkId, o_mboxId,
+                      get_huid(i_pProc), actual_linkId, actual_mboxId,
                       TRACE_ERR_ARGS(err));
             break;
         }
@@ -203,7 +261,8 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
               "Tgt=0x%.08X, link=%d, mbox=%d attn_found=%d: "
               "data=0x%.16llX. "
               TRACE_ERR_FMT,
-              get_huid(i_pProc), o_linkId, o_mboxId, attn_found, o_data,
+              get_huid(i_pProc), actual_linkId, actual_mboxId,
+              attn_found, o_data,
               TRACE_ERR_ARGS(err));
 
     return err;
@@ -216,13 +275,13 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
  *         the current node to a processor on another node.
  */
 errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
-                                   const uint64_t & i_data,
-                                   const uint8_t & i_linkId,
-                                   const uint8_t & i_mboxId)
+                                   const uint64_t i_data,
+                                   const uint8_t i_linkId,
+                                   const uint8_t i_mboxId)
 {
     errlHndl_t err = nullptr;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
               "to send data=0x%.16llX through linkId=%d mboxId=%d",
               get_huid(i_pProc), i_data, i_linkId, i_mboxId);
 
@@ -253,8 +312,10 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+              "send data=0x%.16llX through linkId=%d mboxId=%d: "
               TRACE_ERR_FMT,
+              get_huid(i_pProc), i_data, i_linkId, i_mboxId,
               TRACE_ERR_ARGS(err));
 
     return err;
@@ -352,7 +413,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
          * @userdata2[32:63] Target HUID FIR was read from
          * @devdesc          Too many attentions were found in
          *                   the Node Comm FIR Register
-         * @custdesc         Secure Boot failure
+         * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        MOD_NC_MAP_ATTN,
@@ -392,7 +453,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
             o_linkId = (bit / 2);
             o_mboxId = (bit % 2);
 
-            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
+            TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
                       "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
                       TRACE_ERR_FMT,
                       get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
@@ -492,7 +553,7 @@ errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
 /**
  * @brief Add FFDC for the target to an error log
  */
-void getNodeCommFFDC( node_comm_modes_t   i_mode,
+void getNodeCommFFDC( const node_comm_modes_t   i_mode,
                       TARGETING::Target*  i_pProc,
                       errlHndl_t          &io_log)
 {
@@ -556,9 +617,9 @@ void getNodeCommFFDC( node_comm_modes_t   i_mode,
 /**
  * @brief Add a bus callout to an error log
  */
-void addNodeCommBusCallout(node_comm_modes_t i_mode,
+void addNodeCommBusCallout(const node_comm_modes_t i_mode,
                            TARGETING::Target* i_pProc,
-                           uint8_t & i_linkId,
+                           const uint8_t i_linkId,
                            errlHndl_t & io_log,
                            HWAS::callOutPriority i_priority)
 {

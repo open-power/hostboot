@@ -108,8 +108,8 @@ enum node_comm_registers_t : uint64_t
  *
  *  @return uint64_t - Calculated Link Mailbox Register Address
  */
-inline uint64_t getLinkMboxRegAddr(uint64_t i_reg,
-                                   node_comm_modes_t i_mode)
+inline uint64_t getLinkMboxRegAddr(const uint64_t i_reg,
+                                   const node_comm_modes_t i_mode)
 {
     return (i_mode == NCDD_MODE_ABUS)
               ? (i_reg + NCDD_ABUS_REG_OFFSET)
@@ -125,7 +125,8 @@ inline uint64_t getLinkMboxRegAddr(uint64_t i_reg,
  *  @return uint64_t - Calculated Link Mailbox Register Base Address
  *  @note   Returned value is Base/XBUS Address - see node_comm_registers_t
  */
-inline uint64_t getLinkMboxReg(uint8_t i_linkId, uint8_t i_mboxId)
+inline uint64_t getLinkMboxReg(const uint8_t i_linkId,
+                               const uint8_t i_mboxId)
 {
     return NCDD_REG_LINK_MBOX_00 + (2*i_linkId) + i_mboxId;
 }
@@ -140,8 +141,8 @@ inline uint64_t getLinkMboxReg(uint8_t i_linkId, uint8_t i_mboxId)
  *
  *  @return void
  */
-inline void getLinkMboxFromObusInstance(uint8_t i_obusInstance,
-                                        uint8_t i_obusRelLink,
+inline void getLinkMboxFromObusInstance(const uint8_t i_obusInstance,
+                                        const uint8_t i_obusRelLink,
                                         uint8_t & o_linkId,
                                         uint8_t & o_mboxId)
 {
@@ -172,7 +173,8 @@ enum node_comm_fir_reg_helpers_t : uint64_t
  *
  *  @return uint64_t - Calculated FIR Register Attention Bit Mask
  */
-inline uint64_t getLinkMboxFirAttnBit(uint8_t i_linkId, uint8_t i_mboxId)
+inline uint64_t getLinkMboxFirAttnBit(const uint8_t i_linkId,
+                                      const uint8_t i_mboxId)
 {
     return (NCDD_START_OF_ATTN_BITS >> ((2*i_linkId) + i_mboxId));
 }
@@ -184,24 +186,27 @@ inline uint64_t getLinkMboxFirAttnBit(uint8_t i_linkId, uint8_t i_mboxId)
  *
  *  @param[in]  i_pProc  - Processor target to look for attentions on
  *                         Can't be nullptr
+ *  @param[in]  i_linkId - Expected Link Id that received the message
+ *  @param[in]  i_mboxId - Expected Mailbox Id that received the message
  *  @param[out] o_data   - Data received
- *  @param[out] o_linkId - Link Id that received the message
- *  @param[out] o_mboxId - Mailbox Id that received the message
+ *
+ *  @note If message received on different LinkId/MailboxId than i_linkId and
+ *        i_mboxId then an error will be created
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
-                                   uint64_t & o_data,
-                                   uint8_t & o_linkId,
-                                   uint8_t & o_mboxId);
+                                   uint8_t i_linkId,
+                                   uint8_t i_mboxId,
+                                   uint64_t & o_data);
 
 /**
  *  @brief This function sends a message over the ABUS from the processor of
  *         the current node to a processor on another node.
  *
- *  @param[in] i_pProc  - Processor target to look for attentions on
+ *  @param[in] i_pProc  - Processor target sending message
  *                        Can't be nullptr
  *  @param[in] i_data   - Data to be sent
  *  @param[in] i_linkId - Link Id Message is sent from
@@ -212,9 +217,9 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
-                                   const uint64_t & i_data,
-                                   const uint8_t & i_linkId,
-                                   const uint8_t & i_mboxId);
+                                   uint64_t i_data,
+                                   uint8_t i_linkId,
+                                   uint8_t i_mboxId);
 
 
 /**
@@ -286,7 +291,7 @@ void getNodeCommFFDC(node_comm_modes_t i_mode,
 void addNodeCommBusCallout(
     node_comm_modes_t i_mode,
     TARGETING::Target* i_pProc,
-    uint8_t & i_linkId,
+    uint8_t i_linkId,
     errlHndl_t & io_log,
     HWAS::callOutPriority i_priority = HWAS::SRCI_PRIORITY_HIGH);
 

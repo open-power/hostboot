@@ -109,6 +109,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     {
 
     // Check other input parameters
+    // @TODO RTC 203642 add check that i_opType is only READ or WRITE
     const auto max_linkId = (mode==NCDD_MODE_ABUS)
                               ? NCDD_MAX_ABUS_LINK_ID
                               : NCDD_MAX_XBUS_LINK_ID;
@@ -136,7 +137,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
          * @userdata1[48:63] MailboxId Value
          * @userdata2        Input Data Pointer
          * @devdesc          Invalid Input Args for Node Comm DD call
-         * @custdesc         Secure Boot failure
+         * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        MOD_NCDD_PERFORM_OP,
@@ -409,7 +410,7 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
          * @userdata1        Status Register Value
          * @userdata2        Target HUID
          * @devdesc          Sent bit not set in Node Comm status/ctrl register
-         * @custdesc         Secure Boot failure
+         * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        MOD_NCDD_WRITE,
@@ -501,7 +502,7 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
              * @userdata1        Status Register Value
              * @userdata2        Target HUID
              * @devdesc          Error found in Node Comm status/ctrl register
-             * @custdesc         Secure Boot failure
+             * @custdesc         Trusted Boot failure
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            MOD_NCDD_CHECK_FOR_ERRORS,
@@ -597,7 +598,7 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
                  * @userdata2[0:31]  Status/Control Register Address
                  * @userdata2[32:63] Target HUID
                  * @devdesc          Timed out waiting for command complete.
-                 * @custdesc         Secure Boot failure
+                 * @custdesc         Trusted Boot failure
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               MOD_NCDD_WAIT_FOR_CMD_COMP,
