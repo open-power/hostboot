@@ -58,7 +58,6 @@ BASE_OBJECTS += cxxtest_data.o
 BASE_OBJECTS += sprintf.o
 BASE_OBJECTS += crc32.o
 BASE_OBJECTS += utilmisc.o
-BASE_OBJECTS += tls.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
@@ -340,7 +339,7 @@ hbibl_OBJECTS += ${BOOTLDR_OBJECTS}
 hbibl_LDFILE = bootloader.ld
 hbibl_NO_RELOCATION = 1
 
-hbicore_OBJECTS += ${BASE_OBJECTS}
+hbicore_OBJECTS += ${BASE_OBJECTS} tls.o
 hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
 hbicore_MODULES += ${BASE_MODULES}
 hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
@@ -369,7 +368,7 @@ endif
 hbicore_test_LDFILE = kernel.ld
 
 hbirt_OBJECTS += ${RUNTIME_OBJECTS}
-hbirt_OBJECTS += ${BASE_OBJECTS}
+hbirt_OBJECTS += ${BASE_OBJECTS} tlsrt.o
 hbirt_MODULES += ${RUNTIME_MODULES}
 hbirt_DATA_MODULES += ${RUNTIME_DATA_MODULES}
 hbirt_DATA_MODULES += $(if $(CONFIG_HBRT_PRD),$(prd_rule_prf_targets))
