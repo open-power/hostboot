@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -731,7 +731,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
         cmd3 = ""
         if (simenv.hb_mode == 0): #new mode (Axone + beyond)
-            cmd3 = "(get-master-proc).reset-fsimbox-reg index=0x104"
+            cmd3 = "(get-master-procs)[0].reset-fsimbox-reg index=0x104"
         else:
             #old mode (Cumulus + prior)
             cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
