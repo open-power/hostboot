@@ -169,11 +169,13 @@ struct ErrorInfoHwCallout
     /// @param[in] i_hw              Hardware to callout
     /// @param[in] i_calloutPriority Priority of callout
     /// @param[in] i_refTarget       Reference to reference target
+    /// @param[in] i_clkPos          Clock position
     ///
     ErrorInfoHwCallout(
         const HwCallouts::HwCallout i_hw,
         const CalloutPriorities::CalloutPriority i_calloutPriority,
-        const Target<TARGET_TYPE_ALL>& i_refTarget);
+        const Target<TARGET_TYPE_ALL>& i_refTarget,
+        const uint8_t i_clkPos = CLOCK_POS_UNDEF);
 
 #ifdef FAPI_CUSTOM_MALLOC
     ///
@@ -202,6 +204,9 @@ struct ErrorInfoHwCallout
     // The reference target (needed for some HW callouts to identify what to
     // callout). The target handle is NULL if there is no reference target.
     Target<TARGET_TYPE_ALL> iv_refTarget;
+
+    // Clock position
+    uint8_t iv_clkPos;
 };
 
 ///
@@ -548,6 +553,7 @@ struct ErrorInfoEntryHwCallout
     uint8_t iv_hw;
     uint8_t iv_calloutPriority;
     uint8_t iv_refObjIndex;
+    uint8_t iv_clkPos;
     void addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                       const void* const* i_object) const;
 };
