@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2018
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -149,6 +149,7 @@ BASE_MODULES += $(if $(CONFIG_BMC_IPMI),ipmibase)
 BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
+BASE_MODULES += $(if $(CONFIG_CONSOLE),console)
 
 EXTENDED_MODULES += istep06
 EXTENDED_MODULES += istep07
@@ -194,7 +195,6 @@ EXTENDED_MODULES += imageprocs
 EXTENDED_MODULES += sbeio
 EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
 EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
-EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
 EXTENDED_MODULES += xz
