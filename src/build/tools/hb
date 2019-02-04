@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -424,8 +424,8 @@ hb_startsimics()
         #export MYDIR=$bb/obj/ppc/hbfw/simics/startup.simics
         #then /runsim -m axone -o hb_script_to_run=$MYDIR
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} -o hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor"
-        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} -o hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor" "ppc"
+        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor"
+        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor" "ppc"
     else
         execute_in_sandbox \
             "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
