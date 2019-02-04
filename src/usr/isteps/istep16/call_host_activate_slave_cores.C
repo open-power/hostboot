@@ -51,6 +51,7 @@
 #include    <scom/scomif.H>
 #include    <errl/errludprintk.H>
 #include    <intr/intr_reasoncodes.H>
+#include    <initservice/istepdispatcherif.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -83,6 +84,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     TARGETING::targetService().getTopLevelTarget(sys);
     assert( sys != NULL );
     uint32_t l_numCores = 0;
+
+    // keep track of which cores started
+    TargetHandleList l_startedCores;
 
     for(TargetHandleList::const_iterator
         l_core = l_cores.begin();
@@ -233,7 +237,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 // Add interesting ISTEP traces
                 l_errl->collectTrace(ISTEP_COMP_NAME,256);
 
-                l_stepError.addErrorDetails( l_errl );
+                // Choosing to ignore this intermittent error
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errlCommit( l_errl, HWPF_COMP_ID );
 
                 // Remember that we failed so we can gard the core if it
@@ -241,6 +246,14 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 l_prevFail = 1;
                 (*l_core)->
                   setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+
+#ifdef CONFIG_BMC_IPMI
+                // Initiate a graceful power cycle
+                CONSOLE::displayf(ISTEP_COMP_NAME, "System Rebooting To Retry Recoverable Error");
+                CONSOLE::flush();
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_host_activate_slave_cores: requesting power cycle");
+                INITSERVICE::requestReboot();
+#endif
 
                 break;
             }
@@ -306,17 +319,29 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             // Zero out the counter if we passed 
             else if( l_prevFail > 0 )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "call_host_activate_slave_cores: "
-                           "Resetting failure count for core %.8X",
-                           TARGETING::get_huid(*l_core) );
-                l_prevFail = 0;
-                (*l_core)->
-                  setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+                // Add to the list of passing cores so we can
+                //  clear ATTR_PREVIOUS_WAKEUP_FAIL later
+                l_startedCores.push_back(*l_core);
             }
         }
     }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+    // Clear out the wakeup_fail indicators only after every core has passed.
+    //  Doing this outside the loop helps mitigate the (unlikely) case where
+    //  a failure bounces between different cores on several consecutive boots.
+    for(TargetHandleList::const_iterator
+        l_core = l_startedCores.begin();
+        l_core != l_startedCores.end();
+        ++l_core)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_host_activate_slave_cores: "
+                   "Resetting failure count for core %.8X",
+                   TARGETING::get_huid(*l_core) );
+        ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail = 0;
+        (*l_core)->
+          setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
+    }
 
 #if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
     if( l_stepError.isNull() )
