@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -52,13 +52,46 @@ _init:
 
     cmpwi cr0, r8, 0          # Perform relocations (if any).
     beq 2f
+
+    # TLS workaround
+    # Load ASCII 'T','L','S' + 0x00 into bits 32:63 of r6, which will be used
+    # to compare against bits 0-31 of each relocation entry.  A match signifies
+    # that this and the next relocation entry are the TLS module and offset
+    # relocations respectively.  Skip both relocations before continuing the
+    # processing.  These first two directives create the reference pattern to
+    # compare against.  Also skip a relocation entry if its value is 0.
+    rldicl r6,r6,0,63         # Clear r6 to zero
+    addis r6, 0, 0x544C       # Load ASCII "TL" into bits 32:47 of r6
+    ori r6, r6, 0x5300        # Load ASCII "S" + 0x00 into bits 48:63 of r6
+
     mtctr r8
 1:
     ldu r8, 8(r10)            # Get relocation destination
     add r8, r8, r4
     ld r7, 0(r8)              # Get relocation address
+
+
+    # TLS workaround (continued for next 8 instructions)
+    rldicl r5,r5,0,63         # Clear r5 to zero
+    cmp cr0, 0, r5, r7        # Compare the relocation address (r7) to zero (r5)
+    beq cr0, 3f               # If the relocation address is zero, do
+                              # not adjust it and instead jump to the loop
+                              # decrement/branch instruction
+
+    rldicl r5,r7,32,32        # Rotate bits 0-31 of the relocation address
+                              # into 32-63 and clear bits 0-31, saving result
+                              # to r5, to set up the next comparison
+    cmp cr0, 0, r6, r5        # Compare bits 32-63, which should both contain
+                              # ASCII TLS+0x00 if this is a TLS module
+    bne cr0, 4f               # If not a TLS module relocation, keep going;
+    ldu r8, 8(r10)            # otherwise, skip the TLS module relocation
+    bdnz 3f                   # and decrement the loop counter to match. Jump
+                              # to a 2nd skip/decrement pair to effectively skip
+                              # the next TLS module relocation as well
+4:
     add r7, r7, r4
     std r7, 0(r8)             # Update relocation address.
+3:
     bdnz 1b                   # Decrement CTR and continue loop.
 2:
     addi r10, r4, 0x2008      # Find pointer to main TOC.

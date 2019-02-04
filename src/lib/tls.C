@@ -31,8 +31,20 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <string.h>
+#ifndef __HOSTBOOT_RUNTIME
 #include <util/lockfree/stack.H>
+#else
+#include <util/nolockfree/stack.H>
+#endif
 #include <sys/vfs.h>
+
+/**
+ *  @brief Mask which suppresses ignored portions of a TLS module ID.  When
+ *      The linker creates a module ID, it prefixes it with "TLS" + 0x00
+ *      as the first 32 bits.  This mask slices that off to leave just the
+ *      normalized module ID
+ */
+const size_t TLS_MODULE_MASK = 0x00000000FFFFFFFFULL;
 
 /** Thread Local Storage - How it works.
  *
@@ -86,8 +98,36 @@ struct __tls_linker_tuple
 /** Info about the .tdata section for each module. */
 struct __tls_module
 {
-    void* sect_addr;
-    size_t size;
+    void* sect_addr; //< Starting address of module
+    size_t size;     //< Size of module
+    size_t module;   //< Module ID of this module
+                     //< (set by custom linker)
+
+    /**
+     *  @brief Default constructor
+     */
+    __tls_module()
+     : sect_addr(0),
+       size(0),
+       module(0)
+    {
+    }
+
+    /**
+     *  @brief Specialized contstructor
+     *
+     *  @param[in] i_start  Module starting address.  Must not be nullptr.
+     *  @param[in] i_size   Module size in bytes
+     *  @param[in] i_module Modue ID of the module
+     */
+    __tls_module(void* const  i_start,
+                 const size_t i_size,
+                 const size_t i_module)
+      : sect_addr(i_start),
+        size(i_size),
+        module(i_module)
+    {
+    }
 };
 
 /** TLS destructor data. */
@@ -103,7 +143,11 @@ struct __tls_dtor
 struct __tls_thread_info
 {
     size_t count;
+#ifndef __HOSTBOOT_RUNTIME
     Util::Lockfree::Stack<__tls_dtor> dtors;
+#else
+    Util::NoLockFree::Stack<__tls_dtor> dtors;
+#endif
     void* blobs[0];
 };
 
@@ -114,51 +158,47 @@ std::vector<__tls_module> __tls_pending_modules;
 /** Get the previously registered __tls_module data for a TLS variable */
 const __tls_module* __tls_get_module(const __tls_linker_tuple* tuple)
 {
+    size_t tuple_module = tuple->module & TLS_MODULE_MASK;
+
     // Look the module up in the __tls_modules first, in case we've seen
     // this module before in another thread.
-    if ((__tls_modules.size() > tuple->module) &&
-        (__tls_modules[tuple->module].sect_addr != nullptr))
+    if ((__tls_modules.size() > tuple_module) &&
+        (__tls_modules[tuple_module].sect_addr != nullptr))
     {
-        return &__tls_modules[tuple->module];
+        return &__tls_modules[tuple_module];
     }
 
     // We plan to insert a new module, so make sure we can contain it.
-    if (__tls_modules.size() <= tuple->module)
+    if (__tls_modules.size() <= tuple_module)
     {
-        __tls_modules.resize(tuple->module+1);
+        __tls_modules.resize(tuple_module+1);
     }
 
     // This is the first time we've seen this module.  Need to look up in
     // pending.
 
-    // The TLS sections are at the beginning of the .rodata section and the
-    // linker tuples are somewhere in .data.  Therefore sect_addr < tuple.
-    // Search __tls_pending_modules for the highest address section that is
-    // less than the tuple address.
-    auto best = __tls_pending_modules.begin();
-    auto curr = best;
-    while(curr != __tls_pending_modules.end())
-    {
-        if ((curr->sect_addr > best->sect_addr) &&
-           (curr->sect_addr < tuple))
+    // The module should have pre-registered its module ID in association
+    // with its starting address and size; look for a module ID match.
+    auto moduleItr = std::find_if(
+        __tls_pending_modules.begin(),
+        __tls_pending_modules.end(),
+        [&tuple_module](const __tls_module& i_module)
         {
-            best = curr;
-        }
-        ++curr;
-    }
-    assert(best != __tls_pending_modules.end());
+            return (tuple_module == i_module.module);
+        });
+    assert(moduleItr != __tls_pending_modules.end());
 
     // Copy it into the __tls_modules and remove it from the pending list.
-    __tls_modules[tuple->module] = *best;
-    __tls_pending_modules.erase(best);
+    __tls_modules[tuple_module] = *moduleItr;
+    __tls_pending_modules.erase(moduleItr);
 
-    return &__tls_modules[tuple->module];
+    return &__tls_modules[tuple_module];
 }
 
 /* Since Hostboot runtime only has a single thread, we'll just create a
  * single global TLS area. */
 #ifdef __HOSTBOOT_RUNTIME
-task_t __tls_task_struct;
+task_t tls_task_struct;
 #endif
 
 /** Get a TLS variable address
@@ -168,6 +208,8 @@ task_t __tls_task_struct;
 extern "C"
 void* __tls_get_addr(const __tls_linker_tuple* tuple)
 {
+    size_t tuple_module = tuple->module & TLS_MODULE_MASK;
+
     task_t* task = nullptr;
 #ifdef __HOSTBOOT_RUNTIME
     task = &tls_task_struct;
@@ -184,36 +226,36 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
     //      - tls[module] is nullptr
     // Then: module blob needs to be allocated.
     if ((tls_info == nullptr) ||
-        (tls_info->count <= tuple->module) ||
-        (tls_info->blobs[tuple->module] == nullptr))
+        (tls_info->count <= tuple_module) ||
+        (tls_info->blobs[tuple_module] == nullptr))
     {
 
         // If there isn't room for the module's blob, we need to allocate it.
-        if ((tls_info == nullptr) || (tls_info->count <= tuple->module))
+        if ((tls_info == nullptr) || (tls_info->count <= tuple_module))
         {
-            decltype(__tls_thread_info::count) old_size = 0;
+            decltype(__tls_thread_info::count) old_count = 0;
             auto new_size = sizeof(__tls_thread_info) +
-                            sizeof(void*)*(tuple->module+1);
+                            sizeof(void*)*(tuple_module+1);
 
             // Allocate or reallocate the tls info.
             if (tls_info == nullptr)
             {
-                old_size = 0;
+                old_count = 0;
                 tls_info = reinterpret_cast<decltype(tls_info)>(
                     malloc(new_size));
                 memset(&tls_info->dtors, '\0', sizeof(tls_info->dtors));
             }
             else
             {
-                old_size = tls_info->count;
+                old_count = tls_info->count;
                 tls_info = reinterpret_cast<decltype(tls_info)>(
                     realloc(tls_info, new_size));
             }
 
             // Clear the newly allocated area and update the count.
-            memset(&tls_info->blobs[old_size], '\0', new_size -
-                   (sizeof(__tls_thread_info) + sizeof(void*)*old_size));
-            tls_info->count = tuple->module+1;
+            memset(&tls_info->blobs[old_count], '\0', new_size -
+                   (sizeof(__tls_thread_info) + sizeof(void*)*old_count));
+            tls_info->count = tuple_module+1;
 
             // save into task struct.
             task->tls_context = tls_info;
@@ -224,7 +266,7 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
         mutex_lock(&__tls_mutex);
         {
             auto module = __tls_get_module(tuple);
-            auto blob = tls_info->blobs[tuple->module] = malloc(module->size);
+            auto blob = tls_info->blobs[tuple_module] = malloc(module->size);
             memcpy(blob, module->sect_addr, module->size);
         }
         mutex_unlock(&__tls_mutex);
@@ -232,7 +274,7 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
     }
 
     // Return the offset of the TLS variable from this module's blob.
-    return &reinterpret_cast<uint8_t*>(tls_info->blobs[tuple->module])
+    return &reinterpret_cast<uint8_t*>(tls_info->blobs[tuple_module])
         [tuple->offset+VFS_PPC64_DTPREL_OFFSET];
 }
 
@@ -240,13 +282,12 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
  *
  *  Called by init() in module_init.
  */
-void __tls_register(void* s, void* e)
+void __tls_register(void* s, void* e, const size_t i_module)
 {
     if (s == e)
         return;
 
-    __tls_module m = { s, ((size_t)e) - ((size_t)s) };
-
+    __tls_module m(s,  ((size_t)e) - ((size_t)s), i_module );
     mutex_lock(&__tls_mutex);
     {
         __tls_pending_modules.push_back(m);

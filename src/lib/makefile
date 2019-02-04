@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ OBJS += utilmisc.o
 
 OBJS += tls.o
 OBJS += errno.o
+OBJS += tlsrt.o
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1

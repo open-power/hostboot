@@ -228,7 +228,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                          "std 2, 40(1); bctrl; ld 2, 40(1); "
                          "mr %0, 3" :
                 "=r" (result) : "r" (entry), "r" (param0), "r" (param1) :
-                "lr","ctr","r0","r3","r4","r5","r6","r7","r8","r9",
+                "lr","ctr","cr0","r0","r3","r4","r5","r6","r7","r8","r9",
                 "r10","r11"); // TODO: Need to double check the ABI here.
 
             return result;

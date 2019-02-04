@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Jan Hlavac                                                         */
 /*                                                                        */
@@ -132,6 +132,10 @@ struct Object
         FILE * iv_output;               //!< output file handle
         ssize_t tls_module;             //!< module id of this module's
                                         //   thread local storage.
+        map<uint64_t,string> tls_vars;  //!< keep track of TLS variables in
+                                        //   this module by mapping offsets
+                                        //   to names for use with identifying
+                                        //   unnamed DTPRELs
         /**
          * Read the object from it's file and extract bfd, text, & data image
          * @param[in] i_file : file path
@@ -219,7 +223,7 @@ inline bool Object::isELF()
 }
 
 /**
- * Infomraiton needed to build the Module table in each output image
+ * Information needed to build the Module table in each output image
  */
 class ModuleTable
 {
@@ -289,10 +293,23 @@ vector<ModuleTable> module_tables;
 map<string,size_t> weak_symbols;
 set<string> all_symbols;
 set<string> weak_symbols_to_check;
+
+// map TLS symbol names to TLS module IDs
+map<string, uint64_t> tls_modules;
+
+// map TLS symbol names to TLS offsets
+map<string, uint64_t> tls_offsets;
+
 bool includes_extended_image = false;
 bool relocation = true;
 
 size_t next_tls_id = 0;
+
+/**
+ *  @brief Marker (ASCII 'TLS' + 0x00) or'd into bit 0 position of a TLS module
+ *      relocation to flag it as such for runtime relocation processing
+ */
+const uint64_t TLS_MARKER = 0x544C530000000000ULL;
 
 //-----------------------------------------------------------------------------
 // MAIN
@@ -612,6 +629,38 @@ bool Object::write_object()
             cout << strerror(error) << endl;
         }
 
+        // Look for the "TLS_MODULE_ID" symbol in the module.  If found, seek to
+        // its location in the final binary and update it with the TLS module ID
+        // for this module.
+        if (symbols.find(VFS_TOSTRING(TLS_MODULE_ID)) != symbols.end())
+        {
+            fseek(iv_output,   symbols[VFS_TOSTRING(TLS_MODULE_ID)].address
+                             + offset + data.vma_offset, SEEK_SET);
+            size_t tlsModuleId = 0;
+            bfd_putb64(get_tls_module(),&tlsModuleId);
+            if (sizeof(tlsModuleId) != fwrite(&tlsModuleId, sizeof(uint8_t),
+                    sizeof(tlsModuleId), iv_output))
+            {
+                const int error = errno;
+                cout << "Error writing TLS_MODULE_ID to output: " << endl;
+                cout << strerror(error) << endl;
+            }
+            else
+            {
+                cout << "Setting module ID to " << get_tls_module() << " for "
+                     << name << " addr = "
+                     << symbols[VFS_TOSTRING(TLS_MODULE_ID)].address
+                     <<  " + " << offset + data.vma_offset << endl;
+            }
+
+            // Seek back to where the cursor would have been, had the module
+            // ID not been updated
+            fseek(iv_output, offset + data.vma_offset + data.size, SEEK_SET);
+        }
+        else
+        {
+            cout << " module ID not found for " << name << endl;
+        }
     }
     else // binary blob
     {
@@ -690,11 +739,27 @@ bool Object::read_relocation()
         cout << "\tSymbol: " << syms[i]->name << endl;
         cout << "\t\tAddress: " << std::hex << syms[i]->value << endl;
 
+        bool is_tls = false;
+
         // Determine symbol types.
+        if (syms[i]->flags & BSF_THREAD_LOCAL)
+        {
+            cout << "\t\tTLS_VARIABLE" << endl;
+            is_tls = true;
+        }
+
         if (syms[i]->flags & BSF_GLOBAL)
         {
             s.type |= Symbol::GLOBAL;
-            cout << "\t\tGLOBAL" << endl;
+            cout << "\t\tGLOBAL";
+            if (is_tls)
+            {
+                cout << " TLS offset: " << bfd_asymbol_value(syms[i]);
+
+                // store the name in a map of offsets to TLS variable names
+                tls_vars[bfd_asymbol_value(syms[i])] = s.name;
+            }
+            cout << endl;
         }
         else if (syms[i]->flags & (BSF_LOCAL | BSF_WEAK | BSF_GNU_UNIQUE))
         {
@@ -827,10 +892,19 @@ bool Object::perform_local_relocations()
 
         bool needs_relocation = true;
 
+        bool is_weak = false;
+
         fseek(iv_output, offset + i->address, SEEK_SET);
         fread(data, sizeof(uint64_t), 1, iv_output);
 
+        if (weak_symbols.find(i->name) != weak_symbols.end())
+        {
+            cout << "\t\tWEAK" << endl;
+            is_weak = true;
+        }
+
         address = bfd_getb64(data);
+
         if ((address != i->addend) && (address != 0))
         {
             ostringstream oss;
@@ -855,13 +929,25 @@ bool Object::perform_local_relocations()
             address = get_tls_module();
             needs_relocation = false;
             relocation = address;
+
+            cout << "\t\tTLS_MODULE" << endl;
         }
         else if (i->type & Symbol::TLS_OFFSET)
         {
             // Set value to TLS offset.
-            address = i->addend - VFS_PPC64_DTPREL_OFFSET;
+            cout << "\t\tTLS_OFFSET" << endl;
+            address = relocation = i->addend - VFS_PPC64_DTPREL_OFFSET;
             needs_relocation = false;
-            relocation = address;
+
+            // look up the offset in tls_vars find the name and use that
+            // to map the name to the correct TLS offset
+            tls_offsets[tls_vars[i->addend]] = relocation;
+            tls_modules[tls_vars[i->addend]] = get_tls_module();
+        }
+        else if (is_weak && address == 0)
+        {
+            cout << "\tWEAK NULL" << endl;
+            relocation = 0;
         }
         else // Perform relocation.
         {
@@ -956,6 +1042,12 @@ bool Object::perform_global_relocations()
                     }
                     else
                     {
+                        bool is_tls = false;
+                        if (tls_modules.find(i->name) != tls_modules.end())
+                        {
+                            is_tls = true;
+                        }
+
                         if (s.type & Symbol::FUNCTION)
                         {
                             cout << "\tTOC link for function: " << s.name
@@ -966,7 +1058,28 @@ bool Object::perform_global_relocations()
                             cout << "\tOffset to " << i->addend << endl;
                             symbol_addr += i->addend;
                         }
+
                         symbol_addr += j->base_addr;
+
+                        if (is_tls)
+                        {
+                            if (i->type & Symbol::TLS_MODULE)
+                            {
+                                symbol_addr = tls_modules[i->name];
+
+                                // Bitwise OR the TLS marker into the relocation
+                                // to flag it as a TLS module entry for
+                                // relocation processing code.  This is safe
+                                // since it would take 4 giga-modules to over
+                                // flow into that space.
+                                symbol_addr |= TLS_MARKER;
+                            }
+                            else if (i->type & Symbol::TLS_OFFSET)
+                            {
+                                symbol_addr = tls_offsets[i->name];
+                            }
+                        }
+
                         bfd_putb64(symbol_addr, data);
                         fseek(iv_output, offset + i->address, SEEK_SET);
                         fwrite(data, sizeof(uint64_t), 1, iv_output);
