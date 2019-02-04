@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,10 +286,11 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
 *  @retval NULL No parent found
 *  @retval !NULL Parent found, equal to the retval
  */
-template< TargetType K, typename V = plat_target_handle_t >
+template< TargetType K, MulticastType M = MULTICAST_OR,
+        typename V = plat_target_handle_t >
 inline V getPervasiveParent(V i_pTarget)
 {
-    Target<K,V> fapi2_target(i_pTarget);
+    Target<K, M, V> fapi2_target(i_pTarget);
     return static_cast<V>(
         fapi2_target.template getParent<TARGET_TYPE_PERV>());
 }
