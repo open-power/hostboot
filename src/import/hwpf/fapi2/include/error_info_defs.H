@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #endif
 namespace fapi2
 {
+// For HW callout - Clock position undefined to 0xFF(default)
+#define CLOCK_POS_UNDEF 0xFF
 
 ///
 /// @brief Type to hold the ffdc data to be sent to hostboot

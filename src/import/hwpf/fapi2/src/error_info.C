@@ -68,14 +68,17 @@ ErrorInfoFfdc::ErrorInfoFfdc(const uint32_t i_ffdcId,
 /// @param[in] i_hw              Hardware to callout
 /// @param[in] i_calloutPriority Priority of callout
 /// @param[in] i_refTarget       Reference to reference target
+/// @param[in[ i_clkPos          Clock position
 ///
 ErrorInfoHwCallout::ErrorInfoHwCallout(
     const HwCallouts::HwCallout i_hw,
     const CalloutPriorities::CalloutPriority i_calloutPriority,
-    const Target<TARGET_TYPE_ALL>& i_refTarget):
+    const Target<TARGET_TYPE_ALL>& i_refTarget,
+    const uint8_t i_clkPos):
     iv_hw(i_hw),
     iv_calloutPriority(i_calloutPriority),
-    iv_refTarget(i_refTarget)
+    iv_refTarget(i_refTarget),
+    iv_clkPos(i_clkPos)
 {}
 
 ///
@@ -247,10 +250,11 @@ void ErrorInfoEntryHwCallout::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
     ErrorInfoHwCallout* ei = new ErrorInfoHwCallout(
         static_cast<HwCallouts::HwCallout>(iv_hw),
         static_cast<CalloutPriorities::CalloutPriority>(iv_calloutPriority),
-        target);
+        target,
+        iv_clkPos);
 
-    FAPI_DBG("addErrorInfo: Adding hw callout hw: %d, pri: %d",
-             ei->iv_hw, ei->iv_calloutPriority);
+    FAPI_DBG("addErrorInfo: Adding hw callout target: 0x%lx hw: %d, pri: %d, pos: %d",
+             ei->iv_refTarget.get(), ei->iv_hw, ei->iv_calloutPriority, ei->iv_clkPos);
 
     i_info->iv_hwCallouts.push_back(std::shared_ptr<ErrorInfoHwCallout>(ei));
 }

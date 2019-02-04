@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -66,6 +66,7 @@ my $ffdc_type                 = "fapi2::ffdc_t";
 my $mcast_type                = "fapi2::mcast_t";
 my $scom_addr_type            = "uint64_t";
 my $ffdc_count                = 0;
+my $clock_ffdc_type           = "uint8_t";
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -292,7 +293,7 @@ sub addFfdcMethod
     # If we're generating empty classes, not using an argument name will avoid the unused parameter warnings
     my $param = ( $arg_empty_ffdc eq undef ) ? "i_value" : "";
 
-    if ( $type eq $ffdc_type )
+    if ( $type eq $ffdc_type || $type eq $clock_ffdc_type )
     {
         $method = "    template< typename T >\n";
         $method .= "    inline $class_name& set_$ffdc_uc(const T& $param)\n";
@@ -1069,6 +1070,24 @@ foreach my $argnum ( 0 .. $#ARGV )
                     {
                         $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
                     }
+
+                    # HW Callout - Clock position
+                    if ( exists $callout->{hw}->{clkPos} )
+                    {
+                        # Add the Targets to the objectlist if they don't already exist
+                        my $objNum1 = addEntryToArray( \@eiObjects, $callout->{hw}->{clkPos} );
+
+                        $eiEntryStr .=
+                            "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = $callout->{hw}->{clkPos}; \\\n";
+
+                        # Add a method to the ffdc-gathering class
+                        addFfdcMethod( \%methods, $callout->{hw}->{clkPos}, $err->{rc}, $clock_ffdc_type, $objNum1 );
+                    }
+                    else
+                    {
+                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = 0xff; \\\n";
+                    }
+
                     $eiEntryCount++;
                     $elementsFound++;
                 }
