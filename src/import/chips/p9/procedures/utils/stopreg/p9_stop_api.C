@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ const uint32_t LEGACY_QUAD_SCOM_SUPPORTED   =   63;
 //-----------------------------------------------------------------------------
 
 /**
- * @brief       vaildated input arguments passed to p9_stop_save_cpureg_control.
+ * @brief       validated input arguments passed to p9_stop_save_cpureg_control.
  * @param[in]   i_pImage            point to start of HOMER
  * @param[in]   i_coreId            id of the core
  * @param[in]   i_threadId          id of the thread
@@ -651,138 +651,9 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
                                        const uint64_t  i_regData,
                                        const uint64_t  i_pir )
 {
-    StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;    // procedure return code
-    HomerSection_t*     chipHomer       =    NULL;
-    SmfHomerSection_t*  smfChipHomer    =    NULL;
+    MY_INF(">> p9_stop_save_cpureg" );
 
-    do
-    {
-        uint32_t threadId       =   0;
-        uint32_t coreId         =   0;
-        uint32_t lookUpKey      =   0;
-        void* pSprEntryLocation =   NULL;   // an offset w.r.t. to start of image
-        void* pThreadLocation   =   NULL;
-        bool threadScopeReg     =   false;
-        uint8_t l_urmorFix      =   false;
-        uint64_t  l_sprValue    =   0;
-        uint8_t l_selfRestVer   =   0;
-
-        MY_INF(">> p9_stop_save_cpureg" );
-
-        l_rc = getCoreAndThread( i_pImage, i_pir, &coreId, &threadId );
-
-        if( l_rc )
-        {
-            MY_ERR("Failed to determine Core Id and Thread Id from PIR 0x%016llx",
-                   i_pir);
-            break;
-        }
-
-        MY_INF( " PIR 0x%016llx coreId %d threadid %d "
-                " registerId %d", i_pir, coreId,
-                threadId, i_regId );
-
-        // First of all let us validate all input arguments.
-        l_rc =  validateSprImageInputs( i_pImage,
-                                        i_regId,
-                                        coreId,
-                                        &threadId,
-                                        &threadScopeReg );
-
-        if( l_rc )
-        {
-            // Error: bad argument traces out error code
-            MY_ERR("Bad input argument rc %d", l_rc );
-
-            break;
-        }
-
-        l_urmorFix      =   *(uint8_t*)((uint8_t*)i_pImage + CPMR_HOMER_OFFSET + CPMR_URMOR_FIX_BYTE);
-        l_selfRestVer   =   *(uint8_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_SELF_RESTORE_VER_BYTE );
-
-        if( l_selfRestVer )
-        {
-            smfChipHomer = ( SmfHomerSection_t*)i_pImage;
-
-            if( threadScopeReg )
-            {
-                pThreadLocation =
-                    &(smfChipHomer->iv_coreThreadRestore[coreId].iv_threadRestoreArea[threadId][0]);
-            }
-            else
-            {
-                pThreadLocation =
-                    &(smfChipHomer->iv_coreThreadRestore[coreId].iv_coreRestoreArea[0]);
-            }
-        }
-        else    //Old fips or OPAL release that doesn't support SMF
-        {
-            chipHomer = (HomerSection_t*)i_pImage;
-
-            if( threadScopeReg )
-            {
-                pThreadLocation =
-                    &(chipHomer->iv_coreThreadRestore[coreId][threadId].iv_threadArea[0]);
-            }
-            else
-            {
-                pThreadLocation =
-                    &(chipHomer->iv_coreThreadRestore[coreId][threadId].iv_coreArea[0]);
-            }
-        }
-
-        if( ( SWIZZLE_4_BYTE(BLR_INST) == *(uint32_t*)pThreadLocation ) ||
-            ( SWIZZLE_4_BYTE(ATTN_OPCODE) == *(uint32_t*) pThreadLocation ) )
-        {
-            // table for given core id doesn't exit. It needs to be
-            // defined.
-            pSprEntryLocation = pThreadLocation;
-        }
-        else
-        {
-            // an SPR restore section for given core already exists
-            lookUpKey = genKeyForSprLookup( i_regId );
-            l_rc = lookUpSprInImage( (uint32_t*)pThreadLocation,
-                                     lookUpKey,
-                                     threadScopeReg,
-                                     &pSprEntryLocation,
-                                     l_selfRestVer );
-        }
-
-        if( l_rc )
-        {
-            MY_ERR("Invalid or corrupt SPR entry. CoreId 0x%08x threadId ",
-                   "0x%08x regId 0x%08x lookUpKey 0x%08x pThreadLocation 0x%08x"
-                   , coreId, threadId, i_regId, lookUpKey, pThreadLocation );
-            break;
-        }
-
-        if( ( P9_STOP_SPR_URMOR == i_regId ) && ( l_urmorFix ) )
-        {
-            l_sprValue  =  i_regData - URMOR_CORRECTION;
-        }
-        else
-        {
-            l_sprValue  =  i_regData;
-        }
-
-        l_rc = updateSprEntryInImage( (uint32_t*) pSprEntryLocation,
-                                      i_regId,
-                                      l_sprValue,
-                                      UPDATE_SPR_ENTRY );
-
-        if( l_rc )
-        {
-            MY_ERR( " Failed to update the SPR entry of PIR 0x%08x reg"
-                    "0x%08x", i_pir, i_regId );
-            break;
-        }
-
-    }
-    while(0);
-
-    MY_INF("<< p9_stop_save_cpureg" );
-    return l_rc;
+    return proc_stop_save_cpureg( i_pImage, i_regId, i_regData, i_pir );
 }
 
 //-----------------------------------------------------------------------------
@@ -1008,6 +879,239 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
                                     const ScomOperation_t i_operation,
                                     const ScomSection_t i_section )
 {
+    MY_INF(">> p9_stop_save_scom");
+
+    return proc_stop_save_scom( i_pImage, i_scomAddress,
+                                i_scomData, i_operation, i_section );
+}
+
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief   searches a self save entry of an SPR in self-save segment.
+ * @param[in]   i_sprBitPos         bit position associated with SPR in save mask vector.
+ * @param[in]   l_pSprSaveStart     start location of SPR save segment
+ * @param[in]   i_searchLength      length of SPR save segment
+ * @param[in]   i_pSaveSprLoc       start location of save entry for a given SPR.
+ * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
+ */
+STATIC StopReturnCode_t lookUpSelfSaveSpr( uint32_t i_sprBitPos, uint32_t* l_pSprSaveStart,
+                                    uint32_t  i_searchLength, uint32_t** i_pSaveSprLoc )
+{
+    int32_t l_saveWordLength    =   (int32_t)(i_searchLength >> 2);
+    uint32_t l_oriInst          =   getOriInstruction( 0, 0, i_sprBitPos );
+    StopReturnCode_t l_rc       =   STOP_SAVE_FAIL;
+
+    while( l_saveWordLength > 0 )
+    {
+        if( l_oriInst == *l_pSprSaveStart )
+        {
+            *i_pSaveSprLoc   =   l_pSprSaveStart;
+            l_rc             =   STOP_SAVE_SUCCESS;
+            break;
+        }
+
+        l_pSprSaveStart++;
+        l_saveWordLength--;
+    }
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief   searches a self save entry of an SPR in self-save segment.
+ * @param[in]   i_pSaveReg  start of editable location of a SPR save entry.
+ * @param[in]   i_sprNum    Id of the SPR for which entry needs to be edited.
+ * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
+ */
+STATIC StopReturnCode_t updateSelfSaveEntry( uint32_t* i_pSaveReg, uint16_t i_sprNum )
+{
+    StopReturnCode_t l_rc   =   STOP_SAVE_SUCCESS;
+
+    do
+    {
+        if( !i_pSaveReg )
+        {
+            l_rc    =   STOP_SAVE_FAIL;
+            MY_ERR( "Failed to update self save area for SPR 0x%04x", i_sprNum );
+            break;
+        }
+
+        if( P9_STOP_SPR_MSR == i_sprNum )
+        {
+            *i_pSaveReg     =    getMfmsrInstruction( 1 );
+        }
+        else
+        {
+            *i_pSaveReg     =   getMfsprInstruction( 1, i_sprNum );
+        }
+
+        i_pSaveReg++;
+
+        *i_pSaveReg         =   getBranchLinkRegInstruction( );
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------
+
+StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
+        const uint64_t i_pir,
+        const uint32_t i_saveRegVector )
+{
+    MY_INF( ">> p9_stop_save_cpureg_control" );
+
+    return proc_stop_save_cpureg_control( i_pImage, i_pir, i_saveRegVector );
+}
+
+//-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t p9_stop_init_cpureg(  void* const i_pImage, const uint32_t i_corePos )
+{
+    MY_INF( ">> p9_stop_init_cpureg" );
+
+    return proc_stop_init_cpureg( i_pImage, i_corePos );
+}
+
+//-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t p9_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos )
+{
+    MY_INF( ">> p9_stop_init_self_save" );
+
+    return proc_stop_init_self_save( i_pImage, i_corePos );
+}
+
+//-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t proc_stop_init_cpureg(  void* const i_pImage, const uint32_t i_corePos )
+{
+
+    StopReturnCode_t    l_rc        =   STOP_SAVE_SUCCESS;
+    uint32_t* l_pRestoreStart       =   NULL;
+    void* l_pTempLoc                =   NULL;
+    SmfHomerSection_t* l_pHomer     =   NULL;
+    uint32_t l_threadPos            =   0;
+    uint32_t l_lookUpKey            =   0;
+    uint32_t l_sprIndex             =   0;
+    uint8_t l_selfRestVer           =   0;
+
+    MY_INF( ">> proc_stop_init_cpureg" );
+
+    do
+    {
+        if( !i_pImage )
+        {
+            l_rc    =   STOP_SAVE_ARG_INVALID_IMG;
+            break;
+        }
+
+        if( i_corePos > MAX_CORE_ID_SUPPORTED )
+        {
+            l_rc    =  STOP_SAVE_ARG_INVALID_CORE;
+            break;
+        }
+
+        l_pHomer        =   ( SmfHomerSection_t * ) i_pImage;
+        l_selfRestVer   =   *(uint8_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_SELF_RESTORE_VER_BYTE );
+
+        for( l_sprIndex = 0; l_sprIndex < MAX_SPR_SUPPORTED; l_sprIndex++ )
+        {
+            //Check if a given SPR needs to be self-saved each time on STOP entry
+
+            l_lookUpKey     =   genKeyForSprLookup( ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId );
+
+            if( g_sprRegister[l_sprIndex].iv_isThreadScope )
+            {
+                for( l_threadPos = 0; l_threadPos < MAX_THREADS_PER_CORE; l_threadPos++ )
+                {
+                    l_pRestoreStart =
+                        (uint32_t*)&l_pHomer->iv_coreThreadRestore[i_corePos].iv_threadRestoreArea[l_threadPos][0];
+
+                    l_rc    =   lookUpSprInImage( (uint32_t*)l_pRestoreStart, l_lookUpKey,
+                                                  g_sprRegister[l_sprIndex].iv_isThreadScope,
+                                                  &l_pTempLoc,
+                                                  l_selfRestVer );
+
+                    if( l_rc )
+                    {
+                        MY_ERR( "Thread SPR lookup failed in p9_stop_init_cpureg SPR %d Core %d Thread %d Index %d",
+                                g_sprRegister[l_sprIndex].iv_sprId, i_corePos, l_threadPos, l_sprIndex );
+                        break;
+                    }
+
+                    l_rc = updateSprEntryInImage( (uint32_t*) l_pTempLoc,
+                                                  ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId,
+                                                  0x00,
+                                                  INIT_SPR_REGION );
+
+                    if( l_rc )
+                    {
+                        MY_ERR( "Thread SPR region init failed. Core %d SPR Id %d",
+                                i_corePos, g_sprRegister[l_sprIndex].iv_sprId );
+                        break;
+                    }
+
+                }//end for thread
+
+                if( l_rc )
+                {
+                    break;
+                }
+
+            }//end if SPR threadscope
+            else
+            {
+                l_pRestoreStart     =   (uint32_t*)&l_pHomer->iv_coreThreadRestore[i_corePos].iv_coreRestoreArea[0];
+
+                l_rc                =   lookUpSprInImage( (uint32_t*)l_pRestoreStart, l_lookUpKey,
+                                        g_sprRegister[l_sprIndex].iv_isThreadScope,
+                                        &l_pTempLoc, l_selfRestVer );
+
+                if( l_rc )
+                {
+                    MY_ERR( "Core SPR lookup failed in p9_stop_init_cpureg" );
+                    break;
+                }
+
+                l_rc    =   updateSprEntryInImage( (uint32_t*) l_pTempLoc,
+                                                   ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId,
+                                                   0x00,
+                                                   INIT_SPR_REGION );
+
+                if( l_rc )
+                {
+                    MY_ERR( "Core SPR region init failed. Core %d SPR Id %d SPR Index %d",
+                            i_corePos, g_sprRegister[l_sprIndex].iv_sprId, l_sprIndex );
+                    break;
+                }
+
+            }// end else
+
+        }// end for l_sprIndex
+
+    }
+    while(0);
+
+    MY_INF( "<< proc_stop_init_cpureg" );
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t proc_stop_save_scom( void* const   i_pImage,
+                                      const uint32_t i_scomAddress,
+                                      const uint64_t i_scomData,
+                                      const ScomOperation_t i_operation,
+                                      const ScomSection_t i_section )
+{
+    MY_INF( ">> proc_stop_save_scom" );
+
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
     uint32_t entryLimit =   0;
     uint8_t chipletId   =   0;
@@ -1028,7 +1132,6 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
     uint32_t swizzleBlr     =   SWIZZLE_4_BYTE(BLR_INST);
     bool     cacheEntry     =   true;
 
-    MY_INF(">> p9_stop_save_scom");
 
     //Reads SGPE image version info from QPMR Header in HOMER
     //For backward compatibility, for base version of SGPE Hcode,
@@ -1323,87 +1426,16 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
         updateEntryHeader( pEditScomHeader, imageVer, l_maxScomRestoreEntry );
     }
 
-    MY_INF("<< p9_stop_save_scom");
-    return l_rc;
-}
-
-//-----------------------------------------------------------------------------
-
-/**
- * @brief   searches a self save entry of an SPR in self-save segment.
- * @param[in]   i_sprBitPos         bit position associated with SPR in save mask vector.
- * @param[in]   l_pSprSaveStart     start location of SPR save segment
- * @param[in]   i_searchLength      length of SPR save segment
- * @param[in]   i_pSaveSprLoc       start location of save entry for a given SPR.
- * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
- */
-STATIC StopReturnCode_t lookUpSelfSaveSpr( uint32_t i_sprBitPos, uint32_t* l_pSprSaveStart,
-                                    uint32_t  i_searchLength, uint32_t** i_pSaveSprLoc )
-{
-    int32_t l_saveWordLength    =   (int32_t)(i_searchLength >> 2);
-    uint32_t l_oriInst          =   getOriInstruction( 0, 0, i_sprBitPos );
-    StopReturnCode_t l_rc       =   STOP_SAVE_FAIL;
-
-    while( l_saveWordLength > 0 )
-    {
-        if( l_oriInst == *l_pSprSaveStart )
-        {
-            *i_pSaveSprLoc   =   l_pSprSaveStart;
-            l_rc             =   STOP_SAVE_SUCCESS;
-            break;
-        }
-
-        l_pSprSaveStart++;
-        l_saveWordLength--;
-    }
+    MY_INF( "<< proc_stop_save_scom" );
 
     return l_rc;
 }
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------
 
-/**
- * @brief   searches a self save entry of an SPR in self-save segment.
- * @param[in]   i_pSaveReg  start of editable location of a SPR save entry.
- * @param[in]   i_sprNum    Id of the SPR for which entry needs to be edited.
- * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
- */
-STATIC StopReturnCode_t updateSelfSaveEntry( uint32_t* i_pSaveReg, uint16_t i_sprNum )
-{
-    StopReturnCode_t l_rc   =   STOP_SAVE_SUCCESS;
-
-    do
-    {
-        if( !i_pSaveReg )
-        {
-            l_rc    =   STOP_SAVE_FAIL;
-            MY_ERR( "Failed to update self save area for SPR 0x%04x", i_sprNum );
-            break;
-        }
-
-        if( P9_STOP_SPR_MSR == i_sprNum )
-        {
-            *i_pSaveReg     =    getMfmsrInstruction( 1 );
-        }
-        else
-        {
-            *i_pSaveReg     =   getMfsprInstruction( 1, i_sprNum );
-        }
-
-        i_pSaveReg++;
-
-        *i_pSaveReg         =   getBranchLinkRegInstruction( );
-    }
-    while(0);
-
-    return l_rc;
-}
-
-//-----------------------------------------------------------------------------
-
-StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
-        const uint64_t i_pir,
-        const uint32_t i_saveRegVector )
+StopReturnCode_t proc_stop_save_cpureg_control(  void* i_pImage,
+                                                 const uint64_t i_pir,
+                                                 const uint32_t i_saveRegVector )
 {
     StopReturnCode_t l_rc   =   STOP_SAVE_SUCCESS;
     uint32_t l_coreId       =   0;
@@ -1419,6 +1451,7 @@ StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
     uint32_t * l_pTempWord          =   NULL;
     SmfHomerSection_t* l_pHomer     =   NULL;
     uint8_t l_selfRestVer           =   0;
+    MY_INF(">> proc_stop_save_cpureg_control" );
 
     do
     {
@@ -1522,134 +1555,168 @@ StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
     }
     while(0);
 
+    MY_INF("<< proc_stop_save_cpureg_control" );
+
     return l_rc;
+
 }
 
 //-----------------------------------------------------------------------------------------------------
 
-StopReturnCode_t p9_stop_init_cpureg(  void* const i_pImage, const uint32_t i_corePos )
+StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
+                                       const CpuReg_t  i_regId,
+                                       const uint64_t  i_regData,
+                                       const uint64_t  i_pir )
 {
-    StopReturnCode_t    l_rc        =   STOP_SAVE_SUCCESS;
-    uint32_t* l_pRestoreStart       =   NULL;
-    void* l_pTempLoc                =   NULL;
-    SmfHomerSection_t* l_pHomer     =   NULL;
-    uint32_t l_threadPos            =   0;
-    uint32_t l_lookUpKey            =   0;
-    uint32_t l_sprIndex             =   0;
-    uint8_t l_selfRestVer           =   0;
+    MY_INF(">> proc_stop_save_cpureg" );
 
-    MY_INF( ">> p9_stop_init_cpureg" );
+    StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;    // procedure return code
+    HomerSection_t*     chipHomer       =    NULL;
+    SmfHomerSection_t*  smfChipHomer    =    NULL;
 
     do
     {
-        if( !i_pImage )
+        uint32_t threadId       =   0;
+        uint32_t coreId         =   0;
+        uint32_t lookUpKey      =   0;
+        void* pSprEntryLocation =   NULL;   // an offset w.r.t. to start of image
+        void* pThreadLocation   =   NULL;
+        bool threadScopeReg     =   false;
+        uint8_t l_urmorFix      =   false;
+        uint64_t  l_sprValue    =   0;
+        uint8_t l_selfRestVer   =   0;
+
+
+        l_rc = getCoreAndThread( i_pImage, i_pir, &coreId, &threadId );
+
+        if( l_rc )
         {
-            l_rc    =   STOP_SAVE_ARG_INVALID_IMG;
+            MY_ERR("Failed to determine Core Id and Thread Id from PIR 0x%016llx",
+                   i_pir);
             break;
         }
 
-        if( i_corePos > MAX_CORE_ID_SUPPORTED )
+        MY_INF( " PIR 0x%016llx coreId %d threadid %d "
+                " registerId %d", i_pir, coreId,
+                threadId, i_regId );
+
+        // First of all let us validate all input arguments.
+        l_rc =  validateSprImageInputs( i_pImage,
+                                        i_regId,
+                                        coreId,
+                                        &threadId,
+                                        &threadScopeReg );
+
+        if( l_rc )
         {
-            l_rc    =  STOP_SAVE_ARG_INVALID_CORE;
+            // Error: bad argument traces out error code
+            MY_ERR("Bad input argument rc %d", l_rc );
+
             break;
         }
 
-        l_pHomer        =   ( SmfHomerSection_t * ) i_pImage;
+        l_urmorFix      =   *(uint8_t*)((uint8_t*)i_pImage + CPMR_HOMER_OFFSET + CPMR_URMOR_FIX_BYTE);
         l_selfRestVer   =   *(uint8_t *)((uint8_t *)i_pImage + CPMR_HOMER_OFFSET + CPMR_SELF_RESTORE_VER_BYTE );
 
-        for( l_sprIndex = 0; l_sprIndex < MAX_SPR_SUPPORTED; l_sprIndex++ )
+        if( l_selfRestVer )
         {
-            //Check if a given SPR needs to be self-saved each time on STOP entry
+            smfChipHomer = ( SmfHomerSection_t*)i_pImage;
 
-            l_lookUpKey     =   genKeyForSprLookup( ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId );
-
-            if( g_sprRegister[l_sprIndex].iv_isThreadScope )
+            if( threadScopeReg )
             {
-                for( l_threadPos = 0; l_threadPos < MAX_THREADS_PER_CORE; l_threadPos++ )
-                {
-                    l_pRestoreStart =
-                        (uint32_t*)&l_pHomer->iv_coreThreadRestore[i_corePos].iv_threadRestoreArea[l_threadPos][0];
-
-                    l_rc    =   lookUpSprInImage( (uint32_t*)l_pRestoreStart, l_lookUpKey,
-                                                  g_sprRegister[l_sprIndex].iv_isThreadScope,
-                                                  &l_pTempLoc,
-                                                  l_selfRestVer );
-
-                    if( l_rc )
-                    {
-                        MY_ERR( "Thread SPR lookup failed in p9_stop_init_cpureg SPR %d Core %d Thread %d Index %d",
-                                g_sprRegister[l_sprIndex].iv_sprId, i_corePos, l_threadPos, l_sprIndex );
-                        break;
-                    }
-
-                    l_rc = updateSprEntryInImage( (uint32_t*) l_pTempLoc,
-                                                  ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId,
-                                                  0x00,
-                                                  INIT_SPR_REGION );
-
-                    if( l_rc )
-                    {
-                        MY_ERR( "Thread SPR region init failed. Core %d SPR Id %d",
-                                i_corePos, g_sprRegister[l_sprIndex].iv_sprId );
-                        break;
-                    }
-
-                }//end for thread
-
-                if( l_rc )
-                {
-                    break;
-                }
-
-            }//end if SPR threadscope
+                pThreadLocation =
+                    &(smfChipHomer->iv_coreThreadRestore[coreId].iv_threadRestoreArea[threadId][0]);
+            }
             else
             {
-                l_pRestoreStart     =   (uint32_t*)&l_pHomer->iv_coreThreadRestore[i_corePos].iv_coreRestoreArea[0];
+                pThreadLocation =
+                    &(smfChipHomer->iv_coreThreadRestore[coreId].iv_coreRestoreArea[0]);
+            }
+        }
+        else    //Old fips or OPAL release that doesn't support SMF
+        {
+            chipHomer = (HomerSection_t*)i_pImage;
 
-                l_rc                =   lookUpSprInImage( (uint32_t*)l_pRestoreStart, l_lookUpKey,
-                                        g_sprRegister[l_sprIndex].iv_isThreadScope,
-                                        &l_pTempLoc, l_selfRestVer );
+            if( threadScopeReg )
+            {
+                pThreadLocation =
+                    &(chipHomer->iv_coreThreadRestore[coreId][threadId].iv_threadArea[0]);
+            }
+            else
+            {
+                pThreadLocation =
+                    &(chipHomer->iv_coreThreadRestore[coreId][threadId].iv_coreArea[0]);
+            }
+        }
 
-                if( l_rc )
-                {
-                    MY_ERR( "Core SPR lookup failed in p9_stop_init_cpureg" );
-                    break;
-                }
+        if( ( SWIZZLE_4_BYTE(BLR_INST) == *(uint32_t*)pThreadLocation ) ||
+            ( SWIZZLE_4_BYTE(ATTN_OPCODE) == *(uint32_t*) pThreadLocation ) )
+        {
+            // table for given core id doesn't exit. It needs to be
+            // defined.
+            pSprEntryLocation = pThreadLocation;
+        }
+        else
+        {
+            // an SPR restore section for given core already exists
+            lookUpKey = genKeyForSprLookup( i_regId );
+            l_rc = lookUpSprInImage( (uint32_t*)pThreadLocation,
+                                     lookUpKey,
+                                     threadScopeReg,
+                                     &pSprEntryLocation,
+                                     l_selfRestVer );
+        }
 
-                l_rc    =   updateSprEntryInImage( (uint32_t*) l_pTempLoc,
-                                                   ( CpuReg_t )g_sprRegister[l_sprIndex].iv_sprId,
-                                                   0x00,
-                                                   INIT_SPR_REGION );
+        if( l_rc )
+        {
+            MY_ERR("Invalid or corrupt SPR entry. CoreId 0x%08x threadId ",
+                   "0x%08x regId 0x%08x lookUpKey 0x%08x pThreadLocation 0x%08x"
+                   , coreId, threadId, i_regId, lookUpKey, pThreadLocation );
+            break;
+        }
 
-                if( l_rc )
-                {
-                    MY_ERR( "Core SPR region init failed. Core %d SPR Id %d SPR Index %d",
-                            i_corePos, g_sprRegister[l_sprIndex].iv_sprId, l_sprIndex );
-                    break;
-                }
+        if( ( P9_STOP_SPR_URMOR == i_regId ) && ( l_urmorFix ) )
+        {
+            l_sprValue  =  i_regData - URMOR_CORRECTION;
+        }
+        else
+        {
+            l_sprValue  =  i_regData;
+        }
 
-            }// end else
+        l_rc = updateSprEntryInImage( (uint32_t*) pSprEntryLocation,
+                                      i_regId,
+                                      l_sprValue,
+                                      UPDATE_SPR_ENTRY );
 
-        }// end for l_sprIndex
+        if( l_rc )
+        {
+            MY_ERR( " Failed to update the SPR entry of PIR 0x%08x reg"
+                    "0x%08x", i_pir, i_regId );
+            break;
+        }
 
     }
     while(0);
 
-    MY_INF( "<< p9_stop_init_cpureg" );
+    MY_INF("<< proc_stop_save_cpureg" );
+
     return l_rc;
 }
 
 //-----------------------------------------------------------------------------------------------------
 
-StopReturnCode_t p9_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos )
+StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos )
 {
+
     StopReturnCode_t    l_rc        =   STOP_SAVE_SUCCESS;
     uint32_t* l_pSaveStart          =   NULL;
     SmfHomerSection_t *  l_pHomer   =   NULL;
     uint32_t l_threadPos            =   0;
     uint32_t l_sprBitPos            =   0;
     uint32_t l_sprIndexAdj          =   0;
-    MY_INF( ">> p9_stop_init_self_save" );
+
+    MY_INF(">> proc_stop_init_self_save" );
 
     do
     {
@@ -1756,12 +1823,13 @@ StopReturnCode_t p9_stop_init_self_save(  void* const i_pImage, const uint32_t i
     }
     while(0);
 
-    MY_INF( "<< p9_stop_init_self_save" );
+    MY_INF("<< proc_stop_init_self_save" );
+
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------------------------------
 #ifdef __cplusplus
 } //namespace stopImageSection ends
-
 }  //extern "C"
 #endif

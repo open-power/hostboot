@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,26 @@ typedef enum
     P9_STOP_SPR_PMCR    =    884,   // core register
     P9_STOP_SPR_HID     =   1008,   // core register
     P9_STOP_SPR_MSR     =   2000,   // thread register
+
+    //enum members which are project agnostic
+    PROC_STOP_SPR_DAWR    =    180,   // thread register
+    PROC_STOP_SPR_CIABR   =    187,   // thread register
+    PROC_STOP_SPR_DAWRX   =    188,   // thread register
+    PROC_STOP_SPR_HSPRG0  =    304,   // thread register
+    PROC_STOP_SPR_HRMOR   =    313,   // core register
+    PROC_STOP_SPR_LPCR    =    318,   // thread register
+    PROC_STOP_SPR_HMEER   =    337,   // core register
+    PROC_STOP_SPR_PTCR    =    464,   // core register
+    PROC_STOP_SPR_USPRG0  =    496,   // thread register
+    PROC_STOP_SPR_USPRG1  =    497,   // thread register
+    PROC_STOP_SPR_URMOR   =    505,   // core register
+    PROC_STOP_SPR_SMFCTRL =    511,   // thread register
+    PROC_STOP_SPR_LDBAR   =    850,   // thread register
+    PROC_STOP_SPR_PSSCR   =    855,   // thread register
+    PROC_STOP_SPR_PMCR    =    884,   // core register
+    PROC_STOP_SPR_HID     =   1008,   // core register
+    PROC_STOP_SPR_MSR     =   2000,   // thread register
+
 } CpuReg_t;
 
 /**
@@ -110,7 +130,20 @@ typedef enum
     P9_STOP_SCOM_RESET      =   6,
     P9_STOP_SCOM_OR_APPEND  =   7,
     P9_STOP_SCOM_AND_APPEND =   8,
-    P9_STOP_SCOM_OP_MAX     =   9
+    P9_STOP_SCOM_OP_MAX     =   9,
+
+    //enum members which are project agnostic
+    PROC_STOP_SCOM_OP_MIN     =   0,
+    PROC_STOP_SCOM_APPEND     =   1,
+    PROC_STOP_SCOM_REPLACE    =   2,
+    PROC_STOP_SCOM_OR         =   3,
+    PROC_STOP_SCOM_AND        =   4,
+    PROC_STOP_SCOM_NOOP       =   5,
+    PROC_STOP_SCOM_RESET      =   6,
+    PROC_STOP_SCOM_OR_APPEND  =   7,
+    PROC_STOP_SCOM_AND_APPEND =   8,
+    PROC_STOP_SCOM_OP_MAX     =   9,
+
 } ScomOperation_t;
 
 /**
@@ -123,7 +156,15 @@ typedef enum
     P9_STOP_SECTION_EQ_SCOM     =   2,
     P9_STOP_SECTION_L2          =   3,
     P9_STOP_SECTION_L3          =   4,
-    P9_STOP_SECTION_MAX         =   5
+    P9_STOP_SECTION_MAX         =   5,
+
+    //enum members which are project agnostic
+    PROC_STOP_SECTION_MIN         =   0,
+    PROC_STOP_SECTION_CORE_SCOM   =   1,
+    PROC_STOP_SECTION_EQ_SCOM     =   2,
+    PROC_STOP_SECTION_L2          =   3,
+    PROC_STOP_SECTION_L3          =   4,
+    PROC_STOP_SECTION_MAX         =   5,
 } ScomSection_t;
 
 /**
@@ -227,12 +268,78 @@ p9_stop_save_cpureg_control( void* i_pImage, const uint64_t i_pir,
  * @brief       initializes self-save region with specific instruction.
  * @param[in]   i_pImage    start address of homer image of P9 chip.
  * @param[in]   i_corePos   physical core's relative position within processor chip.
- * @return      STOP_SAVE_SUCCESS SUCCESS if self-save is initialized successfully,
+ * @return      STOP_SAVE_SUCCESS  if self-save is initialized successfully,
  *              error code otherwise.
  * @note        API is intended only for use case of HOMER build. There is no explicit
  *              effort to support any other use case.
  */
 StopReturnCode_t p9_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos );
+
+/**
+ * @brief   creates SCOM restore entry for a given scom adress in HOMER.
+ * @param   i_pImage        points to start address of HOMER image.
+ * @param   i_scomAddress   address associated with SCOM restore entry.
+ * @param   i_scomData      data associated with SCOM restore entry.
+ * @param   i_operation     operation type requested for API.
+ * @param   i_section       section of HOMER in which restore entry needs to be created.
+ * @return  STOP_SAVE_SUCCESS if API succeeds, error code otherwise.
+ * @note    It is an API for creating SCOM restore entry in HOMER. It is agnostic to
+ *          generation of POWER processor.
+ */
+
+StopReturnCode_t proc_stop_save_scom( void* const   i_pImage,
+                                      const uint32_t i_scomAddress,
+                                      const uint64_t i_scomData,
+                                      const ScomOperation_t i_operation,
+                                      const ScomSection_t i_section );
+
+/**
+ * @brief       initializes self save restore region of HOMER.
+ * @param[in]   i_pImage    points to base of HOMER image.
+ * @param[in]   i_corePos   position of the physical core.
+ * @return      STOP_SAVE_SUCCESS if API succeeds, error code otherwise.
+ * @note        It is an API for initializing self restore region in HOMER. It is agnostic to
+ *              generation of POWER processor.
+ */
+StopReturnCode_t proc_stop_init_cpureg(  void* const i_pImage, const uint32_t i_corePos );
+
+/**
+ * @brief       enables self save for a given set of SPRs
+ * @param[in]   i_pImage        points to start address of HOMER image.
+ * @param[in]   i_pir           PIR value associated with core and thread.
+ * @param[in]   i_saveRegVector bit vector representing the SPRs that needs to be self saved.
+ * @return      STOP_SAVE_SUCCESS if API succeeds, error code otherwise.
+ * @note        It is an API for enabling self save of SPRs  and it is agnostic to
+ *              generation of POWER processor.
+ */
+StopReturnCode_t proc_stop_save_cpureg_control(  void* i_pImage,
+        const uint64_t i_pir,
+        const uint32_t i_saveRegVector );
+
+/**
+ * @brief       creates an SPR restore entry in HOMER
+ * @param[in]   i_pImage        points to start address of HOMER image.
+ * @param[in]   i_pir           PIR value associated with core and thread.
+ * @param[in]   i_saveRegVector bit vector representing the SPRs that needs to be self saved.
+ * @return      STOP_SAVE_SUCCESS if API succeeds, error code otherwise.
+ * @note        It is an API for enabling self save of SPRs  and it is agnostic to
+ *              generation of POWER processor.
+ */
+StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
+        const CpuReg_t  i_regId,
+        const uint64_t  i_regData,
+        const uint64_t  i_pir );
+
+/**
+ * @brief       initializes self-save region with specific instruction.
+ * @param[in]   i_pImage    start address of homer image.
+ * @param[in]   i_corePos   physical core's relative position within processor chip.
+ * @return      STOP_SAVE_SUCCESS  if self-save is initialized successfully,
+ *              error code otherwise.
+ * @note        API is project agnostic and is intended only for use case of HOMER build.
+ *              There is no explicit effort to support any other use case.
+ */
+StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos );
 
 #ifdef __cplusplus
 } // extern "C"
