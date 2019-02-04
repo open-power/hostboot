@@ -167,7 +167,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
          * @userdata2[32:63] Target HUID data was sent from
          * @devdesc          No Attention was found after sending data in
          *                   XBUS Node Comm Test
-         * @custdesc         Secure Boot failure
+         * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        MOD_NC_XBUS_TEST,
@@ -242,7 +242,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
          * @userdata2[32:63] Target HUID data was read from
          * @devdesc          No Attention was found after sending data in
          *                   Xbus Node Comm Test
-         * @custdesc         Secure Boot failure
+         * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        MOD_NC_XBUS_TEST,
