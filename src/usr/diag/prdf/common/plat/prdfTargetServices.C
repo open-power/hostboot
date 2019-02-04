@@ -511,6 +511,8 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MC,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_OMIC,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
 
@@ -575,6 +577,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_OMIC,   TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_OMIC,   TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
 
+        { TYPE_MCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCC,    TYPE_OMI,        TargetService::CHILD_BY_AFFINITY  },
 
