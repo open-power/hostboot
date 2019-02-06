@@ -242,14 +242,3 @@
         capture     group default;
     };
 
-    ############################################################################
-    # ECC Debug/WAT Control Register
-    ############################################################################
-
-    register DBGR
-    {
-        name        "ECC Debug/WAT Control Register";
-        scomaddr    0x07010A0B;
-        capture     group default;
-    };
-
