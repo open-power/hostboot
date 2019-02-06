@@ -322,8 +322,6 @@ push @systemAttr,
     "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3", $reqPol->{'vmem_regulator_memory_power_limit_per_dimm'},
     "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4", $reqPol->{'mss_mrw_vmem_regulator_memory_power_limit_per_dimm_ddr4'},
     "MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE", $reqPol->{'vmem_regulator_memory_power_limit_per_dimm_adjustment_enable'},
-    "MSS_MRW_PREFETCH_ENABLE", $reqPol->{'mss_prefetch_enable'},
-    "MSS_MRW_CLEANER_ENABLE", $reqPol->{'mss_cleaner_enable'},
     #TODO RTC:161768 these need to come from MRW
     "MSS_MRW_MEM_M_DRAM_CLOCKS", $reqPol->{'mss_mrw_mem_m_dram_clocks'},
     "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS", $reqPol->{'mss_mrw_periodic_memcal_mode_options'},

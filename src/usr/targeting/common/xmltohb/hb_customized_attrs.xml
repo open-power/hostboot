@@ -383,11 +383,6 @@
      </attribute>
 
     <attribute>
-          <id>ATTR_MSS_MRW_PREFETCH_ENABLE</id>
-          <default>1</default>
-     </attribute>
-
-    <attribute>
           <id>ATTR_PROC_FSP_BAR_ENABLE</id>
           <default>0</default>
           <no_export/>
