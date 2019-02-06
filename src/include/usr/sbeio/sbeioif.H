@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,7 +347,20 @@ namespace SBEIO
                                   uint64_t i_destAddr,
                                   bool   & o_opSupported);
 
-
+    /**
+    * @brief Sends a PSU chipOp to fetch security list binary dump in the SBE
+    *
+    * @param[in]  i_addr         Address that hostboot has prepared which the
+    *                            securityList Bin Dump addr sbe will write too
+    *
+    * @param[in]  i_procChip     Target with SBE to send read request to
+    *                            Assert if i_procChip == nullptr
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendPsuSecurityListBinDumpRequest(const uint64_t i_addr,
+                                         TARGETING::Target *i_procChip);
 
 } //end namespace SBEIO
 
