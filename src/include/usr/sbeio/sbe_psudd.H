@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,7 @@ class SbePsu
             SBE_PSU_GENERIC_MSG_QUIESCE      = 0x05,
             SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06,
             SBE_PSU_MSG_STASH_KEY_ADDR       = 0x07,
+            SBE_PSU_SECURITY_LIST_BIN_DUMP   = 0x08,
         };
 
         /**
@@ -322,6 +323,25 @@ class SbePsu
             SBE_MEM_REGION_RSP_USED_REGS  = 0x01,
         };
 
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuSecurityListBinDumpNonReservedMsgs
+        {
+            SBE_SECURITY_LIST_BIN_DUMP_REQ_USED_REGS     = 0x01,
+            SBE_SECURITY_LIST_BIN_DUMP_RSP_USED_REGS     = 0x01,
+        };
+
 
         /**
          * @brief Struct for PSU command message format
@@ -421,6 +441,18 @@ class SbePsu
                 uint64_t cd7_PsuQuiesce_MbxReg1reserved;
                 uint64_t cd7_PsuQuiesce_MbxReg2reserved;
                 uint64_t cd7_PsuQuiesce_MbxReg3reserved;
+            } PACKED;
+
+            struct //securityListBinDump
+            {
+                uint16_t cd7_securityListBinDump_MbxReg0Reserved;  //Mbx Reg 0
+                uint16_t cd7_securityListBinDump_ControlFlags;     //Mbx Reg 0
+                uint16_t cd7_securityListBinDump_SeqID;            //Mbx Reg 0
+                uint8_t  cd7_securityListBinDump_CommandClass;     //Mbx Reg 0  0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  cd7_securityListBinDump_Command;          //Mbx Reg 0  0x08 (SBE_PSU_SECURITY_LIST_BIN_DUMP)
+                uint64_t cd7_securityListBinDump_addr;             //Mbx Reg 1
+                uint64_t cd7_securityListBinDump_MbxReg2reserved;  //Mbx Reg 2
+                uint64_t cd7_securityListBinDump_MbxReg3reserved;  //Mbx Reg 3
             } PACKED;
 
             struct //stashKeyAddr
