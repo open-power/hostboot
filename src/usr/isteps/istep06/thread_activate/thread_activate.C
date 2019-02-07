@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@
 
 //  fapi support
 #include    <fapi2.H>
-#include    <fapi2_target.H>
+#include    <fapi2/target.H>
 #include    <fapi2_hw_access.H>
 #include    <plat_hwp_invoker.H>
 #include    <istep_reasoncodes.H>

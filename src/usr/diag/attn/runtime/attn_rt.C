@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <prdf/common/prdfMain_common.H>
 
 #include <p9_io_obus_firmask_save_restore.H>
-#include <fapi2_target.H>              // fapi2::Target
+#include <fapi2/target.H>              // fapi2::Target
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 
 using namespace std;

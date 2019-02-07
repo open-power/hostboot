@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 #include "TodAssert.H"
 #include "TodTrace.H"
 //HWPF
-#include <fapi2_target.H>
+#include <fapi2/target.H>
 #include <target_types.H>
 #include "TodUtils.H"
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <hbotcompid.H>                 // HWPF_COMP_ID
 
 //  Targeting support
-#include <fapi2_target.H>               // fapi2::Target
+#include <fapi2/target.H>               // fapi2::Target
 #include <target.H>                     // TARGETING::Target
 
 //  Error handling support
