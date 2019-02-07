@@ -25,7 +25,7 @@
 
 ///
 /// @file nvdimm_utils.C
-/// @brief Subroutines to support nvdimm backup/restore process
+/// @brief Subroutines to support nvdimm restore process.
 ///
 // *HWP HWP Owner: Tsung Yeung <tyeung@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
@@ -162,17 +162,21 @@ fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_MCA
 {
     fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
 
-    // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MINALL,
-    //          and enable minimum domain reduction
+    // Entry time to 0 for immediate entry
+    constexpr uint64_t l_str_entry_time = 0;
+
+    // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MIN0,
+    //          and disable minimum domain reduction (allow immediate entry of STR)
     FAPI_TRY(mss::mc::read_mbarpc0(i_target, l_mbarpc0_data));
     mss::mc::set_power_control_min_max_domains_enable( l_mbarpc0_data, mss::states::OFF );
-    mss::mc::set_power_control_min_max_domains( l_mbarpc0_data, mss::min_max_domains::MAXALL_MINALL );
-    mss::mc::set_power_control_min_domain_reduction_enable( l_mbarpc0_data, mss::states::ON );
+    mss::mc::set_power_control_min_max_domains( l_mbarpc0_data, mss::min_max_domains::MAXALL_MIN0 );
+    mss::mc::set_power_control_min_domain_reduction_enable( l_mbarpc0_data, mss::states::OFF );
     FAPI_TRY(mss::mc::write_mbarpc0(i_target, l_mbarpc0_data));
 
     // Step 2 - In MBASTR0Q, enable STR entry
     FAPI_TRY(mss::mc::read_mbastr0(i_target, l_mbastr0_data));
     mss::mc::set_self_time_refresh_enable( l_mbastr0_data, mss::states::ON );
+    mss::mc::set_enter_self_time_refresh_time( l_mbastr0_data, l_str_entry_time );
     FAPI_TRY(mss::mc::write_mbastr0(i_target, l_mbastr0_data));
 
     // Step 3 - In MBARPC0Q, enable power domain control.
@@ -195,22 +199,21 @@ fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // Step 1 - In MBARPC0Q, disable power domain control
+    // Step 1 - In MBARPC0Q, disable power domain control.
     FAPI_TRY(mss::mc::read_mbarpc0(i_target, l_mbarpc0_data));
     mss::mc::set_power_control_min_max_domains_enable( l_mbarpc0_data, mss::states::OFF );
     FAPI_TRY(mss::mc::write_mbarpc0(i_target, l_mbarpc0_data));
 
-    // Step 2 - In MBASTR0Q, disable STR entry
-    FAPI_TRY(mss::mc::read_mbastr0(i_target, l_mbastr0_data));
-    mss::mc::set_self_time_refresh_enable( l_mbastr0_data, mss::states::OFF );
-    FAPI_TRY(mss::mc::write_mbastr0(i_target, l_mbastr0_data));
-
-    // Step 3 - Run memdiags to read the port to force CKE back to high
+    // Step 2 - Run memdiags to read the port to force CKE back to high
     FAPI_TRY(self_refresh_exit_helper(i_target));
 
     // maint_addr_mode could be enabled by the helper. Disable it before exiting
     // otherwise it will introduce problem to other DIMMs on the same MCBIST
     FAPI_TRY(maint_addr_mode_off(l_mcbist));
+
+    // Restore MBASTR0Q and MBARPC0Q to the original values based on MRW
+    FAPI_TRY(mss::mc::set_pwr_cntrl_reg(i_target));
+    FAPI_TRY(mss::mc::set_str_reg(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

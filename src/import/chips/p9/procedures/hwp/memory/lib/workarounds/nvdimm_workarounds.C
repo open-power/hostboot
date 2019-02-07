@@ -32,7 +32,7 @@
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: FSP:HB
+// *HWP Consumed by: FSP:SBE
 
 #include <fapi2.H>
 #include <vector>
@@ -89,6 +89,13 @@ const uint64_t FARB5Q_REG[] =
     MCA_7_MBA_FARB5Q,
 };
 
+// MCB_CNTLQ
+constexpr const uint64_t MCB_CNTLQ_REG[] =
+{
+    MCBIST_0_MCB_CNTLQ,
+    MCBIST_1_MCB_CNTLQ,
+};
+
 constexpr uint8_t PORTS_PER_MODULE = 8;
 
 ///
@@ -111,22 +118,32 @@ fapi2::ReturnCode self_refresh_entry( const fapi2::Target<fapi2::TARGET_TYPE_PRO
     FAPI_DBG("Entering STR on port %u.", l_mca_pos);
 
     {
-        fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
+        fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data, l_mcbcntlq_data;
         constexpr uint64_t ENABLE = 1;
         constexpr uint64_t DISABLE = 0;
-        constexpr uint64_t MINALL_MAXALL = 0b000;
+        constexpr uint64_t MAXALL_MIN0 = 0b010;
+        constexpr uint64_t STOP = 1;
+        constexpr uint64_t PORTS_PER_MCBIST = 4;
+        constexpr uint64_t TIME_0 = 0;
+        const uint8_t l_mcbist = l_mca_pos < PORTS_PER_MCBIST ? 0 : 1;
 
-        // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MINALL,
-        //          and enable minimum domain reduction
+        // Stop mcbist first otherwise it can kick the DIMM out of STR
+        FAPI_TRY(fapi2::getScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_mcbcntlq_data));
+        l_mcbcntlq_data.writeBit<MCBIST_CCS_CNTLQ_STOP>(STOP);
+        FAPI_TRY(fapi2::putScom(i_target, MCB_CNTLQ_REG[l_mcbist], l_mcbcntlq_data));
+
+        // Step 1 - In MBARPC0Q, disable power domain control, set domain to MAXALL_MIN0,
+        //          and disable minimum domain reduction (allow immediate entry of STR)
         FAPI_TRY(fapi2::getScom(i_target, MBARPC0Q_REG[l_mca_pos], l_mbarpc0_data));
         l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE>(DISABLE);
-        l_mbarpc0_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS, MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN>(MINALL_MAXALL);
-        l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>(ENABLE);
+        l_mbarpc0_data.insertFromRight<MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS, MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MIN0);
+        l_mbarpc0_data.writeBit<MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>(DISABLE);
         FAPI_TRY(fapi2::putScom(i_target, MBARPC0Q_REG[l_mca_pos], l_mbarpc0_data));
 
         // Step 2 - In MBASTR0Q, enable STR entry
         FAPI_TRY(fapi2::getScom(i_target, MBASTR0Q_REG[l_mca_pos], l_mbastr0_data));
         l_mbastr0_data.writeBit<MCA_MBASTR0Q_CFG_STR_ENABLE>(ENABLE);
+        l_mbastr0_data.insertFromRight<MCA_MBASTR0Q_CFG_ENTER_STR_TIME, MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN>(TIME_0);
         FAPI_TRY(fapi2::putScom(i_target, MBASTR0Q_REG[l_mca_pos], l_mbastr0_data));
 
         // Step 3 - In MBARPC0Q, enable power domain control.

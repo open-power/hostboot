@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -376,6 +376,34 @@ inline void get_self_time_refresh_enable( const fapi2::buffer<uint64_t>& i_data,
 {
     o_state = i_data.getBit<TT::CFG_STR_ENABLE>() ? mss::states::ON : mss::states::OFF;
     FAPI_DBG("get_power_control_min_domain_reduction_enable to %d", o_state);
+}
+
+///
+/// @brief Sets the enter STR time
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_value the value to write to set the STR time
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void set_enter_self_time_refresh_time( fapi2::buffer<uint64_t>& io_data, const uint64_t& i_value )
+{
+    FAPI_DBG("set_enter_self_time_refresh_time to %d", i_value);
+    io_data.insertFromRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>(i_value);
+}
+
+///
+/// @brief Gets the enter STR time
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_value the STR time value from register data
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_enter_self_time_refresh_time( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    o_value = i_data.extractToRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>();
+    FAPI_DBG("get_enter_self_time_refresh_time %d", o_value);
 }
 
 ///
