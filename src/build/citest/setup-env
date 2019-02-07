@@ -37,15 +37,15 @@ echo "MACHINE IS $MACHINE"
 if [ "$CHIP" == "NIMBUS" ];
 then
     export PNOR=nimbus.pnor
-    export CONFIG_FILE=
+    unset CONFIG_FILE
 elif [ "$CHIP" == "CUMULUS" ];
 then
     export PNOR=cumulus.pnor
-    export CONFIG_FILE=
+    unset CONFIG_FILE
 elif [ "$CHIP" == "CUMULUS_CDIMM" ];
 then
     export PNOR=cumulus_cdimm.pnor
-    export CONFIG_FILE=
+    unset CONFIG_FILE
 elif [ "$CHIP" == "FSPBUILD" ];
 then
     export PNOR=ZZ.pnor
