@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
 //  Targeting support
-#include <fapi2_target.H>              // fapi2::Target
+#include <fapi2/target.H>              // fapi2::Target
 #include <target.H>                    // Target
 
 //  Error handling support
