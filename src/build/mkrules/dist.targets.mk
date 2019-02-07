@@ -80,9 +80,10 @@ COPY_FILES = \
     src/build/buildpnor/buildpnor.pl:openpower \
     src/build/buildpnor/genfakeheader.pl:openpower \
     src/build/buildpnor/genPnorImages.pl:openpower \
+    src/build/buildpnor/buildUcdFlashImages.pl:openpower \
     src/build/buildpnor/PnorUtils.pm:openpower \
     src/build/buildpnor/imprintHwKeyHash:openpower \
-	src/build/buildpnor/wof-tables-img:openpower \
+    src/build/buildpnor/wof-tables-img:openpower \
     src/build/buildpnor/memd_creation.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
@@ -301,6 +302,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/genfakeheader.pl \
     src/build/buildpnor/genPnorImages.pl \
+    src/build/buildpnor/buildUcdFlashImages.pl \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/imprintHwKeyHash \
     src/build/buildpnor/defaultPnorLayout.xml \
