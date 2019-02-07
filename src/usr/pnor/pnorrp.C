@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -251,6 +251,7 @@ iv_TOC_used(TOC_0)
 ,iv_shutdown_pending(false)
 {
     TRACDCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
+
     // setup everything in a separate function
     initDaemon();
 
@@ -1315,7 +1316,6 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readFromDevice> i_offset=0x%X, i_chip=%d", i_offset, i_chip );
     errlHndl_t l_errhdl = NULL;
-    uint8_t* ecc_buffer = NULL;
     o_fatalError = 0;
 
     do
@@ -1329,8 +1329,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         // if we need to handle ECC we need to read more than 1 page
         if( i_ecc )
         {
-            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC]();
-            data_to_read = ecc_buffer;
+            data_to_read = iv_ecc_buffer;
             read_size = PAGESIZE_PLUS_ECC;
         }
 
@@ -1408,11 +1407,6 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         }
     } while(0);
 
-    if( ecc_buffer )
-    {
-        delete[] ecc_buffer;
-    }
-
     TRACUCOMP(g_trac_pnor, "< PnorRP::readFromDevice" );
     return l_errhdl;
 }
@@ -1427,7 +1421,6 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::writeToDevice> i_offset=%X, i_chip=%d", i_offset, i_chip );
     errlHndl_t l_errhdl = NULL;
-    uint8_t* ecc_buffer = NULL;
 
     do
     {
@@ -1440,11 +1433,10 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
         // apply ECC to data if needed
         if( i_ecc )
         {
-            ecc_buffer = new uint8_t[PAGESIZE_PLUS_ECC];
             PNOR::ECC::injectECC( reinterpret_cast<uint8_t*>(i_src),
                                   PAGESIZE,
-                                  reinterpret_cast<uint8_t*>(ecc_buffer) );
-            data_to_write = reinterpret_cast<void*>(ecc_buffer);
+                                  reinterpret_cast<uint8_t*>(iv_ecc_buffer) );
+            data_to_write = reinterpret_cast<void*>(iv_ecc_buffer);
             write_size = PAGESIZE_PLUS_ECC;
         }
 
@@ -1462,11 +1454,6 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
             break;
         }
     } while(0);
-
-    if( ecc_buffer )
-    {
-        delete[] ecc_buffer;
-    }
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::writeToDevice" );
     return l_errhdl;

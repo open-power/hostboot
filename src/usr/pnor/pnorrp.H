@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -35,6 +35,8 @@
 #include "pnor_common.H"
 #include "ffs.h"
 #include <config.h>
+#include "pnor_utils.H"
+
 /**
  * PNOR Resource Provider
  */
@@ -189,7 +191,7 @@ class PnorRP
 
     /**
      * sent when a shutdown message is sent, used to elimnate further writes
-     * to pnore during a shutdown process
+     * to pnor during a shutdown process
      */
     bool iv_shutdown_pending;
 
@@ -198,6 +200,12 @@ class PnorRP
      *  indexed by physical page number inside PNOR
      */
     std::map<uint64_t,FlashStats_t> iv_stats;
+
+    /**
+     * Create a permanent buffer to handle ECC translations rather than
+     *  constantly allocating new pages every time.  This is always 2 pages.
+     */
+    uint8_t iv_ecc_buffer[PNOR::PAGESIZE_PLUS_ECC];
 
     /**
      * @brief Initialize the daemon, called by constructor
