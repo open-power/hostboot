@@ -97,6 +97,7 @@ enum PositionBounds
     MAX_MBA_PER_MEMBUF  = 2,
     MAX_PORT_PER_MBA    = 2,
     MAX_DIMM_PER_PORT   = 2,
+    MAX_DIMM_PER_RANK   = 2,
     MAX_L4_PER_MEMBUF   = 1,
 
     MAX_NVDIMM_PER_PROC = MAX_DIMM_PER_PORT * MAX_MCA_PER_PROC,

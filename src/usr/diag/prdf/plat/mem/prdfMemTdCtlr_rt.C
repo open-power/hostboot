@@ -1260,6 +1260,22 @@ uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
                     PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MBA>(0x%08x) failed",
                             iv_chip->getHuid() );
                 }
+
+                // The HWP that stops the command apparently clears the command
+                // complete attention, which we were not expecting. Therefore,
+                // we must manually set the attention.
+                SCAN_COMM_REGISTER_CLASS * mbaspa_or =
+                                            iv_chip->getRegister("MBASPA_OR");
+                mbaspa_or->SetBit( 0 );
+
+                mbaspa_or->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on MBASPA_OR" );
+                }
+
+                // There is now a command complete attention for this MBA. So
+                // break out of the for-loop.
                 break;
             }
         }
