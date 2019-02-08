@@ -504,39 +504,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_SYSTEM_IPL_PHASE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    Define context for current phase of system IPL.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>
-    HB_IPL          = 0x1,
-    HB_RUNTIME      = 0x2,
-    CACHE_CONTAINED = 0x4,
-    CHIP_CONTAINED  = 0x8
-  </enum>
-  <writeable/>
-  <platInit/>
-  <mrwHide/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_IS_MPIPL</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    Indicates if current IPL is memory-preserving.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>
-    FALSE = 0x0,
-    TRUE = 0x1
-  </enum>
-  <platInit/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_MAX_INTERLEAVE_GROUP_SIZE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
