@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ p9_hcd_l2_stopclocks(
     uint32_t                                    l_loops1ms;
     uint64_t                                    l_region_clock = 0;
     uint64_t                                    l_l2sync_clock = 0;
+    uint8_t                                     ex_pos;
     uint64_t                                    l_l2mask_pscom = 0;
     uint8_t                                     l_attr_chip_unit_pos = 0;
     auto l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
@@ -117,7 +118,7 @@ p9_hcd_l2_stopclocks(
     if (l_rc)
     {
         FAPI_INF("Clock controller of this cache chiplet is inaccessible, return");
-        goto fapi_try_exit;
+        goto qssr_update;
     }
 
     FAPI_DBG("Check PERV clock status for access to CME via CLOCK_STAT[4]");
@@ -212,10 +213,22 @@ p9_hcd_l2_stopclocks(
     // Update QSSR
     // -------------------------------
 
+qssr_update:
     FAPI_DBG("Set EX as stopped in QSSR");
-    FAPI_TRY(putScom(l_chip, PU_OCB_OCI_QSSR_OR,
-                     ((uint64_t)i_select_ex << SHIFT64((l_attr_chip_unit_pos << 1) + 1))));
+    ex_pos = l_attr_chip_unit_pos << 1;
+    l_data64.flush<0>();
 
+    if (i_select_ex & p9hcd::EVEN_EX)
+    {
+        l_data64.setBit(ex_pos);
+    }
+
+    if (i_select_ex & p9hcd::ODD_EX)
+    {
+        l_data64.setBit(ex_pos + 1);
+    }
+
+    FAPI_TRY(putScom(l_chip, PU_OCB_OCI_QSSR_OR, l_data64));
 fapi_try_exit:
 
     FAPI_INF("<<p9_hcd_l2_stopclocks");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,8 +87,10 @@ p9_hcd_cache_stopclocks(
     uint32_t                                       l_loops1ms                  = 0;
     uint32_t                                       l_scom_addr                 = 0;
     uint8_t                                        l_attr_chip_unit_pos        = 0;
+    uint8_t                                        l_attr_chip_core_pos = 0;
     uint8_t                                        l_attr_vdm_enabled           = 0;
     uint8_t                                        l_is_mpipl                  = 0;
+    uint8_t                                        l_eq_pos;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
     auto l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -100,15 +102,12 @@ p9_hcd_cache_stopclocks(
         (fapi2::TARGET_STATE_FUNCTIONAL);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, l_sys, l_is_mpipl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
+                           l_attr_chip_unit_pos));
+    //  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+    l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
-    //Check if EQ is powered off; if so, return
-    FAPI_TRY(fapi2::getScom(i_target, EQ_PPM_PFSNS, l_data64),
-             "Error reading data from EQ_PPM_PFSNS");
 
-    if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
-    {
-        return fapi2::current_err;
-    }
 
     if(l_is_mpipl)
     {
@@ -158,10 +157,6 @@ p9_hcd_cache_stopclocks(
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED, l_chip,
                            l_attr_vdm_enabled));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
-                           l_attr_chip_unit_pos));
-    //  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
-    l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
     if (i_select_regions & p9hcd::CLK_REGION_EX0_L3)
     {
@@ -229,7 +224,7 @@ p9_hcd_cache_stopclocks(
     if (l_rc)
     {
         FAPI_INF("Clock controller of this cache chiplet is inaccessible, return");
-        goto fapi_try_exit;
+        goto qssr_update;
     }
 
     FAPI_DBG("Check PERV clock status for access to CME via CLOCK_STAT[4]");
@@ -351,11 +346,11 @@ p9_hcd_cache_stopclocks(
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                it.getParent<fapi2::TARGET_TYPE_PERV>(),
-                               l_attr_chip_unit_pos));
+                               l_attr_chip_core_pos));
         FAPI_DBG("Assert core[%d] PCB Mux Disable via C_SLAVE_CONFIG[7]",
-                 (l_attr_chip_unit_pos - p9hcd::PERV_TO_CORE_POS_OFFSET));
+                 (l_attr_chip_core_pos - p9hcd::PERV_TO_CORE_POS_OFFSET));
         l_scom_addr = (C_SLAVE_CONFIG_REG + (0x1000000 *
-                                             (l_attr_chip_unit_pos - p9hcd::PERV_TO_CORE_POS_OFFSET)));
+                                             (l_attr_chip_core_pos - p9hcd::PERV_TO_CORE_POS_OFFSET)));
         FAPI_TRY(getScom(l_chip, l_scom_addr, l_data64));
         FAPI_TRY(putScom(l_chip, l_scom_addr, DATA_SET(7)));
     }
@@ -387,13 +382,15 @@ p9_hcd_cache_stopclocks(
         FAPI_TRY(putScom(i_target, EQ_QPPM_QCCR_WCLEAR, MASK_SET(4)));
     }
 
+qssr_update:
     // -------------------------------
     // Update QSSR and STOP history
     // -------------------------------
-
+    l_eq_pos = l_attr_chip_unit_pos + 14;
+    l_data64.flush<0>();
+    l_data64.setBit(l_eq_pos);
     FAPI_DBG("Set cache as stopped in QSSR");
-    FAPI_TRY(putScom(l_chip, PU_OCB_OCI_QSSR_OR,
-                     BIT64(l_attr_chip_unit_pos + 14)));
+    FAPI_TRY(putScom(l_chip, PU_OCB_OCI_QSSR_OR, l_data64));
 
     FAPI_DBG("Set cache as stopped in STOP history register");
     FAPI_TRY(putScom(i_target, EQ_PPM_SSHSRC, BIT64(0)));

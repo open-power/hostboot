@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,15 +110,19 @@ p9_hcd_core_stopclocks(
 
     if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
     {
+        FAPI_DBG("Set core as stopped in STOP history register");
+        FAPI_TRY(putScom(i_target, C_PPM_SSHSRC, BIT64(0)));
         return fapi2::current_err;
     }
 
     //Check if core is powered off; if so, return
     FAPI_TRY(fapi2::getScom(i_target, C_PPM_PFSNS, l_data64),
-             "Error reading data from EQ_PPM_PFSNS");
+             "Error reading data from C_PPM_PFSNS");
 
     if (l_data64.getBit<C_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
     {
+        FAPI_DBG("Set core as stopped in STOP history register");
+        FAPI_TRY(putScom(i_target, C_PPM_SSHSRC, BIT64(0)));
         return fapi2::current_err;
     }
 
