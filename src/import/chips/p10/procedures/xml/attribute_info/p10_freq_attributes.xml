@@ -53,6 +53,22 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_CORE_BOOT_MHZ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Core boot frequency at 1:1 from Nest DPLL</description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_CORE_BOOT_MULT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Core boot frequency multiplier</description>
+  <valueType>uint16</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_MC_MHZ</id>
   <targetType>TARGET_TYPE_MC</targetType>
   <description>
@@ -98,6 +114,14 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_PAU_MULT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>PAU frequency multiplier</description>
+  <valueType>uint16</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_PCIE_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
@@ -108,5 +132,15 @@
   <valueType>uint32</valueType>
   <platInit/>
  </attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_I2C_BUS_DIV_REF</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Ref clock I2C bus divider consumed by code running out of OTPROM
+  </description>
+  <valueType>uint16</valueType>
+  <platInit/>
+</attribute>
 <!-- ********************************************************************** -->
 </attributes>
