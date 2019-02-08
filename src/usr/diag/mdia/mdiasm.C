@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include <sys/time.h>
 #include <p9c_mss_maint_cmds.H>
 #include <dimmBadDqBitmapFuncs.H>
+#include <sys/misc.h>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -889,7 +890,10 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
 
         if(!iv_tp)
         {
-            MDIA_FAST("Starting threadPool...");
+            //create same number of tasks in the pool as there are cpu threads
+            const size_t l_num_tasks = cpu_thread_count();
+            Util::ThreadPoolManager::setThreadCount(l_num_tasks);
+            MDIA_FAST("Starting threadPool with %u tasks...", l_num_tasks);
             iv_tp = new Util::ThreadPool<WorkItem>();
             iv_tp->start();
         }
