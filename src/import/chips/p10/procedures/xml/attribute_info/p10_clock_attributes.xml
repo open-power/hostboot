@@ -1,0 +1,331 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_clock_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Defines system specific value of processor refclock receiver termination
+  </description>
+  <enum>NONE = 0, FIFTY_OHM = 1</enum>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Defines system specific value of PCI refclock receiver termination
+  </description>
+  <enum>NONE = 0, FIFTY_OHM = 1, ONE_HUNDRED_OHM = 3</enum>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_PLL_MUX</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>setup clock mux settings</description>
+  <valueType>uint64</valueType>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_REFCLOCK_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Osc refclock configurations</description>
+  <valueType>uint8</valueType>
+  <enum>OSC0 = 0x0, OSC1 = 0x1, BOTH_OSC0 = 0x2, BOTH_OSC1 = 0x3</enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ************************************************************************-->
+<attribute>
+  <id>ATTR_CLOCK_MUX0A_RCS_PLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>RCS PLL input for FPLL #1</description>
+  <valueType>uint8</valueType>
+  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX0B_RCS_PLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>RCS PLL input for FPLL #2</description>
+  <valueType>uint8</valueType>
+  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX0C_RCS_PLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>RCS PLL input for FPLL #3</description>
+  <valueType>uint8</valueType>
+  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX0D_RCS_PLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>RCS PLL input for FPLL #4</description>
+  <valueType>uint8</valueType>
+  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX1_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MUX 1 input</description>
+  <valueType>uint8</valueType>
+  <enum>PAU_DPLL_INPUT = 0, TCK = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX2A_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MUX 2a input</description>
+  <valueType>uint8</valueType>
+  <enum>MUX1 = 0, PAU_DPLL_OUTPUT = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX2B_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MUX 2b input</description>
+  <valueType>uint8</valueType>
+  <enum>MUX1 = 0, PAU_DPLL_OUTPUT = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX3_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MUX 3 input</description>
+  <valueType>uint8</valueType>
+  <enum>MUX2B = 0, NEST_DPLL_OUTPUT = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX4A_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MUX 4a input</description>
+  <valueType>uint8</valueType>
+  <enum>MUX0 = 0, MUX1 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ************************************************************************-->
+<attribute>
+  <id>ATTR_CLOCK_MUX10_PAU_DPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>PAU DPLL input from FPLL</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_4 = 0, FPLL_3 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX11_NEST_DPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>NEST DPLL input from FPLL</description>
+  <valueType>uint8</valueType>
+  <enum> FPLL_4 = 0, FPLL_3 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX12_OMI_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>OMI LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, FPLL_2 = 1, FPLL_3 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX13_OPT_133_SOURCE_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Mux 13 input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, FPLL_2 = 1, FPLL_3 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX14_OPT_156_SOURCE_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Mux 14 input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_2 = 0, FPLL_3 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX15_IOHS0_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS0 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX16_IOHS1_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS1 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_14 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX17_IOHS2_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS2 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_14 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX18_IOHS3_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS3 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX19_IOHS4_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS4 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX20_IOHS5_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS5 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX21_IOHS6_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS6 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX22_IOHS7_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>IOHS7 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_1 = 0, MUX_13 = 1, MUX_14 = 2</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX23_PCI_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Mux 23 input from FPLL</description>
+  <valueType>uint8</valueType>
+  <enum>FPLL_4 = 0, FPLL_3 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX24_PCI0_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>PCI0 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FREQ_100MHZ = 0, MUX_23 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_MUX25_PCI1_LCPLL_INPUT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>PCI1 LCPLL input</description>
+  <valueType>uint8</valueType>
+  <enum>FREQ_100MHZ = 0, MUX_23 = 1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCK_PLL_MUX_TOD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    setup clock mux settings for TOD Refclk input
+    0b0 = 16 MHz I/O Filter PLL Output
+    0b1 = 32 MHz LPC reference clock
+  </description>
+  <valueType>uint8</valueType>
+  <enum>IO_FPLL_OUTPUT = 0, LPC_REF_CLK = 1</enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>

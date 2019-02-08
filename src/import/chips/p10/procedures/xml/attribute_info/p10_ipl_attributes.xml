@@ -1,0 +1,177 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_ipl_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYSTEM_IPL_PHASE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Define context for current phase of system IPL</description>
+  <valueType>uint8</valueType>
+  <enum>
+    HB_IPL          = 0x1,
+    HB_RUNTIME      = 0x2,
+    CACHE_CONTAINED = 0x4,
+    CHIP_CONTAINED  = 0x8
+  </enum>
+  <writeable/>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IS_MPIPL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Indicates if current IPL is memory-preserving</description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ISTEP_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates whether IPL should be done by stepping through the isteps (true) 
+    or continuously executing all steps end-to-end (false).
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0, TRUE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SBE_RUNTIME_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates that SBE should go directly to runtime functionality</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0, TRUE = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IS_SP_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates whether we are connected to FSP or not</description>
+  <valueType>uint8</valueType>
+  <enum>FSP_LESS = 0x0, FSP = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DISABLE_HBBL_VECTORS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    BootLoader HWP flag to not place 12K exception vectors.
+    This flag is only applicable when security is disabled.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <default>FALSE</default>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKUP_SEEPROM_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select Primary or Backup SEEPROM</description>
+  <valueType>uint8</valueType>
+  <enum>PRIMARY = 0x0,SECONDARY = 0x1</enum>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BOOT_FLAGS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Switch to using a flag to indicate SEEPROM side SBE
+    Bit 0     : Indicates istep IPL (0b1)
+    Bit 1     : Indicates that SBE should go directly to runtime functionality (0b1)
+    Bit 2     : Reserved for HB usage for the SBE to indicate an MPIPL to Hostboot
+    Bit 3     : Indicates FSPless (0b0), otherwise FSP attached (0b1)
+    Bit 4     : Reserved
+    Bit 5     : Indicates that the SBE should not send back internal FFDC on any ChipOp failure response
+    Bit 6     : Disable security
+    Bit 7     : Allow ATTR overrides in secure system
+    Bit 8,9   : FW SMT override mode. These bits are only used by Hostboot, not the SBE
+    Bit 10    : Reserved
+    Bit 11    : Disable Scom white/blacklist in secure systems
+    Bit 12    : Disable Invalid Scom address check
+    Bit 13    : Indicates SBE was in MFG mode, where extra tests/isteps can be executed
+    Bit 14    : Enable SBE output via SUART during boot
+    Bit 15-27 : Available
+    Bit 28-31 : Reserved
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SYS_FORCE_ALL_CORES</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Indicate that p10_sbe_select_ex should force selection to ALL good
+    EX chiplets having good quads,cores even if only a single EX chiplet mode is executed.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>ALL_CORES = 0x1, NOT_ALL_CORES = 0x0</enum>
+  <platInit/>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SECURITY_ENABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Holds the state of Security Access Bit (SAB)</description>
+  <valueType>uint8</valueType>
+  <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SECURITY_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    SBE context: If SBE image has ATTR_SECURITY_MODE == 0b1, leave  SAB bit as is.
+    Otherwise (ATTR_SECURITY_MODE == 0b0), query mailbox scratch register 3 bit 6
+    and if set, clear the SAB bit.
+    Non-SBE context: If ATTR_SECURITY_MODE == 0b1, do not attempt to clear the SAB
+    bit via the FSI path. Otherwise (ATTR_SECURITY_MODE == 0b0), attempt to clear
+    the SAB bit via the FSI path. Customer level chips will silently ignore such
+    a request, whereas early lab versions may honor it for debug purposes.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>
