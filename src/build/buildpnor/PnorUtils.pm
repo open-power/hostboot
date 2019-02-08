@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -161,6 +161,7 @@ sub loadPnorLayout
             my $volatile = (exists $sectionEl->{volatile} ? "yes" : "no");
             if (($i_testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
             {
+                trace(2, "$this_func: Skipping $eyeCatch because this is non-test");
                 next;
             }
 
@@ -371,7 +372,7 @@ sub checkSpaceConstraints
             # cases fit
             if ($testRun && $eyeCatch eq "HBI")
             {
-                print "Adjusting HBI size - ran out of space for test cases\n";
+                print "$this_func: Adjusting HBI size - ran out of space for test cases\n";
                 adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize);
             }
             else
@@ -391,6 +392,7 @@ sub checkSpaceConstraints
 sub adjustHbiPhysSize
 {
     my ($i_sectionHashRef, $i_hbiKey, $i_filesize) = @_;
+    my $this_func = (caller(0))[3];
 
     my %sectionHash = %$i_sectionHashRef;
 
@@ -410,7 +412,13 @@ sub adjustHbiPhysSize
         if ( $sectionHash{$section}{physicalOffset} >
              $sectionHash{$i_hbiKey}{physicalOffset} )
         {
+            my $origoffset = $sectionHash{$section}{physicalOffset};
             $sectionHash{$section}{physicalOffset} += $hbi_move;
+            trace(3, "$this_func: Section $sectionHash{$section}{eyeCatch} : " . sprintf("%X",$origoffset) . " --> " . sprintf("%X",$sectionHash{$section}{physicalOffset}));
+        }
+        else
+        {
+            printf "$this_func: Section $sectionHash{$section}{eyeCatch} : unchanged";
         }
     }
 }
