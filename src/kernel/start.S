@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2018
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -764,6 +764,10 @@ intvect_system_reset:
 
     ;// Raise priority to high.
     or 2,2,2
+
+    ;// Need to send a msgysnc to prevent weak consistency issues
+    ;// with doorbells (they execute this path prior to dbell intr)
+    .long 0x7C0006EC
 
     ;// Free up two registers temporarily.
     mtsprg0 r1

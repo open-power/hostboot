@@ -65,19 +65,20 @@ void kernel_execute_hyp_doorbell()
     doorbell_clear();
 
     //Execute all work items on doorbell_actions stack
-    KernelWorkItem *l_work = t->cpu->doorbell_actions.pop();
+    cpu_t* l_cpu = CpuManager::getCurrentCPU();
+    KernelWorkItem *l_work = l_cpu->doorbell_actions.pop();
     while(l_work != nullptr)
     {
         //Execute Work Item and then delete it
         (*l_work)();
         delete l_work;
-        l_work = t->cpu->doorbell_actions.pop();
+        l_work = l_cpu->doorbell_actions.pop();
     }
 
     //IPC messages come in only on the master, so
     //If this is a doorbell to the master -- check
     cpu_t* master = CpuManager::getMasterCPU();
-    if(t->cpu == master)
+    if(l_cpu == master)
     {
         size_t pir = getPIR();
         printk("IPC msg pir %lx incoming\n", pir);
