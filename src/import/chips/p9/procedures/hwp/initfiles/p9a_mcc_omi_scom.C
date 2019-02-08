@@ -304,7 +304,7 @@ fapi2::ReturnCode p9a_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x7010a13ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b0000110000 );
+            l_scom_buffer.insert<48, 8, 54, uint64_t>(literal_0b0000110000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x7010a13ull, l_scom_buffer));
         }
         {
