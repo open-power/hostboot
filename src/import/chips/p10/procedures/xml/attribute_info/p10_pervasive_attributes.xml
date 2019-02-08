@@ -1,0 +1,187 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_pervasive_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PG</id>
+  <targetType>TARGET_TYPE_PERV</targetType>
+  <description>
+    Chiplet Partial good info attribute
+    This should be a direct copy of the data from the PG keyword of VPD.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_SBE_MASTER_CHIP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if SBE on this chip is serving as hostboot drawer master
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SECTOR_BUFFER_STRENGTH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Sector buffer strength</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PULSE_MODE_ENABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>enable the pulse mode</description>
+  <valueType>uint8</valueType>
+  <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PULSE_MODE_VALUE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>value for pulse mode</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_NDL_MESHCTRL_SETUP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Control NDL training:meshctrl setup</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MC_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>MC0, MC1, MC2, MC3 pll bucket selection</description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IOHS_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>IOHS pll bucket selection</description>
+  <valueType>uint8</valueType>
+  <array>8</array>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_FILTER_1_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    To skip the locking sequence and check for lock of CP filter1 PLL
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_FILTER_2_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    To skip the locking sequence and check for lock of CP filter2 PLL
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_FILTER_3_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    To skip the locking sequence and check for lock of CP filter3 PLL
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CP_FILTER_4_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    To skip the locking sequence and check for lock of CP filter4 PLL
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PAU_DPLL_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Skip locking sequence and check for lock of PAU DPLL
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_NEST_DPLL_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Skip locking sequence and check for lock of NEST DPLL
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_TANK_PLL_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Skip locking sequence and check for lock of IO PLL
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CORE_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Capturing Cores Gard Value
+    Each bit position corresponds to a core starting at core 0 being bit 0
+    Each nibble is representative of an EQ chiplets Cores
+    The EQ is always functional, so this field only tracks core state
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>
