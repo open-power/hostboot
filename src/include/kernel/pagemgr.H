@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,7 @@ class PageManager
 
         static size_t cv_coalesce_count;        //!< running coalesced counter
         static size_t cv_low_page_count;        //!< lowest page count
+        static size_t cv_alloc_coalesce_count;  //!< number of repeat allocs
 
     protected:
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 #include <kernel/taskmgr.H>
 #include <kernel/console.H>
 #include <kernel/doorbell.H>
+#include <kernel/misc.H>
+
 
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
@@ -181,6 +183,8 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             printk("Unhandled msg rc %d (%s) for key %p on task %d @ %p\n",
                     msg_rc, ErrnoToString(msg_rc), key, deferred_task->tid,
                     deferred_task->context.nip);
+            KernelMisc::printkBacktrace(deferred_task);
+            MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
             endTaskList.insert(deferred_task);
         }
         else if (CONTINUE_DEFER == rc)
