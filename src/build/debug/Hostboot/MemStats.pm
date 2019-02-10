@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -75,6 +75,10 @@ sub main
       ::findPointer("PAGEMCNT",
                     "PageManager::cv_coalesce_count");
 
+    my $page_alloc_coal = ::read64
+      ::findPointer("PAGEMACC",
+                    "PageManager::cv_alloc_coalesce_count");
+
     my $big_heap_pages_used = ::read32
       ::findPointer("HEAPMLPC",
                     "HeapManager::cv_largeheap_page_count");
@@ -118,6 +122,7 @@ sub main
     ::userDisplay "    Free pages:              $free_pages\n";
     ::userDisplay "    Free pages Low mark:     $free_min\n";
     ::userDisplay "    Page chunks coalesced:   $page_coal\n";
+    ::userDisplay "    Page alloc coalesces:    $page_alloc_coal\n";
     ::userDisplay "\nHeap:\n";
     ::userDisplay "    Pages used by heap:      $heap_total  ".
                   "(B:$big_heap_pages_used,S:$small_heap_pages_used)\n";

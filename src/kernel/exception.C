@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,7 @@ void kernel_execute_inst_storage()
     {
         printk("Inst Storage exception on %d: %lx, %lx\n",
                t->tid, getSRR0(), getSRR1());
+        KernelMisc::printkBacktrace(t);
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }

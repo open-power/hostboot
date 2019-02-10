@@ -553,7 +553,7 @@ void CpuManager::critAssert(uint64_t i_failAddr)
         {
             // print status to the console.
             printk("TI initiated on all threads (crit_assert)\n");
-
+            MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         }
 
         void activeMainWork()

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,11 +39,12 @@
 #include <kernel/bltohbdatamgr.H>
 #include <kernel/misc.H>
 #include <usr/debugpointers.H>
+#include <kernel/cpumgr.H>
 
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
-
+size_t PageManager::cv_alloc_coalesce_count = 0;
 
 void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
 {
@@ -165,10 +166,11 @@ void* PageManager::allocatePage(size_t n, bool userspace)
 
             // Didn't successfully allocate, so yield in hopes that memory
             // will eventually free up (ex. VMM flushes).
+            constexpr size_t MAX_ATTEMPTS = 10000;
             if (NULL == page)
             {
                 l_attempts++;
-                if( l_attempts == 10000 )
+                if( l_attempts == MAX_ATTEMPTS )
                 {
                     printk( "Cannot allocate %ld pages to %d!\n",
                             n, task_gettid() );
@@ -176,7 +178,25 @@ void* PageManager::allocatePage(size_t n, bool userspace)
                     KernelMisc::printkBacktrace(nullptr);
                     task_crash();
                 }
+
                 task_yield();
+
+                // Force a defrag of the memory 10 times
+                if( l_attempts % (MAX_ATTEMPTS/10) == 0 )
+                {
+                    printkd( "Forcing coalesce to allocate %ld pages to %d!\n",
+                             n, task_gettid() );
+                    coalesce();
+                    ++PageManager::cv_alloc_coalesce_count;
+                }
+
+                // Try to evict some pages once
+                if( l_attempts == MAX_ATTEMPTS/2 )
+                {
+                    printkd( "Forcing periodics to allocate %ld pages to %d!\n",
+                             n, task_gettid() );
+                    CpuManager::forceMemoryPeriodic();
+                }
             }
         }
     }
@@ -496,4 +516,7 @@ void PageManager::_addDebugPointers()
     DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERCOALESCECOUNT,
                              &PageManager::cv_coalesce_count,
                              sizeof(PageManager::cv_coalesce_count));
+    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERALLOCCOUNT,
+                             &PageManager::cv_alloc_coalesce_count,
+                             sizeof(PageManager::cv_alloc_coalesce_count));
 }
