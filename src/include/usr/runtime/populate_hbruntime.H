@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,8 @@
 #include <hdat/hdat.H>
 #include <vector>
 #include <utility>
+#include <errl/errlentry.H>
+#include <pnor/pnorif.H>
 
 namespace RUNTIME
 {
