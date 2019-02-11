@@ -33,6 +33,7 @@
 #include <runtime/populate_hbruntime.H>
 #include <pnor/pnorif.H>
 #include <runtime/common/runtime_utils.H>
+#include <vfs/vfs.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -137,6 +138,42 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         PreVerifiedLidMgr::unlock();
 
         TRACFCOMP( g_trac_runtime, EXIT_MRK"testLoadFromPnor complete" );
+    }
+
+    // Handle the case where we are running the testcases before the
+    //  libruntime.so module has been loaded
+    bool iv_loaded_libruntime;
+
+    PreVerifiedLidMgrTest()
+      : CxxTest::TestSuite(), iv_loaded_libruntime(false)
+    {
+        // Need to load up the runtime module if it isn't already loaded
+        if (  !VFS::module_is_loaded( "libruntime.so" ) )
+        {
+            errlHndl_t errhdl = VFS::module_load( "libruntime.so" );
+            if ( errhdl )
+            {
+                TS_FAIL("PreVerifiedLidMgrTest> Failed to load libruntime.so");
+                errlCommit(errhdl,RUNTIME_COMP_ID);
+            }
+            else
+            {
+                iv_loaded_libruntime = true;
+            }
+        }
+    }
+
+    ~PreVerifiedLidMgrTest()
+    {
+        if( iv_loaded_libruntime )
+        {
+            errlHndl_t errhdl = VFS::module_unload( "libruntime.so" );
+            if ( errhdl )
+            {
+                TS_FAIL("PreVerifiedLidMgrTest> Failed to unload libruntime.so");
+                errlCommit(errhdl,RUNTIME_COMP_ID);
+            }
+        }
     }
 };
 

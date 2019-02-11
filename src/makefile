@@ -244,7 +244,7 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 TESTCASE_MODULES += testpirformat
 TESTCASE_MODULES += testi2c
 TESTCASE_MODULES += testmbox
-TESTCASE_MODULES += testrtloader
+TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES),,testrtloader)
 TESTCASE_MODULES += testsbe
 TESTCASE_MODULES += testsbeio
 TESTCASE_MODULES += testerrl
@@ -255,7 +255,7 @@ TESTCASE_MODULES += testscom
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
-TESTCASE_MODULES += $(if $(CONFIG_FSP_BUILD),,testnvram)
+TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpscom
 

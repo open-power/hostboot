@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2019
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +26,10 @@ ROOTPATH = ../../../..
 
 MODULE = testutil
 
-TESTS = *.H
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testmclmgr.H)
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testtcemgr.H)
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testlidmgr.H)
+TESTS += threadpool.H
 
 include ${ROOTPATH}/config.mk
 

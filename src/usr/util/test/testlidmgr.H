@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ public:
      */
     void testLidInPnorTest(void)
     {
+        UTIL_FT(INFO_MRK"testLidInPnorTest> Begin");
         errlHndl_t l_errl = NULL;
         size_t l_lidSize = 0;
         UtilLidMgr l_lidMgr(Util::TEST_LIDID);
@@ -129,6 +130,7 @@ public:
             }
             delete[] l_ptrTest;
         }while(0);
+        UTIL_FT(INFO_MRK"testLidInPnorTest> End");
     }
 
     /**
@@ -137,6 +139,7 @@ public:
      */
     void testLidInPnorOcc(void)
     {
+        UTIL_FT(INFO_MRK"testLidInPnorOcc> Begin");
         errlHndl_t l_errl = NULL;
 
         do
@@ -217,6 +220,7 @@ public:
                 TS_FAIL("testLidInPnorOcc: failed to release lid from PNOR");
             }
         }while(0);
+        UTIL_FT(INFO_MRK"testLidInPnorOcc> End");
     }
 };
 

@@ -33,6 +33,7 @@
 #include <usr/vmmconst.h>
 #include <runtime/preverifiedlidmgr.H>
 #include <util/util_reasoncodes.H>
+#include <util/utillidmgr.H>
 
 namespace MCL
 {

@@ -1,0 +1,6 @@
+config EARLY_TESTCASES
+    default n
+    help
+        Execute unit tests at the end of the istep specified in
+        EARLY_TESTCASES_ISTEP and then shut down.
+

@@ -93,6 +93,8 @@
 #include <devicefw/userif.H>
 #include <p9_perv_scom_addresses.H>
 // ---------------------------
+#include <initservice/extinitserviceif.H>
+
 
 namespace ISTEPS_TRACE
 {
@@ -871,6 +873,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
     do {
 
+    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
@@ -973,8 +978,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         }
 
         // Zero ATTR_RECONFIGURE_LOOP
-        TARGETING::Target* l_pTopLevel = NULL;
-        TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
         l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(0);
 
         // Read ATTR_ISTEP_PAUSE_ENABLE attribute
@@ -1121,6 +1124,40 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         TRACDCOMP( g_trac_initsvc,
                   INFO_MRK"doIstep: Empty Istep, nothing to do!" );
     }
+
+#ifdef CONFIG_EARLY_TESTCASES
+    // Check to see if we should run testcases here
+    TARGETING::ATTR_EARLY_TESTCASES_ISTEP_type l_runCxxIstep =
+      l_pTopLevel->getAttr<TARGETING::ATTR_EARLY_TESTCASES_ISTEP>();
+    if( (((i_istep & 0xFF) << 8) | (i_substep & 0xFF))
+        == l_runCxxIstep )
+    {
+        TRACFCOMP(g_trac_initsvc, "doIstep: Executing CXX testcases!");
+        uint32_t l_status = SHUTDOWN_STATUS_GOOD;
+
+        //  - Run CXX testcases
+        err = INITSERVICE::executeUnitTests();
+        if(err)
+        {
+            errlCommit (err, INITSVC_COMP_ID);
+            l_status = SHUTDOWN_STATUS_UT_FAILED;
+        }
+
+        //  - Call shutdown using payload base, and payload entry.
+        // NOTE: this call will not return if successful.
+        TARGETING::Target* l_pSys = NULL;
+        TARGETING::targetService().getTopLevelTarget( l_pSys );
+        uint64_t payloadBase =
+          l_pSys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+        payloadBase = (payloadBase * MEGABYTE);
+        uint64_t payloadEntry =
+          l_pSys->getAttr<TARGETING::ATTR_PAYLOAD_ENTRY>();
+        INITSERVICE::doShutdown( l_status,
+                                 false,
+                                 payloadBase,
+                                 payloadEntry );
+    }
+#endif
 
     } while (0); // if there was an error break here
 

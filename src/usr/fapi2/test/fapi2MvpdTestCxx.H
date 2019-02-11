@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -320,10 +320,15 @@ public:
 
   void testMvpdGetPoundVBucket(void)
   {
+      FAPI_INF("MvpdGetPoundVBucket Test entry... ");
       int numTests = 0;
       int numFails = 0;
+
+#ifdef CONFIG_EARLY_TESTCASES
+      // Requires some prereqs of step7
+      FAPI_INF("Skipping poundv tests");
+#else
       fapi2::ReturnCode   l_rc;
-      FAPI_INF("MvpdGetPoundVBucket Test entry... ");
 
       // Create a vector of TARGETING::Target pointers
       TARGETING::TargetHandleList l_chipletList;
@@ -403,6 +408,7 @@ public:
           FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, voltageData.bucketId);
       }
 
+#endif
       FAPI_INF("MvpdGetPoundVBucket:: Test Complete. %d/%d fails",  numFails , numTests);
       FAPI_INF("MvpdGetPoundVBucket Test exit... ");
   }
@@ -411,8 +417,13 @@ public:
   {
       int numTests = 0;
       int numFails = 0;
-      fapi2::ReturnCode   l_rc;
       FAPI_INF("MvpdGetPoundWBucket Test entry... ");
+
+#ifdef CONFIG_EARLY_TESTCASES
+      // Requires some prereqs of step7
+      FAPI_INF("Skipping poundv tests");
+#else
+      fapi2::ReturnCode   l_rc;
 
       // Create a vector of TARGETING::Target pointers
       TARGETING::TargetHandleList l_chipletList;
@@ -470,6 +481,8 @@ public:
 
           FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, vdmData.bucketId);
       }
+
+#endif
 
       FAPI_INF("MvpdGetPoundWBucket:: Test Complete. %d/%d fails",
                numFails,
