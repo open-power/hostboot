@@ -8694,7 +8694,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8760,7 +8760,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8826,7 +8826,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8892,7 +8892,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8958,7 +8958,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -9024,7 +9024,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -9090,7 +9090,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
