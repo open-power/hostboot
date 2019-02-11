@@ -207,6 +207,7 @@ extern "C"
     /// *************************************
     const p10ChipletId_t PervTargetChipletIdTable[] =
     {
+        PIB_CHIPLET_ID,
         PERV_CHIPLET_ID,
         N0_CHIPLET_ID,
         N1_CHIPLET_ID,
