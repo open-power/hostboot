@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -404,6 +404,11 @@ public:
         uint32_t l_num;
 
         do {
+#ifdef CONFIG_EARLY_TESTCASES
+            TS_TRACE("testXscom4: Skipping test, multicast groups not setup yet");
+            break;
+#endif
+
             // Loop thru write table
             for( l_num=0; l_num < g_xscomMultiWriteTableSz; l_num++)
             {
@@ -459,7 +464,7 @@ public:
 
                 if( l_readData != l_testEntry.data )
                 {
-                    TS_FAIL("testXscom4: XSCom multicast read back doesn't match write!");
+                    TS_FAIL("testXscom4: XSCom multicast read back doesn't match write for %.8X!", l_testEntry.addr);
                     /*@
                     * @errortype
                     * @moduleid     XSCOM::XSCOM_TEST_XSCOM4

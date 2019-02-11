@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = testruntime
-TESTS += testpreverifiedlidmgr.H
+TESTS += $(if $(CONFIG_EARLY_TESTCASES),,testpreverifiedlidmgr.H)
 TESTS += test_checkHbResMemLimit.H
 #@TODO RTC 132750
 #TESTS += hdatservicetest.H

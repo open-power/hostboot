@@ -32,6 +32,7 @@
 #include <runtime/interface.h>
 #include <runtime/runtime_reasoncodes.H>
 #include <vmmconst.h>
+#include <vfs/vfs.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -150,6 +151,43 @@ public:
 
         }while(0);
         TRACFCOMP(g_trac_runtime, "testAddressBelowHbResMemRange finished");
+    }
+
+
+    // Handle the case where we are running the testcases before the
+    //  libruntime.so module has been loaded
+    bool iv_loaded_libruntime;
+
+    CheckHbResMemLimitTest()
+      : CxxTest::TestSuite(), iv_loaded_libruntime(false)
+    {
+        // Need to load up the runtime module if it isn't already loaded
+        if (  !VFS::module_is_loaded( "libruntime.so" ) )
+        {
+            errlHndl_t errhdl = VFS::module_load( "libruntime.so" );
+            if ( errhdl )
+            {
+                TS_FAIL("CheckHbResMemLimitTest> Failed to load libruntime.so");
+                errlCommit(errhdl,RUNTIME_COMP_ID);
+            }
+            else
+            {
+                iv_loaded_libruntime = true;
+            }
+        }
+    }
+
+    ~CheckHbResMemLimitTest()
+    {
+        if( iv_loaded_libruntime )
+        {
+            errlHndl_t errhdl = VFS::module_unload( "libruntime.so" );
+            if ( errhdl )
+            {
+                TS_FAIL("CheckHbResMemLimitTest> Failed to unload libruntime.so");
+                errlCommit(errhdl,RUNTIME_COMP_ID);
+            }
+        }
     }
 };
 

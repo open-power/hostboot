@@ -175,6 +175,23 @@
   </attribute>
 
   <attribute>
+    <id>EARLY_TESTCASES_ISTEP</id>
+    <description>
+        Indicates which istep we should execute the CXX testcases after, if
+        CONFIG_EARLY_TESTCASES is set.
+        Format: 0xMMmm, where MM=major step, mm=minor step, e.g. 6.9=0x0609.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <!-- Default to running as soon as Hostboot is able -->
+        <default>0x0609</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>EEPROM_PAGE_ARRAY</id>
     <description>
         Used to keep track of which EEPROM page the current I2C master bus is set to

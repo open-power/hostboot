@@ -343,6 +343,10 @@
         <id>X_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>EARLY_TESTCASES_ISTEP</id>
+        <default>0x0609</default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
