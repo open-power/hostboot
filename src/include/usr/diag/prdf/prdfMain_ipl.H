@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,16 +65,13 @@ extern int32_t analyzeIplCEStats( const TARGETING::TargetHandle_t i_mba,
                                   bool &o_calloutMade );
 
 /**
- * @brief  Starts memory background scrubbing on all MBAs in the node.
- *
- * This will only start the initial fast scrub of all memory. PRD on the FSP or
- * HostServices (SP-less machines) will need to resume normal background
- * scrubbing once this initial fast scrub is complete.
- *
+ * @brief  Starts memory background scrubbing on the given target.
+ * @param  i_trgt A target that contains the maintenance command logic (i.e.
+ *                MCBIST or MBA).
  * @return If an error log is returned, then some internal function failed. See
  *         the FFDC in the error log for failure details.
  */
-extern errlHndl_t startScrub();
+extern errlHndl_t startScrub( const TARGETING::TargetHandle_t i_trgt );
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
