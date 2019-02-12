@@ -592,4 +592,222 @@ typedef struct
     uint8_t reserved1[SENSOR_CACHE_PADDING_SIZE_1];
 } sensor_cache_struct;
 
+///
+/// @brief Contains all information back from the explorer
+/// @note Taken from the MSCC explorer FW document
+/// All names and formatting are due to a one-to-one copy
+///
+typedef struct user_response_msdg
+{
+    uint16_t DFIMRL_DDRCLK; // Max Read Latency counted by DDR Clock
+    /* Training status*/
+    uint16_t Failure_L0_C_3_2_1_0; // Lane 0/DQ0 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L1_C_3_2_1_0; // Lane 1/DQ1 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L2_C_3_2_1_0; // Lane 2/DQ2 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L3_C_3_2_1_0; // Lane 3/DQ3 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L4_C_3_2_1_0; // Lane 4/DQ4 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L5_C_3_2_1_0; // Lane 5/DQ5 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L6_C_3_2_1_0; // Lane 6/DQ6 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L7_C_3_2_1_0; // Lane 7/DQ7 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L8_C_3_2_1_0; // Lane 8/DM0/DBI0 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L9_C_3_2_1_0; // Lane 9/DQ8 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L10_C_3_2_1_0; // Lane 10/DQ9 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L11_C_3_2_1_0; // Lane 11/DQ10 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L12_C_3_2_1_0; // Lane 12/DQ11 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L13_C_3_2_1_0; // Lane 13/DQ12 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L14_C_3_2_1_0; // Lane 14/DQ13 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L15_C_3_2_1_0; // Lane 15/DQ14 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L16_C_3_2_1_0; // Lane 16/DQ15 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L17_C_3_2_1_0; // Lane 17/DM1/DBI1 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L18_C_3_2_1_0; // Lane 18/DQ16 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L19_C_3_2_1_0; // Lane 19/DQ17 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L20_C_3_2_1_0; // Lane 20/DQ18 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L21_C_3_2_1_0; // Lane 21/DQ19 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L22_C_3_2_1_0; // Lane 22/DQ20 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L23_C_3_2_1_0; // Lane 23/DQ21 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L24_C_3_2_1_0; // Lane 24/DQ22 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L25_C_3_2_1_0; // Lane 25/DQ23 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L26_C_3_2_1_0; // Lane 26/DM2/DBI2 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L27_C_3_2_1_0; // Lane 27/DQ24 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L28_C_3_2_1_0; // Lane 28/DQ25 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L29_C_3_2_1_0; // Lane 29/DQ26 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L30_C_3_2_1_0; // Lane 30/DQ27 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L31_C_3_2_1_0; // Lane 31/DQ28 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L32_C_3_2_1_0; // Lane 32/DQ29 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L33_C_3_2_1_0; // Lane 33/DQ30 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L34_C_3_2_1_0; // Lane 34/DQ31 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L35_C_3_2_1_0; // Lane 35/DM3/DBI3 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L36_C_3_2_1_0; // Lane 36/DQ32 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L37_C_3_2_1_0; // Lane 37/DQ33 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L38_C_3_2_1_0; // Lane 38/DQ34 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L39_C_3_2_1_0; // Lane 39/DQ35 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L40_C_3_2_1_0; // Lane 40/DQ36 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L41_C_3_2_1_0; // Lane 41/DQ37 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L42_C_3_2_1_0; // Lane 42/DQ38 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L43_C_3_2_1_0; // Lane 43/DQ39 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L44_C_3_2_1_0; // Lane 44/DM4/DBI4 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L45_C_3_2_1_0; // Lane 45/DQ40 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L46_C_3_2_1_0; // Lane 46/DQ41 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L47_C_3_2_1_0; // Lane 47/DQ42 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L48_C_3_2_1_0; // Lane 48/DQ43 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L49_C_3_2_1_0; // Lane 49/DQ44 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L50_C_3_2_1_0; // Lane 50/DQ45 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L51_C_3_2_1_0; // Lane 51/DQ46 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L52_C_3_2_1_0; // Lane 52/DQ47 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L53_C_3_2_1_0; // Lane 53/DM5/DBI5 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L54_C_3_2_1_0; // Lane 54/DQ48 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L55_C_3_2_1_0; // Lane 55/DQ49 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L56_C_3_2_1_0; // Lane 56/DQ50 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L57_C_3_2_1_0; // Lane 57/DQ51 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L58_C_3_2_1_0; // Lane 58/DQ52 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L59_C_3_2_1_0; // Lane 59/DQ53 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L60_C_3_2_1_0; // Lane 60/DQ54 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L61_C_3_2_1_0; // Lane 61/DQ55 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L62_C_3_2_1_0; // Lane 62/DM6/DBI6 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L63_C_3_2_1_0; // Lane 63/DQ56 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L64_C_3_2_1_0; // Lane 64/DQ57 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L65_C_3_2_1_0; // Lane 65/DQ58 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L66_C_3_2_1_0; // Lane 66/DQ59 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L67_C_3_2_1_0; // Lane 67/DQ60 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L68_C_3_2_1_0; // Lane 68/DQ61 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L69_C_3_2_1_0; // Lane 69/DQ62 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L70_C_3_2_1_0; // Lane 70/DQ63 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L71_C_3_2_1_0; // Lane 71/DM7/DBI7 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L72_C_3_2_1_0; // Lane 72/DQ64 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L73_C_3_2_1_0; // Lane 73/DQ65 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L74_C_3_2_1_0; // Lane 74/DQ66 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L75_C_3_2_1_0; // Lane 75/DQ67 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L76_C_3_2_1_0; // Lane 76/DQ68 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L77_C_3_2_1_0; // Lane 77/DQ69 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L78_C_3_2_1_0; // Lane 78/DQ70 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L79_C_3_2_1_0; // Lane 79/DQ71 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L80_C_3_2_1_0; // Lane 80/DM8/DBI8 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L81_C_3_2_1_0; // Lane 81/DQ72 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L82_C_3_2_1_0; // Lane 82/DQ73 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L83_C_3_2_1_0; // Lane 83/DQ74 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L84_C_3_2_1_0; // Lane 84/DQ75 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L85_C_3_2_1_0; // Lane 85/DQ76 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L86_C_3_2_1_0; // Lane 86/DQ77 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L87_C_3_2_1_0; // Lane 87/DQ78 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L88_C_3_2_1_0; // Lane 88/DQ79 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_L89_C_3_2_1_0; // Lane 89/DM9/DBI9 and Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    /* MRS values*/
+    uint16_t MR0; // Value of DDR mode register MR0 for all ranks for current pstate
+    uint16_t MR1; // Value of DDR mode register MR1 for all ranks for current pstate
+    uint16_t MR2; // Value of DDR mode register MR2 for all ranks for current pstate
+    uint16_t MR3; // Value of DDR mode register MR3 for all ranks for current pstate
+    uint16_t MR4; // Value of DDR mode register MR4 for all ranks for current pstate
+    uint16_t MR5; // Value of DDR mode register MR5 for all ranks for current pstate
+    uint16_t MR6[4][20]; // 4 = Max Ranks, each rank has 20 entries. Byte offset 0x6a, CSR
+    // Addr 0x54035, Direction=In
+    uint8_t F0RC00_D0; // [3:0] = Setting[3:0] of F0RC00, DIMM0. Unused for UDIMM.
+    uint8_t F0RC01_D0; // [3:0] = Setting[3:0] of F0RC01, DIMM0. Unused for UDIMM.
+    uint8_t F0RC02_D0; // [3:0] = Setting[3:0] of F0RC02, DIMM0. Unused for UDIMM.
+    uint8_t F0RC03_D0; // [3:0] = Setting[3:0] of F0RC03, DIMM0. Unused for UDIMM.
+    uint8_t F0RC04_D0; // [3:0] = Setting[3:0] of F0RC04, DIMM0. Unused for UDIMM.
+    uint8_t F0RC05_D0; // [3:0] = Setting[3:0] of F0RC05, DIMM0. Unused for UDIMM.
+    uint8_t F0RC06_D0; // [3:0] = Setting[3:0] of F0RC06, DIMM0. Unused for UDIMM.
+    uint8_t F0RC07_D0; // [3:0] = Setting[3:0] of F0RC07, DIMM0. Unused for UDIMM.
+    uint8_t F0RC08_D0; // [3:0] = Setting[3:0] of F0RC08, DIMM0. Unused for UDIMM.
+    uint8_t F0RC09_D0; // [3:0] = Setting[3:0] of F0RC09, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0A_D0; // [3:0] = Setting[3:0] of F0RC0A, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0B_D0; // [3:0] = Setting[3:0] of F0RC0B, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0C_D0; // [3:0] = Setting[3:0] of F0RC0C, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0D_D0; // [3:0] = Setting[3:0] of F0RC0D, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0E_D0; // [3:0] = Setting[3:0] of F0RC0E, DIMM0. Unused for UDIMM.
+    uint8_t F0RC0F_D0; // [3:0] = Setting[3:0] of F0RC0F, DIMM0. Unused for UDIMM.
+    uint8_t F0RC1x_D0; // Setting[7:0] of RCD control word F0RC1x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC2x_D0; // Setting[7:0] of RCD control word F0RC2x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC3x_D0; // Setting[7:0] of RCD control word F0RC3x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC4x_D0; // Setting[7:0] of RCD control word F0RC4x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC5x_D0; // Setting[7:0] of RCD control word F0RC5x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC6x_D0; // Setting[7:0] of RCD control word F0RC6x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC7x_D0; // Setting[7:0] of RCD control word F0RC7x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC8x_D0; // Setting[7:0] of RCD control word F0RC8x, DIMM0. Unused for UDIMM.
+    uint8_t F0RC9x_D0; // Setting[7:0] of RCD control word F0RC9x, DIMM0. Unused for UDIMM.
+    uint8_t F0RCAx_D0; // Setting[7:0] of RCD control word F0RCAx, DIMM0. Unused for UDIMM.
+    uint8_t F0RCBx_D0; // Setting[7:0] of RCD control word F0RCBx, DIMM0. Unused for UDIMM.
+    uint8_t F1RC00_D0; // [3:0] = Setting[3:0] of F1RC00, DIMM0. Unused for UDIMM.
+    uint8_t F1RC01_D0; // [3:0] = Setting[3:0] of F1RC01, DIMM0. Unused for UDIMM.
+    uint8_t F1RC02_D0; // [3:0] = Setting[3:0] of F1RC02, DIMM0. Unused for UDIMM.
+    uint8_t F1RC03_D0; // [3:0] = Setting[3:0] of F1RC03, DIMM0. Unused for UDIMM.
+    uint8_t F1RC04_D0; // [3:0] = Setting[3:0] of F1RC04, DIMM0. Unused for UDIMM.
+    uint8_t F1RC05_D0; // [3:0] = Setting[3:0] of F1RC05, DIMM0. Unused for UDIMM.
+    uint8_t F1RC06_D0; // [3:0] = Setting[3:0] of F1RC06, DIMM0. Unused for UDIMM.
+    uint8_t F1RC07_D0; // [3:0] = Setting[3:0] of F1RC07, DIMM0. Unused for UDIMM.
+    uint8_t F1RC08_D0; // [3:0] = Setting[3:0] of F1RC08, DIMM0. Unused for UDIMM.
+    uint8_t F1RC09_D0; // [3:0] = Setting[3:0] of F1RC09, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0A_D0; // [3:0] = Setting[3:0] of F1RC0A, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0B_D0; // [3:0] = Setting[3:0] of F1RC0B, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0C_D0; // [3:0] = Setting[3:0] of F1RC0C, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0D_D0; // [3:0] = Setting[3:0] of F1RC0D, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0E_D0; // [3:0] = Setting[3:0] of F1RC0E, DIMM0. Unused for UDIMM.
+    uint8_t F1RC0F_D0; // [3:0] = Setting[3:0] of F1RC0F, DIMM0. Unused for UDIMM.
+    uint8_t F1RC1x_D0; // Setting[7:0] of RCD control word F1RC1x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC2x_D0; // Setting[7:0] of RCD control word F1RC2x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC3x_D0; // Setting[7:0] of RCD control word F1RC3x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC4x_D0; // Setting[7:0] of RCD control word F1RC4x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC5x_D0; // Setting[7:0] of RCD control word F1RC5x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC6x_D0; // Setting[7:0] of RCD control word F1RC6x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC7x_D0; // Setting[7:0] of RCD control word F1RC7x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC8x_D0; // Setting[7:0] of RCD control word F1RC8x, DIMM0. Unused for UDIMM.
+    uint8_t F1RC9x_D0; // Setting[7:0] of RCD control word F1RC9x, DIMM0. Unused for UDIMM.
+    uint8_t F1RCAx_D0; // Setting[7:0] of RCD control word F1RCAx, DIMM0. Unused for UDIMM.
+    uint8_t F1RCBx_D0; // Setting[7:0] of RCD control word F1RCBx, DIMM0. Unused for UDIMM.
+    uint8_t F0RC00_D1; // [3:0] = Setting[3:0] of F0RC00, DIMM1. Unused for UDIMM.
+    uint8_t F0RC01_D1; // [3:0] = Setting[3:0] of F0RC01, DIMM1. Unused for UDIMM.
+    uint8_t F0RC02_D1; // [3:0] = Setting[3:0] of F0RC02, DIMM1. Unused for UDIMM.
+    uint8_t F0RC03_D1; // [3:0] = Setting[3:0] of F0RC03, DIMM1. Unused for UDIMM.
+    uint8_t F0RC04_D1; // [3:0] = Setting[3:0] of F0RC04, DIMM1. Unused for UDIMM.
+    uint8_t F0RC05_D1; // [3:0] = Setting[3:0] of F0RC05, DIMM1. Unused for UDIMM.
+    uint8_t F0RC06_D1; // [3:0] = Setting[3:0] of F0RC06, DIMM1. Unused for UDIMM.
+    uint8_t F0RC07_D1; // [3:0] = Setting[3:0] of F0RC07, DIMM1. Unused for UDIMM.
+    uint8_t F0RC08_D1; // [3:0] = Setting[3:0] of F0RC08, DIMM1. Unused for UDIMM.
+    uint8_t F0RC09_D1; // [3:0] = Setting[3:0] of F0RC09, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0A_D1; // [3:0] = Setting[3:0] of F0RC0A, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0B_D1; // [3:0] = Setting[3:0] of F0RC0B, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0C_D1; // [3:0] = Setting[3:0] of F0RC0C, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0D_D1; // [3:0] = Setting[3:0] of F0RC0D, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0E_D1; // [3:0] = Setting[3:0] of F0RC0E, DIMM1. Unused for UDIMM.
+    uint8_t F0RC0F_D1; // [3:0] = Setting[3:0] of F0RC0F, DIMM1. Unused for UDIMM.
+    uint8_t F0RC1x_D1; // Setting[7:0] of RCD control word F0RC1x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC2x_D1; // Setting[7:0] of RCD control word F0RC2x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC3x_D1; // Setting[7:0] of RCD control word F0RC3x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC4x_D1; // Setting[7:0] of RCD control word F0RC4x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC5x_D1; // Setting[7:0] of RCD control word F0RC5x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC6x_D1; // Setting[7:0] of RCD control word F0RC6x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC7x_D1; // Setting[7:0] of RCD control word F0RC7x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC8x_D1; // Setting[7:0] of RCD control word F0RC8x, DIMM1. Unused for UDIMM.
+    uint8_t F0RC9x_D1; // Setting[7:0] of RCD control word F0RC9x, DIMM1. Unused for UDIMM.
+    uint8_t F0RCAx_D1; // Setting[7:0] of RCD control word F0RCAx, DIMM1. Unused for UDIMM.
+    uint8_t F0RCBx_D1; // Setting[7:0] of RCD control word F0RCBx, DIMM1. Unused for UDIMM.
+    uint8_t F1RC00_D1; // [3:0] = Setting[3:0] of F1RC00, DIMM1. Unused for UDIMM.
+    uint8_t F1RC01_D1; // [3:0] = Setting[3:0] of F1RC01, DIMM1. Unused for UDIMM.
+    uint8_t F1RC02_D1; // [3:0] = Setting[3:0] of F1RC02, DIMM1. Unused for UDIMM.
+    uint8_t F1RC03_D1; // [3:0] = Setting[3:0] of F1RC03, DIMM1. Unused for UDIMM.
+    uint8_t F1RC04_D1; // [3:0] = Setting[3:0] of F1RC04, DIMM1. Unused for UDIMM.
+    uint8_t F1RC05_D1; // [3:0] = Setting[3:0] of F1RC05, DIMM1. Unused for UDIMM.
+    uint8_t F1RC06_D1; // [3:0] = Setting[3:0] of F1RC06, DIMM1. Unused for UDIMM.
+    uint8_t F1RC07_D1; // [3:0] = Setting[3:0] of F1RC07, DIMM1. Unused for UDIMM.
+    uint8_t F1RC08_D1; // [3:0] = Setting[3:0] of F1RC08, DIMM1. Unused for UDIMM.
+    uint8_t F1RC09_D1; // [3:0] = Setting[3:0] of F1RC09, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0A_D1; // [3:0] = Setting[3:0] of F1RC0A, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0B_D1; // [3:0] = Setting[3:0] of F1RC0B, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0C_D1; // [3:0] = Setting[3:0] of F1RC0C, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0D_D1; // [3:0] = Setting[3:0] of F1RC0D, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0E_D1; // [3:0] = Setting[3:0] of F1RC0E, DIMM1. Unused for UDIMM.
+    uint8_t F1RC0F_D1; // [3:0] = Setting[3:0] of F1RC0F, DIMM1. Unused for UDIMM.
+    uint8_t F1RC1x_D1; // Setting[7:0] of RCD control word F1RC1x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC2x_D1; // Setting[7:0] of RCD control word F1RC2x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC3x_D1; // Setting[7:0] of RCD control word F1RC3x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC4x_D1; // Setting[7:0] of RCD control word F1RC4x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC5x_D1; // Setting[7:0] of RCD control word F1RC5x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC6x_D1; // Setting[7:0] of RCD control word F1RC6x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC7x_D1; // Setting[7:0] of RCD control word F1RC7x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC8x_D1; // Setting[7:0] of RCD control word F1RC8x, DIMM1. Unused for UDIMM.
+    uint8_t F1RC9x_D1; // Setting[7:0] of RCD control word F1RC9x, DIMM1. Unused for UDIMM.
+    uint8_t F1RCAx_D1; // Setting[7:0] of RCD control word F1RCAx, DIMM1. Unused for UDIMM.
+    uint8_t F1RCBx_D1; // Setting[7:0] of RCD control word F1RCBx, DIMM1. Unused for UDIMM.
+} user_response_msdg;
+
 #endif
