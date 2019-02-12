@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,9 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
-#include <prdfCenMbaDomain.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
-#include <prdfP9McbistDomain.H>
+#include <prdfMemBgScrub.H>
 
 // Custom compile configs
 #include <config.h>
@@ -115,7 +114,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
 
 //------------------------------------------------------------------------------
 
-errlHndl_t startScrub()
+errlHndl_t startScrub( const TargetHandle_t i_trgt )
 {
     #define PRDF_FUNC "[PRDF::startScrub] "
     PRDF_ENTER( PRDF_FUNC );
@@ -123,63 +122,40 @@ errlHndl_t startScrub()
     errlHndl_t o_errl = nullptr;
 
     int32_t l_rc = SUCCESS;
-    HUID nodeId = INVALID_HUID;
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
     do
     {
-        // Since the last refresh is in istep10 host_prd_hwreconfig,
-        // it may be good to call it again here at istep16 mss_scrub
-        // to remove any non-functional MBAs from PRD system model.
-        o_errl = noLock_refresh();
-        // This shouldn't return any error but if it does, break out
-        if( nullptr != o_errl )
+        // Get the PRD chip object.
+        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
+        if ( nullptr == chip )
         {
-            PRDF_ERR( PRDF_FUNC "noLock_refresh() failed" );
-            break;
-        }
-
-        // This is run in Hostboot so there should only be one node.
-        TargetHandleList list = getFunctionalTargetList( TYPE_NODE );
-        if ( 1 != list.size() )
-        {
-            PRDF_ERR( PRDF_FUNC "getFunctionalTargetList(TYPE_NODE) failed" );
+            PRDF_ERR( PRDF_FUNC "unable to find chip object for given target: "
+                                "0x%08x", getHuid(i_trgt) );
             l_rc = FAIL; break;
         }
-        nodeId = getHuid(list[0]);
 
-        PRDF_ENTER( PRDF_FUNC "HUID=0x%08x", nodeId );
-
-        // Start background scrubbing.
-        TARGETING::MODEL procModel = getChipModel( getMasterProc() );
-        if ( MODEL_CUMULUS == procModel )
+        // Start background scrubbing on this target.
+        switch ( chip->getType() )
         {
-            MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
-            l_rc = domain->startScrub();
+            case TYPE_MBA:    startInitialBgScrub<TYPE_MBA>(   chip); break;
+            case TYPE_MCBIST: startInitialBgScrub<TYPE_MCBIST>(chip); break;
+            default:
+                PRDF_ERR( PRDF_FUNC "Unsupported maintenance target type "
+                          "0x%02x", chip->getType() );
+                l_rc = FAIL;
         }
-        else if ( MODEL_NIMBUS == procModel )
-        {
-            McbistDomain * domain =
-                            (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
-            l_rc = domain->startScrub();
-        }
-        else
-        {
-            PRDF_ERR(PRDF_FUNC "Master PROC model %d not supported", procModel);
-            PRDF_ASSERT(false);
-        }
-
-        PRDF_EXIT( PRDF_FUNC "HUID=0x%08x", nodeId );
+        if ( SUCCESS != l_rc ) break;
 
     } while (0);
 
-    if (( SUCCESS != l_rc ) && (NULL == o_errl))
+    if ( SUCCESS != l_rc )
     {
         // Get user data
-        uint64_t ud12 = PRDF_GET_UINT64_FROM_UINT32( nodeId, __LINE__ );
-        uint64_t ud34 = PRDF_GET_UINT64_FROM_UINT32( 0,      0        );
+        uint64_t ud12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_trgt), 0 );
+        uint64_t ud34 = PRDF_GET_UINT64_FROM_UINT32( 0,               0 );
 
         // Create error log
         o_errl = new ERRORLOG::ErrlEntry(
@@ -193,7 +169,9 @@ errlHndl_t startScrub()
                                      HWAS::SRCI_PRIORITY_HIGH );
 
         // Add traces
-        o_errl->collectTrace( PRDF_COMP_NAME, 512 );
+        o_errl->collectTrace( PRDF_COMP_NAME,      512 );
+        o_errl->collectTrace( FAPI_TRACE_NAME,     256 );
+        o_errl->collectTrace( FAPI_IMP_TRACE_NAME, 256 );
     }
 
     PRDF_EXIT( PRDF_FUNC );

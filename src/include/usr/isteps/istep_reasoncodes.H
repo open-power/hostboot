@@ -65,6 +65,7 @@ namespace ISTEP
         MOD_SMP_WRAP_PROC_IOVALID                         = 0x22,
         MOD_APPLY_HCODE_GEN_CPU_REGS                      = 0x23,
         MOD_GET_LANEMASK_FROM_HX_KEYWORD                  = 0x24,
+        MOD_MSS_SCRUB                                     = 0x25,
     };
 
     /**

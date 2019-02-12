@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,11 @@ namespace   INITSERVICE
                 // Hostboot PRD should no longer be called after this step.
                 ISTEPNAME(16,04,"mss_scrub"),
                 ISTEP_16::call_mss_scrub,
+#ifdef CONFIG_NVDIMM
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+#else
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+#endif
         },
         {
                 ISTEPNAME(16,05,"host_load_io_ppe"),
