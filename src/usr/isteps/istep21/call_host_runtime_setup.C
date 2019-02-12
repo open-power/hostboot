@@ -66,6 +66,10 @@
 #include "call_update_ucd_flash.H"
 #endif
 
+#ifdef CONFIG_NVDIMM
+#include "call_nvdimm_update.H"
+#endif
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -705,6 +709,12 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
+#ifdef CONFIG_NVDIMM
+        // Update the NVDIMM controller code, if necessary
+        // Need to do this after LIDs are accessible
+        NVDIMM_UPDATE::call_nvdimm_update();
+#endif
+
 #ifdef CONFIG_START_OCC_DURING_BOOT
         bool l_activatePM = TARGETING::is_sapphire_load();
 #else
@@ -746,7 +756,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
 #endif
         }
-        // No support for OCC 
+        // No support for OCC
         else if( !Util::isSimicsRunning() )
         {
             //Shouldnt clear this ATTR_PM_FIRINIT_DONE_ONCE_FLAG
@@ -836,7 +846,7 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
-        
+
         // Update the MDRT Count from Attribute
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;

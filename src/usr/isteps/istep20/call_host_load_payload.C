@@ -40,10 +40,6 @@
 #include <xz/xz.h>
 #include <config.h>
 
-#ifdef CONFIG_NVDIMM
-#include "call_nvdimm_update.H"
-#endif
-
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -133,12 +129,6 @@ void* call_host_load_payload (void *io_pArgs)
                 break;
             }
         }
-
-#ifdef CONFIG_NVDIMM
-        // Update the NVDIMM controller code, if necessary
-        // Need to do this after LIDs are accessible
-        NVDIMM_UPDATE::call_nvdimm_update();
-#endif
 
     }while(0);
 
