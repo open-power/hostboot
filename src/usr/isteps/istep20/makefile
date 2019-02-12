@@ -26,6 +26,5 @@ ROOTPATH = ../../../..
 MODULE = istep20
 
 OBJS += call_host_load_payload.o
-OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
 
 include ${ROOTPATH}/config.mk

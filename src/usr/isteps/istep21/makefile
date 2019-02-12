@@ -43,5 +43,6 @@ OBJS += freqAttrData.o
 OBJS += call_host_verify_hdat.o
 OBJS += call_host_start_payload.o
 OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
+OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
 
 include ${ROOTPATH}/config.mk
