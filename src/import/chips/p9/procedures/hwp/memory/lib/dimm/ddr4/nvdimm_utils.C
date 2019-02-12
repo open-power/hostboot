@@ -67,21 +67,49 @@ namespace nvdimm
 {
 
 ///
-/// @brief Disable maintenance address mode
-/// Specialization for TARGET_TYPE_MCBIST
+/// @brief Wrapper to read MAINT_ADDR_MODE_EN
+/// Specialization for TARGET_TYPE_MCA
 /// @param[in] i_target the target associated with this subroutine
+/// @param[out] o_state MAINT_ADDR_MODE_EN state
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template<>
-fapi2::ReturnCode maint_addr_mode_off( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+template< >
+fapi2::ReturnCode get_maint_addr_mode_en( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        mss::states& o_state )
 {
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY( mss::getScom(i_target, TT::MCBAGRAQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
-    l_data.clearBit<TT::MAINT_ADDR_MODE_EN>();
+    FAPI_TRY( mss::getScom(l_mcbist, TT::MCBAGRAQ_REG, l_data),
+              "%s Failed getScom", mss::c_str(l_mcbist) );
+    o_state = l_data.getBit<TT::MAINT_ADDR_MODE_EN>() ? mss::states::HIGH : mss::states::LOW;
 
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAGRAQ_REG, l_data), "%s Failed putScom", mss::c_str(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief change maintenance address mode
+/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_target the target associated with this subroutine
+/// @param[in] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< >
+fapi2::ReturnCode change_maint_addr_mode_en( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const mss::states i_state )
+{
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(l_mcbist, TT::MCBAGRAQ_REG, l_data),
+              "%s Failed getScom", mss::c_str(l_mcbist) );
+    l_data.writeBit<TT::MAINT_ADDR_MODE_EN>(i_state);
+
+    FAPI_TRY( mss::putScom(l_mcbist, TT::MCBAGRAQ_REG, l_data),
+              "%s Failed putScom", mss::c_str(l_mcbist) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -151,6 +179,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 ///
 /// @brief Put target into self-refresh
 /// Specialization for TARGET_TYPE_MCA
@@ -197,7 +226,6 @@ template< >
 fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     fapi2::buffer<uint64_t> l_mbarpc0_data, l_mbastr0_data;
-    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Step 1 - In MBARPC0Q, disable power domain control.
     FAPI_TRY(mss::mc::read_mbarpc0(i_target, l_mbarpc0_data));
@@ -209,7 +237,7 @@ fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 
     // maint_addr_mode could be enabled by the helper. Disable it before exiting
     // otherwise it will introduce problem to other DIMMs on the same MCBIST
-    FAPI_TRY(maint_addr_mode_off(l_mcbist));
+    FAPI_TRY(change_maint_addr_mode_en(i_target, mss::states::LOW));
 
     // Restore MBASTR0Q and MBARPC0Q to the original values based on MRW
     FAPI_TRY(mss::mc::set_pwr_cntrl_reg(i_target));
@@ -294,6 +322,17 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
+    mss::states l_maint_addr_enabled = mss::states::LOW;
+
+    FAPI_TRY(get_maint_addr_mode_en(i_target, l_maint_addr_enabled));
+
+    if (l_maint_addr_enabled)
+    {
+        //If maint addr, disable it before doing rcd_load(). RCD load
+        //this bit on can interfere with other ports on the same mcbist
+        FAPI_TRY(change_maint_addr_mode_en(i_target, mss::states::LOW));
+    }
+
     // Subseqent restore on later nvdimms would go wonky if this goes before STR exit...
     FAPI_TRY( mss::rcd_load( i_target ) );
 
@@ -317,6 +356,9 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
     {
         FAPI_TRY( pda_vref_latch( l_dimm ) );
     }
+
+    //Restore main_addr_mode_en to previous setting
+    FAPI_TRY(change_maint_addr_mode_en(i_target, l_maint_addr_enabled));
 
 fapi_try_exit:
     return fapi2::current_err;

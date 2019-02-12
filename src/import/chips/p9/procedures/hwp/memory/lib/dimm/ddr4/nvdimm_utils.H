@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
@@ -43,13 +44,26 @@ namespace nvdimm
 {
 
 ///
-/// @brief Disable maintenance address mode
+/// @brief Wrapper to read MAINT_ADDR_MODE_EN
 /// @tparam T the target type associated with this subroutine
 /// @param[in] i_target the target associated with this subroutine
+/// @param[out] o_state MAINT_ADDR_MODE_EN state
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode maint_addr_mode_off( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode get_maint_addr_mode_en( const fapi2::Target<T>& i_target,
+        mss::states& o_state );
+
+///
+/// @brief change maintenance address mode
+/// @tparam T the target type associated with this subroutine
+/// @param[in] i_target the target associated with this subroutine
+/// @param[in] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode change_maint_addr_mode_en( const fapi2::Target<T>& i_target,
+        const mss::states i_state );
 
 ///
 /// @brief Helper for self_refresh_exit().
