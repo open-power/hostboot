@@ -507,12 +507,40 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<28, 4, 60, uint64_t>(l_TGT2_ATTR_EFF_DRAM_TCCD_L[l_def_PORT_INDEX] );
-            l_scom_buffer.insert<32, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
-                    l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
-            l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
-                    l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
-            l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
-                    l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
+
+            if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1))
+            {
+                l_scom_buffer.insert<32, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
+            }
+            else if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] != literal_1))
+            {
+                l_scom_buffer.insert<32, 5, 59, uint64_t>(((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) + literal_6) );
+            }
+
+            if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
+            }
+            else if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] != literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>(((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) + literal_6) );
+            }
+
+            if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) );
+            }
+            else if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] != literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>(((((l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX] + literal_4) +
+                        l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX]) + literal_6) );
+            }
+
             l_scom_buffer.insert<47, 4, 60, uint64_t>((((l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX] + literal_4) +
                     l_def_BUS_TURNAROUND_TCK) - l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX]) );
             l_scom_buffer.insert<51, 6, 58, uint64_t>(((l_TGT2_ATTR_EFF_DRAM_CWL[l_def_PORT_INDEX] + literal_4) +
