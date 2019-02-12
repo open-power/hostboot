@@ -31,7 +31,7 @@ PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
 XIP_CUSTOMIZE_PATH = ${PROCEDURES_PATH}/hwp/customize
 HWP_ACC_PATH += ${PROCEDURES_PATH}/hwp/accessors
-
+OCMB_HWP_PATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 
 EXTRAINCDIR += ${HWP_ACC_PATH}
 EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
@@ -49,6 +49,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${INITFILES_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
+EXTRAINCDIR += ${OCMB_HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 
 OBJS += call_proc_build_smp.o
@@ -86,7 +88,8 @@ VPATH += ${PERV_HWP_PATH}
 VPATH += ${PROCEDURES_PATH}/hwp/io
 VPATH += ${PROCEDURES_PATH}/hwp/pm
 VPATH += ${PROCEDURES_PATH}/hwp/lib
-VPATH+=  ${HWP_ACC_PATH}
+VPATH +=  ${HWP_ACC_PATH}
+VPATH +=  ${OCMB_HWP_PATH}
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -119,6 +122,9 @@ include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
 
 # p9a_ocmb_enable
 include ${PERV_HWP_PATH}/p9a_ocmb_enable.mk
+
+# exp_check_for_ready
+OBJS+=exp_check_for_ready.o
 
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10
