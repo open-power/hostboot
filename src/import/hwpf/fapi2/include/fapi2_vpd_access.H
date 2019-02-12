@@ -52,7 +52,7 @@ class VPDInfo<TARGET_TYPE_MCS>
 {
     public:
         /// @brief VPDInfo constructor
-        /// @param[in]  Type of VPD data to return
+        /// @param[in] i_vpd_type Type of VPD data to return
         VPDInfo( const fapi2::MemVpdData& i_vpd_type)
             : iv_vpd_type(i_vpd_type),
               iv_size(VPD_INFO_INVALID_64),
@@ -86,7 +86,7 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
 {
     public:
         /// @brief VPDInfo constructor
-        /// @param[in]  Type of VPD data to return
+        /// @param[in] i_vpd_type Type of VPD data to return
         VPDInfo( const fapi2::MemVpdData& i_vpd_type)
             : iv_vpd_type(i_vpd_type),
               iv_size(VPD_INFO_INVALID_64),
