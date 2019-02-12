@@ -94,6 +94,7 @@
 //HWP
 #include <p9_update_security_ctrl.H>
 #include <p9a_ocmb_enable.H>
+#include <exp_check_for_ready.H>
 
 // secureboot
 #include <secureboot/service.H>
@@ -974,16 +975,12 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
             l_proc_iter != functionalProcChipList.end();
             ++l_proc_iter)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X",
-                TARGETING::get_huid( *l_proc_iter ));
-
         //Raise fences on centaurs to prevent FSP from analyzing
         // if HB TIs for recoverable errors
         fenceAttachedMembufs( *l_proc_iter );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "passing target HUID %.8X ",
+                "START: p9_cen_ref_clk_enable started on target HUID %.8X",
                 TARGETING::get_huid( *l_proc_iter ) );
 
         // Cumulus only
@@ -998,7 +995,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : proc_cen_ref_clk_enable",
+                    "ERROR : proc_cen_ref_clk_enable"
                     "failed, returning errorlog" );
 
             // capture the target data in the elog
@@ -1013,10 +1010,13 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : proc_cen_ref_clk_enable",
+                    "SUCCESS : proc_cen_ref_clk_enable"
                     "completed ok");
         }
 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "START : p9a_ocmb_enable"
+                    "starting on 0x%.08X", TARGETING::get_huid( *l_proc_iter ));
 
         // Invoke the HWP passing in the proc target
         // HWP loops on child OCMB targets
@@ -1027,8 +1027,8 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : p9a_ocmb_enable",
-                    "failed, returning errorlog" );
+                    "ERROR : p9a_ocmb_enable"
+                    "failed, committing errorlog" );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget( *l_proc_iter ).addToLog( l_errl );
@@ -1042,9 +1042,52 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : p9a_ocmb_enable",
-                    "completed ok");
+                    "SUCCESS : p9a_ocmb_enable"
+                    "completed ok on 0x%.08X", TARGETING::get_huid( *l_proc_iter ));
         }
+
+        TARGETING::TargetHandleList l_functionalOcmbChipList;
+        getChildAffinityTargets( l_functionalOcmbChipList,
+                                 const_cast<TARGETING::Target*>(*l_proc_iter),
+                                 TARGETING::CLASS_CHIP,
+                                 TARGETING::TYPE_OCMB_CHIP,
+                                 true);
+
+        for (const auto & l_ocmb : l_functionalOcmbChipList)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Start : exp_check_for_ready "
+                        "for 0x%.08X", TARGETING::get_huid(l_ocmb));
+
+            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb);
+            FAPI_INVOKE_HWP(l_errl,
+                            exp_check_for_ready,
+                            l_fapi_ocmb_target);
+
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : exp_check_for_ready"
+                          "failed for target 0x%.08X , committing errorlog", TARGETING::get_huid(l_ocmb) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget( l_ocmb ).addToLog( l_errl );
+
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit error log
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SUCCESS : exp_check_for_ready"
+                          "completed ok");
+            }
+        }
+
+
 
     }   // endfor
 
