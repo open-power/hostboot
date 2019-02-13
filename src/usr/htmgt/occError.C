@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ namespace HTMGT
                 if (l_occSrc == 0x2A01)
                 {
                     // 2A01 is Periodic OCC Telemetry / Call Home data
-                    TMGT_ERR("OCC is reporting Periodic Telemetry Data (0x2A01)"
+                    TMGT_INF("OCC is reporting Periodic Telemetry Data (0x2A01)"
                              " - NOT AN ERROR");
                 }
 
@@ -159,41 +159,12 @@ namespace HTMGT
                 }
 
                 // Process Actions
-                bool l_occReset = false;
-                elogProcessActions(l_occElog->actions, l_occReset, severity);
-
-                // Need to add WOF reason code to OCC object regardless of
-                // whether WOF resets are disabled.
-                if( l_occElog->actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED )
-                {
-                    iv_wofResetReasons |= l_usrDtls_ptr->userData1;
-                    TMGT_ERR("WOF Reset Reasons for OCC%d = 0x%08x",
-                             iv_instance,
-                             iv_wofResetReasons);
-
-                }
-
-                // Check if we need a WOF requested reset
-                if(iv_needsWofReset == true)
-                {
-                    TMGT_ERR("WOF Reset detected! SRC = 0x%X",
-                             l_occSrc);
-
-                    // We compare against one less than the threshold because
-                    // the WOF reset count doesn't get incremented until
-                    // the resetPrep
-                    if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
-                    {
-                        // Not at WOF reset threshold yet. Set sev to INFO
-                        severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
-                    }
-                }
-
-                if (l_occReset == true)
-                {
-                    iv_needsReset = true;
-                    OccManager::updateSafeModeReason(l_occSrc, iv_instance);
-                }
+                bool l_call_home_event = false;
+                elogProcessActions(l_occElog->actions,
+                                   l_occSrc,
+                                   l_usrDtls_ptr->userData1,
+                                   severity,
+                                   l_call_home_event);
 
                 // Create OCC error log
                 // NOTE: word 4 (used by extended reason code) to save off OCC
@@ -210,6 +181,13 @@ namespace HTMGT
                           (l_usrDtls_ptr->modId << 16 ) |
                           l_occElog->extendedRC, // extended reason code
                           severity);
+
+                if (l_call_home_event)
+                {
+                    // Force info log to the BMC.
+                    // No HW Callouts (SELs) will be created for this error
+                    l_errlHndl->setEselCallhomeInfoEvent(true);
+                }
 
                 // Add callout information
                 const uint8_t l_max_callouts = l_occElog->maxCallouts;
@@ -336,14 +314,9 @@ namespace HTMGT
                                  "HALT_ON_SRC is set.  Resets will be disabled",
                                  iv_instance, l_occSrc);
                         set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
+                        // Force unrecoverable elog
+                        l_errlHndl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     }
-                }
-
-                // Process force error log to be sent to BMC.
-                if((l_occElog->actions & TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED)||
-                   (l_occSrc == (OCCC_COMP_ID | 0x01 ) ) )    //GEN_CALLHOME_LOG
-                {
-                    l_errlHndl->setEselCallhomeInfoEvent(true);
                 }
 
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
@@ -542,10 +515,16 @@ namespace HTMGT
 
     } // end Occ::elogAddCallout()
 
-    void Occ::elogProcessActions(const uint8_t i_actions,
-                                 bool        & o_occReset,
-                                 ERRORLOG::errlSeverity_t & o_errlSeverity)
+
+    void Occ::elogProcessActions(const uint8_t  i_actions,
+                                 const uint32_t i_src,
+                                 uint32_t       i_data,
+                                 ERRORLOG::errlSeverity_t & io_errlSeverity,
+                                 bool         & o_call_home)
     {
+        bool l_occReset = false;
+        o_call_home = false;
+
         if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
             iv_failed = false;
@@ -553,7 +532,6 @@ namespace HTMGT
             // Check if WOF resets are disabled
             if(int_flags_set(FLAG_WOF_RESET_DISABLED) == true)
             {
-                o_occReset = false;
                 iv_needsWofReset = false;
                 TMGT_INF("elogProcessActions: OCC%d requested a WOF reset "
                          "but WOF resets are DISABLED",
@@ -561,27 +539,64 @@ namespace HTMGT
             }
             else // WOF resets are enabled
             {
-                o_occReset = true;
+                l_occReset = true;
                 iv_needsWofReset = true;
-                TMGT_INF("elogProcessActions: OCC%d requested a WOF reset",
+                TMGT_ERR("elogProcessActions: OCC%d requested a WOF reset",
                          iv_instance);
+
+                // We compare against one less than the threshold because the
+                // WOF reset count doesn't get incremented until the resetPrep
+                if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
+                {
+                    // Not at WOF reset threshold yet. Set sev to INFO
+                    io_errlSeverity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                }
             }
+
+            // Need to add WOF reason code to OCC object regardless of
+            // whether WOF resets are disabled.
+            iv_wofResetReasons |= i_data;
+            TMGT_ERR("elogProcessActions: WOF Reset Reasons for OCC%d = 0x%08x",
+                     iv_instance, iv_wofResetReasons);
         }
         else
         {
             if (i_actions & TMGT_ERRL_ACTIONS_RESET_REQUIRED)
             {
-                o_occReset = true;
+                l_occReset = true;
                 iv_failed = true;
                 iv_resetReason = OCC_RESET_REASON_OCC_REQUEST;
 
                 TMGT_INF("elogProcessActions: OCC%d requested reset",
-                             iv_instance);
+                         iv_instance);
+
+                // If reset will force safe mode, then make error unrecoverable
+                if (OCC_RESET_COUNT_THRESHOLD == iv_resetCount)
+                {
+                    if (io_errlSeverity != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+                    {
+                        // update severity to UNRECOVERABLE
+                        TMGT_ERR("elogProcessActions: changing severity to "
+                                 "UNRECOVERABLE (was sev=0x%02X)",
+                                 io_errlSeverity);
+                        io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                    }
+                }
+                else if (io_errlSeverity != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+                {
+                    // update severity to INFO
+                    TMGT_INF("elogProcessActions: changing severity to "
+                             "INFORMATIONAL (was sev=0x%02X)",
+                             io_errlSeverity);
+                    io_errlSeverity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                    // log will be sent to BMC with NO SEL (hardware callouts)
+                    o_call_home = true;
+                }
             }
 
             if (i_actions & TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED)
             {
-                o_occReset = true;
+                l_occReset = true;
                 iv_failed = true;
                 iv_resetReason = OCC_RESET_REASON_CRIT_FAILURE;
                 iv_resetCount = OCC_RESET_COUNT_THRESHOLD;
@@ -589,8 +604,26 @@ namespace HTMGT
                 TMGT_INF("elogProcessActions: OCC%d requested safe mode",
                          iv_instance);
                 TMGT_CONSOLE("OCC%d requested system enter safe mode",
-                                 iv_instance);
+                             iv_instance);
             }
+        }
+
+        // Check if error needs to be forced to the BMC:
+        //   1. 2A01 = OCC call home/telemetry data, OR
+        //   2. OCC requested force, but error was changed to info by HTMGT
+        //   (log will be sent to the BMC with NO SEL (hardware callouts))
+        if ( (i_src == (OCCC_COMP_ID | 0x01 )) || // GEN_CALLHOME_LOG
+             ( (i_actions & TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED) &&
+               (io_errlSeverity == ERRORLOG::ERRL_SEV_INFORMATIONAL) ) )
+        {
+            o_call_home = true;
+        }
+
+        // If reset required, save the SRC in case it leads to safe mode
+        if (l_occReset == true)
+        {
+            iv_needsReset = true;
+            OccManager::updateSafeModeReason(i_src, iv_instance);
         }
 
     } // end Occ::elogProcessActions()
