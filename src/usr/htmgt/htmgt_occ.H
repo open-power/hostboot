@@ -351,13 +351,19 @@ namespace HTMGT
             /**
              * @brief Determine what actions are required for elog
              *
-             * @param[in]  i_actions       Action requested by OCC
-             * @param[out] o_occReset      returns true if OCC reset is needed
-             * @param[out] o_errlSeverity  severity to use for elog commit
+             * @param[in]     i_actions        Action flags requested by OCC
+             * @param[in]     i_src            SRC being reported by OCC
+             * @param[in]     i_data           Additional data used when
+             *                                 processing actions
+             * @param[in,out] io_errlSeverity  Severity to use for elog
+             * @param[out]    o_call_home      True if info error should be
+             *                                 reported to BMC
              */
-            void elogProcessActions(const uint8_t i_actions,
-                                    bool        & o_occReset,
-                                    ERRORLOG::errlSeverity_t & o_errlSeverity);
+            void elogProcessActions(const uint8_t  i_actions,
+                                    const uint32_t i_src,
+                                    const uint32_t i_data,
+                                    ERRORLOG::errlSeverity_t & io_errlSeverity,
+                                    bool         & o_call_home);
 
 
             /**
