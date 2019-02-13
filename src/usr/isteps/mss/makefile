@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
+IMPORT_PATH        = ${ROOTPATH}/src/import
+PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
@@ -62,6 +63,73 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
 
 EXTRAINCDIR += ${MSS_LIB}
 
+include ${ROOTPATH}/src/build/mkrules/script.rules.mk
+include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+
+# Generate generic_system_accessors header file
+MSS_GENERIC_PATH := $(IMPORT_PATH)/generic/memory/lib
+MSS_GENERIC_INCLUDES := $(shell find $(MSS_GENERIC_PATH) -type d)
+
+GENERATED = generic_system_accessors
+COMMAND = gen_accessors.pl
+$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+
+OUTPATH = ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+FILE_PREFIX = mss_generic_system
+
+SOURCES += $(IMPORT_PATH)/hwpf/fapi2/xml/attribute_info/system_attributes.xml
+
+CLEAN_TARGETS += ${OUTPATH}/mss_generic_system_attribute_getters.H
+CLEAN_TARGETS += ${OUTPATH}/.generic_system_accessors.built
+
+define generic_system_accessors_RUN
+		$(C1) mkdir $(OUTPATH) -p
+		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+endef
+
+$(call BUILD_GENERATED)
+
+# Generate generic_memory_accessors header file
+GENERATED = generic_accessors
+COMMAND = gen_accessors.pl
+$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+
+OUTPATH = ${ROOTPATH}/obj/genfiles/generic/memory/lib
+FILE_PREFIX = mss_generic
+
+SOURCES += $(shell find $(IMPORT_PATH)/generic/procedures/xml/attribute_info/ -type f)
+
+CLEAN_TARGETS += ${OUTPATH}/mss_generic_attribute_getters.H
+CLEAN_TARGETS += ${OUTPATH}/mss_generic_attribute_setters.H
+CLEAN_TARGETS += ${OUTPATH}/.generic_accessors.built
+
+define generic_accessors_RUN
+		$(C1) mkdir $(OUTPATH) -p
+		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+endef
+
+$(call BUILD_GENERATED)
+
+# Generate explorer_memory_accessors header file
+GENERATED = gen_exp_accessors
+COMMAND = gen_accessors.pl
+$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+
+OUTPATH = ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+FILE_PREFIX = mss_explorer
+
+SOURCES += $(shell find $(IMPORT_PATH)/chips/ocmb/explorer/procedures/xml/attribute_info/ -type f)
+
+CLEAN_TARGETS += ${OUTPATH}/mss_explorer_attribute_getters.H
+CLEAN_TARGETS += ${OUTPATH}/mss_explorer_attribute_setters.H
+CLEAN_TARGETS += ${OUTPATH}/.gen_exp_accessors.built
+
+define gen_exp_accessors_RUN
+		$(C1) mkdir $(OUTPATH) -p
+		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+endef
+
+$(call BUILD_GENERATED)
 # Add common and generated parts to object list.
 
 MSS_PATH := $(PROCEDURES_PATH)/hwp/memory/lib
