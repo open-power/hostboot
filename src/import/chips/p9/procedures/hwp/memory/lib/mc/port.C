@@ -38,8 +38,9 @@
 #include <lib/mc/port.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/ecc/ecc.H>
+#include <generic/memory/lib/ecc/ecc.H>
 #include <lib/workarounds/mca_workarounds.H>
+#include <lib/ecc/nimbus_mbs_error_vector_trap.H>
 
 namespace mss
 {

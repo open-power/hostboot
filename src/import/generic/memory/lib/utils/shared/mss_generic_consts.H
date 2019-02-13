@@ -229,6 +229,18 @@ enum generic_ffdc_codes
     POWER_LIMIT = 0x1072,
     SLOPE = 0x1073,
     INTERCEPT = 0x1074,
+
+    // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
+    FWMS_READ = 30,
+    FWMS_WRITE = 31,
+
+    // Used in hw_mark_store.H for MSS_INVALID_RANK_PASSED
+    HWMS_READ = 40,
+    HWMS_WRITE = 41,
+
+    // MSS_INVALID_INDEX_PASSED
+    SYMBOL_COUNT_READ = 50,
+    SYMBOL_COUNT_WRITE = 51,
 };
 
 ///

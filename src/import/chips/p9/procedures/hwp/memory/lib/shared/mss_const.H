@@ -63,7 +63,7 @@ enum sizes
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
-    MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
+    MAX_DQ_BITS = 72,
     MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
     MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x8's there are 9 DRAM for 72 bits
     MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DRAM for 72 bits
@@ -132,18 +132,6 @@ enum ffdc_function_codes
     DRAM_ROW_BITS = 26,
     SOFT_POST_PACKAGE_REPAIR = 27,
     EFF_BC07 = 28,
-
-    // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
-    FWMS_READ = 30,
-    FWMS_WRITE = 31,
-
-    // Used in hw_mark_store.H for MSS_INVALID_RANK_PASSED
-    HWMS_READ = 40,
-    HWMS_WRITE = 41,
-
-    // MSS_INVALID_INDEX_PASSED
-    SYMBOL_COUNT_READ = 50,
-    SYMBOL_COUNT_WRITE = 51,
 
     // Used in rank.H
     MAP_RP_PRIMARY_TO_INIT_CAL = 60,

@@ -42,7 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/shared/mss_const.H>
-#include <lib/ecc/ecc_traits.H>
+#include <lib/ecc/ecc_traits_nimbus.H>
 #include <lib/mc/port.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/utils/bit_count.H>

@@ -42,7 +42,7 @@
 #include <explorer_scom_addresses_fld.H>
 
 #include <lib/shared/exp_consts.H>
-#include <lib/ecc/ecc_traits.H>
+#include <lib/ecc/ecc_traits_explorer.H>
 #include <lib/mc/exp_port.H>
 #include <lib/utils/mss_exp_conversions.H>
 #include <lib/mcbist/exp_mcbist_traits.H>

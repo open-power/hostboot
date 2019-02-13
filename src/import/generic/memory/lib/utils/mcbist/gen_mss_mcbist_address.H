@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 #include <utility>
-
+#include <generic/memory/lib/ecc/ecc_traits.H>
 
 namespace mss
 {
@@ -73,7 +73,7 @@ namespace ecc
 /// @tparam TT traits type defaults to eccTraits<T>
 ///
 // See declaration below
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T> >
 class trap_address;
 
 namespace fwms
@@ -84,7 +84,7 @@ namespace fwms
 /// @brief Converts Firmware Mark Store ADDRESS field into mcbist::address
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2 Target Type defaults to fapi2::TARGET_TYPE_MCA or TARGET_TYPE_MEM_PORT
-/// @tparam TT traits type defaults to eccTraits<T>
+/// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @note template argument defaults are in forward declaration in lib/mcbist/address.H
 /// @note 12 = dimm
 /// @note 13:14 = mrank
@@ -93,7 +93,7 @@ namespace fwms
 /// @note 20:22 = bank
 ///
 // See declaration below
-template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T> >
 class address;
 
 } // close namespace fwms

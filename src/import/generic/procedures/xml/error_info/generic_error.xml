@@ -1061,4 +1061,67 @@
     <ffdc>RANK</ffdc>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_GALOIS_TO_SYMBOL</rc>
+    <description> An invalid galois code was found</description>
+    <ffdc>GALOIS</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SYMBOL_FOR_GALOIS</rc>
+    <description> An invalid symbol was passed to symbol_to_galois</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_DQ_TO_SYMBOL</rc>
+    <description> An invalid DQ bit index received to map to Galois symbol</description>
+    <ffdc>DQ</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_SYMBOL_TO_DQ</rc>
+    <description> An invalid symbol received to map to DQ bit index</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RANK_PASSED</rc>
+    <description> An invalid rank was passed to ecc::read function</description>
+    <ffdc>RANK</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_INDEX_PASSED</rc>
+    <description> An invalid index was passed to MODAL_SYMBOL_COUNT function</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

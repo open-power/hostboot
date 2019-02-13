@@ -22,3 +22,49 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file ecc_traits_nimbus.C
+/// @brief Traits class for the MC ECC syndrome registers
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/shared/mss_const.H>
+#include <chips/p9/procedures/hwp/memory/lib/shared/nimbus_defaults.H>
+#include <lib/ecc/ecc_traits_nimbus.H>
+
+namespace mss
+{
+
+// we need these declarations here in order for the linker to see the definitions
+// in the eccTraits class
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::MAINLINE_NCE_REGS[];
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::MAINLINE_RCE_REGS[];
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::MAINLINE_MPE_REGS[];
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::MAINLINE_UE_REGS[];
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::MAINLINE_AUE_REGS[];
+constexpr const uint64_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::ERROR_VECTOR_REGS[];
+
+constexpr const uint8_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::symbol2galois[];
+constexpr const uint8_t eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>::symbol2dq[];
+
+// Definition of the symbol error count registers
+const std::vector< uint64_t > eccTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>::SYMBOL_COUNT_REG =
+{
+    MCBIST_MBSSYMEC0Q,
+    MCBIST_MBSSYMEC1Q,
+    MCBIST_MBSSYMEC2Q,
+    MCBIST_MBSSYMEC3Q,
+    MCBIST_MBSSYMEC4Q,
+    MCBIST_MBSSYMEC5Q,
+    MCBIST_MBSSYMEC6Q,
+    MCBIST_MBSSYMEC7Q,
+    MCBIST_MBSSYMEC8Q,
+};
+
+} // close namespace mss
