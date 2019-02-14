@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -42,5 +42,6 @@ OBJS += call_host_runtime_setup.o
 OBJS += freqAttrData.o
 OBJS += call_host_verify_hdat.o
 OBJS += call_host_start_payload.o
+OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
 
 include ${ROOTPATH}/config.mk
