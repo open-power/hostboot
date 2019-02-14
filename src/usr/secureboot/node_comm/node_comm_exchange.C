@@ -273,7 +273,7 @@ errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
 } // end of nodeCommAbusLogNonce
 
 /**
- * @brief A function to create the slave node response quote that consists of
+ * @brief A function to create the slave node quote response that consists of
  *        eye catcher, slave node ID, quote and signature data (represented by
  *        the QuoteDataOut structure), the contents of PCRs 0-7, the
  *        Attestation Key Certificate returned from TPM, the size
@@ -288,13 +288,13 @@ errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
  *       indicating that the slave quote is bad.
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_request,
+errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_request,
                                          size_t& o_size,
                                          uint8_t*& o_resp)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenSlaveResponseQuote");
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenSlaveQuoteResponse");
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
     bool l_errorOccurred = false;
 
@@ -310,7 +310,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional ||
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: primary TPM not found or not functional");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: primary TPM not found or not functional");
         l_errorOccurred = true;
         break;
     }
@@ -324,7 +324,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
     if(i_request->EyeCatcher == MSTNOTPM)
     {
         l_errorOccurred = true;
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: Master indicated an issue with secure nodecomm (master eye catcher is MSTNOTPM)");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: Master indicated an issue with secure nodecomm (master eye catcher is MSTNOTPM)");
         // Case 1
         if(l_tpmRequired)
         {
@@ -359,7 +359,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
     else if(i_request->EyeCatcher != MASTERQ_)
     {
         l_errorOccurred = true;
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: Invalid master eye catcher received: 0x%x", i_request->EyeCatcher);
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: Invalid master eye catcher received: 0x%x", i_request->EyeCatcher);
         if(l_tpmRequired)
         {
             /* @
@@ -387,7 +387,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
     l_errl = TRUSTEDBOOT::createAttestationKeys(l_primaryTpm);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not create attestation keys");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not create attestation keys");
         break;
     }
 
@@ -396,7 +396,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
     l_errl = TRUSTEDBOOT::readAKCertificate(l_primaryTpm, &l_AKCert);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not read AK certificate");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not read AK certificate");
         break;
     }
 
@@ -414,7 +414,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
                                     sizeof(l_AKCert.buffer));
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not extend AK Certificate hash to TPM");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not extend AK Certificate hash to TPM");
         break;
     }
 
@@ -427,7 +427,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
                                         &l_quoteData);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not generate TPM quote");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not generate TPM quote");
         break;
     }
 
@@ -435,13 +435,13 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
     l_errl = TRUSTEDBOOT::flushContext(l_primaryTpm);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not flush TPM context");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not flush TPM context");
         break;
     }
 
     // Step 5: Read the selected PCRs
     // Make sure there is only 1 algo selection
-    assert(i_request->PcrSelect.count == 1, "nodeCommGenSlaveResponseQuote: only 1 hash algo is supported for PCR read");
+    assert(i_request->PcrSelect.count == 1, "nodeCommGenSlaveQuoteResponse: only 1 hash algo is supported for PCR read");
     uint32_t l_pcrCount = 0;
     TRUSTEDBOOT::TPM_Pcr l_pcrRegs[TRUSTEDBOOT::FW_USED_PCR_COUNT] = {
                                                   TRUSTEDBOOT::PCR_0,
@@ -478,7 +478,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
                                       l_pcrDigests[l_pcr].buffer);
             if(l_errl)
             {
-                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not read PCR%d", l_pcr);
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not read PCR%d", l_pcr);
                 break;
             }
         }
@@ -493,7 +493,7 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
                                         TRUSTEDBOOT::getTpmLogMgr(l_primaryTpm);
     if(!l_primaryLogMgr)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveResponseQuote: could not fetch primary TPM's log");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: could not fetch primary TPM's log");
         /*@
          * @errortype
          * @reasoncode RC_NC_NO_PRIMARY_TPM_LOG
@@ -614,10 +614,10 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
         }
     }
 
-    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenSlaveResponseQuote: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenSlaveQuoteResponse: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
-} //nodeCommGenSlaveResponseQuote
+} //nodeCommGenSlaveQuoteResponse
 
 /**
  * @brief A function to generate a master quote request blob that will be sent
@@ -627,11 +627,11 @@ errlHndl_t nodeCommGenSlaveResponseQuote(const MasterQuoteRequestBlob* const i_r
  * @param[out] o_request the output master quote request data structure
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t nodeCommGenMasterRequestQuote(MasterQuoteRequestBlob* const o_request)
+errlHndl_t nodeCommGenMasterQuoteRequest(MasterQuoteRequestBlob* const o_request)
 {
     errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenMasterRequestQuote");
+    TRACFCOMP(g_trac_nc, ENTER_MRK"nodeCommGenMasterQuoteRequest");
     bool l_tpmRequired = TRUSTEDBOOT::isTpmRequired();
     do {
     TARGETING::Target* l_primaryTpm = nullptr;
@@ -640,7 +640,7 @@ errlHndl_t nodeCommGenMasterRequestQuote(MasterQuoteRequestBlob* const o_request
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional ||
        !l_primaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterRequestQuote: primary TPM not found or is not functional");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterQuoteRequest: primary TPM not found or is not functional");
 
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_NC_GEN_MASTER_REQUEST,
@@ -659,11 +659,11 @@ errlHndl_t nodeCommGenMasterRequestQuote(MasterQuoteRequestBlob* const o_request
                                     o_request->MasterNonce);
     if(l_errl)
     {
-        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterRequestQuote: GetRandom failed");
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenMasterQuoteRequest: GetRandom failed");
         break;
     }
 
-    // Select PCRs (PCR0-7) to include in slave response quote
+    // Select PCRs (PCR0-7) to include in slave quote response
     o_request->PcrSelect.count = 1; // One algorithm
     o_request->PcrSelect.pcrSelections[0].algorithmId =
                                                     TRUSTEDBOOT::TPM_ALG_SHA256;
@@ -714,10 +714,10 @@ errlHndl_t nodeCommGenMasterRequestQuote(MasterQuoteRequestBlob* const o_request
         }
     }
 
-    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenMasterRequestQuote: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+    TRACFCOMP(g_trac_nc, EXIT_MRK"nodeCommGenMasterQuoteRequest: " TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
 #endif
     return l_errl;
-} // nodeCommGenMasterRequestQuote
+} // nodeCommGenMasterQuoteRequest
 
 /**
  * @brief A function to process the response of one of the slave nodes
@@ -869,7 +869,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         break;
     }
 
-
+    // Loop 1: Exchange SBID/nonces between Master and each of the Slave Nodes
     for ( auto const l_obus : i_obus_instances)
     {
         uint8_t my_linkId = 0;
@@ -887,7 +887,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                     expected_peer_linkId,
                                     expected_peer_mboxId);
 
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: "
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: Loop 1: "
                   "my: linkId=%d, mboxId=%d, ObusInstance=%d. "
                   "expected peer: linkId=%d, mboxId=%d, ObusInstance=%d.",
                   my_linkId, my_mboxId, l_obus.myObusInstance,
@@ -901,8 +901,8 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommAbusGetRandom(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Error Back "
-                      "From nodeCommAbusGetRandom: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 1: "
+                      "Error Back From nodeCommAbusGetRandom: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
@@ -924,7 +924,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
 
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 1: "
                       "nodeCommAbusTransferSend returned an error");
             break;
         }
@@ -933,8 +933,8 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommAbusLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Error Back From "
-                      "nodeCommAbusLogNonce: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 1: "
+                      "Error Back From nodeCommAbusLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
@@ -955,13 +955,13 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                    data_rcv_size);
         if (err)
         {
-           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: "
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: Loop 1: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
         // If no err is returned, data_rcv_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_rcv_buffer!=nullptr,"nodeCommAbusExchangeMaster: data_rcv_buffer returned as nullptr");
+        assert(data_rcv_buffer!=nullptr,"nodeCommAbusExchangeMaster: Loop 1: data_rcv_buffer returned as nullptr");
 
         // Add receiver Link Id to the message data
         // @TODO RTC 203642 Check that data_rcv_size == sizeof(uint64_t)
@@ -977,21 +977,115 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommAbusLogNonce(msg_data.value);
         if (err)
         {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Error Back "
-                      "From nodeCommAbusLogNonce: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 1: "
+                      "Error Back From nodeCommAbusLogNonce: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
 
-    } // end of loop on i_obus_instances
+    } // end of Loop 1 (SBID/nonces) on i_obus_instances
 
     if(err)
     {
         break;
     }
 
-    // @TODO RTC 203642 Do Another Loop for Quotes
+    // Loop 2: Master Node will request quotes from each Slave Node by first
+    // sending a Quote Request and then waiting to receive a Quote Response
+    for ( auto const l_obus : i_obus_instances)
+    {
+        uint8_t my_linkId = 0;
+        uint8_t my_mboxId = 0;
+        getLinkMboxFromObusInstance(l_obus.myObusInstance,
+                                    l_obus.myObusRelLink,
+                                    my_linkId,
+                                    my_mboxId);
+
+        uint8_t expected_peer_linkId = 0;
+        uint8_t expected_peer_mboxId = 0;
+        getLinkMboxFromObusInstance(l_obus.peerObusInstance,
+                                    // same relative link for peer path:
+                                    l_obus.myObusRelLink,
+                                    expected_peer_linkId,
+                                    expected_peer_mboxId);
+
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: Loop 2: "
+                  "my: linkId=%d, mboxId=%d, ObusInstance=%d. "
+                  "expected peer: linkId=%d, mboxId=%d, ObusInstance=%d.",
+                  my_linkId, my_mboxId, l_obus.myObusInstance,
+                  expected_peer_linkId, expected_peer_mboxId,
+                  l_obus.peerObusInstance);
+
+        // Generate Master Quote Request
+        MasterQuoteRequestBlob quote_request{};
+        err = nodeCommGenMasterQuoteRequest(&quote_request);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 2: "
+                      "Error Back From nodeCommGenMasterQuoteRequest: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+
+        // Send Quote Request to a slave
+        size_t tmp_size = sizeof(quote_request);
+        err = nodeCommTransferSend(i_mProcInfo.tgt,
+                                   my_linkId,
+                                   my_mboxId,
+                                   NCT_TRANSFER_QUOTE_REQUEST,
+                                   reinterpret_cast<uint8_t*>
+                                     (&quote_request),
+                                   tmp_size);
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 2: "
+                      "nodeCommAbusTransferSend returned an error");
+            break;
+        }
+
+        // Look for Quote Response from the slave node
+        size_t data_rcv_size = 0;
+        if (data_rcv_buffer != nullptr)
+        {
+            free(data_rcv_buffer);
+            data_rcv_buffer = nullptr;
+        }
+        err = nodeCommTransferRecv(i_mProcInfo.tgt,
+                                   my_linkId,
+                                   my_mboxId,
+                                   NCT_TRANSFER_QUOTE_RESPONSE,
+                                   data_rcv_buffer,
+                                   data_rcv_size);
+        if (err)
+        {
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: Loop 2: "
+                      "nodeCommTransferRecv returned an error");
+           break;
+        }
+        // If no err is returned, data_rcv_buffer should be valid, but do a
+        // sanity check here to be certain
+        assert(data_rcv_buffer!=nullptr,"nodeCommAbusExchangeMaster: Loop 2: data_rcv_buffer returned as nullptr");
+
+        // Process the Quote Response that was returned from the slave node
+        err = nodeCommProcessSlaveQuote(data_rcv_buffer, data_rcv_size);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 2: "
+                      "Error Back nodeCommProcessSlaveQuote: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+
+    } // end of Loop-2 (Quotes) on i_obus_instances
+
+    if (err)
+    {
+        break;
+    }
 
     } while( 0 );
 
@@ -1037,8 +1131,9 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
               i_obus_instance.peerProcInstance,
               i_obus_instance.peerObusInstance);
 
-    // Pointer to buffer used for receiving data from nodeCommTransferRecv()
-    uint8_t * data_rcv_buffer = nullptr;
+    // Pointer to buffer used for transferring and receiving data
+    // from nodeCommTransferSend() and nodeCommTransferRecv()
+    uint8_t * data_buffer = nullptr;
 
     do
     {
@@ -1052,32 +1147,32 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
 
         // First Wait for Message From Master
-        if (data_rcv_buffer != nullptr)
+        if (data_buffer != nullptr)
         {
-            free(data_rcv_buffer);
-            data_rcv_buffer = nullptr;
+            free(data_buffer);
+            data_buffer = nullptr;
         }
-        size_t data_rcv_size = 0;
+        size_t data_size = 0;
         err = nodeCommTransferRecv(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
                                    NCT_TRANSFER_SBID,
-                                   data_rcv_buffer,
-                                   data_rcv_size);
+                                   data_buffer,
+                                   data_size);
         if (err)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeSlave: "
                       "nodeCommTransferRecv returned an error");
            break;
         }
-        // If no err is returned, data_rcv_buffer should be valid, but do a
+        // If no err is returned, data_buffer should be valid, but do a
         // sanity check here to be certain
-        assert(data_rcv_buffer!=nullptr,"nodeCommAbusExchangeSlave: data_rcv_buffer returned as nullptr");
+        assert(data_buffer!=nullptr,"nodeCommAbusExchangeSlave: data_buffer returned as nullptr");
 
 
         // Add receiver Link Id to the message data
         msg_format_t msg_data;
-        memcpy(&(msg_data.value), data_rcv_buffer, data_rcv_size);
+        memcpy(&(msg_data.value), data_buffer, data_size);
         msg_data.receiver_linkId = my_linkId;
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeSlave: Msg received, "
@@ -1150,12 +1245,78 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
             break;
         }
 
+        // Wait for Quote Request from Master Node
+        if (data_buffer != nullptr)
+        {
+            free(data_buffer);
+            data_buffer = nullptr;
+        }
+        data_size = 0;
+        err = nodeCommTransferRecv(i_mProcInfo.tgt,
+                                   my_linkId,
+                                   my_mboxId,
+                                   NCT_TRANSFER_QUOTE_REQUEST,
+                                   data_buffer,
+                                   data_size);
+        if (err)
+        {
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeSlave: "
+                      "nodeCommTransferRecv returned an error");
+           break;
+        }
+        // If no err is returned, data_buffer should be valid, but do a
+        // sanity check here to be certain
+        assert(data_buffer!=nullptr,"nodeCommAbusExchangeSlave: data_buffer returned as nullptr");
+
+        // @TODO 203642 check that size back is size of MasterQuoteRequestBlob
+
+        // Cast the data received into a MasterQuoteRequestBlob
+        MasterQuoteRequestBlob quote_request{};
+        memcpy(&quote_request, data_buffer, data_size);
+
+        // re-use data_buffer and data_size for the Quote Response
+        if (data_buffer != nullptr)
+        {
+            free(data_buffer);
+            data_buffer = nullptr;
+        }
+        data_size = 0;
+
+        // Generate the Quote Response
+        err = nodeCommGenSlaveQuoteResponse(&quote_request,
+                                            data_size,
+                                            data_buffer);
+
+        if (err)
+        {
+           TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeSlave: "
+                      "nodeCommGenSlaveQuoteResponse returned an error");
+           break;
+        }
+
+        // Send the Quote Response
+        err = nodeCommTransferSend(i_mProcInfo.tgt,
+                                   my_linkId,
+                                   my_mboxId,
+                                   NCT_TRANSFER_QUOTE_RESPONSE,
+                                   data_buffer,
+                                   data_size);
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeSlave: "
+                      "nodeCommAbusTransferSend returned an error");
+            break;
+        }
+
+        // Nothing left for slave node to do
+
     } while( 0 );
 
-    if (data_rcv_buffer != nullptr)
+    if (data_buffer != nullptr)
     {
-        free(data_rcv_buffer);
-        data_rcv_buffer = nullptr;
+        free(data_buffer);
+        data_buffer = nullptr;
     }
 
 
