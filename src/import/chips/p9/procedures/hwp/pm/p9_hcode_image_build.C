@@ -144,7 +144,7 @@ enum
     CORE_REST_WORDS_PER_THREAD  =  (CORE_RESTORE_SIZE_PER_THREAD >> 2),
     TWO_MB_ALIGNMENT_CHECK      =   0x1FFFFF,
     SMF_BIT_CHECK               =   0x0001000000000000ull,
-    INST_VALUE_SC2              =   0x44400042,
+    INST_VALUE_SC2              =   0x44000042,
     SRESET_WORD_POS             =   0x40,
 };
 
@@ -4801,19 +4801,29 @@ fapi_try_exit:
 
 /**
  * @brief       populates CME image header with base address of unsecure HOMER.
- * @param[in]   i_procTgt   fapi2 target for P9 chip
- * @param[in]   i_pHomer    points to HOMER
+ * @param[in]   i_procTgt    fapi2 target for P9 chip
+ * @param[in]   i_pHomer     points to HOMER
+ * @param[in]   i_smfEnabled SMF enable status
  * @return      fapi2 return code
  * @note:       initializes CME image header irrespective of SMF enable state for
  * simplicity. It will be a behave as NOP for SMF disabled system.
  */
-fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer )
+fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer,
+                                                uint8_t  i_smfEnabled )
 {
     uint64_t l_unsecureHomerAdd     =   0;
     uint8_t  l_invalidAddress       =   0;
     cmeHeader_t* pCmeHdr            =
                 (cmeHeader_t*) & i_pHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
     FAPI_DBG( ">> populateUnsecureHomerAddress" );
+
+    if( !i_smfEnabled )
+    {
+        //if SMF is disabled, populating Us-Secure HOMER address field with as Regular HOMER
+        //address. This approach keeps hcode design simple.
+        pCmeHdr->g_cme_unsec_cpmr_PhyAddr   =   pCmeHdr->g_cme_cpmr_PhyAddr;
+        goto fapi_try_exit;
+    }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_UNSECURE_HOMER_ADDRESS,
                            i_procTgt,
@@ -4885,7 +4895,7 @@ fapi2::ReturnCode   initUnsecureHomer( void* const  i_pBuf2, const uint32_t  i_s
        memcpy( l_pWord + wordCnt, &l_initInst, sizeof(uint32_t) );
     }
 
-    l_initInst              =   INST_VALUE_SC2;
+    l_initInst              =   SWIZZLE_4_BYTE(INST_VALUE_SC2);
     memcpy( l_pWord + SRESET_WORD_POS, &l_initInst, sizeof(uint32_t) );
 
     fapi_try_exit:
@@ -5071,7 +5081,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                   l_riskLevel, l_qpmrHdr, i_imgType ),
               "Failed To Layout Quad Rings" );
 
-    FAPI_TRY( populateUnsecureHomerAddress( i_procTgt, pChipHomer ),
+    FAPI_TRY( populateUnsecureHomerAddress( i_procTgt, pChipHomer, l_chipFuncModel.isSmfEnabled() ),
               "Failed To Populate Unsecure HOMER Region with sc2 instruction" );
 
     //Update CPMR Header with Scan Ring details
