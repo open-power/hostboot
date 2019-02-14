@@ -28,7 +28,7 @@
 ///
 /// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
 /// HWP FW Maintainer:
-/// HWP Consumed by: CRONUS, HOSTBOOT, HWSV
+/// HWP Consumed by: Cronus, HB, HWSV
 ///
 
 #ifndef P10_SCOM_ADDR_H
@@ -189,7 +189,10 @@ extern "C"
 
     typedef enum
     {
-        PCI_SAT_ID  = 0x0,
+        PEC_SAT_ID  = 0x0,
+        PHB0_SAT_ID = 0x1,
+        PHB1_SAT_ID = 0x2,
+        PHB2_SAT_ID = 0x3,
     } p10_PCI_SatId_t;
 
     typedef enum

@@ -26,10 +26,9 @@
 /// @file p10_scominfo.H
 /// @brief P10 chip unit SCOM address platform translation code
 ///
-/// HWP Owner: thi@us.ibm.com
-/// HWP Team: NEST
-/// HWP Level: 1
-/// HWP Consumed by: FSP/HB
+/// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
+/// HWP FW Maintainer:
+/// HWP Consumed by: Cronus, HB, HWSV
 ///
 
 #ifndef P10_SCOMINFO_H
@@ -45,7 +44,8 @@ extern "C"
     // Modes of translation
     typedef enum
     {
-        P10_DEFAULT_MODE = 0,       // Default P10
+        P10_DEFAULT_MODE = 0,       // Default platform behavior
+        P10_ENGD_BUILD_MODE = 1,    // Apply customization for ENGD build
     } p10TranslationMode_t;
 
     typedef enum

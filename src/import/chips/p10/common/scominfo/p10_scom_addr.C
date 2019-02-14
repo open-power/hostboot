@@ -26,10 +26,9 @@
 /// @file p10_scom_addr.C
 /// @brief P10 chip unit SCOM address platform translation code
 ///
-/// HWP Owner: thi@us.ibm.com
-/// HWP Team: NEST
-/// HWP Level: 1
-/// HWP Consumed by: FSP/HB
+/// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
+/// HWP FW Maintainer:
+/// HWP Consumed by: Cronus, HB, HWSV
 ///
 
 // includes
@@ -150,8 +149,8 @@ extern "C"
         }
 
         // Endpoint must be PSCOM (0x1) and Sat ID must be 0
-        else if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
-                  (getSatId() == PCI_SAT_ID) )          // 0
+        if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
+             (getSatId() == PEC_SAT_ID) )          // 0
         {
             // For PEC addresses via NEST regions, ring ID must be 0x6
             if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
@@ -196,20 +195,37 @@ extern "C"
     {
         bool l_phbTarget = false;
 
-        // Must have PCIE chiplet ID
-        if ( (getChipletId() >= PCI0_CHIPLET_ID) && // 0x8
-             (getChipletId() <= PCI1_CHIPLET_ID) )  // 0x9
+        // Endpoint must be PSCOM (0x1)
+        if ( (getEndpoint() == PSCOM_ENDPOINT) )  // 0x1
         {
-            // Endpoint must be PSCOM (0x1) and Sat ID must be 0
-            if ( (getEndpoint() == PSCOM_ENDPOINT) &&  // 0x1
-                 (getSatId() == PCI_SAT_ID) )          // 0
+            // PCIE chiplet ID
+            if ( (getChipletId() >= PCI0_CHIPLET_ID) && // 0x8
+                 (getChipletId() <= PCI1_CHIPLET_ID) )  // 0x9
             {
-                // Ring ID must be 0x3, 0x4, or 0x5
+                // Ring ID of 0x3, 0x4, or 0x5
                 if ( (getRingId() >= IO_PCI0_RING_ID) &&  // 0x3
                      (getRingId() <= IO_PCI2_RING_ID) )   // 0x5
                 {
                     l_phbTarget = true;
                 }
+
+                // or, Ring ID of 0x2, Sat ID 1-3
+                if ( (getRingId() == PCI_RING_ID) && // 0x2
+                     (getSatId() >= PHB0_SAT_ID) &&  // 0x1
+                     (getSatId() <= PHB2_SAT_ID) )   // 0x3
+                {
+                    l_phbTarget = true;
+                }
+            }
+
+            // N0/N1 chiplet ID
+            if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
+                 (getChipletId() <= N1_CHIPLET_ID) &&  // 0x3
+                 (getRingId() == N0_PE0_RING_ID)  &&   // 0x6
+                 (getSatId() >= PHB0_SAT_ID) &&        // 0x1
+                 (getSatId() <= PHB2_SAT_ID) )         // 0x3
+            {
+                l_phbTarget = true;
             }
         }
 
@@ -221,15 +237,20 @@ extern "C"
     {
         uint8_t l_instance = 0;
 
-        // PCI0, instance 0-2
-        if (getChipletId() == PCI0_CHIPLET_ID)
+        if ( (getChipletId() == N1_CHIPLET_ID) ||
+             (getChipletId() == PCI1_CHIPLET_ID) )
         {
-            l_instance = (getRingId() - IO_PCI0_RING_ID);
+            l_instance += 3;
         }
-        // PCI1, instance 3-5
+
+        if ( (getRingId() == N0_PE0_RING_ID) ||
+             (getRingId() == PCI_RING_ID) )
+        {
+            l_instance += (getSatId() - 1);
+        }
         else
         {
-            l_instance = getRingId();
+            l_instance += (getRingId() - 3);
         }
 
         return l_instance;
@@ -285,15 +306,20 @@ extern "C"
                         l_pervTarget = true;
                     }
                 }
-
+                else if (getEndpoint() == CLOCK_CTRL_ENDPOINT)  // 0x3
+                {
+                    l_pervTarget = true;
+                }
                 // Check if Endpoint is a PERV endpoint
                 else if ( (getEndpoint() == CHIPLET_CTRL_ENDPOINT) ||     // 0x0
-                          (getEndpoint() == CLOCK_CTRL_ENDPOINT)   ||     // 0x3
                           (getEndpoint() == FIR_ENDPOINT)          ||     // 0x4
                           (getEndpoint() == THERMAL_ENDPOINT)      ||     // 0x5
                           (getEndpoint() == PCBSLV_ENDPOINT) )            // 0xF
                 {
-                    l_pervTarget = true;
+                    if ( getRingId() == PSCOM_RING_ID)                    // 0x0
+                    {
+                        l_pervTarget = true;
+                    }
                 }
 
                 break;

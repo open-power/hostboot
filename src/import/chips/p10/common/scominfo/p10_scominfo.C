@@ -28,7 +28,7 @@
 ///
 /// HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
 /// HWP FW Maintainer:
-/// HWP Consumed by: CRONUS, HOSTBOOT, HWSV
+/// HWP Consumed by: Cronus, HB, HWSV
 ///
 
 // includes
@@ -472,6 +472,7 @@ extern "C"
     {
         p10_scom_addr l_scom(i_scomAddr);
         o_chipUnitRelated = false;
+        o_chipUnitPairing.clear();
 
         // Quad registers which can be addressed by EQ target type
         // eq: 0..7
@@ -521,15 +522,6 @@ extern "C"
             // PU_NMMU_CHIPUNIT
             o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_NMMU_CHIPUNIT,
                                         l_scom.getNmmuTargetInstance()));
-        }
-
-        // PERV registers
-        if (l_scom.isPervTarget())
-        {
-            o_chipUnitRelated = true;
-            // PU_PERV_CHIPUNIT
-            o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_PERV_CHIPUNIT,
-                                        l_scom.getPervTargetInstance()));
         }
 
         // IOHS registers
@@ -602,6 +594,22 @@ extern "C"
             // PU_PPE_CHIPUNIT
             o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_PPE_CHIPUNIT,
                                         l_scom.getPpeTargetInstance()));
+        }
+
+        // PERV registers
+        if (l_scom.isPervTarget())
+        {
+            // if running in engineering data build flow context, do not
+            // emit associations for registers which would have only
+            // a single association of type PERV
+            if (!((o_chipUnitPairing.size() == 0) &&
+                  (i_mode == P10_ENGD_BUILD_MODE)))
+            {
+                o_chipUnitRelated = true;
+                // PU_PERV_CHIPUNIT
+                o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_PERV_CHIPUNIT,
+                                            l_scom.getPervTargetInstance()));
+            }
         }
 
         /// Address may be of a chip, let it pass through
