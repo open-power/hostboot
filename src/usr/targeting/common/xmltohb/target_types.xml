@@ -25,6 +25,15 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <targetType>
+    <id>asic</id>
+    <parent>base</parent>
+    <attribute>
+      <id>CLASS</id>
+      <default>ASIC</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>base</id>
     <attribute>
       <id>AFFINITY_PATH</id>
@@ -145,6 +154,14 @@
   <targetType>
     <id>chip-NPCT501</id>
     <parent>chip-tpm-cectpm</parent>
+  </targetType>
+
+  <!-- This special UCD target adapts the MRW to Hostboot's specific UCD
+      target.  All attributes should be declared against the parent
+      target. -->
+  <targetType>
+    <id>chip-UCD9090</id>
+    <parent>ucd9090</parent>
   </targetType>
 
   <targetType>
@@ -1110,6 +1127,18 @@
   </targetType>
 
   <targetType>
+    <id>i2c-power-sequencer</id>
+    <parent>asic</parent>
+    <attribute>
+      <id>I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>POWER_SEQUENCER</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>i2c_mux_pca9847</id>
     <parent>chip</parent>
     <attribute>
@@ -1869,6 +1898,24 @@
     <attribute>
       <default>UART</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>ucd90120a</id>
+    <parent>i2c-power-sequencer</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>UCD90120A</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>ucd9090</id>
+    <parent>i2c-power-sequencer</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>UCD9090</default>
     </attribute>
   </targetType>
 
