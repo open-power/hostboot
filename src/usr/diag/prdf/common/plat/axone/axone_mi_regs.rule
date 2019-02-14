@@ -53,6 +53,15 @@
         name        "MCFGP";
         scomaddr    0x501080A;
         capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPA
+    {
+        name        "MCFGPA";
+        scomaddr    0x0501080B;
+        capture     group default;
+        capture     group MirrorConfig;
     };
 
     register MCFGPM
@@ -60,4 +69,13 @@
         name        "MCFGPM";
         scomaddr    0x501080C;
         capture     group default;
+        capture     group MirrorConfig;
+    };
+
+    register MCFGPMA
+    {
+        name        "MCFGPMA";
+        scomaddr    0x0501080D;
+        capture     group default;
+        capture     group MirrorConfig;
     };
