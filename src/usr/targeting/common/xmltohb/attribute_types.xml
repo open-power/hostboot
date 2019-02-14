@@ -651,8 +651,12 @@
       <value>10</value>
     </enumerator>
     <enumerator>
-      <name>MAX</name>
+      <name>ASIC</name>
       <value>11</value>
+    </enumerator>
+    <enumerator>
+      <name>MAX</name>
+      <value>12</value>
     </enumerator>
     <id>CLASS</id>
   </enumerationType>
@@ -2492,6 +2496,61 @@
   </attribute>
 
   <attribute>
+    <id>I2C_CONTROL_INFO</id>
+    <description>Information needed to address an I2C slave device</description>
+    <complexType>
+      <description>Structure to define addressing this I2C slave device.
+    </description>
+      <field>
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the I2C master
+      </description>
+        <name>i2cMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0x80</default>
+        <description>I2C master engine. This is a 2-bit value.</description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0x80</default>
+        <description>Port from the I2C Master device. This is a 6-bit value.
+      </description>
+        <name>port</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0x80</default>
+        <description>Device address on the I2C bus. This is a 7-bit value,
+          but then shifted 1 bit left.</description>
+        <name>devAddr</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the I2C mux for
+            this device
+                     must enable to connect this device to its I2C master, if applicable.
+                     0xFF indicates no I2C mux present or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path of the I2C mux for this device, if any.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>Structure which defines which I2C access method to use at
         a point in time.  Only applicable if target supports one or more I2C
@@ -3787,6 +3846,12 @@
     </enumerator>
     <enumerator>
       <name>PCA9847</name>
+    </enumerator>
+    <enumerator>
+      <name>UCD9090</name>
+    </enumerator>
+    <enumerator>
+      <name>UCD90120A</name>
     </enumerator>
     <id>MODEL</id>
   </enumerationType>
