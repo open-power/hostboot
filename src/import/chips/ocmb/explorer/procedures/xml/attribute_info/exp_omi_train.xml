@@ -46,7 +46,7 @@
             NORMAL_MODE = 0,
             MANUFACTURING_MODE = 1
         </enum>
-        <default>0</default>
+        <initToZero/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_fw_mode</mssAccessorName>
     </attribute>
@@ -62,7 +62,7 @@
             NO_LOOPBACK_TESTING = 0,
             PERFORM_LOOPBACK_TESTING = 1
         </enum>
-        <default>0</default>
+        <initToZero/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_opencapi_loopback_test</mssAccessorName>
     </attribute>
@@ -79,7 +79,7 @@
             I2C = 1,
             JTAG = 2
         </enum>
-        <default>0</default>
+        <initToZero/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_transport_layer</mssAccessorName>
     </attribute>
@@ -96,7 +96,7 @@
            BOOT_RIGHT_AFTER_CONFIG = 0,
            WAIT_FOR_HOST_CMD = 1
         </enum>
-        <default>0</default>
+        <initToZero/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_dl_layer_boot_mode</mssAccessorName>
     </attribute>
@@ -112,7 +112,7 @@
             FULL_BOOT = 0,
             STEP_BY_STEP_BOOT = 1
         </enum>
-        <default>0</default>
+        <initToZero/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_boot_mode</mssAccessorName>
     </attribute>
@@ -129,6 +129,7 @@
             LANE_4= 2
         </enum>
         <default>1</default>
+        <platInit/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_lane_mode</mssAccessorName>
     </attribute>
@@ -146,6 +147,7 @@
            SERDES_25_60GBPS = 3
         </enum>
         <default>3</default>
+        <platInit/>
         <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_serdes_frequency</mssAccessorName>
     </attribute>
