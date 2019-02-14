@@ -118,7 +118,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
         if (time_polled_ns >= NODE_COMM_POLL_DELAY_TOTAL_NS)
         {
-            TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: "
               "timeout: time_polled_ns-0x%.16llX, MAX=0x%.16llX, "
               "interval=0x%.16llX",
               time_polled_ns, NODE_COMM_POLL_DELAY_TOTAL_NS, interval_ns);
@@ -257,7 +257,7 @@ errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
+    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
               "Tgt=0x%.08X, link=%d, mbox=%d attn_found=%d: "
               "data=0x%.16llX. "
               TRACE_ERR_FMT,
@@ -312,7 +312,7 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
+    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusSendMessage: iProc=0x%.08X "
               "send data=0x%.16llX through linkId=%d mboxId=%d: "
               TRACE_ERR_FMT,
               get_huid(i_pProc), i_data, i_linkId, i_mboxId,

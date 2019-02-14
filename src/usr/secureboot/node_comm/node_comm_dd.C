@@ -229,7 +229,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     }
 
 
-    TRACFCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
+    TRACUCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
                "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX. "
                TRACE_ERR_FMT,
                (node_comm_args.mode == NCDD_MODE_ABUS)
