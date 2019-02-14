@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ enum exp_struct_sizes
     TRAINING_RESPONSE_NUM_LANES = 80,
     TRAINING_RESPONSE_NUM_RC = 27,
     TRAINING_RESPONSE_MR6_SIZE = TRAINING_RESPONSE_NUM_RANKS * TRAINING_RESPONSE_NUM_DRAM,
+    RCW_8BIT_CUTOFF = 16,
 };
 
 ///

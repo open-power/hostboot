@@ -118,6 +118,16 @@ enum ecid_consts
     REG_BIT_OFFSET = 32,
 };
 
+///
+/// @brief generic explorer constants
+///
+enum generic_consts
+{
+    // Number of DRAM for x4 vs x8
+    EXP_NUM_DRAM_X4 = 20,
+    EXP_NUM_DRAM_X8 = 10,
+};
+
 namespace i2c
 {
 
