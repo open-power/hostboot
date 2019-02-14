@@ -1,0 +1,4 @@
+config UCD_FLASH_UPDATES
+    default n
+    help
+        Enable UCD power sequencer flash updates

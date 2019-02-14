@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <config.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <initservice/isteps_trace.H>
@@ -59,6 +60,10 @@
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
   #include <isteps/pm/occAccess.H>
   #include <isteps/pm/occCheckstop.H>
+#endif
+
+#ifdef CONFIG_UCD_FLASH_UPDATES
+#include "call_update_ucd_flash.H"
 #endif
 
 using   namespace   ERRORLOG;
@@ -665,6 +670,10 @@ void* call_host_runtime_setup (void *io_pArgs)
         {
             break;
         }
+
+#ifdef CONFIG_UCD_FLASH_UPDATES
+        POWER_SEQUENCER::TI::UCD::call_update_ucd_flash();
+#endif
 
         // Fill in Hostboot runtime data if there is a PAYLOAD
         if( !(TARGETING::is_no_load()) )

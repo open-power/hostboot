@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@ const size_t MclCompSectionPadSize = 16;
 const ComponentID g_MclCompId {"MSTCONT"};
 const ComponentID g_PowervmCompId {"POWERVM"};
 const ComponentID g_OpalCompId {"OPAL"};
+const ComponentID g_UcdCompId {"UCD9090"};
 
 void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr)
 {
@@ -96,10 +97,10 @@ void CompInfo::print() const
 // MasterContainerLidMgr
 ////////////////////////////////////////////////////////////////////////////////
 
-MasterContainerLidMgr::MasterContainerLidMgr()
+MasterContainerLidMgr::MasterContainerLidMgr(const bool i_loadOnly)
 : iv_mclSize(MCL_SIZE), iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0),
   iv_pMclVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
-  iv_compInfoCache{}, iv_hasHeader(true)
+  iv_compInfoCache{}, iv_hasHeader(true), iv_loadOnly(i_loadOnly)
 {
     // Need to make Memory spaces HRMOR-relative
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
@@ -352,6 +353,70 @@ void MasterContainerLidMgr::printCompInfoCache()
 #endif
 }
 
+errlHndl_t MasterContainerLidMgr::processSingleComponent(
+    const ComponentID& i_compId,
+          CompInfo&    o_info)
+{
+    errlHndl_t pError = nullptr;
+    const CompInfo empty;
+    o_info = empty;
+
+    do {
+
+    auto compInfoPairItr = iv_compInfoCache.find(i_compId);
+    if(compInfoPairItr != iv_compInfoCache.end())
+    {
+        // Cache component ID string
+        compIdToString(compInfoPairItr->first, iv_curCompIdStr);
+
+        pError = processComponent(compInfoPairItr->first,
+                                  compInfoPairItr->second);
+        if (pError)
+        {
+            UTIL_FT(ERR_MRK "MasterContainerLidMgr::processSingleComponent: "
+                "processComponent failed for component ID %s",
+                iv_curCompIdStr);
+            break;
+        }
+
+        // Print component Info after loading component and verifying
+        UTIL_FT("MasterContainerLidMgr::processSingleComponent %s Info",
+                iv_curCompIdStr);
+        iv_compInfoCache.at(compInfoPairItr->first).print();
+
+        // Tell caller what was loaded
+        o_info = compInfoPairItr->second;
+    }
+    else
+    {
+        UTIL_FT(ERR_MRK "MasterContainerLidMgr::processSingleComponent: "
+                "Could not find component 0x%016llX (1st 8 bytes) in MCL",
+                compIdToInt(i_compId));
+        /*@
+         * @errortype
+         * @moduleid   Util::UTIL_MCL_PROCESS_SINGLE_COMP
+         * @reasoncode Util::UTIL_LIDMGR_INVAL_COMP
+         * @userdata1  Component ID [truncated to 8 bytes]
+         * @devdesc    Could not find requested component ID in master
+         *     container LID
+         * @custdesc   Firmware load error
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            Util::UTIL_MCL_PROCESS_SINGLE_COMP,
+            Util::UTIL_LIDMGR_INVAL_COMP,
+            compIdToInt(i_compId),
+            0,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        pError->collectTrace(UTIL_COMP_NAME);
+        break;
+    }
+
+    } while(0);
+
+    return pError;
+}
+
 errlHndl_t MasterContainerLidMgr::processComponents()
 {
     errlHndl_t l_errl = nullptr;
@@ -382,8 +447,9 @@ errlHndl_t MasterContainerLidMgr::processComponents()
     return l_errl;
 }
 
-errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
-                                                   CompInfo& io_compInfo)
+errlHndl_t MasterContainerLidMgr::processComponent(
+    const ComponentID& i_compId,
+          CompInfo&    io_compInfo)
 {
     UTIL_FT(ENTER_MRK"MasterContainerLidMgr::processComponent %s",
             iv_curCompIdStr);
@@ -394,15 +460,16 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
     // Check if Component is POWERVM (aka PHYP)
     bool isPhypComp = (i_compId == g_PowervmCompId) ? true : false;
 
-    // Only process components if they are marked PRE_VERIFY
-    if( (io_compInfo.flags & CompFlags::PRE_VERIFY) !=
-         CompFlags::PRE_VERIFY)
+    // Only process components if they are marked PRE_VERIFY or we're in load only mode
+    if(   (   (io_compInfo.flags & CompFlags::PRE_VERIFY)
+           != CompFlags::PRE_VERIFY)
+       && (!iv_loadOnly))
     {
         UTIL_FT("MasterContainerLidMgr::processComponent not a pre-verify section skipping...");
         break;
     }
 
-    // Total size of all Lids in component reoprted by the FSP
+    // Total size of all LIDs in component reported by the FSP
     size_t l_reportedSize = 0;
     // Load lids into temp mainstore memory
     l_errl = loadLids(io_compInfo, l_reportedSize, isPhypComp);
@@ -495,8 +562,10 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
     }
 
     // Only load lids into HB reserved memory if component is preverified
-    if( (io_compInfo.flags & CompFlags::PRE_VERIFY) ==
-         CompFlags::PRE_VERIFY)
+    // and MCL manager is not in load-only mode
+    if(   (   (io_compInfo.flags & CompFlags::PRE_VERIFY)
+           == CompFlags::PRE_VERIFY)
+       && (!iv_loadOnly))
     {
         auto l_curAddr =  reinterpret_cast<uint64_t>(iv_pVaddr);
         bool l_firstLid = true;
@@ -584,6 +653,9 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                 break;
             }
 
+            // Store current LID load virtual address
+            lidInfo.vAddr = l_pLidVaddr;
+
             // Increment vaddr pointer
             l_pLidVaddr += l_lidSize;
 
@@ -637,6 +709,9 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         // Only verify the lids if in secure mode
         if (SECUREBOOT::enabled())
         {
+            UTIL_FT(ENTER_MRK"MasterContainerLidMgr::verifyExtend: "
+                "Secure enabled, calling verifyContainer");
+
             // Verify Container - some combination of Lids
             l_errl = SECUREBOOT::verifyContainer(iv_pVaddr,
                                              extractLidIds(io_compInfo.lidIds));
@@ -646,6 +721,8 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
                 SECUREBOOT::handleSecurebootFailure(l_errl);
                 assert(false,"Bug! handleSecurebootFailure shouldn't return!");
             }
+            UTIL_FT(ENTER_MRK"MasterContainerLidMgr::verifyExtend: "
+                "Secure enabled, calling verifyComponent");
 
             // Verify the component in the Secure Header matches the MCL
             l_errl = SECUREBOOT::verifyComponentId(l_conHdr, iv_curCompIdStr);

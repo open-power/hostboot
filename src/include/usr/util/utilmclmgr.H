@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,27 @@ class MasterContainerLidMgrTest;
 namespace MCL
 {
 
+/**
+ *  @brief Structure used to hold information about a container loaded into
+ *      memory using the MCL manager
+ */
+struct LoadedContainerInfo_t
+{
+    void*  pSecureHeader; ///< Virtual address of secure header; nullptr if N/A
+    void*  pContent;      ///< Virtual address of container logical content
+    size_t size;          ///< Size of container logical content in bytes
+
+    /**
+     *  @brief Builds a default LoadedContainerInfo_t
+     */
+    LoadedContainerInfo_t()
+        : pSecureHeader(nullptr),
+          pContent(nullptr),
+          size(0)
+    {
+    }
+};
+
 // Component ID(name) within MCL
 typedef std::array<uint8_t,16> ComponentID;
 
@@ -46,10 +67,11 @@ typedef std::array<uint8_t,16> ComponentID;
 // NOTE: ComponentID in the MCL does not include NULL terminator so include room
 typedef char CompIdString[17];
 
-// Constants to simplify checking for the MCL and POWERVM comp ids
+// Constants to simplify checking for the MCL and POWERVM/UCD9090 comp ids
 extern const ComponentID g_MclCompId;
 extern const ComponentID g_PowervmCompId;
 extern const ComponentID g_OpalCompId;
+extern const ComponentID g_UcdCompId;
 
 // @enum Permission Types for MCL Component
 enum class CompFlags : uint16_t
@@ -118,12 +140,14 @@ extern const size_t MclCompSectionPadSize;
 // @brief Structure that holds lid ids and sizes
 struct LidInfo
 {
-    LidInfo(): id(0), size(0) {}
-    LidInfo(uint32_t i_id): id(i_id), size(0) {}
-    LidInfo(uint32_t i_id, size_t i_size): id(i_id), size(i_size) {}
+    LidInfo(): id(0), size(0), vAddr(nullptr) {}
+    LidInfo(uint32_t i_id): id(i_id), size(0), vAddr(nullptr) {}
+    LidInfo(uint32_t i_id, size_t i_size): id(i_id), size(i_size),
+        vAddr(nullptr) {}
 
-    uint32_t id;
-    size_t size;
+    uint32_t id; // LID ID
+    size_t size; // Size of LID
+    void* vAddr; // Virtual address where LID was loaded
 
     /**
      * @brief  Lid Info equality comparison
@@ -133,7 +157,9 @@ struct LidInfo
      */
     bool operator==(const LidInfo& rhs) const
     {
-        return (id == rhs.id && size == rhs.size);
+        return (   (id == rhs.id)
+                && (size == rhs.size)
+                && (vAddr == rhs.vAddr));
     }
 
     /**
@@ -242,9 +268,13 @@ class MasterContainerLidMgr
 
     /**
      * @brief Default Constructor
-     *        Initializes memory spaces, loads, and parses the MCL.
+     *     Initializes memory spaces, loads, and parses the MCL.
+     *
+     * @param[in] i_loadOnly Only load content into memory on subsequent
+     *     requests to process components.  Do not not move the content to
+     *     Hostboot reserved memory.
      */
-    MasterContainerLidMgr();
+    MasterContainerLidMgr(bool i_loadOnly = false);
 
     /**
      * @brief Destructor. Cleans up memory allocated for class
@@ -256,6 +286,31 @@ class MasterContainerLidMgr
      *        See: processComponent for more info
      */
     errlHndl_t processComponents();
+
+    /**
+     *  @brief Process a single, named component from the MCL.
+     *      Loads the specified component into the managed mainstore memory
+     *      region.  If component is marked pre-verified, cryptographically
+     *      verifies the component and extends its measurement to the TPM.
+     *      If MCL manager is in non-load-only mode, copies the content into
+     *      Hostboot reserved memory region as well.
+     *
+     *  @param[in] i_compId Component ID to load
+     *  @param[out] o_info  Information (LID ID, size, virtual address, etc.)
+     *      for the LIDs that were loaded.
+     *
+     *  @note: The container will go out of scope if another container is loaded
+     *      or the MCL manager goes out of scope.
+     *
+     *  @note: Component info will be reset on each call
+     *
+     *  @return errlHndl_t Error log handle
+     *  @retval nullptr    Success
+     *  @retval !nullptr   Error; Error log handle points to valid error log
+     */
+    errlHndl_t processSingleComponent(
+        const ComponentID&           i_compId,
+              CompInfo&              o_info);
 
     /**
      * @brief TPM extend information for secure components
@@ -427,6 +482,10 @@ class MasterContainerLidMgr
 
     // Cache current comp id string for easy tracing
     CompIdString iv_curCompIdStr;
+
+    // When processing a component, only load the component and verify / measure
+    // it (do not copy it to reserved memory).
+    bool iv_loadOnly;
 
     // Cached PHyp header
     static uint8_t cv_pPhypHeader[PAGE_SIZE];

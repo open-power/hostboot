@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@ namespace Util
         UTIL_MCL_PROCESS_COMP   = 0x12,       // MasterContainerLidMgr::processComponent
         UTIL_MOD_GET_OBUS_PLL_BUCKET = 0x14,  // UtilCommonAttr::getObusPllBucket
         UTIL_LIDMGR_CSTOR       = 0x15,       // UtilLidMgr::UtilLidMgr
+        UTIL_MCL_PROCESS_SINGLE_COMP = 0x16,  // UtilLidMgr::processSingleComponent
     };
 
     enum ReasonCode
@@ -83,6 +84,7 @@ namespace Util
         UTIL_ERC_NO_FREQ_LIST            = UTIL_COMP_ID | 0x1A,
         UTIL_ERC_NO_MATCHING_FREQ        = UTIL_COMP_ID | 0x1B,
         UTIL_LIDMGR_INVAL_LID_REQUEST    = UTIL_COMP_ID | 0x1C,
+        UTIL_LIDMGR_INVAL_COMP           = UTIL_COMP_ID | 0x1D,
     };
 };
 
