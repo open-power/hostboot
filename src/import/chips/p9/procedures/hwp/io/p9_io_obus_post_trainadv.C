@@ -152,12 +152,12 @@ fapi2::ReturnCode p9_io_obus_post_trainadv(
     uint64_t l_mfg_flags = 0x0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS, l_sys_tgt, l_mfg_flags));
 
-    if(l_mfg_flags == fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS)
+    if(l_mfg_flags & fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS)
     {
         uint8_t l_mfg_error_threshold = 0x0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_O_MNFG_ERROR_THRESHOLD, l_sys_tgt, l_mfg_error_threshold));
 
-        if(l_mfg_error_threshold != fapi2:: ENUM_ATTR_IO_O_MNFG_ERROR_THRESHOLD_CORNER_MODE)
+        if(l_mfg_error_threshold == fapi2::ENUM_ATTR_IO_O_MNFG_ERROR_THRESHOLD_CORNER_MODE)
         {
             // Setup ECC & CRC Masks
             FAPI_TRY(p9_io_obus_mnfg_setup_ecc_crc_masks(i_tgt),
@@ -175,7 +175,7 @@ fapi2::ReturnCode p9_io_obus_post_trainadv(
                      "error from p9_io_obus_mnfg_adj_tally_logic()");
 
         }
-        else if(l_mfg_error_threshold != fapi2:: ENUM_ATTR_IO_O_MNFG_ERROR_THRESHOLD_RELIABILITY_MODE)
+        else if(l_mfg_error_threshold == fapi2::ENUM_ATTR_IO_O_MNFG_ERROR_THRESHOLD_RELIABILITY_MODE)
         {
             // Setup ECC & CRC Masks
             FAPI_TRY(p9_io_obus_mnfg_setup_ecc_crc_masks(i_tgt),
