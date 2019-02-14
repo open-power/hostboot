@@ -148,7 +148,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
         const DeconfigureFlags i_deconfigRule)
 {
-    HWAS_INF("Apply gard record for a target");
+    HWAS_INF("Apply gard record for target %.8X", get_huid(i_pTarget));
     errlHndl_t l_pErr = NULL;
     do
     {
@@ -183,12 +183,16 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
 
         HWAS_MUTEX_UNLOCK(iv_mutex);
 
+        // Need to set GARD_APPLIED bit for all garded targets
+        update_hwas_changed_mask(i_pTarget, HWAS_CHANGED_BIT_GARD_APPLIED);
+
         if(i_deconfigRule == SPEC_DECONFIG)
         {
+            HWAS_INF(
+                "Skip platLogEvent(GARD_APPLIED) for spec_deconfig target %.8X",
+                get_huid(i_pTarget));
             break;
         }
-
-        update_hwas_changed_mask(i_pTarget, HWAS_CHANGED_BIT_GARD_APPLIED);
         l_pErr = platLogEvent(i_pTarget, GARD_APPLIED);
         if (l_pErr)
         {
