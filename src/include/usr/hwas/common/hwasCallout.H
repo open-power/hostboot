@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,6 +159,11 @@ enum epubProcedureID
     EPUB_PRC_GPU_ISOLATION_PROCEDURE= 0x5E,
     ///< Problem is related to one or more installed GPUs,
     ///<   Manual isolation is required to determine which one
+
+    EPUB_PRC_NVDIMM_ERR             = 0x61,
+    ///< The diagnostic function detected a problem with the NVDIMM.
+    ///<    Both the NVDIMM and the cable connecting the DIMM to the
+    ///<    Backup Power Module should be replaced
 };
 
 // from srci/fsp/srci.H
@@ -218,6 +223,8 @@ enum partTypeEnum
     PCI_REF_CLOCK                   = 11,
     // @TODO 195920 Remove SMP_CABLE once HWSV code no longer references it
     SMP_CABLE                       = 12, //Target is SMPGROUP
+    BPM_CABLE_PART_TYPE             = 13, //Backup Power Module for NVDIMM
+    NV_CONTROLLER_PART_TYPE         = 14,
 };
 
 enum sensorTypeEnum

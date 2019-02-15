@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ const epubProcToSub_t PROCEDURE_TO_SUBSYS_TABLE[] =
     { EPUB_PRC_COOLING_SYSTEM_ERR     , EPUB_MISC_SUBSYS            },
     { EPUB_PRC_FW_VERIFICATION_ERR    , EPUB_FIRMWARE_SUBSYS        },
     { EPUB_PRC_GPU_ISOLATION_PROCEDURE, EPUB_CEC_HDW_SUBSYS         },
+    { EPUB_PRC_NVDIMM_ERR             , EPUB_MEMORY_SUBSYS          },
 };
 
 struct epubTargetTypeToSub_t

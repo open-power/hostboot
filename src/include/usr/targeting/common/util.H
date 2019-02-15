@@ -204,7 +204,7 @@ uint8_t  is_fused_mode( );
  *
  * @return bool - True if the given target is an NVDIMM
  */
-bool isNVDIMM( TARGETING::Target * i_target );
+bool isNVDIMM( const TARGETING::Target * i_target );
 
 /**
  * @brief Grab list of NVDIMMs under the processor

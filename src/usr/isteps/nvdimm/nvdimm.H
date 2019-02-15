@@ -307,7 +307,7 @@ enum i2c_out_values : uint8_t
     RSTR_IN_PROGRESS            = 0x09,
     ERASE_IN_PROGRESS           = 0x11,
     ARM_IN_PROGRESS             = 0x41,
-    CHARGE_IN_PROGRESS          = 0x41,
+    CHARGE_IN_PROGRESS          = 0x01,
     SAVE_SUCCESS                = 0x01,
     RSTR_SUCCESS                = 0X01,
     ARM_SUCCESS                 = 0X09,

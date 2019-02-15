@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,6 +149,8 @@ case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
                     case_PART_TYPE(PROC_REF_CLOCK)
                     case_PART_TYPE(PCI_REF_CLOCK)
                     case_PART_TYPE(SMP_CABLE)
+                    case_PART_TYPE(BPM_CABLE_PART_TYPE)
+                    case_PART_TYPE(NV_CONTROLLER_PART_TYPE)
 
                     default:
                         i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",
@@ -369,7 +371,7 @@ case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
 #define case_FLAG(_type) \
             case HWAS::_type: i_parser.PrintString( "Flag", #_type); break;
                 case_FLAG(FLAG_LINK_DOWN)
-                case(HWAS::FLAG_NONE): break; //do not print anything                    
+                case(HWAS::FLAG_NONE): break; //do not print anything
                 default:
                       i_parser.PrintNumber( "Flag", "UNKNOWN: 0x%X",
                                             ntohl(pData->flag) );
