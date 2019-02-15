@@ -109,6 +109,15 @@ p9_hcd_cache_stopclocks(
 
 
 
+    //Check if EQ is powered off; if so, return
+    FAPI_TRY(fapi2::getScom(i_target, EQ_PPM_PFSNS, l_data64),
+             "Error reading data from EQ_PPM_PFSNS");
+
+    if(l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        return fapi2::current_err;
+    }
+
     if(l_is_mpipl)
     {
         // PB_PURGE related SCOMs should be added to the beginning of
