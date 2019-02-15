@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -586,7 +586,7 @@ fapi2::ReturnCode pm_corequad_reset(
         uint16_t l_qaccr_value = 0;
         uint16_t l_caccr_value = 0;
         l_address = EQ_QPPM_QACCR;
-        uint8_t l_caccr_bit_13_14_15_value = 0;
+        uint8_t l_caccr_bit_13_14_value = 0;
         FAPI_TRY(fapi2::getScom(l_quad_chplt, l_address, l_quad_data64),
                  "ERROR: Failed to read EQ_QPPM_QACCR");
 
@@ -617,7 +617,7 @@ fapi2::ReturnCode pm_corequad_reset(
                     FAPI_TRY(fapi2::getScom(l_core_chplt, l_address, l_core_data64),
                              "ERROR: Failed to read C_CPPM_CACCR");
 
-                    //extract 0:11 bits data
+                    //extract 0:11 (SB_STRENGH, PULSE_MODE, SW VALUE)
                     l_core_data64.extract<C_CPPM_CACCR_CLK_SB_STRENGTH,
                                           C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
 
@@ -636,15 +636,15 @@ fapi2::ReturnCode pm_corequad_reset(
                     }
                     else
                     {
-                        //extract 13:14:15 bits
+                        //extract 13:14 (SB OVERRIDE, SW OVERRIDE)
                         l_core_data64.
-                        extractToRight<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(l_caccr_bit_13_14_15_value);
+                        extractToRight<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 2>(l_caccr_bit_13_14_value);
 
-                        if (l_caccr_bit_13_14_15_value)
+                        if (l_caccr_bit_13_14_value)
                         {
                             //Clear override bits
-                            l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(0);
-                            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+                            l_core_data64.flush<0>().setBit<13, 2>();
+                            FAPI_TRY(fapi2::putScom(l_core_chplt, C_CPPM_CACCR_CLEAR, l_core_data64),
                                      "ERROR: Failed to write C_CPPM_CACCR");
                         }
 
@@ -836,9 +836,9 @@ fapi2::ReturnCode pm_disable_resclk(
             }
 
             // By default clear override bits before QACCR is updated
-            //bit 13:14:15
-            l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(0);
-            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+            // bit 13:14
+            l_core_data64.flush<0>().setBit<13, 2>();
+            FAPI_TRY(fapi2::putScom(l_core_chplt, C_CPPM_CACCR_CLEAR, l_core_data64),
                      "ERROR: Failed to write C_CPPM_CACCR");
 
         } //end of core list
