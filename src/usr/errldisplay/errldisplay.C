@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -297,6 +297,8 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Part Type                : %s", #_t
                     case_PART_TYPE(LPC_SLAVE_PART_TYPE)
                     case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
                     case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
+                    case_PART_TYPE(BPM_CABLE_PART_TYPE)
+                    case_PART_TYPE(NV_CONTROLLER_PART_TYPE)
                     default:
                         CONSOLE::displayf(NULL, "  Part Type                : UNKNOWN 0x%X",
                                           callout->partType);

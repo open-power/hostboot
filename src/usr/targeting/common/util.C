@@ -282,7 +282,7 @@ uint8_t  is_fused_mode( )
 } // end is_fused_mode
 
 
-bool isNVDIMM( TARGETING::Target * i_target )
+bool isNVDIMM( const TARGETING::Target * i_target )
 {
     // Not the most elegant way of doing it but the hybrid attributes
     // are at the MCS level. Need to find my way up to MCS and check

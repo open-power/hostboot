@@ -362,9 +362,12 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
-            //@TODO RTC 199645 - add HW callout on dimm target.
-            //if nvdimm is not ready for access by now, this is
-            //a failing indication on the NV controller
+
+            // If nvdimm is not ready for access by now, this is
+            // a failing indication on the NV controller
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
         }
 
     }while(0);
@@ -489,9 +492,12 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT  );
 
         l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
-        //@TODO RTC 199645 - add HW callout on dimm target.
-        //may have to move the error handling to the caller
-        //as different op could have different error severity
+
+        // May have to move the error handling to the caller
+        // as different op could have different error severity
+        l_err->addPartCallout( i_nvdimm,
+                               HWAS::NV_CONTROLLER_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_HIGH);
     }
 
     return l_err;
@@ -705,9 +711,12 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
-            //@TODO RTC 199645 - add procedure callout on backup power source.
-            //Failure setting the energy source policy could mean error on the
-            //battery or even the cabling
+
+            // Failure setting the energy source policy could mean error on the
+            // battery or even the cabling
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::BPM_CABLE_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
         }
     }while(0);
 
@@ -850,8 +859,10 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
 
                     nvdimmSetStatusFlag(*it, NSTD_ERR_NOPRSV);
                     //@TODO RTC 199645 - add HW callout on dimm target
-                    //If we failed to de-assert reset_n, the dimm is pretty much useless.
-                    //Let's not restore if that happens
+                    // If we failed to de-assert reset_n, the dimm is pretty much useless.
+                    // Let's not restore if that happens
+                    // The callout will be added inside the HWP
+                    // Leaving this comment here as a reminder, will remove later
                     break;
                 }
             }
@@ -866,7 +877,9 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
 
                 nvdimmSetStatusFlag(*it, NSTD_ERR_NOPRSV);
                 //@TODO RTC 199645 - add HW callout on dimm target
-                //Without SRE the data could be not reliably restored
+                // Without SRE the data could be not reliably restored
+                // The callout will be added inside the HWP
+                // Leaving this comment here as a reminder, will remove later
                 break;
             }
             it++;
@@ -889,8 +902,6 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             l_err = nvdimmWriteReg(l_nvdimm, NVDIMM_FUNC_CMD, RESTORE_IMAGE);
             if (l_err)
             {
-                //@TODO RTC 199645 - add HW callout on dimm target
-                //failing here is likely an NV controller/i2c problem
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X], error initiating restore!!",
                           TARGETING::get_huid(l_nvdimm));
@@ -912,8 +923,6 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             l_err = nvdimmPollRestoreDone(l_nvdimm, l_poll);
             if (l_err)
             {
-                //@TODO RTC 199645 - add HW callout on dimm target
-                //Restore is taking longer than the allotted time here.
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"NDVIMM HUID[%X], error restoring!",
                           TARGETING::get_huid(l_nvdimm));
@@ -933,8 +942,6 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
             l_err = nvdimmGetRestoreValid(l_nvdimm, l_rstrValid);
             if (l_err)
             {
-                //@TODO RTC 199645 - add HW callout on dimm target
-                //failing here is likely an NV controller/i2c problem
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmRestore Target[%X] error validating restore status!",
                           TARGETING::get_huid(l_nvdimm));
@@ -966,9 +973,12 @@ errlHndl_t nvdimmRestore(TargetHandleList i_nvdimmList, uint8_t &i_mpipl)
 
                 l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
                 nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
-                //@TODO RTC 199645 - add HW callout on dimm target
-                //Invalid restore could be due to dram not in self-refresh
-                //or controller issue. Data should not be trusted at this point
+
+                // Invalid restore could be due to dram not in self-refresh
+                // or controller issue. Data should not be trusted at this point
+                l_err->addPartCallout( l_nvdimm,
+                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
                 break;
             }
         }
@@ -1066,10 +1076,13 @@ errlHndl_t nvdimmCheckEraseSuccess(Target *i_nvdimm)
 
         l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
         errlCommit( l_err, NVDIMM_COMP_ID );
-        //@TODO RTC 199645 - add HW callout on dimm target.
-        //failure to erase could mean internal NV controller error and/or
-        //HW error on nand flash. NVDIMM will lose persistency if failed to
-        //erase nand flash
+
+        // Failure to erase could mean internal NV controller error and/or
+        // HW error on nand flash. NVDIMM will lose persistency if failed to
+        // erase nand flash
+        l_err->addPartCallout( i_nvdimm,
+                               HWAS::NV_CONTROLLER_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_HIGH);
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmCheckEraseSuccess(): nvdimm[%X] ret[%X]",
@@ -1210,9 +1223,12 @@ errlHndl_t nvdimmOpenPage(Target *i_nvdimm,
                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
             l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-            //@TODO RTC 199645 - add HW callout on dimm target.
-            //failure to open page most likely means problem with
-            //the NV controller.
+
+            // Failure to open page most likely means problem with
+            // the NV controller.
+            l_err->addPartCallout( i_nvdimm,
+                                   HWAS::NV_CONTROLLER_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
         }
     }while(0);
 
@@ -1340,8 +1356,6 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
 
                 if (l_err)
                 {
-                    //@TODO RTC 199645 - add HW callout on dimm target
-                    //Backup is taking longer than the allotted time here.
                     nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOPRSV);
                     TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X], error backing up the DRAM!",
                               TARGETING::get_huid(l_nvdimm));
@@ -1427,8 +1441,6 @@ void nvdimm_init(Target *i_nvdimm)
 
         if (l_err)
         {
-            //@TODO RTC 199645 - add HW callout on dimm target
-            //Backup is taking longer than the allotted time here.
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_NOPRSV);
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_int() nvdimm[%X], error backing up the DRAM!",
                       TARGETING::get_huid(i_nvdimm));
@@ -1443,8 +1455,6 @@ void nvdimm_init(Target *i_nvdimm)
 
         if (l_err)
         {
-            //@TODO RTC 199645 - add HW callout on dimm target
-            //Failed to disarm the reset_n trigger
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_NOPRSV);
             TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_init() nvdimm[%X], error disarming the nvdimm!",
                       TARGETING::get_huid(i_nvdimm));

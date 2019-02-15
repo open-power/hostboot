@@ -308,10 +308,16 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
                                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
 
         l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-        //@TODO RTC 199645 - add HW callout on dimm target
-        //failure to arm could mean internal NV controller error or
-        //even error on the battery pack. NVDIMM will lose persistency
-        //if failed to arm trigger
+
+        // Failure to arm could mean internal NV controller error or
+        // even error on the battery pack. NVDIMM will lose persistency
+        // if failed to arm trigger
+        l_err->addPartCallout( i_nvdimm,
+                               HWAS::NV_CONTROLLER_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_HIGH);
+        l_err->addPartCallout( i_nvdimm,
+                               HWAS::BPM_CABLE_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_MED);
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmCheckArmSuccess() nvdimm[%X] ret[%X]",
