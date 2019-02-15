@@ -36,7 +36,6 @@ PRDR_RULE_TABLES += nimbus_xbus.prf
 PRDR_RULE_TABLES += nimbus_mcbist.prf
 PRDR_RULE_TABLES += nimbus_mcs.prf
 PRDR_RULE_TABLES += nimbus_mca.prf
-PRDR_RULE_TABLES += nimbus_nvdimm.prf
 
 # P9 Cumulus Chip
 PRDR_RULE_TABLES += cumulus_proc.prf

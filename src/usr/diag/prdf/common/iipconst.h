@@ -102,8 +102,6 @@ enum DOMAIN_ID
     OMI_DOMAIN    = 0x85,
     OCMB_DOMAIN   = 0x86,
 
-    NVDIMM_DOMAIN = 0x87,
-
     CLOCK_DOMAIN_FAB          = 0x90,
     CLOCK_DOMAIN_MEMBUF       = 0x91,
     CLOCK_DOMAIN_IO           = 0x92,
