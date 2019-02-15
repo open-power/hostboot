@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,8 @@
 
 //HWP
 #include    <p9_io_dmi_linktrain.H>
+#include    <exp_omi_setup.H>
+#include    <exp_omi_train.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -99,6 +101,69 @@ void* call_dmi_io_run_training (void *io_pArgs)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "SUCCESS :  p9_io_dmi_linktrain HWP");
+        }
+
+    }
+
+    TARGETING::TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "exp_omi_setup HWP target HUID 0x%.08x",
+            TARGETING::get_huid(l_ocmb_target));
+
+        //  call the HWP with each target
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb_target);
+
+        FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  exp_omi_setup HWP on target HUID 0x%.08x",
+                l_err->reasonCode(), TARGETING::get_huid(l_ocmb_target) );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error , continue on to next OCMB
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  exp_omi_setup HWP on target 0x%.08X, starting training", TARGETING::get_huid(l_ocmb_target));
+
+            FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  exp_omi_train HWP on target HUID 0x%.08x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_ocmb_target) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error , continue on to next OCMB
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  exp_omi_train HWP on target 0x%.08X", TARGETING::get_huid(l_ocmb_target));
+            }
         }
 
     }

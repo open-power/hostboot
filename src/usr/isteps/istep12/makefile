@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,10 @@ P9_PERV_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/perv
 P9_NEST_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/nest
 P9_INITFILE_PATH   = $(P9_PROCEDURES_PATH)/hwp/initfiles
 
+P9A_MSS_HWP_PATH   = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
+EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXPLORER_OMI_HWP_PATH  = ${EXPLORER_HWP_PATH}/lib/omi
+
 CENT_PROC_PATH     = ${ROOTPATH}/src/import/chips/centaur/procedures
 CENT_IO_HWP_PATH   = $(CENT_PROC_PATH)/hwp/io
 CENT_MEM_HWP_PATH  = $(CENT_PROC_PATH)/hwp/memory
@@ -44,6 +48,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += $(P9_PROCEDURES_PATH)/hwp/ffdc/
 EXTRAINCDIR += $(P9_IO_HWP_PATH)
@@ -53,6 +58,8 @@ EXTRAINCDIR += $(P9_INITFILE_PATH)
 EXTRAINCDIR += $(CENT_MEM_HWP_PATH)
 EXTRAINCDIR += $(CENT_INITFILE_PATH)
 EXTRAINCDIR += $(CENT_IO_HWP_PATH)
+EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 
 VPATH += $(P9_NEST_HWP_PATH)
 VPATH += $(P9_PERV_HWP_PATH)
@@ -61,6 +68,9 @@ VPATH += $(P9_INITFILE_PATH)
 VPATH += $(CENT_MEM_HWP_PATH)
 VPATH += $(CENT_INITFILE_PATH)
 VPATH += $(CENT_IO_HWP_PATH)
+VPATH += ${P9A_MSS_HWP_PATH}
+VPATH += ${EXPLORER_HWP_PATH}
+VPATH += ${EXPLORER_OMI_HWP_PATH}
 VAPTH += ${ROOTPATH}/src/usr/fapi2
 
 OBJS += call_mss_getecid.o
@@ -82,6 +92,10 @@ OBJS+=p9c_set_inband_addr.o
 
 # HWP objects need to unmask inband errors during framelock
 OBJS+=p9c_mss_unmask_errors.o
+
+# HWP files we do not have .mks for
+OBJS+=p9a_omi_train.o
+OBJS+=exp_omi_utils.o
 
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -105,5 +119,7 @@ include $(CENT_IO_HWP_PATH)/p9_io_cen_pdwn_lanes.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_clear_firs.mk
 include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
 include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
+include ${EXPLORER_HWP_PATH}/exp_omi_setup.mk
+include ${EXPLORER_HWP_PATH}/exp_omi_train.mk
 
 include ${ROOTPATH}/config.mk
