@@ -139,10 +139,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Extended image (12MB w/o ECC)</description>
+        <description>Hostboot Extended image (15MB)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x451000</physicalOffset>
-        <physicalRegionSize>0xD80000</physicalRegionSize>
+        <physicalRegionSize>0xF00000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -150,7 +150,7 @@ Layout Description
     <section>
         <description>SBE-IPL (Staging Area) (752K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0x11D1000</physicalOffset>
+        <physicalOffset>0x1351000</physicalOffset>
         <physicalRegionSize>0xBC000</physicalRegionSize>
         <sha512perEC/>
         <sha512Version/>
@@ -160,7 +160,7 @@ Layout Description
     <section>
         <description>HCODE Ref Image (1.125MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0x128D000</physicalOffset>
+        <physicalOffset>0x140D000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -169,17 +169,17 @@ Layout Description
     <section>
         <description>Hostboot Runtime Services for Sapphire (7.0MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0x13AD000</physicalOffset>
+        <physicalOffset>0x152D000</physicalOffset>
         <physicalRegionSize>0x700000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
-        <description>Payload (21.375MB)</description>
+        <description>Payload (19.875MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0x1AAD000</physicalOffset>
-        <physicalRegionSize>0x1560000</physicalRegionSize>
+        <physicalOffset>0x1C2D000</physicalOffset>
+        <physicalRegionSize>0x13E0000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -327,7 +327,7 @@ Layout Description
     <section>
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x3E14000</physicalOffset>
+        <physicalOffset>0x3DF4000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -335,7 +335,7 @@ Layout Description
     <section>
         <description>Ultravisor XSCOM White/Blacklist (64K)</description>
         <eyeCatch>UVBWLIST</eyeCatch>
-        <physicalOffset>0x3E94000</physicalOffset>
+        <physicalOffset>0x3E74000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
