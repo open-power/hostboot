@@ -47,7 +47,6 @@ namespace PRDF
     extern const char * nimbus_mcbist;
     extern const char * nimbus_mcs;
     extern const char * nimbus_mca;
-    extern const char * nimbus_nvdimm;
 
     // P9 Cumulus Chip
     extern const char * cumulus_proc;

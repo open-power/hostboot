@@ -69,7 +69,6 @@ PRDF_PLUGIN_DEFINE_NS( nimbus_ec,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_eq,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_ex,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mca,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( nimbus_nvdimm,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mcbist,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_mcs,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,    CommonPlugins, ClearServiceCallFlag );

@@ -138,8 +138,4 @@ actionclass mca_ue_algorithm_th_1
 actionclass analyzeDDRPHYFIR { analyze(gDDRPHYFIR); };
 actionclass analyzeMCACALFIR { analyze(gMCACALFIR); };
 actionclass analyzeMCAECCFIR { analyze(gMCAECCFIR); };
-actionclass analyzeNVDIMM
-{
-    try( analyze(connected(TYPE_DIMM, 0)),
-         analyze(connected(TYPE_DIMM, 1)) );
-};
+

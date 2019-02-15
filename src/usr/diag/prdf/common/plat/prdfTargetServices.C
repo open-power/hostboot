@@ -1232,6 +1232,7 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target )
             }
             break;
         }
+
         default:
             PRDF_ERR( "[getParentChip] Unsupported class: %d", l_class );
     }

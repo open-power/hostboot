@@ -46,7 +46,6 @@
 #include <prdfP9ExDomain.H>
 #include <prdfP9McDomain.H>
 #include <prdfP9McaDomain.H>
-#include <prdfP9NvdimmDomain.H>
 #include <prdfP9McbistDomain.H>
 #include <prdfP9MccDomain.H>
 #include <prdfP9McsDomain.H>
@@ -107,7 +106,6 @@ errlHndl_t PlatConfigurator::build()
             unitMap[TYPE_MCBIST] = new McbistDomain( MCBIST_DOMAIN );
             unitMap[TYPE_MCS   ] = new McsDomain(    MCS_DOMAIN    );
             unitMap[TYPE_MCA   ] = new McaDomain(    MCA_DOMAIN    );
-            unitMap[TYPE_DIMM  ] = new NvdimmDomain( NVDIMM_DOMAIN );
 
             break;
 
@@ -257,8 +255,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                             { TYPE_OBUS,   nimbus_obus    },
                             { TYPE_MCBIST, nimbus_mcbist  },
                             { TYPE_MCS,    nimbus_mcs     },
-                            { TYPE_MCA,    nimbus_mca     },
-                            { TYPE_DIMM,   nimbus_nvdimm  }, } },
+                            { TYPE_MCA,    nimbus_mca     }, } },
         { MODEL_CUMULUS,  { { TYPE_PROC,   cumulus_proc   },
                             { TYPE_EQ,     cumulus_eq     },
                             { TYPE_EX,     cumulus_ex     },
@@ -301,19 +298,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     // Iterate all the targets for this type and add to given domain.
     for ( const auto & trgt : getFunctionalTargetList(i_type) )
     {
-        TARGETING::MODEL model;
-
-        // If the target type is TYPE_DIMM, assume it is an NVDIMM, so we need
-        // to get the parent MCA to use to get the chip model
-        if ( TYPE_DIMM == getTargetType(trgt) )
-        {
-            TargetHandle_t parentMca = getConnectedParent( trgt, TYPE_MCA );
-            model = getChipModel( parentMca );
-        }
-        else
-        {
-            model = getChipModel( trgt );
-        }
+        TARGETING::MODEL model = getChipModel( trgt );
 
         // Ensure this model is supported.
         if ( fnMap.end() == fnMap.find(model) )
