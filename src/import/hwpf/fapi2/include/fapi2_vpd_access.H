@@ -91,7 +91,7 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
             : iv_vpd_type(i_vpd_type),
               iv_size(VPD_INFO_INVALID_64),
               iv_omi_freq_mhz(VPD_INFO_INVALID_64),
-              iv_rank_count(VPD_INFO_INVALID_64),
+              iv_rank(VPD_INFO_INVALID_64),
               iv_is_config_ffdc_enabled(true),
               iv_efd_type(VPD_INFO_INVALID_8),
               iv_dmb_mfg_id(VPD_INFO_INVALID_16),
@@ -110,8 +110,8 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
         // frequency of attached OMI bus
         uint64_t iv_omi_freq_mhz;
 
-        // number of master ranks
-        uint64_t iv_rank_count;
+        // rank for which settings are valid
+        uint64_t iv_rank;
 
         // set to false to avoid collecting a real ReturnCode
         bool     iv_is_config_ffdc_enabled;

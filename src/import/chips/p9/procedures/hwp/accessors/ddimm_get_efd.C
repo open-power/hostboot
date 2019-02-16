@@ -599,17 +599,17 @@ extern "C"
 
         /// Get the EFD MR
         // Look up the bit mask for the given MR
-        l_rankMask = ddrMasterRankToBitMask( io_vpdInfo.iv_rank_count);
+        l_rankMask = ddrMasterRankToBitMask( io_vpdInfo.iv_rank);
 
         // If no value for MR, then mapping of MR was unsuccessful
         FAPI_ASSERT( l_rankMask,
                      fapi2::TEST_ERROR_A().set_TARGET(i_ocmbFapi2Target),
                      "ddr4_get_efd: Master rank %d not supported by Axone",
-                     io_vpdInfo.iv_rank_count );
+                     io_vpdInfo.iv_rank );
 
         FAPI_DBG ("ddr4_get_efd: Caller supplied master rank = %d, "
                   "converted to master rank bit value mask = 0x%.2X",
-                  io_vpdInfo.iv_rank_count, l_rankMask);
+                  io_vpdInfo.iv_rank, l_rankMask);
 
         //// Fourthly, find the EFD that matches the given frequency
         //// and master rank
@@ -626,7 +626,7 @@ extern "C"
                   "%d (mapped to 0x%.4X) and caller supplied master rank = "
                   "%d (mapped to 0x%.2X)",
                   io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
-                  io_vpdInfo.iv_rank_count, l_rankMask);
+                  io_vpdInfo.iv_rank, l_rankMask);
 
         // Iterate over the EFDs looking for a match
         ii = 0;
@@ -730,7 +730,7 @@ extern "C"
                          "for frequency %d (frequency bit mask 0x%.4X) and "
                          "master rank %d (master rank bit mask 0x%.2X)",
                          io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
-                         io_vpdInfo.iv_rank_count, l_rankMask);
+                         io_vpdInfo.iv_rank, l_rankMask);
 
             // If unable to collect FFDC and assert, at least trace out error
             // and exit with false
@@ -738,7 +738,7 @@ extern "C"
                       "for frequency = %d (frequency bit mask = 0x%.4X) and "
                       "master rank = %d (master rank bit mask = 0x%.2X)",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
-                      io_vpdInfo.iv_rank_count, l_rankMask);
+                      io_vpdInfo.iv_rank, l_rankMask);
 
             fapi2::current_err == fapi2::FAPI2_RC_FALSE;
             goto fapi_try_exit;
