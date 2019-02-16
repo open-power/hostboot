@@ -169,6 +169,10 @@ namespace PARTIAL_GOOD
     const size_t MCS_R1_CU_MASK                  = 0x0003;
     // Rule 2 only applies to chip units 2 & 3
     const size_t MCS_R2_CU_MASK                  = 0x000C;
+    // Rule 3 only applies to chip units 0 & 2
+    const size_t MCS_R3_CU_MASK                  = 0x0005;
+    // Rule 4 only applies to chip units 1 & 3
+    const size_t MCS_R4_CU_MASK                  = 0x000A;
 
     // NPU
     // PG/AG Masks

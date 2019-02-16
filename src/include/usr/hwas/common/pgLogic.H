@@ -163,6 +163,10 @@ namespace PARTIAL_GOOD
     extern const size_t MCS_R1_CU_MASK;
     // Rule 2 only applies to chip units 2 & 3
     extern const size_t MCS_R2_CU_MASK;
+    // Rule 3 only applies to chip units 0 & 2
+    extern const size_t MCS_R3_CU_MASK;
+    // Rule 4 only applies to chip units 1 & 3
+    extern const size_t MCS_R4_CU_MASK;
 
     // NPU
     // PG/AG Masks
@@ -611,7 +615,7 @@ namespace PARTIAL_GOOD
                         MCS_R1_CU_MASK,
                         NO_SPECIAL_RULE
                     ),
-                    // MCS Rule 1: For chip units 2 and 3. Check MCS23
+                    // MCS Rule 2: For chip units 2 and 3. Check MCS23
                     new PartialGoodRule
                     (
                         {&PREDICATE_NIMBUS},
@@ -621,7 +625,7 @@ namespace PARTIAL_GOOD
                         MCS_R2_CU_MASK,
                         NO_SPECIAL_RULE
                     ),
-                    // MCS Rule 3: For chip units 0 and 1. Check bits in the
+                    // MCS Rule 3: For chip units 0 and 2. Check bits in the
                     //             MCxx entry including specific IOM bit, but
                     //             not the other bits in the partial good
                     //             region.
@@ -631,10 +635,10 @@ namespace PARTIAL_GOOD
                         MCS_R3_PG_MASK,
                         MCS_ALL_GOOD_MASK,
                         USE_CHIPLET_ID,
-                        MCS_R1_CU_MASK,
+                        MCS_R3_CU_MASK,
                         NO_SPECIAL_RULE
                     ),
-                    // MCS Rule 4: For chip units 2 and 3. Check bits in the
+                    // MCS Rule 4: For chip units 1 and 3. Check bits in the
                     //             MCxx entry including specific IOM bit, but
                     //             not the other bits in the partial good
                     //             region.
@@ -644,7 +648,7 @@ namespace PARTIAL_GOOD
                         MCS_R4_PG_MASK,
                         MCS_ALL_GOOD_MASK,
                         USE_CHIPLET_ID,
-                        MCS_R2_CU_MASK,
+                        MCS_R4_CU_MASK,
                         NO_SPECIAL_RULE
                     ),
                 }// End of PG Rules for MCS Target
