@@ -848,8 +848,33 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW446279</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW446279 SMP Abus Cable Failure
+      Use PPE SW recovery
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW446279_DISABLE_FIX</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW446279 SMP Abus Cable Failure
       Disable HW fixes to rely on PPE SW recovery
@@ -859,6 +884,13 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x13</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -8094,7 +8126,7 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW404391_SCAN</id>>
+    <id>ATTR_CHIP_EC_FEATURE_HW404391_SCAN</id>
     <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD2.1+: Workaround glxmux xstate issue by adjusting scan flush
@@ -8108,6 +8140,31 @@
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW404391_SCAN_OB12</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD2.1+: Workaround glxmux xstate issue by adjusting scan flush
+      state of selected latches in NVDL and PHY logic
+    </description>
+    <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
@@ -8372,6 +8429,23 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x13</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW440920</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Revert to ordered ("p8") TLBIE mode, disable NMMU snoop of TLBIE.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -8686,6 +8760,59 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Defines the ec level where pibmem repair is supported for Axone.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MEMORY_DIRECT_ATTACHED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     The processor supports direct attached memory via DDR interface
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MEMORY_DMI_ATTACHED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     The processor supports memory attached via Centaur memory buffer chip.
+     DMI connection links processor and Centaur chips.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MEMORY_OMI_ATTACHED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     The processor supports memory attached via OCMB memory buffer chip.
+     OMI connection links processor and OCMB chips.
     </description>
     <chipEcFeature>
       <chip>
