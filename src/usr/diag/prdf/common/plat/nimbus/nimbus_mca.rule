@@ -281,7 +281,7 @@ group gMCACALFIR
     /** MCACALFIR[8]
      *  event_n active on DDR interface
      */
-    (rMCACALFIR, bit(8)) ? defaultMaskedError;
+    (rMCACALFIR, bit(8)) ? analyzeNvdimms;
 
     /** MCACALFIR[9]
      *  WRQ or RRQ is in a hung state.
