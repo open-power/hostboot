@@ -946,6 +946,28 @@
   </attribute>
 
   <attribute>
+    <description>
+      While in Secureboot, this value is set to 1 the first time attribute
+      override is attempted and error logged.
+    </description>
+    <id>OVERRIDES_ATTEMPTED_FLAG</id>
+    <persistency>volatile-zeroed</persistency>
+    <simpleType>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
+    </simpleType>
+    <readable/>
+    <writeable/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <no_export/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>PART_NUMBER</id>
     <description>The part number for a particular FRU target</description>
     <simpleType>

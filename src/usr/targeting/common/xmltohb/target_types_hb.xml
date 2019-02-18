@@ -309,6 +309,9 @@
     <attribute>
       <id>OCC_COMMON_AREA_PHYS_ADDR</id>
     </attribute>
+    <attribute>
+      <id>OVERRIDES_ATTEMPTED_FLAG</id>
+    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
