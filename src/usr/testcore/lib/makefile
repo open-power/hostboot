@@ -30,6 +30,7 @@ MODULE = testsyslib
 TESTS = stltest.H
 #TODO RTC:204720
 #TESTS += synctest.H
+TESTS += tls.H
 
 SUBDIRS += runtime.d
 
