@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,6 +224,15 @@ fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
 ///
 fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                const std::vector<dimm::kind>& i_kinds);
+
+///
+/// @brief Enforce the NVDIMM pairing per MCS
+/// @param[in] i_target FAPI2 target (MCS)
+/// @param[in] i_kinds a vector of DIMM
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode check_nvdimm_pairing(const fapi2::Target<fapi2::TARGET_TYPE_MCS> i_target,
+                                       const std::vector<dimm::kind>& l_kinds);
 
 // Adding in code based plug rules - as supporting code gets added, the following checks can be deleted
 namespace code

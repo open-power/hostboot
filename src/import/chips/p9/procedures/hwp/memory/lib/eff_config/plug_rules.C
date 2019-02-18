@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <vpd_access.H>
 #include <mss.H>
+#include <algorithm>
 #include <lib/mss_vpd_decoder.H>
 
 #include <lib/dimm/rank.H>
@@ -758,6 +759,71 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Enforce the NVDIMM pairing per MCS for performance
+/// @param[in] i_target FAPI2 target (MCS)
+/// @param[in] i_kinds a vector of DIMM
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode check_nvdimm_pairing(const fapi2::Target<fapi2::TARGET_TYPE_MCS> i_target,
+                                       const std::vector<dimm::kind>& l_kinds)
+{
+    // 3 scenarios where the pairing rule would fail:
+    // (1). Odd number of NVDIMMs installed
+    // (2). Even number NVDIMMs are plugged but 1 deconfigured
+    // (3). 1 NVDIMM and 1 RDIMM mixed in the same MCS
+
+    bool l_has_nvdimm = false;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    for (uint8_t idx = 0; idx < l_kinds.size(); idx++)
+    {
+        l_has_nvdimm |= (l_kinds[idx].iv_hybrid_memory_type == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM);
+
+        if (l_has_nvdimm)
+        {
+            break;
+        }
+    }
+
+    FAPI_DBG("l_has_nvdimm %d", l_has_nvdimm);
+
+    // No reason to continue if there is no nvdimm installed
+    if (l_has_nvdimm)
+    {
+        // Odd number of functional NVDIMMs installed. Covers (1) & (2)
+        // We can safely assume that all the other NVDIMM-related plug rules are satisfied
+        // as this subroutine is called after all the other plug rule checks
+        FAPI_ASSERT( (l_kinds.size() % 2) == 0,
+                     fapi2::MSS_PLUG_RULES_ODD_NVDIMM_INSTALLED()
+                     .set_NUM_NVDIMMS_IN_MCS(l_kinds.size())
+                     .set_MCS_TARGET(i_target),
+                     "Odd number of NVDIMMs detected to be functional" );
+
+        // Make sure no mixing dimm type
+        bool l_condition = false;
+
+        for (uint8_t idx = 0; idx < l_kinds.size(); idx++)
+        {
+            l_condition = l_kinds[idx].iv_hybrid == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID &&
+                          l_kinds[idx].iv_hybrid_memory_type == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM;
+
+            if (!l_condition)
+            {
+                break;
+            }
+        }
+
+        FAPI_ASSERT( l_condition,
+                     fapi2::MSS_PLUG_RULES_NVDIMM_RDIMM_MIXED()
+                     .set_MCS_TARGET(i_target),
+                     "No mixing of RDIMM and NVDIMM in the same MCS" );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace plug_rule
 
 ///
@@ -796,6 +862,12 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
         // So we'll just error out if we find a bad port, this could make 2 deconfig loops instead of one,
         // but it's worth for proper behavior and really shouldn't happen often
         FAPI_TRY( enforce_plug_rules(p) );
+    }
+
+    // Enforce the NVDIMM pairing rule
+    {
+        const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
+        FAPI_TRY( plug_rule::check_nvdimm_pairing(i_target, l_dimm_kinds) );
     }
 
 fapi_try_exit:

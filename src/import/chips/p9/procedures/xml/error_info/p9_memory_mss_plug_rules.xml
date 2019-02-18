@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -485,6 +485,56 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </deconfigure>
-</hwpError>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_ODD_NVDIMM_INSTALLED</rc>
+    <description>
+      The MCS called out has odd number of NVDIMMs installed or has two/four NVDIMMs 
+      but the one is deconfigured.
+    </description>
+    <ffdc>NUM_NVDIMMS_IN_MCS</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCS_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCS_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_NVDIMM_RDIMM_MIXED</rc>
+    <description>
+      The MCS called out has NVDIMM and RDIMM mixed
+    </description>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCS_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCS_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
 
 </hwpErrors>
