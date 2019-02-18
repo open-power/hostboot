@@ -66,8 +66,8 @@ BEGIN
 }
 
 use lib "$pwd";
-use lib $ENV{PROJECT_ROOT} . "/generic/memory/tools"; # EKB Path
-use lib $ENV{PROJECT_ROOT} . "/src/import/generic/memory/tools"; # Hostboot Path
+use lib $ENV{PROJECT_ROOT} . "/generic/memory/tools";               # EKB Path
+use lib $ENV{PROJECT_ROOT} . "/src/import/generic/memory/tools";    # Hostboot Path
 
 use English;
 use Carp qw( croak );

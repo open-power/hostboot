@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 namespace mss
 {
@@ -92,17 +93,6 @@ bool pll_unlock( const fapi2::buffer<uint64_t>& i_local_fir,
 fapi2::ReturnCode pll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
                            fapi2::ReturnCode& io_rc,
                            bool& o_fir_error );
-
-///
-/// @brief Checks whether any FIRs have lit up on a target
-/// @tparam T the fapi2::TargetType which hold the FIR bits
-/// @param[in] i_target - the target on which to operate
-/// @param[in,out] io_rc - the return code for the function
-/// @param[out] o_fir_error - true iff a FIR was hit
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode bad_fir_bits( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc, bool& o_fir_error );
 
 ///
 /// @brief Checks whether the passed in FIRs have any un-masked errors set
@@ -168,7 +158,7 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fa
 
     FAPI_ERR("%s has a bad return code, time to check some firs!", mss::c_str(i_target));
 
-    l_fircheck_scom_err = bad_fir_bits(i_target, io_rc, l_fir_error);
+    l_fircheck_scom_err = bad_fir_bits<mss::mc_type::NIMBUS>(i_target, io_rc, l_fir_error);
 
     FAPI_ERR("%s took a fail. FIR was %s", mss::c_str(i_target),
              l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");

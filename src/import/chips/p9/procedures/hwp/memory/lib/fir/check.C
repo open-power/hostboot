@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,17 +351,16 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks whether any FIRs have lit up on a target
-/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @brief Checks whether any FIRs have lit up on a target - NIMBUS/MCBIST specialization
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< >
-fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                fapi2::ReturnCode& io_rc,
-                                bool& o_fir_error )
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        fapi2::ReturnCode& io_rc,
+        bool& o_fir_error )
 {
     // Start by assuming we do not have a FIR
     o_fir_error = false;
@@ -414,17 +413,16 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks whether any FIRs have lit up on a target
-/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @brief Checks whether any FIRs have lit up on a target - NIMBUS/MCA sepcialization
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< >
-fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                fapi2::ReturnCode& io_rc,
-                                bool& o_fir_error )
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        fapi2::ReturnCode& io_rc,
+        bool& o_fir_error )
 {
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     // Start by assuming we do not have a FIR

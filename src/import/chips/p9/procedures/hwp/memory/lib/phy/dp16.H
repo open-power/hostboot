@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
 
@@ -1063,7 +1064,7 @@ fapi2::ReturnCode reset_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode reset_bad_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                        const uint8_t i_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT]);
+                                        const uint8_t (&i_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
 
 ///
 /// @brief Configures the DQS_DISABLE register based upon the bad DQ information for x4 DRAM
@@ -2056,24 +2057,15 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     const uint64_t l_rp );
 
 ///
-/// @brief Write disable bits
-/// @note This is different than a register write as it writes attributes which
-/// cause firmware to act on the disabled bits.
-/// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
-///
-fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
-
-///
 /// @brief Write disable bits - helper for testing
 /// @note This is different than a register write as it writes attributes which
 /// cause firmware to act on the disabled bits.
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] containing the attribute information
+/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] containing the attribute information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t (&o_bad_dq)[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] );
+        uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] );
 
 ///
 /// @brief Process read vref calibration errors
@@ -2508,6 +2500,49 @@ inline void get_wr_vref_value( const fapi2::buffer<uint64_t> i_data,
 }
 
 } // close namespace wr_vref
+
+///
+/// @brief Interface class for recording bad bits
+/// @note Bad bits could change for new generations of chips
+/// an interface class is used to simplify the interactions
+///
+class bad_bits_interface
+{
+    public:
+
+        ///
+        /// @brief Default constructor
+        ///
+        bad_bits_interface() = default;
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~bad_bits_interface() = default;
+
+        ///
+        /// @param[in] i_target the DIMM to record training results on
+        /// @param[out] o_bad_bits the processed bad bits
+        ///
+        fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
+        {
+            return record_bad_bits_helper(i_target, o_bad_dq);
+        }
+};
+
+///
+/// @brief Writes the bad bits into the bad bits attribute
+/// @note Wrapper function to beautify the interface to the genric function
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    bad_bits_interface l_interface;
+    return mss::record_bad_bits<mss::mc_type::NIMBUS>(i_target, l_interface);
+}
+
 } // close namespace dp16
 } // close namespace mss
 

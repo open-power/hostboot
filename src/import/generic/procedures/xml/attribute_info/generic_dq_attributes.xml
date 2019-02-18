@@ -23,4 +23,23 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+
+    <attribute>
+      <id>ATTR_BAD_DQ_BITMAP</id>
+      <targetType>TARGET_TYPE_DIMM</targetType>
+      <description>
+        Bad DQ bitmap from a controller point of view.
+        The data is a 10 byte bitmap for each of 4 possible ranks.
+        The bad DQ data is stored in NVRAM, and it is stored in a special format
+        translated to a DIMM Connector point of view.
+        All of these details are hidden from the user of this attribute.
+      </description>
+      <valueType>uint8</valueType>
+      <mssAccessorName>bad_dq_bitmap</mssAccessorName>
+      <array>4 10</array>
+      <platInit/>
+      <initToZero/>
+      <writeable/>
+    </attribute>
+
 </attributes>

@@ -941,6 +941,28 @@ sub generate_setters
 }
 
 #
+# @brief Helper function to idenitify if we're an MC port target
+# @param[in] system - system type
+# @return reference to an array of target types
+#
+sub identify_mc_port_helper
+{
+
+    # Gets input and checks to make sure it's valid
+    croak "Incorrect number of inputs passed into gen_accessors::identify_mc_port_helper" if ( @ARG != 1 );
+
+    my ($system) = @ARG;
+
+    my @mc_port_target_types = ();
+    foreach my $type ( keys( %{ ${ +TARGET_TYPES }{$system} } ) )
+    {
+        push( @mc_port_target_types, ${ +TARGET_TYPES }{$system}{$type} ) if ( $type ne "DIMM" );
+    }
+
+    return \@mc_port_target_types;
+}
+
+#
 # @brief Generate accessor methods for a given attribute
 # @param[in] system - system type
 # @param[in] attr - reference to the attribute to process
@@ -960,11 +982,7 @@ sub generate_accessor_methods
     my @s_parameters = ();
 
     # Generate parameter info depending on target type
-    my @target_types = ();
-    foreach my $type ( keys( %{ ${ +TARGET_TYPES }{$system} } ) )
-    {
-        push( @target_types, ${ +TARGET_TYPES }{$system}{$type} );
-    }
+    my @target_types = @{ identify_mc_port_helper($system) };
 
     my $attr_type = $attr->{targetType};
     if ( grep( /^$attr_type$/, @target_types ) )

@@ -50,6 +50,8 @@ enum common_consts
 {
     DEFAULT_POLL_LIMIT = 50,  ///< the number of poll attempts in the event we can't calculate another
     MEMCMP_EQUAL = 0,         ///< Equal comparison value for memcmp
+    BAD_BITS_RANKS = 4,       ///< Bad bit attribute's number of ranks
+    BAD_DQ_BYTE_COUNT = 10,      ///< Bad bit attribute's number of byte
 };
 
 ///

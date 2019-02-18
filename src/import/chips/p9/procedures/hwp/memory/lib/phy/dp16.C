@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4065,7 +4065,7 @@ fapi2::ReturnCode reset_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 {
     for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
-        uint8_t l_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
+        uint8_t l_bad_dq[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
 
         FAPI_TRY( mss::bad_dq_bitmap(d, &(l_bad_dq[0][0])), "%s failed bad_dq_bitmap", mss::c_str(d) );
         FAPI_TRY( reset_bad_bits_helper(d, l_bad_dq), "%s failed reset_bad_bits_helper", mss::c_str(d) );
@@ -4144,7 +4144,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no errors on the scoms
 ///
 fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint8_t i_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT])
+        const uint8_t (&i_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
@@ -4199,58 +4199,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write disable bits
-/// @note This is different than a register write as it writes attributes which
-/// cause firmware to act on the disabled bits.
-/// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if no error on the scoms or attribute sets
-///
-fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    // If we have a FIR set that could have caused our training fail, then skip checking bad bits in FW
-    // PRD will handle the FIR and retrigger the procedure
-#ifdef __HOSTBOOT_MODULE
-    bool l_fir_error = false;
-
-    // Note: using success here will cause an RC to not be logged
-    // We can still see if we do have a FIR error though
-    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-    FAPI_TRY(mss::check::bad_fir_bits(i_target, l_rc, l_fir_error), "%s took an error while checking FIR's",
-             mss::c_str(i_target));
-
-    // Exit if we took a FIR error - PRD will handle bad bits
-    if(l_fir_error)
-    {
-        FAPI_INF("%s has FIR's set, exiting to let PRD handle it", mss::c_str(i_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-#endif
-
-    for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
-    {
-        uint8_t l_data[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
-
-        FAPI_TRY( mss::dp16::record_bad_bits_helper(d, l_data) );
-
-        // Write
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, d, l_data) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Write disable bits - helper for testing
 /// @note This is different than a register write as it writes attributes which
 /// cause firmware to act on the disabled bits.
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_bad_dq an array of [MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] containing the attribute information
+/// @param[out] o_bad_dq an array of [BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] containing the attribute information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t (&o_bad_dq)[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] )
+        uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] )
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
@@ -4749,5 +4706,19 @@ fapi_try_exit:
 
 } // close namespace wr_vref
 } // close namespace dp16
+
+///
+/// @brief A generic bad bits setter - Nimbus specialization
+/// @param[in] i_target the fapi2 target oon which training was conducted
+/// @param[in] i_array the bad bits to set
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+template <>
+fapi2::ReturnCode set_bad_dq_bitmap<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&i_array)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    return FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, i_array);
+}
+
 } // close namespace mss
 

@@ -46,6 +46,18 @@ namespace check
 {
 
 ///
+/// @brief Checks whether any FIRs have lit up on a target
+/// @tparam MC MC type for which to check FIR's
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc, bool& o_fir_error );
+
+///
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
 /// @tparam IT input data type

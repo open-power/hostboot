@@ -403,11 +403,10 @@ fapi_try_exit:
 /// @param[out] o_repairs_exceeded 2-bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0-1 = DIMM0-1)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-// TODO RTC:157753 Template parameters here are Nimbus specific. Convert to attribute/trait of TARGET_TYPE_MCA when traits are created.
 template<>
-fapi2::ReturnCode restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_DIMM, BAD_DQ_BYTE_COUNT>(
+fapi2::ReturnCode restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, BAD_BITS_RANKS, BAD_DQ_BYTE_COUNT>(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-    const uint8_t i_bad_bits[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT],
+    const uint8_t i_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
     fapi2::buffer<uint8_t>& o_repairs_applied,
     fapi2::buffer<uint8_t>& o_repairs_exceeded)
 {
@@ -476,7 +475,7 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                                    fapi2::buffer<uint8_t>& o_repairs_applied,
                                    fapi2::buffer<uint8_t>& o_repairs_exceeded)
 {
-    uint8_t l_bad_bits[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
+    uint8_t l_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
 
     o_repairs_applied = 0;
     o_repairs_exceeded = 0;
@@ -485,7 +484,7 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     {
         FAPI_TRY( mss::bad_dq_bitmap(l_dimm, &(l_bad_bits[0][0])) );
 
-        FAPI_TRY( (restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_DIMM, BAD_DQ_BYTE_COUNT>(
+        FAPI_TRY( (restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, BAD_BITS_RANKS, BAD_DQ_BYTE_COUNT>(
                        l_dimm, l_bad_bits, o_repairs_applied, o_repairs_exceeded)) );
     }
 

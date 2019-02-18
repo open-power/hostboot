@@ -75,8 +75,6 @@ enum sizes
     NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
     NUM_LRDIMM_TRAINING_PATTERNS = 5,             ///< Used for ATTR_MSS_LRDIMM_TRAINING_PATTERN
 
-
-    BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
     ROW_REPAIR_BYTE_COUNT = 4,     ///< Elements in a ROW_REPAIR_DATA attribute array.
 
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
