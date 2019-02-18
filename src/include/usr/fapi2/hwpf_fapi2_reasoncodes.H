@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ namespace fapi2
         MOD_FAPI2_GET_RING                          = 0x17,
         MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ             = 0x18,
         MOD_FAPI2_PLAT_GET_PROC_TEST                = 0x19,
+        MOD_FAPI2_MONITOR_FOR_FSP_MSGS              = 0x1A,
     };
 
     /**
@@ -125,6 +126,7 @@ namespace fapi2
         RC_DD_SUPPORT_CHECK_FAILED     = FAPI2_COMP_ID | 0x3E,
         RC_SET_ATTR_NOT_VALID          = FAPI2_COMP_ID | 0x3F,
         RC_FAILED_TO_GET_RING_LIST     = FAPI2_COMP_ID | 0x40,
+        RC_ATTR_OVERRIDE_DISALLOWED    = FAPI2_COMP_ID | 0x41,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
@@ -134,7 +136,6 @@ namespace fapi2
         // PLL_BUCKET generated errors
         RC_NO_MATCHING_FREQ            = HWPF_COMP_ID | 0x31,
         RC_FREQ_LIST_NOT_FOUND         = HWPF_COMP_ID | 0x32,
-
     };
 
     /**

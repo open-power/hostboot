@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,6 +270,13 @@ void AttrOverrideSync::monitorForFspMessages()
     msg_q_t l_pMsgQ = msg_q_create();
     errlHndl_t l_pErr = MBOX::msgq_register(MBOX::HB_HWPF_ATTR_MSGQ, l_pMsgQ);
 
+    // Find out if attributes override has been attempted
+    TARGETING::Target* l_pSys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_pSys);
+    // Assert that l_pSys is no longer nullptr
+    assert(l_pSys != nullptr, "AttrOverrideSync::monitorForFspMessages() "
+           "expected top level target, but got nullptr.");
+
     if (l_pErr)
     {
         // In the unlikely event that registering fails, the code will commit an
@@ -296,6 +303,33 @@ void AttrOverrideSync::monitorForFspMessages()
                          "Message (0x%X) from FSP since attribute overrides "
                          "are not allowed",
                          l_pMsg->type);
+
+                // Checking if OVERRIDES_ATTEMPTED_FLAG has not been set to 1.
+                // If so, then this is the first time attributes override is
+                // attempted in an FSP, while in secure mode; in this case, log
+                // an error stating that attributes override was attempted.
+                if (!l_pSys->
+                        getAttr<TARGETING::ATTR_OVERRIDES_ATTEMPTED_FLAG>())
+                {
+                    /*@
+                     * @errortype
+                     * @reasoncode       RC_ATTR_OVERRIDE_DISALLOWED
+                     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+                     * @moduleid         MOD_FAPI2_MONITOR_FOR_FSP_MSGS
+                     * @devdesc          Attribute overrides were rejected
+                     *                   because system is in secure mode
+                     * @custdesc         Action not allowed in secure mode
+                     */
+                    l_pErr = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            MOD_FAPI2_MONITOR_FOR_FSP_MSGS,
+                            RC_ATTR_OVERRIDE_DISALLOWED);
+                    l_pErr->collectTrace(SECURE_COMP_NAME);
+                    SECUREBOOT::addSecureUserDetailsToErrlog(l_pErr);
+                    errlCommit(l_pErr, HWPF_COMP_ID);
+                    l_pSys->
+                        setAttr<TARGETING::ATTR_OVERRIDES_ATTEMPTED_FLAG>(true);
+                }
             }
             else if (l_chunk.iv_pAttributes == NULL)
             {
@@ -972,7 +1006,7 @@ void AttrOverrideSync::dynSetAttrOverrides()
     if (!SECUREBOOT::allowAttrOverrides())
     {
         FAPI_INF("AttrOverrideSync::dynSetAttrOverrides: skipping since "
-                 "attribute overrides are not allowed");
+                "attribute overrides are not allowed");
         return;
     }
 
