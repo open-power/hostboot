@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,6 +288,392 @@ int32_t MemPortFailure( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( nimbus_mca, MemPortFailure );
+
+//##############################################################################
+//
+//                               NVDIMM
+//
+//##############################################################################
+
+enum nvdimmRegOffset
+{
+    MODULE_HEALTH = 0x0A0,
+    MODULE_HEALTH_STATUS0 = 0x0A1,
+    MODULE_HEALTH_STATUS1 = 0x0A2,
+    ERROR_THRESHOLD_STATUS = 0x0A5,
+    WARNING_THRESHOLD_STATUS = 0x0A7,
+};
+
+/**
+ * @brief  Gets a map list of which bits are set from a uint8_t bit list (7:0)
+ * @param  i_data uint8_t bit list (7:0)
+ * @return map<uint8_t, bool> with which bits were set in the bit list.
+ */
+std::map<uint8_t,bool> __nvdimmGetActiveBits( uint8_t i_data )
+{
+    // NOTE: Bit position in i_data that we get from the NVDIMM status register
+    //       will be right justified (7:0), ie ordered 7 to 0 (left to right).
+    std::map<uint8_t,bool> bitList;
+    for ( uint8_t n = 0; n < 8; n++ )
+    {
+        if ( i_data & (0x01 << n) ) bitList[n] = true;
+    }
+    return bitList;
+}
+
+/**
+ * @brief  Analyze NVDIMM Health Status0 Register for errors
+ * @param  io_sc  The step code data struct.
+ * @param  i_dimm The target dimm.
+ * @return errl - fail if unable to read register
+ */
+uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
+                                    TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[__analyzeHealthStatus0Reg] "
+
+    uint32_t o_rc = SUCCESS;
+    uint8_t data = 0;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Health Status0 Register (0xA1) 7:0
+        errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH_STATUS0) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Health Status0 Register. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // BIT 0: Voltage Regulator Fail
+        if ( bitList.count(0) )
+        {
+            // TODO
+        }
+        // BIT 1: VDD Lost
+        if ( bitList.count(1) )
+        {
+            // TODO
+        }
+        // BIT 2: VPP Lost
+        if ( bitList.count(2) )
+        {
+            // TODO
+        }
+        // BIT 3: VTT Lost
+        if ( bitList.count(3) )
+        {
+            // TODO
+        }
+        // BIT 4: DRAM not Self Refresh
+        if ( bitList.count(4) )
+        {
+            // TODO
+        }
+        // BIT 5: Controller HW Error
+        if ( bitList.count(5) )
+        {
+            // TODO
+        }
+        // BIT 6: NV Controller HW Error
+        if ( bitList.count(6) )
+        {
+            // TODO
+        }
+        // BIT 7: NVM Lifetime Error
+        if ( bitList.count(7) )
+        {
+            // TODO
+        }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+/**
+ * @brief  Analyze NVDIMM Health Status1 Register for errors
+ * @param  io_sc  The step code data struct.
+ * @param  i_dimm The target dimm.
+ * @return errl - fail if unable to read register
+ */
+uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
+                                    TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[__analyzeHealthStatus1Reg] "
+
+    uint32_t o_rc = SUCCESS;
+    uint8_t data = 0;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Health Status1 Register (0xA2) 7:0
+        errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH_STATUS1) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Health Status1 Register. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // BIT 0: Insufficient Energy
+        if ( bitList.count(0) )
+        {
+            // TODO
+        }
+        // BIT 1: Invalid Firmware
+        if ( bitList.count(1) )
+        {
+            // TODO
+        }
+        // BIT 2: Configuration Data Error
+        if ( bitList.count(2) )
+        {
+            // TODO
+        }
+        // BIT 3: No Energy Source
+        if ( bitList.count(3) )
+        {
+            // TODO
+        }
+        // BIT 4: Energy Policy Not Set
+        if ( bitList.count(4) )
+        {
+            // TODO
+        }
+        // BIT 5: Energy Source HW Error
+        if ( bitList.count(5) )
+        {
+            // TODO
+        }
+        // BIT 6: Energy Source Health Assessment Error
+        if ( bitList.count(6) )
+        {
+            // TODO
+        }
+        // BIT 7: Reserved
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+/**
+ * @brief  Analyze NVDIMM Error Threshold Status Register for errors
+ * @param  io_sc  The step code data struct.
+ * @param  i_dimm The target dimm.
+ * @return errl - fail if unable to read register
+ */
+uint32_t __analyzeErrorThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
+                                     TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[__analyzeErrorThrStatusReg] "
+
+    uint32_t o_rc = SUCCESS;
+    uint8_t data = 0;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Error Threshold Status Register (0xA5) 7:0
+        errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(ERROR_THRESHOLD_STATUS) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Error Threshold Status Reg. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // BIT 0: NVM Lifetime Error
+        if ( bitList.count(0) )
+        {
+            // TODO
+        }
+        // BIT 1: ES Lifetime Error
+        if ( bitList.count(1) )
+        {
+            // TODO
+        }
+        // BIT 2: ES Temperature Error
+        if ( bitList.count(2) )
+        {
+            // TODO
+        }
+        // BIT 3:7: Reserved
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+/**
+ * @brief  Analyze NVDIMM Warning Threshold Status Register for errors
+ * @param  io_sc  The step code data struct.
+ * @param  i_dimm The target dimm.
+ * @return errl - fail if unable to read register
+ */
+uint32_t __analyzeWarningThrStatusReg( STEP_CODE_DATA_STRUCT & io_sc,
+                                       TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[__analyzeWarningThrStatusReg] "
+
+    uint32_t o_rc = SUCCESS;
+    uint8_t data = 0;
+
+    do
+    {
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Warning Threshold Status Register (0xA7) 7:0
+        errlHndl_t errl = deviceRead( i_dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(WARNING_THRESHOLD_STATUS) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Warning Threshold Status Reg. "
+                      "HUID: 0x%08x", getHuid(i_dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // BIT 0: NVM Lifetime Warning
+        if ( bitList.count(0) )
+        {
+            // TODO
+        }
+        // BIT 1: ES Lifetime Warning
+        if ( bitList.count(1) )
+        {
+            // TODO
+        }
+        // BIT 2: ES Temperature Warning
+        if ( bitList.count(2) )
+        {
+            // TODO
+        }
+        // BIT 3:7: Unused
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+/**
+ * @brief  MCACALFIR[8] - Error from NVDIMM health status registers
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[nimbus_mca::AnalyzeNvdimmHealthStatRegs] "
+
+    uint32_t l_rc = SUCCESS;
+
+    // We need to check both dimms for errors
+    for ( auto & dimm : getConnected(i_chip->getTrgt(), TYPE_DIMM) )
+    {
+        uint8_t data = 0;
+
+        // NVDIMM health status registers size = 1 byte
+        size_t NVDIMM_SIZE = 1;
+
+        // Read the Module Health Register (0xA0) 7:0
+        errlHndl_t errl = deviceRead( dimm, &data, NVDIMM_SIZE,
+            DEVICE_NVDIMM_ADDRESS(MODULE_HEALTH) );
+        if ( errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read Module Health Register. "
+                      "HUID: 0x%08x", getHuid(dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            continue;
+        }
+        std::map<uint8_t,bool> bitList = __nvdimmGetActiveBits( data );
+
+        // BIT 0: Persistency Lost
+        if ( bitList.count(0) )
+        {
+            // Analyze Health Status0 Reg, Health Status1 Reg,
+            // and Error Theshold Status Reg
+            l_rc = __analyzeHealthStatus0Reg( io_sc, dimm );
+            if ( SUCCESS != l_rc ) continue;
+            l_rc = __analyzeHealthStatus1Reg( io_sc, dimm );
+            if ( SUCCESS != l_rc ) continue;
+            l_rc = __analyzeErrorThrStatusReg( io_sc, dimm );
+            if ( SUCCESS != l_rc ) continue;
+        }
+        // BIT 1: Warning Threshold Exceeded
+        if ( bitList.count(1) )
+        {
+            // Analyze Warning Threshold Status Reg
+            l_rc = __analyzeWarningThrStatusReg( io_sc, dimm );
+            if ( SUCCESS != l_rc ) continue;
+        }
+        // BIT 2: Persistency Restored
+        if ( bitList.count(2) )
+        {
+            // TODO
+        }
+        // BIT 3: Below Warning Threshold
+        if ( bitList.count(3) )
+        {
+            // TODO
+        }
+        // BIT 4: Hardware Failure
+        if ( bitList.count(4) )
+        {
+            // TODO
+        }
+        // BIT 5: EVENT_N_LOW
+        if ( bitList.count(5) )
+        {
+            // TODO
+        }
+        // BIT 6:7: Unused
+
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( nimbus_mca, AnalyzeNvdimmHealthStatRegs );
 
 } // end namespace nimbus_mca
 
