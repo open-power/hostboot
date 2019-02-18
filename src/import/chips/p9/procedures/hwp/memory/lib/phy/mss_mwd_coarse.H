@@ -39,6 +39,7 @@
 #define MSS_MWD_COARSE_H
 
 #include <lib/phy/mss_training.H>
+#include <lib/phy/mss_lrdimm_training_helper.H>
 
 namespace mss
 {
@@ -59,12 +60,7 @@ class mwd_coarse : public step
         // From the LRDIMM spec - we only have 5 delays -2->+2
         static constexpr uint64_t NUM_DELAYS = 5;
 
-        // Default delay value 2 is for 0 nck
-        static constexpr uint8_t DEFAULT_DELAYS = 2;
-        static constexpr uint8_t DEFAULT_TO_PASS = 0xF8;
-        static constexpr uint8_t PASSING_RESULT = 0x0f;
-        static constexpr uint8_t FAILING_RESULT = 0x00;
-
+        static constexpr uint64_t RANKS_PER_FUNCTION_SPACE = 2;
         mwd_coarse() :
             step("MWD_COARSE")
         {}
@@ -73,115 +69,6 @@ class mwd_coarse : public step
         /// @brief Default virtual destructor
         ///
         ~mwd_coarse() = default;
-
-        ///
-        /// @class mwd_coarse::recorder
-        /// @brief Records the results for a given nibble
-        ///
-        struct recorder
-        {
-            static constexpr uint64_t CLEAN = 0;
-
-            ///
-            /// @brief Default constructor
-            ///
-            recorder() :
-                iv_results(DEFAULT_TO_PASS),
-                iv_final_delay(DEFAULT_DELAYS),
-                iv_invalid_data_count(CLEAN)
-            {}
-
-            ///
-            /// @brief constructor
-            /// @param[in] i_results results from the MWD_COARSE run
-            /// @param[in] i_final final delay chosen by the MWD_COARSE run
-            /// @param[in] i_invalid_count invalid data count from MWD_COARSE run
-            ///
-            recorder(const fapi2::buffer<uint8_t> i_results, const uint8_t i_final_delay, const uint64_t i_invalid_count = CLEAN) :
-                iv_results(i_results),
-                iv_final_delay(i_final_delay),
-                iv_invalid_data_count(i_invalid_count)
-            {}
-
-            // Records a given bit per nibble per delay
-            // 1 = compare
-            // 0 = miscompare
-            // Fun thing is the LRDIMM spec sends out 1's for compares, so no enums needed
-            fapi2::buffer<uint8_t> iv_results;
-            uint8_t iv_final_delay;
-            uint64_t iv_invalid_data_count;
-
-            ///
-            /// @brief Adds results to the recorder
-            /// @param[in] i_delay the current delay
-            /// @param[in] i_result the result for the current nibble - right aligned
-            /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-            ///
-            fapi2::ReturnCode add_results(const uint8_t i_delay, const uint8_t i_result)
-            {
-                bool l_passed = false;
-
-                // 0 is not passed
-                if(i_result == FAILING_RESULT)
-                {
-                    l_passed = false;
-                }
-
-                // F is passed - only if we had already passed at this location
-                else if(i_result == PASSING_RESULT)
-                {
-                    l_passed = iv_results.getBit(i_delay);
-                }
-
-                // Anything else is an error case
-                else
-                {
-                    l_passed = false;
-                    FAPI_DBG("delay%u has a invalid result of 0x%02x", i_delay, i_result);
-                    iv_invalid_data_count++;
-                }
-
-                FAPI_TRY(iv_results.writeBit(l_passed, i_delay));
-
-            fapi_try_exit:
-                return fapi2::current_err;
-            }
-
-
-            ///
-            /// @brief Finds the final result for the whole buffer
-            /// @param[in] i_target the DIMM target for the data
-            /// @param[in] i_dimm_rank the DIMM rank on which to set the delay
-            /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-            ///
-            fapi2::ReturnCode find_final_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                               const uint64_t i_dimm_rank)
-            {
-                // uint8_t() is to make the bit count compile as it's expecting an integral type
-                // buffers don't count as an integral type as they're classes
-                const uint8_t l_results(iv_results);
-
-                // If we never find a passing region, just log an error and set a 2
-                if(iv_results == 0)
-                {
-                    iv_final_delay = 2;
-                    FAPI_ERR("%s rank%u found no passing regions setting to an offset of 0 data:0x%02x", mss::c_str(i_target), i_dimm_rank,
-                             iv_results);
-                    return fapi2::FAPI2_RC_SUCCESS;
-                }
-
-                // Otherwise, find our first passing region
-                // We should really only have 1, so let's log an error if that's not the case
-                if(bit_count(l_results) > 1)
-                {
-                    FAPI_ERR("%s rank%u found more than one passing region data:0x%02x", mss::c_str(i_target), i_dimm_rank, iv_results);
-                }
-
-                iv_final_delay = first_bit_set(l_results);
-
-                return fapi2::FAPI2_RC_SUCCESS;
-            }
-        };
 
         ///
         /// @brief conduct write then read
@@ -228,7 +115,7 @@ class mwd_coarse : public step
             // Even ranks are on function space 0
             // Odd ranks are on function space 1
             // Just mod it by 2...
-            return (i_dimm_rank % 2) ? FUNC_SPACE_1 : FUNC_SPACE_0;
+            return (i_dimm_rank % RANKS_PER_FUNCTION_SPACE) ? FUNC_SPACE_1 : FUNC_SPACE_0;
         }
 
         ///
@@ -242,7 +129,9 @@ class mwd_coarse : public step
             // Taken from the spec ~page 60->64
             // Ranks 0/1: 0x0d
             // Ranks 2/3: 0x0f
-            return (i_dimm_rank < 2) ? 0x0d : 0x0f;
+            constexpr uint8_t RANK01 = 0x0d;
+            constexpr uint8_t RANK23 = 0x0f;
+            return (i_dimm_rank < RANKS_PER_FUNCTION_SPACE) ? RANK01 : RANK23;
         }
 
         ///
@@ -268,7 +157,7 @@ class mwd_coarse : public step
         fapi2::ReturnCode analyze_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                           const uint64_t i_dimm_rank,
                                           const uint8_t i_delay,
-                                          std::vector<std::pair<recorder, recorder>>& io_results) const;
+                                          std::vector<std::pair<coarse_recorder, coarse_recorder>>& io_results) const;
 
         ///
         /// @brief Creates the nibble flags for the invalid data callout
@@ -281,7 +170,7 @@ class mwd_coarse : public step
         ///
         uint32_t flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint8_t i_rank,
-                                    const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                    const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders,
                                     uint64_t& o_invalid_count) const;
 
         ///
@@ -294,7 +183,7 @@ class mwd_coarse : public step
         ///
         fapi2::ReturnCode callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                 const uint8_t i_rank,
-                                                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                                                const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const;
 
         ///
         /// @brief Creates the nibble flags for the not one passing region callout
@@ -305,7 +194,7 @@ class mwd_coarse : public step
         ///
         uint32_t flag_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                               const uint8_t i_rank,
-                                              const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                                              const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const;
 
         ///
         /// @brief Calls out if a rank found not one passing region
@@ -316,7 +205,7 @@ class mwd_coarse : public step
         ///
         fapi2::ReturnCode callout_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint8_t i_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_recorders) const;
+                const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const;
 
         ///
         /// @brief Finds the final results for the whole DIMM rank
@@ -327,7 +216,7 @@ class mwd_coarse : public step
         ///
         fapi2::ReturnCode find_final_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              const uint64_t i_dimm_rank,
-                                             std::vector<std::pair<recorder, recorder>>& io_results) const;
+                                             std::vector<std::pair<coarse_recorder, coarse_recorder>>& io_results) const;
 
         ///
         /// @brief Sets the final delays for a DIMM/rank target
@@ -339,7 +228,7 @@ class mwd_coarse : public step
         ///
         fapi2::ReturnCode set_final_delays_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 const uint64_t i_dimm_rank,
-                const std::vector<std::pair<recorder, recorder>>& i_results,
+                const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_results,
                 mss::ddr4::pba::commands& o_container) const;
 
         ///
@@ -351,7 +240,7 @@ class mwd_coarse : public step
         ///
         fapi2::ReturnCode set_final_delays(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                            const uint64_t i_dimm_rank,
-                                           const std::vector<std::pair<recorder, recorder>>& i_results) const;
+                                           const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_results) const;
 
         ///
         /// @brief Executes the pre-cal step workaround

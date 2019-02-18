@@ -157,7 +157,7 @@ fapi_try_exit:
 fapi2::ReturnCode mwd_coarse::analyze_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
         const uint8_t i_delay,
-        std::vector<std::pair<recorder, recorder>>& io_results) const
+        std::vector<std::pair<coarse_recorder, coarse_recorder>>& io_results) const
 {
     uint8_t l_buffer = 0;
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
@@ -219,7 +219,7 @@ fapi_try_exit:
 ///
 uint32_t mwd_coarse::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                         const uint8_t i_rank,
-                                        const std::vector<std::pair<recorder, recorder>>& i_recorders,
+                                        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders,
                                         uint64_t& o_invalid_count) const
 {
     o_invalid_count = 0;
@@ -243,8 +243,8 @@ uint32_t mwd_coarse::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_D
 
         // Updates the bitmap
         o_invalid_count += l_recorder.first.iv_invalid_data_count + l_recorder.second.iv_invalid_data_count;
-        append_nibble_flags(l_recorder.first.iv_invalid_data_count != recorder::CLEAN,
-                            l_recorder.second.iv_invalid_data_count != recorder::CLEAN,
+        append_nibble_flags(l_recorder.first.iv_invalid_data_count != coarse_recorder::CLEAN,
+                            l_recorder.second.iv_invalid_data_count != coarse_recorder::CLEAN,
                             l_per_nibble_flags);
 
         l_buffer++;
@@ -263,7 +263,7 @@ uint32_t mwd_coarse::flag_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_D
 ///
 fapi2::ReturnCode mwd_coarse::callout_invalid_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const
 {
     // Per nibble invalid data - bitmap
     // A bitmap is used to simplify the error callouts
@@ -295,7 +295,7 @@ fapi_try_exit:
 ///
 uint32_t mwd_coarse::flag_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const
 {
     uint8_t l_buffer = 0;
 
@@ -336,7 +336,7 @@ uint32_t mwd_coarse::flag_not_one_passing_region( const fapi2::Target<fapi2::TAR
 ///
 fapi2::ReturnCode mwd_coarse::callout_not_one_passing_region( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_recorders) const
+        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_recorders) const
 {
     // Per nibble weird data and no transition flags - bitmap
     // A bitmap is used to simplify the error callouts
@@ -362,7 +362,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mwd_coarse::find_final_results(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
-        std::vector<std::pair<recorder, recorder>>& io_results) const
+        std::vector<std::pair<coarse_recorder, coarse_recorder>>& io_results) const
 {
     uint8_t l_buffer = 0;
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
@@ -396,7 +396,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mwd_coarse::set_final_delays_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_results,
+        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_results,
         mss::ddr4::pba::commands& o_container) const
 {
     uint8_t l_buffer = 0;
@@ -459,7 +459,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mwd_coarse::set_final_delays(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_dimm_rank,
-        const std::vector<std::pair<recorder, recorder>>& i_results) const
+        const std::vector<std::pair<coarse_recorder, coarse_recorder>>& i_results) const
 {
 
     mss::ddr4::pba::commands l_container;
@@ -656,7 +656,7 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         const auto l_dimm_rank = mss::index(l_rank);
 
         // Creates our structure of data for the recorders
-        std::vector<std::pair<recorder, recorder>> l_results(MAX_LRDIMM_BUFFERS);
+        std::vector<std::pair<coarse_recorder, coarse_recorder>> l_results(MAX_LRDIMM_BUFFERS);
 
         // Gets our DIMM from this rank
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
