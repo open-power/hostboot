@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/testcore/makefile $
+# $Source: src/usr/testcore/tlsmod/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,14 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-SUBDIRS += lib.d
-SUBDIRS += kernel.d
-SUBDIRS += rtloader.d
-SUBDIRS += memoize.d
-SUBDIRS += pir.d
-SUBDIRS += tlsmod.d
+MODULE = testtlsmod
 
+TESTS += tlsmod.H
+TESTS += tlsfile.H
+TESTS += nontrivial.H
+TESTS += trivial.H
+
+OBJS += tlsfile.o
+OBJS += nontrivial.o
+OBJS += trivial.o
+OBJS += tlsmod.o
 include ${ROOTPATH}/config.mk
-

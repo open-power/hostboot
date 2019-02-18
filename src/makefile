@@ -251,6 +251,7 @@ TESTCASE_MODULES += testerrl
 TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
+TESTCASE_MODULES += testtlsmod
 TESTCASE_MODULES += testscom
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testintr
