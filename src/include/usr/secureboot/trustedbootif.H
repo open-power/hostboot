@@ -322,7 +322,7 @@ namespace TRUSTEDBOOT
      *  @return errlHndl_t nullptr if successful or error log otherwise. Failure
      *                     to poison a TPM will result in deconfiguring the TPM.
      */
-    errlHndl_t poisonTpm(const TpmTarget* i_pTpm);
+    errlHndl_t poisonTpm(TpmTarget* i_pTpm);
 
     /**
      * @brief Poison all functional TPMs on the node. Calls poisonTpm for

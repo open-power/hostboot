@@ -7618,6 +7618,29 @@
   </attribute>
 
   <attribute>
+    <id>TPM_POISONED</id>
+    <description>
+        A flag indicating whether the TPM has been poisoned. A poisoned TPM
+        has a random number extended into its PCR but not mirrorred to its
+        log. That creates a disconnection between the TPM and its log, which
+        in turn makes it impossible to perform remote attestation on the TPM.
+    </description>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
         Setting to require(0x1) or not require(0x0) a functional TPM to
         boot the system.

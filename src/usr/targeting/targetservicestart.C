@@ -636,6 +636,7 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 tpm->setAttr<ATTR_HB_TPM_INIT_ATTEMPTED>(0);
                 tpm->setAttr<ATTR_HB_TPM_LOG_MGR_PTR>(0);
+                tpm->setAttr<ATTR_TPM_POISONED>(0);
             }
 
             //Assemble list of membuf and zero out some virtual address attributes

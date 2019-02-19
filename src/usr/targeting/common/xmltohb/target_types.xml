@@ -927,6 +927,9 @@
       <id>TPM_INFO</id>
     </attribute>
     <attribute>
+      <id>TPM_POISONED</id>
+    </attribute>
+    <attribute>
       <id>TPM_UNUSABLE</id>
     </attribute>
     <attribute>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1762,6 +1762,22 @@ errlHndl_t populate_hbSecurebootData ( void )
         bool trusted = false;
 #ifdef CONFIG_TPMDD
         trusted = TRUSTEDBOOT::functionalPrimaryTpmExists();
+
+        if(trusted)
+        {
+            // Check if the primary TPM has been poisoned. If it has,
+            // trustedboot state cannot be guaranteed on the system.
+            TARGETING::Target* l_primaryTpm = nullptr;
+            TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
+            if(!l_primaryTpm ||
+                l_primaryTpm->getAttr<TARGETING::ATTR_TPM_POISONED>())
+            {
+                // Primary TPM doesn't exist or is poisoned -
+                // turn off trustedboot
+                trusted = false;
+            }
+        }
+
 #endif
         l_sysSecSets->trustedboot = trusted? 1: 0;
 
