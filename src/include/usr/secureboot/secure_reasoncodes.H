@@ -68,6 +68,8 @@ namespace SECUREBOOT
         MOD_NC_GEN_SLAVE_RESPONSE           = 0x2B,
         MOD_NC_GEN_MASTER_REQUEST           = 0x2C,
         MOD_NC_PROCESS_SLAVE_QUOTE          = 0x2D,
+        MOD_NCT_SEND                        = 0x2E,
+        MOD_NCT_RECEIVE                     = 0x2F,
    };
 
     enum SECUREReasonCode
@@ -98,7 +100,7 @@ namespace SECUREBOOT
         RC_COULD_NOT_ALLOCATE_SMF_MEM      = SECURE_COMP_ID | 0x17,
         RC_ALLOCATED_NE_REQUESTED          = SECURE_COMP_ID | 0x18,
 
-        // Use 0x20-0x2F range for Node Communications
+        // Use 0x20-0x3F range for Node Communications
         RC_NCDD_HW_ERROR_FOUND             = SECURE_COMP_ID | 0x20,
         RC_NCDD_CMD_COMP_TIMEOUT           = SECURE_COMP_ID | 0x21,
         RC_NC_DATA_MISCOMPARE              = SECURE_COMP_ID | 0x22,
@@ -115,6 +117,11 @@ namespace SECUREBOOT
         RC_NC_NO_PRIMARY_TPM_LOG           = SECURE_COMP_ID | 0x2D,
         RC_NC_BAD_MASTER_EYE_CATCH         = SECURE_COMP_ID | 0x2E,
         RC_NC_BAD_SLAVE_QUOTE              = SECURE_COMP_ID | 0x2F,
+        RC_NCDD_INVALID_OP_TYPE            = SECURE_COMP_ID | 0x30,
+        RC_NCT_TYPE_SIZE_MISMATCH          = SECURE_COMP_ID | 0x31,
+        RC_NCT_ACK_MISMATCH                = SECURE_COMP_ID | 0x32,
+        RC_NCT_INITIATION_MISMATCH         = SECURE_COMP_ID | 0x33,
+        RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM  = SECURE_COMP_ID | 0x34,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

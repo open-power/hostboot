@@ -1330,6 +1330,12 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                                               MOD_TPM_VERIFYFUNCTIONAL,
                                               RC_TPM_NOFUNCTIONALTPM_FAIL);
 
+                TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                          "tpmVerifyFunctionalPrimaryTpmExists: Shutting down "
+                          "system because no Functional Primary TPM was found "
+                          "but system policy required it. errl EID 0x%08X",
+                          err->eid());
+
                 // Add low priority HB SW callout
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_LOW);
@@ -1362,8 +1368,9 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                     err = TARGETING::AttrRP::syncAllAttributesToFsp();
                     if(err)
                     {
-                        TRACFCOMP(g_trac_trustedboot, ERR_MRK"Could not sync"
-                                  " attributes to FSP; errl EID 0x%08X",
+                        TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                                  "tpmVerifyFunctionalPrimaryTpmExists: Could "
+                                  "not sync attributes to FSP; errl EID 0x%08X",
                                   err->eid());
                         errlCommit(err, TRBOOT_COMP_ID);
                     }
@@ -1376,13 +1383,13 @@ void tpmVerifyFunctionalPrimaryTpmExists(
             else
             {
                 TRACUCOMP(g_trac_trustedboot,
-                          "No functional primary TPM found but"
-                                                            "TPM not Required");
+                          "tpmVerifyFunctionalPrimaryTpmExists: No functional "
+                          "primary TPM found but TPM not Required");
             }
         }
         else
         {
-            TRACUCOMP(g_trac_trustedboot,
+            TRACUCOMP(g_trac_trustedboot,"tpmVerifyFunctionalPrimaryTpmExists: "
                       "No functional primary TPM found but not running secure");
         }
 
@@ -2117,6 +2124,11 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
                    "not available: retVal=%d (sensorNum=0x%X)",
                    retVal, sensorNum );
     }
+
+    TRACFCOMP( g_trac_trustedboot,
+               "getTpmRequiredSensorValue: isAvail=%s, o_isTpmRequired=%s",
+               (retVal ? "Yes" : "No"),
+               (o_isTpmRequired ? "Yes" : "No") );
 #else
     // IPMI support not there, so consider sensor not available
     retVal = false;
@@ -2124,12 +2136,6 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
                "not found; retVal=%d",
                retVal );
 #endif
-
-
-    TRACFCOMP( g_trac_trustedboot,
-               "getTpmRequiredSensorValue: isAvail=%s, o_isTpmRequired=%s",
-               (retVal ? "Yes" : "No"),
-               (o_isTpmRequired ? "Yes" : "No") );
 
     return retVal;
 }

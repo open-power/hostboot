@@ -108,8 +108,32 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     do
     {
 
+    // Verify OP type
+    if ( (i_opType != DeviceFW::READ) &&
+         (i_opType != DeviceFW::WRITE) )
+    {
+        TRACFCOMP( g_trac_nc,ERR_MRK"nodeCommPerformOp: Invalid opType: 0x%X",
+                   i_opType);
+        /*@
+         * @errortype
+         * @moduleid     MOD_NCDD_PERFORM_OP
+         * @reasoncode   RC_NCDD_INVALID_OP_TYPE
+         * @userdata1    Operation type
+         * @userdata2    Input Target HUID
+         * @devdesc      NodeComm DD invalid operation type
+         * @custdesc     Trusted Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            MOD_NCDD_PERFORM_OP,
+                            RC_NCDD_INVALID_OP_TYPE,
+                            i_opType,
+                            node_comm_args.tgt_huid,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
     // Check other input parameters
-    // @TODO RTC 203642 add check that i_opType is only READ or WRITE
     const auto max_linkId = (mode==NCDD_MODE_ABUS)
                               ? NCDD_MAX_ABUS_LINK_ID
                               : NCDD_MAX_XBUS_LINK_ID;
@@ -149,7 +173,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
                                          node_comm_args.mboxId),
                                        reinterpret_cast<uint64_t>(
                                          node_comm_args.data_ptr),
-                                       true /*Add HB SW Callout*/ );
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
         break;
     }
 

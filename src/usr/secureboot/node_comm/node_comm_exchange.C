@@ -134,48 +134,60 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     errlHndl_t err = nullptr;
     o_nonce = NODE_COMM_DEFAULT_NONCE;
     Target* tpm_tgt = nullptr;
-    TargetHandleList tpmTargetList;
 
     TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
 
     do
     {
 
-    // Get all possible functional TPMs
-    TRUSTEDBOOT::getTPMs(tpmTargetList);
+    // Can only use the functional Primary TPM
+    // This function call requires the CONFIG check for compilation purposes,
+    // but no extra error handling is needed as it should not have gotten this
+    // far if CONFIG_TPMDD wasn't set
+#ifdef CONFIG_TPMDD
+    TRUSTEDBOOT::getPrimaryTpm(tpm_tgt);
+#endif
+    HwasState hwasState{};
+    if(tpm_tgt)
+    {
+        hwasState = tpm_tgt->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        TRACUCOMP(g_trac_nc,INFO_MRK
+                  "TPM HUID 0x%08X has state of {present=%d, "
+                  "functional=%d}",
+                  get_huid(tpm_tgt),
+                  hwasState.present,hwasState.functional);
 
-    if (tpmTargetList.size() == 0)
+    }
+
+    if ((tpm_tgt == nullptr) ||
+        (hwasState.functional == false))
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusGetRandom: no functional "
-                  "TPMs found - tpmTargetList.size() = %d - Committing "
-                  "predictive error. Continuing using default nonce=0x%.16llX",
-                  tpmTargetList.size(), o_nonce);
+                  "Primary TPM: huid=0x%.08X: functional=%d",
+                  get_huid(tpm_tgt), hwasState.functional);
 
         /*@
          * @errortype
-         * @reasoncode       RC_NCEX_NO_FUNCTIONAL_TPMS
+         * @reasoncode       RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM
          * @moduleid         MOD_NCEX_GET_RANDOM
-         * @userdata1        <Unused>
-         * @userdata2        <Unused>
-         * @devdesc          No functional TPMs were found
+         * @userdata1        TPM Target HUID
+         * @userdata2[0:31]  TPM Target HWAS State Present
+         * @userdata2[31:63] TPM Target HWAS State Functional
+         * @devdesc          Functional Primary TPM was not found
          * @custdesc         Trusted Boot failure
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                        MOD_NCEX_GET_RANDOM,
-                                       RC_NCEX_NO_FUNCTIONAL_TPMS,
-                                       0,
-                                       0,
-                                       true /*Add HB SW Callout*/ );
-
-        // err commited outside of do-while loop below
+                                       RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM,
+                                       get_huid(tpm_tgt),
+                                       TWO_UINT32_TO_UINT64(
+                                         hwasState.present,
+                                         hwasState.functional),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
         // break here to skip calling GetRandom() below
         break;
     }
-
-    // Use first of functional TPM target list
-    // @TODO RTC 203642 Update this to use Primary TPM
-    tpm_tgt = tpmTargetList[0];
 
     // This function call requires the CONFIG check for compilation purposes,
     // but no extra error handling is needed as it should not have gotten this
@@ -206,10 +218,8 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
 
     if (err)
     {
-        err->collectTrace(SECURE_COMP_NAME);
-        err->collectTrace(NODECOMM_TRACE_NAME);
         err->collectTrace(TRBOOT_COMP_NAME);
-        errlCommit(err, SECURE_COMP_ID);
+        err->collectTrace(NODECOMM_TRACE_NAME);
     }
 
     TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusGetRandom: "
@@ -591,6 +601,10 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     {
         // There was some error; allocate the output buffer just big enough
         // for an eye catcher and node ID
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommGenSlaveQuoteResponse: An error "
+                 "occurred during slave quote composition. Sending NDNOTPM_ "
+                 "back Master Node after poisoning all TPMs on this node");
+
         NCEyeCatcher_t l_badEyeCatcher = NDNOTPM_;
         o_resp = new uint8_t[sizeof(l_badEyeCatcher) + sizeof(l_nodeId)]{};
         memcpy(o_resp, &l_badEyeCatcher, sizeof(l_badEyeCatcher));
@@ -888,10 +902,10 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: Loop 1: "
                   "my: linkId=%d, mboxId=%d, ObusInstance=%d. "
-                  "expected peer: linkId=%d, mboxId=%d, ObusInstance=%d.",
+                  "expected peer: n%d linkId=%d, mboxId=%d, ObusInstance=%d",
                   my_linkId, my_mboxId, l_obus.myObusInstance,
-                  expected_peer_linkId, expected_peer_mboxId,
-                  l_obus.peerObusInstance);
+                  l_obus.peerNodeInstance, expected_peer_linkId,
+                  expected_peer_mboxId, l_obus.peerObusInstance);
 
         // Get random number from TPM
         msg_format_t msg_data;
@@ -916,6 +930,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferSend(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   l_obus.peerNodeInstance,
                                    NCT_TRANSFER_SBID,
                                    reinterpret_cast<uint8_t*>
                                      (&(msg_data.value)),
@@ -924,7 +939,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 1: "
-                      "nodeCommAbusTransferSend returned an error");
+                      "nodeCommTransferSend returned an error");
             break;
         }
 
@@ -949,6 +964,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferRecv(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   l_obus.peerNodeInstance,
                                    NCT_TRANSFER_SBID,
                                    data_rcv_buffer,
                                    data_rcv_size);
@@ -963,7 +979,6 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         assert(data_rcv_buffer!=nullptr,"nodeCommAbusExchangeMaster: Loop 1: data_rcv_buffer returned as nullptr");
 
         // Add receiver Link Id to the message data
-        // @TODO RTC 203642 Check that data_rcv_size == sizeof(uint64_t)
         // here and in other places where SBID is handled
         memcpy(&(msg_data.value), data_rcv_buffer, data_rcv_size);
         msg_data.receiver_linkId = my_linkId;
@@ -1033,6 +1048,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferSend(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   l_obus.peerNodeInstance,
                                    NCT_TRANSFER_QUOTE_REQUEST,
                                    reinterpret_cast<uint8_t*>
                                      (&quote_request),
@@ -1041,7 +1057,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: Loop 2: "
-                      "nodeCommAbusTransferSend returned an error");
+                      "nodeCommTransferSend returned an error");
             break;
         }
 
@@ -1055,6 +1071,7 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferRecv(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   l_obus.peerNodeInstance,
                                    NCT_TRANSFER_QUOTE_RESPONSE,
                                    data_rcv_buffer,
                                    data_rcv_size);
@@ -1155,6 +1172,7 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferRecv(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   i_obus_instance.peerNodeInstance,
                                    NCT_TRANSFER_SBID,
                                    data_buffer,
                                    data_size);
@@ -1221,6 +1239,7 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferSend(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   i_obus_instance.peerNodeInstance,
                                    NCT_TRANSFER_SBID,
                                    reinterpret_cast<uint8_t*>
                                      (&(msg_data.value)),
@@ -1254,6 +1273,7 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferRecv(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   i_obus_instance.peerNodeInstance,
                                    NCT_TRANSFER_QUOTE_REQUEST,
                                    data_buffer,
                                    data_size);
@@ -1266,8 +1286,6 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         // If no err is returned, data_buffer should be valid, but do a
         // sanity check here to be certain
         assert(data_buffer!=nullptr,"nodeCommAbusExchangeSlave: data_buffer returned as nullptr");
-
-        // @TODO 203642 check that size back is size of MasterQuoteRequestBlob
 
         // Cast the data received into a MasterQuoteRequestBlob
         MasterQuoteRequestBlob quote_request{};
@@ -1297,6 +1315,7 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         err = nodeCommTransferSend(i_mProcInfo.tgt,
                                    my_linkId,
                                    my_mboxId,
+                                   i_obus_instance.peerNodeInstance,
                                    NCT_TRANSFER_QUOTE_RESPONSE,
                                    data_buffer,
                                    data_size);
@@ -1304,7 +1323,7 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeSlave: "
-                      "nodeCommAbusTransferSend returned an error");
+                      "nodeCommTransferSend returned an error");
             break;
         }
 
@@ -1431,7 +1450,7 @@ errlHndl_t nodeCommAbusExchange(void)
                                        RC_NCEX_INVALID_PHYS_PATH,
                                        get_huid(mProcInfo.tgt),
                                        0,
-                                       true /*Add HB SW Callout*/ );
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
         ERRORLOG::ErrlUserDetailsStringSet path;
         path.add("mProc PHYS Entity Path", l_phys_path_str);
@@ -1654,7 +1673,7 @@ errlHndl_t nodeCommAbusExchange(void)
                                        TWO_UINT32_TO_UINT64(
                                          obus_instances.size(),
                                          total_nodes),
-                                       true /*Add HB SW Callout*/ );
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
         break;
     }

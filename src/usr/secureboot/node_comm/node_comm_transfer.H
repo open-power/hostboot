@@ -30,6 +30,7 @@
 // ----------------------------------------------
 #include <config.h>
 #include "node_comm.H"
+#include <map>
 
 // ----------------------------------------------
 // Defines
@@ -56,7 +57,6 @@ enum node_comm_transfer_types_t : uint8_t
     // Types of ACKs (Ackowledgments)
     NCT_ACK_OF_INTIATION           =  0x01,
     NCT_ACK_OF_DATA                =  0x02,
-    // @TODO RTC 203642: ACK of non-support and shutting down the channel?
 
     // Message Transfer Types
     NCT_TRANSFER_SBID              =  0x10,
@@ -85,6 +85,15 @@ union node_comm_msg_format_t
     } PACKED;
 };
 
+/**
+ * @brief Map of expected sizes associated with Message Transfer Types
+ */
+const std::map<node_comm_transfer_types_t, size_t>
+    TransferSizeMap = {{NCT_TRANSFER_SBID,
+                            sizeof(uint64_t)},
+                         {NCT_TRANSFER_QUOTE_REQUEST,
+                            sizeof(MasterQuoteRequestBlob)}};
+
 
 /**
  *  @brief This function sends multiple messages with data over the ABUS from
@@ -94,9 +103,13 @@ union node_comm_msg_format_t
  *                               Can't be nullptr
  *  @param[in] i_linkId        - Link Id Message is sent from
  *  @param[in] i_mboxId        - Mailbox Id Message is sent from
+ *  @param[in] i_recvNode      - Node expected to receive the message
  *  @param[in] i_transferType  - Transfer Message Type to send
  *  @param[in] i_data          - Data to be sent
  *  @param[in] i_dataSize      - Size of Data to be sent in bytes
+ *
+ *  @note i_dataSize is verified to match i_transferType when applicable
+ *        based on TransferSizeMap.
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
@@ -105,6 +118,7 @@ union node_comm_msg_format_t
 errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                                 uint8_t i_linkId,
                                 uint8_t i_mboxId,
+                                uint8_t i_recvNode,
                                 node_comm_transfer_types_t i_transferType,
                                 const uint8_t * i_data,
                                 size_t i_dataSize);
@@ -117,6 +131,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
  *                                Can't be nullptr
  *  @param[in]  i_linkId        - Link Id Message is expected from
  *  @param[in]  i_mboxId        - Mailbox Id Message is expected from
+ *  @param[in]  i_sentNode      - Node expected to have sent the message
  *  @param[in]  i_transferType  - Expected Transfer Message Type to receive
  *                                Failure if different type is received
  *  @param[out] o_data          - Data received
@@ -127,6 +142,9 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
  *          If an error is returned, o_data will be nullptr and o_dataSize
  *          will be zero.
  *
+ *  @note o_dataSize is verified to match i_transferType when applicable
+ *        based on TransferSizeMap.
+ *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
@@ -134,6 +152,7 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
 errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                                 uint8_t i_linkId,
                                 uint8_t i_mboxId,
+                                uint8_t i_sentNode,
                                 node_comm_transfer_types_t i_transferType,
                                 uint8_t*& o_data,
                                 size_t & o_dataSize);

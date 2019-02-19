@@ -31,7 +31,9 @@
 #include <devicefw/userif.H>
 #include <trace/interface.H>
 #include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
+#include <targeting/targplatutil.H>
 #include <secureboot/nodecommif.H>
+#include <secureboot/secure_reasoncodes.H>
 #include "node_comm.H"
 #include "node_comm_transfer.H"
 
@@ -50,6 +52,7 @@ namespace NODECOMM
 errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                                 const uint8_t i_linkId,
                                 const uint8_t i_mboxId,
+                                const uint8_t i_recvNode,
                                 node_comm_transfer_types_t i_transferType,
                                 const uint8_t * i_data,
                                 const size_t i_dataSize)
@@ -63,13 +66,51 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
     size_t total_data_msgs = (i_dataSize + (sizeof(uint64_t)-1))
                              /sizeof(uint64_t);
 
+    auto my_node = TARGETING::UTIL::getCurrentNodePhysId();
+
     TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferSend: iProc=0x%.08X "
               "to send %d bytes of data through linkId=%d mboxId=%d over "
-              "%d data messages",
-              get_huid(i_pProc), i_dataSize, i_linkId, i_mboxId, total_data_msgs);
+              "%d data messages to node %d",
+              get_huid(i_pProc), i_dataSize, i_linkId, i_mboxId,
+              total_data_msgs, i_recvNode);
 
     do
     {
+        // Check expected size of msgType here
+        if ((TransferSizeMap.count(i_transferType) > 0) &&
+            (TransferSizeMap.at(i_transferType) != i_dataSize))
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: iProc=0x%.08X: "
+              "i_dataSize %d bytes does not align with i_transferType 0x%X: "
+              "Expected size %d bytes.",
+              get_huid(i_pProc), i_dataSize, i_transferType,
+              TransferSizeMap.at(i_transferType));
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCT_TYPE_SIZE_MISMATCH
+             * @moduleid         MOD_NCT_SEND
+             * @userdata1[0:31]  Input TARGET HUID
+             * @userdata1[32:63] Input Data Size
+             * @userdata2[0:31]  Input Transfer Type
+             * @userdata2[32:63] Expected Size For Input Transfer Type
+             * @devdesc          Invalid Input Args for Node Comm Transfer Send
+             * @custdesc         Trusted Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_NCT_SEND,
+                                          RC_NCT_TYPE_SIZE_MISMATCH,
+                                          TWO_UINT32_TO_UINT64(
+                                            get_huid(i_pProc),
+                                            i_dataSize),
+                                          TWO_UINT32_TO_UINT64(
+                                            i_transferType,
+                                            TransferSizeMap.at(
+                                              i_transferType)),
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
         // Keep track of data sent
         size_t bytes_sent = 0;
         size_t bytes_left = i_dataSize;
@@ -89,9 +130,8 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                 node_comm_msg_format_t send_msg;
                 send_msg.value = 0;  // Clear out the data
 
-                // @TODO RTC 203642 Fix sendingNode and recving Node
-                send_msg.sendingNode = 0;
-                send_msg.recvingNode = 1;
+                send_msg.sendingNode = my_node;
+                send_msg.recvingNode = i_recvNode;
 
                 send_msg.msgType = i_transferType;
                 send_msg.msgSeqNum = msg_seq;
@@ -160,12 +200,60 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
                       "msg %d: receiving ACK = 0x%.16llX",
                       msg_seq, data_recv);
 
+            // Verify that ACK returned has expected data
+            node_comm_msg_format_t ack_msg = {.value = data_recv};
+            auto ack_expected_msg_type = NCT_ACK_OF_DATA;
+            if (msg_seq==0)
+            {
+                ack_expected_msg_type = NCT_ACK_OF_INTIATION;
+            }
 
+            if ((ack_msg.sendingNode != i_recvNode) ||
+                (ack_msg.recvingNode != my_node) ||
+                (ack_msg.msgType     != ack_expected_msg_type) ||
+                (ack_msg.msgSeqNum   != msg_seq))
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferSend: "
+                  "ACK has bad data! Got (expected): sN=%d (%d), rN=%d (%d), "
+                  "msgType=0x%X (0x%X), msgSeqNum=0x%X (0x%X)",
+                  ack_msg.sendingNode, i_recvNode,
+                  ack_msg.recvingNode, my_node,
+                  ack_msg.msgType, ack_expected_msg_type,
+                  ack_msg.msgSeqNum, msg_seq);
 
-            // @TODO RTC 203642 Check that ACK is
-            // -- from the right node
-            // -- from right linkId/mboxId
-            // -- the right type of ACK
+                /*@
+                 * @errortype
+                 * @reasoncode       RC_NCT_ACK_MISMATCH
+                 * @moduleid         MOD_NCT_SEND
+                 * @userdata1[0:15]  Actual Node Sending the ACK
+                 * @userdata1[16:31] Expected Node Sending the ACK
+                 * @userdata1[32:47] Actual Node Receiving the ACK
+                 * @userdata1[48:63] Expected Node Receiving the ACK
+                 * @userdata2[0:15]  Actual Message Type from the ACK
+                 * @userdata2[16:31] Expected Message Type from the ACK
+                 * @userdata2[32:47] Actual Sequence Number from the ACK
+                 * @userdata2[48:63] Expected Sequence Number from the ACK
+                 * @devdesc          Invalid data from ACK for Node Comm
+                 *                   Transfer Send
+                 * @custdesc         Trusted Boot failure
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              MOD_NCT_SEND,
+                              RC_NCT_ACK_MISMATCH,
+                              FOUR_UINT16_TO_UINT64(
+                                ack_msg.sendingNode,
+                                i_recvNode,
+                                ack_msg.recvingNode,
+                                my_node),
+                              FOUR_UINT16_TO_UINT64(
+                                ack_msg.msgType,
+                                ack_expected_msg_type,
+                                ack_msg.msgSeqNum,
+                                msg_seq),
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
 
         }  // end of for-loop of messages
 
@@ -189,15 +277,20 @@ errlHndl_t nodeCommTransferSend(TARGETING::Target* i_pProc,
 errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                                 const uint8_t i_linkId,
                                 const uint8_t i_mboxId,
+                                const uint8_t i_sentNode,
                                 node_comm_transfer_types_t i_transferType,
                                 uint8_t*& o_data,
                                 size_t & o_dataSize)
 {
     errlHndl_t err = nullptr;
 
+    auto my_node = TARGETING::UTIL::getCurrentNodePhysId();
+
     TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommTransferRecv: i_pProc=0x%.08X "
-              "expecting messages of type 0x%.02x from linkId=%d mboxId=%d",
-              get_huid(i_pProc), i_transferType, i_linkId, i_mboxId);
+              "expecting messages of type 0x%.02x from linkId=%d mboxId=%d, "
+              "node=%d",
+              get_huid(i_pProc), i_transferType, i_linkId, i_mboxId,
+              i_sentNode);
 
     // Clear the output variables to be safe
     o_data = nullptr;
@@ -231,17 +324,63 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
                   init_msg.msgType, init_msg.msgSeqNum, init_msg.totalDataMsgs,
                   init_msg.totalDataSize);
 
-        // @TODO RTC 203642 Add the following checks:
-        // - check nodes
-        // - init_msg.msgSeqNum should be 0 for initiation message
-        // - check that expected transfer type is received
+        // Verify Data in the Initiation message
+        auto expected_msg_seq = 0;
+        if ((init_msg.sendingNode != i_sentNode) ||
+            (init_msg.recvingNode != my_node) ||
+            (init_msg.msgType     != i_transferType) ||
+            (init_msg.msgSeqNum   != expected_msg_seq))
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferRecv: "
+              "Initiation Message has bad data! Got (expected): "
+              "sN=%d (%d), rN=%d (%d), "
+              "msgType=0x%X (0x%X), msgSeqNum=0x%X (0x%X)",
+              init_msg.sendingNode, i_sentNode,
+              init_msg.recvingNode, my_node,
+              init_msg.msgType, i_transferType,
+              init_msg.msgSeqNum, expected_msg_seq);
 
-
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCT_INITIATION_MISMATCH
+             * @moduleid         MOD_NCT_RECEIVE
+             * @userdata1[0:15]  Actual Node Sending the Initiation Message
+             * @userdata1[16:31] Expected Node Sending the Initiation Message
+             * @userdata1[32:47] Actual Node Receiving the Initiation Message
+             * @userdata1[48:63] Expected Node Receiving the Initiaion Message
+             * @userdata2[0:15]  Actual Message Type from Initiation Message
+             * @userdata2[16:31] Expected Message Type from Initiation Message
+             * @userdata2[32:47] Actual Sequence Number from Initiation Message
+             * @userdata2[48:63] Expected Sequence Number from Initiation Msg
+             * @devdesc          Invalid data from Initiation Message
+             * @custdesc         Trusted Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_NCT_RECEIVE,
+                                          RC_NCT_INITIATION_MISMATCH,
+                                          FOUR_UINT16_TO_UINT64(
+                                            init_msg.sendingNode,
+                                            i_sentNode,
+                                            init_msg.recvingNode,
+                                            my_node),
+                                          FOUR_UINT16_TO_UINT64(
+                                            init_msg.msgType,
+                                            i_transferType,
+                                            init_msg.msgSeqNum,
+                                            expected_msg_seq),
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
         // Reply with ACK:
         node_comm_msg_format_t ack_msg = {.value = 0};
         ack_msg.value = 0;
 
-        // @TODO RTC 203642 Fix sending node Ids
+        // Set node info
+        // NOTE: These values are from the perspective of
+        // sending the ACK and *not* from sending/receiving the data
+        ack_msg.sendingNode = TARGETING::UTIL::getCurrentNodePhysId();
+        ack_msg.recvingNode = i_sentNode;
+
         // Always set these for ACK of Initiation:
         ack_msg.msgSeqNum = 0;
         ack_msg.msgType = NCT_ACK_OF_INTIATION;
@@ -318,7 +457,7 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
             bytes_read += loop_bytes_read;
             bytes_left -= loop_bytes_read;
 
-            // Send Data ACK
+            // Send Data ACK (re-uses previous ack_msg settings)
             ack_msg.msgType = NCT_ACK_OF_DATA;
             ack_msg.msgSeqNum = msg_seq;
             ack_msg.totalDataSize = bytes_read;
@@ -356,8 +495,48 @@ errlHndl_t nodeCommTransferRecv(TARGETING::Target* i_pProc,
         {
             o_data = data_buffer;
             o_dataSize = init_msg.totalDataSize;
-        }
 
+
+            // Check size of data returned against the expected amount based
+            // on the msgType
+            if ((TransferSizeMap.count(i_transferType) > 0) &&
+                (TransferSizeMap.at(i_transferType) != o_dataSize))
+            {
+                TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommTransferReceive: "
+                          "iProc=0x%.08X: o_dataSize %d bytes does not "
+                          "align with i_transferType 0x%X: "
+                          "Expected size %d bytes.",
+                          get_huid(i_pProc), o_dataSize, i_transferType,
+                          TransferSizeMap.at(i_transferType));
+
+                /*@
+                 * @errortype
+                 * @reasoncode       RC_NCT_TYPE_SIZE_MISMATCH
+                 * @moduleid         MOD_NCT_RECEIVE
+                 * @userdata1[0:31]  Input TARGET HUID
+                 * @userdata1[32:63] Output Data Size
+                 * @userdata2[0:31]  Input Transfer Type
+                 * @userdata2[32:63] Expected Size For Input Transfer Type
+                 * @devdesc          Unexpected Size of Data Received based on
+                 *                   Input Transfer Type
+                 * @custdesc         Trusted Boot failure
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              MOD_NCT_RECEIVE,
+                              RC_NCT_TYPE_SIZE_MISMATCH,
+                              TWO_UINT32_TO_UINT64(
+                                get_huid(i_pProc),
+                                o_dataSize),
+                              TWO_UINT32_TO_UINT64(
+                                i_transferType,
+                                TransferSizeMap.at(
+                                  i_transferType)),
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+
+        }
 
     } while( 0 );
 
