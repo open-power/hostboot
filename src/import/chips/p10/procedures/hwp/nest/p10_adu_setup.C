@@ -31,124 +31,120 @@
 /// *HWP Consumed by: SBE
 ///
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <p10_adu_setup.H>
 #include <p10_adu_utils.H>
 
-extern "C"
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode p10_adu_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_address,
+    const bool i_rnw,
+    const uint32_t i_flags,
+    uint32_t& o_numGranules)
 {
+    FAPI_DBG("Entering...");
 
-//--------------------------------------------------------------------------
-//  HWP entry point
-//--------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                    & i_target,
-                                    const uint64_t i_address,
-                                    const bool i_rnw,
-                                    const uint32_t i_flags,
-                                    uint32_t& o_numGranules)
+    ////////////////////////////////////////////////////////
+    // Local variables
+    ////////////////////////////////////////////////////////
+    adu_operationFlag l_aduFlag;
+    uint32_t l_flags;
+
+    ////////////////////////////////////////////////////////
+    // Read input flags and fix unsupported conditions
+    // Note: Auto increment is only supported for dma
+    ////////////////////////////////////////////////////////
+
+    l_aduFlag.getFlag(i_flags);
+
+    if (l_aduFlag.getOperationType() != adu_operationFlag::DMA_PARTIAL)
     {
-        //return code
-        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        uint32_t num_attempts = 1;
-        bool lock_pick = false;
-
-        // mark HWP entry
-        FAPI_DBG("Entering ...\n");
-
-        //ADU status/control information
-        bool adu_is_dirty = false;
-        bool adu_leave_dirty = i_flags & FLAG_LEAVE_DIRTY;
-
-        // Process input flag
-        p10_ADU_oper_flag l_myAduFlag;
-        l_myAduFlag.getFlag(i_flags);
-
-        // permit/pass autoinc only if performing a DMA operation
-        if (l_myAduFlag.getOperationType() != p10_ADU_oper_flag::DMA_PARTIAL)
-        {
-            l_myAduFlag.setAutoIncrement(false);
-        }
-
-        uint32_t l_flags = l_myAduFlag.setFlag();
-
-        // don't generate fabric command, just pre-condition ADU for upcoming switch
-        if ((l_myAduFlag.getOperationType() == p10_ADU_oper_flag::PRE_SWITCH_AB) ||
-            (l_myAduFlag.getOperationType() == p10_ADU_oper_flag::PRE_SWITCH_CD) ||
-            (l_myAduFlag.getOperationType() == p10_ADU_oper_flag::POST_SWITCH))
-        {
-            FAPI_TRY(p10_adu_coherent_utils_set_switch_action(
-                         i_target,
-                         (l_myAduFlag.getOperationType() == p10_ADU_oper_flag::PRE_SWITCH_AB),
-                         (l_myAduFlag.getOperationType() == p10_ADU_oper_flag::PRE_SWITCH_CD)),
-                     "Error from p10_adu_coherent_utils_set_switch_action");
-            o_numGranules = 1;
-            goto fapi_try_exit;
-        }
-
-        //check arguments
-        FAPI_TRY(p10_adu_coherent_utils_check_args(i_target, i_address, l_flags),
-                 "Error from p10_adu_coherent_utils_check_args");
-
-        //ensure fabric is running, unless we're trying to initialize it
-        if (l_myAduFlag.getOperationType() != p10_ADU_oper_flag::PB_INIT_OPER)
-        {
-            FAPI_TRY(p10_adu_coherent_utils_check_fbc_state(i_target),
-                     "Error from p10_adu_coherent_utils_check_fbc_status");
-        }
-
-        //acquire ADU lock to guarantee exclusive use of the ADU resources
-        //ADU state machine will be reset/cleared by this routine
-        lock_pick = l_flags & FLAG_LOCK_PICK;
-        num_attempts = l_flags & FLAG_LOCK_TRIES;
-        FAPI_TRY(p10_adu_coherent_manage_lock(i_target, lock_pick, true, num_attempts),
-                 "Error from p10_adu_coherent_manage_lock");
-
-        if (l_myAduFlag.getAutoIncrement() == true)
-        {
-            //figure out how many granules can be requested before setup needs to be run again
-            FAPI_TRY(p10_adu_coherent_utils_get_num_granules(i_address, o_numGranules),
-                     "Error from p10_adu_coherent_utils_get_num_granules");
-        }
-        else
-        {
-            o_numGranules = 1;
-        }
-
-        //Set dirty since we need to attempt to cleanup/release the lock so the ADU is not in a locked state if operation fails from this point
-        adu_is_dirty = true;
-
-        //setup the ADU registers for the read/write
-        FAPI_TRY(p10_adu_coherent_setup_adu(i_target, i_address, i_rnw, l_flags),
-                 "Error from p10_adu_coherent_setup_registers");
-
-    fapi_try_exit:
-
-        l_rc = fapi2::current_err;
-        FAPI_DBG("Error to return : %08X", (uint64_t) l_rc);
-
-        //if an error has occurred, ADU is dirty, and instructed to clean up,
-        //attempt to reset ADU and free lock (propogate rc of original fail)
-        if (l_rc && adu_is_dirty && !adu_leave_dirty)
-        {
-            (void) p10_adu_coherent_utils_reset_adu(i_target);
-            (void) p10_adu_coherent_manage_lock(i_target, false, false, num_attempts);
-        }
-
-        //Append the input data to an error if we got an error back
-#ifndef __PPE__
-
-        if (l_rc)
-        {
-            p10_adu_coherent_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
-        }
-
-#endif
-
-        FAPI_DBG("Exiting with return code : %08X...", (uint64_t) l_rc);
-        return l_rc;
+        l_aduFlag.setAutoIncrement(false);
     }
 
-} // extern "C"
+    l_flags = l_aduFlag.setFlag();
+
+    ////////////////////////////////////////////////////////
+    // For pre/post switch operations, modify the adu
+    // switch AB/CD controls only; this does not result
+    // in a fabric transaction being broadcast so skip
+    // any following checks
+    ////////////////////////////////////////////////////////
+
+    if ((l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_AB) ||
+        (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_CD) ||
+        (l_aduFlag.getOperationType() == adu_operationFlag::POST_SWITCH))
+    {
+        FAPI_TRY(p10_adu_utils_set_switch_action(i_target,
+                 (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_AB),
+                 (l_aduFlag.getOperationType() == adu_operationFlag::PRE_SWITCH_CD)),
+                 "Error from p10_adu_utils_set_switch_action");
+        o_numGranules = 1;
+        goto fapi_try_exit;
+    }
+
+    ////////////////////////////////////////////////////////
+    // Process coherent read/write options
+    // Note: Check the address alignment and figure out how
+    //       many granules can be requested before setup
+    //       needs to be run again
+    ////////////////////////////////////////////////////////
+
+    if ((l_aduFlag.getOperationType() == adu_operationFlag::CACHE_INHIBIT) ||
+        (l_aduFlag.getOperationType() == adu_operationFlag::DMA_PARTIAL))
+    {
+        FAPI_TRY(p10_adu_utils_check_args(i_target, i_address, l_flags),
+                 "Error from p10_adu_utils_check_args");
+    }
+
+    if (l_aduFlag.getAutoIncrement() == true)
+    {
+        FAPI_TRY(p10_adu_utils_get_num_granules(i_address, o_numGranules),
+                 "Error from p10_adu_utils_get_num_granules");
+    }
+    else
+    {
+        o_numGranules = 1;
+    }
+
+    ////////////////////////////////////////////////////////
+    // Check fabric state, acquire lock, setup adu command
+    // Note: Only check fabric state if not doing a pbinit
+    ////////////////////////////////////////////////////////
+
+    if (l_aduFlag.getOperationType() != adu_operationFlag::PB_INIT_OPER)
+    {
+        FAPI_TRY(p10_adu_utils_check_fbc_state(i_target),
+                 "Error from p10_adu_utils_check_fbc_status");
+    }
+
+    FAPI_TRY(p10_adu_utils_manage_lock(i_target, l_aduFlag.getLockControl(), true, l_aduFlag.getNumLockAttempts()),
+             "Error from p10_adu_utils_manage_lock");
+
+    FAPI_TRY(p10_adu_utils_setup_adu(i_target, i_address, i_rnw, l_flags),
+             "Error from p10_adu_utils_setup_registers");
+
+fapi_try_exit:
+
+    ////////////////////////////////////////////////////////
+    // Cleanup ADU registers
+    // Note: Clean up regardless of error/success unless
+    //       flags indicate that the ADU status register
+    //       should be left dirty
+    ////////////////////////////////////////////////////////
+
+    if (l_aduFlag.getOperFailCleanup())
+    {
+        (void) p10_adu_utils_reset_adu(i_target);
+        (void) p10_adu_utils_manage_lock(i_target, false, false, l_aduFlag.getNumLockAttempts());
+    }
+
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}

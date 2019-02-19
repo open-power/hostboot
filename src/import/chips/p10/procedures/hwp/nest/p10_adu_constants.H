@@ -45,8 +45,7 @@ extern "C"
 // Constant definitions
 //----------------------------------------------------------------------------------------------
 
-//if the flag is more than 1 bit there will be a start and end bit for the flag
-//these give the bit position that is expected for the flags
+    // Define the bit positions that are expected for the flags
     enum adu_flags
     {
         // Operation type
@@ -112,20 +111,20 @@ extern "C"
         FLAG_NOT_USED_BITS    = 0x0000FFFF,                    // Bit 16:31
     };
 
-// Operation type values
-    const uint32_t FLAG_ADU_TTYPE_DMA     = 0x00000000ull;   // DMA partial
-    const uint32_t FLAG_ADU_TTYPE_CI      = 0x20000000ull;   // Cache inhibit
-    const uint32_t FLAG_ADU_TTYPE_PB_DIS  = 0x40000000ull;   // PB operation (disable)
-    const uint32_t FLAG_ADU_TTYPE_PMISC   = 0x60000000ull;   // Switch operation
-    const uint32_t FLAG_ADU_TTYPE_PB_INIT = 0x80000000ull;   // PB operation (init)
+    // Operation type values
+    const uint32_t FLAG_ADU_TTYPE_DMA     = 0x00000000ull; // DMA partial
+    const uint32_t FLAG_ADU_TTYPE_CI      = 0x20000000ull; // Cache inhibit
+    const uint32_t FLAG_ADU_TTYPE_PB_DIS  = 0x40000000ull; // PB operation (disable)
+    const uint32_t FLAG_ADU_TTYPE_PMISC   = 0x60000000ull; // Switch operation
+    const uint32_t FLAG_ADU_TTYPE_PB_INIT = 0x80000000ull; // PB operation (init)
 
-// Flag size values
+    // Flag size values
     const uint32_t FLAG_SIZE_TSIZE_1   = 0x00000000ull;
     const uint32_t FLAG_SIZE_TSIZE_2   = 0x00100000ull;
     const uint32_t FLAG_SIZE_TSIZE_4   = 0x00200000ull;
     const uint32_t FLAG_SIZE_TSIZE_8   = 0x00300000ull;
 
-// Shift positions
+    // Shift positions
     const uint64_t FLAG_ADU_TTYPE_SHIFT  = 29;
     const uint64_t FLAG_LOCK_TRIES_SHIFT = 16;
     const uint64_t FLAG_ADU_SIZE_SHIFT   = 20;

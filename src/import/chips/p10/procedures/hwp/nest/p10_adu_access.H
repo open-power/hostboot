@@ -44,45 +44,44 @@
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
-
 #include <fapi2.H>
 #include <p10_adu_constants.H>
-//#include <p10_pba_constants.H>
 
 //-----------------------------------------------------------------------------------
 // Structure definitions
 //-----------------------------------------------------------------------------------
 
-//function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p10_adu_access_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-                        const uint64_t,
-                        const bool,
-                        const uint32_t,
-                        const bool,
-                        const bool,
-                        uint8_t[] );
-
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
-
-extern "C" {
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_adu_access_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const uint64_t,
+    const bool,
+    const uint32_t,
+    const bool,
+    const bool,
+    uint8_t[]);
 
 //-----------------------------------------------------------------------------------
 // Function prototype
 //-----------------------------------------------------------------------------------
 
-/// @brief do the actual read/write from the ADU
-/// @param[in] i_target       => P10 chip target
-/// @param[in] i_address      => base real address for read/write operation (expected to be 8B aligned)
-/// @param[in] i_rnw          => if the operation is a read not write (1 for read, 0 for write)
-/// @param[in] i_flags        => other information that is needed - see the p10_adu_constants adu_flags enums for bit definitions
-//                               Note: To construct the flag you can use p10_ADU_oper_flag class
-/// @param[in] i_lastGranule  => if this is the last 8B of data that we are collecting (true = last granule, false = not last granule)
-/// @param[in] i_firstGranule => if this is the first 8B of data that we are collecting (true = first granule, false = not first granule)
-/// @param[in, out] io_data   => The data is read/written
-/// @return FAPI_RC_SUCCESS if the read/write completes successfully
+extern "C"
+{
+
+///
+/// @brief Execute the read/write operation from the adu
+///
+/// @param[in] i_target        Reference to processor chip target
+/// @param[in] i_address       Base real address for read/write operation (expected to be 8B aligned)
+/// @param[in] i_rnw           True if the operation is read not write (1 for read, 0 for write)
+/// @param[in] i_flags         Other information that is needed, see the p10_adu_constants adu_flags enums for bit definitions
+///                            Note: The adu_operationFlag class can be used to construct the flag
+/// @param[in] i_firstGranule  True if this is the first 8B of data that we are collecting (true=firstGranule, false=notFirstGranule)
+/// @param[in] i_lastGranule   True if this is the last 8B of data that we are collecting (true=lastGranule, false=notLastGranule)
+/// @param[in, out] io_data    Data that is read/written
+///
+/// @return FAPI_RC_SUCCESS if the read/write completes successfully, else error code.
+///
     fapi2::ReturnCode p10_adu_access(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const uint64_t i_address,
@@ -91,6 +90,7 @@ extern "C" {
         const bool i_firstGranule,
         const bool i_lastGranule,
         uint8_t io_data[]);
+
 } //extern "C"
 
 #endif //_P10_ADU_ACCESS_H_

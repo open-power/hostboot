@@ -31,1049 +31,1047 @@
 /// *HWP Consumed by: SBE
 ///
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <p10_adu_utils.H>
-//#include <p10_fbc_utils.H>
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 
-extern "C"
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+// Ttype constant variables
+const uint32_t ALTD_CMD_TTYPE_CL_DMA_RD  = 0x06; //0b0000110
+const uint32_t ALTD_CMD_TTYPE_DMA_PR_WR  = 0x26; //0b0100110
+const uint32_t ALTD_CMD_TTYPE_CI_PR_RD   = 0x34; //0b0110100
+const uint32_t ALTD_CMD_TTYPE_CI_PR_WR   = 0x37; //0b0110111
+const uint32_t ALTD_CMD_TTYPE_PB_OPER    = 0x3F; //0b0111111
+const uint32_t ALTD_CMD_TTYPE_PMISC_OPER = 0x31; //0b0110001
+
+// Tsize constant variables
+const uint32_t ALTD_CMD_CI_TSIZE_1   =  2; // Secondary encode for ci_pr_rd and ci_pr_wr is
+const uint32_t ALTD_CMD_CI_TSIZE_2   =  4; // 0ttt sss0 (where sss represents the tsize)
+const uint32_t ALTD_CMD_CI_TSIZE_4   =  6;
+const uint32_t ALTD_CMD_CI_TSIZE_8   =  8;
+const uint32_t ALTD_CMD_DMAW_TSIZE_1 =  2; // Secondary encode for dma_pr_w is ssss sss0
+const uint32_t ALTD_CMD_DMAW_TSIZE_2 =  4; // (where ssss sss represents the tsize)
+const uint32_t ALTD_CMD_DMAW_TSIZE_4 =  8;
+const uint32_t ALTD_CMD_DMAW_TSIZE_8 = 16;
+const uint32_t ALTD_CMD_DMAR_TSIZE   =  0; // Secondary encode is always 0 for cl_dma_rd
+
+// Value for scope for any DMA write operations
+const uint32_t ALTD_CMD_SCOPE_GROUP = 0b00000011;
+
+// Values for PB operations
+const uint32_t ALTD_CMD_PB_DIS_OPERATION_TSIZE = 0b00001000; // pbop.disable_all w/ fastpath
+const uint32_t ALTD_CMD_PB_INIT_OPERATION_TSIZE = 0b00001011; // pbop.enable_all w/ fastpath
+const uint32_t ALTD_CMD_SCOPE_SYSTEM = 0b00000101;
+const uint32_t ALTD_STATUS_CRESP_VALUE_ACK_DONE = 0x04;
+
+// Values for PMISC operations
+const uint32_t ALTD_CMD_PMISC_TSIZE_1 = 0b00000010; // PMISC SWITCH
+const uint32_t ALTD_CMD_PMISC_TSIZE_2 = 0b01000000; // PMISC HTM
+
+// OPTION reg values for SWITCH operation
+const uint32_t QUIESCE_SWITCH_WAIT_COUNT = 128;
+const uint32_t INIT_SWITCH_WAIT_COUNT = 128;
+
+//FORCE ECC Register field/bit definitions
+const uint32_t ALTD_DATA_TX_ECC_END_BIT = 16;
+const uint32_t ALTD_DATA_ECC_MASK = 0xFFFFull;
+
+// ADU operation delay/polling constants for hw/sim
+const uint32_t PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY       = 10000;
+const uint32_t PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY   = 50000;
+const uint32_t PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY     = 100;
+const uint32_t PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY = 20000;
+const uint32_t PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS  = 10;
+
+// TODO: Replace checks with definition from fbc_utils when imported (RTC 205266)
+const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
+
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_check_args
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_check_args(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_address,
+    const uint32_t i_flags)
 {
-    //---------------------------------------------------------------------------------
-    // Constant definitions
-    //---------------------------------------------------------------------------------
+    FAPI_DBG("Entering...");
 
-    //ADU register field/bit definitions
+    adu_operationFlag l_myAduFlag;
+    adu_operationFlag::Transaction_size_t l_transSize;
+    uint32_t l_actualTransSize;
 
-    // ADU Option Register field/bit definitions
-    const uint32_t FBC_ALTD_HW397129 = 52;
+    // Get the transaction size
+    l_transSize = l_myAduFlag.getTransactionSize();
 
-    //TType Constant variables
-    const uint32_t ALTD_CMD_TTYPE_CL_DMA_RD   = 6;  //0b0000110
-    const uint32_t ALTD_CMD_TTYPE_DMA_PR_WR   = 38; //0b0100110
-    const uint32_t ALTD_CMD_TTYPE_CI_PR_RD    = 52; //0b0110100
-    const uint32_t ALTD_CMD_TTYPE_CI_PR_WR    = 55; //0b0110111
-    const uint32_t ALTD_CMD_TTYPE_PB_OPER     = 0b0111111;
-    const uint32_t ALTD_CMD_TTYPE_PMISC_OPER  = 0b0110001;
-
-    //these should be 1, 2, 3, 4 but they are shifted over one to the left because for
-    //ci_pr_rd and ci_pr_w the secondary encode is 0ttt ssss0
-    const uint32_t ALTD_CMD_CI_TSIZE_1 = 2;
-    const uint32_t ALTD_CMD_CI_TSIZE_2 = 4;
-    const uint32_t ALTD_CMD_CI_TSIZE_4 = 6;
-    const uint32_t ALTD_CMD_CI_TSIZE_8 = 8;
-    //these should be 1, 2, 4, 8 but they are shifted over one to the left because for
-    //dma_pr_w the secondary encode is tSize & '0'
-    const uint32_t ALTD_CMD_DMAW_TSIZE_1 = 2;
-    const uint32_t ALTD_CMD_DMAW_TSIZE_2 = 4;
-    const uint32_t ALTD_CMD_DMAW_TSIZE_4 = 8;
-    const uint32_t ALTD_CMD_DMAW_TSIZE_8 = 16;
-    //I think that the secondary encoding should always be 0 for cl_dma_rd
-    const uint32_t ALTD_CMD_DMAR_TSIZE = 0;
-
-    //Value for scope for any DMA write operations
-    const uint32_t ALTD_CMD_SCOPE_GROUP         = 0b00000011;
-
-    // Values for PB operations
-    const uint32_t ALTD_CMD_PB_DIS_OPERATION_TSIZE  = 0b00001000;
-    const uint32_t ALTD_CMD_PB_INIT_OPERATION_TSIZE  = 0b00001011;
-    const uint32_t ALTD_CMD_SCOPE_SYSTEM        = 0b00000101;
-
-    // Values for PMISC operations
-    const uint32_t ALTD_CMD_PMISC_TSIZE_1  = 0b00000010;    // PMISC SWITCH
-    const uint32_t ALTD_CMD_PMISC_TSIZE_2  = 0b01000000;    // PMISC HTM
-
-    // OPTION reg values for SWITCH operation
-    const uint32_t QUIESCE_SWITCH_WAIT_COUNT = 128;
-    const uint32_t INIT_SWITCH_WAIT_COUNT = 128;
-
-    //FORCE ECC Register field/bit definitions
-    const uint32_t ALTD_DATA_TX_ECC_END_BIT = 16;
-
-    const uint32_t ALTD_DATA_ECC_MASK = 0xFFFFull;
-
-    // ADU operation delay times for HW/sim
-    const uint32_t PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY = 10000;
-    const uint32_t PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY = 50000;
-    const uint32_t PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY = 100;
-    const uint32_t PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY = 20000;
-
-    // TODO: Replace checks with definition from fbc_utils when imported (RTC 205266)
-    const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-
-    //---------------------------------------------------------------------------------
-    // Function definitions
-    //---------------------------------------------------------------------------------
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_utils_check_args(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const uint64_t i_address,
-        const uint32_t i_flags)
+    // Translate the transaction size to the actual size (1, 2, 4, or 8 bytes)
+    if (l_transSize == adu_operationFlag::TSIZE_1)
     {
-        FAPI_DBG("Start");
+        l_actualTransSize = 1;
+    }
+    else if (l_transSize == adu_operationFlag::TSIZE_2)
+    {
+        l_actualTransSize = 2;
+    }
+    else if (l_transSize == adu_operationFlag::TSIZE_4)
+    {
+        l_actualTransSize = 4;
+    }
+    else
+    {
+        l_actualTransSize = 8;
+    }
 
-        p10_ADU_oper_flag l_myAduFlag;
-        p10_ADU_oper_flag::Transaction_size_t l_transSize;
-        uint32_t l_actualTransSize;
+    // Check the address alignment
+    FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
+                fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                .set_TARGET(i_target)
+                .set_ADDRESS(i_address)
+                .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
+                .set_TSIZE(l_actualTransSize)
+                .set_FLAGS(i_flags),
+                "Address is not cacheline aligned!");
 
-        //Get the transaction size
-        l_transSize = l_myAduFlag.getTransactionSize();
+    // Make sure the address is within the ADU bounds
+    FAPI_ASSERT(i_address <= P10_FBC_UTILS_FBC_MAX_ADDRESS,
+                fapi2::P10_ADU_UTILS_INVALID_ARGS()
+                .set_TARGET(i_target)
+                .set_ADDRESS(i_address)
+                .set_MAXADDRESS(P10_FBC_UTILS_FBC_MAX_ADDRESS)
+                .set_TSIZE(l_actualTransSize)
+                .set_FLAGS(i_flags),
+                "Address exceeds supported fabric real address range!");
 
-        //Translate the transaction size to the actual size (1, 2, 4, or 8 bytes)
-        if ( l_transSize == p10_ADU_oper_flag::TSIZE_1 )
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_check_fbc_state
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_check_fbc_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> l_data;
+
+    bool fbc_initialized = false;
+    bool fbc_running = false;
+
+    // TODO: Replace checks with function from fbc_utils when imported (RTC 205266)
+
+    //// Get the state of the fabric
+    //FAPI_TRY(p10_fbc_utils_get_fbc_state(i_target, fbc_initialized, fbc_running),
+    //         "Error from p10_fbc_utils_get_fbc_state");
+
+    // TODO: Scom access to check pb_init not working on vbu model yet, placeholder code below (RTC 205266)
+    //FAPI_TRY(getScom(i_target, PU_PB_ES3_MODE, l_data), "Error reading pb_init from Powerbus ES3 Mode Config Register");
+    //fbc_initalized = l_data.getBit<PU_PB_ES3_MODE_PBIXXX_INIT>();
+    fbc_initialized = true;
+
+    FAPI_TRY(getScom(i_target, PU_SND_MODE_REG, l_data), "Error reading pb_stop from pMisc Mode Register");
+    fbc_running = !(l_data.getBit<PU_SND_MODE_REG_PB_STOP>());
+
+    // Make sure the fabric is initialized and running, otherwise set an error
+    FAPI_ASSERT(fbc_initialized && fbc_running,
+                fapi2::P10_ADU_FBC_NOT_INITIALIZED()
+                .set_TARGET(i_target),
+                "Fabric is not initialized or running");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_get_num_granules
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_get_num_granules(
+    const uint64_t i_address,
+    uint32_t& o_numGranules)
+{
+    FAPI_DBG("Entering...");
+
+    // From the address figure out when it is going to no longer be within the ADU bound by
+    // doing the max fbc address minus the address and then divide by 8 to get number of bytes
+    // and by 8 to get number of 8 byte granules that can be sent
+    o_numGranules = ((P10_FBC_UTILS_FBC_MAX_ADDRESS - i_address) / 8) / 8;
+
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_set_quiesce_init
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_set_quiesce_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_option_reg_data(0);
+
+    // Setup pre-command quiesce; sends a pb quiesce command before executing adu command
+    altd_option_reg_data.setBit<PU_ALTD_OPTION_REG_FBC_WITH_PRE_QUIESCE>();
+    altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT,
+                                         PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT_LEN>
+                                         (QUIESCE_SWITCH_WAIT_COUNT);
+
+    // Setup post-command init; sends a pb init command after executing adu command
+    altd_option_reg_data.setBit<PU_ALTD_OPTION_REG_FBC_WITH_POST_INIT>();
+    altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT,
+                                         PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT_LEN>
+                                         (INIT_SWITCH_WAIT_COUNT);
+
+    // Write to ADU special option reg
+    FAPI_TRY(putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
+             "Error setting quiesce/init options via PU_ALTD_OPTION_REG register");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_set_switch_action
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_set_switch_action(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_switch_ab,
+    const bool i_switch_cd)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> pmisc_data;
+    fapi2::buffer<uint64_t> pmisc_mask;
+
+    // Build ADU pMisc Mode register content
+    FAPI_DBG("Writing ADU pMisc Mode register: switch_ab=%s, switch_cd=%s",
+             i_switch_ab ? "true" : "false", i_switch_cd ? "true" : "false");
+
+    // Switch AB bit
+    pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>(i_switch_ab);
+    pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>();
+
+    // Switch CD bit
+    pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>(i_switch_cd);
+    pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>();
+
+    FAPI_TRY(putScomUnderMask(i_target, PU_SND_MODE_REG, pmisc_data, pmisc_mask),
+             "Error writing pb switch actions to PU_SND_MODE_REG register");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_setup_adu
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_setup_adu(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_address,
+    const bool i_rnw,
+    const uint32_t i_flags)
+{
+    // Print the address and the flag along with start
+    FAPI_DBG("Entering... Addr 0x%.16llX, Flag 0x%.8X", i_address, i_flags);
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data(0);
+    fapi2::buffer<uint64_t> altd_addr_reg_data(i_address);
+    fapi2::buffer<uint64_t> altd_option_reg_data(0);
+    adu_operationFlag l_myAduFlag;
+    adu_operationFlag::OperationType_t l_operType;
+    adu_operationFlag::Transaction_size_t l_transSize;
+    uint32_t l_altd_cmd_reg_fbc_ttype = 0;
+    uint32_t l_altd_cmd_reg_fbc_tsize = 0;
+
+    // Write the address into altd_addr_reg
+    FAPI_TRY(putScom(i_target, PU_ALTD_ADDR_REG, altd_addr_reg_data),
+             "Error writing to ALTD_ADDR Register");
+
+    // Process input flag
+    l_myAduFlag.getFlag(i_flags);
+    l_operType = l_myAduFlag.getOperationType();
+    l_transSize = l_myAduFlag.getTransactionSize();
+
+    // Now work on getting the altd cmd register set up; go through all the bits and set/clear as needed
+    // this routine assumes the lock is held by the caller, preserve this locked state
+    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_LOCKED>();
+
+    // =========================================
+    // === Setting for DMA and CI operations ===
+    // =========================================
+    if ( (l_operType == adu_operationFlag::CACHE_INHIBIT) ||
+         (l_operType == adu_operationFlag::DMA_PARTIAL) )
+    {
+        // =========================================
+        // ====== DMA and CI common settings =======
+        // =========================================
+
+        // Set fbc_altd_rnw if it's a read
+        if (i_rnw)
         {
-            l_actualTransSize = 1;
+            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_RNW>();
         }
-        else if ( l_transSize == p10_ADU_oper_flag::TSIZE_2 )
-        {
-            l_actualTransSize = 2;
-        }
-        else if ( l_transSize == p10_ADU_oper_flag::TSIZE_4 )
-        {
-            l_actualTransSize = 4;
-        }
+        // Clear fbc_altd_rnw if it's a write
         else
         {
-            l_actualTransSize = 8;
+            altd_cmd_reg_data.clearBit<PU_ALTD_CMD_REG_FBC_RNW>();
         }
 
-        //Check the address alignment
-        FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
-                    fapi2::P10_ADU_COHERENT_UTILS_INVALID_ARGS().set_TARGET(i_target).set_ADDRESS(
-                        i_address).set_FLAGS(i_flags),
-                    "Address is not cacheline aligned");
-
-        //Make sure the address is within the ADU bounds
-        FAPI_ASSERT(i_address <= P10_FBC_UTILS_FBC_MAX_ADDRESS,
-                    fapi2::P10_ADU_COHERENT_UTILS_INVALID_ARGS().set_TARGET(i_target).set_ADDRESS(
-                        i_address).set_FLAGS(i_flags),
-                    "Address exceeds supported fabric real address range");
-
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_utils_check_fbc_state(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        bool fbc_initialized = false;
-        bool fbc_running = false;
-        FAPI_DBG("Start");
-
-        //Get the state of the fabric
-        //FAPI_TRY(p10_fbc_utils_get_fbc_state(i_target, fbc_initialized, fbc_running),
-        //         "Error from p10_fbc_utils_get_fbc_state");
-
-        //Make sure the fabric is initialized and running othewise set an error
-        FAPI_ASSERT(fbc_initialized
-                    && fbc_running, fapi2::P10_ADU_FBC_NOT_INITIALIZED_ERR().set_TARGET(i_target).set_INITIALIZED(
-                        fbc_initialized).set_RUNNING(
-                        fbc_running), "Fabric is not initialized or running");
-
-    fapi_try_exit:
-        FAPI_DBG("End");
-        return fapi2::current_err;
-
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_utils_get_num_granules(
-        const uint64_t i_address,
-        uint32_t& o_numGranules)
-    {
-        fapi2::ReturnCode rc;
-        FAPI_DBG("Start");
-
-        //From the address figure out when it is going to no longer be within the ADU bound by
-        //doing the max fbc address minus the address and then divide by 8 to get number of bytes
-        //and by 8 to get number of 8 byte granules that can be sent
-        o_numGranules = ((P10_FBC_UTILS_FBC_MAX_ADDRESS - i_address) / 8) / 8;
-
-        FAPI_DBG("Exiting");
-        return rc;
-    }
-
-
-
-    ///
-    /// @brief Setup the value for ADU option register to enable
-    ///        quiesce & init around a switch operation.
-    ///
-    /// @param [in] i_target   Proc target
-    ///
-    /// @return FAPI2_RC_SUCCESS if OK
-    ///
-    fapi2::ReturnCode setQuiesceInit(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        FAPI_DBG("Start");
-        fapi2::ReturnCode l_rc;
-        fapi2::buffer<uint64_t> altd_option_reg_data(0);
-
-        // Set up quiesce
-        altd_option_reg_data.setBit<PU_ALTD_OPTION_REG_FBC_WITH_PRE_QUIESCE>();
-        altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT,
-                                             PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT_LEN>
-                                             (QUIESCE_SWITCH_WAIT_COUNT);
-
-        // Setup Post-command init
-        altd_option_reg_data.setBit<PU_ALTD_OPTION_REG_FBC_WITH_POST_INIT>();
-        altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT,
-                                             PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT_LEN>
-                                             (INIT_SWITCH_WAIT_COUNT);
-
-        //If DD2 setup workaround for HW397129 to re-enable fastpath for DD2
-        altd_option_reg_data.setBit<FBC_ALTD_HW397129>();
-
-        // Write to ADU option reg
-        FAPI_DBG("OPTION reg value 0x%016llX", altd_option_reg_data);
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
-                 "Error writing to PU_ALTD_OPTION_REG register");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_utils_set_switch_action(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_switch_ab,
-        const bool i_switch_cd)
-    {
-        FAPI_DBG("Start");
-        fapi2::buffer<uint64_t> pmisc_data;
-        fapi2::buffer<uint64_t> pmisc_mask;
-
-        // Build ADU pMisc Mode register content
-        FAPI_DBG("writing ADU pMisc Mode register: switch_ab=%s, switch_cd=%s",
-                 i_switch_ab ? "true" : "false", i_switch_cd ? "true" : "false");
-
-        // Switch AB bit
-        pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>(i_switch_ab);
-        pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>();
-
-        // Switch CD bit
-        pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>(i_switch_cd);
-        pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>();
-
-        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_SND_MODE_REG, pmisc_data, pmisc_mask),
-                 "Error from putScomUnderMask (PU_SND_MODE_REG)");
-
-    fapi_try_exit:
-        FAPI_DBG("End");
-        return fapi2::current_err;
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_setup_adu(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const uint64_t i_address,
-        const bool i_rnw,
-        const uint32_t i_flags)
-    {
-        //Print the address and the flag along with start
-        FAPI_DBG("Start Addr 0x%.16llX, Flag 0x%.8X", i_address, i_flags);
-
-        fapi2::ReturnCode rc;
-        fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
-        fapi2::buffer<uint64_t> altd_addr_reg_data(i_address);
-        fapi2::buffer<uint64_t> altd_option_reg_data(0x0);
-        p10_ADU_oper_flag l_myAduFlag;
-        p10_ADU_oper_flag::OperationType_t l_operType;
-        p10_ADU_oper_flag::Transaction_size_t l_transSize;
-        uint32_t var_PU_ALTD_CMD_REG_FBC_TTYPE = 0;
-        uint32_t var_PU_ALTD_CMD_REG_FBC_TSIZE = 0;
-
-        //Write the address into altd_addr_reg
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_ADDR_REG, altd_addr_reg_data),
-                 "Error writing to ALTD_ADDR Register");
-
-        // Process input flag
-        l_myAduFlag.getFlag(i_flags);
-        l_operType = l_myAduFlag.getOperationType();
-        l_transSize = l_myAduFlag.getTransactionSize();
-
-        //Now work on getting the altd cmd register set up - go through all the bits and set/clear as needed
-        //this routine assumes the lock is held by the caller, preserve this locked state
-        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_LOCKED>();
-
-        // ---------------------------------------------
-        // Setting for DMA and CI operations
-        // ---------------------------------------------
-        if ( (l_operType == p10_ADU_oper_flag::CACHE_INHIBIT) ||
-             (l_operType == p10_ADU_oper_flag::DMA_PARTIAL) )
+        // If auto-inc set the auto-inc bit
+        if (l_myAduFlag.getAutoIncrement() == true)
         {
+            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_AUTO_INC>();
+        }
 
-            // ---------------------------------------------
-            // DMA & CI common settings
-            // ---------------------------------------------
-            // Set fbc_altd_rnw if it's a read
+        // =========================================
+        // ====== CI specific: ttype & tsize =======
+        // =========================================
+        if (l_operType == adu_operationFlag::CACHE_INHIBIT)
+        {
+            FAPI_DBG("ADU operation type: Cache Inhibited");
+
+            // Set TTYPE
             if (i_rnw)
             {
-                altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_RNW>();
+                l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_CI_PR_RD;
             }
-            // Clear fbc_altd_rnw if it's a write
             else
             {
-                altd_cmd_reg_data.clearBit<PU_ALTD_CMD_REG_FBC_RNW>();
+                l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_CI_PR_WR;
             }
 
-            // If auto-inc set the auto-inc bit
-            if (l_myAduFlag.getAutoIncrement() == true)
+            // Set TSIZE
+            if ( l_transSize == adu_operationFlag::TSIZE_1 )
             {
-                altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_AUTO_INC>();
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_CI_TSIZE_1;
             }
-
-            // ---------------------------------------------------
-            // Cache Inhibit specific: TTYPE & TSIZE
-            // ---------------------------------------------------
-            if (l_operType == p10_ADU_oper_flag::CACHE_INHIBIT)
+            else if ( l_transSize == adu_operationFlag::TSIZE_2 )
             {
-                FAPI_DBG("ADU operation type: Cache Inhibited");
-
-                // Set TTYPE
-                if (i_rnw)
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CI_PR_RD;
-                }
-                else
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CI_PR_WR;
-                }
-
-                // Set TSIZE
-                if ( l_transSize == p10_ADU_oper_flag::TSIZE_1 )
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_1;
-                }
-                else if ( l_transSize == p10_ADU_oper_flag::TSIZE_2 )
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_2;
-                }
-                else if ( l_transSize == p10_ADU_oper_flag::TSIZE_4 )
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_4;
-                }
-                else
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_8;
-                }
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_CI_TSIZE_2;
             }
-
-            // ---------------------------------------------------
-            // DMA specific: TTYPE & TSIZE
-            // ---------------------------------------------------
+            else if ( l_transSize == adu_operationFlag::TSIZE_4 )
+            {
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_CI_TSIZE_4;
+            }
             else
             {
-                FAPI_DBG("ADU operation type: DMA");
-
-                // If a read, set ALTD_CMD_TTYPE_CL_DMA_RD
-                // Set the tsize to ALTD_CMD_DMAR_TSIZE
-                if (i_rnw)
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CL_DMA_RD;
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAR_TSIZE;
-                }
-                // If a write set ALTD_CMD_TTYPE_DMA_PR_WR
-                // Set the tsize according to flag setting
-                else
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_DMA_PR_WR;
-
-                    //Set scope to system scope
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
-
-                    // Set TSIZE
-                    if ( l_transSize == p10_ADU_oper_flag::TSIZE_1 )
-                    {
-                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_1;
-                    }
-                    else if ( l_transSize == p10_ADU_oper_flag::TSIZE_2 )
-                    {
-                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_2;
-                    }
-                    else if ( l_transSize == p10_ADU_oper_flag::TSIZE_4 )
-                    {
-                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_4;
-                    }
-                    else
-                    {
-                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_8;
-                    }
-                }
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_CI_TSIZE_8;
             }
         }
 
-        // ---------------------------------------------
-        // Setting for PB and PMISC operations
-        // ---------------------------------------------
-        if ( (l_operType == p10_ADU_oper_flag::PB_DIS_OPER) ||
-             (l_operType == p10_ADU_oper_flag::PB_INIT_OPER) ||
-             (l_operType == p10_ADU_oper_flag::PMISC_OPER) )
+        // =========================================
+        // ====== DMA specific: ttype & tsize ======
+        // =========================================
+        else
         {
+            FAPI_DBG("ADU operation type: DMA");
 
-            // ---------------------------------------------
-            // PB & PMISC common settings
-            // ---------------------------------------------
-
-            // Set the start op bit
-            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
-
-            // Set operation scope
-            altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE,
-                                              PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
-
-            // Set DROP_PRIORITY = HIGH
-            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_DROP_PRIORITY>();
-
-            // Set AXTYPE = Address only
-            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_AXTYPE>();
-
-            // ---------------------------------------------------
-            // PB specific: TTYPE & TSIZE
-            // ---------------------------------------------------
-            if ((l_operType == p10_ADU_oper_flag::PB_DIS_OPER) ||
-                (l_operType == p10_ADU_oper_flag::PB_INIT_OPER))
+            // If a read, set ALTD_CMD_TTYPE_CL_DMA_RD
+            // Set the tsize to ALTD_CMD_DMAR_TSIZE
+            if (i_rnw)
             {
-                FAPI_DBG("ADU operation type: PB OPERATION");
+                l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_CL_DMA_RD;
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_DMAR_TSIZE;
+            }
+            // If a write set ALTD_CMD_TTYPE_DMA_PR_WR
+            // Set the tsize according to flag setting
+            else
+            {
+                l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_DMA_PR_WR;
 
-                // Set TTYPE
-                var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_PB_OPER;
+                //Set scope to system scope
+                altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
+
+                // Set TSIZE
+                if ( l_transSize == adu_operationFlag::TSIZE_1 )
+                {
+                    l_altd_cmd_reg_fbc_tsize = ALTD_CMD_DMAW_TSIZE_1;
+                }
+                else if ( l_transSize == adu_operationFlag::TSIZE_2 )
+                {
+                    l_altd_cmd_reg_fbc_tsize = ALTD_CMD_DMAW_TSIZE_2;
+                }
+                else if ( l_transSize == adu_operationFlag::TSIZE_4 )
+                {
+                    l_altd_cmd_reg_fbc_tsize = ALTD_CMD_DMAW_TSIZE_4;
+                }
+                else
+                {
+                    l_altd_cmd_reg_fbc_tsize = ALTD_CMD_DMAW_TSIZE_8;
+                }
+            }
+        }
+    }
+
+    // =========================================
+    // == Setting for PB and PMISC operations ==
+    // =========================================
+    if ( (l_operType == adu_operationFlag::PB_DIS_OPER) ||
+         (l_operType == adu_operationFlag::PB_INIT_OPER) ||
+         (l_operType == adu_operationFlag::PMISC_OPER) )
+    {
+        // =========================================
+        // ====== PB & PMISC common settings =======
+        // =========================================
+
+        // Set the start op bit
+        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
+        // Set operation scope
+        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_GROUP);
+        // Set DROP_PRIORITY = HIGH
+        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_DROP_PRIORITY>();
+        // Set AXTYPE = Address only
+        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_AXTYPE>();
+
+        // =========================================
+        // ====== PB specific: ttype & tsize =======
+        // =========================================
+        if ((l_operType == adu_operationFlag::PB_DIS_OPER) ||
+            (l_operType == adu_operationFlag::PB_INIT_OPER))
+        {
+            FAPI_DBG("ADU operation type: PB OPERATION");
+
+            // Set TTYPE
+            l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_PB_OPER;
+            // Set TM_QUIESCE
+            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE>();
+
+            if (l_operType == adu_operationFlag::PB_DIS_OPER)
+            {
+                // TSIZE for PB operation is fixed value: 0b00001000
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_PB_DIS_OPERATION_TSIZE;
+            }
+            else
+            {
+                // Set OVERWRITE_PBINIT
+                altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_OVERWRITE_PBINIT>();
+
+                // TSIZE for PB operation is fixed value: 0b00001011
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_PB_INIT_OPERATION_TSIZE;
+            }
+        }
+
+        // =========================================
+        // ===== PMISC specific: ttype & tsize =====
+        // =========================================
+        else
+        {
+            FAPI_DBG("ADU operation type: PMISC");
+
+            // Set TTYPE
+            l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_PMISC_OPER;
+
+            // Set TSIZE
+            if ( l_transSize == adu_operationFlag::TSIZE_1 )
+            {
                 // Set TM_QUIESCE
                 altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE>();
 
-                if (l_operType == p10_ADU_oper_flag::PB_DIS_OPER)
-                {
-                    // TSIZE for PB operation is fixed value: 0b00001000
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PB_DIS_OPERATION_TSIZE;
-                }
-                else
-                {
-                    // Set OVERWRITE_PBINIT
-                    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_OVERWRITE_PBINIT>();
-
-                    // Set up quiesce
-                    altd_option_reg_data.setBit<PU_ALTD_OPTION_REG_FBC_WITH_PRE_QUIESCE>();
-                    altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT,
-                                                         PU_ALTD_OPTION_REG_FBC_AFTER_QUIESCE_WAIT_COUNT_LEN>
-                                                         (QUIESCE_SWITCH_WAIT_COUNT);
-                    FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
-                             "Error writing to ALTD_OPTION Register");
-
-                    // TSIZE for PB operation is fixed value: 0b00001011
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PB_INIT_OPERATION_TSIZE;
-                }
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_PMISC_TSIZE_1;
+                // Set quiesce and init around a switch operation in option reg
+                FAPI_TRY(p10_adu_utils_set_quiesce_init(i_target), "Error from p10_adu_utils_set_quiesce_init");
             }
-
-            // ---------------------------------------------------
-            // PMISC specific: TTYPE & TSIZE
-            // ---------------------------------------------------
-            else
+            else if ( l_transSize == adu_operationFlag::TSIZE_2 )
             {
-                FAPI_DBG("ADU operation type: PMISC");
-
-                // Set TTYPE
-                var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_PMISC_OPER;
-
-                // Set TSIZE
-                if ( l_transSize == p10_ADU_oper_flag::TSIZE_1 )
-                {
-                    // Set TM_QUIESCE
-                    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE>();
-
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PMISC_TSIZE_1;
-                    // Set quiesce and init around a switch operation in option reg
-                    FAPI_TRY(setQuiesceInit(i_target), "setQuiesceInit() returns error");
-                }
-                else if ( l_transSize == p10_ADU_oper_flag::TSIZE_2 )
-                {
-                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PMISC_TSIZE_2;
-                }
-
+                l_altd_cmd_reg_fbc_tsize = ALTD_CMD_PMISC_TSIZE_2;
             }
+
         }
-
-        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>
-        (var_PU_ALTD_CMD_REG_FBC_TTYPE);
-        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(var_PU_ALTD_CMD_REG_FBC_TSIZE);
-
-        //Print out what we are setting for altd cmd register data
-        FAPI_DBG("CMD reg value 0x%016llX", altd_cmd_reg_data);
-
-        //Write altd cmd register with the settings that were set above
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error writing to ALTD_CMD Register");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
     }
 
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_adu_write(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_firstGranule,
-        const uint64_t i_address,
-        p10_ADU_oper_flag& i_aduOper,
-        const uint8_t i_write_data[])
+    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(l_altd_cmd_reg_fbc_ttype);
+    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE, PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(l_altd_cmd_reg_fbc_tsize);
+
+    // Write altd cmd register with the settings that were set above
+    FAPI_TRY(putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
+             "Error launching adu command via ALTD Cmd Register (PU_ALTD_CMD_REG)");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_start_op
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_start_op(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data(0);
+
+    // Read the altd_cmd_register
+    FAPI_TRY(getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error reading from the ALTD_CMD_REG");
+    // Set the start op bit
+    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
+    // Write the altd_cmd_register
+    FAPI_TRY(putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_adu_write
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_adu_write(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_firstGranule,
+    const uint64_t i_address,
+    adu_operationFlag& i_aduOper,
+    const uint8_t i_write_data[])
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data;
+    fapi2::buffer<uint64_t> altd_status_reg_data;
+    fapi2::buffer<uint64_t> force_ecc_reg_data;
+    uint64_t write_data = 0x0ull;
+    int eccIndex = 8;
+
+    // Get ADU operation info from flag
+    bool l_itagMode          = i_aduOper.getItagMode();
+    bool l_eccMode           = i_aduOper.getEccMode();
+    bool l_overrideEccMode   = i_aduOper.getEccItagOverrideMode();
+    bool l_autoIncMode       = i_aduOper.getAutoIncrement();
+    bool l_accessForceEccReg = (l_itagMode | l_eccMode | l_overrideEccMode);
+
+    // Dump ADU write settings
+    FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, OVERRIDE_ECC 0x%.8X, AUTOINC 0x%.8X",
+             l_itagMode, l_eccMode, l_overrideEccMode, l_autoIncMode);
+
+    // Get the write data that was passed in as a uint8 into a uint64
+    for (int i = 0; i < 8; i++)
     {
-        FAPI_DBG("Start");
+        write_data |= ( static_cast<uint64_t>(i_write_data[i]) << (56 - (8 * i)) );
+    }
 
-        fapi2::buffer<uint64_t> altd_cmd_reg_data;
-        fapi2::buffer<uint64_t> altd_status_reg_data;
-        fapi2::buffer<uint64_t> force_ecc_reg_data;
-        uint64_t write_data = 0x0ull;
-        int eccIndex = 8;
+    // Put the uint64 write data into the buffer
+    fapi2::buffer<uint64_t> altd_data_reg_data(write_data);
 
-        // Get ADU operation info from flag
-        bool l_itagMode          = i_aduOper.getItagMode();
-        bool l_eccMode           = i_aduOper.getEccMode();
-        bool l_overrideEccMode   = i_aduOper.getEccItagOverrideMode();
-        bool l_autoIncMode       = i_aduOper.getAutoIncrement();
-        bool l_accessForceEccReg = (l_itagMode | l_eccMode | l_overrideEccMode);
+    // If we are doing something with ecc/itag data
+    if (l_accessForceEccReg == true)
+    {
+        // Read the FORCE_ECC register
+        FAPI_TRY(getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error reading the FORCE_ECC Register");
 
-        // Dump ADU write settings
-        FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, OVERRIDE_ECC 0x%.8X",
-                 l_itagMode, l_eccMode, l_overrideEccMode);
-        FAPI_DBG("       AUTOINC 0x%.8X", l_autoIncMode);
-
-        //Get the write data that was passed in as a uint8 into a uint64
-        for (int i = 0; i < 8; i++)
+        // If we want to write the itag bit set that bit
+        if (l_itagMode == true)
         {
-            write_data |= ( static_cast<uint64_t>(i_write_data[i]) << (56 - (8 * i)) );
+            eccIndex++;
+            force_ecc_reg_data.setBit<PU_FORCE_ECC_REG_ALTD_DATA_ITAG>();
         }
 
-        //Put the uint64 write data into the buffer
-        fapi2::buffer<uint64_t> altd_data_reg_data(write_data);
-
-        //If we are doing something with ecc/itag data
-        if (l_accessForceEccReg == true)
+        // If we want to write the ecc data get the data
+        if (l_eccMode == true)
         {
-            //Read the FORCE_ECC register
-            FAPI_TRY(fapi2::getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error reading the FORCE_ECC Register");
-
-            //if we want to write the itag bit set that bit
-            if (l_itagMode == true)
-            {
-                eccIndex++;
-                force_ecc_reg_data.setBit<PU_FORCE_ECC_REG_ALTD_DATA_ITAG>();
-            }
-
-            //if we want to write the ecc data get the data
-            if (l_eccMode == true)
-            {
-                force_ecc_reg_data.insertFromRight < PU_FORCE_ECC_REG_ALTD_DATA_TX,
-                                                   PU_FORCE_ECC_REG_ALTD_DATA_TX_LEN >
-                                                   ((uint64_t)i_write_data[eccIndex]);
-            }
-
-            //if we want to overwrite the ecc data set that bit
-            if (l_overrideEccMode == true)
-            {
-                force_ecc_reg_data.setBit<PU_FORCE_ECC_REG_ALTD_DATA_TX_OVERWRITE>();
-            }
-
-            //Write to the FORCE_ECC register
-            FAPI_TRY(fapi2::putScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error writing to the FORCE_ECC Register");
+            force_ecc_reg_data.insertFromRight<PU_FORCE_ECC_REG_ALTD_DATA_TX, PU_FORCE_ECC_REG_ALTD_DATA_TX_LEN>
+            ((uint64_t)i_write_data[eccIndex]);
         }
 
-        //write the data into the altd_data_reg
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_DATA_REG, altd_data_reg_data),
-                 "Error writing to ALTD_DATA Register");
-
-        //Set the ALTD_CMD_START_OP bit to start the write(first granule for autoinc case or not autoinc)
-        if ( i_firstGranule || (l_autoIncMode == false) )
+        // If we want to overwrite the ecc data set that bit
+        if (l_overrideEccMode == true)
         {
-            //read the altd_cmd_register
-            FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error reading from the ALTD_CMD_REG");
-            //set the start op bit
-            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
-            //write the altd_cmd_register
-            FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
+            force_ecc_reg_data.setBit<PU_FORCE_ECC_REG_ALTD_DATA_TX_OVERWRITE>();
         }
 
-        //If this is a ci operation we want to poll the status register for completion
-        if (i_aduOper.getOperationType() == p10_ADU_oper_flag::CACHE_INHIBIT)
+        // Write to the FORCE_ECC register
+        FAPI_TRY(putScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data), "Error writing to the FORCE_ECC Register");
+    }
+
+    // Write the data into the altd_data_reg
+    FAPI_TRY(putScom(i_target, PU_ALTD_DATA_REG, altd_data_reg_data),
+             "Error writing to ALTD_DATA Register");
+
+    // Set the ALTD_CMD_START_OP bit to start the write (first granule for autoinc case or not autoinc)
+    if ( i_firstGranule || (l_autoIncMode == false) )
+    {
+        FAPI_TRY(p10_adu_utils_start_op(i_target), "Error returned from p10_adu_utils_start_op");
+    }
+
+    // If this is a ci operation we want to poll the status register for completion
+    if (i_aduOper.getOperationType() == adu_operationFlag::CACHE_INHIBIT)
+    {
+        FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, false),
+                 "Error checking adu busy bit via p10_adu_utils_busy_bit_poll");
+
+        FAPI_TRY(p10_adu_utils_status_errors_check(i_target, false),
+                 "Error checking adu status errors via p10_adu_utils_status_errors_check");
+    }
+    // If it is not a ci operation we just want to delay for a while and then this write is done
+    else
+    {
+        // Delay to allow time for the write to progress
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_adu_read
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_adu_read(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_firstGranule,
+    const uint64_t i_address,
+    adu_operationFlag& i_aduOper,
+    uint8_t o_read_data[])
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data;
+    fapi2::buffer<uint64_t> altd_status_reg_data;
+    fapi2::buffer<uint64_t> altd_data_reg_data;
+    fapi2::buffer<uint64_t> force_ecc_reg_data;
+    int eccIndex = 8;
+
+    // Get ADU operation info from flag
+    bool l_itagMode    = i_aduOper.getItagMode();
+    bool l_eccMode     = i_aduOper.getEccMode();
+    bool l_autoIncMode = i_aduOper.getAutoIncrement();
+
+    // Dump ADU read settings
+    FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, AUTOINC 0x%.8X",
+             l_itagMode, l_eccMode, l_autoIncMode);
+
+    // Set the ALTD_CMD_START_OP bit to start the read (first granule for autoinc case or not autoinc)
+    if ( i_firstGranule || (l_autoIncMode == false) )
+    {
+        FAPI_TRY(p10_adu_utils_start_op(i_target), "Error returned from p10_adu_utils_start_op");
+    }
+
+    // If this is a ci operation we want to poll the status register for completion
+    if (i_aduOper.getOperationType() == adu_operationFlag::CACHE_INHIBIT)
+    {
+        FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, false),
+                 "Error checking adu busy bit via p10_adu_utils_busy_bit_poll");
+
+        FAPI_TRY(p10_adu_utils_status_errors_check(i_target, false),
+                 "Error checking adu status errors via p10_adu_utils_status_errors_check");
+    }
+    else
+    {
+        // Delay to allow time for the read to progress
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY, PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
+    }
+
+    // If we want to include the itag and ecc data collect them before the read
+    if ( l_itagMode || l_eccMode )
+    {
+        // Read the FORCE_ECC register
+        FAPI_TRY(getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data),
+                 "Error reading from the FORCE_ECC Register");
+
+        // If we are reading the itag get that data and put it in the read_data array
+        if (l_itagMode)
         {
-            bool l_busyBitStatus = true;
+            eccIndex = 9;
+            o_read_data[8] = force_ecc_reg_data.getBit<PU_FORCE_ECC_REG_ALTD_DATA_ITAG>();
+        }
 
-            for (uint32_t i = 0; i < 100000; i++)
+        // If we are reading the ecc get that data and put it in the read_data array
+        if (l_eccMode)
+        {
+            o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
+        }
+    }
+
+    // Read data from altd_data_reg
+    FAPI_TRY(getScom(i_target, PU_ALTD_DATA_REG, altd_data_reg_data),
+             "Error reading from the ALTD_DATA Register");
+
+    // Format the uint64 read data into an uint8 array
+    for (int i = 0; i < 8; i++)
+    {
+        o_read_data[i] = (altd_data_reg_data >> (56 - (i * 8))) & 0xFFull;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_reset_adu
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_reset_adu(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data(0);
+
+    // Get the current value from altd_cmd register
+    FAPI_TRY(getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error reading from ALTD_CMD Register");
+
+    // Set the reset_fsm, clear_status, and locked bits to do an ADU reset
+    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_RESET_FSM>();
+    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_CLEAR_STATUS>();
+    altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_LOCKED>();
+
+    // Write the altd_cmd register
+    FAPI_TRY(putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
+             "Error clearing/resetting the adu using the ALTD_CMD Register");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_cleanup_adu
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_cleanup_adu(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data(0);
+
+    // Wwrite all zeroes to altd_cmd_reg to cleanup everything
+    FAPI_TRY(putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
+             "Error clearing the ALTD_CMD Register");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_busy_bit_poll
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_busy_bit_poll(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_expBusyState)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> l_statusReg(0);
+    bool l_expectedState = false;
+
+    // Check for a successful status max_wait_poll times
+    for (uint i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
+    {
+        // Read ADU status register
+        FAPI_TRY(getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg), "Error reading from ALTD_STATUS Register");
+
+        // Form condition to determine whether busy bit is in the correct state
+        l_expectedState = (i_expBusyState && l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>()) ||
+                          (!i_expBusyState && !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>());
+
+        // Break from poll if state of busy bit is as expected
+        if (l_expectedState)
+        {
+            FAPI_DBG("Hooray busy bit is in the expected state!");
+            break;
+        }
+
+        // Otherwise delay before polling the busy bit again
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY, PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
+                 "Error with fapiDelay while waiting for adu busy bit to reach the desired state");
+    }
+
+    // Throw an error if busy bit is still in incorrect state at this point
+    FAPI_ASSERT(l_expectedState,
+                fapi2::P10_ADU_STATUS_REG_BAD_BUSY_STATE()
+                .set_TARGET(i_target)
+                .set_EXPBUSYBIT(i_expBusyState)
+                .set_ACTBUSYBIT(l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>()),
+                "State of the adu busy bit remained in an unexpected state");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_status_errors_check
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_status_errors_check(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_addrOnlyOper)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> l_statusReg(0);
+    bool l_statusError = false;
+
+    // Check for a successful status max_wait_poll times
+    for (uint i = 0; i < PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS; i++)
+    {
+        l_statusError = false;
+
+        // Read ALTD_STATUS_REG
+        FAPI_TRY(getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg), "Error reading from ALTD_STATUS Register");
+
+        // Check for errors in status register
+        l_statusError =
+            ( l_statusError ||
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_WAIT_CMD_ARBIT>() ||
+              !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDR_DONE>()     || //Address portion of the operation is not complete
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_WAIT_RESP>()      || //Waiting for a clean combined response (cresp)
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_OVERRUN_ERROR>()  || //New data written before old was used/read w/o new data
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_AUTOINC_ERROR>()  || //Internal address counter rolled over the 0.5M boundary
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_COMMAND_ERROR>()  || //New command was issued before previous one finished
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDRESS_ERROR>()  || //Invalid address; pb responded with addr_err cresp
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_PBINIT_MISSING>() || //Attempt to start a command without pb_init active
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_CE>()         || //ECC Correctable error
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_UE>()         || //ECC Uncorrectable error
+              l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_SUE>()           //ECC Special Uncorrectable error
+            );
+
+        // If address only operation, do not check for PU_ALTD_STATUS_REG_FBC_DATA_DONE otherwise it should be set
+        if (i_addrOnlyOper == false)
+        {
+            l_statusError |= !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_DATA_DONE>();
+        }
+
+        // Break out of checking status max_wait_poll times if status register is clean
+        if (!l_statusError)
+        {
+            FAPI_DBG("Hooray the adu status register is error free!");
+            break;
+        }
+
+        // Delay to allow the write/read/other command to finish
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY, PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
+                 "Error with fapiDelay while waiting for adu command completion");
+    }
+
+    // Polled the status register for a clean status max_wait_poll number of times;
+    // throw errors if the status register is still not clean.
+
+    // Throw an explicit error for address errors if detected
+    FAPI_ASSERT(!l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDRESS_ERROR>(),
+                fapi2::P10_ADU_STATUS_REG_ADDRESS_ERR()
+                .set_TARGET(i_target)
+                .set_STATUSREG(l_statusReg),
+                "Address error detected by ADU Status Register");
+
+    // Otherwise throw a generic error if not an address error
+    FAPI_ASSERT(l_statusError == false,
+                fapi2::P10_ADU_STATUS_REG_UNEXPECTED_ERR()
+                .set_TARGET(i_target)
+                .set_STATUSREG(l_statusReg),
+                "Unexpected errors in ADU Status Registers");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_status_check
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_status_check(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_expBusyState,
+    const bool i_addrOnlyOper)
+{
+    FAPI_DBG("Entering...");
+
+    // Poll busy bit to be in expected state
+    FAPI_TRY(p10_adu_utils_busy_bit_poll(i_target, i_expBusyState),
+             "Error returned from p10_adu_utils_busy_bit_poll");
+
+    // Check status register for any errors
+    FAPI_TRY(p10_adu_utils_status_errors_check(i_target, i_addrOnlyOper),
+             "Error retruned from p10_adu_utils_status_errors_check");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_clear_autoinc
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_clear_autoinc(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::buffer<uint64_t> altd_cmd_reg_data;
+
+    // Get the value of altd_cmd register
+    FAPI_TRY(getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
+             "Error reading from ALTD_CMD Register");
+
+    // Clear the autoinc bit
+    altd_cmd_reg_data.clearBit<PU_ALTD_CMD_REG_FBC_AUTO_INC>();
+
+    // Write to the altd_cmd register with the autoinc bit cleared
+    FAPI_TRY(putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
+             "Error clearing the auto_inc bit from the ALTD_CMD Register");
+
+fapi_try_exit:
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_manage_lock
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_adu_utils_manage_lock(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_lock_pick,
+    const bool i_lock,
+    const uint32_t i_num_attempts)
+{
+    FAPI_DBG("Entering...");
+
+    fapi2::ReturnCode rc;
+    fapi2::buffer<uint64_t> lock_control(0);
+    uint32_t attempt_count = 1;
+    bool lock_pick_first_time = true;
+
+    // Num_attempts cannot be 0, otherwise throw an error
+    if (i_num_attempts == 0)
+    {
+        FAPI_ERR("Invalid value %d for number of lock manipulation attempts",
+                 i_num_attempts);
+    }
+
+    // Set up data buffer to perform desired lock manipulation operation
+    // If we are locking set the locked bit, reset_fsm bit, and clear_status bit
+    if (i_lock)
+    {
+        FAPI_DBG("Configuring lock manipulation control data buffer to perform lock acquisition");
+        lock_control.setBit(PU_ALTD_CMD_REG_FBC_LOCKED);
+        lock_control.setBit<PU_ALTD_CMD_REG_FBC_RESET_FSM>();
+        lock_control.setBit<PU_ALTD_CMD_REG_FBC_CLEAR_STATUS>();
+    }
+    else
+    {
+        FAPI_DBG("Configuring lock manipulation control data buffer to perform lock release");
+    }
+
+    // Try to lock/unlock the lock the number of times specified with i_num_attempts
+    while (1)
+    {
+        FAPI_DBG("ADU Lock Attempt %d of %d", attempt_count, i_num_attempts);
+
+        // Write ADU command register to attempt lock manipulation
+        FAPI_DBG("Writing ADU Command register to attempt lock manipulation");
+        rc = putScom(i_target, PU_ALTD_CMD_REG, lock_control);
+
+        // Pass back return code to caller unless it specifically indicates
+        // that the ADU lock manipulation was unsuccessful and we're going
+        // to try again
+        if ((rc != fapi2::FAPI2_RC_PLAT_ERR_ADU_LOCKED) || (attempt_count == i_num_attempts))
+        {
+            // rc does not indicate success
+            if (rc)
             {
-                //Check the busy bit if it's busy exit otherwise check the status
-                FAPI_TRY(p10_adu_coherent_status_check(i_target, EXIT_ON_BUSY, false,
-                                                       l_busyBitStatus),
-                         "Error from p10_adu_coherent_status_check");
-
-                //If the data done bit is set (the data transfer is done we are done
-                if (!l_busyBitStatus)
+                // rc does not indicate lock held, exit
+                if (rc != fapi2::FAPI2_RC_PLAT_ERR_ADU_LOCKED)
                 {
+                    FAPI_ERR("Failed to obtain adu lock due to fapiPutScom error (PU_ALTD_CMD_REG)");
                     break;
                 }
-            }
-        }
-        //If it's not a ci operation we just want to delay for a while and then this write is done
-        else
-        {
-            //delay to allow time for the write to progress
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
-        }
 
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_adu_read(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_firstGranule,
-        const uint64_t i_address,
-        p10_ADU_oper_flag& i_aduOper,
-        uint8_t o_read_data[])
-    {
-        FAPI_DBG("Start");
-
-        fapi2::buffer<uint64_t> altd_cmd_reg_data;
-        fapi2::buffer<uint64_t> altd_status_reg_data;
-        fapi2::buffer<uint64_t> altd_data_reg_data;
-        fapi2::buffer<uint64_t> force_ecc_reg_data;
-        int eccIndex = 8;
-
-        // Get ADU operation info from flag
-        bool l_itagMode          = i_aduOper.getItagMode();
-        bool l_eccMode           = i_aduOper.getEccMode();
-        bool l_autoIncMode       = i_aduOper.getAutoIncrement();
-
-        // Dump ADU read settings
-        FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, AUTOINC 0x%.8X",
-                 l_itagMode, l_eccMode, l_autoIncMode);
-
-        //Set the ALTD_CMD_START_OP bit to start the read(first granule for autoinc case or not autoinc)
-        if ( i_firstGranule || (l_autoIncMode == false) )
-        {
-            //read the altd_cmd_register
-            FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error reading from the ALTD_CMD_REG");
-            //set the start op bit
-            altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
-            //write the altd_cmd_register
-            FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
-        }
-
-        //If this is a ci operation we want to poll the status register for completion
-        if (i_aduOper.getOperationType() == p10_ADU_oper_flag::CACHE_INHIBIT)
-        {
-            bool l_busyBitStatus = true;
-
-            for (uint32_t i = 0; i < 100000; i++)
-            {
-                //We want to exit if it's still busy and keep polling on that bit - otherwise actually check the status
-                FAPI_TRY(p10_adu_coherent_status_check(i_target, EXIT_ON_BUSY, false,
-                                                       l_busyBitStatus),
-                         "Error from p10_adu_coherent_status_check");
-
-                //If the data done bit is set (the data transfer is done we can go read the data
-                if (!l_busyBitStatus)
+                // rc indicates lock held, out of attempts
+                if (attempt_count == i_num_attempts)
                 {
-                    break;
-                }
-            }
-        }
-        else
-        {
-            //delay to allow time for the read to progress
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_OPER_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_OPER_SIM_CYCLE_DELAY), "fapiDelay error");
-        }
-
-        //if we want to include the itag and ecc data collect them before the read
-        if ( l_itagMode || l_eccMode )
-        {
-            //Read the FORCE_ECC register
-            FAPI_TRY(fapi2::getScom(i_target, PU_FORCE_ECC_REG, force_ecc_reg_data),
-                     "Error reading from the FORCE_ECC Register");
-
-            //If we are reading the itag get that data and put it in the read_data array
-            if (l_itagMode)
-            {
-                eccIndex = 9;
-                o_read_data[8] = force_ecc_reg_data.getBit<PU_FORCE_ECC_REG_ALTD_DATA_ITAG>();
-            }
-
-            //If we are reading the ecc get that data and put it in the read_data array
-            if (l_eccMode)
-            {
-                o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
-            }
-        }
-
-        //read data from altd_data_reg
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_DATA_REG, altd_data_reg_data),
-                 "Error reading from the ALTD_DATA Register");
-
-        //Format the uint64 read data into an uint8 array
-        for (int i = 0; i < 8; i++)
-        {
-            o_read_data[i] = (altd_data_reg_data >> (56 - (i * 8))) & 0xFFull;
-        }
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    fapi2::ReturnCode p10_adu_coherent_utils_reset_adu(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        FAPI_DBG("Start");
-
-        fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
-
-        //Get the current value from altd_cmd register so we don't write over anything
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error reading from ALTD_CMD Register");
-
-        //set the reset_fsm, clear_status, and locked bits to do an ADU reset
-        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_RESET_FSM>();
-        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_CLEAR_STATUS>();
-        altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_LOCKED>();
-        //Write the altd_cmd register
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error setting the reset_fsm bit from the ALTD_CMD Register");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    //---------------------------------------------------------------------------------
-    // NOTE: description in header
-    //---------------------------------------------------------------------------------
-    fapi2::ReturnCode p10_adu_coherent_cleanup_adu(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        FAPI_DBG("Start");
-
-        fapi2::buffer<uint64_t> altd_cmd_reg_data(0x0);
-
-        //write all 0s to altd_cmd_reg to cleanup everything
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error clearing the ALTD_CMD Register");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    fapi2::ReturnCode p10_adu_coherent_status_check(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const adu_status_busy_handler i_busyBitHandler,
-        const bool i_addressOnlyOper,
-        bool& o_busyBitStatus)
-    {
-        FAPI_DBG("Start");
-
-        fapi2::buffer<uint64_t> l_statusReg(0x0);
-        bool l_statusError = false;
-
-        //Check for a successful status 10 times
-        for (int i = 0; i < 10; i++)
-        {
-            //Delay to allow the write/read/other command to finish
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
-                     "fapiDelay error");
-
-            l_statusError = false;
-
-            // Read ALTD_STATUS_REG
-            FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg),
-                     "Error reading from ALTD_STATUS Register");
-            //print out altd_status_reg
-            FAPI_DBG("PU_ALTD_STATUS_REG reg value 0x%016llX", l_statusReg);
-
-            // ---- Handle busy options ----
-
-            // Get busy bit output
-            o_busyBitStatus = l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ALTD_BUSY>();
-
-            // Handle busy bit according to specified input
-            if (o_busyBitStatus == true)
-            {
-                // Exit if busy
-                if (i_busyBitHandler == EXIT_ON_BUSY)
-                {
-                    goto fapi_try_exit;
-                }
-                // if the busy bit was set and it was expected to be clear there is a status error
-                else if (i_busyBitHandler == EXPECTED_BUSY_BIT_CLEAR)
-                {
-                    l_statusError = true;
-                }
-            }
-            //If the busy bit was not set and it was expected to be set there is a status error
-            else if (i_busyBitHandler == EXPECTED_BUSY_BIT_SET)
-            {
-                l_statusError = true;
-            }
-
-            // ---- Check for other errors ----
-            // Check the WAIT_CMD_ARBIT bit and make sure it's 0
-            // Check the ADDR_DONE bit and make sure it's set
-            // Check the WAIT_RESP bit to make sure it's clear
-            // Check the OVERRUN_ERR to make sure it's clear
-            // Check the AUTOINC_ERR to make sure it's clear
-            // Check the COMMAND_ERR to make sure it's clear
-            // Check the ADDRESS_ERR to make sure it's clear
-            // Check the COMMAND_HANG_ERR to make sure it's clear
-            // Check the DATA_HANG_ERR to make sure it's clear
-            // Check the PBINIT_MISSING to make sure it's clear
-            // Check the ECC_CE to make sure it's clear
-            // Check the ECC_UE to make sure it's clear
-            // Check the ECC_SUE to make sure it's clear
-            l_statusError =
-                ( l_statusError ||
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_WAIT_CMD_ARBIT>()        ||
-                  !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDR_DONE>()        ||   //The address potion of the operation is complete
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_WAIT_RESP>()         ||   //Waiting for a clean combined response (CResp)
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_OVERRUN_ERROR>()
-                  ||   //New data was written before the previous data was used/read or a read was performed without new data arriving
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_AUTOINC_ERROR>()
-                  || //AutoInc Error indicates internal address counter rolled over the 0.5M boundary
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_COMMAND_ERROR>()
-                  || //New command was issued before previous one finished
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDRESS_ERROR>()
-                  || //Invalid Address error : PB responded with Address Error CResp
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_PBINIT_MISSING>()    ||   //attempt to start a command without pb_init active
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_CE>()            ||   //ECC Correctable error
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_UE>()            ||   //ECC Uncorrectable error
-                  l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ECC_SUE>()                //ECC Special Uncorrectable error
-                );
-
-            // If Address only operation, do not check for PU_ALTD_STATUS_REG_FBC_DATA_DONE otherwise it should be set
-            if ( i_addressOnlyOper == false )
-            {
-                l_statusError |= !l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_DATA_DONE>();
-            }
-
-            //If there is not a status error, we can break out of checking status 10 times
-            if (!l_statusError)
-            {
-                break;
-            }
-        }
-
-        // If error, display trace
-        if (l_statusError)
-        {
-            FAPI_ERR("Status mismatch detected");
-
-            FAPI_ERR("FBC_ALTD_BUSY = %d", (o_busyBitStatus ? 1 : 0));
-            FAPI_ERR("ALTD_STATUS_REG = %016llX", l_statusReg);
-        }
-
-        if (l_statusReg.getBit<PU_ALTD_STATUS_REG_FBC_ADDRESS_ERROR>())
-        {
-            //If there's an error, raise an error
-            FAPI_ASSERT( (l_statusError == false), fapi2::P10_ADU_STATUS_REG_ERR_ADDR_ERR()
-                         .set_TARGET(i_target)
-                         .set_STATUSREG(l_statusReg),
-                         "Status Register check error");
-        }
-        else
-        {
-            //If there's an error, raise an error
-            FAPI_ASSERT( (l_statusError == false), fapi2::P10_ADU_STATUS_REG_ERR_NO_ADDR_ERR()
-                         .set_TARGET(i_target)
-                         .set_STATUSREG(l_statusReg),
-                         "Status Register check error");
-        }
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    fapi2::ReturnCode p10_adu_coherent_clear_autoinc(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        FAPI_DBG("Start");
-
-        fapi2::buffer<uint64_t> altd_cmd_reg_data;
-
-        //Get the value of altd_cmd register so we don't write over it
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error reading from ALTD_CMD Register");
-
-        //clear the autoinc bit
-        altd_cmd_reg_data.clearBit<PU_ALTD_CMD_REG_FBC_AUTO_INC>();
-
-        //Write to the altd_cmd register with the autoinc bit cleared
-        FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
-                 "Error clearing the auto_inc bit from the ALTD_CMD Register");
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-
-    fapi2::ReturnCode p10_adu_coherent_manage_lock(const
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-            const bool i_lock_pick,
-            const bool i_lock,
-            const uint32_t i_num_attempts)
-    {
-        FAPI_DBG("Start");
-
-        fapi2::ReturnCode rc;
-        fapi2::buffer<uint64_t> lock_control(0x0);
-        uint32_t attempt_count = 1;
-        bool lock_pick_first_time = true;
-
-        // num_attempts cannot be 0, otherwise throw an error
-        if (i_num_attempts == 0)
-        {
-            FAPI_ERR("Invalid value %d for number of lock manipulation attempts",
-                     i_num_attempts);
-        }
-
-        // set up data buffer to perform desired lock manipulation operation
-        // If we are locking set the locked bit, reset_fsm bit, and clear_status bit
-        if (i_lock)
-        {
-            FAPI_DBG("Configuring lock manipulation control data buffer to perform lock acquisition");
-            lock_control.setBit(PU_ALTD_CMD_REG_FBC_LOCKED);
-            lock_control.setBit<PU_ALTD_CMD_REG_FBC_RESET_FSM>();
-            lock_control.setBit<PU_ALTD_CMD_REG_FBC_CLEAR_STATUS>();
-        }
-        else
-        {
-            FAPI_DBG("Configuring lock manipulation control data buffer to perform lock release");
-        }
-
-        // try to lock/unlock the lock the number of times specified with i_num_attempts
-        while (1)
-        {
-            // write ADU command register to attempt lock manipulation
-            FAPI_DBG("Writing ADU Command register to attempt lock manipulation");
-            rc = fapi2::putScom(i_target, PU_ALTD_CMD_REG, lock_control);
-
-            // pass back return code to caller unless it specifically indicates
-            // that the ADU lock manipulation was unsuccessful and we're going
-            // to try again
-            if ((rc != fapi2::FAPI2_RC_PLAT_ERR_ADU_LOCKED)
-                || (attempt_count == i_num_attempts))
-            {
-                // rc does not indicate success
-                if (rc)
-                {
-                    // rc does not indicate lock held, exit
-                    if (rc != fapi2::FAPI2_RC_PLAT_ERR_ADU_LOCKED)
+                    // If out of attempts but lock pick is desired try to pick the lock once and see if it works
+                    if (i_lock_pick && i_lock && lock_pick_first_time)
                     {
-                        FAPI_ERR("fapiPutScom error (PU_ALTD_CMD_REG)");
+                        FAPI_DBG("Out of lock attempts, going to try a lock pick as desired");
+                        lock_control.setBit(PU_ALTD_CMD_REG_FBC_LOCK_PICK);
+                        attempt_count--;
+                        lock_pick_first_time = false;
+                    }
+                    // If we are out of attempts and are not trying to pick the lock or if we already picked the lock, error out
+                    else
+                    {
+                        FAPI_ASSERT(false, fapi2::P10_ADU_UTILS_LOCK_ERR()
+                                    .set_TARGET(i_target)
+                                    .set_LOCK_PICK(i_lock_pick)
+                                    .set_LOCK(i_lock)
+                                    .set_NUM_ATTEMPTS(i_num_attempts),
+                                    "Ran out of lock attempts or failed to pick lock");
                         break;
                     }
-
-                    // rc indicates lock held, out of attempts
-                    if (attempt_count == i_num_attempts)
-                    {
-                        //if out of attempts but lock pick is desired try to pick the lock once and see if it works
-                        if (i_lock_pick && i_lock && lock_pick_first_time)
-                        {
-                            lock_control.setBit(PU_ALTD_CMD_REG_FBC_LOCK_PICK);
-                            attempt_count--;
-                            lock_pick_first_time = false;
-                            FAPI_DBG("Trying to do a lock pick as desired");
-                        }
-                        //If we are out of attempts and are not trying to pick the lock or if we already picked the lock, error out
-                        else
-                        {
-                            FAPI_ASSERT(false, fapi2::P10_ADU_COHERENT_UTILS_LOCK_ERR().set_TARGET(i_target).set_LOCK_PICK(i_lock_pick).set_LOCK(
-                                            i_lock).set_NUM_ATTEMPTS(i_num_attempts),
-                                        "Ran out of lock attempts or were unable to pick lock");
-                            break;
-                        }
-                    }
                 }
-
+            }
+            else
+            {
                 // rc clean, lock management operation successful
-                FAPI_DBG("Lock manipulation successful or going to try a lock pick");
+                FAPI_DBG("Lock manipulation successful!");
                 break;
             }
-
-            // delay to provide time for ADU lock to be released
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
-                     "fapiDelay error");
-
-            // increment attempt count, loop again
-            attempt_count++;
-            FAPI_DBG("Attempt %d of %d", attempt_count,
-                     i_num_attempts);
         }
 
-    fapi_try_exit:
+        // Delay to provide time for ADU lock to be released
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY, PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
+                 "Error with fapiDelay while waiting for adu lock");
 
-        //if there is an error from trying to lock/unlock
-        if(rc)
-        {
-            fapi2::current_err = rc;
-        }
-
-        FAPI_DBG("End");
-        return fapi2::current_err;
-
+        // Increment attempt count, loop again
+        attempt_count++;
     }
 
-    void p10_adu_coherent_append_input_data(const uint64_t i_address, const bool i_rnw, const uint32_t i_flags,
-                                            fapi2::ReturnCode& o_rc)
+fapi_try_exit:
+
+    // If there is an error from trying to lock/unlock
+    if(rc)
     {
+        fapi2::current_err = rc;
+    }
 
+    FAPI_DBG("Exiting...");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_adu_utils_append_input_data
+////////////////////////////////////////////////////////
+void p10_adu_utils_append_input_data(
+    const uint64_t i_address,
+    const bool i_rnw,
+    const uint32_t i_flags,
+    fapi2::ReturnCode& o_rc)
+{
 #ifndef __PPE__
-        uint64_t l_address = i_address;
-        bool l_rnw = i_rnw;
-        uint32_t l_flags = i_flags;
-        fapi2::ffdc_t ADDRESS;
-        fapi2::ffdc_t RNW;
-        fapi2::ffdc_t FLAGS;
-        ADDRESS.ptr() = static_cast<void*>(&l_address);
-        ADDRESS.size() = sizeof(l_address);
-        RNW.ptr() = static_cast<void*>(&l_rnw);
-        RNW.size() = sizeof(l_rnw);
-        FLAGS.ptr() = static_cast<void*>(&l_flags);
-        FLAGS.size() = sizeof(l_flags);
+    uint64_t l_address = i_address;
+    bool l_rnw = i_rnw;
+    uint32_t l_flags = i_flags;
+    fapi2::ffdc_t ADDRESS;
+    fapi2::ffdc_t RNW;
+    fapi2::ffdc_t FLAGS;
+    ADDRESS.ptr() = static_cast<void*>(&l_address);
+    ADDRESS.size() = sizeof(l_address);
+    RNW.ptr() = static_cast<void*>(&l_rnw);
+    RNW.size() = sizeof(l_rnw);
+    FLAGS.ptr() = static_cast<void*>(&l_flags);
+    FLAGS.size() = sizeof(l_flags);
 
-        if ((o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_COHERENT_UTILS_INVALID_ARGS)
-            || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_FBC_NOT_INITIALIZED_ERR)
-            || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_ERR_ADDR_ERR)
-            || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_ERR_NO_ADDR_ERR)
-            || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_COHERENT_UTILS_LOCK_ERR))
-        {
-            FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P10_ADU_COHERENT_UTILS_EXTRA_INPUT_DATA);
-        }
+    if ((o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_UTILS_INVALID_ARGS)
+        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_FBC_NOT_INITIALIZED)
+        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_ADDRESS_ERR)
+        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_STATUS_REG_UNEXPECTED_ERR)
+        || (o_rc == (fapi2::ReturnCode) fapi2::RC_P10_ADU_UTILS_LOCK_ERR))
+    {
+        FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_P10_ADU_UTILS_EXTRA_INPUT_DATA);
+    }
 
 #endif
-    }
-
-} // extern "C
+}
