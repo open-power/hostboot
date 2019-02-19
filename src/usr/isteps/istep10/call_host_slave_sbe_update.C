@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -269,6 +269,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
             errlCommit( l_errl, HWPF_COMP_ID );
         }
 
+        #ifndef CONFIG_AXONE_BRING_UP
         // Call to check state of Processor SBE SEEPROMs and
         // make any necessary updates
         l_errl = SBE::updateProcessorSbeSeeproms(
@@ -282,6 +283,8 @@ void* call_host_slave_sbe_update (void *io_pArgs)
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
+
+        #endif
 
         // Call to Validate any Alternative Master's connection to PNOR
         // Only call this in MNFG mode
