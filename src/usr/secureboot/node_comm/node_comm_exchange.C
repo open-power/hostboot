@@ -770,11 +770,6 @@ errlHndl_t nodeCommProcessSlaveQuote(uint8_t* const i_slaveQuote,
             l_errl->collectTrace(TRBOOT_COMP_NAME);
             l_errl->collectTrace(NODECOMM_TRACE_NAME);
         }
-        else
-        {
-            // @TODO RTC 203645 need to notify HDAT to turn off trustedboot flag
-            // in RUNTIME::IPLPARMS_SYSTEM
-        }
         break;
     }
 

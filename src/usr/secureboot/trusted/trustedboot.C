@@ -2254,7 +2254,7 @@ errlHndl_t GetRandom(const TpmTarget* i_pTpm,
 }
 #endif // CONFIG_TPMDD
 
-errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
+errlHndl_t poisonTpm(TpmTarget* i_pTpm)
 {
     uint64_t l_randNum = 0;
     errlHndl_t l_errl = nullptr;
@@ -2262,6 +2262,14 @@ errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
 #ifdef CONFIG_TPMDD
 
     do {
+
+    l_errl = validateTpmHandle(i_pTpm);
+    if(l_errl)
+    {
+        break;
+    }
+
+    i_pTpm->setAttr<TARGETING::ATTR_TPM_POISONED>(true);
 
     // Note: GetRandom validates the TPM handle internally and returns an
     // error log if invalid
