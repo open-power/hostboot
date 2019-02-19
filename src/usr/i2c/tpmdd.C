@@ -693,7 +693,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
             ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
 
-            const auto plid = pError->plid();
+            const auto original_eid  = pError->eid();
+            const auto original_plid = pError->plid();
             pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             errlCommit(pError,TPMDD_COMP_ID);
 
@@ -721,8 +722,15 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 get_huid(i_pTpm),
                 0,
                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-            pError->plid(plid);
+            pError->plid(original_plid);
             ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+            TRACFCOMP(g_trac_tpmdd, ERR_MRK
+                "tpmPresence: Due to Error eid=0x%.8X plid=0x%.8X involving "
+                "TPM with HUID=0x%08X, committing Unrecoverable Error "
+                "eid=0x%.8X with same plid=0x%.8X",
+                original_eid, original_plid, TARGETING::get_huid(i_pTpm),
+                pError->eid(), pError->plid());
 
             // Hardware/Procedure callouts/trace should have been added to the
             // original log but the main HW/SW callouts/traces are replicated here
@@ -1852,7 +1860,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     // Printing mux info separately, if combined, nothing is displayed
     char* l_muxPath = io_tpmInfo.i2cMuxPath.toString();
-    TRACFCOMP(g_trac_tpmdd, "tpmReadAttributes(): "
+    TRACUCOMP(g_trac_tpmdd, "tpmReadAttributes(): "
               "muxSelector=0x%X, muxPath=%s",
               io_tpmInfo.i2cMuxBusSelector,
               l_muxPath);
