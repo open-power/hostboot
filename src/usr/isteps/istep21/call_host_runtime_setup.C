@@ -749,9 +749,16 @@ void* call_host_runtime_setup (void *io_pArgs)
         // No support for OCC 
         else if( !Util::isSimicsRunning() )
         {
+            //Shouldnt clear this ATTR_PM_FIRINIT_DONE_ONCE_FLAG
+            //when we reset pm complex  from here.
+            //Reason is this executes during istpe 21.3 then in runtime we do pm
+            //reset again so to avoid saving cme fir mask value we shouldn't
+            //reset the above attribute
+            uint8_t l_skip_fir_attr_reset = 1;
             // Since we are not leaving the PM complex alive, we will
             //  explicitly put it into reset and clean up any memory
-            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES);
+            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES, 
+                                     l_skip_fir_attr_reset);
             if (l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

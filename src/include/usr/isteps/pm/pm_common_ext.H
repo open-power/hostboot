@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,10 +118,13 @@ namespace HBPM
      * @brief Reset PM Complex for all proc targets.
      *
      * @param[in]  i_opt  Option to reset HW, attributes, or both
+     * @param[in]  i_skip_fir_attr_reset optin to skip this attribute
+     * ATTR_PM_FIRINIT_DONE_ONCE_FLAG to reset the value to 0
      *
      * @return errlHndl_t  Error log if resetPMAll failed
      */
-    errlHndl_t resetPMAll( resetOptions_t i_opt = RESET_HW );
+    errlHndl_t resetPMAll( resetOptions_t i_opt = RESET_HW ,uint8_t
+                           i_skip_fir_attr_reset = 0);
 
     /**
      * @brief Verify all OCCs at checkpoint.
