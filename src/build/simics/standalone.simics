@@ -41,12 +41,11 @@ if ($hb_skip_vpd_preload == 0) {
 # If Axone and Beyond, load VPD into DDIMM VPD
 if ($hb_mode == 0){
             $dimmSpd  = $hb_script_location + "/dimmspd.dat"
-            $procMvpd = "/gsa/rchgsa/home/c/r/crgeddes/documents/hbBuild/procvpd.dat"
 
-            proc_hb0.seeprom0_image.load-file $procMvpd
+            proc_hb0.seeprom0_image.load-file $vpd_proc
             echo "    - loaded MVPD to seeprom0"
 
-            proc_hb0.seeprom2_image.load-file $procMvpd
+            proc_hb0.seeprom2_image.load-file $vpd_proc
             echo "    - loaded MVPD to seeprom2"
 
             ddimm0.VPD_0_image.load-file $dimmSpd

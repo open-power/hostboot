@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,8 +188,9 @@ void*    call_mss_freq( void *io_pArgs )
         // allow it to change here
         TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
-
+        #ifndef CONFIG_AXONE_BRING_UP
         uint32_t l_originalNest = Util::getBootNestFreq();
+        #endif
 
         // Read MC_SYNC_MODE from SBE itself and set the attribute
         uint8_t l_bootSyncMode = 0;
@@ -253,7 +254,7 @@ void*    call_mss_freq( void *io_pArgs )
                    "WARNING skipping p9_mss_freq_system HWP due to error detected in p9_mss_freq HWP. An error should have been committed.");
         }
 
-
+        #ifndef CONFIG_AXONE_BRING_UP
         // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
         uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
         uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
@@ -321,6 +322,7 @@ void*    call_mss_freq( void *io_pArgs )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "WARNING skipping SBE update checks due to previous errors" );
         }
+        #endif
     }
 
     } while(0);
