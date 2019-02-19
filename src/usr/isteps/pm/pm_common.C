@@ -1141,7 +1141,8 @@ namespace HBPM
     /**
      *  @brief Reset PM complex for all chips
      */
-    errlHndl_t resetPMAll( resetOptions_t i_opt )
+    errlHndl_t resetPMAll( resetOptions_t i_opt,
+                           uint8_t i_skip_fir_attr_reset)
     {
         errlHndl_t l_errl = nullptr;
 
@@ -1172,8 +1173,11 @@ namespace HBPM
                 // Zero out the HOMER vars
                 (void) convertHomerPhysToVirt( l_procChip, 0 );
 
-                // Zero out the FIR save/restore
-                l_procChip->setAttr<ATTR_PM_FIRINIT_DONE_ONCE_FLAG>(0);
+                if (!i_skip_fir_attr_reset)
+                {
+                    // Zero out the FIR save/restore
+                    l_procChip->setAttr<ATTR_PM_FIRINIT_DONE_ONCE_FLAG>(0);
+                }
             }
         }
 
