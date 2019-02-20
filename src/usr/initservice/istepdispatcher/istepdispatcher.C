@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -362,6 +362,26 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
         if(iv_istepMode)
         {
+
+
+#ifdef CONFIG_BMC_IPMI
+            // Disable watchdog action to prevent the system from shutting down
+            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
+                                  IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
+                                  static_cast<uint8_t>
+                                  (IPMIWATCHDOG::DO_NOT_STOP |
+                                   IPMIWATCHDOG::BIOS_FRB2),
+                                   IPMIWATCHDOG::NO_ACTIONS); // do nothing
+            if(err_ipmi)
+            {
+               TRACFCOMP(g_trac_initsvc,
+                              "init: ERROR: Set IPMI watchdog Failed");
+                err_ipmi->collectTrace("INITSVC", 1024);
+                errlCommit(err_ipmi, INITSVC_COMP_ID );
+
+            }
+
+#endif
             // In IStep mode (receive messages to run individual steps)
             // always listen to debug interface.  If on FSP this allows
             // both HWSV, Cronus, and debug tools to control the IPL
@@ -378,18 +398,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         {
 
 #ifdef CONFIG_BMC_IPMI
-            //run the ipmi watchdog in non istep mode only
-            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                                  IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN);
-
-            if(err_ipmi)
-            {
-               TRACFCOMP(g_trac_initsvc,
-                              "init: ERROR: Set IPMI watchdog Failed");
-                err_ipmi->collectTrace("INITSVC", 1024);
-                errlCommit(err_ipmi, INITSVC_COMP_ID );
-
-            }
 
             // Start the watchdog
             err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();

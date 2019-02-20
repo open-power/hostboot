@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,6 @@ MODULE = ipmiext
 include ipmi.mk
 
 OBJS += ipmifru.o
-OBJS += ipmiwatchdog.o
 OBJS += ipmifruinv.o
 OBJS += ipmipowerstate.o
 OBJS += ipmichassiscontrol.o
