@@ -80,6 +80,17 @@ uint64_t lookupEepromAddr(const eepromRecordHeader& i_eepromRecordHeader)
     {
         l_vaddr = l_it->second;
     }
+
+    if(l_vaddr == 0)
+    {
+        TRACSSCOMP( g_trac_eeprom, "lookupEepromAddr() failed to find I2CM Huid: 0x%.08X, Port: 0x%.02X, Engine: 0x%.02X, Dev Addr: 0x%.02X, Mux Select: 0x%.02X, Size: 0x%.08X in g_cachedEeproms",
+                    i_eepromRecordHeader.completeRecord.i2c_master_huid,
+                    i_eepromRecordHeader.completeRecord.port,
+                    i_eepromRecordHeader.completeRecord.engine,
+                    i_eepromRecordHeader.completeRecord.devAddr,
+                    i_eepromRecordHeader.completeRecord.mux_select,
+                    i_eepromRecordHeader.completeRecord.cache_copy_size);
+    }
     return l_vaddr;
 }
 
@@ -647,8 +658,8 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
 
 errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 TARGETING::Target * i_target,
-                                void * io_buffer,
-                                size_t i_buflen,
+                                void *  io_buffer,
+                                size_t& io_buflen,
                                 eeprom_addr_t &i_eepromInfo)
 {
     errlHndl_t l_errl = nullptr;
@@ -673,14 +684,25 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
         // Ensure that a copy of the eeprom exists in our map of cached eeproms
         if(l_eepromCacheVaddr)
         {
+            // First check if io_buffer is a nullptr, if so then assume user is
+            // requesting size back in io_bufferlen
+            if(io_buffer == nullptr)
+            {
+                io_buflen = l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE;
+                TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
+                            "io_buffer == nullptr , returning io_buflen as 0x%lx",
+                            io_buflen);
+                break;
+            }
+
             TRACSSCOMP( g_trac_eeprom, "eepromPerformOpCache() "
                     "Performing %s on target 0x%.08X offset 0x%lx   length 0x%x     vaddr 0x%lx",
                     (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
                     TARGETING::get_huid(i_target),
-                    i_eepromInfo.offset, i_buflen, l_eepromCacheVaddr);
+                    i_eepromInfo.offset, io_buflen, l_eepromCacheVaddr);
 
             // Make sure that offset + buflen are less than the total size of the eeprom
-            if(i_eepromInfo.offset + i_buflen > (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
+            if(i_eepromInfo.offset + io_buflen > (l_eepromRecordHeader.completeRecord.cache_copy_size * KILOBYTE))
             {
                 TRACFCOMP(g_trac_eeprom,
                           ERR_MRK"eepromPerformOpCache: i_eepromInfo.offset + i_offset is greater than size of eeprom (0x%x KB)",
@@ -698,7 +720,7 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 EEPROM_CACHE_PERFORM_OP,
                                 EEPROM_OVERFLOW_ERROR,
-                                TO_UINT64(i_buflen),
+                                TO_UINT64(io_buflen),
                                 TO_UINT64(i_eepromInfo.offset),
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
@@ -709,18 +731,18 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
 
             if(i_opType == DeviceFW::READ)
             {
-                memcpy(io_buffer, reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), i_buflen);
+                memcpy(io_buffer, reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), io_buflen);
             }
             else if(i_opType == DeviceFW::WRITE)
             {
-                memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), io_buffer,  i_buflen);
+                memcpy(reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset), io_buffer,  io_buflen);
 
                 #ifndef __HOSTBOOT_RUNTIME
 
                 // Perform flush to ensure pnor is updated
                 int rc = mm_remove_pages( FLUSH,
                                           reinterpret_cast<void *>(l_eepromCacheVaddr + i_eepromInfo.offset),
-                                          i_buflen );
+                                          io_buflen );
                 if( rc )
                 {
                     TRACFCOMP(g_trac_eeprom,ERR_MRK"eepromPerformOpCache:  Error from mm_remove_pages trying for flush contents write to pnor! rc=%d",rc);
