@@ -71,6 +71,9 @@ PRDR_RULE_TABLES += axone_omic.prf
 PRDR_RULE_TABLES += centaur_membuf.prf
 PRDR_RULE_TABLES += centaur_mba.prf
 
+# Explorer Chip
+PRDR_RULE_TABLES += explorer_ocmb.prf
+
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}
 prd_rule_disp_targets = ${PRDR_RULE_TABLES:.prf=.prf.disp.C}

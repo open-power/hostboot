@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,6 +195,7 @@ PRDF_TARGET_TYPE_ALIAS( TYPE_MI,        TARGETING::TYPE_MI        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_DMI,       TARGETING::TYPE_DMI       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MCC,       TARGETING::TYPE_MCC       )
 PRDF_TARGET_TYPE_ALIAS( TYPE_OMIC,      TARGETING::TYPE_OMIC      )
+PRDF_TARGET_TYPE_ALIAS( TYPE_OCMB_CHIP, TARGETING::TYPE_OCMB_CHIP )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MEMBUF,    TARGETING::TYPE_MEMBUF    )
 PRDF_TARGET_TYPE_ALIAS( TYPE_L4,        TARGETING::TYPE_L4        )
 PRDF_TARGET_TYPE_ALIAS( TYPE_MBA,       TARGETING::TYPE_MBA       )

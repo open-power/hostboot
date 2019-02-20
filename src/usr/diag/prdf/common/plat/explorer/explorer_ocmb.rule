@@ -1463,5 +1463,6 @@ group gOMIDLFIR
  ##############################################################################
 
 # Include the actions defined for this target
+.include "p9_common_actions.rule";
 .include "explorer_ocmb_actions.rule";
 
