@@ -48,6 +48,16 @@ inline fapi2::ReturnCode getVPD(
     return platGetVPD( i_target, io_vpd_info, o_blob );
 }
 
+// platform specialization for OCMB target
+template<>
+inline fapi2::ReturnCode getVPD(
+                          const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                          VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpd_info,
+                          uint8_t* o_blob)
+{
+    return platGetVPD( i_target, io_vpd_info, o_blob );
+}
+
 };
 
 #endif // __VPDACCESS_H_
