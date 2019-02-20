@@ -93,6 +93,9 @@ include $(HWP_PATH_2)/p9c_mss_eff_config.mk
 include $(HWP_PATH_2)/p9c_mss_eff_config_thermal.mk
 include $(HWP_PATH_2)/p9c_mss_bulk_pwr_throttles.mk
 include $(HWP_PATH_2)/p9c_mss_eff_mb_interleave.mk
+include $(HWP_PATH_3)/p9a_mss_freq.mk
+include $(HWP_PATH_3)/p9a_mss_freq_system.mk
+
 #host_mss_attr_cleanup : MSS ATTR Cleanup
 include $(HWP_PATH_2)/p9c_mss_attr_cleanup.mk
 
