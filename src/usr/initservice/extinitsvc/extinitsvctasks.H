@@ -383,7 +383,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
          * @brief  Explorer Scom library
          */
         {
-            "libexpscom.so" ,                   // taskname
+            "libexpaccess.so" ,                 // taskname
             NULL,                               // no pointer to fn
             {
                 INIT_TASK,                      // task type

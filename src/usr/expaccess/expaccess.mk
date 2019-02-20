@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/expscom/makefile $
+# $Source: src/usr/expaccess/expaccess.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2019
 # [+] International Business Machines Corp.
 #
 #
@@ -22,9 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = expscom
-
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
@@ -33,16 +30,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
-# Need to build exp_indband to use EKB's getMMIO/putMMIO
+# Need to build exp_indband to use EKB's getMMIO/putMMIO/getCMD/getRSP
 OBJS += exp_inband.o
-
 OBJS += expscom_trace.o
 OBJS += expscom_utils.o
 OBJS += i2cscomdd.o
 OBJS += mmioscomdd.o
-
-SUBDIRS += test.d
-
-VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
-
-include ${ROOTPATH}/config.mk
