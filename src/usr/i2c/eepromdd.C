@@ -91,10 +91,12 @@ errlHndl_t resolveSource(TARGETING::Target * i_target,
     // then we know it exists in cache somewhere
     if(lookupEepromAddr(l_eepromRecordHeader))
     {
+        TRACFCOMP(g_trac_eeprom,"Eeprom found in cache, looking at eecache");
         o_source = EEPROM::CACHE;
     }
     else
     {
+        TRACFCOMP(g_trac_eeprom,"Eeprom not found in cache, looking at hardware");
         o_source = EEPROM::HARDWARE;
     }
 

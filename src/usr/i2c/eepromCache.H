@@ -46,9 +46,11 @@ namespace EEPROM
 *           device.
 *       OUTPUT: Pointer to the data that was read from the target device.
 *
-* @param[in] i_buflen
+* @param[in] io_buflen
 *       INPUT: Length of the buffer to be written to target device or
 *       length of buffer to be read from target device.
+*       Output: If io_buffer is passed in as nullptr size will be set in
+*               io_buflen as an out param
 *
 * @param [in] i_eepromInfo struct containing information needed to perform
 *        operation on the given i2c eeprom. NOTE It is expected that
@@ -62,7 +64,7 @@ namespace EEPROM
 errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                                 TARGETING::Target * i_target,
                                 void * io_buffer,
-                                size_t i_buflen,
+                                size_t & io_buflen,
                                 eeprom_addr_t &i_eepromInfo);
 
 /**
