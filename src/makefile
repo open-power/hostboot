@@ -215,7 +215,7 @@ EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
-EXTENDED_MODULES += expscom
+EXTENDED_MODULES += expaccess
 
 #***************************************
 # Working test modules
@@ -258,7 +258,7 @@ TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
-TESTCASE_MODULES += testexpscom
+TESTCASE_MODULES += testexpaccess
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
@@ -309,8 +309,10 @@ RUNTIME_MODULES += nestmemutils
 RUNTIME_MODULES += imageprocs_rt
 RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 RUNTIME_MODULES += mss_rt
+RUNTIME_MODULES += expaccess_rt
 
 RUNTIME_DATA_MODULES +=
+
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
 RUNTIME_TESTCASE_MODULES += testsyslib_rt
 RUNTIME_TESTCASE_MODULES += testxscom_rt
@@ -324,12 +326,12 @@ RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += testpnor_rt
 RUNTIME_TESTCASE_MODULES += testfapi2_rt
-
 RUNTIME_TESTCASE_MODULES += testsecureboot_rt
 RUNTIME_TESTCASE_MODULES += testtargeting_rt
 RUNTIME_TESTCASE_MODULES += testsbeio_rt
 RUNTIME_TESTCASE_MODULES += testpm_rt
 RUNTIME_TESTCASE_MODULES += testrsvdtracebuf_rt
+# RUNTIME_TESTCASE_MODULES += testexpaccess_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/expscom/test/expscomtest.H $                          */
+/* $Source: src/usr/expaccess/test/expscomtest.H $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
