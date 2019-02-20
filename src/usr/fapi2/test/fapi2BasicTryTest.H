@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <fapi2.H>
-// #include <plat_attribute_service.H>
+#include <fapi2/plat_hwp_invoker.H>
 
 //--------------------------------------------------------------------------
 /// @file  p9_basicTry.C
@@ -148,41 +148,45 @@ class Fapi2BasicTryTest : public CxxTest::TestSuite
         int numTests = 0;
         int numFails = 0;
         fapi2::ReturnCode l_rc;
-
+        errlHndl_t l_err = nullptr;
 
         FAPI_INF("fapi2basicTry starting ... ");
 
         numTests++;
-        l_rc = p9_fapi_tryFailure();
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_tryFailure);
         if ( true == (bool)l_rc )
         {
             numFails++;
             TS_FAIL(" p9_fapi_tryFailure returned error");
         }
+        if( l_err ) { delete l_err; }
 
         numTests++;
-        l_rc = p9_fapi_assertFailure();
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_assertFailure);
         if ( true == (bool)l_rc )
         {
             numFails++;
             TS_FAIL(" p9_fapi_assertFailure returned error");
         }
+        if( l_err ) { delete l_err; }
 
         numTests++;
-        l_rc = p9_fapi_trySuccess();
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_trySuccess);
         if ( true == (bool)l_rc )
         {
             numFails++;
             TS_FAIL(" p9_fapi_trySuccess returned error");
         }
+        if( l_err ) { delete l_err; }
 
         numTests++;
-        l_rc = p9_fapi_assertSuccess();
+        FAPI_INVOKE_HWP_RC(l_err,l_rc,p9_fapi_assertSuccess);
         if ( true == (bool)l_rc )
         {
             numFails++;
             TS_FAIL(" p9_fapi_assertSuccess returned error");
         }
+        if( l_err ) { delete l_err; }
 
         FAPI_INF("fapi2basicTry:: Test Complete. %d/%d fails", numFails, numTests);
 

@@ -124,7 +124,8 @@ enum FAPI2_TEST_TARGET_ID {
     MY_MI,
     MY_DMI,
     MY_OMI,
-    MY_OMIC,
+    MY_OMIC0,
+    MY_OMIC2,
     MY_MCC,
     MY_OCMB,
     MY_MEM_PORT,
@@ -157,7 +158,7 @@ if(l_chipList.size())                                                           
 }                                                                                                            \
 else                                                                                                         \
 {                                                                                                            \
-    TS_FAIL("TEST_FUNCTION_NAME Fail: could not find any proc, skipping tests");                             \
+    TS_FAIL(#TEST_FUNCTION_NAME" Fail: could not find any proc, skipping tests");                             \
     numFails++;                                                                                              \
     break;                                                                                                   \
 }                                                                                                            \
@@ -173,7 +174,7 @@ for( uint64_t x = 0; x < NUM_TARGETS; x++ )                                     
     }                                                                                                        \
     else if(targeting_targets[x] == nullptr)                                                                 \
     {                                                                                                        \
-        FAPI_ERR("TEST_FUNCTION_NAME:: targeting_targets[%d] is null", x);                                   \
+        FAPI_ERR(#TEST_FUNCTION_NAME":: targeting_targets[%d] is null", x);                                   \
         generationSuccess = false;                                                                           \
     }                                                                                                        \
 }                                                                                                            \
@@ -181,7 +182,7 @@ numTests++;                                                                     
 if(!generationSuccess)                                                                                       \
 {                                                                                                            \
     numFails++;                                                                                              \
-    TS_FAIL("TEST_FUNCTION_NAME Fail : failed to correctly generate targets");                               \
+    TS_FAIL(#TEST_FUNCTION_NAME" Fail : failed to correctly generate targets");                               \
 }                                                                                                            \
 /* Common Targets  */                                                                                        \
 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>  fapi2_procTarget(targeting_targets[MY_PROC]);                   \
@@ -205,10 +206,12 @@ fapi2::Target<fapi2::TARGET_TYPE_MC>         fapi2_mcTarget(targeting_targets[MY
 fapi2::Target<fapi2::TARGET_TYPE_MI>         fapi2_miTarget(targeting_targets[MY_MI]);   /* Cumulus / Axone*/\
 fapi2::Target<fapi2::TARGET_TYPE_DMI>        fapi2_dmiTarget(targeting_targets[MY_DMI]); /* Cumulus */       \
 fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);          /* Axone */\
-fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omicTarget(targeting_targets[MY_OMIC]);        /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic0Target(targeting_targets[MY_OMIC0]);        /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omic2Target(targeting_targets[MY_OMIC2]);        /* Axone */\
 fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);          /* Axone */\
 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>  fapi2_ocmbTarget(targeting_targets[MY_OCMB]);        /* Axone */\
 fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targets[MY_MEM_PORT]); /* Axone */
+
 
 
 /**

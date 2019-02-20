@@ -116,6 +116,11 @@ class TPMDDTest: public CxxTest::TestSuite
 
             do
             {
+#ifdef CONFIG_AXONE_BRING_UP
+                TRACFCOMP( g_trac_tpmdd,"Skipping test on Axone" );
+                break;
+#endif
+
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)

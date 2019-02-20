@@ -46,6 +46,11 @@ elif [ "$CHIP" == "CUMULUS_CDIMM" ];
 then
     export PNOR=cumulus_cdimm.pnor
     unset CONFIG_FILE
+elif [ "$CHIP" == "AXONE" ];
+then
+    export PNOR=axone.pnor
+    export CONFIG_FILE=src/build/configs/simics_axone.config
+    export MACHINE=AXONE
 elif [ "$CHIP" == "FSPBUILD" ];
 then
     export PNOR=ZZ.pnor

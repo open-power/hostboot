@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include <scom/scomif.H>
-
+#include <config.h>
 #include <devicefw/driverif.H>
 
 
@@ -444,10 +444,15 @@ public:
           uint64_t addr;
           uint64_t data;
           bool     isFail;
+          TARGETING::ATTR_MODEL_type model;
       } test_data[] = {
-          { scom_targets[myPROC0], 0x80000C010D010C3F ,0x1234432112344321, false},
-          { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false },
-          { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true },
+          { scom_targets[myPROC0], 0x80000C010D010C3F ,0x1234432112344321, false, TARGETING::MODEL_POWER9 },
+          { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_NIMBUS },
+          { scom_targets[myPROC0], 0x80000C0107011C3F, 0x123443211234ABAB, false, TARGETING::MODEL_CUMULUS },
+#ifndef CONFIG_AXONE_BRING_UP
+          { scom_targets[myPROC0], 0x800040000701103F, 0x123443211234ABAB, false, TARGETING::MODEL_AXONE },
+#endif
+          { scom_targets[myPROC0], 0x8FFFFFFFFFFFFFFF, 0x123443211234ABAB, true,  TARGETING::MODEL_POWER9 },
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -458,6 +463,14 @@ public:
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          // only run if this is the right kind of target
+          auto l_model = test_data[x].target->getAttr<TARGETING::ATTR_MODEL>();
+          if( (TARGETING::MODEL_POWER9 != test_data[x].model)
+              && (l_model != test_data[x].model) )
           {
               continue;
           }
@@ -500,6 +513,14 @@ public:
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          // only run if this is the right kind of target
+          auto l_model = test_data[x].target->getAttr<TARGETING::ATTR_MODEL>();
+          if( (TARGETING::MODEL_POWER9 != test_data[x].model)
+              && (l_model != test_data[x].model) )
           {
               continue;
           }
@@ -1165,12 +1186,14 @@ public:
      { scom_targets[myNV0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
      { scom_targets[myNV1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
      { scom_targets[myCAPP0],0x2010803, 0x2010803, false, TARGETING::MODEL_POWER9},
-     { scom_targets[myMC0],0x0701008, 0x0701008, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMC1],0x0701008, 0x0801008, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMC0],0x07010008, 0x07010008, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMC1],0x07010008, 0x08010008, false, TARGETING::MODEL_AXONE},
      { scom_targets[myMC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMC1],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
-     { scom_targets[myMI0],0x2010803, 0x2010803, false, TARGETING::MODEL_AXONE},
-     { scom_targets[myMI3],0x2010803, 0x3010803, false, TARGETING::MODEL_AXONE},
+#ifndef CONFIG_AXONE_BRING_UP
+     { scom_targets[myMI0],0x02010803, 0x02010803, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI3],0x02010803, 0x03010803, false, TARGETING::MODEL_AXONE},
+#endif
      { scom_targets[myMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMI3],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
      { scom_targets[myMCC0],0x07010900, 0x07010900, false, TARGETING::MODEL_AXONE},
