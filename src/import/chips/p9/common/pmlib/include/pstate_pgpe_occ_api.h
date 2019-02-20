@@ -406,7 +406,44 @@ typedef struct
     } dw3;
 } pgpe_wof_values_t;
 
+// -----------------------------------------------------------------------------
+// Start Error Log Table
+
+/// Maximum number of error log entries available
+#define MAX_HCODE_ELOG_ENTRIES 4
+
+/// Index into the array of error log entries
+enum elog_entry_index
+{
+    ELOG_PGPE_CRITICAL      = 0,
+    ELOG_PGPE_INFO          = 1,
+    ELOG_SGPE_CRITICAL      = 2,
+    ELOG_SGPE_INFO          = 3,
+};
+
+/// Structure of an individual error log entry
 typedef struct
+{
+    union
+    {
+        uint64_t value;
+        struct
+        {
+            uint32_t high_order;
+            uint32_t low_order;
+        } words;
+        struct
+        {
+            uint64_t errlog_id                  : 8;
+            uint64_t errlog_src                 : 8;
+            uint64_t errlog_len                 : 16;
+            uint64_t errlog_addr                : 32;
+        } fields;
+    } dw0;
+} hcode_elog_entry_t;
+
+/// Full Error Log Table
+typedef struct hcode_error_table
 {
     union
     {
@@ -423,71 +460,13 @@ typedef struct
             uint64_t reserved                   : 24;
         } fields;
     } dw0;
-    union
-    {
-        uint64_t value;
-        struct
-        {
-            uint32_t high_order;
-            uint32_t low_order;
-        } words;
-        struct
-        {
-            uint64_t errlog_id                  : 8;
-            uint64_t errlog_src                 : 8;
-            uint64_t errlog_len                 : 16;
-            uint64_t pgpe_critical_log_address  : 32;
-        } fields;
-    } dw1;
-    union
-    {
-        uint64_t value;
-        struct
-        {
-            uint32_t high_order;
-            uint32_t low_order;
-        } words;
-        struct
-        {
-            uint64_t errlog_id                  : 8;
-            uint64_t errlog_src                 : 8;
-            uint64_t errlog_len                 : 16;
-            uint64_t pgpe_info_log_address      : 32;
-        } fields;
-    } dw2;
-    union
-    {
-        uint64_t value;
-        struct
-        {
-            uint32_t high_order;
-            uint32_t low_order;
-        } words;
-        struct
-        {
-            uint64_t errlog_id                  : 8;
-            uint64_t errlog_src                 : 8;
-            uint64_t errlog_len                 : 16;
-            uint64_t sgpe_critical_log_address  : 32;
-        } fields;
-    } dw3;
-    union
-    {
-        uint64_t value;
-        struct
-        {
-            uint32_t high_order;
-            uint32_t low_order;
-        } words;
-        struct
-        {
-            uint64_t errlog_id                  : 8;
-            uint64_t errlog_src                 : 8;
-            uint64_t errlog_len                 : 16;
-            uint64_t sgpe_info_log_address      : 32;
-        } fields;
-    } dw4;
-} errlog_idx_t;
+
+    /// Array of error log entries (index with enum elog_entry_index)
+    hcode_elog_entry_t  elog[MAX_HCODE_ELOG_ENTRIES];
+} hcode_error_table_t;
+
+// End Error Log Table
+// -----------------------------------------------------------------------------
 
 typedef struct
 {
@@ -516,7 +495,7 @@ typedef struct
     uint64_t            reserved1;
 
     /// Hcode Error Log Index
-    errlog_idx_t        errlog_idx;
+    hcode_error_table_t  errlog_idx;
 
     //Reserved
     uint64_t            reserved2[24];
