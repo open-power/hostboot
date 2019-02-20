@@ -5,7 +5,8 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,5 +31,6 @@ OBJS += ipmirp.o
 OBJS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmidd.o)
 OBJS += ipmiconfig.o
 OBJS += ipmiselrecord.o
+OBJS += ipmiwatchdog.o
 
 include ${ROOTPATH}/config.mk
