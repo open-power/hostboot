@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include    <initservice/isteps_trace.H>
 
 //  targeting support
+#include    <targeting/common/targetservice.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <attributetraits.H>
@@ -63,6 +64,7 @@
 #include    <p9c_mss_volt.H>
 #include    <p9c_mss_volt_vddr_offset.H>
 #include    <p9c_mss_volt_dimm_count.H>
+#include    <p9a_mss_volt.H>
 
 namespace   ISTEP_07
 {
@@ -95,7 +97,7 @@ void call_mss_volt_hwps (p9c_mss_volt_FP_t i_mss_volt_hwps,
     {
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Calling %s hwp with list of membuf targets"
+              "Calling %s hwp with list of MEMBUF targets"
               " with VDDR_ID=%d, list size=%d",
               i_mss_volt_hwp_str, l_vddr,
               i_membufFapiTargetMap[l_vddr].size());
@@ -179,166 +181,234 @@ void* call_mss_volt( void *io_pArgs )
 
     do
     {
-        TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+        ATTR_MODEL_type l_procModel =  targetService().getProcessorModel();
 
-       if (l_membufTargetList.size() > 0)
-       {
+        if(l_procModel == MODEL_CUMULUS)
+        {
+            TargetHandleList l_membufTargetList;
+            getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-           MembufTargetMap_t l_membufFapiTargetMap {};
-           VDDR_ID_vect_t l_unique_vddrs {};
-           buildMembufLists(l_membufTargetList, l_membufFapiTargetMap,
-                   l_unique_vddrs);
-
-           FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt,
-                                    l_membufFapiTargetMap,
-                                    l_unique_vddrs,
-                                    l_StepError);
-           if (l_StepError.getErrorHandle())
-           {
+            if (l_membufTargetList.size() == 0)
+            {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR: p9c_mss_volt HWP failed");
+                          "ERROR: No MEMBUF targets found, skipping p9c_mss_volt HWP");
                 break;
-           }
+            }
 
-           FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_vddr_offset,
-                                    l_membufFapiTargetMap,
-                                    l_unique_vddrs,
-                                    l_StepError);
-           if (l_StepError.getErrorHandle())
-           {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Calling p9c_mss_volt HWPs on list of MEMBUF %d targets",
+                    l_membufTargetList.size());
+
+            MembufTargetMap_t l_membufFapiTargetMap {};
+            VDDR_ID_vect_t l_unique_vddrs {};
+            buildMembufLists(l_membufTargetList, l_membufFapiTargetMap,
+                    l_unique_vddrs);
+
+            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt,
+                                      l_membufFapiTargetMap,
+                                      l_unique_vddrs,
+                                      l_StepError);
+            if (l_StepError.getErrorHandle())
+            {
+                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: p9c_mss_volt HWP failed");
+                  break;
+            }
+
+            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_vddr_offset,
+                                      l_membufFapiTargetMap,
+                                      l_unique_vddrs,
+                                      l_StepError);
+            if (l_StepError.getErrorHandle())
+            {
+                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: p9c_mss_volt_vddr_offset HWP failed");
+                  break;
+            }
+
+            FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_dimm_count,
+                                      l_membufFapiTargetMap,
+                                      l_unique_vddrs,
+                                      l_StepError);
+            if (l_StepError.getErrorHandle())
+            {
+                  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: p9c_mss_volt_vddr_offset HWP failed");
+                  break;
+            }
+        }
+        else if(l_procModel == MODEL_NIMBUS)
+        {
+
+            TargetHandleList l_mcsTargetList;
+            getAllChiplets(l_mcsTargetList, TYPE_MCS);
+
+            if (l_mcsTargetList.size() == 0)
+            {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR: p9c_mss_volt_vddr_offset HWP failed");
+                          "ERROR: No MCS targets found, skipping p9_mss_volt HWP");
                 break;
-           }
+            }
 
-           FAPI_MSS_VOLT_CALL_MACRO(p9c_mss_volt_dimm_count,
-                                    l_membufFapiTargetMap,
-                                    l_unique_vddrs,
-                                    l_StepError);
-           if (l_StepError.getErrorHandle())
-           {
+            std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >
+                l_mcsFapiTargetsList;
+
+            for(auto & l_mcs_target : l_mcsTargetList)
+            {
+                fapi2::Target <fapi2::TARGET_TYPE_MCS>
+                    l_mcs_fapi_target (l_mcs_target);
+
+                l_mcsFapiTargetsList.push_back( l_mcs_fapi_target );
+            }
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Calling p9_mss_volt on list of %d MCS targets",
+                    l_mcsTargetList.size());
+
+            FAPI_INVOKE_HWP(l_err, p9_mss_volt, l_mcsFapiTargetsList);
+
+            // process return code
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X:  p9_mss_volt HWP() failed",
+                        l_err->reasonCode());
+
+                // Create IStep error log and cross reference to error
+                // that occurred
+                l_StepError.addErrorDetails(l_err);
+
+                // Commit Error
+                errlCommit( l_err, HWPF_COMP_ID );
+            }
+            else
+            {
+                // No need to compute dynamic values if mss_volt failed
+
+                // Calculate Dynamic Offset voltages for each domain
+                Target* pSysTarget = NULL;
+                targetService().getTopLevelTarget(pSysTarget);
+                assert(
+                        (pSysTarget != NULL),
+                        "call_mss_volt: Code bug!  System target was NULL.");
+
+                // only calculate if system supports dynamic voltage
+                if (pSysTarget->getAttr<ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >() == 1)
+                {
+                    l_err = computeDynamicMemoryVoltage<
+                        ATTR_MSS_VDD_PROGRAM,
+                        ATTR_VDD_ID>();
+                    if(l_err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                                "VDD domain",
+                                l_err->reasonCode());
+                        l_StepError.addErrorDetails(l_err);
+                        errlCommit(l_err,HWPF_COMP_ID);
+                    }
+
+                    l_err = computeDynamicMemoryVoltage<
+                        ATTR_MSS_AVDD_PROGRAM,
+                        ATTR_AVDD_ID>();
+                    if(l_err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                                "AVDD domain",
+                                l_err->reasonCode());
+                        l_StepError.addErrorDetails(l_err);
+                        errlCommit(l_err,HWPF_COMP_ID);
+                    }
+
+                    l_err = computeDynamicMemoryVoltage<
+                        ATTR_MSS_VCS_PROGRAM,
+                        ATTR_VCS_ID>();
+                    if(l_err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                                "VCS domain",
+                                l_err->reasonCode());
+                        l_StepError.addErrorDetails(l_err);
+                        errlCommit(l_err,HWPF_COMP_ID);
+                    }
+
+                    l_err = computeDynamicMemoryVoltage<
+                        ATTR_MSS_VPP_PROGRAM,
+                        ATTR_VPP_ID>();
+                    if(l_err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                                "VPP domain",
+                                l_err->reasonCode());
+                        l_StepError.addErrorDetails(l_err);
+                        errlCommit(l_err,HWPF_COMP_ID);
+                    }
+
+                    l_err = computeDynamicMemoryVoltage<
+                        ATTR_MSS_VDDR_PROGRAM,
+                        ATTR_VDDR_ID>();
+                    if(l_err)
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                                "VDDR domain",
+                                l_err->reasonCode());
+                        l_StepError.addErrorDetails(l_err);
+                        errlCommit(l_err,HWPF_COMP_ID);
+                    }
+                }
+            }
+        }
+        else if( l_procModel ==  MODEL_AXONE)
+        {
+            TargetHandleList l_memportTargetList;
+            getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
+
+            if (l_memportTargetList.size() == 0)
+            {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR: p9c_mss_volt_vddr_offset HWP failed");
+                          "ERROR: No MEM_PORT targets found, skipping p9a_mss_volt HWP");
                 break;
-           }
-       }
-       else
-       {
-           TargetHandleList l_mcsTargetList;
-           getAllChiplets(l_mcsTargetList, TYPE_MCS);
+            }
 
-           std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >
-               l_mcsFapiTargetsList;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Calling p9a_mss_volt HWPs on list %d of MEM_PORT targets",
+                      l_memportTargetList.size());
 
-           for(auto & l_mcs_target : l_mcsTargetList)
-           {
-               fapi2::Target <fapi2::TARGET_TYPE_MCS>
-                   l_mcs_fapi_target (l_mcs_target);
+            std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >
+                l_memportFapiTargetsList;
 
-               l_mcsFapiTargetsList.push_back( l_mcs_fapi_target );
-           }
+            for(auto & l_memport_target : l_memportTargetList)
+            {
+                fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT>
+                    l_memport_fapi_target (l_memport_target);
 
-           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Calling p9_mss_volt on list of mcs targets");
+                l_memportFapiTargetsList.push_back(l_memport_fapi_target);
 
-           FAPI_INVOKE_HWP(l_err, p9_mss_volt, l_mcsFapiTargetsList);
+                FAPI_INVOKE_HWP(l_err, p9a_mss_volt, l_memportFapiTargetsList);
 
-           // process return code
-           if ( l_err )
-           {
-               TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X:  p9_mss_volt HWP() failed",
-                       l_err->reasonCode());
+                if ( l_err )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "ERROR 0x%.8X:  p9a_mss_volt HWP() failed on target 0x%.08X",
+                              l_err->reasonCode(), get_huid(l_memport_target));
 
-               // Create IStep error log and cross reference to error
-               // that occurred
-               l_StepError.addErrorDetails(l_err);
+                    // Create IStep error log and cross reference to error
+                    // that occurred
+                    l_StepError.addErrorDetails(l_err);
 
-               // Commit Error
-               errlCommit( l_err, HWPF_COMP_ID );
-           }
-           else
-           {
-               // No need to compute dynamic values if mss_volt failed
+                    // Commit Error
+                    errlCommit( l_err, HWPF_COMP_ID );
+                }
 
-               // Calculate Dynamic Offset voltages for each domain
-               Target* pSysTarget = NULL;
-               targetService().getTopLevelTarget(pSysTarget);
-               assert(
-                       (pSysTarget != NULL),
-                       "call_mss_volt: Code bug!  System target was NULL.");
+                l_memportFapiTargetsList.clear();
+            }
 
-               // only calculate if system supports dynamic voltage
-               if (pSysTarget->getAttr<ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >() == 1)
-               {
-                   l_err = computeDynamicMemoryVoltage<
-                       ATTR_MSS_VDD_PROGRAM,
-                       ATTR_VDD_ID>();
-                   if(l_err)
-                   {
-                       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "ERROR 0x%08X: computeDynamicMemoryVoltage for "
-                               "VDD domain",
-                               l_err->reasonCode());
-                       l_StepError.addErrorDetails(l_err);
-                       errlCommit(l_err,HWPF_COMP_ID);
-                   }
 
-                   l_err = computeDynamicMemoryVoltage<
-                       ATTR_MSS_AVDD_PROGRAM,
-                       ATTR_AVDD_ID>();
-                   if(l_err)
-                   {
-                       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "ERROR 0x%08X: computeDynamicMemoryVoltage for "
-                               "AVDD domain",
-                               l_err->reasonCode());
-                       l_StepError.addErrorDetails(l_err);
-                       errlCommit(l_err,HWPF_COMP_ID);
-                   }
-
-                   l_err = computeDynamicMemoryVoltage<
-                       ATTR_MSS_VCS_PROGRAM,
-                       ATTR_VCS_ID>();
-                   if(l_err)
-                   {
-                       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "ERROR 0x%08X: computeDynamicMemoryVoltage for "
-                               "VCS domain",
-                               l_err->reasonCode());
-                       l_StepError.addErrorDetails(l_err);
-                       errlCommit(l_err,HWPF_COMP_ID);
-                   }
-
-                   l_err = computeDynamicMemoryVoltage<
-                       ATTR_MSS_VPP_PROGRAM,
-                       ATTR_VPP_ID>();
-                   if(l_err)
-                   {
-                       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "ERROR 0x%08X: computeDynamicMemoryVoltage for "
-                               "VPP domain",
-                               l_err->reasonCode());
-                       l_StepError.addErrorDetails(l_err);
-                       errlCommit(l_err,HWPF_COMP_ID);
-                   }
-
-                   l_err = computeDynamicMemoryVoltage<
-                       ATTR_MSS_VDDR_PROGRAM,
-                       ATTR_VDDR_ID>();
-                   if(l_err)
-                   {
-                       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "ERROR 0x%08X: computeDynamicMemoryVoltage for "
-                               "VDDR domain",
-                               l_err->reasonCode());
-                       l_StepError.addErrorDetails(l_err);
-                       errlCommit(l_err,HWPF_COMP_ID);
-                   }
-               }
-           }
-       }
+        }
    }while(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );

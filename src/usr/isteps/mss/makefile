@@ -46,6 +46,8 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
@@ -151,8 +153,6 @@ MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 
  MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
  MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
- # TODO RTC:206774 remove when MSS team changes filename
- MSS_AXONE_SOURCE := $(filter-out sync.o,$(MSS_AXONE_SOURCE))
  MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_AXONE_SOURCE))
 
 
