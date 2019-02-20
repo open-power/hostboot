@@ -426,6 +426,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                 reinterpret_cast<TPM2_QuoteOut*>(o_outBuf);
                   TPM2_QuoteOut* l_tpmRespData =
                                 reinterpret_cast<TPM2_QuoteOut*>(i_respBuf);
+                  l_respPtr->authSessionSize = l_tpmRespData->authSessionSize;
                   memcpy(l_respPtr->quoteData,
                          l_tpmRespData->quoteData,
                          sizeof(l_tpmRespData->base.responseSize));
@@ -1520,7 +1521,9 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
 
     // The response size contains the size of the base response structure too,
     // so subtract that size from the size of the actual quote data.
-    o_data->size = l_read->base.responseSize-sizeof(l_read->base);
+    o_data->size = l_read->base.responseSize -
+                   sizeof(l_read->base) -
+                   sizeof(l_read->authSessionSize);
     memcpy(o_data->data, l_quoteDataPtr, o_data->size);
 
     } while(0);

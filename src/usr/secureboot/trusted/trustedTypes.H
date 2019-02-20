@@ -598,6 +598,7 @@ namespace TRUSTEDBOOT
     struct _TPM2_QuoteOut
     {
         TPM2_BaseOut base;
+        uint32_t authSessionSize;
         uint8_t quoteData[MAX_TRANSMIT_SIZE];
     } PACKED;
     typedef struct _TPM2_QuoteOut TPM2_QuoteOut;
