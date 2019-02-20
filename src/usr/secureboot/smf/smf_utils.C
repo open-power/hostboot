@@ -25,7 +25,7 @@
 #include <secureboot/smf_utils.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
-#include <targeting/targplatutil.H>
+#include <targeting/common/util.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <assert.h>
 #include <limits.h>

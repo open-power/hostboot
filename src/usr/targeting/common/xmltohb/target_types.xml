@@ -1730,6 +1730,9 @@
       <id>PNOR_FLASH_WORKAROUNDS</id>
     </attribute>
     <attribute>
+      <id>PROC_COMPATIBILITY_REQ</id>
+    </attribute>
+    <attribute>
       <id>PROC_REFCLOCK_RCVR_TERM</id>
     </attribute>
     <attribute>
@@ -1746,6 +1749,9 @@
     </attribute>
     <attribute>
       <id>REDUNDANT_CLOCKS</id>
+    </attribute>
+    <attribute>
+      <id>RISK_LEVEL_ORIGIN</id>
     </attribute>
     <attribute>
       <id>RUN_MAX_MEM_PATTERNS</id>

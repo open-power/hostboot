@@ -38,6 +38,8 @@
 #include <stdint.h>
 #include <algorithm>
 #include <map>
+#include <stdio.h> // sprintf
+
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
 #include <initservice/initserviceif.H>
@@ -45,6 +47,7 @@
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/util.H>
 
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
@@ -53,7 +56,6 @@
 
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
-#include <targeting/common/utilFilter.H>
 
 namespace HWAS
 {
@@ -3559,7 +3561,7 @@ bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,
         //actually running compat mode
         if ((i_baseEC != i_compareEC) &&
 #ifdef __HOSTBOOT_MODULE  //Only check risk level in HB, HWSV always allow
-            (l_risk < 4) &&
+            (l_risk < TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM) &&
 #endif
             ((i_baseEC == 0x22) || (i_baseEC == 0x23)) &&
             ((i_compareEC == 0x22) || (i_compareEC == 0x23)))
@@ -3574,7 +3576,7 @@ bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,
         //actually running compat mode
         if ((i_baseEC != i_compareEC) &&
 #ifdef __HOSTBOOT_MODULE  //Only check risk level in HB, HWSV always allow
-            (l_risk < 4) &&
+            (l_risk < TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM) &&
 #endif
             ((i_baseEC == 0x12) || (i_baseEC == 0x13)) &&
             ((i_compareEC == 0x12) || (i_compareEC == 0x13)))
@@ -3587,6 +3589,343 @@ bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,
     return l_mixOk;
 }
 
+/**
+ * @brief Upgrade the Compatibility Risk Level to Native Risk Level
+ * @param io_risk - RISK_LEVEL that gets upgraded
+ */
+void upgradeRiskLevel( uint8_t & io_risk )
+{
+    if (io_risk <= TARGETING::UTIL::P9N22_P9C12_RUGBY_FAVOR_PERFORMANCE)
+    {
+        // 0,1 -> 4
+        io_risk = TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM;
+    }
+    else if (io_risk == TARGETING::UTIL::P9N22_NO_RUGBY_MITIGATIONS)
+    {
+        // 2 -> 5
+        io_risk =
+            TARGETING::UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_PERFORMANCE;
+    }
+    // 3-5: stay same
+}
+
+/**
+ * @brief Downgrade the Native Risk Level to Compatibility Risk Level
+ * @param io_risk - RISK_LEVEL that gets downgraded
+ */
+void downgradeRiskLevel( uint8_t & io_risk )
+{
+    if (io_risk == TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM)
+    {
+        // Base level Native needs to go to base level Compatibilty
+        // 4 -> 0
+        io_risk = TARGETING::UTIL::P9N22_P9C12_RUGBY_FAVOR_SECURITY;
+    }
+    else if
+    (io_risk == TARGETING::UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_PERFORMANCE)
+    {
+        // 5 -> 2
+        io_risk = TARGETING::UTIL::P9N22_NO_RUGBY_MITIGATIONS;
+    }
+    // 0-3: stay same
+}
+
+/**
+ * @brief Update ATTR_RISK_LEVEL of NIMBUS_ONLY systems to
+ *        a native or compatibility level if so directed via
+ *        MRW attribute setting
+ *        See README file for Compatibility Truth Tables that will
+ *        indicate what RISK_LEVEL should be after this function.
+ * @return Error if not able to update setting, else nullptr
+ */
+errlHndl_t updateProcCompatibilityRiskLevel()
+{
+    HWAS_INF("updateProcCompatibilityRiskLevel entry");
+    errlHndl_t l_err = nullptr;
+
+    // First EC chip level on the system (first processor's checked level)
+    TARGETING::ATTR_EC_type l_firstEc = 0;
+    TARGETING::Target * pFirstEcChip = nullptr;
+    // Last EC chip level on the system (last processor's checked level)
+    TARGETING::ATTR_EC_type l_lastEc = 0;
+    TARGETING::Target * pLastEcChip = nullptr;
+    TARGETING::TargetHandleList l_procChips;
+    bool mixedEc = false;
+
+    do
+    {
+        //Get all functional chips
+        getAllChips(l_procChips, TYPE_PROC);
+
+        //Loop through all functional procs and
+        //check for a mismatch of EC levels
+        for(const auto & l_chip : l_procChips)
+        {
+            l_lastEc = l_chip->getAttr<TARGETING::ATTR_EC>();
+            if (l_firstEc == 0)
+            {
+                // first chip, setup the last EC read to valid values
+                l_firstEc = l_lastEc;
+                pFirstEcChip = l_chip;
+            }
+            if (l_firstEc != l_lastEc)
+            {
+                // found a different EC level so mark ECs mixed
+                mixedEc = true;
+                pLastEcChip = l_chip;
+                break;
+            }
+        }
+
+        // Now update the RISK_LEVEL
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        auto l_risk = pSys->getAttr<TARGETING::ATTR_RISK_LEVEL>();
+        auto l_original_risk = l_risk;
+        auto l_risk_origin = pSys->getAttr<TARGETING::ATTR_RISK_LEVEL_ORIGIN>();
+        auto l_proc_compatibility_req =
+            pSys->getAttr<TARGETING::ATTR_PROC_COMPATIBILITY_REQ>();
+
+        if (l_proc_compatibility_req ==
+            TARGETING::PROC_COMPATIBILITY_REQ_FORCED_COMPATIBILITY)
+        {
+            // If RISK_LEVEL is a Native setting (4 or more)
+            if (l_risk >= TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM)
+            {
+                // Both PROC_COMPATIBILITY_REQ and DEFAULT_MRW_RISK_LEVEL are
+                // MRW attributes that should make sense
+                // Error if risk is Native and set by the MRW because
+                // we don't know what the MRW really wants for RISK_LEVEL.
+                if (l_risk_origin == TARGETING::RISK_LEVEL_ORIGIN_MRW)
+                {
+                    HWAS_ERR("updateProcCompatibilityRiskLevel::Trying to "
+                        "force compatibility of invalid MRW risk level %d",
+                        l_risk);
+
+                    /*
+                     * @errortype
+                     * @severity           ERRL_SEV_UNRECOVERABLE
+                     * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
+                     * @reasoncode         RC_FORCED_COMPAT_INVALID_LEVEL
+                     * @devdesc            MRW setting of RISK_VALUE is invalid
+                     *                     for FORCED_COMPATIBILITY
+                     * @custdesc           Incompatible Processor Chip Levels
+                     * @userdata1[00:31]   1st EC level
+                     * @userdata1[32:63]   2nd EC level
+                     * @userdata2[00:15]   RISK_LEVEL
+                     * @userdata2[16:31]   PROC_COMPATIBILITY_REQ
+                     * @userdata2[32:63]   RISK_LEVEL_ORIGIN (0=USER, 1=MRW)
+                     *
+                     */
+                    const uint64_t userdata1 =
+                        (static_cast<uint64_t>(l_firstEc) << 32) |
+                        static_cast<uint64_t>(l_lastEc);
+
+                    const uint64_t userdata2 =
+                        (static_cast<uint64_t>(l_risk) << 48) |
+                        (static_cast<uint64_t>(l_proc_compatibility_req) << 32) |
+                        (static_cast<uint64_t>(l_risk_origin));
+
+                    l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                      MOD_UPDATE_PROC_COMPAT_RISK_LEVEL,
+                                      RC_FORCED_COMPAT_INVALID_LEVEL,
+                                      userdata1,
+                                      userdata2);
+                    // SW_CALLOUT - MRW setting error
+                    hwasErrorAddProcedureCallout( l_err,
+                        HWAS::EPUB_PRC_HB_CODE, HWAS::SRCI_PRIORITY_LOW );
+                    break;
+                }
+
+                // All system types should be put in compatibility mode so
+                // downgrade to force compatibility if risk is 4 or more
+                downgradeRiskLevel(l_risk);
+            }
+        }
+        else if (l_proc_compatibility_req ==
+                 TARGETING::PROC_COMPATIBILITY_REQ_ALLOW_COMPATIBILITY)
+        {
+            // Upgrade DD2.3 system if risk is 2 or less and set by MRW
+            if (!mixedEc &&
+                (l_risk <= TARGETING::UTIL::P9N22_NO_RUGBY_MITIGATIONS) &&
+                (l_risk_origin == TARGETING::RISK_LEVEL_ORIGIN_MRW) &&
+                (l_firstEc == 0x23))
+            {
+                upgradeRiskLevel(l_risk);
+            }
+            // Downgrade Mixed or DD2.2 systems with risk = 4 or more
+            else if ((mixedEc || (l_firstEc == 0x22)) &&
+                (l_risk >= TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM))
+            {
+                downgradeRiskLevel(l_risk);
+            }
+        }
+        else // TARGETING::MRW_COMPATIBILITY_RISK_FLAG_FORCE_NATIVE
+        {
+            // NATIVE mode does NOT allow mixed EC
+            if (mixedEc)
+            {
+                HWAS_ERR("updateProcCompatibilityRiskLevel::Trying to "
+                    "force native compatibility of mixed processor levels",
+                    " (0x%02X and 0x%02X)", l_firstEc, l_lastEc );
+
+                /*
+                 * @errortype
+                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
+                 * @reasoncode         RC_FORCED_NATIVE_INVALID_MIXED_EC
+                 * @devdesc            Forced native compatibility not allowed
+                 *                     for mixed EC levels
+                 * @custdesc           Incompatible Processor Chip Levels
+                 * @userdata1[00:31]   1st EC level
+                 * @userdata1[32:63]   2nd EC level
+                 * @userdata2[00:15]   RISK_LEVEL
+                 * @userdata2[16:31]   PROC_COMPATIBILITY_REQ
+                 * @userdata2[32:63]   RISK_LEVEL_ORIGIN (0=USER, 1=MRW)
+                 *
+                 */
+                const uint64_t userdata1 =
+                    (static_cast<uint64_t>(l_firstEc) << 32) |
+                    static_cast<uint64_t>(l_lastEc);
+
+                const uint64_t userdata2 =
+                    (static_cast<uint64_t>(l_risk) << 48) |
+                    (static_cast<uint64_t>(l_proc_compatibility_req) << 32) |
+                    (static_cast<uint64_t>(l_risk_origin));
+
+                l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_UPDATE_PROC_COMPAT_RISK_LEVEL,
+                                  RC_FORCED_NATIVE_INVALID_MIXED_EC,
+                                  userdata1,
+                                  userdata2);
+                // Callout the DD2.2 as high and DD2.3 as low
+                if (l_firstEc == 0x22)
+                {
+                    // pFirstEcChip is DD2.2
+                    platHwasErrorAddHWCallout(l_err,
+                                              pFirstEcChip,
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              NO_DECONFIG,
+                                              GARD_NULL);
+                    // pLastEcChip is DD2.3
+                    platHwasErrorAddHWCallout(l_err,
+                                              pLastEcChip,
+                                              HWAS::SRCI_PRIORITY_LOW,
+                                              NO_DECONFIG,
+                                              GARD_NULL);
+                }
+                else
+                {
+                    // pFirstEcChip is DD2.3
+                    platHwasErrorAddHWCallout(l_err,
+                                              pFirstEcChip,
+                                              HWAS::SRCI_PRIORITY_LOW,
+                                              NO_DECONFIG,
+                                              GARD_NULL);
+                    // pLastEcChip is DD2.2
+                    platHwasErrorAddHWCallout(l_err,
+                                              pLastEcChip,
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              NO_DECONFIG,
+                                              GARD_NULL);
+                }
+                break;
+            }
+
+            // DD2.3 system does not support risk=3, if in NATIVE mode
+            if ((l_firstEc == 0x23) &&
+                (l_risk == TARGETING::UTIL::P9N22_P9N23_JAVA_PERF))
+            {
+                HWAS_ERR("updateProcCompatibilityRiskLevel::Trying to "
+                    "force native compatibility of DD2.3 for risk level %d",
+                    l_risk);
+
+                /*
+                 * @errortype
+                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid           MOD_UPDATE_PROC_COMPAT_RISK_LEVEL
+                 * @reasoncode         RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK
+                 * @devdesc            Risk level 3 is incompatible for forced
+                 *                     native setting of DD2.3
+                 * @custdesc           Incompatible Processor Chip Levels
+                 * @userdata1[00:31]   1st EC level
+                 * @userdata1[32:63]   2nd EC level
+                 * @userdata2[00:15]   RISK_LEVEL
+                 * @userdata2[16:31]   PROC_COMPATIBILITY_REQ
+                 * @userdata2[32:63]   RISK_LEVEL_ORIGIN (0=USER, 1=MRW)
+                 *
+                 */
+                const uint64_t userdata1 =
+                    (static_cast<uint64_t>(l_firstEc) << 32) |
+                    static_cast<uint64_t>(l_lastEc);
+
+                const uint64_t userdata2 =
+                    (static_cast<uint64_t>(l_risk) << 48) |
+                    (static_cast<uint64_t>(l_proc_compatibility_req) << 32) |
+                    (static_cast<uint64_t>(l_risk_origin));
+
+                l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_UPDATE_PROC_COMPAT_RISK_LEVEL,
+                                  RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK,
+                                  userdata1,
+                                  userdata2);
+                // SW_CALLOUT - MRW setting error (FORCED_NATIVE)
+                hwasErrorAddProcedureCallout( l_err,
+                                              HWAS::EPUB_PRC_HB_CODE,
+                                              HWAS::SRCI_PRIORITY_LOW );
+                break;
+            }
+
+            // DD2.3 system should be upgraded to native level if
+            // risk is 2 or less
+            if ((l_firstEc == 0x23) &&
+                (l_risk <= TARGETING::UTIL::P9N22_NO_RUGBY_MITIGATIONS))
+            {
+                upgradeRiskLevel(l_risk);
+            }
+
+            // DD2.2 system should be downgraded to run in its
+            // native mode if risk is 4 or more
+            if ((l_firstEc == 0x22) &&
+                (l_risk >= TARGETING::UTIL::P9N23_P9C13_NATIVE_MODE_MINIMUM))
+            {
+                downgradeRiskLevel(l_risk);
+            }
+        }
+
+        char ecLevelStr[20];
+        if (mixedEc)
+        {
+            sprintf(ecLevelStr,"Mixed");
+        }
+        else
+        {
+            sprintf(ecLevelStr,"0x%02X", l_firstEc);
+        }
+        if (l_risk != l_original_risk)
+        {
+            HWAS_INF("updateProcCompatibilityRiskLevel: "
+                "Update RISK_LEVEL from %d to %d "
+                "(EC Level: %s, RISK_ORIGIN: %s, PROC_COMPATIBILITY_REQ: %d)",
+                l_original_risk, l_risk, ecLevelStr,
+                l_risk_origin==TARGETING::RISK_LEVEL_ORIGIN_MRW?"MRW":"User",
+                l_proc_compatibility_req);
+            pSys->setAttr<TARGETING::ATTR_RISK_LEVEL>(l_risk);
+        }
+        else
+        {
+            HWAS_DBG("updateProcCompatibilityRiskLevel: "
+                "Keeping RISK_LEVEL %d "
+                "(EC Level: %s, RISK_ORIGIN: %s, PROC_COMPATIBILITY_REQ: %d)",
+                l_risk, ecLevelStr,
+                l_risk_origin==TARGETING::RISK_LEVEL_ORIGIN_MRW?"MRW":"User",
+                l_proc_compatibility_req);
+        }
+    } while (0);
+
+    HWAS_INF("updateProcCompatibilityRiskLevel exit");
+    return l_err;
+}
 
 errlHndl_t validateProcessorEcLevels()
 {
@@ -3622,6 +3961,17 @@ errlHndl_t validateProcessorEcLevels()
         l_masterEc = l_pMasterProc->getAttr<TARGETING::ATTR_EC>();
         l_masterHuid = get_huid(l_pMasterProc);
         l_model = l_pMasterProc->getAttr<TARGETING::ATTR_MODEL>();
+
+        // Update the RISK_LEVEL attribute before checking EC level mismatch
+        if(TARGETING::MODEL_NIMBUS == l_model)
+        {
+            l_err = updateProcCompatibilityRiskLevel();
+            if (l_err)
+            {
+                HWAS_ERR("validateProcessorEcLevels:: Unable to update RISK_LEVEL");
+                break;
+            }
+        }
 
         //Loop through all functional procs and create error logs
         //for any processors whose EC does not match the master
