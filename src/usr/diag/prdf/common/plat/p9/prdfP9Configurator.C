@@ -184,6 +184,7 @@ errlHndl_t PlatConfigurator::build()
 
     // Memory chip domains are always second.
     if ( nullptr != membufDomain ) sysDmnLst.push_back( membufDomain );
+    if ( nullptr != ocmbChipDomain ) sysDmnLst.push_back( ocmbChipDomain );
 
     // Processor chip domains are always third.
     sysDmnLst.push_back( procDomain );
