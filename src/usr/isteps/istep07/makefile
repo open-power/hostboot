@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,7 +27,8 @@ MODULE = istep07
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
 HWP_PATH_2 += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
-HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
+HWP_PATH_3 += ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory
+HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/ ${HWP_PATH_3}/
 
 #Add all the object files required for istep07 module
 OBJS += call_mss_volt.o
@@ -79,6 +80,7 @@ include $(HWP_PATH_2)/p9c_mss_volt.mk
 include $(HWP_PATH_2)/p9c_mss_volt_vddr_offset.mk
 include $(HWP_PATH_2)/p9c_mss_volt_dimm_count.mk
 include $(HWP_PATH_2)/mss_dynamic_vid_utils.mk
+include $(HWP_PATH_3)/p9a_mss_volt.mk
 
 #mss_freq : Calc dimm frequency
 include $(HWP_PATH_1)/p9_mss_freq.mk
