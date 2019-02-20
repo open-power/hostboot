@@ -5845,7 +5845,7 @@
     <description>
        Tracks if a specific core has previously experienced a timeout during
        initial activation.
-          0 = No previous errors reported; 
+          0 = No previous errors reported;
           1 = Core failed on the last attempt to be started
     </description>
     <id>PREVIOUS_WAKEUP_FAIL</id>
@@ -5903,6 +5903,41 @@
     <persistency>non-volatile</persistency>
     <readable/>
   </attribute>
+
+  <attribute>
+    <description>Required Processor Compatibility Setting</description>
+    <id>PROC_COMPATIBILITY_REQ</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <enumeration>
+        <id>PROC_COMPATIBILITY_REQ</id>
+      </enumeration>
+    </simpleType>
+  </attribute>
+
+  <enumerationType>
+    <default>ALLOW_COMPATIBILITY</default>
+    <description>
+        Enumeration specifying the compatibility setting for Processor ECs
+        ALLOW_COMPATIBILITY = set RISK_LEVEL to best allowed
+        FORCED_COMPATIBILITY = set RISK_LEVEL to a compatible level
+        FORCED_NATIVE = set RISK_LEVEL to ECs native setting
+    </description>
+    <enumerator>
+      <name>ALLOW_COMPATIBILITY</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCED_COMPATIBILITY</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>FORCED_NATIVE</name>
+      <value>2</value>
+    </enumerator>
+    <id>PROC_COMPATIBILITY_REQ</id>
+  </enumerationType>
 
   <attribute>
     <id>PROC_DCM_INSTALLED</id>
@@ -6642,6 +6677,38 @@
       </uint8_t>
     </simpleType>
   </attribute>
+
+  <attribute>
+    <description>Where did the RISK_LEVEL setting originate?
+    This is used to make sure the MRW isn't setting an invalid level
+    for FORCED_COMPATIBILITY.
+    </description>
+    <id>RISK_LEVEL_ORIGIN</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <enumeration>
+        <id>RISK_LEVEL_ORIGIN</id>
+      </enumeration>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <default>USER</default>
+    <description>
+        Enumeration specifying what was used to setup the RISK_LEVEL
+    </description>
+    <enumerator>
+      <name>USER</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>MRW</name>
+      <value>1</value>
+    </enumerator>
+    <id>RISK_LEVEL_ORIGIN</id>
+  </enumerationType>
 
   <attribute>
     <description>Size of RNG IO Region</description>

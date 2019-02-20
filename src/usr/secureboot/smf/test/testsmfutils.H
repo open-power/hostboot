@@ -29,9 +29,9 @@
 
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/util.H>
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
-#include <targeting/targplatutil.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <secureboot/smf_utils.H>
 #include <errl/errlmanager.H>

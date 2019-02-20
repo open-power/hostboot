@@ -522,6 +522,12 @@ static void initializeAttributes(TargetService& i_targetService,
                   i_masterScratch[INITSERVICE::SPLESS::SCRATCH_3];
                 l_riskLevel = l_scratch3.riskLevel;
             }
+            else
+            {
+                // MRW used to setup RISK_LEVEL
+                l_pTopLevel->setAttr<ATTR_RISK_LEVEL_ORIGIN>
+                    (RISK_LEVEL_ORIGIN_MRW);
+            }
             TARG_INF( "Setting RISK_LEVEL=%d", l_riskLevel );
             l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
 
