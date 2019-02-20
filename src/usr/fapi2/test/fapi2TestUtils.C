@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,7 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         // when looking up the target
         l_epath.setType(TARGETING::EntityPath::PATH_AFFINITY);
 
-        // Setup OCBM_CHIP and MEM_PORT
+        // Setup OCMB_CHIP and MEM_PORT
         GENERATE_TARGET(TYPE_OCMB_CHIP,sys0node0ocmb0,MY_OCMB,0)
         GENERATE_TARGET(TYPE_MEM_PORT,sys0node0ocmb0memport0,MY_MEM_PORT,0)
 
@@ -173,8 +173,10 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         l_epath.removeLast(); l_epath.removeLast();
         l_epath.removeLast();
 
-        // Setup OMIC
-        GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic0,MY_OMIC,0)
+        // Setup OMICs
+        GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic0,MY_OMIC0,0)
+        l_epath.removeLast();
+        GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic2,MY_OMIC2,2)
     }
 
     // End System Specific P9 Target
@@ -193,18 +195,22 @@ bool isHwValid(TARGETING::Target* i_procChip, uint8_t i_hwType)
         auto l_model = i_procChip->getAttr<TARGETING::ATTR_MODEL>();
         if (l_model == TARGETING::MODEL_CUMULUS)
         {
-            if (i_hwType == MY_MCS || i_hwType == MY_MCA || i_hwType == MY_MCBIST ||
-                i_hwType == MY_OMI || i_hwType == MY_OMIC || i_hwType == MY_MCC ||
-                i_hwType == MY_OCMB || i_hwType == MY_MEM_PORT)
+            if (i_hwType == MY_MCS || i_hwType == MY_MCA
+                || i_hwType == MY_MCBIST || i_hwType == MY_OMI
+                || i_hwType == MY_OMIC0 || i_hwType == MY_OMIC2
+                || i_hwType == MY_MCC || i_hwType == MY_OCMB
+                || i_hwType == MY_MEM_PORT)
             {
                 isValid = false;
             }
         }
         else if (l_model == TARGETING::MODEL_NIMBUS)
         {
-            if (i_hwType == MY_MC || i_hwType == MY_MI || i_hwType == MY_DMI ||
-                i_hwType == MY_OMI || i_hwType == MY_OMIC || i_hwType == MY_MCC ||
-                i_hwType == MY_OCMB || i_hwType == MY_MEM_PORT)
+            if (i_hwType == MY_MC || i_hwType == MY_MI
+                || i_hwType == MY_DMI || i_hwType == MY_OMI
+                || i_hwType == MY_OMIC0 || i_hwType == MY_OMIC2
+                || i_hwType == MY_MCC || i_hwType == MY_OCMB
+                || i_hwType == MY_MEM_PORT)
             {
                 isValid = false;
             }

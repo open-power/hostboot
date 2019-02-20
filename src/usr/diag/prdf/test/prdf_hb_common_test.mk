@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -92,7 +92,7 @@ TESTS += ${PRD_USR_TEST_PATH}/prdfTest_XBus.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ABus.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
-TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
+TESTS += $(if $(CONFIG_AXONE_BRING_UP),,${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H)
 #@TODO RTC:178802
 #TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
 

@@ -38,6 +38,7 @@
 #include <fapi2TestUtils.H>
 #include <p9_mmiotests.H>
 #include <plat_hwp_invoker.H>
+#include <config.h>
 
 using namespace fapi2;
 
@@ -151,6 +152,7 @@ void test_fapi2MmioAccess()
     int numTests = 0;
     int numFails = 0;
 
+#ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = nullptr;
 
     // Create a vector of TARGETING::Target pointers
@@ -211,6 +213,7 @@ void test_fapi2MmioAccess()
             l_errl = nullptr;
         }
     }
+#endif
 
     FAPI_INF("fapi2MmioAccessTest Test Complete. %d/%d fails", numFails, numTests);
 }

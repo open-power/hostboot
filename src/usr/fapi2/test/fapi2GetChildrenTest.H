@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,10 +31,8 @@
 #include <cxxtest/TestSuite.H>
 #include <functional>
 #include <plat_utils.H>
-
-
 #include <error_scope.H>
-
+#include <config.h>
 
 namespace fapi2
 {
@@ -101,7 +99,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: MCAs per MCBIST mismatch");
+                TS_FAIL("test_fapi2GetChildren:: MCAs per MCBIST mismatch");
                 numFails++;
                 break;
             }
@@ -120,7 +118,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: DMIs per MC mismatch");
+                TS_FAIL("test_fapi2GetChildren:: DMIs per MC mismatch");
                 numFails++;
                 break;
             }
@@ -140,7 +138,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: OMIs per MC mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OMIs per MC mismatch");
                 numFails++;
                 break;
             }
@@ -155,7 +153,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            FAPI_INF("fapi2TargetTest:: present cores per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: present cores per proc mismatch");
             numFails++;
             break;
         }
@@ -170,7 +168,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            FAPI_INF("fapi2TargetTest:: functional cores per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: functional cores per proc mismatch");
             numFails++;
             break;
         }
@@ -188,7 +186,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: MCAs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: MCAs per proc mismatch");
                 numFails++;
                 break;
             }
@@ -207,7 +205,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: DMIs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: DMIs per proc mismatch");
                 numFails++;
                 break;
             }
@@ -227,28 +225,45 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: OMIs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OMIs per proc mismatch");
                 numFails++;
                 break;
             }
         }
 
-        if (isHwValid(l_proc, MY_OMIC)
+        if (isHwValid(l_proc, MY_OMIC2)
             && isHwValid(l_proc, MY_OMI))
         {
-            l_childOMIs = fapi2_omicTarget.getChildren<fapi2::TARGET_TYPE_OMI>(TARGET_STATE_PRESENT);
-            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OMIC]);
+            l_childOMIs = fapi2_omic2Target.getChildren<fapi2::TARGET_TYPE_OMI>(TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OMIC2]);
             l_actualSize = l_childOMIs.size();
 
-            //Set expected size to be the number of OMIs per proc
-            l_expectedSize = MAX_OMI_PER_OMIC;
+            // OMIC2 only has 2 OMIs (others have 3)
+            l_expectedSize = 2;
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: # OMIs foound for OMIC0 proc is %d and not %d",
+                TS_FAIL("test_fapi2GetChildren:: # OMIs foound for OMIC0 proc is %d and not %d",
                          l_actualSize, l_expectedSize);
                 numFails++;
                 break;
+            }
+
+            bool l_foundme = false;
+            for( auto omi : l_childOMIs )
+            {
+                if( reinterpret_cast<TARGETING::Target*>(omi.get())
+                    == targeting_targets[MY_OMI] )
+                {
+                    l_foundme = true;
+                    break;
+                }
+            }
+            if( !l_foundme )
+            {
+                TS_FAIL("OMI %.8X not found in child list for OMIC %.8X",
+                        TARGETING::get_huid(targeting_targets[MY_OMI]),
+                        TARGETING::get_huid(targeting_targets[MY_OMIC2]));
             }
         }
 
@@ -264,7 +279,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: OCMBs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: OCMBs per proc mismatch");
                 numFails++;
                 break;
             }
@@ -282,7 +297,7 @@ void test_fapi2GetChildren()
             numTests++;
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: MEM_PORTs per proc mismatch");
+                TS_FAIL("test_fapi2GetChildren:: MEM_PORTs per proc mismatch");
                 numFails++;
                 break;
             }
@@ -298,7 +313,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            FAPI_INF("fapi2TargetTest:: cores per EX mismatch");
+            TS_FAIL("test_fapi2GetChildren:: cores per EX mismatch");
             numFails++;
             break;
         }
@@ -313,7 +328,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            FAPI_INF("fapi2TargetTest:: cores per EQ mismatch");
+            TS_FAIL("test_fapi2GetChildren:: cores per EQ mismatch");
             numFails++;
             break;
         }
@@ -329,7 +344,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
-            FAPI_INF("fapi2TargetTest:: EXs per proc mismatch");
+            TS_FAIL("test_fapi2GetChildren:: EXs per proc mismatch");
             numFails++;
             break;
         }
@@ -735,7 +750,7 @@ void test_fapi2GetChildren()
 
             if(candidateTarget == nullptr)
             {
-                FAPI_INF("fapi2TargetTest:: candidateTarget not found");
+                TS_FAIL("test_fapi2GetChildren:: candidateTarget not found");
                 numFails++;
                 break;
             }
@@ -749,7 +764,7 @@ void test_fapi2GetChildren()
 
             if(l_actualSize != l_expectedSize)
             {
-                FAPI_INF("fapi2TargetTest:: children of pervasive mismatch");
+                TS_FAIL("test_fapi2GetChildren:: children of pervasive mismatch");
                 numFails++;
                 break;
             }
@@ -788,7 +803,7 @@ void test_fapi2GetChildren()
                                         l_targetHuid,
                                         true/*SW Error*/);
         errlCommit(l_err,HWPF_COMP_ID);
-        TS_FAIL("fapi2TargetTest Fail, for HUID: %d , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
+        TS_FAIL("test_fapi2GetChildren Fail, for HUID: %d , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
     }
     FAPI_INF("fapi2GetChildrenTest:: Test Complete. %d/%d fails",  numFails , numTests);
 }
@@ -837,7 +852,6 @@ void test_fapi2GetChildrenFilter()
             }
             else if(targeting_targets[x] == nullptr)
             {
-              FAPI_ERR("Unable to find target for item %d in targeting_targets", x);
               numFails++;
               TS_FAIL("test_fapi2GetChildrenFilter Fail: Unable to find target for item %d in targeting_targets", x);
               break;
@@ -955,6 +969,7 @@ void test_fapi2getChildTargetsForCDG()
     size_t l_expectedDimmsUnderPort0 = 0;
     size_t l_expectedDimmsUnderPort1 = 0;
     TARGETING::TargetHandleList l_chipList;
+
     do
     {
         FAPI_DBG("start of test_fapi2getChildTargetsForCDG()");
@@ -980,18 +995,23 @@ void test_fapi2getChildTargetsForCDG()
             l_expectedDimmsUnderPort0 = l_expectedDimms;
             l_expectedDimmsUnderPort1 = 0;
         }
-        else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS ||
-                 l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_AXONE)
+        else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS)
         {
             l_expectedDimms = 8;
             l_expectedDimmsUnderPort0 = l_expectedDimms/2;
             l_expectedDimmsUnderPort1 = l_expectedDimms/2;
         }
+        else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_AXONE)
+        {
+            l_expectedDimms = 9;
+            l_expectedDimmsUnderPort0 = 0xFF; //wrong
+            l_expectedDimmsUnderPort1 = 0xFF; //wrong
+        }
         else //both are nullptr
         {
             // Should never get here since error should have been returned
             // above
-            FAPI_ERR("fapi2getChildTargetsForCDG: Never Should Happen");
+            TS_FAIL("fapi2getChildTargetsForCDG: Never Should Happen");
             numFails++;
             break;
         }
@@ -1010,7 +1030,7 @@ void test_fapi2getChildTargetsForCDG()
         numTests++;
         if(l_dimmList.size() != l_expectedDimms)
         {
-            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d not equal expected %d",
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d not equal expected %d",
                     l_dimmList.size(),l_expectedDimms);
             numFails++;
         }
@@ -1027,9 +1047,11 @@ void test_fapi2getChildTargetsForCDG()
 
         if(l_dimmList.size() != l_expectedDimmsUnderPort0)
         {
-            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
+#ifndef CONFIG_AXONE_BRING_UP
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
                     l_dimmList.size(),l_expectedDimmsUnderPort0);
             numFails++;
+#endif
         }
 
         // All dimms under port 1
@@ -1044,9 +1066,11 @@ void test_fapi2getChildTargetsForCDG()
 
         if(l_dimmList.size() != l_expectedDimmsUnderPort1)
         {
-            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
+#ifndef CONFIG_AXONE_BRING_UP
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
                     l_dimmList.size(),l_expectedDimmsUnderPort1);
             numFails++;
+#endif
         }
 
         // All dimms under socket 0
@@ -1060,9 +1084,11 @@ void test_fapi2getChildTargetsForCDG()
         numTests++;
         if(l_dimmList.size() != l_expectedDimms)
         {
-            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0 not equal expected %d",
+#ifndef CONFIG_AXONE_BRING_UP
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0 not equal expected %d",
                     l_dimmList.size(),l_expectedDimms);
             numFails++;
+#endif
         }
 
         // All dimms under socket 1
@@ -1076,7 +1102,7 @@ void test_fapi2getChildTargetsForCDG()
         numTests++;
         if(l_dimmList.size() != 0)
         {
-            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 1 not equal expected %d",
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 1 not equal expected %d",
                     l_dimmList.size(),0);
             numFails++;
         }

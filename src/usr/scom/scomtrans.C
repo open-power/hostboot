@@ -494,6 +494,11 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             TRACFCOMP(g_trac_scom, "Target type and scom Addr do not match.");
             TRACFCOMP(g_trac_scom, "scomTranslate-Invalid Address io_addr=0x%X, Type 0x%.8X, HUID 0x%.8X",
             io_addr, i_type, TARGETING::get_huid(i_target));
+            for(uint32_t i = 0; i < l_scomPairings.size(); i++)
+            {
+                TRACFCOMP(g_trac_scom, "Scom Pairing: chipUnitType=%d, chipUnitNum=%d",
+                          l_scomPairings[i].chipUnitType, l_scomPairings[i].chipUnitNum);
+            }
 
 
             uint32_t userdata32_1 = TWO_UINT16_TO_UINT32(

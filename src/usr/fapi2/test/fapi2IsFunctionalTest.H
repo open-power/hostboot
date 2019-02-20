@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MI], fapi2_miTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_DMI], fapi2_dmiTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMI], fapi2_omiTarget)
-            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC], fapi2_omicTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC0], fapi2_omic0Target)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC2], fapi2_omic2Target)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCC], fapi2_mccTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PROC], fapi2_procTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OCMB], fapi2_ocmbTarget)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,8 @@ void test_fapi2Hwp()
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mi, fapi2_miTarget, MY_MI)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_dmi, fapi2_dmiTarget, MY_DMI)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omi, fapi2_omiTarget, MY_OMI)
-        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omicTarget, MY_OMIC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omic0Target, MY_OMIC0)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omic2Target, MY_OMIC2)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcc, fapi2_mccTarget, MY_MCC)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_ocmb, fapi2_ocmbTarget, MY_OCMB)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mem_port, fapi2_memportTarget, MY_MEM_PORT)

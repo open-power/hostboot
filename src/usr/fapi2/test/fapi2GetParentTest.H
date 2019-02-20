@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,10 @@ void test_fapi2GetParent()
         if(TARGETING::get_huid(targeting_targets[PARENT_TEST_TARGET_ID]) !=                                    \
             TARGETING::get_huid(l_parent))                                                                     \
         {                                                                                                      \
-            TS_FAIL("fapi2TargetTest::Unable to find SRC_TYPE's" #PARENT_TYPE "parent!");                      \
+            TS_FAIL("test_fapi2GetParent::Unable to find " #SRC_TYPE "'s " #PARENT_TYPE " parent!");           \
+            FAPI_INF("Found=%.8X, Expected=%.8X",                                                              \
+                     TARGETING::get_huid(l_parent),                                                            \
+                     TARGETING::get_huid(targeting_targets[PARENT_TEST_TARGET_ID]));                           \
             numFails++;                                                                                        \
         }                                                                                                      \
     }
@@ -192,12 +195,12 @@ void test_fapi2GetParent()
     }
     // OMIC Parent Tests
     if (isHwValid(l_proc, MY_MC)  &&
-        isHwValid(l_proc, MY_OMIC))
+        isHwValid(l_proc, MY_OMIC0))
     {
         // Check parent MC
-        GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMIC, MY_MC, TARGET_TYPE_MC)
+        GET_PARENT_TEST_MACRO(MY_OMIC0, TARGET_TYPE_OMIC, MY_MC, TARGET_TYPE_MC)
         // Check parent proc
-        GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMIC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+        GET_PARENT_TEST_MACRO(MY_OMIC0, TARGET_TYPE_OMIC, MY_PROC, TARGET_TYPE_PROC_CHIP)
     }
     // OMI Parent Tests
     if (isHwValid(l_proc, MY_OMI))
@@ -209,10 +212,10 @@ void test_fapi2GetParent()
             // Check parent MCC
             GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MCC, TARGET_TYPE_MCC)
         }
-        if (isHwValid(l_proc, MY_OMIC))
+        if (isHwValid(l_proc, MY_OMIC2))
         {
             // Check parent OMIC
-            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_OMIC, TARGET_TYPE_OMIC)
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_OMIC2, TARGET_TYPE_OMIC)
         }
         if (isHwValid(l_proc, MY_MI))
         {
@@ -354,7 +357,7 @@ void test_fapi2GetParent()
             {targeting_targets[MY_OMI],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_OMI>(i_pTarget); }},
-            {targeting_targets[MY_OMIC],
+            {targeting_targets[MY_OMIC0],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_OMIC>(i_pTarget); }},
           };
@@ -443,7 +446,7 @@ void test_fapi2GetParent()
                     true/*SW Error*/);
 
                 errlCommit(l_err,HWPF_COMP_ID);
-                TS_FAIL("fapi2TargetTest::Unable to find unit's pervasive!");
+                TS_FAIL("test_fapi2GetParent::Unable to find unit's pervasive!");
                 numFails++;
             }
         }
