@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -550,8 +550,8 @@ static void hdatGetFeatureFlagInfo(
         assert(l_pSysTarget != NULL);
     }
 
-    // Default the dd level to 2.2
-    uint8_t l_ddLevel = HDAT_PROC_NIMBUS_DD_22;
+    // Default the dd level to 2.3
+    uint8_t l_ddLevel = HDAT_PROC_NIMBUS_DD_23;
     const hdatIplpFeatureFlagSetting_t * l_featFlagArr;
     uint32_t l_featFlagArrSize = 0;
     uint8_t l_riskLvl = 0;
@@ -563,24 +563,33 @@ static void hdatGetFeatureFlagInfo(
     // DD level is set
     l_ddLevel = l_pvr.getDDLevel();
 
-    // Default to Nimbus DD2.2 settings (DD1.0 doesn't matter) and these are
-    // current settings for cumulus
-    // Default to DD2 flag struct index.
-    uint8_t l_idx = 2;
-    l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx];
+    // Default to Nimbus DD2.3
+    uint8_t l_ddLvlIdx = 2;
+    l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
     l_featFlagArrSize =
-        sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx]);
+        sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
 
-    // Modify for Nimubs DD2.0 and DD2.1
+    // Set the value based on DD level and risk level
     if (l_pvr.chipType == PVR_t::NIMBUS_CHIP)
     {
-        if (l_ddLevel == HDAT_PROC_NIMBUS_DD_20) {l_idx = 0;}
-        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_21) {l_idx = 1;}
-        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_22) {l_idx = 2;}
+        if ( (l_ddLevel == HDAT_PROC_NIMBUS_DD_20) ||
+             (l_ddLevel == HDAT_PROC_NIMBUS_DD_21)
+           )
+        {
+            l_ddLvlIdx = HDAT_NIMBUS_DD_20_21_IDX;
+        }
+        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_22)
+        {
+            l_ddLvlIdx = HDAT_NIMBUS_DD_22_IDX;
+        }
+        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_23)
+        {
+            l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
+        }
 
-        l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx];
+        l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
         l_featFlagArrSize =
-            sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx]);
+            sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
     }
         
     HDAT_DBG("Feature flag array size:0x%x, Model:0x%x, DD Level:0x%x "
