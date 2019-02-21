@@ -37,8 +37,9 @@ namespace SENSOR
 {
     enum dcmi_cc
     {
-        POWER_LIMIT_ACTIVE     = 0x00,
-        POWER_LIMIT_NOT_ACTIVE = 0x80,
+        POWER_LIMIT_ACTIVE        = 0x00,
+        POWER_LIMIT_NOT_ACTIVE    = 0x80,
+        POWER_LIMIT_NOT_SUPPORTED = 0xC1
     };
 
     // fetch the user defined power limit stored on the BMC
@@ -70,9 +71,12 @@ namespace SENSOR
 
         if( l_err == NULL )
         {
-            // make sure the completion code is good, then read the bytes
-            if( (l_cc == POWER_LIMIT_NOT_ACTIVE) ||
-                    (l_cc == POWER_LIMIT_ACTIVE) )
+            if( l_cc == POWER_LIMIT_NOT_SUPPORTED )
+            {
+                TRACFCOMP(g_trac_ipmi, "Power limit is not supported by BMC");
+            }
+            else if( (l_cc == POWER_LIMIT_NOT_ACTIVE) ||
+                     (l_cc == POWER_LIMIT_ACTIVE) )
             {
                 // from the dcmi spec
                 // byte 1   completion code
