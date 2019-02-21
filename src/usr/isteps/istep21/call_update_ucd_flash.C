@@ -31,7 +31,8 @@
 #include <hbotcompid.H>
 #include <config.h>
 #include <initservice/isteps_trace.H>
-
+#include <isteps/ucd/updateUcdFlash.H>
+#include <secureboot/trustedbootif.H>
 #include "call_update_ucd_flash.H"
 
 namespace POWER_SEQUENCER
@@ -67,7 +68,15 @@ void call_update_ucd_flash(void)
             break;
         }
 
+        // Make sure TPM queue is flushed before doing any I2C operations
+        TRUSTEDBOOT::flushTpmQueue();
+
         // @TODO RTC 201990 add flash update algorithm and make trace TRACDBIN
+        // call into:
+        //
+        // errlHndl_t updateUcdFlash(
+        //     TARGETING::Target* i_pUcd,
+        //     const void*        i_pFlashImage);
         for(const auto& lid : info.lidIds)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"LID ID=0x%08X, "

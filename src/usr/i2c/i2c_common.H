@@ -25,7 +25,7 @@
 #ifndef __I2C_COMMON_H
 #define __I2C_COMMON_H
 
-
+#include <devicefw/driverif.H>
 /**
  * @file i2c_common.H
  *
@@ -40,20 +40,32 @@
 namespace I2C
 {
 
+struct Smbus_t
+{
+    uint8_t commandCode; // Command for read/write block operations
+    bool    usePec;      // Whether to use PEC byte or not
+};
+
 /**
  * @brief Structure used to pass important variables between functions
  */
 struct misc_args_t
 {
+    DeviceFW::I2C_SUBOP subop; ///< Sub-operation to perform
     uint8_t  port;
     uint8_t  engine;
     uint64_t devAddr;
     bool     skip_mode_setup;
     bool     with_stop;
     bool     read_not_write;
-    uint64_t bus_speed;          // in kbits/sec (ie 400KHz)
-    uint16_t bit_rate_divisor;   // uint16_t to match size in mode register
-    uint64_t polling_interval_ns;  // in nanoseconds
+    bool     with_address;      ///< Send address
+    bool     with_start;        ///< Send start bit
+    bool     read_continue;     ///< Allow one logical read across multiple I2C
+                                ///< ops.  Set when next read will be tied to
+                                ///< current read
+    uint64_t bus_speed;          ///< in kbits/sec (ie 400KHz)
+    uint16_t bit_rate_divisor;   ///< uint16_t to match size in mode register
+    uint64_t polling_interval_ns;  ///< in nanoseconds
     uint64_t timeout_count;
     uint64_t offset_length;
     uint8_t* offset_buffer;
@@ -62,12 +74,18 @@ struct misc_args_t
 
     TARGETING::I2cSwitches switches;
 
-    misc_args_t():port(0xFF),
+    Smbus_t  smbus;
+
+    misc_args_t():subop(DeviceFW::I2C_STANDARD),
+                  port(0xFF),
                   engine(0xFF),
                   devAddr(0xFFFFFFFF),
                   skip_mode_setup(false),
                   with_stop(true),
                   read_not_write(true),
+                  with_address(true),
+                  with_start(true),
+                  read_continue(false),
                   bus_speed(0),
                   bit_rate_divisor(0),
                   polling_interval_ns(0),
@@ -75,7 +93,8 @@ struct misc_args_t
                   offset_length(0),
                   offset_buffer(nullptr),
                   i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
-                  i2cMuxPath(nullptr)
+                  i2cMuxPath(nullptr),
+                  smbus( {0,true} )
                   {
                       memset(&switches, 0x0, sizeof(switches));
                   };

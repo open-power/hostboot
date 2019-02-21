@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,20 @@ namespace DeviceFW
         WILDCARD = -1,
     };
 
+    /**
+     *  @brief Enum indicating which type of I2C sub-operation
+     *     to perform
+     */
+    enum I2C_SUBOP : uint64_t
+    {
+        I2C_STANDARD           = 0, ///< Traditional I2C
+        I2C_PAGE_OP            = 1, ///< Page operation
+        I2C_SMBUS_BLOCK        = 2, ///< I2c SMBUS Block Read/Write
+        I2C_SMBUS_WORD         = 3, ///< I2c SMBUS Read/Write Word
+        I2C_SMBUS_BYTE         = 4, ///< I2c SMBUS Read/Write Byte
+        I2C_SMBUS_SEND_OR_RECV = 5, ///< I2c SMBUS Send/Receive Byte
+    };
+
 #ifndef PARSER
     /** Construct the device addressing parameters for FSISCOM device ops.
      *  @param[in] i_address - FSISCOM address to operate on.
@@ -130,12 +144,40 @@ namespace DeviceFW
      */
     #define DEVICE_I2C_PARMS(port, engine, devAddr, offset_len,\
                              offset, muxSelector, i_i2cMuxPath)\
+        static_cast<uint64_t>( DeviceFW::I2C_STANDARD ),\
         static_cast<uint64_t>( port ),\
         static_cast<uint64_t>( engine ),\
         static_cast<uint64_t>( devAddr ),\
         static_cast<uint64_t>( offset_len ),\
         static_cast<uint8_t*>( offset ),\
         static_cast<uint64_t>( muxSelector), \
+        static_cast<const TARGETING::EntityPath*>(i_i2cMuxPath)
+
+    /**
+     * @brief Macro that handles the I2C SMBUS data transfers that use
+     *     a command code (Read/Write Word/Byte or Block Read/Write)
+     */
+    #define I2C_SMBUS_RW_W_CMD_PARAMS(i_subop,i_engine,i_port,i_devAddr,\
+                 i_commandCode,i_muxSelector,i_i2cMuxPath)\
+        static_cast<uint64_t>(i_subop),\
+        static_cast<uint64_t>(i_port),\
+        static_cast<uint64_t>(i_engine),\
+        static_cast<uint64_t>(i_devAddr),\
+        static_cast<uint64_t>(i_commandCode),\
+        static_cast<uint64_t>(i_muxSelector),\
+        static_cast<const TARGETING::EntityPath*>(i_i2cMuxPath)
+
+    /**
+     * @brief Macro that handles the I2C SMBUS data transfers that don't use
+     *     a command code byte (Send/Receive Byte)
+     */
+    #define I2C_SMBUS_RW_WO_CMD_PARAMS(i_subop,i_engine,i_port,i_devAddr,\
+                                   i_muxSelector,i_i2cMuxPath)\
+        static_cast<uint64_t>(i_subop),\
+        static_cast<uint64_t>(i_port),\
+        static_cast<uint64_t>(i_engine),\
+        static_cast<uint64_t>(i_devAddr),\
+        static_cast<uint64_t>(i_muxSelector),\
         static_cast<const TARGETING::EntityPath*>(i_i2cMuxPath)
 
     /**
@@ -151,6 +193,53 @@ namespace DeviceFW
                                 i_i2cMuxBusSelector, i_i2cMuxPath )\
         DeviceFW::I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr,\
                                 0, nullptr, i_i2cMuxBusSelector, i_i2cMuxPath)
+
+    /**
+     *  @brief Construct the device addressing parameters for the I2C SMBUS
+     *      data transfer commands that have a command parameter
+     *
+     *  @param[in] i_engine Which I2C master engine to use
+     *  @param[in] i_port Which port to use from the I2C master engine above
+     *  @param[in] i_devAddr The device address to communicate with on a given
+     *      engine/port.
+     *  @param[in] i_commandCode The PMBUS command to execute
+     *  @param[in] i_i2cMuxBusSelector The I2C MUX bus selector
+     *  @param[in] i_i2cMuxPath The I2C MUX entity path
+     */
+    #define DEVICE_I2C_SMBUS_BLOCK(i_engine,i_port,i_devAddr,i_commandCode,\
+                                   i_i2cMuxBusSelector,i_i2cMuxPath)\
+        DeviceFW::I2C, I2C_SMBUS_RW_W_CMD_PARAMS(DeviceFW::I2C_SMBUS_BLOCK,\
+                               i_engine,i_port,i_devAddr,\
+                               i_commandCode,i_i2cMuxBusSelector,i_i2cMuxPath)
+
+    #define DEVICE_I2C_SMBUS_WORD(i_engine,i_port,i_devAddr,i_commandCode,\
+                                   i_i2cMuxBusSelector,i_i2cMuxPath )\
+        DeviceFW::I2C, I2C_SMBUS_RW_W_CMD_PARAMS(DeviceFW::I2C_SMBUS_WORD,\
+                               i_engine,i_port,i_devAddr,\
+                               i_commandCode,i_i2cMuxBusSelector,i_i2cMuxPath)
+
+    #define DEVICE_I2C_SMBUS_BYTE(i_engine, i_port,i_devAddr,i_commandCode,\
+                                   i_i2cMuxBusSelector,i_i2cMuxPath)\
+        DeviceFW::I2C, I2C_SMBUS_RW_W_CMD_PARAMS(DeviceFW::I2C_SMBUS_BYTE,\
+                               i_engine,i_port,i_devAddr,\
+                               i_commandCode,i_i2cMuxBusSelector,i_i2cMuxPath)
+    /**
+     *  @brief Construct the device addressing parameters for the I2C SMBUS
+     *      data transfer commands that lack a command parameter
+     *
+     *  @param[in] i_engine Which I2C master engine to use
+     *  @param[in] i_port Which port to use from the I2C master engine above
+     *  @param[in] i_devAddr The device address to communicate with on a given
+     *      engine/port.
+     *  @param[in] i_i2cMuxBusSelector The I2C MUX bus selector
+     *  @param[in] i_i2cMuxPath The I2C MUX entity path
+     */
+    #define DEVICE_I2C_SMBUS_SEND_OR_RECV(i_engine, i_port, i_devAddr,\
+                                   i_i2cMuxBusSelector,i_i2cMuxPath)\
+        DeviceFW::I2C, I2C_SMBUS_RW_WO_CMD_PARAMS(\
+                               DeviceFW::I2C_SMBUS_SEND_OR_RECV,\
+                               i_engine,i_port,i_devAddr,\
+                               i_i2cMuxBusSelector,i_i2cMuxPath)
 
     /**
      * Construct the device addressing parameters for the I2C-offset device ops.
@@ -184,6 +273,7 @@ namespace DeviceFW
 #define DEVICE_I2C_CONTROL_PAGE_OP( i_port, i_engine, i_shouldLock,\
                                     i_desired_page, i_lockMutex )\
             DeviceFW::I2C,\
+            static_cast<uint64_t>(DeviceFW::I2C_PAGE_OP),\
             static_cast<uint64_t>(i_port),\
             static_cast<uint64_t>(i_engine),\
             0xffffffff,\

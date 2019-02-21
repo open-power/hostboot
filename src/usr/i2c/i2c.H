@@ -63,6 +63,15 @@ enum
     PAGE_ONE_ADDR  = 0x6E,
 };
 
+/**
+ * @brief Value of the rightmost (7th) bit of an I2C address, which on the
+ *     wire indicates whether the operation is a read or a write
+ */
+enum I2C_OP_DIRECTION : uint8_t
+{
+    WRITE = 0x00, ///< Write operation
+    READ  = 0x01, ///< Read operation
+};
 
 /**
  * @brief FIFO size (width) in bytes.  This dictates how many bytes
@@ -959,6 +968,259 @@ void setLogicalFsiEnginePort(size_t &io_logical_engine,
 void addHwCalloutsI2c(errlHndl_t i_err,
                       TARGETING::Target * i_target,
                       const misc_args_t & i_args);
+
+namespace SMBUS
+{
+
+/**
+ *  @brief Calculates a packet error code (PEC) over the specified number of
+ *      bytes at the specified address.
+ *
+ *  @par Detailed Description:
+ *      Calculates a packet error code (PEC) over the specified number of bytes
+ *      at the specified address.  Specifically, it applies a CRC-8 algorithm, a
+ *      very common/simple CRC detailed @
+ *      https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks
+ *
+ *  @param[in] i_pData Pointer to the start of the data; must not be nullptr
+ *  @param[in] i_size  Number of bytes to consider when computing the PEC
+ *
+ *  return uint8_t Computed PEC byte
+ */
+uint8_t calculatePec(
+    const uint8_t* const i_pData,
+    const size_t         i_size);
+
+/**
+ *  @brief Structure which tracks the Send Byte
+ *      transaction to assist in calculating the PEC byte at the end (if
+ *      applicable)
+ */
+struct SendByte
+{
+    // The following fields are known prior to the transaction:
+
+    // The remote device's address which starts the transaction;
+    // RW bit will be 0
+    uint8_t writeAddr;
+
+    // Data byte to send
+    uint8_t dataByte;
+
+    // PEC byte
+    uint8_t pec;
+
+    // Size of message to send, excluding address byte, including PEC byte if
+    // applicable
+    size_t messageSize;
+
+    /**
+     *  @brief Constructor
+     *
+     *  @param[in] i_address Address of the remote device
+     *  @param[in] i_pDataByte Pointer to byte to send.  Must not be nullptr.
+     *  @param[in] i_usePec Whether to suffix transaction with PEC byte or not
+     */
+    SendByte(      uint8_t i_address,
+             const void*   i_pDataByte,
+                   bool    i_usePec);
+} PACKED;
+
+/**
+ *  @brief Structure which tracks the Write Byte or Write Word
+ *      transaction to assist in calculating the PEC byte at the end (if
+ *      applicable)
+ */
+struct WriteByteOrWord
+{
+    // The following fields are known prior to the transaction:
+
+    // The remote device's address which starts the transaction;
+    // RW bit will be 0
+    uint8_t writeAddr;
+
+    // The PMBUS command code to send as part of the write
+    uint8_t commandCode;
+
+    // Data bytes the originator intends to send.
+    // 1 for Write byte
+    // 2 for Write word
+    // One more byte is added in case there is a PEC byte.
+    uint8_t dataBytes[sizeof(uint16_t)+sizeof(uint8_t)];
+
+    // How many data bytes (excluding PEC) the originator intends to send
+    uint8_t byteCount;
+
+    // Size of message to send, excluding address byte, including PEC byte if
+    // applicable
+    size_t messageSize;
+
+    /**
+     *  @brief Constructor
+     *
+     *  @param[in] i_address Address of the remote device
+     *  @param[in] i_commandCode PMBUS command code to execute
+     *  @param[in] i_byteCount Number of data bytes to send (1 or 2)
+     *  @param[in] i_pDataBytes Pointer to byte stream to send.  Must not be
+     *      nullptr
+     *  @param[in] i_usePec Whether to suffix transaction with PEC byte or not
+     */
+    WriteByteOrWord(      uint8_t i_address,
+                          uint8_t i_commandCode,
+                          uint8_t i_byteCount,
+                    const void*   i_pDataBytes,
+                          bool    i_usePec);
+} PACKED;
+
+/**
+ *  @brief Structure which tracks the block write transaction to assist in
+ *     calculating the PEC byte at the end
+ */
+struct BlockWrite
+{
+    // The following fields are known prior to the transaction:
+
+    // The remote device's address which starts the transaction;
+    // RW bit will be 0
+    uint8_t writeAddr;
+
+    // The PMBUS command code to send as part of the write
+    uint8_t commandCode;
+
+    // How many data bytes (excluding PEC) the originator intends to send
+    uint8_t byteCount;
+
+    // Data bytes the originator intends to send.  Max 255.  One more byte is
+    // added in case there is a PEC byte
+    uint8_t dataBytes[UINT8_MAX+sizeof(uint8_t)];
+
+    // Size of message to send, excluding address byte, including PEC byte if
+    // applicable
+    size_t messageSize;
+
+    /**
+     *  @brief Constructor
+     *
+     *  @param[in] i_address Address of the remote device
+     *  @param[in] i_commandCode PMBUS command code to execute
+     *  @param[in] i_byteCount Number of data bytes to send
+     *  @param[in] i_pDataBytes Pointer to byte stream to send.  Must not be
+     *      nullptr
+     *  @param[in] i_usePec Whether to suffix transaction with PEC byte or not
+     */
+    BlockWrite(      uint8_t i_address,
+                     uint8_t i_commandCode,
+                     uint8_t i_byteCount,
+               const void*   i_pDataBytes,
+                     bool    i_usePec);
+
+} PACKED;
+
+/**
+ *  @brief Structure which tracks the read byte|word transaction to assist in
+ *     calculating the PEC byte at the end
+ */
+struct ReadByteOrWord
+{
+    // The following fields are known prior to the transaction:
+
+    // The remote device's address which starts the transaction;
+    // RW bit will be 0
+    uint8_t writeAddr;
+
+    // The PMBUS command code to send as part of the write
+    uint8_t commandCode;
+
+    // The remote device's address (sent after repeated start);
+    // RW bit will be 1
+    uint8_t readAddr;
+
+    // The following fields are filled in during the transaction:
+
+    // Data bytes (1 if read byte, 2 if read word) returned by the remote device
+    uint8_t dataBytes[sizeof(uint16_t)];
+
+    // PEC byte returned by the remote device (if supported)
+    uint8_t pec;
+
+    // # data byte requested (1 or 2)
+    uint8_t byteCount;
+
+    /**
+     *  @brief Constructor
+     *
+     *  @param[in] i_address Address of the remote device
+     *  @param[in] i_commandCode PMBUS command code to execute
+     *  @param[in] i_byteCount Number of bytes to read (1 or 2)
+     */
+    ReadByteOrWord(uint8_t i_address,
+                   uint8_t i_commandCode,
+                   uint8_t i_byteCount)
+      : writeAddr(i_address),
+        commandCode(i_commandCode),
+        readAddr(i_address | I2C_OP_DIRECTION::READ),
+        pec(0),
+        byteCount(i_byteCount)
+    {
+        assert(((byteCount==1) || (byteCount==2)),
+            "Invalid byte count %d for read byte or read word", byteCount);
+        memset(dataBytes,0x00,sizeof(dataBytes));
+    }
+
+} PACKED;
+
+/**
+ *  @brief Structure which tracks the block read transaction to assist in
+ *     calculating the PEC byte at the end
+ */
+struct BlockRead
+{
+    // The following fields are known prior to the transaction:
+
+    // The remote device's address which starts the transaction;
+    // RW bit will be 0
+    uint8_t writeAddr;
+
+    // The PMBUS command code to send as part of the write
+    uint8_t commandCode;
+
+    // The remote device's address (sent after repeated start);
+    // RW bit will be 1
+    uint8_t readAddr;
+
+    // The following fields are filled in during the transaction:
+
+    // How many data bytes (excluding PEC) the remote device intends
+    // to return.
+    uint8_t blockCount;
+
+    // Data bytes (blockCount of them) returned by the remote device
+    uint8_t dataBytes[UINT8_MAX];
+
+    // PEC byte returned by the remote device (if supported)
+    uint8_t pec;
+
+    /**
+     *  @brief Constructor
+     *
+     *  @param[in] i_address Address of the remote device
+     *  @param[in] i_commandCode PMBUS command code to execute
+     */
+    BlockRead(const uint8_t i_address,
+              const uint8_t i_commandCode)
+      : writeAddr(i_address),
+        commandCode(i_commandCode),
+        readAddr(i_address | I2C_OP_DIRECTION::READ),
+        blockCount(0),
+        pec(0)
+    {
+        memset(dataBytes,0x00,sizeof(dataBytes));
+    }
+
+} PACKED;
+
+} // End SMBUS namespace
+
 }; // end I2C namespace
 
 #endif  // __I2C_H
