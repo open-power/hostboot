@@ -269,6 +269,36 @@ inline void advance_to_page_align(FILE * i_f)
     }
 }
 
+/**
+ * @brief Throw error if std::fread was performed incorrectly.
+ * @param[i] i_buffer: pointer to the first object in the array to be read
+ * @param[i] i_size: size of each object in i_buffer array, in bytes
+ * @param[i] i_count: number of the objects in i_buffer array to be read
+ * @param[i] i_stream: input-file pointer
+ */
+inline void fread_wrapper(void* i_buffer, const size_t i_size,
+        const size_t i_count, FILE* i_stream)
+{
+
+    size_t n_values_read = fread(i_buffer,i_size,i_count,i_stream);
+
+    if (i_count != n_values_read)
+    {
+        if (feof(i_stream))
+        {
+            throw "End of file reached, file not read fully.";
+        }
+        else if (ferror(i_stream))
+        {
+            throw "Error occurred while reading file.";
+        }
+        else
+        {
+            throw "Unknown read error.";
+        }
+    }
+}
+
 //
 // Global variables
 //
@@ -597,7 +627,7 @@ bool Object::write_object()
         long int file_size = ftell(file);
         uint8_t * buffer = new uint8_t[file_size];
         fseek(file,0,SEEK_SET);
-        fread(buffer,file_size,1,file);
+        fread_wrapper(buffer,file_size,1,file);
         fwrite(buffer,file_size,1,iv_output);
         delete [] buffer;
         fclose(file);
@@ -795,7 +825,7 @@ bool Object::perform_local_relocations()
         char data[sizeof(uint64_t)];
 
         fseek(iv_output, offset + i->address, SEEK_SET);
-        fread(data, sizeof(uint64_t), 1, iv_output);
+        fread_wrapper(data, sizeof(uint64_t), 1, iv_output);
 
         address = bfd_getb64(data);
         if ((address != i->addend) && (address != 0))
@@ -885,7 +915,8 @@ bool Object::perform_global_relocations()
                         }
 
                         fseek(j->iv_output, symbol_addr, SEEK_SET);
-                        fread(data, sizeof(uint64_t), 3, j->iv_output);
+                        fread_wrapper(data, sizeof(uint64_t), 3,
+                                              j->iv_output);
 
                         fseek(iv_output, offset + i->address, SEEK_SET);
                         fwrite(data, sizeof(uint64_t), 3, iv_output);
@@ -996,7 +1027,7 @@ void ModuleTable::write_table(vector<Object> & i_objects)
         cout << "Updating base module table..." << endl;
         fseek(iv_output, module_table_offset, SEEK_SET);
         char mx_mod_ch = 0;
-        fread(&mx_mod_ch,sizeof(char),1,iv_output);
+        fread_wrapper(&mx_mod_ch,sizeof(char),1,iv_output);
         max_modules = (uint64_t)mx_mod_ch; // VFS_MODULE_MAX;
         ++i;
     }

@@ -611,8 +611,8 @@ bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 {
-    if(AttributeTraits<A>::writeable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
 
@@ -641,18 +641,18 @@ void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 template<const ATTRIBUTE_ID A>
 mutex_t* Target::getHbMutexAttr() const
 {
-    if(AttributeTraits<A>::hbMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::hbMutex == AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _getHbMutexAttr(A);
 }
 
 template<const ATTRIBUTE_ID A>
 util::Mutex* Target::getFspMutexAttr() const
 {
-    if(AttributeTraits<A>::fspMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::fspMutex == AttributeTraits<A>::fspMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _getFspMutexAttr(A);
 }
 
@@ -660,9 +660,9 @@ template<const ATTRIBUTE_ID A>
 bool Target::tryGetHbMutexAttr(
     mutex_t*& o_pMutex) const
 {
-    if(AttributeTraits<A>::hbMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::hbMutex == AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _tryGetHbMutexAttr(A,o_pMutex);
 }
 
@@ -672,7 +672,8 @@ const char* Target::getAttrAsString() const
     // Note: the compiler optimizes the following check (which fails
     // at compile time if the attribute does not have a string
     // conversion) away
-    if(AttributeTraits<A>::hasStringConversion) { }
+    if(AttributeTraits<A>::hasStringConversion ==
+            AttributeTraits<A>::hasStringConversion) { }
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
     if (unlikely(!l_read))

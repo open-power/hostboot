@@ -324,8 +324,12 @@ namespace DeviceFW
                         void* io_buffer, size_t& io_buflen,
                         AccType i_accessType, ...)
     {
-        return InvalidParameterType(); // Cause a compile fail if not one of
-                                       // the explicit template specializations.
+        // Cause a compile fail if not one of
+        // the explicit template specializations.
+        static_assert(sizeof(AccType) != sizeof(AccType), "Must use"
+                      " an explicitly supported template specialization");
+        errlHndl_t errl = nullptr;
+        return errl;
     }
 
     /**
@@ -349,8 +353,12 @@ namespace DeviceFW
                         void* io_buffer, size_t& io_buflen,
                         AccType i_accessType, va_list i_args)
     {
-        return InvalidParameterType(); // Cause a compile fail if not one of
-                                       // the explicit template specializations.
+        // Cause a compile fail if not one of
+        // the explicit template specializations.
+        static_assert(sizeof(AccType) != sizeof(AccType), "Must use"
+                      " an explicitly supported template specialization");
+        errlHndl_t errl = nullptr;
+        return errl;
     }
 
     // --- Below are template specializations to aid in type-safety. ---
