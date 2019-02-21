@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ extern "C"
         bool l_is_enterprise = false;
         bool l_is_half_dimm = false;
 
-        // Gets the configuration information
+        // Gets the configuration information from attributes
         FAPI_TRY(mss::enterprise_mode(i_target, l_is_enterprise));
         FAPI_TRY(mss::half_dimm_mode(i_target, l_is_half_dimm));
 

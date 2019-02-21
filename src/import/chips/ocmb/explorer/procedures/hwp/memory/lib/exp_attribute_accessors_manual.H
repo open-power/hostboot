@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,8 @@
 #define EXP_ATTR_ACCESS_MANUAL_H_
 
 #include <fapi2.H>
+#include <mss_explorer_attribute_getters.H>
+
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 
@@ -51,7 +53,8 @@ namespace mss
 /// @param[out] o_is_enterprise_mode true if the part is in enterprise mode
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
         bool& o_is_enterprise_mode )
 {
     // Constexprs for beautification
@@ -63,8 +66,8 @@ inline fapi2::ReturnCode enterprise_mode( const fapi2::Target<fapi2::TARGET_TYPE
     uint8_t l_enterprise = 0;
     uint8_t l_override = 0;
 
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, i_target, l_enterprise) );
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, i_target, l_override) );
+    FAPI_TRY( mss::attr::get_ocmb_enterprise_mode(i_target, l_enterprise) );
+    FAPI_TRY( mss::attr::get_ocmb_nonenterprise_mode_override(i_target, l_override) );
 
     {
         const bool l_enterprise_mode = l_enterprise == ENTERPRISE;
@@ -89,7 +92,8 @@ fapi_try_exit:
 /// @param[out] o_is_half_dimm_mode true if the part is in half-DIMM mode
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
         bool& o_is_half_dimm_mode )
 {
     // Variables
@@ -109,7 +113,7 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // Now that we're not in enterprise mode, check for overrides
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_target, l_override) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode_override(i_target, l_override) );
 
     // If we have an override, set based upon the override
     if(l_override != fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_NO_OVERRIDE)
@@ -121,7 +125,7 @@ inline fapi2::ReturnCode half_dimm_mode( const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // No override, so go with the attribute derived from the ECID
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm) );
+    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode(i_target, l_half_dimm) );
 
     // Set half DIMM mode based upon the the normal attribute
     o_is_half_dimm_mode = l_half_dimm == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -6949,5 +6949,7 @@ static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_LEFT                      =
 static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_LEFT_LEN                  = 5   ;
 static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_RIGHT                     = 35  ;
 static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_RIGHT_LEN                 = 5   ;
+
+static const uint8_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 10  ;
 
 #endif

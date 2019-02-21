@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -292,6 +292,19 @@
             LITTLE_ENDIAN = 1
         </enum>
         <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_ECID</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            ECID of the chip as determined by the IPL getecid procedure.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <array>14</array>
+        <writeable/>
+        <mssAccessorName>ocmb_ecid</mssAccessorName>
     </attribute>
 
 </attributes>

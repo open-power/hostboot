@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,6 +102,19 @@ enum ffdc_codes
     SET_MRAM_SUPPORT = 0x1049,
     SET_3DS_HEIGHT = 0x1050,
     SET_SPD_CL_SUPPORTED = 0x1051,
+};
+
+///
+/// @brief constants for getecid procedure
+///
+enum ecid_consts
+{
+    FUSE_ARRAY_SIZE = 14,
+    DATA_IN_SIZE = 16,
+    // TK - Will need to be changed once ATTR_ECID is made larger
+    ATTR_ECID_SIZE = 2,
+    // 32 bit registers with getScom/putScom use the right-most 32 bits
+    REG_BIT_OFFSET = 32,
 };
 
 namespace i2c
