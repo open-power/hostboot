@@ -77,30 +77,35 @@ enum i2cModuleId
  */
 enum i2cReasonCode
 {
-    I2C_INVALID_REASONCODE               = I2C_COMP_ID | 0x00,   // Invalid Reasoncode
-    I2C_INVALID_DATA_BUFFER              = I2C_COMP_ID | 0x01,   // Invalid Data Buffer pointer
-    I2C_INVALID_OP_TYPE                  = I2C_COMP_ID | 0x02,   // Invalid Operation type
-    I2C_FIFO_TIMEOUT                     = I2C_COMP_ID | 0x03,   // Timed out waiting on FIFO
-    I2C_BUS_NOT_READY                    = I2C_COMP_ID | 0x04,   // Bus Not ready
-    I2C_CMD_COMP_TIMEOUT                 = I2C_COMP_ID | 0x05,   // Timeout waiting for Cmd Complete
-    I2C_HW_ERROR_FOUND                   = I2C_COMP_ID | 0x06,   // Error found in status register
-    I2C_MASTER_SENTINEL_TARGET           = I2C_COMP_ID | 0x07,   // Master Sentinel used as target
-    I2C_NO_CENTAUR_FOUND                 = I2C_COMP_ID | 0x08,   // No Centaur chip found
-    I2C_NO_PROC_FOUND                    = I2C_COMP_ID | 0x09,   // No Processor chip found
-    I2C_ATTRIBUTE_NOT_FOUND              = I2C_COMP_ID | 0x0A,   // Needed I2C-related Attribute not found
-    I2C_NACK_ONLY_FOUND                  = I2C_COMP_ID | 0x0B,   // Only NACK found in status register
-    I2C_ARBITRATION_LOST_ONLY_FOUND      = I2C_COMP_ID | 0x0C,   // Bus Arbi lost found in status reg
-    I2C_RUNTIME_INTERFACE_ERR            = I2C_COMP_ID | 0x0D,   // Read/write unavailable at runtime
-    I2C_RUNTIME_ERR                      = I2C_COMP_ID | 0x0E,   // Failed run-time operation
-    I2C_RUNTIME_INVALID_OFFSET_LENGTH    = I2C_COMP_ID | 0x0F,   // Offset length of invalid size
-    I2C_INVALID_EEPROM_PAGE_MUTEX        = I2C_COMP_ID | 0x10,   // Error getting page mutex for i2c engine.
-    I2C_INVALID_EEPROM_PAGE_REQUEST      = I2C_COMP_ID | 0x11,   // Invalid EEPROM page request
-    I2C_FAILURE_UNLOCKING_EEPROM_PAGE    = I2C_COMP_ID | 0x12,   // Error while attempting to unlock the eeprom page
-    INVALID_MASTER_TARGET                = I2C_COMP_ID | 0x13,   // Master I2C target not valid
-    I2C_MUX_TARGET_NOT_FOUND             = I2C_COMP_ID | 0x14,   // The MUX target is not valid (null)
-    I2C_MUX_TARGET_NON_FUNCTIONAL        = I2C_COMP_ID | 0x15,   // The MUX target is non functional
-    I2C_INVALID_LENGTH                   = I2C_COMP_ID | 0x16,   // Invalid data buffer length passed to function
-    I2C_NULL_MASTER_TARGET               = I2C_COMP_ID | 0x17,   // Target Service's toPath() returned nullptr for target
+    I2C_INVALID_REASONCODE                = I2C_COMP_ID | 0x00,   // Invalid Reasoncode
+    I2C_INVALID_DATA_BUFFER               = I2C_COMP_ID | 0x01,   // Invalid Data Buffer pointer
+    I2C_INVALID_OP_TYPE                   = I2C_COMP_ID | 0x02,   // Invalid Operation type
+    I2C_FIFO_TIMEOUT                      = I2C_COMP_ID | 0x03,   // Timed out waiting on FIFO
+    I2C_BUS_NOT_READY                     = I2C_COMP_ID | 0x04,   // Bus Not ready
+    I2C_CMD_COMP_TIMEOUT                  = I2C_COMP_ID | 0x05,   // Timeout waiting for Cmd Complete
+    I2C_HW_ERROR_FOUND                    = I2C_COMP_ID | 0x06,   // Error found in status register
+    I2C_MASTER_SENTINEL_TARGET            = I2C_COMP_ID | 0x07,   // Master Sentinel used as target
+    I2C_NO_CENTAUR_FOUND                  = I2C_COMP_ID | 0x08,   // No Centaur chip found
+    I2C_NO_PROC_FOUND                     = I2C_COMP_ID | 0x09,   // No Processor chip found
+    I2C_ATTRIBUTE_NOT_FOUND               = I2C_COMP_ID | 0x0A,   // Needed I2C-related Attribute not found
+    I2C_NACK_ONLY_FOUND                   = I2C_COMP_ID | 0x0B,   // Only NACK found in status register
+    I2C_ARBITRATION_LOST_ONLY_FOUND       = I2C_COMP_ID | 0x0C,   // Bus Arbi lost found in status reg
+    I2C_RUNTIME_INTERFACE_ERR             = I2C_COMP_ID | 0x0D,   // Read/write unavailable at runtime
+    I2C_RUNTIME_ERR                       = I2C_COMP_ID | 0x0E,   // Failed run-time operation
+    I2C_RUNTIME_INVALID_OFFSET_LENGTH     = I2C_COMP_ID | 0x0F,   // Offset length of invalid size
+    I2C_INVALID_EEPROM_PAGE_MUTEX         = I2C_COMP_ID | 0x10,   // Error getting page mutex for i2c engine.
+    I2C_INVALID_EEPROM_PAGE_REQUEST       = I2C_COMP_ID | 0x11,   // Invalid EEPROM page request
+    I2C_FAILURE_UNLOCKING_EEPROM_PAGE     = I2C_COMP_ID | 0x12,   // Error while attempting to unlock the eeprom page
+    INVALID_MASTER_TARGET                 = I2C_COMP_ID | 0x13,   // Master I2C target not valid
+    I2C_MUX_TARGET_NOT_FOUND              = I2C_COMP_ID | 0x14,   // The MUX target is not valid (null)
+    I2C_MUX_TARGET_NON_FUNCTIONAL         = I2C_COMP_ID | 0x15,   // The MUX target is non functional
+    I2C_INVALID_LENGTH                    = I2C_COMP_ID | 0x16,   // Invalid data buffer length passed to function
+    I2C_NULL_MASTER_TARGET                = I2C_COMP_ID | 0x17,   // Target Service's toPath() returned nullptr for target
+    I2C_INVALID_SEND_BYTE_LENGTH          = I2C_COMP_ID | 0x18,   // Invalid send byte length
+    I2C_INVALID_WRITE_BYTE_OR_WORD_LENGTH = I2C_COMP_ID | 0x19,   // Invalid write byte/word length
+    I2C_INVALID_BLOCK_WRITE_LENGTH        = I2C_COMP_ID | 0x1A,   // Invalid block write length
+    I2C_INVALID_READ_BYTE_OR_WORD_LENGTH  = I2C_COMP_ID | 0x1B,   // Invalid read byte/word length
+    I2C_INVALID_BLOCK_READ_LENGTH         = I2C_COMP_ID | 0x1C,   // Invalid block read length
 };
 
 

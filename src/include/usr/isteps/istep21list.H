@@ -135,6 +135,9 @@ const DepModInfo  g_istep21Dependancies = {
 #ifdef CONFIG_NVDIMM
         DEP_LIB(libnvdimm.so),
 #endif
+#ifdef CONFIG_UCD_FLASH_UPDATES
+        DEP_LIB(libucd.so),
+#endif
         NULL
     }
 };

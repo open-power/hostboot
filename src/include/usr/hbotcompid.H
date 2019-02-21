@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -476,6 +476,15 @@ const char SMF_COMP_NAME[] = "smf";
 
 //@}
 
+/** @name UCD
+ *  UCD flash update component
+ */
+//@{
+const compId_t UCD_COMP_ID = 0x4100;
+const char UCD_COMP_NAME[] = "ucd";
+
+//@}
+//
 /** @name HDAT
  *  HDAT component
  *  @Note HDAT_COMP_ID=0x9000 matches with what

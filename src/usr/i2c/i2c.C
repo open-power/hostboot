@@ -58,6 +58,7 @@
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
 #include <hwas/common/hwas.H>  // HwasState
+#include <algorithm>
 
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimmif.H>
@@ -104,6 +105,102 @@ const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
 
 namespace I2C
 {
+
+namespace SMBUS
+{
+
+uint8_t calculatePec(
+    const uint8_t* const i_pData,
+    const size_t         i_size)
+{
+    uint8_t pec = 0;
+
+    for (size_t index=0; index<i_size; ++index)
+    {
+       pec ^= i_pData[index];
+       pec = pec ^ (pec<<1) ^ (pec<<2) ^ ((pec&128)?9:0) ^ ((pec&64)?7:0);
+    }
+
+    return pec;
+}
+
+BlockWrite::BlockWrite(
+           const uint8_t       i_address,
+           const uint8_t       i_commandCode,
+           const uint8_t       i_byteCount,
+           const void*   const i_pDataBytes,
+           const bool          i_usePec)
+
+  : writeAddr(i_address),
+    commandCode(i_commandCode),
+    byteCount(i_byteCount)
+{
+    memcpy(dataBytes,i_pDataBytes,i_byteCount);
+    memset(dataBytes+i_byteCount,0x00,sizeof(dataBytes)-i_byteCount);
+    messageSize =   offsetof(I2C::SMBUS::BlockWrite,dataBytes)
+                  + byteCount - sizeof(writeAddr);
+    if(i_usePec)
+    {
+        ++messageSize;
+        const auto pec = I2C::SMBUS::calculatePec(
+            reinterpret_cast<uint8_t*>(&writeAddr),
+            messageSize);
+        *(reinterpret_cast<uint8_t*>(&writeAddr)+messageSize)=pec;
+    }
+}
+
+WriteByteOrWord::WriteByteOrWord(
+        const uint8_t       i_address,
+        const uint8_t       i_commandCode,
+        const uint8_t       i_byteCount,
+        const void*   const i_pDataBytes,
+        const bool          i_usePec)
+    : writeAddr(i_address),
+      commandCode(i_commandCode),
+      byteCount(i_byteCount)
+{
+    assert(((byteCount==1) || (byteCount==2)),
+        "Invalid byte count %d for write byte or write word",
+        byteCount);
+    memcpy(dataBytes,i_pDataBytes,byteCount);
+    memset(dataBytes+byteCount,0x00,sizeof(dataBytes)-byteCount);
+    messageSize =   offsetof(I2C::SMBUS::WriteByteOrWord,dataBytes)
+                  - offsetof(I2C::SMBUS::WriteByteOrWord,commandCode)
+                  + byteCount;
+    if(i_usePec)
+    {
+        // Currently message size does not reflect the address.  If we
+        // are adding a PEC byte, that will up the amount of data we need
+        // to transmit.  Leverage the preincrement to calculate the PEC over
+        // the right number of bytes.
+        const auto pec = I2C::SMBUS::calculatePec(
+            reinterpret_cast<uint8_t*>(&writeAddr),
+            ++messageSize);
+        *(dataBytes+byteCount)=pec;
+    }
+}
+
+SendByte::SendByte(const uint8_t       i_address,
+                   const void*   const i_pDataByte,
+                   const bool          i_usePec)
+    : writeAddr(i_address),
+      dataByte(*reinterpret_cast<const uint8_t*>(i_pDataByte))
+{
+    messageSize =   offsetof(I2C::SMBUS::SendByte,pec)
+                  - offsetof(I2C::SMBUS::SendByte,dataByte);
+    if(i_usePec)
+    {
+        // Currently message size does not reflect the address.  If we
+        // are adding a PEC byte, that will up the amount of data we need
+        // to transmit.  Leverage the preincrement to calculate the PEC over
+        // the right number of bytes.
+        pec = I2C::SMBUS::calculatePec(
+            reinterpret_cast<uint8_t*>(&writeAddr),
+            ++messageSize);
+    }
+}
+
+} // End SMBUS namespace
 
 // Register the generic I2C perform Op with the routing code for Procs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
@@ -159,17 +256,20 @@ void dumpMiscArgsData(const I2C::misc_args_t & i_args)
         l_muxPath = i_args.i2cMuxPath->toString();
     }
 
-    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData: "
-               "port(%d), engine(%d), devAddr(0x%X), skip_mode_step(%d), "
-               "with_stop(%d), read_not_write(%d), bus_speed(%d)",
-               i_args.port, i_args.engine, i_args.devAddr,
+    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData: subop(0x%016llX), "
+               "engine(%d), port(%d), devAddr(0x%X), skip_mode_step(%d), "
+               "with_stop(%d), read_not_write(%d), with_address(%d), "
+               "with_start(%d)",
+               i_args.subop,i_args.engine, i_args.port, i_args.devAddr,
                i_args.skip_mode_setup, i_args.with_stop,
-               i_args.read_not_write, i_args.bus_speed );
+               i_args.read_not_write, i_args.with_address,
+               i_args.with_start);
 
-    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData cont.: "
-               "bit_rate_divisor(%d), polling_interval_ns(%d), "
+    TRACFCOMP( g_trac_i2c,"dumpMiscArgsData cont.: read_continue(%d), "
+               "bus_speed(%d), bit_rate_divisor(%d), polling_interval_ns(%d), "
                "timeout_count(%d), offset_length(%d), offset_buffer(%p/0x%X)",
-               i_args.bit_rate_divisor, i_args.polling_interval_ns,
+               i_args.read_continue,i_args.bus_speed,i_args.bit_rate_divisor,
+               i_args.polling_interval_ns,
                i_args.timeout_count, i_args.offset_length,
                i_args.offset_buffer,
                (0x0 == i_args.offset_buffer ? 0 : *(i_args.offset_buffer) ) );
@@ -208,6 +308,11 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     //  Address, Port, Engine, Device Addr.
     // Other args set below
     misc_args_t args;
+
+    // Read in the sub-operation
+    const auto subop =
+        static_cast<DeviceFW::I2C_SUBOP>(va_arg(i_args,uint64_t));
+
     args.port = va_arg( i_args, uint64_t );
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
@@ -287,16 +392,41 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // Else this is not a page operation, call the normal common function
     else
     {
-        args.offset_length = va_arg( i_args, uint64_t);
-        uint8_t* temp = reinterpret_cast<uint8_t*>(va_arg(i_args, uint64_t));
-        args.i2cMuxBusSelector = va_arg( i_args, uint64_t);
-        args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(va_arg(i_args, uint64_t));
-
-        if ( args.offset_length != 0 )
+        if(   (subop==DeviceFW::I2C_SMBUS_BLOCK)
+           || (subop==DeviceFW::I2C_SMBUS_BYTE)
+           || (subop==DeviceFW::I2C_SMBUS_WORD))
         {
-            args.offset_buffer = temp;
-
+            args.smbus.commandCode =
+                static_cast<decltype(args.smbus.commandCode)>(
+                    va_arg(i_args,uint64_t));
+            args.smbus.usePec = true; // All implementations use PEC
+            args.i2cMuxBusSelector = va_arg(i_args,uint64_t);
+            args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(
+                va_arg(i_args, uint64_t));
         }
+        else if(subop==DeviceFW::I2C_SMBUS_SEND_OR_RECV)
+        {
+            args.smbus.usePec = true; // All implementations use PEC
+            args.i2cMuxBusSelector = va_arg(i_args,uint64_t);
+            args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(
+                va_arg(i_args, uint64_t));
+        }
+        else // Standard ops
+        {
+            args.offset_length = va_arg( i_args, uint64_t);
+            uint8_t* temp = reinterpret_cast<uint8_t*>(
+                va_arg(i_args, uint64_t));
+            args.i2cMuxBusSelector = va_arg( i_args, uint64_t);
+            args.i2cMuxPath = reinterpret_cast<const TARGETING::EntityPath*>(
+                va_arg(i_args, uint64_t));
+            if ( args.offset_length != 0 )
+            {
+                args.offset_buffer = temp;
+
+            }
+        }
+
+        args.subop=subop;
 
         err = i2cCommonOp( i_opType,
                            i_target,
@@ -1240,9 +1370,594 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         /*******************************************************/
 
         /***********************************************/
+        /* I2C SMBUS Send Byte                         */
+        /***********************************************/
+        if(   (i_opType  == DeviceFW::WRITE )
+           && (i_args.subop == DeviceFW::I2C_SMBUS_SEND_OR_RECV))
+        {
+            TRACUCOMP(g_trac_i2c, INFO_MRK
+                      "I2C SMBUS Send Byte, "
+                      "Use PEC = %d.",
+                      i_args.smbus.usePec);
+
+            // If requested length is anything other than 1 byte, throw an
+            // error.
+            if(io_buflen != sizeof(uint8_t))
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode I2C_INVALID_SEND_BYTE_LENGTH
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   I2C_PERFORM_OP
+                 * @userdata1  Size of request
+                 * @devdesc    Invalid input buffer length for send byte request
+                 * @custdesc   Unexpected firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    I2C_PERFORM_OP,
+                    I2C_INVALID_SEND_BYTE_LENGTH,
+                    io_buflen,
+                    0,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                err->collectTrace(I2C_COMP_NAME);
+
+                io_buflen = 0;
+
+                break;
+            }
+
+            // Write SMBUS Send Byte command to device.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
+            i_args.with_address    = true;
+            i_args.with_start      = true;
+
+            I2C::SMBUS::SendByte sendByte(i_args.devAddr,
+                                          io_buffer,
+                                          i_args.smbus.usePec);
+            do {
+
+            size_t writeSize = sendByte.messageSize;
+            const auto writeSizeExp = writeSize;
+            err = i2cWrite(i_target,
+                           &sendByte.dataByte,
+                           writeSize,
+                           i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(writeSize == writeSizeExp,
+                   "Write size mismatch; expected %d but got %d",
+                   writeSizeExp,writeSize);
+
+            io_buflen = sizeof(sendByte.dataByte);
+
+            } while(0);
+
+            if(err)
+            {
+                io_buflen = 0;
+            }
+        }
+        /***********************************************/
+        /* I2C SMBUS Write Byte / Write Word           */
+        /***********************************************/
+        else if(   (i_opType  == DeviceFW::WRITE )
+                && (   (i_args.subop == DeviceFW::I2C_SMBUS_BYTE)
+                    || (i_args.subop == DeviceFW::I2C_SMBUS_WORD)))
+        {
+            // Note: The SMBUS spec calls a 2 byte value a "word"
+
+            TRACUCOMP(g_trac_i2c, INFO_MRK
+                      "I2C SMBUS Write %s: Command code = 0x%02X, "
+                      "Use PEC = %d.",
+                      i_args.subop == DeviceFW::I2C_SMBUS_BYTE ?
+                          "Byte" : "Word",
+                      i_args.smbus.commandCode,
+                      i_args.smbus.usePec);
+
+            // If requested length is != 1 byte for a write byte transaction,
+            // or != 2 bytes for a write word transaction, throw an error.
+            if(   (   (i_args.subop == DeviceFW::I2C_SMBUS_BYTE)
+                   && (io_buflen != sizeof(uint8_t)))
+               || (   (i_args.subop == DeviceFW::I2C_SMBUS_WORD)
+                   && (io_buflen != sizeof(uint16_t))))
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode I2C_INVALID_WRITE_BYTE_OR_WORD_LENGTH
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   I2C_PERFORM_OP
+                 * @userdata1  Size of request
+                 * @userdata2  Sub-op
+                 * @devdesc    Invalid input buffer length for write byte or
+                 *     write word request
+                 * @custdesc   Unexpected firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    I2C_PERFORM_OP,
+                    I2C_INVALID_WRITE_BYTE_OR_WORD_LENGTH,
+                    io_buflen,
+                    i_args.subop,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                err->collectTrace(I2C_COMP_NAME);
+
+                io_buflen = 0;
+
+                break;
+            }
+
+            // Write SMBUS Write Byte or Write Word command to device.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
+            i_args.with_address    = true;
+            i_args.with_start      = true;
+
+            uint8_t bytes = (i_args.subop == DeviceFW::I2C_SMBUS_BYTE) ?
+                sizeof(uint8_t) : sizeof(uint16_t);
+            I2C::SMBUS::WriteByteOrWord writeByteOrWord(i_args.devAddr,
+                                              i_args.smbus.commandCode,
+                                              bytes,
+                                              io_buffer,
+                                              i_args.smbus.usePec);
+            do {
+
+            size_t writeSize = writeByteOrWord.messageSize;
+            const auto writeSizeExp = writeSize;
+            err = i2cWrite(i_target,
+                           &writeByteOrWord.commandCode,
+                           writeSize,
+                           i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(writeSize == writeSizeExp,
+                   "Write size mismatch; expected %d but got %d",
+                   writeSizeExp,writeSize);
+
+            io_buflen = writeByteOrWord.byteCount;
+
+            } while(0);
+
+            if(err)
+            {
+                io_buflen = 0;
+            }
+        }
+        /***********************************************/
+        /* I2C SMBUS Block Write                       */
+        /***********************************************/
+        else if(   (i_opType  == DeviceFW::WRITE )
+                && (i_args.subop == DeviceFW::I2C_SMBUS_BLOCK))
+        {
+            TRACUCOMP(g_trac_i2c, INFO_MRK
+                      "I2C SMBUS Block Write: Command code = 0x%02X, "
+                      "Use PEC = %d.",
+                      i_args.smbus.commandCode,
+                      i_args.smbus.usePec);
+
+            // If requested length is for < 1 byte or > 255 bytes for a block
+            // write transaction, throw an error.
+            if(   (!io_buflen)
+               || (io_buflen > UINT8_MAX) )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode I2C_INVALID_BLOCK_WRITE_LENGTH
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   I2C_PERFORM_OP
+                 * @userdata1  Size of request
+                 * @devdesc    Invalid input buffer length for block write
+                 *     request
+                 * @custdesc   Unexpected firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    I2C_PERFORM_OP,
+                    I2C_INVALID_BLOCK_WRITE_LENGTH,
+                    io_buflen,
+                    0,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+                err->collectTrace(I2C_COMP_NAME);
+
+                io_buflen = 0;
+
+                break;
+            }
+
+            // Write SMBUS block write command to device.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
+            i_args.with_address    = true;
+            i_args.with_start      = true;
+
+            I2C::SMBUS::BlockWrite blockWrite(i_args.devAddr,
+                                              i_args.smbus.commandCode,
+                                              io_buflen,
+                                              io_buffer,
+                                              i_args.smbus.usePec);
+            do {
+
+            size_t writeSize = blockWrite.messageSize;
+            const auto writeSizeExp = writeSize;
+            err = i2cWrite(i_target,
+                           &blockWrite.commandCode,
+                           writeSize,
+                           i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(writeSize == writeSizeExp,
+                   "Write size mismatch; expected %d but got %d",
+                   writeSizeExp,writeSize);
+
+            io_buflen = blockWrite.byteCount;
+
+            } while(0);
+
+            if(err)
+            {
+                io_buflen = 0;
+            }
+        }
+        /***********************************************/
+        /* I2C SMBUS Read Word or Byte                 */
+        /***********************************************/
+        else if(   (i_opType  == DeviceFW::READ )
+                && (   (i_args.subop == DeviceFW::I2C_SMBUS_BYTE)
+                    || (i_args.subop == DeviceFW::I2C_SMBUS_WORD)))
+        {
+            // Note: The SMBUS spec calls a 2 byte value a "word"
+
+            TRACUCOMP(g_trac_i2c, INFO_MRK
+                      "I2C SMBUS Read %s: Command code = 0x%02X, "
+                      "Use PEC = %d",
+                      i_args.subop == DeviceFW::I2C_SMBUS_BYTE ?
+                          "Byte" : "Word",
+                      i_args.smbus.commandCode,
+                      i_args.smbus.usePec);
+
+            // If requested length is != 1 byte for a read byte transaction,
+            // or != 2 bytes for a read word transaction, throw an error.
+            if(   (   (i_args.subop == DeviceFW::I2C_SMBUS_BYTE)
+                   && (io_buflen != sizeof(uint8_t)))
+               || (   (i_args.subop == DeviceFW::I2C_SMBUS_WORD)
+                   && (io_buflen != sizeof(uint16_t))))
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode I2C_INVALID_READ_BYTE_OR_WORD_LENGTH
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   I2C_PERFORM_OP
+                 * @userdata1  Size of request
+                 * @userdata2  Sub-op
+                 * @devdesc    Invalid input buffer length for read byte or
+                 *     read word request
+                 * @custdesc   Unexpected firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    I2C_PERFORM_OP,
+                    I2C_INVALID_READ_BYTE_OR_WORD_LENGTH,
+                    io_buflen,
+                    i_args.subop,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                err->collectTrace(I2C_COMP_NAME);
+
+                io_buflen = 0;
+
+                break;
+            }
+
+            // Write SMBUS Read Byte|Word command to device.  Inhibit stop
+            // because the protocol requires a chained read operation without
+            // a stop in between.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = false;
+            i_args.skip_mode_setup = false;
+            i_args.with_address    = true;
+            i_args.with_start      = true;
+
+            uint8_t bytes = (   i_args.subop
+                             == DeviceFW::I2C_SMBUS_BYTE) ?
+                sizeof(uint8_t) : sizeof(uint16_t);
+
+            I2C::SMBUS::ReadByteOrWord readByteOrWord(i_args.devAddr,
+                                                      i_args.smbus.commandCode,
+                                                      bytes);
+            do {
+
+            size_t commandCodeSize = sizeof(readByteOrWord.commandCode);
+            const auto commandCodeSizeExp = commandCodeSize;
+            err = i2cWrite(i_target,
+                           &readByteOrWord.commandCode,
+                           commandCodeSize,
+                           i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(commandCodeSize == commandCodeSizeExp,
+                   "Command code write size mismatch; expected %d but got %d",
+                   commandCodeSizeExp,commandCodeSize);
+
+            // Now read the required number of data bytes (1 or 2).
+            // If there is no PEC byte, complete the transaction with a stop
+            // and inform the engine there is no subsequent read.  If the PEC
+            // byte is supported, withhold the stop and inform the engine there
+            // is an additional read transaction coming.  Since this is a
+            // continuation of the original operation but as a read, repeat the
+            // start bit and address.
+            i_args.read_not_write  = true;
+            i_args.skip_mode_setup = true;
+            i_args.with_stop      = i_args.smbus.usePec ? false : true;
+            i_args.read_continue  = i_args.smbus.usePec ? true : false;
+
+            size_t dataBytesSize = readByteOrWord.byteCount;
+            const auto dataBytesSizeExp = dataBytesSize;
+            err = i2cRead(i_target,
+                          readByteOrWord.dataBytes,
+                          dataBytesSize,
+                          i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(dataBytesSize == dataBytesSizeExp,
+                   "Data bytes read size mismatch; expected %d but got %d",
+                   dataBytesSizeExp,dataBytesSize);
+
+            if(i_args.smbus.usePec)
+            {
+                // Read the PEC byte with stop at the end and inform engine
+                // the chained reads are complete
+                i_args.with_stop = true;
+                i_args.read_continue = false;
+                i_args.with_address  = false;
+                i_args.with_start    = false;
+
+                size_t pecSize=sizeof(readByteOrWord.pec);
+                const auto pecSizeExp=pecSize;
+                err = i2cRead(i_target,
+                              &readByteOrWord.pec,
+                              pecSize,
+                              i_args);
+                if(err)
+                {
+                    break;
+                }
+
+                assert(pecSize == pecSizeExp,
+                       "PEC byte read size mismatch; expected %d but got %d",
+                       pecSizeExp,pecSize);
+
+                const size_t pecBytes =
+                      offsetof(I2C::SMBUS::ReadByteOrWord,dataBytes)
+                    + readByteOrWord.byteCount;
+                const auto expectedPec = I2C::SMBUS::calculatePec(
+                    reinterpret_cast<uint8_t*>(&readByteOrWord),pecBytes);
+                if(readByteOrWord.pec != expectedPec)
+                {
+                    TRACFCOMP(g_trac_i2c, ERR_MRK
+                              "Bad PEC byte detected; expected 0x%02X "
+                              "but received 0x%02X.  # PEC bytes = %d",
+                              expectedPec,readByteOrWord.pec,pecBytes);
+
+                    // @TODO RTC 201990 support bad PEC handling
+                    // Right now just ignore it
+                }
+            }
+
+            // Copy the amount of data returned by the remote device, or
+            // the user requested amount, whichever is smaller
+            io_buflen = readByteOrWord.byteCount;
+            memcpy(io_buffer,readByteOrWord.dataBytes,io_buflen);
+
+            } while(0);
+
+            if(err)
+            {
+                io_buflen = 0;
+            }
+        }
+        /***********************************************/
+        /* I2C SMBUS Block Read                        */
+        /***********************************************/
+        else if(   (i_opType  == DeviceFW::READ )
+                && (i_args.subop == DeviceFW::I2C_SMBUS_BLOCK))
+        {
+            TRACUCOMP(g_trac_i2c, INFO_MRK
+                      "I2C SMBUS Block Read: Command code = 0x%02X, "
+                      "Use PEC = %d.",
+                      i_args.smbus.commandCode,
+                      i_args.smbus.usePec);
+
+            // If requested length is < 1 byte or > 255 bytes for a block
+            // read transaction, throw an error.
+            if(   (!io_buflen)
+               || (io_buflen > UINT8_MAX) )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode I2C_INVALID_BLOCK_READ_LENGTH
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   I2C_PERFORM_OP
+                 * @userdata1  Size of request
+                 * @devdesc    Invalid input buffer length for block read
+                 *     request
+                 * @custdesc   Unexpected firmware error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    I2C_PERFORM_OP,
+                    I2C_INVALID_BLOCK_READ_LENGTH,
+                    io_buflen,
+                    0,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+                err->collectTrace(I2C_COMP_NAME);
+
+                io_buflen = 0;
+
+                break;
+            }
+
+            // Write SMBUS block read command to device.  Inhibit stop
+            // because the protocol requires a chained read operation without
+            // a stop in between.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = false;
+            i_args.skip_mode_setup = false;
+            i_args.with_address    = true;
+            i_args.with_start      = true;
+
+            I2C::SMBUS::BlockRead blockRead(i_args.devAddr,
+                                            i_args.smbus.commandCode);
+
+            do {
+
+            size_t commandCodeSize = sizeof(i_args.smbus.commandCode);
+            const auto commandCodeSizeExp = commandCodeSize;
+            err = i2cWrite(i_target,
+                           &i_args.smbus.commandCode,
+                           commandCodeSize,
+                           i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(commandCodeSize == commandCodeSizeExp,
+                   "Command code write size mismatch; expected %d but got %d",
+                   commandCodeSizeExp,commandCodeSize);
+
+            // Read the block count byte, which indicates how many
+            // bytes (up to 255) the remote device will return as part of the
+            // logical response.  Does -not- include PEC byte.
+            // Since it's a continuation of an existing command, send a repeated
+            // start and address, but again do not send the stop because
+            // the read must continue later.  Also set read-continue in the
+            // engine so that we can break the full set of reads into multiple
+            // transactions and don't setup the engine again.
+            i_args.read_not_write  = true;
+            i_args.read_continue = true;
+            i_args.skip_mode_setup = true;
+
+            size_t blockCountSize = sizeof(blockRead.blockCount);
+            const auto blockCountSizeExp = blockCountSize;
+            err = i2cRead(i_target,
+                          &blockRead.blockCount,
+                          blockCountSize,
+                          i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(blockCountSize == blockCountSizeExp,
+                   "Block count read size mismatch; expected %d but got %d",
+                   blockCountSizeExp,blockCountSize);
+
+            // Now read the specified number of data bytes.
+            // If there is no PEC byte, complete the transaction with a stop
+            // and inform the engine there is no subsequent read.  If the PEC
+            // byte is supported, withhold the stop inform the engine there is
+            // an additional read transaction coming.  Since this is a
+            // continuation of the read, withhold the start bit and the address.
+            // nor is an address.
+            i_args.with_start     = false;
+            i_args.with_address   = false;
+            i_args.with_stop      = i_args.smbus.usePec ? false : true;
+            i_args.read_continue  = i_args.smbus.usePec ? true : false;
+
+            size_t dataBytesSize = blockRead.blockCount;
+            const auto dataBytesSizeExp = dataBytesSize;
+            err = i2cRead(i_target,
+                          blockRead.dataBytes,
+                          dataBytesSize,
+                          i_args);
+            if(err)
+            {
+                break;
+            }
+
+            assert(dataBytesSize == dataBytesSizeExp,
+                   "Data bytes read size mismatch; expected %d but got %d",
+                   dataBytesSizeExp,dataBytesSize);
+
+            if(i_args.smbus.usePec)
+            {
+                // Read the PEC byte with stop at the end and inform engine
+                // the chained reads are complete
+                i_args.with_stop = true;
+                i_args.read_continue = false;
+
+                size_t pecSize=sizeof(blockRead.pec);
+                const auto pecSizeExp=pecSize;
+                err = i2cRead(i_target,
+                              &blockRead.pec,
+                              pecSize,
+                              i_args);
+                if(err)
+                {
+                    break;
+                }
+
+                assert(pecSize == pecSizeExp,
+                       "PEC byte read size mismatch; expected %d but got %d",
+                       pecSizeExp,pecSize);
+
+                const size_t pecBytes =
+                      offsetof(I2C::SMBUS::BlockRead,dataBytes)
+                    + blockRead.blockCount;
+                const auto expectedPec = I2C::SMBUS::calculatePec(
+                    reinterpret_cast<uint8_t*>(&blockRead),pecBytes);
+                if(blockRead.pec != expectedPec)
+                {
+                    TRACFCOMP(g_trac_i2c, ERR_MRK
+                              "Bad PEC byte detected; expected 0x%02X "
+                              "but received 0x%02X.  # PEC bytes = %d",
+                              expectedPec,blockRead.pec,pecBytes);
+
+                    // @TODO RTC 201990 support bad PEC handling
+                    // Right now just ignore it
+                }
+            }
+
+            // Copy the amount of data returned by the remote device, or
+            // the user requested amount, whichever is smaller
+            io_buflen = std::min(io_buflen,
+                                 static_cast<size_t>(blockRead.blockCount));
+            memcpy(io_buffer,blockRead.dataBytes,io_buflen);
+
+            } while(0);
+
+            if(err)
+            {
+                io_buflen = 0;
+            }
+        }
+        /***********************************************/
         /* I2C Read with Offset                        */
         /***********************************************/
-        if( i_opType        == DeviceFW::READ &&
+        else if( i_opType        == DeviceFW::READ &&
             i_args.offset_length != 0 )
         {
             // First WRITE offset to device without a stop
@@ -2027,9 +2742,11 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
 
     TRACUCOMP( g_trac_i2c,
-               ENTER_MRK"i2cSetup(): buf_len=%d, r_nw=%d, w_stop=%d, sms=%d",
-               i_buflen, i_args.read_not_write, i_args.with_stop,
-               i_args.skip_mode_setup);
+               ENTER_MRK"i2cSetup(): buf_len=%d, r_nw=%d, w_start=%d, "
+               "w_address=%d, w_stop=%d, read_continue=%d, sms=%d",
+               i_buflen, i_args.read_not_write, i_args.with_start,
+               i_args.with_address, i_args.with_stop,
+               i_args.read_continue,i_args.skip_mode_setup);
 
     // Define the registers that we'll use
     mode_reg_t mode;
@@ -2104,13 +2821,16 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 
         // Write Command Register:
         //      - with start
+        //      - with continue
         //      - with stop
+        //      - with address
         //      - RnW
         //      - length
         cmd.value = 0x0ull;
-        cmd.with_start = 1;
+        cmd.with_start = (i_args.with_start ? 1 : 0);
+        cmd.read_continue = (i_args.read_continue ? 1 : 0);
         cmd.with_stop = (i_args.with_stop ? 1 : 0);
-        cmd.with_addr = 1;
+        cmd.with_addr = (i_args.with_address ? 1 : 0);
 
         // cmd.device_addr is 7 bits
         // devAddr though is a uint64_t

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -39,7 +39,7 @@ use File::Path;
 use Cwd;
 
 # This constant has a corresponding entry in src/include/usr/initservice/initsvcstructs.H.
-use constant MAX_DEPENDENT_MODULES => 10;
+use constant MAX_DEPENDENT_MODULES => 12;
 
 # validate the number of input args
 if( $#ARGV == -1 || $#ARGV > 4 )
