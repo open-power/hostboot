@@ -32,6 +32,7 @@ P9_INITFILE_PATH   = $(P9_PROCEDURES_PATH)/hwp/initfiles
 
 P9A_MSS_HWP_PATH   = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
 EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXPLORER_INC_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXPLORER_OMI_HWP_PATH  = ${EXPLORER_HWP_PATH}/lib/omi
 
 CENT_PROC_PATH     = ${ROOTPATH}/src/import/chips/centaur/procedures
@@ -60,6 +61,7 @@ EXTRAINCDIR += $(CENT_INITFILE_PATH)
 EXTRAINCDIR += $(CENT_IO_HWP_PATH)
 EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}
+EXTRAINCDIR += ${EXPLORER_INC_PATH}
 
 VPATH += $(P9_NEST_HWP_PATH)
 VPATH += $(P9_PERV_HWP_PATH)
