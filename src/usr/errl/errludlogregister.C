@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace ERRORLOG
 {
 
 using namespace TARGETING;
+using namespace DeviceFW;
 
 extern TARG_TD_t g_trac_errl;
 
@@ -278,6 +279,16 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
  *
  *  This function will call the readRegister() function to log and do the read.
  */
+
+// This extension will silence warnings relating to the mis-match of argument
+// types used in the various aliases created in this document.
+
+// The following flag is only available in GCC 8
+#if __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattribute-alias"
+#endif
+
 template <>
 void ErrlUserDetailsLogRegister::addData<>(
     DeviceFW::AccessType i_accessType, ...)
@@ -290,6 +301,9 @@ __attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister9__addDataEhz")));
 void ErrlUserDetailsLogRegister::__addData(
     uint8_t i_accessType, ...)
 {
+    static_assert(LAST_DRIVER_ACCESS_TYPE <= UINT8_MAX,
+        "Logic violation, LAST_DRIVER_ACCESS_TYPE is greater than UINT8_MAX.");
+
     TRACDCOMP(g_trac_errl, "LogRegister::addData: type %x",
         i_accessType);
 
@@ -316,6 +330,10 @@ void ErrlUserDetailsLogRegister::addDataBuffer<>(
     void *i_dataBuf, size_t i_dataSize,
     DeviceFW::AccessType_DriverOnly i_accessType, ...)
 __attribute__((alias("_ZN8ERRORLOG26ErrlUserDetailsLogRegister15__addDataBufferEPvmhz")));
+
+#if __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif // ignoring -Wattribute-alias in GCC 8
 
 void ErrlUserDetailsLogRegister::__addDataBuffer(
     void *i_dataBuf, size_t i_dataSize,

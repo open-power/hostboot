@@ -294,8 +294,8 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
     {
          err->addHwCallout(i_pProc,
                 HWAS::SRCI_PRIORITY_LOW,
-                    i_mismatches.val && // for any mismatch
-                        !RC_MASTER_PROC_SBE_KEYS_HASH_MISMATCH?
+                    (i_mismatches.val && // for any mismatch
+                    i_rc != RC_MASTER_PROC_SBE_KEYS_HASH_MISMATCH) ?
                     HWAS::NO_DECONFIG: // don't deconfig the processor
                     HWAS::DELAYED_DECONFIG,
                 HWAS::GARD_NULL);

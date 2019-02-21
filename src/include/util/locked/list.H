@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,9 +44,9 @@ namespace Util
 		void insert(_T*);
 
 		void erase(_T* node);
-		void erase(_K& key);
+                _T* erase(_K& key);
 
-		_T* find(_K& key) const;
+                _T* find(_K& key) const;
 
                 bool empty();
                 _T* begin();
@@ -156,7 +158,7 @@ namespace Util
 	}
 
 	template <typename _T, typename _K, bool locked, typename _S>
-	void List<_T,_K,locked,_S>::erase(_K& key)
+        _T* List<_T,_K,locked,_S>::erase(_K& key)
 	{
 	    __lock();
 

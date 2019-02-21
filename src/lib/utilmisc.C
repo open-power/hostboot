@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,13 +29,18 @@ namespace Util
 {
 
 bool isSimics() __attribute__((alias("__isSimicsRunning")));
-extern "C" void __isSimicsRunning() NEVER_INLINE;
+extern "C" bool __isSimicsRunning() NEVER_INLINE;
 
-void __isSimicsRunning()
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
+bool __isSimicsRunning()
 {
     asm volatile("li 3, 0");
     MAGIC_INSTRUCTION(MAGIC_SIMICS_CHECK);
 }
+
+#pragma GCC diagnostic pop
 
 bool isSimicsRunning()
 {

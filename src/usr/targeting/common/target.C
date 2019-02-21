@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -883,8 +883,6 @@ void setFrequencyAttributes( Target * i_sys,
     TARGETING::getAllChips( l_procList,
                             TARGETING::TYPE_PROC,
                             true ); // true: return functional procs
-
-    TargetHandleList::iterator l_procTarget;
 
     TARG_EXIT();
     #undef TARG_FN

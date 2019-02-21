@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,7 @@
     uint64_t l_d2 = io_errl->getUserData2();                      \
     TRACFCOMP( PRDF::traceDesc,"SRC 16:19  %16llx %16llx",        \
                l_d1, l_d2 );                                      \
-    if(i_actions) {} \
+    if( 0 != (i_actions) ) {} \
     errlCommit(io_errl, PRDF_COMP_ID); }
 
 /**
