@@ -1984,9 +1984,17 @@ template<const ATTRIBUTE_ID A>
 const char* attrToString(
     typename AttributeTraits<A>::Type const& i_attrValue)
 {
-    // Default behavior is to fail the compile if caller attempt to print an
+    // Default behavior is to fail the compile if caller attempts to print an
     // unsupported string
-    return InvalidAttributeForStringification();
+    #ifdef __HOSTBOOT_MODULE
+        static_assert(A != A, \"Must use an explicitly supported template \"
+                              \"specialization\");
+    #else
+        char mustUseTemplateSpecialization[A != A ? 1 : -1];
+    #endif
+
+    const char* retVal = NULL;
+    return retVal;
 }
 
 VERBATIM

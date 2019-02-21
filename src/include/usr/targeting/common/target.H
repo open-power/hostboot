@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -846,31 +846,33 @@ template<const ATTRIBUTE_ID A>
 bool Target::tryGetAttrNotSynced(
     typename AttributeTraits<A>::Type& o_attrValue) const
 {
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
-    if(AttributeTraits<A>::notFspMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::notFspMutex == AttributeTraits<A>::notFspMutex) { }
     return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
 }
 
 template<const ATTRIBUTE_ID A>
 bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
 {
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
-    if(AttributeTraits<A>::notFspMutex) { }
+    if(AttributeTraits<A>::notFspMutex == AttributeTraits<A>::notFspMutex) { }
 #endif //!defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
-    if(AttributeTraits<A>::fspAccessible) { }
+    if(AttributeTraits<A>::fspAccessible == AttributeTraits<A>::fspAccessible)
+       { }
     return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
 }
 
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 {
-    if(AttributeTraits<A>::writeable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
-    if(AttributeTraits<A>::fspAccessible) { }
+    if(AttributeTraits<A>::fspAccessible == AttributeTraits<A>::fspAccessible)
+       { }
 #endif //!defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
@@ -879,8 +881,8 @@ template<const ATTRIBUTE_ID A>
 bool Target::trySetAttrNotSynced(
     typename AttributeTraits<A>::Type const& i_attrValue)
 {
-    if(AttributeTraits<A>::writeable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
 
@@ -903,9 +905,9 @@ typename AttributeTraits<A>::Type Target::getAttr(AttrRP* i_attrRP,
                                                       i_ppAttrAddr) const
 {
     typename AttributeTraits<A>::Type l_attrValue;
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::notHbMutex) { }
-    if(AttributeTraits<A>::notFspMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::notFspMutex == AttributeTraits<A>::notFspMutex) { }
 
     bool l_read = _tryGetAttrUnsafe(A,
                                     sizeof(l_attrValue),
@@ -934,18 +936,18 @@ void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 template<const ATTRIBUTE_ID A>
 mutex_t* Target::getHbMutexAttr() const
 {
-    if(AttributeTraits<A>::hbMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::hbMutex == AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _getHbMutexAttr(A);
 }
 
 template<const ATTRIBUTE_ID A>
 util::Mutex* Target::getFspMutexAttr() const
 {
-    if(AttributeTraits<A>::fspMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::fspMutex == AttributeTraits<A>::fspMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _getFspMutexAttr(A);
 }
 
@@ -953,9 +955,9 @@ template<const ATTRIBUTE_ID A>
 bool Target::tryGetHbMutexAttr(
     mutex_t*& o_pMutex) const
 {
-    if(AttributeTraits<A>::hbMutex) { }
-    if(AttributeTraits<A>::readable) { }
-    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::hbMutex == AttributeTraits<A>::hbMutex) { }
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     return _tryGetHbMutexAttr(A,o_pMutex);
 }
 
@@ -965,7 +967,8 @@ const char* Target::getAttrAsString() const
     // Note: the compiler optimizes the following check (which fails
     // at compile time if the attribute does not have a string
     // conversion) away
-    if(AttributeTraits<A>::hasStringConversion) { }
+    if(AttributeTraits<A>::hasStringConversion ==
+            AttributeTraits<A>::hasStringConversion) { }
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
     if (unlikely(!l_read))

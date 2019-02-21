@@ -596,7 +596,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                 //fix the offset for the TEST section so that the testcases
                 //don't collide
-                i_offset = (PNOR::TEST) ? (i_offset+
+                i_offset = (l_id==PNOR::TEST) ? (i_offset+
                        ((PNOR::pnorTestSec_rt_readwrite_offset*9)/8)):i_offset;
 
                 uint32_t l_flashAddr = l_info.flashAddr + i_offset;

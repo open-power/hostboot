@@ -95,7 +95,7 @@ namespace SBEIO
                 SBE_TRACF(ERR_MRK "sendPsuSecurityBinDumpRequest: Changing 'Command  Not Supported' Error Log To Informational.");
                 errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errl->collectTrace(SBEIO_COMP_NAME);
-                ERRORLOG::errlCommit(errl, SBEIO_COMP_NAME);
+                ERRORLOG::errlCommit(errl, SBEIO_COMP_ID);
             }
         }
 

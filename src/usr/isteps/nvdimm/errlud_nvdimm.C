@@ -150,7 +150,7 @@ UdNvdimmParms::UdNvdimmParms( uint8_t i_opType,
 
     memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
     l_pBuf += strlen(l_muxPath);
-    l_pBuf = '\0';   // add a terminator for ease of parsing
+    *l_pBuf = '\0';   // add a terminator for ease of parsing
     ++l_pBuf;
 
     free(l_muxPath);

@@ -419,8 +419,10 @@ errlHndl_t createElogFromHxKeywordRc( hxKeywordRc i_rc,
 
     // make sure we don't access beyond the boundary of i_hxKeywordData
     // when copying to hxKwdData variable
-    static_assert((sizeof(i_hxKeywordData) >= sizeof(hxKwdData)),
-        "createElogFromHxKeywordRc: sizeof(i_hxKeywordData) is less than hxKwdData size");
+    static_assert(
+        (sizeof(ATTR_PEC_PCIE_HX_KEYWORD_DATA_type) >= sizeof(hxKwdData)),
+        "createElogFromHxKeywordRc: sizeof(i_hxKeywordData) is less than "
+        "hxKwdData size");
     memcpy(&hxKwdData, i_hxKeywordData, sizeof(hxKwdData));
 
     /*@
