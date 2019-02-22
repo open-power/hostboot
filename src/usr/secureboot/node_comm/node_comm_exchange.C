@@ -520,6 +520,7 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     // Figure out the size of the slave quote
     o_size = sizeof(l_goodEyeCatch) +
              sizeof(l_nodeId) +
+             sizeof(l_quoteData.size) +
              l_quoteData.size +
              sizeof(l_pcrCount) +
              // Only include the read PCRs in the slave quote
@@ -539,6 +540,9 @@ errlHndl_t nodeCommGenSlaveQuoteResponse(const MasterQuoteRequestBlob* const i_r
     // Now the node ID
     memcpy(o_resp + l_currentOffset, &l_nodeId, sizeof(l_nodeId));
     l_currentOffset += sizeof(l_nodeId);
+    // The size of the quote and signature structures
+    memcpy(o_resp + l_currentOffset,&l_quoteData.size,sizeof(l_quoteData.size));
+    l_currentOffset += sizeof(l_quoteData.size);
     // The TPM quote & signature information (both are included in the TPM
     // quote blob)
     memcpy(o_resp + l_currentOffset, l_quoteData.data, l_quoteData.size);
