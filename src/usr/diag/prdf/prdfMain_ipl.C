@@ -128,6 +128,19 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
 
     do
     {
+        // Will need the chip and system objects initialized for several parts
+        // of this function and sub-functions. If this is MPIPL we may not be
+        // initialized yet.
+        if ( (false == g_initialized) || (nullptr == systemPtr) )
+        {
+            o_errl = noLock_initialize();
+            if ( nullptr != o_errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to initialize PRD" );
+                break;
+            }
+        }
+
         // Get the PRD chip object.
         ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
         if ( nullptr == chip )
