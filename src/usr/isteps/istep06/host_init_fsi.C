@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,65 @@ i2cEngineSelect find_proc_i2c_engines_for_tpm ( void )
     return static_cast<i2cEngineSelect>(engineSelect);
 }
 
+/* @brief Find Processor I2C Engines Connected to NVDIMMs
+ *
+ * This helper function loops through all of the DIMMs in the system,
+ * checks if they are an NVDIMM, and finds all of the Processors
+ * that serve as their I2C Masters.  It then keeps track of
+ * which processor I2C engine(s) are used.
+ *
+ * @return i2cEngineSelect - bit-wise enum indicating which processor engine(s)
+ *                           were found
+ */
+i2cEngineSelect find_proc_i2c_engines_for_nvdimms ( void )
+{
+    int engineSelect = static_cast<int>(I2C_ENGINE_SELECT_NONE);
+
+#ifdef CONFIG_NVDIMM
+    // Get all functional DIMMs
+    //   Functional is valid this early in the boot because we only call this in MPIPL
+    TargetHandleList dimmList;
+    getAllLogicalCards(dimmList, TYPE_DIMM, true );
+
+    for (auto dimm : dimmList)
+    {
+        if( isNVDIMM(dimm) )
+        {
+            ATTR_EEPROM_NV_INFO_type nvdimmData =
+              dimm->getAttr<ATTR_EEPROM_NV_INFO>();
+
+            TargetHandle_t proc_target = nullptr;
+            proc_target = targetService().toTarget( nvdimmData.i2cMasterPath );
+
+            // If NVDIMM is connected to a processor then keep track
+            // of what engine needs to be reset
+            assert( proc_target->getAttr<ATTR_TYPE>() == TYPE_PROC,
+                    "find_proc_i2c_engines_for_nvdimms: Unsupported i2c master type for NVDIMM" );
+
+            engineSelect |=
+              static_cast<int>(i2cEngineToEngineSelect(nvdimmData.engine));
+        }
+    }
+
+    // There should only be 1 or 0 such bus per processor.  So if we found multiple
+    // engines then we know that there are different proc/engine combinations
+    // and we'd need a I2C reset interface to support that.  This check here
+    // makes sure we add that support when its necessary.
+    assert(__builtin_popcount(engineSelect)<=1,
+           "find_proc_i2c_engines_for_nvdimms: Only one engine should be found");
+
+#endif
+
+    if( engineSelect != I2C_ENGINE_SELECT_NONE )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Found NVDIMM i2c master at 0x%X",
+                   engineSelect );
+    }
+
+    return static_cast<i2cEngineSelect>(engineSelect);
+}
+
 
 void* host_init_fsi( void *io_pArgs )
 {
@@ -156,6 +215,26 @@ void* host_init_fsi( void *io_pArgs )
             {
                 // Commit this error
                 errlCommit( l_err, ISTEP_COMP_ID );
+            }
+
+            // This engine (specifically the Host logic) is used at runtime by the OCC.  We
+            //   need to reset it back to a known state before we start using it again to
+            //   avoid noticing leftover errors/activities (like interrupts).  Since this is
+            //   a MPIPL, the hardware isn't reset unless we explicitly do it.
+            TARGETING::Target* l_pTopLevel = NULL;
+            TARGETING::targetService().getTopLevelTarget( l_pTopLevel );
+            assert(l_pTopLevel, "host_init_fsi: no TopLevelTarget");
+            if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+            {
+                l_err = i2cResetActiveMasters(
+                                I2C_PROC_HOST,
+                                false,
+                                find_proc_i2c_engines_for_nvdimms());
+                if (l_err)
+                {
+                    // Commit this error
+                    errlCommit( l_err, ISTEP_COMP_ID );
+                }
             }
         }
 
