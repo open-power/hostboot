@@ -45,12 +45,10 @@
 #include <xscom/piberror.H>
 
 namespace fapi2 {
-//@fixme-RTC:147599-Remove when thread-local storage works right
-///
-/// @brief Lock or unlock the HWP futex
-/// @param[i] i_lock  true:lock the mutex, false:unlock
-///
-void hwpLock( bool i_lock );
+/*
+ * @brief Resets all HWP thread_local vars
+ */
+void hwpResetGlobals(void);
 }
 
 /**
@@ -68,7 +66,7 @@ void hwpLock( bool i_lock );
 
 #define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
     {\
-        fapi2::hwpLock(true); \
+        fapi2::hwpResetGlobals(); \
         fapi2::ReturnCode invoke_rc; \
         FAPI_EXEC_HWP(invoke_rc, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(invoke_rc);\
@@ -76,7 +74,7 @@ void hwpLock( bool i_lock );
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
         }\
-        fapi2::hwpLock(false); \
+        fapi2::hwpResetGlobals(); \
     }
 
 /**
@@ -95,14 +93,14 @@ void hwpLock( bool i_lock );
 
 #define FAPI_INVOKE_HWP_RC(ERRHNDL, _RC, FUNC, _args_...) \
     {\
-        fapi2::hwpLock(true); \
+        fapi2::hwpResetGlobals(); \
         FAPI_EXEC_HWP(_RC, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(_RC);\
         if( ERRHNDL ) {\
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
         }\
-        fapi2::hwpLock(false); \
+        fapi2::hwpResetGlobals(); \
     }
 
 /**
@@ -117,9 +115,9 @@ void hwpLock( bool i_lock );
  */
 #define FAPI_CALL_HWP( RETURN, FUNC, _args_...) \
    {\
-        fapi2::hwpLock(true); \
+        fapi2::hwpResetGlobals(); \
         RETURN = FUNC(_args_); \
-        fapi2::hwpLock(false); \
+        fapi2::hwpResetGlobals(); \
    }
 
 /**
@@ -133,9 +131,9 @@ void hwpLock( bool i_lock );
  */
 #define FAPI_CALL_HWP_NORETURN( FUNC, _args_...) \
    {\
-        fapi2::hwpLock(true); \
+        fapi2::hwpResetGlobals(); \
         FUNC(_args_); \
-        fapi2::hwpLock(false); \
+        fapi2::hwpResetGlobals(); \
    }
 
 

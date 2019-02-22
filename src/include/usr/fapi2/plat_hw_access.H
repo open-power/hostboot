@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,7 +278,11 @@ void platSetOpMode(const OpModes i_mode);
 /// @return the operational mode
 OpModes platGetOpMode(void);
 
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+extern thread_local OpModes opMode;
+#else
 extern OpModes opMode;
+#endif
 
 //--------------------------------------------------------------------------
 // PIB Error Mask Functions

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,11 +58,20 @@ const uint32_t CFAM_ENGINE_OFFSET = 0xFE00;
 // Function prototypes
 uint64_t platGetDDScanMode(const uint32_t i_ringMode);
 
-//TODO RTC:147599 Make this thread_local
+// Operational mode for scom operations (ignore errors, wakeup core, etc.)
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+thread_local OpModes opMode = NORMAL;
+#else
 OpModes opMode = NORMAL;
+#endif
 
-//TODO RTC:147599 Make pib_err_mask thread local
+// Bitmap of PIB errors to ignore during a PIB oeration
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+thread_local uint8_t pib_err_mask = 0x00;
+#else
 uint8_t pib_err_mask = 0x00;
+#endif
+
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
