@@ -55,4 +55,19 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_EXP_INBAND_BE_DATA_RANGE</rc>
+    <description>
+       Data is not long enough for big endian conversion
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DATA_SIZE</ffdc>
+    <ffdc>MAX_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

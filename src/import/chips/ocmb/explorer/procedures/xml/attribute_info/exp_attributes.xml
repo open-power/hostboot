@@ -260,4 +260,38 @@
         <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether or not transaction bytes are
+          swapped before and after mmio accesses to
+          the buffer.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>
+            SWAP = 0,
+            NO_SWAP = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Controls whether the structure fields written
+          and read to and from the buffer are big
+          or little endian.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>
+            BIG_ENDIAN = 0,
+            LITTLE_ENDIAN = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
 </attributes>
