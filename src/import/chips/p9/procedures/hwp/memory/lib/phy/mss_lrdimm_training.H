@@ -642,11 +642,38 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    const uint64_t i_mpr_loc,
                                    const uint64_t i_rank)
 {
+    // We don't know our coarse adjust at this point, so send the ODT two cycles early and hold it two cycles late
+    // Two is the maximum coarse adjust for the LRDIMM
+    constexpr uint64_t SAFETY_CYCLES = 2;
+    constexpr uint64_t ODT_CYCLE_LEN = 5 + SAFETY_CYCLES * 2;
+
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+    uint8_t l_cl = 0;
+    uint8_t l_cwl = 0;
+    uint64_t l_delay = 0;
+    uint8_t l_rd_odt[MAX_RANK_PER_DIMM] = {};
+    const auto l_dimm_rank = mss::index(i_rank);
+    FAPI_TRY( mss::eff_dram_cwl(l_mca, l_cwl) );
+    FAPI_TRY( mss::eff_dram_cl(l_mca, l_cl) );
+    l_delay  = l_cl - l_cwl - SAFETY_CYCLES;
+
+    FAPI_TRY(mss::eff_odt_rd(i_target, &l_rd_odt[0]));
 
     FAPI_TRY( ddr4::mpr_read<fapi2::TARGET_TYPE_MCBIST>(i_target, i_mpr_loc, i_rank, l_program.iv_instructions));
+
+    l_program.iv_instructions[0].arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                              MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay);
+
+    // Holds the RD ODT's for 5 cycles
+    {
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+                                 (l_rd_odt[l_dimm_rank]));
+        auto l_odt = mss::ccs::odt_command<fapi2::TARGET_TYPE_MCBIST>(l_ccs_value, ODT_CYCLE_LEN);
+        l_program.iv_instructions.push_back(l_odt);
+    }
+
     FAPI_TRY( ccs::execute(l_mcbist,
                            l_program,
                            l_mca) );
