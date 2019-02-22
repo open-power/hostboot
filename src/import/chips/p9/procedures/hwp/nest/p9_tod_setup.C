@@ -42,7 +42,7 @@
 //--------------------------------------------------------------------------
 #include <p9_tod_setup.H>
 
-const uint64_t M_PATH_CTRL_REG_CLEAR_VALUE = 0x0000003F00000000;
+const uint64_t M_PATH_CTRL_REG_CLEAR_VALUE = 0x0000000000000000;
 const uint64_t S_PATH_CTRL_REG_CLEAR_VALUE = 0x0000003F00000000;
 
 /// @brief MPIPL specific steps to clear the previous topology, this should be
@@ -173,12 +173,22 @@ fapi2::ReturnCode clear_tod_node(
                             0x0ULL),
              "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
 
-    // Workaround for HW480181: Init remote sync checker tolerance to maximum;
-    // will be closed down by tod_init later.
-    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                            PERV_TOD_S_PATH_CTRL_REG,
-                            S_PATH_CTRL_REG_CLEAR_VALUE),
-             "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
+    if (i_tod_sel == TOD_PRIMARY)
+    {
+        // Workaround for HW480181: Init remote sync checker tolerance to maximum;
+        // will be closed down by configure_tod_node later.
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target), PERV_TOD_S_PATH_CTRL_REG, l_data),
+                 "Error from getScom (PERV_TOD_S_PATH_CTRL_REG)!");
+        l_data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION,
+                               PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_LEN>
+                               (STEP_CHECK_CPS_DEVIATION_93_75_PCENT);
+        l_data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR,
+                               PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_CHECK_CPS_DEVIATION_FACTOR_LEN>
+                               (STEP_CHECK_CPS_DEVIATION_FACTOR_8);
+        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target), PERV_TOD_S_PATH_CTRL_REG, l_data),
+                 "Error from putScom (PERV_TOD_S_PATH_CTRL_REG)!");
+    }
 
 
     // TOD is cleared for this node; if it has children, start clearing
