@@ -284,7 +284,8 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         }
 
         // Get the maximum capture data size.
-        size_t sz_maxData = masterRanks.size() * (sz_rank + sz_port + sz_entry);
+        size_t sz_maxData = masterRanks.size() * MAX_DIMM_PER_RANK *
+                            (sz_rank + sz_port + sz_entry);
 
         // Adjust the size for endianness.
         sz_maxData = ((sz_maxData + sz_word-1) / sz_word) * sz_word;
