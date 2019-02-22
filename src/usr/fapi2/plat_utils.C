@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,11 +70,12 @@ TRAC_INIT(&g_fapiMfgTd, FAPI_MFG_TRACE_NAME, 4*KILOBYTE);
 namespace fapi2
 {
 
-//@fixme-RTC:147599
 // Define global current_err
-//thread_local ReturnCode current_err;
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+thread_local ReturnCode current_err;
+#else
 ReturnCode current_err;
-
+#endif
 
 ///
 /// @brief Retrieve the ring data from the centaur hw image
@@ -1516,35 +1517,15 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
     return fapi_rc;
 }
 
-//@fixme-RTC:147599-Remove when thread-local storage works right
 ///
-/// @brief Mutex to prevent multiple threads from running HWPs at the same time
+/// @brief Resets all HWP thread_local variables
 ///
-mutex_t g_fapi2Mux = MUTEX_INITIALIZER;
-
-//@fixme-RTC:147599-Remove when thread-local storage works right
-///
-/// @brief Lock or unlock the HWP futex
-/// @param[i] i_lock  true:lock the mutex, false:unlock
-///
-void hwpLock( bool i_lock )
+void hwpResetGlobals(void)
 {
-    if( i_lock )
-    {
-        mutex_lock(&g_fapi2Mux);
-        // Clear out all of our global (fake TLS) vars before we start
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::opMode = fapi2::NORMAL;
-        fapi2::setPIBErrorMask(0);
-    }
-    else
-    {
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::opMode = fapi2::NORMAL;
-        fapi2::setPIBErrorMask(0);
-        // Clear out all of our global (fake TLS) vars after we finish
-        mutex_unlock(&g_fapi2Mux);
-    }
+    // Reset all HWP thread_local vars
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::opMode = fapi2::NORMAL;
+    fapi2::setPIBErrorMask(0);
 }
 
 
