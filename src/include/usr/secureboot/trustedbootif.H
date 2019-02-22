@@ -53,7 +53,7 @@ namespace TRUSTEDBOOT
     // Structure that contains the TPM quote data and the size thereof
     struct _QuoteDataOut
     {
-        size_t size; // the size (bytes) of the data pointer
+        uint32_t size; // the size (bytes) of the data pointer
         uint8_t* data; // the actual quote data
         _QuoteDataOut() : size(0), data(nullptr)
         {
