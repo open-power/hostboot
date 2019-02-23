@@ -598,7 +598,7 @@ sub manipulateImages
                     # Ensure there is enough room at the end of the HBBL partition
                     # to store the HW keys' hash.
                     my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
-                    print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
+                    print "HBBL raw size ($bin_file) (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
                     if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
                     {
                         die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
