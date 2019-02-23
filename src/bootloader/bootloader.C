@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -456,42 +456,11 @@ namespace Bootloader{
             bool l_hbbEcc =
                 ( g_blData->bl_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
 
-            uint32_t workingLength= (l_hbbEcc) ?
-                (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC : l_hbbLength;
-
-            // handleMMIO below always moves WORDSIZE chunks at a time, even
-            // if there is just one byte left, so subtract WORDSIZE from the
-            // limit to compensate
-            if(workingLength > (MEGABYTE-WORDSIZE))
-            {
-                BOOTLOADER_TRACE(BTLDR_TRC_BAD_WORK_LEN);
-                /*@
-                 * @errortype
-                 * @moduleid         Bootloader::MOD_BOOTLOADER_MAIN
-                 * @reasoncode       Bootloader::RC_BAD_WORK_LEN
-                 * @userdata1[0:15]  TI_WITH_SRC
-                 * @userdata1[16:31] TI_BOOTLOADER
-                 * @userdata1[32:63] Failing address = 0
-                 * @userdata2[0:31]  Length of data from TOC (bytes)
-                 * @userdata2[32:63] Working length (bytes)
-                 * @errorInfo[0:31]  Max space available (bytes)
-                 * @devdesc  Not enough memory to load boot firmware
-                 * @custdesc Failed to load boot firmware
-                 */
-                bl_terminate(
-                    MOD_BOOTLOADER_MAIN,
-                    RC_BAD_WORK_LEN,
-                    l_hbbLength,
-                    workingLength,
-                    true,
-                    0,
-                    (MEGABYTE-WORDSIZE));
-            }
-
             // Copy HB base code from PNOR to working location
             handleMMIO(l_pnorStart + l_hbbFlashOffset,
                        (l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR,
-                       workingLength,
+                       (l_hbbEcc) ? (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC
+                                  : l_hbbLength,
                        WORDSIZE);
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_WORKING_HANDLEMMIO_RTN);
 
