@@ -40,7 +40,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2_hwp_executor.H>
 #include <fapi2/hw_access.H>
-#include <exp_consts.H>
+#include <lib/shared/exp_consts.H>
 
 extern trace_desc_t* g_trac_expscom;
 

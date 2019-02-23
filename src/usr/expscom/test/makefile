@@ -27,7 +27,8 @@ ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 MODULE = testexpscom
 TESTS = *.H
