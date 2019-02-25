@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 
 //HWP
 #include    <p9_io_dmi_post_trainadv.H>
+#include    <p9a_omi_train_check.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -124,6 +125,43 @@ void* call_dmi_post_trainadv (void *io_pArgs)
 
     }
 
+    // Find omi targets
+    TARGETING::TargetHandleList l_omiTargetList;
+    getAllChiplets(l_omiTargetList, TYPE_OMI);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv: %d OMIs found",
+            l_omiTargetList.size());
+
+    for (const auto & l_omi_target : l_omiTargetList)
+    {
+        //  call the HWP with each OMI target
+        fapi2::Target<fapi2::TARGET_TYPE_OMI> l_fapi_omi_target(l_omi_target);
+
+        FAPI_INVOKE_HWP(l_err, p9a_omi_train_check, l_fapi_omi_target );
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  p9a_omi_train_check HWP on target HUID %.8x",
+                l_err->reasonCode(), TARGETING::get_huid(l_omi_target) );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_omi_target).addToLog( l_err );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS :  p9a_omi_train_check HWP on target HUID %.08x",
+                       TARGETING::get_huid(l_omi_target));
+        }
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
 
