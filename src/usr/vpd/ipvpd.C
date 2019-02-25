@@ -865,13 +865,16 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
           VPD::makeRecordTargetPair(i_record,i_target);
 
         // Check if we already figured out where to get this record from
+        mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
         VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
         if( l_overItr != iv_overridePtr.end() )
         {
             l_overridePtr = l_overItr->second;
+            mutex_unlock(&iv_mutex);
         }
         else
         {
+            mutex_unlock(&iv_mutex);
             // Now go see if we should be using the override and if so
             //  where we find the right copy
             err = checkForRecordOverride(i_record,i_target,l_overridePtr);
@@ -1646,6 +1649,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
 
         // At this point we can assume that the pointer is set into our
         //  map if we need it
+        mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
         VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
         if( l_overItr != iv_overridePtr.end() )
         {
@@ -1680,6 +1684,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
             assert( false,
                     "iv_overridePtr is not set inside IpVpdFacade::fetchData" );
         }
+        mutex_unlock(&iv_mutex);
     }
 
     // Get the data
@@ -2142,9 +2147,12 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
             // At this point we can assume that the pointer is set into our
             //  map if we need it
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
             if( l_overItr != iv_overridePtr.end() )
             {
+                l_overridePtr = l_overItr->second;
+
                 // If we are using an override, we can't write to it
                 if( l_overridePtr != nullptr )
                 {
@@ -2174,9 +2182,13 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                         l_kw),
                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
                     err->collectTrace( "VPD", 256 );
+
+                    mutex_unlock(&iv_mutex);
+
                     break;
                 }
             }
+            mutex_unlock(&iv_mutex);
         }
 
         // Write the data
@@ -2407,7 +2419,9 @@ errlHndl_t IpVpdFacade::checkForRecordOverride( const char* i_record,
     TRACDCOMP( g_trac_vpd, "No override for %s on %.8X", i_record, TARGETING::get_huid(i_target) );
     VPD::RecordTargetPair_t l_recTarg =
       VPD::makeRecordTargetPair(i_record,i_target);
+    mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
     iv_overridePtr[l_recTarg] = nullptr;
+    mutex_unlock(&iv_mutex);
     return nullptr;
 }
 
@@ -2488,7 +2502,9 @@ errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
             TRACFCOMP(g_trac_vpd,"Optional MEMD section not found in PNOR.");
             delete l_errl;
             l_errl = nullptr;
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             iv_overridePtr[l_recTarg] = nullptr;
+            mutex_unlock(&iv_mutex);
             break;
         }
 
@@ -2512,7 +2528,9 @@ errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
         if( !l_valid_memd )
         {
             TRACFCOMP(g_trac_vpd,"MEMD is not valid, ignoring it");
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             iv_overridePtr[l_recTarg] = nullptr;
+            mutex_unlock(&iv_mutex);
             break;
         }
 
@@ -2554,7 +2572,9 @@ errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
 
             // Set the ptr in the map to allow the lookups inside
             //  IpVpdFacade to work
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             iv_overridePtr[l_recTarg] = l_memd_vaddr + l_memd_offset;
+            mutex_unlock(&iv_mutex);
 
             uint32_t l_memd_vm = 0;
             l_errl = retrieveKeyword( l_keyword, l_record,
@@ -2599,7 +2619,9 @@ errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
         // If we did not find a match, set our map back to a nullptr
         if( !l_found_match )
         {
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             iv_overridePtr[l_recTarg] = nullptr;
+            mutex_unlock(&iv_mutex);
         }
     } while(0);
 
