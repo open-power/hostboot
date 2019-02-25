@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -341,7 +341,9 @@ errlHndl_t CvpdFacade::checkForRecordOverride( const char* i_record,
         if( strcmp( i_record, "SPDX" ) )
         {
             TRACFCOMP(g_trac_vpd,"Record %s has no override", i_record);
+            mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
             iv_overridePtr[l_recTarg] = nullptr;
+            mutex_unlock(&iv_mutex);
             break;
         }
 
@@ -361,6 +363,7 @@ errlHndl_t CvpdFacade::checkForRecordOverride( const char* i_record,
 
     // For any error, we should reset the override map so that we'll
     //  attempt everything again the next time we want VPD
+    mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
     if( l_errl )
     {
         iv_overridePtr.erase(l_recTarg);
@@ -369,6 +372,7 @@ errlHndl_t CvpdFacade::checkForRecordOverride( const char* i_record,
     {
         o_ptr = iv_overridePtr[l_recTarg];
     }
+    mutex_unlock(&iv_mutex);
 
     return l_errl;
 }
@@ -403,7 +407,9 @@ errlHndl_t CvpdFacade::loadUnloadSecureSection( input_args_t i_args,
     // Jump out if we don't have an override
     VPD::RecordTargetPair_t l_recTarg =
       VPD::makeRecordTargetPair(l_record,i_target);
+    mutex_lock(&iv_mutex); //iv_overridePtr is not threadsafe
     VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
+    mutex_unlock(&iv_mutex);
     if( l_overItr == iv_overridePtr.end() )
     {
         return nullptr;
