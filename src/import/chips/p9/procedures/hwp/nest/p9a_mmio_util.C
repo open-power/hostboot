@@ -34,6 +34,7 @@
 // *HWP Consumed by: HB
 
 #include <p9a_mmio_util.H>
+#include <p9_fbc_utils.H>
 #include <p9_adu_setup.H>
 #include <p9_adu_access.H>
 #include <p9_adu_coherent_utils.H>
@@ -42,16 +43,33 @@
 fapi2::ReturnCode addOMIBase(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                              uint64_t& io_mmioAddr)
 {
-    uint64_t l_base_addr;
+    std::vector<uint64_t> l_base_addr_nm0;
+    std::vector<uint64_t> l_base_addr_nm1;
+    std::vector<uint64_t> l_base_addr_m;
+    uint64_t l_addr_offset;
+    uint64_t l_base_addr_mmio;
 
-    fapi2::Target<fapi2::TARGET_TYPE_OMI> l_omi_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>();
+    fapi2::Target<fapi2::TARGET_TYPE_OMI> l_omi_target;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip_target;
+
+    l_omi_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>();
+    l_chip_target = l_omi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    // determine base address of chip MMIO range
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address(l_chip_target,
+             EFF_FBC_GRP_CHIP_IDS,
+             l_base_addr_nm0,
+             l_base_addr_nm1,
+             l_base_addr_m,
+             l_base_addr_mmio),
+             "Error from p9_fbc_utils_get_chip_base_address");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET,
                            l_omi_target,
-                           l_base_addr),
+                           l_addr_offset),
              "Error from FAPI_ATTR_GET (ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET)");
 
-    io_mmioAddr |= l_base_addr;
+    io_mmioAddr |= (l_base_addr_mmio | l_addr_offset);
 
 fapi_try_exit:
 

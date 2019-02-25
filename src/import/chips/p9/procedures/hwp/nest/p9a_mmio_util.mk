@@ -23,4 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9a_mmio_util
+OBJS+=p9_fbc_utils.o
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)
