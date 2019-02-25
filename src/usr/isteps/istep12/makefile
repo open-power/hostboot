@@ -94,7 +94,7 @@ OBJS+=p9c_set_inband_addr.o
 OBJS+=p9c_mss_unmask_errors.o
 
 # HWP files we do not have .mks for
-OBJS+=p9a_omi_train.o
+
 OBJS+=exp_omi_utils.o
 
 #Required before all the <procedure>.mk are included
@@ -121,5 +121,8 @@ include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
 include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 include ${EXPLORER_HWP_PATH}/exp_omi_setup.mk
 include ${EXPLORER_HWP_PATH}/exp_omi_train.mk
+include ${P9A_MSS_HWP_PATH}/p9a_omi_train.mk
+include ${P9A_MSS_HWP_PATH}/p9a_omi_train_check.mk
+
 
 include ${ROOTPATH}/config.mk
