@@ -110,11 +110,35 @@ static bool g_update_both_sides = false;
 static bool    g_do_hw_keys_hash_transition = false;
 static SHA512_t g_hw_keys_hash_transition_data = {0};
 
+// ----------------------------------------
+// Global Variables for VMM management
+//   Note - this implies that we can not run any of this code multithread
+static std::list<PNOR::SectionId> g_loadedSections;
+
 using namespace ERRORLOG;
 using namespace TARGETING;
 
 namespace SBE
 {
+    /**
+     * @brief Retrieve the PNOR information for a section and perform
+     *        secure load if required
+     * @parm[in] PNOR Section id
+     * @parm[out] PNOR Section info
+     * @return errlHndl_t = nullptr on success
+     */
+    errlHndl_t loadPnorSection( PNOR::SectionId i_section,
+                                PNOR::SectionInfo_t& o_info);
+
+    /**
+     * @brief Perform secure unload of a PNOR section (if required),
+     *        then flush it out of the VMM
+     * @parm[in] PNOR Section id
+     * @return errlHndl_t = nullptr on success
+     */
+    errlHndl_t unloadPnorSection( PNOR::SectionId i_section);
+
+
     errlHndl_t updateProcessorSbeSeeproms(
         const KEY_TRANSITION_PERM i_keyTransPerm)
     {
@@ -126,7 +150,7 @@ namespace SBE
         bool l_cleanupVmmSpace = false;
         bool l_restartNeeded   = false;
 
-        TRACUCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"updateProcessorSbeSeeproms()");
 
         do{
@@ -596,7 +620,7 @@ namespace SBE
             }
         }
 
-        TRACUCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"updateProcessorSbeSeeproms()" );
 
         return err;
@@ -658,13 +682,13 @@ namespace SBE
             }
 
             // Get SBE PNOR section info from PNOR RP
-            err = getSectionInfo( pnorSectionId,
-                                        pnorInfo );
+            err = loadPnorSection( pnorSectionId,
+                                   pnorInfo );
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Error calling "
-                           "getSectionInfo() rc=0x%.4X",
+                           "loadPnorSection() rc=0x%.4X",
                            err->reasonCode() );
                 break;
             }
@@ -1865,35 +1889,80 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t sbeLoadHcode(char*& o_hcodeAddr)
+    errlHndl_t loadPnorSection( PNOR::SectionId i_section,
+                                PNOR::SectionInfo_t& o_info)
     {
         errlHndl_t l_errl = NULL;
-        PNOR::SectionInfo_t l_info;
 
         do
         {
+#ifdef CONFIG_SECUREBOOT
+            l_errl = loadSecureSection(i_section);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"loadPnorSection() - Error from loadSecureSection(%d)", i_section);
+                break;
+            }
+#endif
 
-            // Get HCODE PNOR section info from PNOR RP
-            l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
+            // Get PNOR section info from PNOR RP
+            l_errl = PNOR::getSectionInfo( i_section, o_info );
             if( l_errl )
             {
+                //Don't leave the secure section loaded
+#ifdef CONFIG_SECUREBOOT
+                errlHndl_t l_tmperrl = unloadSecureSection(i_section);
+                if( l_tmperrl )
+                {
+                    // Things have gotten very bad... just commit the error
+                    errlCommit(l_tmperrl, SBE_COMP_ID);
+                }
+#endif
+
                 //No need to commit error here, it gets handled later
                 //just break out to escape this function
                 break;
             }
 
-            o_hcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
-
             TRACUCOMP( g_trac_sbe,
-                    ERR_MRK"sbeLoadHcode() - Error from "
-                    "HCODE addr = 0x%p ",
-                    o_hcodeAddr);
+                       INFO_MRK"loadPnorSection(%d) - addr = 0x%p ",
+                       i_section, o_info.vaddr);
 
+            // Remember that we loaded this section so that we can
+            //  try to clean up later if something goes awry
+            g_loadedSections.push_back(i_section);
         } while ( 0 );
 
         return  l_errl;
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t unloadPnorSection( PNOR::SectionId i_section)
+    {
+        errlHndl_t l_errl = NULL;
+
+        do
+        {
+#ifdef CONFIG_SECUREBOOT
+            l_errl = unloadSecureSection(i_section);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"unloadPnorSection() - Error from unloadSecureSection(%d)", i_section);
+                break;
+            }
+#endif
+
+            // kick any pages out of the VMM
+            PNOR::flush( i_section );
+
+            // remove this section from the list of loaded ones
+            g_loadedSections.remove(i_section);
+        } while ( 0 );
+
+        return  l_errl;
+    }
+
+/////////////////////////////////////////////////////////////////////
     errlHndl_t getSeepromVersions(sbeTargetState_t& io_sbeState)
     {
         errlHndl_t l_err = nullptr;
@@ -1939,7 +2008,7 @@ namespace SBE
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( l_err, SBEIO_COMP_ID );
+                    errlCommit( l_err, SBE_COMP_ID );
                 }
                 else if(!l_sbeSupportedSeepromReadOp)
                 {
@@ -2010,7 +2079,7 @@ namespace SBE
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                     l_err->collectTrace(SBE_COMP_NAME, 256);
                     l_err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( l_err, SBEIO_COMP_ID );
+                    errlCommit( l_err, SBE_COMP_ID );
                 }
                 else if(!l_sbeSupportedSeepromReadOp)
                 {
@@ -2197,11 +2266,11 @@ namespace SBE
 
             // Get HBBL PNOR section info from PNOR RP
             PNOR::SectionInfo_t pnorInfo;
-            err = getSectionInfo( PNOR::HB_BOOTLOADER, pnorInfo );
+            err = loadPnorSection( PNOR::HB_BOOTLOADER, pnorInfo );
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState: Error calling "
-                           "getSectionInfo() rc=0x%.4X",
+                           "loadPnorSection() rc=0x%.4X",
                            err->reasonCode() );
                 break;
             }
@@ -2318,6 +2387,23 @@ namespace SBE
                 break;
             }
 
+            // We are now done with the SBE and HBBL images in PNOR, unload
+            //  them now to save memory for the other images we have to load
+            err = unloadPnorSection(PNOR::SBE_IPL);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::SBE_IPL)");
+                break;
+            }
+
+            err = unloadPnorSection(PNOR::HB_BOOTLOADER);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"getSbeInfoState() - Error from unloadPnorSection(PNOR::HB_BOOTLOADER)");
+                break;
+            }
+
+
             /*******************************************/
             /*  Append RINGOVD Image from PNOR to SBE  */
             /*******************************************/
@@ -2359,19 +2445,19 @@ namespace SBE
 
 
             // get a pointer to the hcode for the .overlays
-            char* l_hCodeAddr = NULL;
-
-            err = sbeLoadHcode(l_hCodeAddr);
+            PNOR::SectionInfo_t l_hcodePnorInfo;
+            err = loadPnorSection(PNOR::HCODE,l_hcodePnorInfo);
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"ge() - "
-                        "Error from sbeLoadHcode(), "
+                        "Error from loadPnorSection(HCODE), "
                         "RC=0x%X, PLID=0x%lX",
                         ERRL_GETRC_SAFE(err),
                         ERRL_GETPLID_SAFE(err));
                 break;
             }
+            char* l_hCodeAddr = reinterpret_cast<char*>(l_hcodePnorInfo.vaddr);
 
 
             void * pCustomizedBfr = reinterpret_cast<void*>(SBE_IMG_VADDR);
@@ -2390,6 +2476,15 @@ namespace SBE
                            "RC=0x%X, PLID=0x%lX",
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+            // We are now done with the HCODE image in PNOR, unload
+            //  it now to save memory.
+            err = unloadPnorSection(PNOR::HCODE);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::HCODE)");
                 break;
             }
 
@@ -4535,31 +4630,6 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
-            // Load PNOR sections into secure memory
-#ifdef CONFIG_SECUREBOOT
-            err = loadSecureSection(PNOR::SBE_IPL);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::SBE_IPL)");
-                break;
-            }
-
-            err = loadSecureSection(PNOR::HB_BOOTLOADER);
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::HB_BOOTLOADER)");
-                break;
-            }
-
-            err = loadSecureSection(PNOR::HCODE);
-
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::HCODE)");
-                break;
-            }
-#endif
-
         }while(0);
 
         TRACDCOMP( g_trac_sbe,
@@ -4644,32 +4714,20 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 break;
             }
 
-            // Unload PNOR sections from secure memory
-#ifdef CONFIG_SECUREBOOT
-            err = unloadSecureSection(PNOR::SBE_IPL);
-            if (err)
+            // Unload any PNOR sections that might've gotten left loaded
+            //  (probably due to some error path)
+            std::list<PNOR::SectionId> tmplist = g_loadedSections;
+            for( const auto & section : tmplist )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::SBE_IPL)");
-                break;
+                TRACFCOMP(g_trac_sbe,"Leftover section %d",section);
+                err = unloadPnorSection(section);
+                if( err )
+                {
+                    break;
+                }
             }
-
-            err = unloadSecureSection(PNOR::HB_BOOTLOADER);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HB_BOOTLOADER)");
-                break;
-            }
-
-            err = unloadSecureSection(PNOR::HCODE);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HCODE)");
-                break;
-            }
-#endif
-            PNOR::flush( PNOR::SBE_IPL );
-            PNOR::flush( PNOR::HB_BOOTLOADER );
-            PNOR::flush( PNOR::HCODE );
+            if( err ) { break; }
+            g_loadedSections.clear();
 
         }while(0);
 
