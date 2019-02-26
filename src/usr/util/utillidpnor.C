@@ -48,12 +48,11 @@ const size_t lidIdStrLength = 9;
 //          The second Lid in the pair is the Container LID (Secure Header)
 static const PnorLidsMap PnorToLidsMap =
 {
-    { PNOR::TESTRO,   LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
+    { PNOR::TESTRO,  LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
     { PNOR::VERSION, LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
-    { PNOR::OCC,      LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
-    { PNOR::WOFDATA,  LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
-    { PNOR::HCODE,    LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
-    { PNOR::UVBWLIST, LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
+    { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
+    { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     /* @TODO RTC:177927 - Figure out how to handle different Lids for the
                               same PNOR section based on chip.
     { PNOR::HCODE,   LidAndContainerLid(CUMULUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},

@@ -76,7 +76,6 @@ enum SectionId
     CENTAUR_HW_IMG, /**< Centaur HCODE Reference image */
     HDAT,           /**< HDAT data */
     EECACHE,
-    UVBWLIST,       /**< Ultravisor XSCOM white/blacklist binary */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 
