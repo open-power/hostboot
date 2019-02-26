@@ -77,6 +77,7 @@ enum sizes
 {
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
+    MAX_BITS_PER_PORT = 80,
 };
 
 ///

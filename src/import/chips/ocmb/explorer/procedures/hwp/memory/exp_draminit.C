@@ -33,9 +33,10 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#include <exp_inband.H>
 #include <lib/shared/exp_consts.H>
+#include <exp_inband.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/mss_bad_bits.H>
 #include <lib/exp_draminit_utils.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
@@ -91,7 +92,7 @@ extern "C"
             // If not, then we need to process the bad bitmap
             if(l_rc != fapi2::FAPI2_RC_SUCCESS)
             {
-                mss::exp::bad_bit_interface l_interface;
+                mss::exp::bad_bit_interface l_interface(l_train_response);
 
                 // Record bad bits should only fail if we have an attributes issue - that's a major issue
                 FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));

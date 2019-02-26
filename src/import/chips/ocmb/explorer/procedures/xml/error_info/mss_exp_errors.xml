@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,6 +23,18 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_DRAMINIT_BAD_NUM_RANKS</rc>
+    <description>Bad number of ranks were passed in the bad bits functionality</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NUM_RANKS</ffdc>
+    <ffdc>MAX_RANKS</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_EXP_DRAMINIT_UNSUPPORTED_DIMM_TYPE</rc>

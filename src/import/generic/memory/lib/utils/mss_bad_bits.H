@@ -38,9 +38,9 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/mss_generic_attribute_setters.H>
-#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -101,5 +101,5 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-} // ns
+} // ns mss
 #endif

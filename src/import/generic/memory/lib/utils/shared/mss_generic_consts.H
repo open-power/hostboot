@@ -355,6 +355,7 @@ enum class throttle_type
     THERMAL = 1,
 };
 
+
 ///
 /// @brief Trait classes for mc_type
 /// @tparam MC the mc_type
@@ -398,7 +399,6 @@ struct mcTypeTraits<mc_type::EXPLORER>
         DIMMS_PER_PORT = 2,
     };
 };
-
 
 }// mss
 
