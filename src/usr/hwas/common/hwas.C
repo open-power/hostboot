@@ -75,7 +75,6 @@ TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
-
 // SORT functions that we'll use for PR keyword processing
 bool compareProcGroup(procRestrict_t t1, procRestrict_t t2)
 {
@@ -157,71 +156,6 @@ void enableHwasState(Target *i_target,
     hwasState.functional    = i_functional;
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
 }
-
-/**
- * @brief                         This is a helper function for
- *                                isDescFunctional. The name for it is slightly
- *                                misleading because this function will only
- *                                mark children non-functional if the passed-in
- *                                parent is non-functional. Therefore, if a
- *                                parent is passed in that is functional this
- *                                function behaves as a NOOP. This function will
- *                                propagate a parent's non-functional status
- *                                down to all children since children cannot be
- *                                considered functional if they have
- *                                non-functional parents.
- *
- * @param[in]  i_desc             Pointer to the parent target we're looking
- *                                at. Must not be nullptr.
- *
- * @param[in]  i_pgData           Reference to area holding the PG keyword read
- *                                from VPD; must be malloc'ed by the caller, and
- *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
- *
- * @param[in]  io_targetStates    Reference to the pgState_map that will to
- *                                be updated by this function.
- *
- */
-void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
-                               const uint16_t (&i_pgData)
-                                              [VPD_CP00_PG_DATA_ENTRIES],
-                               pgState_map &io_targetStates)
-{
-
-    // Get the state for the parent.
-    auto parentState_it = io_targetStates.find(i_parent);
-
-    if (!parentState_it->second)
-    {
-        // Parent is non-functional. So get the list of all children
-        // and mark them non-functional as well.
-        TargetHandleList l_pDescChildren;
-        targetService().getAssociated(l_pDescChildren, i_parent,
-                                      TargetService::CHILD,
-                                      TargetService::ALL);
-
-        for(TargetHandleList::const_iterator child_it =
-                l_pDescChildren.begin();
-            child_it != l_pDescChildren.end(); ++child_it)
-        {
-            TargetHandle_t child = *child_it;
-
-            auto childState_it = io_targetStates.find(child);
-
-            if(childState_it != io_targetStates.end())
-            {
-                childState_it->second = false;
-            }
-            else
-            {
-                // Child is missing from the targetStates map. Insert it and
-                // mark it non-functional.
-                io_targetStates[child] = false;
-            }
-        }
-    }
-}
-
 
 /**
  * @brief disable obuses in wrap config.
@@ -869,88 +803,14 @@ errlHndl_t discoverTargets()
                 pTarget->getAttr<ATTR_HUID>(),
                 chipFunctional ? "" : "NOT ");
 
-            // now need to mark all of this target's physical descendants as
-            // present and functional as appropriate
-            TargetHandleList pDescList;
-            targetService().getAssociated( pDescList, pTarget,
-                TargetService::CHILD, TargetService::ALL);
-
-            // A map that will keep track of what has already been checked to
-            // eliminate re-checking targets. It also holds functional state.
-            pgState_map targetStates;
-
-            // by default, the descendant's functionality is 'inherited'
-            bool descFunctional = chipFunctional;
-
-            if (chipFunctional)
-            {
-                // Check all of the descendants before moving onto setting
-                // hwasState. They must be checked before the next loop since a
-                // descendant's state can be changed multiple times before
-                // arriving at the final state. The reason for that is that a
-                // descendant could be marked functional until its parent is
-                // checked and then later be updated if the parent is determined
-                // to be non-functional.
-                for (TargetHandleList::const_iterator pDesc_it =
-                        pDescList.begin();
-                     pDesc_it != pDescList.end();
-                     ++pDesc_it)
-                {
-                    isDescFunctional(*pDesc_it, pgData, targetStates);
-                }
-            }
-
-
-            for (TargetHandleList::const_iterator pDesc_it = pDescList.begin();
-                    pDesc_it != pDescList.end();
-                    ++pDesc_it)
-            {
-
-                TargetHandle_t pDesc = *pDesc_it;
-
-                if (chipFunctional)
-                {
-                    // if the chip is functional, then look through the
-                    // partialGood vector to see if its chiplets
-                    // are functional.
-                    //
-                    // The descendant has been checked already, it will
-                    // not be checked again here. The result will be returned
-                    // instead.
-                    descFunctional = isDescFunctional(pDesc,
-                                                      pgData,
-                                                      targetStates);
-                    if(!descFunctional)
-                    {
-                        // Add this descendant to the error log.
-                        hwasErrorAddTargetInfo(infoErrl, *pDesc_it);
-                        createInfoLog = true;
-                    }
-                }
-
-                if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
-                {
-                    // for sub-parts of PERV, it's always present.
-                    enableHwasState(pDesc, chipFunctional, descFunctional,
-                                errlEid);
-                    HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
-                        pDesc->getAttr<ATTR_HUID>(),
-                        "",
-                        descFunctional ? "" : "NOT ");
-                }
-                else
-                {
-                    // for other sub-parts, if it's not functional,
-                    // it's not present.
-                    enableHwasState(pDesc, descFunctional, descFunctional,
-                                errlEid);
-                    HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
-                        pDesc->getAttr<ATTR_HUID>(),
-                        descFunctional ? "" : "NOT ",
-                        descFunctional ? "" : "NOT ");
-                }
-            }
-
+            // Now determine if the descendants of this target are
+            // present and/or functional
+            checkPartialGoodForDescendants(pTarget,
+                                           pgData,
+                                           chipFunctional,
+                                           errlEid,
+                                           infoErrl,
+                                           createInfoLog);
 
             // set HWAS state to show CHIP is present, functional per above
             enableHwasState(pTarget, chipPresent, chipFunctional, errlEid);
@@ -1197,75 +1057,29 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     return l_chipFunctional;
 } // isChipFunctional
 
-
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
                       pgState_map &io_targetStates)
 {
-    bool l_functional = false;
-    TargetHandleList l_pDescChildren;
-    targetService().getAssociated(l_pDescChildren, i_desc,
-                                  TargetService::CHILD,
-                                  TargetService::IMMEDIATE);
+    bool l_functional = true, l_previouslySeen = false;
 
     do {
 
-        // There is a chance that this target has been checked already. Since
-        // descendant list isn't ordered.
+        // Look in the targetStates map to see if the target has been given a
+        // state already. If it's not in the map, then continue with the
+        // algorithm. Otherwise, only continue if the state was marked as
+        // functional. Since the list input into isDescFunctional is sorted
+        // where all of the children are first in the array, then if the current
+        // target is found in io_targetStates and it's not functional that means
+        // that it has no functional children and we shouldn't do any further
+        // checking on it.
         auto selfState_it = io_targetStates.find(i_desc);
-        if (selfState_it != io_targetStates.end())
+        if ((selfState_it != io_targetStates.end())
+            && (selfState_it->second != true))
         {
             // This target has been seen, return.
+            l_previouslySeen = true;
             l_functional = selfState_it->second;
-            break;
-        }
-
-        // First, if a target has children at least one must be functional for
-        // this target to be considered functional.
-        if (l_pDescChildren.size() == 0)
-        {
-            // Target has no children. So, set l_functional to true so that the
-            // check after the loop won't cause the function to exit with a
-            // potentially incorrect result.
-            l_functional = true;
-        }
-
-        // Iterate through the list of children and look them up in the
-        // io_targetStates map. If at least one is functional then the algorithm
-        // will move onto the next set of checks to determine functionality for
-        // this target.
-        for(TargetHandleList::const_iterator child_it = l_pDescChildren.begin();
-            child_it != l_pDescChildren.end(); ++child_it)
-        {
-            TargetHandle_t child = *child_it;
-
-            auto childState = io_targetStates.find(child);
-
-            if (childState == io_targetStates.end())
-            {
-                // The child was not added to the map. This means that it hasn't
-                // been checked yet. So, check it before continuing with this
-                // target.
-                isDescFunctional(child, i_pgData, io_targetStates);
-                childState = io_targetStates.find(child);
-            }
-
-            if (childState->second)
-            {
-                // One child of this target is functional. So far, that
-                // indicates that this target is functional.
-                l_functional = true;
-                break;
-            }
-        }
-
-        if (!l_functional)
-        {
-            // No functional children of this target were found. Target is
-            // considered not functional.
-            HWAS_INF("pDesc 0x%.8X - marked bad because all of "
-                     "its children were bad.",
-                     i_desc->getAttr<ATTR_HUID>());
             break;
         }
 
@@ -1332,19 +1146,337 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
 
     } while(0);
 
-    // Record the result in the targetStates map for later use.
-    io_targetStates[i_desc] = l_functional;
-
-    if ((!l_functional) && (l_pDescChildren.size() != 0))
+    if (!l_previouslySeen)
     {
-        // Since this target isn't functional and it's a parent,
-        // mark the children as non-functional.
-        markChildrenNonFunctional(i_desc, i_pgData, io_targetStates);
+        // Record the result in the targetStates map for later use.
+        io_targetStates[i_desc] = l_functional;
     }
 
     return l_functional;
-} // isDescFunctional
+}
 
+void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
+                               pgState_map &io_targetStates)
+{
+
+    // Get the state for the parent.
+    auto parentState_it = io_targetStates.find(i_parent);
+
+    if ((parentState_it != io_targetStates.end()) && !parentState_it->second)
+    {
+        // Parent is non-functional. So get the list of all children
+        // and mark them non-functional as well.
+        TargetHandleList pDescChildren;
+        targetService().getAssociated(pDescChildren, i_parent,
+                                      TargetService::CHILD,
+                                      TargetService::IMMEDIATE);
+
+        for(auto child : pDescChildren)
+        {
+            auto childState_it = io_targetStates.find(child);
+
+            if (childState_it != io_targetStates.end())
+            {
+                // Ignore children that are already non-functional because the
+                // first part of the partial good algorithm was done by starting
+                // at the bottom of the target hierarchy and working up to the
+                // top. Since this function is called while operating top-down,
+                // that means if there is a child of this target that is
+                // non-functional which has functional children we don't have to
+                // deal with it now since it will eventually be passed into this
+                // function as the parent target and its functional children
+                // will be taken care of at that time.
+                if (childState_it->second == true)
+                {
+                    // Child state is true so change it to false.
+                    childState_it->second = false;
+
+                    // Since this child's state is true it may have functional
+                    // children that need to be marked non-functional. So, we
+                    // should check this child's children.
+                    TargetHandleList pGrandChildren;
+                    targetService().getAssociated(pGrandChildren, child,
+                                                 TargetService::CHILD,
+                                                 TargetService::IMMEDIATE);
+
+                    if (!pGrandChildren.empty())
+                    {
+                        markChildrenNonFunctional(child, io_targetStates);
+                    }
+                }
+            }
+            else
+            {
+                // Child is missing from the targetStates map. Insert it and
+                // mark it non-functional.
+                // NOTE: This won't happen during the actual PG algorithm but
+                //       is left here to be used for testcases or other uses.
+                io_targetStates[child] = false;
+
+                // Since the child was missing and its state is unknown, check
+                // if it has any children and make those non-functional as well.
+                TargetHandleList pGrandChildren;
+                targetService().getAssociated(pGrandChildren, child,
+                                             TargetService::CHILD,
+                                             TargetService::IMMEDIATE);
+
+                if (!pGrandChildren.empty())
+                {
+                    markChildrenNonFunctional(child, io_targetStates);
+                }
+            }
+        }
+    }
+}
+
+errlHndl_t checkPartialGoodForDescendants(
+        const TARGETING::TargetHandle_t &i_pTarget,
+        const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+        const bool i_chipFunctional,
+        const uint32_t i_errlEid,
+        errlHndl_t io_infoErrl,
+        bool &io_createInfoLog,
+        bool i_isTestcase /* = false */,
+        bool* o_testResult /* = nullptr */
+        )
+{
+
+    errlHndl_t errl = nullptr;
+
+    // A map that will keep track of what has already been checked to
+    // eliminate re-checking targets. It also holds functional state.
+    pgState_map targetStates;
+
+    // by default, the descendant's functionality is 'inherited'
+    bool descFunctional = i_chipFunctional;
+
+    // Get a list of this target's physical descendants
+    TargetHandleList pDescList;
+
+    targetService().getAssociated( pDescList, i_pTarget,
+        TargetService::CHILD, TargetService::ALL);
+
+    if (i_isTestcase)
+    {
+        // If we are running a testcase then i_pTarget is the target to be
+        // checked and the children of i_pTarget should be checked along with
+        // it. So, add it to the list and the algorithm will check it too.
+        pDescList.push_back(i_pTarget);
+    }
+
+    if (i_chipFunctional)
+    {
+        // Sort the list of descendants such that the largest affinity
+        // paths are first in the list and targets are grouped by
+        // parent.
+        std::sort(pDescList.begin(), pDescList.end(),
+                  // Define a lambda comparator function for sorting
+                  // criteria.
+                  [](const TargetHandle_t a, const TargetHandle_t b)
+                  {
+                        EntityPath aPath =
+                            a->getAttr<ATTR_AFFINITY_PATH>();
+
+                        TargetHandle_t aParent =
+                            getImmediateParentByAffinity(a);
+
+                        EntityPath bPath =
+                            b->getAttr<ATTR_AFFINITY_PATH>();
+
+                        TargetHandle_t bParent =
+                            getImmediateParentByAffinity(b);
+
+
+                        // a goes before b if its affinity path is
+                        // greater than b's and its parent pointer
+                        // is different from b's.
+                        bool result = false;
+                        if ((aPath.size() > bPath.size())
+                            || ((aPath.size() == bPath.size())
+                                && (aParent > bParent)))
+                        {
+                            result = true;
+                        }
+
+                        return result;
+                  });
+
+        // A pointer to a descendant's parent. This will be updated as
+        // the first pass of PG checking occurs.
+        TargetHandle_t parent = nullptr;
+
+        // Assume the parent has no functional children and the
+        // descendant's state is false.
+        bool parentState = false, descState = false;
+
+        // =========== Partial Good Checking First Pass ===========
+        // Now that the list of descendants has been sorted, we can
+        // proceed with the PG algorithm in two passes. In this pass,
+        // the target hierarchy is navigated from the bottom up to the
+        // top.
+        //
+        // This pass will check all children of a parent and when it
+        // encounters a new parent, it will set the previous parent's
+        // state as true or false.
+        //      true: the parent has at least one functional child
+        //      false: the parent has no functional children.
+        // By setting a parent's state false ahead of time
+        // isDescFunctional is able to skip over that target since,
+        // regardless of PG results, that target will still be
+        // non-functional due to not having functional children.
+        for (auto pDesc : pDescList)
+        {
+            // Check if the parent has changed during iteration. If it
+            // has then all of the children of that parent have been
+            // checked and we now know if it has any functional
+            // children. So, add the parent to targetStates with the
+            // result.
+            if (getImmediateParentByAffinity(pDesc) != parent)
+            {
+                if (parent != nullptr)
+                {
+                    // Add parent's state to the targetStates map.
+                    // Note: If parentState has remained non-functional then
+                    //       that means that it had no functional children
+                    //       which is not allowed. So, PG checks will be
+                    //       skipped for it when it is passed into
+                    //       isDescFunctional.
+                    targetStates[parent] = parentState;
+
+                    if (parentState == false)
+                    {
+                        // No functional children of this target were found.
+                        // Target is considered not functional.
+                        HWAS_INF("pDesc parent 0x%.8X - marked bad because "
+                                 "all of its children were bad.",
+                                 parent->getAttr<ATTR_HUID>());
+                    }
+                }
+                // Update parent pointer to the new parent.
+                parent = getImmediateParentByAffinity(pDesc);
+
+                // Reset parentState to false.
+                parentState = false;
+            }
+
+            descState = isDescFunctional(pDesc,
+                                         i_pgData,
+                                         targetStates);
+
+            // If one descendant of the current parent is functional,
+            // then the parent is functional and should be checked by
+            // isDescFunctional for partial good issues.
+            if (descState == true)
+            {
+                parentState = true;
+            }
+        }
+    }
+
+    // =========== Partial Good Checking Second Pass ===========
+    // After the first pass completes, all targets have had PG checks
+    // applied to them (if necessary) and all parents have been checked
+    // to have at least one functional child. Now we iterate through the
+    // list one final time in reverse and propagate all non-functional
+    // parent states down to functional children, since functional
+    // children must not have non-functional parents.
+    //
+    // As the algorithm works its way through the hierarchy in a
+    // top-down fashion, the final hwasState of the current target is
+    // known and can be set as it works through all of the targets this
+    // time.
+    //
+    // NOTE: If the chip is not functional then the first pass will not execute
+    //       and this iteration will serve only to mark all descendants
+    //       non-functional.
+    TargetHandleList::const_iterator pDescList_rbegin = pDescList.end() - 1;
+    TargetHandleList::const_iterator pDescList_rend = pDescList.begin() - 1;
+
+    for (TargetHandleList::const_iterator pDesc_it = pDescList_rbegin;
+         pDesc_it != pDescList_rend; --pDesc_it)
+    {
+        TargetHandle_t pDesc = *pDesc_it;
+
+        if (i_chipFunctional)
+        {
+
+            // If this descendant is non-functional then
+            // propagate non-functional state down to its children.
+            markChildrenNonFunctional(pDesc,
+                                      targetStates);
+
+            auto pDesc_mapIt = targetStates.find(pDesc);
+            if (pDesc_mapIt != targetStates.end())
+            {
+                descFunctional = pDesc_mapIt->second;
+            }
+            else
+            {
+                /*@
+                 * @errortype
+                 * @severity        ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        MOD_CHECK_PG_FOR_DESC
+                 * @reasoncode      RC_PARTIAL_GOOD_MISSING_TARGET
+                 * @devdesc         A target was not found in the map of
+                 *                  states kept by the PG checking
+                 *                  algorithm. Therefore, it did not have
+                 *                  PG checks run against it.
+                 * @custdesc        An issue occured during IPL of the
+                 *                  system: Internal Firmware Error
+                 * @userdata1       huid of the target
+                 */
+                 errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_CHECK_PG_FOR_DESC,
+                                  RC_PARTIAL_GOOD_MISSING_TARGET,
+                                  pDesc->getAttr<ATTR_HUID>());
+                 break;
+            }
+
+            if(!descFunctional && !i_isTestcase)
+            {
+                // Add this descendant to the error log.
+                hwasErrorAddTargetInfo(io_infoErrl, pDesc);
+                io_createInfoLog = true;
+            }
+        }
+
+        // Don't mess with the state of the system if we are doing test cases.
+        if (!i_isTestcase)
+        {
+            if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
+            {
+                // for sub-parts of PERV, it's always present.
+                enableHwasState(pDesc, i_chipFunctional, descFunctional,
+                            i_errlEid);
+                HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
+                    pDesc->getAttr<ATTR_HUID>(),
+                    i_chipFunctional ? "" : "NOT",
+                    descFunctional ? "" : "NOT ");
+            }
+            else
+            {
+                // for other sub-parts, if it's not functional,
+                // it's not present.
+                enableHwasState(pDesc, descFunctional, descFunctional,
+                            i_errlEid);
+                HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
+                    pDesc->getAttr<ATTR_HUID>(),
+                    descFunctional ? "" : "NOT ",
+                    descFunctional ? "" : "NOT ");
+            }
+        }
+    }
+
+    // Before we return, if this was run in a testcase then we should set the
+    // o_testResult parameter so the testcase is aware of i_pTarget's state.
+    if (i_isTestcase && (o_testResult != nullptr))
+    {
+        *o_testResult = targetStates[i_pTarget];
+    }
+
+    return errl;
+
+}
 
 void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
                          const bool i_present,

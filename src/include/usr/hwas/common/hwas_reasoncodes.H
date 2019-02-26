@@ -41,6 +41,7 @@ namespace HWAS
         MOD_FIND_RULES_FOR_TARGET         = 0x0A,
         MOD_DISCOVER_TARGETS              = 0x0B,
         MOD_UPDATE_PROC_COMPAT_RISK_LEVEL = 0x0C,
+        MOD_CHECK_PG_FOR_DESC             = 0x0D,
     };
 
     enum HwasReasonCode
@@ -78,6 +79,7 @@ namespace HWAS
         RC_FORCED_COMPAT_INVALID_LEVEL          = HWAS_COMP_ID | 0x1B,
         RC_FORCED_NATIVE_INVALID_MIXED_EC       = HWAS_COMP_ID | 0x1C,
         RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK   = HWAS_COMP_ID | 0x1D,
+        RC_PARTIAL_GOOD_MISSING_TARGET          = HWAS_COMP_ID | 0x1E,
     };
 
     enum HwasPlatUserDetailsTypes
