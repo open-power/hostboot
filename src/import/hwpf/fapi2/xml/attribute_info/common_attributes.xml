@@ -40,7 +40,10 @@
       TARGET_TYPE_MBA,
       TARGET_TYPE_DIMM,
       TARGET_TYPE_L4,TARGET_TYPE_MC,
-      TARGET_TYPE_MEM_PORT
+      TARGET_TYPE_MEM_PORT,
+      TARGET_TYPE_NMMU,
+      TARGET_TYPE_PAU,
+      TARGET_TYPE_IOHS
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -80,7 +83,10 @@
       TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
       TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4, TARGET_TYPE_MC,
-      TARGET_TYPE_MEM_PORT
+      TARGET_TYPE_MEM_PORT,
+      TARGET_TYPE_NMMU,
+      TARGET_TYPE_PAU,
+      TARGET_TYPE_IOHS
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
@@ -110,7 +116,10 @@
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
       TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4,
       TARGET_TYPE_MEM_PORT,
-      TARGET_TYPE_DIMM
+      TARGET_TYPE_DIMM,
+      TARGET_TYPE_NMMU,
+      TARGET_TYPE_PAU,
+      TARGET_TYPE_IOHS
     </targetType>
     <description>
       A target's position relative to its immediate parent target.
@@ -123,6 +132,9 @@
       PROC - PERV
       PROC - PEC - PHB
       PROC - CAPP
+      PROC - NMMU
+      PROC - PAU
+      PROC - IOHS
       PROC - MCBIST - MCS - MCA/MEM_PORT - DIMM
       PROC - MC - MI - DMI
       PROC - MC - MI - MCC - OMI
