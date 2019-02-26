@@ -420,6 +420,7 @@ namespace PARTIAL_GOOD
     struct PartialGoodRulesTable
     {
 
+        PartialGoodRulesTable();
         ~PartialGoodRulesTable();
 
         /**
@@ -444,6 +445,9 @@ namespace PARTIAL_GOOD
                                pgLogic_t &o_pgLogic) const;
 
     private:
+
+        mutable TARGETING::TargetHandle_t iv_pMasterProc;
+
         // A map that will hold all of the PG rules for all targets. If a target
         // doesn't have a pg checking logic or special rules it will still be
         // represented in this map because the generic algorithm will consider

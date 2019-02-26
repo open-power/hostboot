@@ -213,6 +213,9 @@ namespace PARTIAL_GOOD
 
     const PartialGoodRulesTable pgTable;
 
+    PartialGoodRulesTable::PartialGoodRulesTable() : iv_pMasterProc(nullptr)
+    {}
+
     PartialGoodRulesTable::~PartialGoodRulesTable()
     {
         for (auto const& type : pgRules_map)
@@ -231,6 +234,21 @@ namespace PARTIAL_GOOD
     {
         errlHndl_t l_errl = nullptr;
 
+        if (iv_pMasterProc == nullptr)
+        {
+            // Since many targets don't have ATTR_MODEL filled in, lookup the
+            // master proc so that we can use to verify if a PG rule is
+            // applicable for this chip type.
+            // NOTE: This is done only once since querying for the master proc
+            //       is an expensive operation.
+            TARGETING::targetService()
+                .masterProcChipTargetHandle(iv_pMasterProc);
+
+            HWAS_ASSERT(iv_pMasterProc, "findRulesForTarget: couldn't get "
+                        "master proc.");
+
+        }
+
         // Lookup the Target in the PG Rules Table
         auto rulesIterator =
             pgRules_map.find(i_target->getAttr<TARGETING::ATTR_TYPE>());
@@ -245,13 +263,6 @@ namespace PARTIAL_GOOD
 
             pgRules_t l_allRules = rulesIterator->second;
 
-            // Since many targets don't have ATTR_MODEL filled in, lookup
-            // the master proc and use that to verify if this chip type is
-            // applicable for the target.
-            TARGETING::TargetService& ts = TARGETING::targetService();
-            TARGETING::TargetHandle_t masterProc;
-            ts.masterProcChipTargetHandle(masterProc);
-
             // Iterate through all of the pg rules and compose a list of
             // applicable rules based on chip unit and chip type.
             for (pgRules_t::const_iterator pgRule = l_allRules.begin();
@@ -262,7 +273,7 @@ namespace PARTIAL_GOOD
 
                 // Compare the pgRule's chip type to the target. Encode the
                 // target's chip unit and see if it is a match for this rule.
-                if ((*pgRule)->iv_applicableChipTypes(masterProc)
+                if ((*pgRule)->iv_applicableChipTypes(iv_pMasterProc)
                     && (*pgRule)->isApplicableToChipUnit(targetCU))
                 {
                     // Current PG Rule is applicable to this target so create
