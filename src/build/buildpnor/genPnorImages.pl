@@ -523,7 +523,6 @@ sub manipulateImages
         $isNormalSecure ||= ($eyeCatch eq "TESTRO");
         $isNormalSecure ||= ($eyeCatch eq "TESTLOAD");
         $isNormalSecure ||= ($eyeCatch eq "VERSION");
-        $isNormalSecure ||= ($eyeCatch eq "UVBWLIST");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");

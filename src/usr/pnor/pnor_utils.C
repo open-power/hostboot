@@ -378,8 +378,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == MEMD ||
                i_section == CAPP ||
                i_section == TESTLOAD ||
-               i_section == VERSION ||
-               i_section == UVBWLIST;
+               i_section == VERSION;
     #endif
 #else
     return false;
@@ -451,7 +450,6 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
-        "UVBWLIST",    /**< PNOR::UVBWLIST       : Ultravisor XSCOM white/blacklist */
 #endif
     };
 

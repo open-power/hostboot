@@ -325,13 +325,4 @@ Layout Description
         <sha512Version/>
         <ecc/>
     </section>
-    <section>
-        <description>Ultravisor XSCOM White/Blacklist (64K)</description>
-        <eyeCatch>UVBWLIST</eyeCatch>
-        <physicalOffset>0x3DF4000</physicalOffset>
-        <physicalRegionSize>0x10000</physicalRegionSize>
-        <side>sideless</side>
-        <sha512Version/>
-        <readOnly/>
-    </section>
 </pnor>
