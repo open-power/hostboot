@@ -158,7 +158,7 @@ typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
  *                                from VPD; must be malloc'ed by the caller, and
  *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
  *
- * @param[in]  io_targetStates    Reference to the target state map to prevent
+ * @param[io]  io_targetStates    Reference to the target state map to prevent
  *                                re-checking targets.
  *
  * @return bool                   Returns true if the descendant is functional;
@@ -168,6 +168,75 @@ typedef std::map<const TARGETING::TargetHandle_t, bool> pgState_map;
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
                       pgState_map &io_targetStates);
+
+
+/**
+ * @brief                         Checks the PG keyword data to determine if all
+ *                                of the descendant chiplets are functional. The
+ *                                caller is responsible for allocating and
+ *                                de-allocating the PG keyword space.
+ *
+ * @param[in]  i_pTarget          The target whose descendants need to be
+ *                                checked. Must not be nullptr.
+ *
+ * @param[in]  i_pgData           Reference to area holding the PG keyword read
+ *                                from VPD; must be malloc'ed by the caller, and
+ *                                must be VPD_CP00_PG_DATA_ENTRIES in size.
+ *
+ * @param[in]  i_chipFunctional   The functional state of i_pTarget.
+ *
+ * @param[in]  i_errlEid          Error log ID of the error associated with
+ *                                i_pTarget, if any.
+ *
+ * @param[io]  io_infoErrl        The informational error log that contains PG
+ *                                issues.
+ *
+ * @param[io]  io_createInfoLog   Determines whether or not PG issues exist and
+ *                                if the informational log should be created.
+ *
+ * @param[in] i_isTestcase        Determines if the code is running from a
+ *                                testcase and if so will not modify the state
+ *                                of the system. Defaulted to false.
+ *
+ * @param[out] o_testResult       A pointer to the functional state of i_pTarget
+ *                                if we are running a test. Default nullptr.
+ *
+ * @return                        Returns an error if encountered, otherwise
+ *                                nullptr.
+ *
+ */
+errlHndl_t checkPartialGoodForDescendants(
+                const TARGETING::TargetHandle_t &i_pTarget,
+                const uint16_t (&i_pgData)[VPD_CP00_PG_DATA_ENTRIES],
+                const bool i_chipFunctional,
+                const uint32_t i_errlEid,
+                errlHndl_t io_infoErrl,
+                bool &io_createInfoLog,
+                bool i_isTestcase = false,
+                bool* o_testResult = nullptr);
+
+/**
+* @brief                         This function will propagate a parent's
+*                                non-functional status down to all functional
+*                                children since children cannot be considered
+*                                functional if they have non-functional parents.
+*                                NOTE: This function will only mark children
+*                                non-functional if the passed-in parent is
+*                                non-functional and is in the io_targetStates
+*                                map. Therefore, if a parent is passsed in that
+*                                is functional or missing from the
+*                                io_targetStates map (parent state unknown) this
+*                                function behaves as a no-op.
+*
+* @param[in]  i_desc             Pointer to the parent target we're looking
+*                                at. Must not be nullptr.
+*
+* @param[io]  io_targetStates    Reference to the pgState_map that will be
+*                                updated by this function.
+*
+*/
+void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
+                                     pgState_map &io_targetStates);
 
 /**
  * @deprecated

@@ -257,7 +257,9 @@ namespace PARTIAL_GOOD
 
             if (rulesIterator == pgRules_map.end())
             {
-                // Target is missing from the table. Return an empty vector.
+                // Target is missing from the table. This is an error, so break
+                // out of this section of code and return the appropriate error
+                // below.
                 break;
             }
 
@@ -334,40 +336,38 @@ namespace PARTIAL_GOOD
                 }
             }
 
-            // If o_targetPgLogic has no entries then that means that there
-            // doesn't exist any PG rules for the given target or another error
-            // was encountered. If no other error occurred then return the
-            // the following error if applicable.
-            if ((l_errl == nullptr) && (o_targetPgLogic.size() == 0))
-            {
-                /*@
-                * @errortype
-                * @severity        ERRL_SEV_UNRECOVERABLE
-                * @moduleid        HWAS::MOD_IS_DESCENDANT_FUNCTIONAL
-                * @reasoncode      HWAS::RC_NO_PG_LOGIC
-                * @devdesc         To enforce all target types have partial good
-                *                  rules and logic, all targets must be included
-                *                  in the PartialGoodRulesTable. A combination
-                *                  of target type, chip type, and chip unit
-                *                  produced an empty set of logic for the
-                *                  target.
-                *
-                * @custdesc        A problem occured during IPL of the system:
-                *                  Internal Firmware Error
-                * @userdata1       target type attribute
-                * @userdata2       HUID of the target
-                */
-                l_errl = hwasError(
-                                   ERRL_SEV_UNRECOVERABLE,
-                                   HWAS::MOD_IS_DESCENDANT_FUNCTIONAL,
-                                   HWAS::RC_NO_PG_LOGIC,
-                                   i_target->getAttr<TARGETING::ATTR_TYPE>(),
-                                   get_huid(i_target));
-
-                break;
-            }
-
         } while(0);
+
+        // If o_targetPgLogic has no entries then that means that there
+        // doesn't exist any PG rules for the given target or another error
+        // was encountered. If no other error occurred then return the
+        // the following error if applicable.
+        if ((l_errl == nullptr) && (o_targetPgLogic.size() == 0))
+        {
+            /*@
+            * @errortype
+            * @severity        ERRL_SEV_UNRECOVERABLE
+            * @moduleid        HWAS::MOD_FIND_RULES_FOR_TARGET
+            * @reasoncode      HWAS::RC_NO_PG_LOGIC
+            * @devdesc         To enforce all target types have partial good
+            *                  rules and logic, all targets must be included
+            *                  in the PartialGoodRulesTable. A combination
+            *                  of target type, chip type, and chip unit
+            *                  produced an empty set of logic for the
+            *                  target.
+            *
+            * @custdesc        A problem occured during IPL of the system:
+            *                  Internal Firmware Error
+            * @userdata1       target type attribute
+            * @userdata2       HUID of the target
+            */
+            l_errl = hwasError(
+                               ERRL_SEV_UNRECOVERABLE,
+                               HWAS::MOD_FIND_RULES_FOR_TARGET,
+                               HWAS::RC_NO_PG_LOGIC,
+                               i_target->getAttr<TARGETING::ATTR_TYPE>(),
+                               get_huid(i_target));
+        }
 
         return l_errl;
     }
