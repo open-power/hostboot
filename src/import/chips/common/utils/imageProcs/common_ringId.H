@@ -81,7 +81,7 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 //                                                                           //
 
 //
-// TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
+// TOR header field (appears in top of every HW, SBE, OVRD, etc ring section)
 //
 typedef struct
 {
@@ -137,7 +137,6 @@ enum TorMagicNum
     TOR_MAGIC_CME   = (uint32_t)0x544F524D,   // "TORM"
     TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
     TOR_MAGIC_OVLY  = (uint32_t)0x544F524C,   // "TORL"
-    TOR_MAGIC_CEN   = (uint32_t)0x544F524E,   // "TORN"
 };
 
 //                                                                           //
@@ -146,22 +145,21 @@ enum TorMagicNum
 
 
 //
-// Chip types and List to represent p9n, p9c, p9a, cen (centaur)
+// Chip types and List to represent p9n, p9c, p9a)
 //
 enum ChipId
 {
     CID_P9N,
     CID_P9C,
     CID_P9A,
-    CID_CEN,
-    NUM_CHIP_IDS = 4
+    NUM_CHIP_IDS = 3
 };
 
 //
 // Ring classes
 // - Specified whether root ring:            ROOT (only applied in RING_PROPERTIES list)
 // - Specifies origination repo:             EKB or MVPD
-// - Specifies chip ID:                      P9 or Centaur
+// - Specifies chip ID:                      P9
 // - Specifies MVPD subclass:                #G or #R
 // - Specifies flush status assumption:      Flushed or non-flushed (prev scanned)
 // - Specifies various special ring classes: FSM, OVLY, STUMPED, CMSK
@@ -175,7 +173,6 @@ enum RingClass
     RCLS_EKB_NONFLUSH_RING = 0b0000000000001100, // EKB P9 ring. Nonflush-scanned
     RCLS_MVPD_PDG_RING     = 0b0000000000010010, // MVPD #G P9 ring. Flush-scanned
     RCLS_MVPD_PDR_RING     = 0b0000000000100010, // MVPD #R P9 ring. Flush-scanned
-    RCLS_EKB_CEN_RING      = 0b0000000001000010, // EKB Cen ring. Flush-scanned
     RCLS_EKB_FSM_RING      = 0b0000000010000110, // EKB P9 ring for eq_ana_bndy. Mixed-scanned
     RCLS_EKB_OVLY_RING     = 0b0000000100010010, // EKB P9 ovly for MVPD GPTR ring. Flush-scanned
     RCLS_EKB_STUMPED_RING  = 0b0000001000000010, // EKB P9 CMSK stump ring. Flush-scanned
