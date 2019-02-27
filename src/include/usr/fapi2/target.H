@@ -462,10 +462,12 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
     // DIMM -> MCA
     // DIMM -> MBA
     // DIMM -> MEM_PORT
+    // DIMM -> OCMB_CHIP
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_DIMM)        &&
                     (K_PARENT != fapi2::TARGET_TYPE_MCA)       &&
                     (K_PARENT != fapi2::TARGET_TYPE_MBA)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MEM_PORT)),
+                    (K_PARENT != fapi2::TARGET_TYPE_MEM_PORT)  &&
+                    (K_PARENT != fapi2::TARGET_TYPE_OCMB_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_DIMM");
 
     // valid parents for PROC
@@ -917,8 +919,10 @@ inline std::vector<Target<K_CHILD, M, V> >
 
     // valid children for OCMB
     // OCMB -> MEM_PORT
+    // OCMB -> DIMM
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT)),
+                    (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_DIMM)),
                   "improper child of fapi2::TARGET_TYPE_OCMB_CHIP");
 
     // valid children for MEM_PORT
