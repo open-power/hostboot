@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -437,6 +437,9 @@ errlHndl_t InitService::executeFn(
                     i_ptask->taskname,
                     l_tidretrc,
                     l_childsts );
+
+            l_errl->collectTrace("ASSERT",128);
+            l_errl->collectTrace("INITSVC",512);
 
             //  break out of do block
             break;
