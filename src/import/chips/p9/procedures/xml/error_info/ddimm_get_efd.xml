@@ -33,12 +33,10 @@
     <ffdc>REQUIRED_MIN_BUFFER_SIZE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
+    <!-- This is always a code bug -->
     <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>OCMB_CHIP_TARGET</refTarget>
-      </hw>
-      <priority>MEDIUM</priority>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -52,11 +50,17 @@
     <ffdc>REQUIRED_DDR_TYPE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
+    <!-- Most likely scenario is an unsupported card getting plugged in -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Could also be a code bug -->
+    <callout>
+      <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
   </hwpError>
@@ -70,12 +74,13 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -86,16 +91,13 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
+    <!-- The SPD itself has invalid data -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -109,12 +111,13 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -125,24 +128,26 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD itself has invalid data -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_DDIMM_GET_EFD_INADEQUATE_EFD_BUFFER_SIZE</rc>
-    <description>The size of the return EFD buffer size in insufficient
+    <description>The size of the return EFD buffer size is insufficient
                  to accommodate an EFD block size.</description>
     <ffdc>EFD_BUFFER_SIZE</ffdc>
     <ffdc>EFD_BLOCK_SIZE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    !-- This is always a code bug -->
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -158,16 +163,27 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- Most likely scenario is a new type of DDIMM got installed, so callout
+         the OCMB as the problem.  Deconfigure it so we can keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+    <!-- We could have down-level code installed. -->
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <!-- It could also be bogus SPD content -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -180,16 +196,27 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- Most likely scenario is a new type of DDIMM got installed, so callout
+         the OCMB as the problem.  Deconfigure it so we can keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+    <!-- We could have down-level code installed. -->
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
+    <!-- It could also be bogus SPD content -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -208,9 +235,10 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- This is always a code bug. -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -225,9 +253,10 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- This is always a code bug. -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -242,12 +271,13 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- The SPD is misconfigured -->
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>
         <refTarget>OCMB_CHIP_TARGET</refTarget>
       </hw>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -261,10 +291,62 @@
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
+    <!-- EFD metadata - 8 bytes per entry -->
+    <ffdc>EFD_METADATA0</ffdc>
+    <ffdc>EFD_METADATA1</ffdc>
+    <ffdc>EFD_METADATA2</ffdc>
+    <ffdc>EFD_METADATA3</ffdc>
+    <ffdc>EFD_METADATA4</ffdc>
+    <ffdc>EFD_METADATA5</ffdc>
+    <ffdc>EFD_METADATA6</ffdc>
+    <ffdc>EFD_METADATA7</ffdc>
+    <ffdc>EFD_METADATA8</ffdc>
+    <ffdc>EFD_METADATA9</ffdc>
+    <ffdc>EFD_METADATA10</ffdc>
+    <ffdc>EFD_METADATA11</ffdc>
+    <ffdc>EFD_METADATA12</ffdc>
+    <ffdc>EFD_METADATA13</ffdc>
+    <ffdc>EFD_METADATA14</ffdc>
+    <ffdc>EFD_METADATA15</ffdc>
+    <ffdc>EFD_METADATA16</ffdc>
+    <ffdc>EFD_METADATA17</ffdc>
+    <ffdc>EFD_METADATA18</ffdc>
+    <ffdc>EFD_METADATA19</ffdc>
+    <ffdc>EFD_METADATA20</ffdc>
+    <ffdc>EFD_METADATA21</ffdc>
+    <ffdc>EFD_METADATA22</ffdc>
+    <ffdc>EFD_METADATA23</ffdc>
+    <ffdc>EFD_METADATA24</ffdc>
+    <ffdc>EFD_METADATA25</ffdc>
+    <ffdc>EFD_METADATA26</ffdc>
+    <ffdc>EFD_METADATA27</ffdc>
+    <ffdc>EFD_METADATA28</ffdc>
+    <ffdc>EFD_METADATA29</ffdc>
+    <ffdc>EFD_METADATA30</ffdc>
+    <ffdc>EFD_METADATA31</ffdc>
+    <!-- Assuming a stable codebase, the most likely cause of this error
+         would be installing a DDIMM that doesn't support the system parameters.
+         Callout the SPD contents as being the problem. -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- This might be buggy or down-level code. -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>NONE</priority>
+      <priority>MEDIUM</priority>
     </callout>
+    <!-- Deconfigure the OCMB itself to let us keep booting. -->
+    <callout>
+      <target>OCMB_CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
