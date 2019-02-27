@@ -308,6 +308,7 @@ RUNTIME_MODULES += tod_rt
 RUNTIME_MODULES += nestmemutils
 RUNTIME_MODULES += imageprocs_rt
 RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
+RUNTIME_MODULES += mss_rt
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
