@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -81,6 +81,34 @@
       Procedure: p9_l2_flush
       Timed out waiting for purge busy indication to clear in L2 Purge Engine
       Command Register.
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_L2_REGISTERS</id>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_PURGE_READY_COMPLETE_TIMEOUT</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CMD_REG</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
+    <description>
+      Procedure: p9_l2_flush
+      Timed out waiting for purge busy indication to clear in L2 Purge Engine
+      Prior to issuing the L2 flush via register.
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>

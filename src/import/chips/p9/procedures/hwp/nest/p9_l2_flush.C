@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,72 @@ enum
 //------------------------------------------------------------------------------
 
 /// See doxygen in header file
+fapi2::ReturnCode purgeReadyCheck(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+    const uint64_t i_busyCount,
+    fapi2::buffer<uint64_t>& o_prdPurgeCmdReg)
+{
+    FAPI_DBG("Entering purgeReadyCheck");
+    uint64_t l_loopCount = 0;
+
+    do
+    {
+        FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, o_prdPurgeCmdReg),
+                 "Error from getScom EX_PRD_PURGE_CMD_REG");
+
+        // Check the EX_PRD_PURGE_CMD_REG_BUSY bit from scom register
+        if ( !o_prdPurgeCmdReg.getBit(EX_PRD_PURGE_CMD_REG_PRGSM_BUSY))
+        {
+            // PURGE is done, get out
+            break;
+        }
+        else
+        {
+            l_loopCount++;
+
+            if (l_loopCount > i_busyCount)
+            {
+                // Time out, exit loop
+                break;
+            }
+
+            // Delay 10ns for each loop
+            FAPI_TRY(fapi2::delay(P9_L2_FLUSH_HW_NS_DELAY,
+                                  P9_L2_FLUSH_SIM_CYCLE_DELAY),
+                     "Fapi Delay call failed.");
+        }
+    }
+    while (1);
+
+    // Error out if still busy
+    if (l_loopCount > i_busyCount)
+    {
+        // engine busy, dump status
+        FAPI_DBG("Purge engine busy (reg_busy = %d, busy_on_this = %d,"
+                 " sm_busy = %d)",
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_BUSY>(),
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY_ON_THIS>(),
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY>());
+
+        FAPI_ASSERT(false, fapi2::P9_PURGE_READY_COMPLETE_TIMEOUT()
+                    .set_TARGET(i_target)
+                    .set_COUNT_THRESHOLD(i_busyCount)
+                    .set_CMD_REG(o_prdPurgeCmdReg),
+                    "Previous purge request has not completed prior to issuing L2 flush.");
+    }
+
+    if (o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_ERR>())
+    {
+        FAPI_INF("WARNING: EX_PRD_PURGE_CMD_REG_ERR set prior to L2 flush");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting purgeReadyCheck - Counter: %d; prdPurgeCmdReg: 0x%.16llX",
+             l_loopCount, o_prdPurgeCmdReg);
+    return fapi2::current_err;
+}
+
+/// See doxygen in header file
 fapi2::ReturnCode purgeCompleteCheck(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
     const uint64_t i_busyCount,
@@ -79,7 +145,7 @@ fapi2::ReturnCode purgeCompleteCheck(
                     "Purge failed. EX_PRD_PURGE_CMD_REG_ERR set");
 
         // Check the EX_PRD_PURGE_CMD_REG_BUSY bit from scom register
-        if ( !o_prdPurgeCmdReg.getBit(EX_PRD_PURGE_CMD_REG_BUSY) )
+        if ( !o_prdPurgeCmdReg.getBit(EX_PRD_PURGE_CMD_REG_BUSY))
         {
             // PURGE is done, get out
             break;
@@ -140,6 +206,7 @@ fapi2::ReturnCode setupAndTriggerPrdPurge(
     // ensure PURGE_CMD_TYPE/MEM/CGC/BANK are clear to specify flush
     // of entire cache
     FAPI_DBG("Write L2 Purge Engine Command Register to initiate cache flush");
+    l_cmdReg.clearBit<EX_PRD_PURGE_CMD_REG_ERR>();
     l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_TYPE,
                     EX_PRD_PURGE_CMD_REG_TYPE_LEN>(i_purgeData.iv_cmdType);
     l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_MEM,
@@ -176,8 +243,8 @@ fapi2::ReturnCode l2_flush_start(
 
     // Ensure that purge engine is idle before starting flush
     // poll Purge Engine status
-    FAPI_TRY(purgeCompleteCheck(i_target, 0, l_cmdReg), // 0 = no wait
-             "Error returned from purgeCompleteCheck call");
+    FAPI_TRY(purgeReadyCheck(i_target, P9_L2_FLUSH_MAX_POLLS, l_cmdReg), // 0 = no wait
+             "Error returned from purgeReadyCheck call");
 
     FAPI_TRY(setupAndTriggerPrdPurge(i_target, i_purgeData, l_cmdReg),
              "Error returned from setupAndTriggerPrdPurge");

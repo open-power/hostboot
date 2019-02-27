@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,23 @@ typedef fapi2::ReturnCode (*p9_l2_flush_FP_t)
 extern "C"
 {
 
+///-----------------------------------------------------------------------------
+///
+/// @brief  Check if any purge is in progress before issuing a new one.
+///
+/// @param[in]  i_target          => EX chiplet target
+/// @param[in]  i_busyCount       => Max busy count waiting for idle
+/// @param[out] o_prdPurgeCmdReg  => EX_PRD_PURGE_CMD_REG value.
+///
+/// @return FAPI2_RC_SUCCESS if engine status returns as idle (with no errors)
+///         before maximum number of polls has been reached
+///         else, return error.
+    fapi2::ReturnCode purgeReadyCheck(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const uint64_t i_busyCount,
+        fapi2::buffer<uint64_t>& o_prdPurgeCmdReg);
+
+///-----------------------------------------------------------------------------
 ///
 /// @brief  Utility function to check for a purge operation to be completed.
 ///         This function polls the EX_PRD_PURGE_CMD_REG_BUSY bit of
