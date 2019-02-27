@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,19 @@ class RtPnor
         errlHndl_t getSideInfo( PNOR::SideId i_side,
                                 PNOR::SideInfo_t& o_info);
 
+
+        /**
+         * @brief  Has RtPnor::init() successfully completed?
+         * @return true if init() finished successfully, otherwise false
+         */
+        bool isPnorInitialized() { return iv_initialized; }
+
+        /**
+         * @brief  Accessor function for iv_initialized.
+         *         true = RtPnor::init() finished successfully
+         */
+        void setInitialized(bool i_initialized);
+
     protected:
        /**
         * @brief Constructor
@@ -146,6 +159,9 @@ class RtPnor
          * @return Error from device
          */
         errlHndl_t readTOC();
+
+        // is RT pnor initialized?
+        bool iv_initialized;
 
         //allow testcases to see inside the class
         friend class PnorRtTest;

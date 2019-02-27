@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,16 @@ void RtPnor::init(errlHndl_t &io_taskRetErrl)
 {
     TRACFCOMP(g_trac_pnor, "RtPnor::init> " );
     io_taskRetErrl  = Singleton<RtPnor>::instance().readTOC();
+    if( !io_taskRetErrl )
+    {
+        Singleton<RtPnor>::instance().setInitialized(true);
+    }
     TRACFCOMP(g_trac_pnor, "<RtPnor::init" );
+}
+/**************************************************************/
+void RtPnor::setInitialized(bool i_initialized)
+{
+    iv_initialized = i_initialized;
 }
 /**************************************************************/
 errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
@@ -115,6 +124,10 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                     "attribute overrides inhibited by secureboot");
             }
             #endif
+            // prevent hang between ErrlManager and rt_pnor
+            assert(iv_initialized,
+                   "RtPnor::getSectionInfo: invalid section error"
+                   " before completing PNOR initialization");
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
@@ -137,6 +150,10 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         {
             TRACFCOMP(g_trac_pnor,"RtPnor::getSectionInfo: Section %d"
                     " size is 0", (int)i_section);
+            // prevent hang between ErrlManager and rt_pnor
+            assert(iv_initialized,
+                   "RtPnor::getSectionInfo: Section size 0 returned"
+                   " before completing PNOR initialization");
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
@@ -334,6 +351,7 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 /*******Protected Methods**************/
 RtPnor::RtPnor()
 {
+    iv_initialized = false;
     errlHndl_t l_err = readTOC();
     if (l_err)
     {
@@ -390,6 +408,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                         " failed proc:%d, part:%s, offset:0x%X, size:0x%X,"
                         " dataPt:0x%X, rc:%d", i_procId, l_partitionName,
                         l_offset, l_readSize, l_dataToRead, l_rc);
+
+                // prevent hang between ErrlManager and rt_pnor
+                assert(iv_initialized,
+                       "RtPnor::readFromDevice: pnor_read returned an error"
+                       " during initialization");
                 /*@
                  * @errortype
                  * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -424,6 +447,10 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                 }
                 else // everything else should have a known size
                 {
+                    // prevent hang between ErrlManager and rt_pnor
+                    assert(iv_initialized,
+                           "RtPnor::readFromDevice: pnor_read failed to read "
+                           "expected amount before rt_pnor initialization");
                     /*@
                      * @errortype
                      * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -484,6 +511,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                 TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice>"
                     " Uncorrectable ECC error : chip=%d,offset=0x%.X",
                     i_procId, i_offset );
+
+                // prevent hang between ErrlManager and rt_pnor
+                assert(iv_initialized,
+                       "RtPnor::readFromDevice: UNCORRECTABLE_ECC encountered"
+                       " during initialization");
                 /*@
                  * @errortype
                  * @moduleid    PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -516,6 +548,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                         TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice> Error"
                         " writing corrected data back to device");
 
+
+                        // prevent hang between ErrlManager and rt_pnor
+                        assert(iv_initialized,
+                               "RtPnor::readFromDevice: pnor_write returned an"
+                               " error during initialization");
                         /*@
                          * @errortype
                          * @moduleid   PNOR::MOD_RTPNOR_READFROMDEVICE
