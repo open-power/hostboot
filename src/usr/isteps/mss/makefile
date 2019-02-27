@@ -145,8 +145,12 @@ MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)
 $(call BUILD_MODULE)
 
+VPATH += ${MSS_LIB}
+
+SUBDIRS += runtime
+
 #HWP build tool
 include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
-VPATH += ${MSS_LIB}
+
