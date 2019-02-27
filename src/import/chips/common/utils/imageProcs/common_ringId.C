@@ -28,10 +28,6 @@ namespace P9_RID
 {
 #include <p9_ringId.H>
 };
-namespace CEN_RID
-{
-#include <cen_ringId.H>
-};
 #include <p9_infrastruct_help.H>
 
 
@@ -198,27 +194,6 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
             strcat(io_ringPath, l_ringDir);
             strcat(io_ringPath, "/");
         }
-        else if ( i_magic == TOR_MAGIC_CEN )
-        {
-            if ( i_ringVariant == RV_BASE ||
-                 i_ringVariant == RV_RL )
-            {
-                rc = get_ipl_ring_path_param(i_ringVariant, l_ringDir);
-            }
-            else
-            {
-                MY_ERR("Invalid ringVariant(=%d) for TOR magic=0x%08x\n", i_ringVariant, i_magic);
-                rc = TOR_INVALID_VARIANT;
-            }
-
-            if (rc)
-            {
-                break;
-            }
-
-            strcat(io_ringPath, l_ringDir);
-            strcat(io_ringPath, "/");
-        }
         else if ( i_magic == TOR_MAGIC_OVRD ||
                   i_magic == TOR_MAGIC_OVLY )
         {
@@ -250,10 +225,6 @@ int ringid_get_num_ring_ids( ChipId_t   i_chipId,
         case CID_P9C:
         case CID_P9A:
             *o_numRingIds = P9_RID::NUM_RING_IDS;
-            break;
-
-        case CID_CEN:
-            *o_numRingIds = CEN_RID::NUM_RING_IDS;
             break;
 
         default:
@@ -297,20 +268,6 @@ int ringid_get_num_chiplets( ChipId_t  i_chipId,
 
             break;
 
-        case CID_CEN:
-            if ( i_torMagic == TOR_MAGIC_CEN ||
-                 i_torMagic == TOR_MAGIC_OVRD )
-            {
-                *o_numChiplets = CEN_RID::CEN_NUM_CHIPLETS;
-            }
-            else
-            {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId(=CID_CEN)\n", i_torMagic);
-                return TOR_INVALID_MAGIC_NUMBER;
-            }
-
-            break;
-
         default:
             MY_ERR("Invalid chipId(=%d)\n", i_chipId);
             return TOR_INVALID_CHIP_ID;
@@ -331,10 +288,6 @@ int ringid_get_ringProps( ChipId_t           i_chipId,
         case CID_P9C:
         case CID_P9A:
             *o_ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
-            break;
-
-        case CID_CEN:
-            *o_ringProps = (RingProperties_t*)&CEN_RID::RING_PROPERTIES;
             break;
 
         default:
@@ -416,34 +369,6 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
 
             break;
 
-        case CID_CEN:
-            if ( i_torMagic == TOR_MAGIC_CEN ||
-                 i_torMagic == TOR_MAGIC_OVRD )
-            {
-                rc = CEN_RID::ringid_get_chiplet_properties(
-                         i_chipletType,
-                         o_chipletData);
-
-                if (rc)
-                {
-                    return rc;
-                }
-
-                *o_numVariants = (*o_chipletData)->numCommonRingVariants;
-
-                if ( i_torMagic == TOR_MAGIC_OVRD )
-                {
-                    *o_numVariants = 1;
-                }
-            }
-            else
-            {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_CEN\n", i_torMagic);
-                return TOR_INVALID_MAGIC_NUMBER;
-            }
-
-            break;
-
         default:
             MY_ERR("Invalid chipId(=%d)\n", i_chipId);
             return TOR_INVALID_CHIP_ID;
@@ -476,19 +401,6 @@ int ringid_get_scanScomAddr( ChipId_t   i_chipId,
             }
 
             l_scanScomAddr = P9_RID::RING_PROPERTIES[i_ringId].scanScomAddr;
-            break;
-
-        case CID_CEN:
-            if (i_ringId >= CEN_RID::NUM_RING_IDS)
-            {
-                MY_ERR("ringid_get_scanScomAddr(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not"
-                       " allowed\n",
-                       i_ringId, CEN_RID::NUM_RING_IDS);
-                rc = TOR_INVALID_RING_ID;
-                break;
-            }
-
-            l_scanScomAddr = CEN_RID::RING_PROPERTIES[i_ringId].scanScomAddr;
             break;
 
         default:
@@ -526,18 +438,6 @@ int ringid_get_ringClass( ChipId_t      i_chipId,
             l_ringClass = P9_RID::RING_PROPERTIES[i_ringId].ringClass;
             break;
 
-        case CID_CEN:
-            if (i_ringId >= CEN_RID::NUM_RING_IDS)
-            {
-                MY_ERR("ringid_get_ringClass(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, CEN_RID::NUM_RING_IDS);
-                rc = TOR_INVALID_RING_ID;
-                break;
-            }
-
-            l_ringClass = CEN_RID::RING_PROPERTIES[i_ringId].ringClass;
-            break;
-
         default:
             MY_ERR("ringid_get_ringClass(): Unsupported chipId (=%d) supplied\n", i_chipId);
             rc = TOR_INVALID_CHIP_ID;
@@ -564,17 +464,6 @@ int ringid_check_ringId( ChipId_t  i_chipId,
             {
                 MY_ERR("ringid_check_ringId(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
                        i_ringId, P9_RID::NUM_RING_IDS);
-                rc = TOR_INVALID_RING_ID;
-                break;
-            }
-
-            break;
-
-        case CID_CEN:
-            if ( i_ringId >= CEN_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
-            {
-                MY_ERR("ringid_check_ringId(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, CEN_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
                 break;
             }
@@ -646,27 +535,6 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 
             break;
 
-        case CID_CEN:
-            if ( i_torMagic == TOR_MAGIC_CEN ||
-                 i_torMagic == TOR_MAGIC_OVRD )
-            {
-                if ( i_chipletType < CEN_RID::CEN_NUM_CHIPLETS )
-                {
-                    *o_chipletIndex = i_chipletType;
-                }
-                else
-                {
-                    rc = TOR_INVALID_CHIPLET_TYPE;
-                }
-            }
-            else
-            {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_CEN\n", i_torMagic);
-                return TOR_INVALID_MAGIC_NUMBER;
-            }
-
-            break;
-
         default:
             MY_ERR("ringid_get_chipletIndex(): Unsupported chipId (=%d) supplied\n", i_chipId);
             rc = TOR_INVALID_CHIP_ID;
@@ -690,7 +558,6 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 std::map <ChipId_t, std::string> chipIdIsMap
 {
     { UNDEFINED_CHIP_ID, ""    },
-    { (ChipId_t)CID_CEN, "cen" },
     { (ChipId_t)CID_P9N, "p9n" },
     { (ChipId_t)CID_P9C, "p9c" },
     { (ChipId_t)CID_P9A, "p9a" }
@@ -700,7 +567,6 @@ std::map <ChipId_t, std::string> chipIdIsMap
 std::map <std::string, ChipId_t> chipTypeIsMap
 {
     { "",    UNDEFINED_CHIP_ID },
-    { "cen", (ChipId_t)CID_CEN },
     { "p9n", (ChipId_t)CID_P9N },
     { "p9c", (ChipId_t)CID_P9C },
     { "p9a", (ChipId_t)CID_P9A }
@@ -710,7 +576,6 @@ std::map <std::string, ChipId_t> chipTypeIsMap
 std::map <uint8_t, ChipId_t> chipIdIcToIsMap
 {
     { 0x0, UNDEFINED_CHIP_ID },
-    { 0x3, (ChipId_t)CID_CEN },
     { 0x5, (ChipId_t)CID_P9N },
     { 0x6, (ChipId_t)CID_P9C },
     { 0x7, (ChipId_t)CID_P9A }
@@ -735,11 +600,6 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
         case CID_P9A:
             ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
             numRingIds = P9_RID::NUM_RING_IDS;
-            break;
-
-        case CID_CEN:
-            ringProps = (RingProperties_t*)&CEN_RID::RING_PROPERTIES;
-            numRingIds = CEN_RID::NUM_RING_IDS;
             break;
 
         default:
@@ -819,11 +679,6 @@ int ringidGetRingId1( ChipId_t     i_chipId,
             numRingIds = P9_RID::NUM_RING_IDS;
             break;
 
-        case CID_CEN:
-            ringProps = (RingProperties_t*)&CEN_RID::RING_PROPERTIES;
-            numRingIds = CEN_RID::NUM_RING_IDS;
-            break;
-
         default:
             MY_ERR("ringidGetRingId1(): Unsupported chipId (=%d) supplied\n", i_chipId);
             rc = TOR_INVALID_CHIP_ID;
@@ -895,7 +750,7 @@ int ringidGetRingId2( ChipId_t       i_chipId,
     bool              bFound = false;
     bool              bOverlap = false;
 
-    // First, select the main ring list we need (P9's or Centaur's). And while we're at it,
+    // First, select the main ring list we need. And while we're at it,
     // convert input chipletType, which can be ignored for ring sections (i.e. torMagic)
     // with only one chiplet, to a valid chipletType
     switch (i_chipId)
@@ -923,23 +778,6 @@ int ringidGetRingId2( ChipId_t       i_chipId,
             else
             {
                 MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P9x=%d\n", i_torMagic, i_chipId);
-                return TOR_INVALID_MAGIC_NUMBER;
-            }
-
-            break;
-
-        case CID_CEN:
-            ringProps = (RingProperties_t*)&CEN_RID::RING_PROPERTIES;
-            numRingIds = CEN_RID::NUM_RING_IDS;
-
-            if ( i_torMagic == TOR_MAGIC_CEN ||
-                 i_torMagic == TOR_MAGIC_OVRD )
-            {
-                l_chipletType = CEN_RID::CEN_TYPE;
-            }
-            else
-            {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_CEN\n", i_torMagic);
                 return TOR_INVALID_MAGIC_NUMBER;
             }
 
@@ -1049,18 +887,6 @@ int ringidGetRingName( ChipId_t     i_chipId,
             }
 
             l_ringName = (std::string)P9_RID::RING_PROPERTIES[i_ringId].ringName;
-            break;
-
-        case CID_CEN:
-            if (i_ringId >= CEN_RID::NUM_RING_IDS)
-            {
-                MY_ERR("ringidGetRingName(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, CEN_RID::NUM_RING_IDS);
-                rc = TOR_INVALID_RING_ID;
-                break;
-            }
-
-            l_ringName = (std::string)CEN_RID::RING_PROPERTIES[i_ringId].ringName;
             break;
 
         default:
