@@ -218,7 +218,7 @@
       </description>
       <initToZero></initToZero>
       <valueType>uint8</valueType>
-      <enum>HALF =0, QUARTER=1</enum>
+      <enum>HALF=0, QUARTER=1</enum>
       <writeable/>
       <array>2 4</array>
       <mssAccessorName>si_geardown_mode</mssAccessorName>
@@ -481,7 +481,8 @@
         <description>
           Array[DIMM][RANK]
           READ, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
-          The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+          The bits in 8 bit field are
+          [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -496,7 +497,8 @@
         <description>
           Array[DIMM][RANK]
           WRITE, On Die Termination triggering bitmap. Use bitmap to determine which ODT to fire for the designated rank.
-          The bits in 8 bit field are [Dimm0 ODT0][Dimm0 ODT1][N/A][N/A][Dimm1 ODT0][Dimm1 ODT1][N/A][N/A]
+          The bits in 8 bit field are
+          [DIMM0 ODT0][DIMM0 ODT1][DIMM0 ODT2][DIMM0 ODT3][DIMM1 ODT0][DIMM1 ODT1][DIMM1 ODT2][DIMM1 ODT3]
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>

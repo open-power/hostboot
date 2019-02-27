@@ -33,8 +33,11 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
-// fapi2
 #include <p9a_mss_freq.H>
+#include <generic/memory/lib/data_engine/p9a/p9a_data_init_traits.H>
+#include <generic/memory/lib/data_engine/data_engine.H>
+#include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/spd/spd_facade.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -43,5 +46,27 @@
 ///
 fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
-    return fapi2::FAPI2_RC_SUCCESS;
+    // We will first set pre-eff_config attribes
+    for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        std::vector<uint8_t> l_raw_spd;
+        FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+        {
+            // Gets the SPD facade
+            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+            mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
+
+            // Checks that the facade was setup correctly
+            FAPI_TRY( l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d) );
+
+            FAPI_TRY( mss::attr_eff_engine<mss::pre_data_init_fields>::set(l_spd_decoder) );
+        }
+
+        // TK - Remove hard-code FREQ -- Should we have enums? Louis problem now
+        uint64_t HARDCODE_FREQ_LOUIS_REMOVE = 25600;
+        FAPI_TRY( mss::attr::set_freq(i_target, HARDCODE_FREQ_LOUIS_REMOVE) );
+    }// dimm
+
+fapi_try_exit:
+    return fapi2::current_err;
 }

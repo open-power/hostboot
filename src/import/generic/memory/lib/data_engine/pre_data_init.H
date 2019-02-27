@@ -42,7 +42,6 @@
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/data_engine/p9n/p9n_data_init_traits.H>
-#include <generic/memory/lib/data_engine/p9a/p9a_data_init_traits.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 
 namespace mss

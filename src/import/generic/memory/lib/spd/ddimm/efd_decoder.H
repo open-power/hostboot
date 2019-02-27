@@ -86,6 +86,7 @@ class base_decoder
 
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_target;
         std::vector<uint8_t> iv_data;
+        size_t iv_rank;
 
     public:
 
@@ -98,11 +99,14 @@ class base_decoder
         /// @brief ctor
         /// @param[in] i_target DIMM target on which to operate
         /// @param[in] i_target EFD data
+        /// @param[in] i_rank the current rank
         ///
         base_decoder(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                     const std::vector<uint8_t>& i_data):
+                     const std::vector<uint8_t>& i_data,
+                     const size_t i_rank):
             iv_target(i_target),
-            iv_data(i_data)
+            iv_data(i_data),
+            iv_rank(i_rank)
         {
         }
 
@@ -115,9 +119,18 @@ class base_decoder
         /// @brief Gets decoder target
         /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         ///
-        virtual fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_dimm_target() const
+        virtual fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_ocmb_target() const
         {
             return iv_target;
+        }
+
+        ///
+        /// @brief Gets rank tied to this decoder
+        /// @return size_t
+        ///
+        virtual size_t get_rank() const
+        {
+            return iv_rank;
         }
 
         ///

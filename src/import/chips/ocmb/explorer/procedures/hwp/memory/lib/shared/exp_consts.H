@@ -33,8 +33,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: CI
 
-#ifndef EXP_CONSTS_H
-#define EXP_CONSTS_H
+#ifndef MSS_EXP_CONSTS_H
+#define MSS_EXP_CONSTS_H
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
@@ -47,6 +47,30 @@ namespace exp
 {
 
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
+
+///
+/// @brief enum list of explorer eff attributes to set
+///
+enum attr_eff_engine_fields
+{
+    // Template recursive base case
+    ATTR_EFF_BASE_CASE = 0,
+
+    // Attrs to set
+    BYTE_ENABLES = 1,
+    NIBBLE_ENABLES = 2,
+    SPD_TAA_MIN = 3,
+    FOUR_RANK_MODE = 4,
+    DDP_COMPATIBILITY = 5,
+    TSV_8H_SUPPORT = 6,
+    PSTATES = 7,
+    MRAM_SUPPORT = 8,
+    HEIGHT_3DS = 9,
+    SPD_CL_SUPPORTED = 10,
+
+    // Dispatcher set to last enum value
+    ATTR_EFF_DISPATCHER = SPD_CL_SUPPORTED,
+};
 
 ///
 /// @brief common explorer sizes
@@ -66,6 +90,18 @@ enum ffdc_codes
     EXP_I2C_SET_FIELD = 0x0001,
     READ_HOST_FW_RESPONSE_STRUCT = 0x0003,
     READ_SENSOR_CACHE_STRUCT = 0x0004,
+
+    SET_BYTE_ENABLES = 0x1041,
+    SET_NIBBLE_ENABLES = 0x1042,
+    SET_TAA_MIN = 0x1043,
+    SET_FOUR_RANK_MODE = 0x1044,
+    SET_DDP_COMPATIBILITY = 0x1045,
+    SET_TSV_8H_SUPPORT = 0x1046,
+    SET_VREF_DQ_TRAIN_RANGE = 0x1047,
+    SET_PSTATES = 0x1048,
+    SET_MRAM_SUPPORT = 0x1049,
+    SET_3DS_HEIGHT = 0x1050,
+    SET_SPD_CL_SUPPORTED = 0x1051,
 };
 
 namespace i2c

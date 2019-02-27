@@ -452,7 +452,7 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
                 fapi2::buffer<uint16_t> l_buffer;
                 right_aligned_insert(l_buffer, l_byte1, l_byte0);
                 o_output = l_buffer;
-                FAPI_INF("%s. Register Manufacturer ID Code: 0x%04x",
+                FAPI_INF("%s. Byte enables: 0x%04x",
                          spd::c_str(iv_target),
                          o_output);
             }
@@ -484,7 +484,7 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
                 fapi2::buffer<uint32_t> l_buffer;
                 right_aligned_insert(l_buffer, l_byte3, l_byte2, l_byte1, l_byte0);
                 o_output = l_buffer;
-                FAPI_INF("%s. Register Manufacturer ID Code: 0x%04x",
+                FAPI_INF("%s. Nibble Enables: 0x%04x",
                          spd::c_str(iv_target),
                          o_output);
             }

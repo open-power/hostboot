@@ -64,7 +64,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
+        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3, DDIMM = 4</enum>
         <writeable/>
         <array>2</array>
         <mssAccessorName>dimm_type</mssAccessorName>
@@ -695,6 +695,20 @@
       <writeable/>
       <array>2</array>
       <mssAccessorName>num_master_ranks_per_dimm</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MEM_EFF_DIMM_RANKS_CONFIGED</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+        Bit wise representation of master ranks in each DIMM that are used for reads and writes.
+        Used by PRD.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array> 2 </array>
+      <mssAccessorName>dimm_ranks_configed</mssAccessorName>
     </attribute>
 
     <attribute>

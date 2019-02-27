@@ -47,12 +47,67 @@ namespace mss
 ///
 enum pre_data_init_fields
 {
-    DIMM_TYPE,
-    DRAM_GEN,
-    HYBRID,
-    HYBRID_MEDIA,
-    MRANKS,
-    DIMM_RANKS_CNFG,
+    // Template recursive base case
+    ATTR_PRE_DATA_ENGINE_CASE = 0,
+
+    DIMM_TYPE = 1,
+    DRAM_GEN = 2,
+    HYBRID = 3,
+    HYBRID_MEDIA = 4,
+    MRANKS = 5,
+    DIMM_RANKS_CNFG = 6,
+
+    // Dispatcher set to last enum value
+    ATTR_PRE_DATA_ENG_DISPATCHER = DIMM_RANKS_CNFG,
+};
+
+///
+/// @brief enum list of SPD based attr fields to set
+///
+enum attr_eff_engine_fields
+{
+    // Template recursive base case
+    ATTR_EFF_BASE_CASE = 0,
+
+    // Attrs to set
+    DRAM_WIDTH = 1,
+
+    // Dispatcher set to last enum value
+    ATTR_EFF_DISPATCHER = DRAM_WIDTH,
+};
+
+///
+/// @brief enum list of SI attr fields to set
+///
+enum attr_si_engine_fields
+{
+    // Template recursive base case
+    ATTR_SI_BASE_CASE = 0,
+
+    // Attrs to set
+    SI_MC_RCV_IMP_DQ_DQS = 1,
+    SI_MC_DRV_IMP_DQ_DQS_PULL_UP = 2,
+    SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN = 3,
+    SI_MC_DRV_SLEW_RATE_DQ_DQS = 4,
+    SI_MC_DRV_IMP_CMD_ADDR = 5,
+    SI_MC_DRV_SLEW_RATE_CMD_ADDR = 6,
+    SI_MC_DRV_IMP_CLK = 7,
+    SI_MC_DRV_SLEW_RATE_CLK = 8,
+    SI_MC_RCV_IMP_ALERT_N = 9,
+    SI_DRAM_RTT_NOM = 10,
+    SI_DRAM_RTT_WR = 11,
+    SI_DRAM_RTT_PARK = 12,
+    SI_DRAM_PREAMBLE = 13,
+    SI_MC_DRV_EQ_DQ_DQS = 14,
+    SI_DRAM_DRV_IMP_DQ_DQS = 15,
+    SI_VREF_DQ_TRAIN_RANGE = 16,
+    SI_VREF_DQ_TRAIN_VALUE = 17,
+    SI_ODT_WR = 18,
+    SI_ODT_RD = 19,
+    SI_GEARDOWN_MODE = 20,
+
+    // Dispatcher set to last enum value
+    ATTR_SI_DISPATCHER = SI_GEARDOWN_MODE,
 };
 
 ///
@@ -63,6 +118,33 @@ enum pre_data_init_fields
 ///
 template< proc_type T, pre_data_init_fields TT >
 class preDataInitTraits;
+
+
+///
+/// @brief Forward declartion of traits for attrEngineTraits
+/// @class attrEngineTraits
+/// @tparam ET enum type
+/// @tparam T enum value
+///
+template < typename ET, ET T>
+struct attrEngineTraits;
+
+///
+/// @brief Forward declartion of traits for setTimingTraits
+/// @class setTimingTraits
+/// @tparam ET enum type
+/// @tparam T enum value
+///
+template < typename ET, ET T >
+struct setTimingTraits;
+
+///
+/// @brief Forward declartion of traits for attr_engine
+/// @class attrEnumTraits
+/// @tparam ET enum type
+///
+template < typename ET >
+struct attrEnumTraits;
 
 }// mss
 

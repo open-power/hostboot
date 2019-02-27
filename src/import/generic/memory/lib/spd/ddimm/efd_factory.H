@@ -48,17 +48,19 @@ namespace efd
 /// @brief Generates the EFD decoder based upon the EFD type
 /// @param[in] i_target DIMM target
 /// @param[in] i_data SPD data
+/// @param[in] i_rank the current rank
 /// @param[out] o_decoder shared pointer to the decoder in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
 ///
 // TODO:update this for other types of EFD
 inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const std::vector<uint8_t>& i_data,
+                                 const size_t i_rank,
                                  std::shared_ptr<base_decoder>& o_decoder_ptr)
 {
-    o_decoder_ptr =
-        std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, mss::spd::rev::V0_0>>(i_target,
-                i_data);
+    o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
+    DDR4_CUSTOM_MICROCHIP,
+    mss::spd::rev::V0_0>>(i_target, i_data, i_rank);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 

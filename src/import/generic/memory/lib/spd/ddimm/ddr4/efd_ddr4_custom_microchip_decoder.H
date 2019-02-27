@@ -68,10 +68,12 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         /// @brief ctor
         /// @param[in] i_target dimm target
         /// @param[in] i_spd_data vector DIMM SPD data
+        /// @param[in] i_rank the current rank
         ///
         decoder(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                const std::vector<uint8_t>& i_spd_data):
-            base_decoder(i_target, i_spd_data)
+                const std::vector<uint8_t>& i_spd_data,
+                const size_t i_rank):
+            base_decoder(i_target, i_spd_data, i_rank)
         {
             // Using the emulation value here
             static_assert( R <= mss::spd::rev::DDIMM_MAX, " R > rev::DDIMM_MAX");
