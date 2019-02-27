@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -370,6 +370,13 @@ class TargetService
          */
         friend class _TargetRawIterator<Target*>;
         friend class _TargetRawIterator<const Target*>;
+
+        /**
+         *  @brief Return the value of iv_processorModel
+         *
+         *  @return ATTR_MODEL_type the model type of the master processor
+         */
+        ATTR_MODEL_type getProcessorModel(void);
 
         /**
          *  @brief Returns the top level physical target
@@ -1104,9 +1111,16 @@ class TargetService
          */
         void _setTopLevelTarget();
 
+        /**
+         *  @brief Set the instance variable iv_processorModel to be the value of
+         *         attribute ATTR_MODEL of the master processor
+         */
+        void _setProcessorModel(void);
+
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not
         Target      * iv_pSys;      // Top Level Target
+        ATTR_MODEL_type iv_processorModel; // Model of the master processor
 
         NodeData_t iv_nodeData;
 
