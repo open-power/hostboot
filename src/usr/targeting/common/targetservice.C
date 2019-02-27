@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,7 +115,8 @@ TRAC_INIT(&g_trac_targeting, "TARG", 4096);
 
 TargetService::TargetService() :
     iv_initialized(false),
-    iv_pSys(NULL)
+    iv_pSys(NULL),
+    iv_processorModel(MODEL_NA)
 {
     #define TARG_FN "TargetService()"
 
@@ -215,11 +216,44 @@ void TargetService::init(const size_t i_maxNodes)
 
         // call to set the top TYPE_SYS target
         _setTopLevelTarget();
+
+        // Lookup the master processor's ATTR_MODEL attribute and set
+        // the instance variable on the targetService object for quick
+        // future reference
+        _setProcessorModel();
     }
 
     TARG_EXIT();
 
     #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService:: _setProcessorModel
+//******************************************************************************
+void TargetService::_setProcessorModel(void)
+{
+    #define TARG_FN "setProcessorModel()"
+    TARG_ENTER();
+
+    TargetHandle_t masterProc = NULL;
+    masterProcChipTargetHandle( masterProc );
+
+    TARG_ASSERT(masterProc, "Failed to find master processor, SW error, check MRW / XML " );
+
+    iv_processorModel = masterProc->getAttr<ATTR_MODEL>();
+
+    TARG_EXIT();
+    #undef TARG_FN
+    return;
+}
+
+//******************************************************************************
+// TargetService:: getProcessorModel
+//******************************************************************************
+ATTR_MODEL_type TargetService::getProcessorModel(void)
+{
+    return iv_processorModel;
 }
 
 //******************************************************************************
