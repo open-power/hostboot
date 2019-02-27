@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,13 +73,17 @@ void RsvdTraceBufService::init()
                                 l_reservedMemory + sizeof(uintptr_t),
                                 l_addressToHead);
 
+        //----------
+        // There is a problem with saving pointers in the trace entry
+        //   Removing this temporarily until a solution is found
+        //----------
         // If the data is not NULL, then retrieve crashed data
         // I want NULL in this case, not nullptr; *l_addressToHead is an int.
         // If I use nullptr; compiler complains
-        if (*l_addressToHead != NULL)
-        {
-            retrieveDataFromLastCrash();
-        }
+        //if (*l_addressToHead != NULL)
+        //{
+        //    retrieveDataFromLastCrash();
+        //}
 
         // After gathering trace info from previous crash, clear buffer data
         iv_rsvdTraceBuffer.clearBuffer();
