@@ -83,6 +83,8 @@ fapi2::ReturnCode step::execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                                  const uint64_t i_rp,
                                  const uint8_t i_abort_on_error ) const
 {
+    FAPI_INF("%s rp%u running %s", mss::c_str(i_target), i_rp, iv_name);
+
     // First, pre-workaround
     FAPI_TRY(pre_workaround(i_target, i_rp, i_abort_on_error));
 

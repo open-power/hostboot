@@ -191,9 +191,6 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // The below code expects us to have ranks in terms of the DIMM values, so index 'em
-    const auto l_rank = mss::index(i_rank);
-
     // Gets the DIMM target
     fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
     FAPI_TRY(mss::rank::get_dimm_target_from_rank(i_target, i_rank, l_dimm),
@@ -219,8 +216,9 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
     FAPI_TRY(disable_address_inversion(l_dimm, l_program.iv_instructions));
 
     // 3) Write the patterns in according to the bank address
+    FAPI_INF("%s are we failing here rank%u", mss::c_str(i_target), i_rank);
     FAPI_TRY(add_mpr_pattern_writes(l_dimm,
-                                    l_rank,
+                                    i_rank,
                                     i_pattern,
                                     l_program.iv_instructions));
 
@@ -684,6 +682,7 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
         //Loop through all of our delays multiple times to reduce noise issues
         std::vector<mrep_dwl_result> l_loop_results(MREP_DWL_LOOP_TIMES);
 
+        const auto l_dimm_rank = mss::index(l_rank);
 
         // 1) Gets the ranks on which to put DRAM into MPR mode
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_rank), "%s failed mpr_load rank%u",
@@ -691,7 +690,8 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
 
 #ifdef LRDIMM_CAPABLE
         // 2) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // 3) put buffer, dram into read preamble training mode
@@ -710,7 +710,8 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
             for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
             {
                 // 5) Set the MREP l_delay -> host issues BCW's
-                FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
+                FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm),
+                         l_rank, l_delay);
 
                 // 6) Do an MPR read -> host issues RD command to the DRAM
                 FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u", mss::c_str(l_dimm),
@@ -751,7 +752,7 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
                   l_rank);
 
         // 13) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
-        FAPI_TRY( write_result_to_buffers(l_dimm, l_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
+        FAPI_TRY( write_result_to_buffers(l_dimm, l_dimm_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
                   mss::c_str(l_dimm), l_rank);
 
         l_rank_index++;
