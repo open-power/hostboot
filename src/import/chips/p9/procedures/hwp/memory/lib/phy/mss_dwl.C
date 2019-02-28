@@ -422,6 +422,10 @@ fapi2::ReturnCode dwl::write_result_to_buffers_helper( const fapi2::Target<fapi2
                                           l_recorder.first.iv_delay :
                                           l_recorder.second.iv_delay;
 
+            FAPI_DBG("%s DWL rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped BC2x:0x%02x BC3x:0x%02x",
+                     mss::c_str(i_target), i_rank, l_buffer, l_recorder.first.iv_delay, l_recorder.second.iv_delay,
+                     l_are_nibbles_swapped ? "are" : "not", l_result_nibble0, l_result_nibble1);
+
             // Function space is derived from the rank
             // 2 is for Nibble 0, 3 is for Nibble 1
             // Data corresponds to the final setting we have
@@ -518,6 +522,7 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
 
         FAPI_DBG("%s RP%u rank%u is going to run DWL", mss::c_str(i_target), i_rp, l_rank);
         const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
+        const auto l_dimm_rank = mss::index(l_rank);
 
         // Vector represents the number of LRDIMM buffers
         // The pair represents the two nibbles that we need to calibrate within the buffer
@@ -530,7 +535,8 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
                  mss::c_str(l_dimm));
 
         // 2) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // 3) Selects the rank to calibrate on the buffer
@@ -545,7 +551,8 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
             for(uint8_t l_delay = 0; l_delay < MREP_DWL_MAX_DELAY; ++l_delay)
             {
                 // 5) Set the DWL l_delay -> host issues BCW's
-                FAPI_TRY(set_delay(l_dimm, l_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
+                FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay), "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm),
+                         l_rank, l_delay);
 
                 // 6) Do an NTTM mode read -> forces the logic to read out the data
                 FAPI_TRY(execute_nttm_mode_read(i_target));
@@ -574,7 +581,7 @@ fapi2::ReturnCode dwl::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
                  l_rank);
 
         // 12) Write final values into the buffers -> host issues BCW's in PBA mode (values are calculated in step 7)
-        FAPI_TRY( write_result_to_buffers(l_dimm, l_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
+        FAPI_TRY( write_result_to_buffers(l_dimm, l_dimm_rank, l_results_recorder), "%s failed write_result_to_buffers rank%u",
                   mss::c_str(l_dimm), l_rank);
     }//l_rank loop
 

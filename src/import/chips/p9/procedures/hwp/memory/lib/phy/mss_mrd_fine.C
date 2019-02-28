@@ -726,6 +726,7 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 
         // Gets the DIMM per RP
         const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
+        const auto l_dimm_rank = mss::index(l_rank);
 
         // Initialize the results information that we will store across this rank
         std::vector<uint16_t> l_eye_sizes_dq(MAX_DQ_BITS);
@@ -744,7 +745,8 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                   mss::c_str(l_dimm), l_rank);
 
         // 6) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // 7) put buffer, dram into read preamble training mode
@@ -762,7 +764,7 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         for(uint8_t l_delay = 0; l_delay < MRD_MAX_DELAY; l_delay++)
         {
             // 9) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
-            FAPI_TRY(set_delay(l_dimm, l_rank, l_delay),
+            FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay),
                      "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
             // 10) Issues the MPR read
             FAPI_TRY( mpr_read(l_dimm, MPR_LOCATION0, l_rank), "%s failed mpr_read rank%u delay%u",
@@ -796,7 +798,7 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                   l_rank);
 
         // 16) Writes the best delays to the buffers using PBA
-        FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_rank, l_final_nibble_delays_buffer),
+        FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
 
     }//rank loop

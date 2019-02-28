@@ -550,11 +550,12 @@ fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                  "%s failed to get DIMM from rank%u", mss::c_str(i_target), l_dimm_rank);
 
         // 3) DRAM into MPR mode
-        FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_dimm_rank), "%s failed mpr_load rank%u",
+        FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_ENABLE, l_rank), "%s failed mpr_load rank%u",
                   mss::c_str(l_dimm), l_dimm_rank);
 
         // 4) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // 5) put buffer, dram into read preamble training mode

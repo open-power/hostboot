@@ -669,7 +669,8 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                  mss::c_str(l_dimm), l_dimm_rank);
 
         // 2) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // 3) Buffer into MWD mode
@@ -695,7 +696,7 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                 // Conduct a WR/RD
                 // Write sends data from the buffer MPR
                 // 6) Read reads back what was written and does a bitwise compare
-                FAPI_TRY(conduct_write_read(l_dimm, l_dimm_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
+                FAPI_TRY(conduct_write_read(l_dimm, l_rank), "%s rank%u failed conduct_write_read", mss::c_str(l_dimm),
                          l_dimm_rank);
 
                 // 7) Conduct an NTTM mode read

@@ -807,6 +807,16 @@ std::vector<cw_info> set_expected_mpr_pattern(const fapi2::buffer<uint8_t>& i_pa
 fapi2::ReturnCode set_expected_mpr_pattern(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const fapi2::buffer<uint8_t>& i_pattern );
 
+///
+/// @brief Generates rank presence for a specific rank
+/// @param[in] i_rank the rank to generate rank presence
+/// @return returns the rank presence value
+///
+inline uint64_t generate_rank_presence(const uint64_t i_rank)
+{
+    return RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << mss::index(i_rank));
+}
+
 // Namespace for any helper functions for calling out errors
 namespace callout
 {

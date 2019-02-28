@@ -743,6 +743,7 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 
         // Gets the DIMM per RP
         const auto& l_dimm = l_dimms[mss::rank::get_dimm_from_rank(l_rank)];
+        const auto& l_dimm_rank = mss::index(l_rank);
         std::vector<uint16_t> l_eye_sizes_dq(MAX_DQ_BITS);
         std::vector<std::pair<final_nibble_delay, final_nibble_delay>> l_final_nibble_delays_buffer(MAX_LRDIMM_BUFFERS);
 
@@ -757,7 +758,8 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                  mss::c_str(l_dimm), l_rank);
 
         // 3) set the rank presence
-        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK & ~(lrdimm::RANK_PRESENCE_BIT << l_rank)), "%s failed set rank%u",
+        FAPI_TRY(set_rank_presence(l_dimm, generate_rank_presence(l_rank)),
+                 "%s failed set rank%u",
                  mss::c_str(l_dimm), l_rank);
 
         // Buffer into MWD mode
@@ -771,7 +773,7 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         {
             // Set delay (broadcast across rank)
             // 5) Sets the delay across all buffers, all nibbles - host issues BCW commands to buffers (cw_info)
-            FAPI_TRY(set_delay(l_dimm, l_rank, l_delay),
+            FAPI_TRY(set_delay(l_dimm, l_dimm_rank, l_delay),
                      "%s failed set_delay rank%u delay%u", mss::c_str(l_dimm), l_rank, l_delay);
 
             // Conduct a WR/RD
@@ -796,7 +798,7 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                   "%s failed found_best_delay_for_each_dq %u", mss::c_str(l_dimm),
                   l_rank);
         // 11) Set best case results into buffer using PBA
-        FAPI_TRY( mwd_fine::write_result_to_buffers( l_dimm, l_rank, l_final_nibble_delays_buffer),
+        FAPI_TRY( mwd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
                   "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
     }
 
