@@ -229,14 +229,13 @@ fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
-    uint8_t l_sim = 0;
-    FAPI_TRY(mss::is_simulation(l_sim));
-
-    static const std::vector< cw_info > l_bcw_info =
+    const std::vector< cw_info > l_bcw_info =
     {
-
         { FUNC_SPACE_0,  RANK_PRESENCE_CW, i_rank,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
     };
+
+    uint8_t l_sim = 0;
+    FAPI_TRY(mss::is_simulation(l_sim));
 
     // DES first - make sure those CKE go high and stay there
     l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
