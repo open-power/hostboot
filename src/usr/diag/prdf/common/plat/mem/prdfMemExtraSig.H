@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,28 @@ PRDR_ERROR_SIGNATURE(MnfgRankCte,   0xffff0071, "", "MNFG per rank CTE");
 PRDR_ERROR_SIGNATURE(MnfgDimmCte,   0xffff0072, "", "MNFG per DIMM CTE");
 PRDR_ERROR_SIGNATURE(MnfgTableFull, 0xffff0073, "", "MNFG CE table full");
 PRDR_ERROR_SIGNATURE(MnfgEntryCte,  0xffff0074, "", "MNFG CE table entry CTE");
+
+PRDR_ERROR_SIGNATURE(NvdimmPersRes, 0xffff0080, "", "NVDIMM Persistency Restored");
+
+PRDR_ERROR_SIGNATURE(VoltRegFail,   0xffff0081, "", "NVDIMM Voltage Regulator Failed");
+PRDR_ERROR_SIGNATURE(VddLost,       0xffff0082, "", "NVDIMM VDD Lost");
+PRDR_ERROR_SIGNATURE(VppLost,       0xffff0083, "", "NVDIMM VPP Lost");
+PRDR_ERROR_SIGNATURE(VttLost,       0xffff0084, "", "NVDIMM VTT Lost");
+PRDR_ERROR_SIGNATURE(NotSelfRefr,   0xffff0085, "", "NVDIMM Dram Not Self Refresh");
+PRDR_ERROR_SIGNATURE(CtrlHwErr,     0xffff0086, "", "NVDIMM Controller Hardware Error");
+PRDR_ERROR_SIGNATURE(NvmCtrlErr,    0xffff0087, "", "NVDIMM NVM Controller Error");
+PRDR_ERROR_SIGNATURE(NvmLifeErr,    0xffff0088, "", "NVDIMM NVM Lifetime Error");
+
+PRDR_ERROR_SIGNATURE(InsuffEnergy,  0xffff0089, "", "NVDIMM Not enough energy for CSAVE");
+PRDR_ERROR_SIGNATURE(InvFwErr,      0xffff008A, "", "NVDIMM Invalid Firmware Error");
+PRDR_ERROR_SIGNATURE(CnfgDataErr,   0xffff008B, "", "NVDIMM Configuration Data Error");
+PRDR_ERROR_SIGNATURE(NoEsPres,      0xffff008C, "", "NVDIMM No Energy Source Present");
+PRDR_ERROR_SIGNATURE(EsPolNotSet,   0xffff008D, "", "NVDIMM Energy Source Policy Not Set");
+PRDR_ERROR_SIGNATURE(EsHwFail,      0xffff008E, "", "NVDIMM Energy Source Hardware Fail");
+PRDR_ERROR_SIGNATURE(EsHlthAssess,  0xffff008F, "", "NVDIMM Energy Source Health Assessment Error");
+
+PRDR_ERROR_SIGNATURE(EsLifeErr,     0xffff0090, "", "NVDIMM Energy Source Lifetime Error");
+PRDR_ERROR_SIGNATURE(EsTmpErr,      0xffff0091, "", "NVDIMM Energy Source Temp Error");
 
 #endif // __prdfMemExtraSig_H
 
