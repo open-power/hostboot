@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,8 @@ OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
 OBJS += p9_pm_get_poundv_bucket.o
+OBJS += fapi2PlatGetVpdOcmbChipTest.o
+
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 ################################################################################

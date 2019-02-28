@@ -387,8 +387,8 @@ fapi2::ReturnCode platGetVPD(
                 break;
             }
 
-            // Retrieve the EFD data from the given SPD buffer.
-            // if o_blob is nullptr then size will be returned in io_vpdInfo.iv_size
+            // Retrieve the EFD data from the given SPD buffer.  If o_blob is
+            // nullptr then size will be returned in io_vpdInfo.iv_size
             FAPI_EXEC_HWP( l_rc,
                            ddimm_get_efd,
                            i_ocmbFapi2Target,
@@ -435,7 +435,9 @@ fapi2::ReturnCode platGetVPD(
         l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
 
-    FAPI_DBG("platGetVPD(OCMB): exit");
+    FAPI_DBG("platGetVPD(OCMB): exiting with %s",
+             ( (l_rc == fapi2::FAPI2_RC_SUCCESS) ?
+               "no errors" : "errors" ));
 
     return l_rc;
 }
