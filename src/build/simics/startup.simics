@@ -26,8 +26,17 @@ python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
 # TODO RTC: 204842 Revist once we get way to read CEC_TYPE from simics
 if ($hb_mode == 1) {
-    $model = (shell "printenv CEC_TYPE")
-    $machine_name = (shell "printenv MACHINE")
+
+    $model=""
+    if(env -x CEC_TYPE) {
+        $model = (env CEC_TYPE)
+    }
+
+    $machine_name=""
+    if(env -x MACHINE) {
+        $machine_name = (env MACHINE)
+    }
+
     $hb_machine = "unknown"
     if ($model == "p9_zztop")     {$hb_machine = "zztop"}
     if ($model == "p9_zeppelin")  {$hb_machine = "zeppelin"}
