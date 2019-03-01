@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,9 @@ MODULE = istep13
 
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 CEN_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
+OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
+EXP_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures
+
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -55,6 +58,8 @@ EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/
 EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
 EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/initfiles
+EXTRAINCDIR += ${EXP_PROCEDURES_PATH}/hwp/memory/
+EXTRAINCDIR += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
 
 
 # from src/usr/isteps/istep13
@@ -91,6 +96,9 @@ include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_scominit.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcbist_scom.mk
+
+include ${EXP_PROCEDURES_PATH}/hwp/memory/exp_scominit.mk
+include ${OCMB_PROCEDURES_PATH}/hwp/initfiles/explorer_scom.mk
 
 #Dram init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
@@ -135,3 +143,5 @@ VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/initfiles
+VPATH    += ${EXP_PROCEDURES_PATH}/hwp/memory
+VPATH    += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
