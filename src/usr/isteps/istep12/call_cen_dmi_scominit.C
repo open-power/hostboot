@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,10 @@
 
 // HWP
 #include    <p9_io_cen_scominit.H>
+
+#ifdef CONFIG_AXONE
+#include    <p9a_omi_setup_bars.H>
+#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -103,9 +107,52 @@ void* call_cen_dmi_scominit (void *io_pArgs)
 
     }
 
+    #ifdef CONFIG_AXONE
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_dmi_scominit: %d procs found",
+            l_procTargetList.size());
+
+    for (const auto & l_proc_target : l_procTargetList)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "p9a_omi_setup_bars HWP target HUID %.8x",
+            TARGETING::get_huid(l_proc_target));
+
+        //  call the HWP with each target
+        fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
+                (l_proc_target);
+
+        FAPI_INVOKE_HWP(l_err, p9a_omi_setup_bars, l_fapi_proc_target);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X:  p9a_omi_setup_bars HWP on target HUID %.8x",
+                l_err->reasonCode(), TARGETING::get_huid(l_proc_target) );
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  p9a_omi_setup_bars HWP");
+        }
+
+    }
+    #endif // CONFIG_AXONE
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_dmi_scominit exit" );
-    
+
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
