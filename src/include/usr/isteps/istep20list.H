@@ -92,9 +92,6 @@ const DepModInfo  g_istep20Dependancies = {
         DEP_LIB(libistep20.so),
         DEP_LIB(libxz.so),
         DEP_LIB(libruntime.so),
-#ifdef CONFIG_NVDIMM
-        DEP_LIB(libnvdimm.so),
-#endif
         NULL
     }
 };

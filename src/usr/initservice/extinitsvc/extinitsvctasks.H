@@ -416,6 +416,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended Module
             }
         },
+#ifdef CONFIG_NVDIMM
+        /**
+         * @brief   NVDIMM module
+         */
+        {
+            "libnvdimm.so" ,                                // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                  // task type
+                EXT_IMAGE,                                  // Extended Module
+            }
+        },
+#endif
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!

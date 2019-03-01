@@ -207,9 +207,6 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libcen.so),
         DEP_LIB(libnestmemutils.so),
-#ifdef CONFIG_NVDIMM
-        DEP_LIB(libnvdimm.so),
-#endif
         NULL
     }
 };

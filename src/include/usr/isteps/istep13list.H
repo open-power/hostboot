@@ -296,9 +296,6 @@ const DepModInfo g_istep13Dependancies = {
         DEP_LIB(libistep13.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libcen.so),
-#ifdef CONFIG_NVDIMM
-        DEP_LIB(libnvdimm.so),
-#endif
         NULL
     }
 };
