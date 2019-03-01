@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,38 +43,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-#ifndef __HOSTBOOT_RUNTIME
-int32_t McbistDomain::startScrub()
-{
-    #define PRDF_FUNC "[McbistDomain::startScrub] "
-
-    PRDF_ENTER( PRDF_FUNC );
-
-    int32_t o_rc = SUCCESS;
-
-    // Iterate all MCBISTs in the domain.
-    for ( uint32_t i = 0; i < GetSize(); ++i )
-    {
-        RuleChip * mcbistChip = LookUp(i);
-
-        // Start background scrub
-        int32_t l_rc = PRDF::startInitialBgScrub<TYPE_MCBIST>(mcbistChip);
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: "
-                    "MCBIST=0x%08x", mcbistChip->GetId() );
-            o_rc = FAIL; continue; // Keep going.
-        }
-    }
-
-    PRDF_EXIT( PRDF_FUNC "prdf: McbistDomain::startScrub exit" );
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-#endif
 
 #ifdef __HOSTBOOT_RUNTIME
 void McbistDomain::handleRrFo()

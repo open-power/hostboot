@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,16 +61,6 @@ class McbistDomain : public RuleChipDomain
      *        during R/R and F/O if required.
      */
     void handleRrFo();
-
-    #endif
-
-    #ifndef __HOSTBOOT_RUNTIME
-
-    /**
-     * @brief Starts memory background scrubbing for all memory.
-     * @param Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    int32_t startScrub();
 
     #endif
 

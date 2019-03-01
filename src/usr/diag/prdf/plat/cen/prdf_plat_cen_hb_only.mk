@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -39,17 +39,6 @@ prd_incpath += ${PRD_SRC_PATH}/plat/cen
 
 # plat/cen/ (rule plugin related)
 prd_rule_plugin += prdfCenMembuf.o
-
-################################################################################
-# Hostboot only object files (IPL only)
-################################################################################
-
-ifneq (${HOSTBOOT_RUNTIME},1)
-
-# plat/cen/ (non-rule plugin related)
-prd_obj += prdfCenMbaDomain_ipl.o
-
-endif
 
 ################################################################################
 # Hostboot only object files (runtime only)

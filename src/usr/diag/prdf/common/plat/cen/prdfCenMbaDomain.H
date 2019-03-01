@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,15 +62,8 @@ class MbaDomain : public RuleChipDomain
      */
     void handleRrFo();
 
-    #elif defined(__HOSTBOOT_MODULE) // IPL only
-
-    /**
-     * @brief Starts memory background scrubbing for each MBA in the node.
-     * @param Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    int32_t startScrub();
-
     #endif
+
 };
 
 } // end namespace PRDF
