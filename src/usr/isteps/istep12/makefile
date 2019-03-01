@@ -92,9 +92,6 @@ OBJS+=p9c_set_inband_addr.o
 # HWP objects need to unmask inband errors during framelock
 OBJS+=p9c_mss_unmask_errors.o
 
-# HWP files we do not have .mks for
-
-
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
@@ -128,6 +125,8 @@ OBJS += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_omi_train.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_omi_setup_bars.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
 
 
 include ${ROOTPATH}/config.mk
