@@ -183,7 +183,14 @@ sub createAttrFromFapi(\%)
     {
         if( exists $fapiattr->{overrideOnly} )
         {
-            $targattr->{persistency} = "volatile";
+            if( exists $fapiattr->{default} )
+            {
+                $targattr->{persistency} = "volatile";
+            }
+            else
+            {
+                $targattr->{persistency} = "volatile-zeroed";
+            }
         }
         else
         {
