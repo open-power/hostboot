@@ -70,6 +70,7 @@ class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t MCB_CNTL_REG = MCBIST_MCB_CNTLQ;
         static constexpr uint64_t CNTLQ_REG = MCBIST_CCS_CNTLQ;
         static constexpr uint64_t STATQ_REG = MCBIST_CCS_STATQ;
+        static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MCA;
 
         enum
         {
@@ -216,6 +217,15 @@ static constexpr uint64_t CKE_ARY_SRX[]  =
 namespace ccs
 {
 
+enum rank_configuration
+{
+    DUAL_DIRECT = 0,
+    QUAD_ENCODED = 1,
+    // Note: we don't include QUAD_DIRECT in here
+    // That's because it uses 4 CS and is board wiring dependent
+    // Not sure if it would use CS23 or CID01 for CS2/3
+};
+
 ///
 /// @brief Enums for CCS return codes
 ///
@@ -245,98 +255,173 @@ class instruction_t
     public:
         fapi2::buffer<uint64_t> arr0;
         fapi2::buffer<uint64_t> arr1;
+        // The MCA indexed rank on which to operate. If this is invalid, all ranks will be disabled
+        uint64_t iv_rank;
+        // We want to have a switch to update rank or not. A user might want to setup CS in some weird way
+        // In that case, they don't want us "fixing" their CS values
+        // We'll default the rank to be updated - we want to send out CS properly
+        bool iv_update_rank;
 
         ///
         /// @brief intstruction_t ctor
-        /// @param[in] i_target the DIMM this instruction is headed for
         /// @param[in] i_rank the rank this instruction is headed for
         /// @param[in] i_arr0 the initial value for arr0, defaults to 0
         /// @param[in] i_arr1 the initial value for arr1, defaults to 0
+        /// @param[in] i_update_rank true if the rank should be updated before being sent, defaults to true
         ///
-        instruction_t( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target = fapi2::Target<fapi2::TARGET_TYPE_DIMM>(),
-                       uint64_t i_rank = NO_CHIP_SELECT_ACTIVE,
+        instruction_t( uint64_t i_rank = NO_CHIP_SELECT_ACTIVE,
                        const fapi2::buffer<uint64_t> i_arr0 = 0,
-                       const fapi2::buffer<uint64_t> i_arr1 = 0):
+                       const fapi2::buffer<uint64_t> i_arr1 = 0,
+                       const bool i_update_rank = true):
             arr0(i_arr0),
-            arr1(i_arr1)
+            arr1(i_arr1),
+            iv_rank(i_rank),
+            iv_update_rank(i_update_rank)
         {
-            // For DIMM0 .first is the CSN_0_1 setting, .second is the CSN_2_3 setting.
-            // For DIMM1 .first is the CSN_2_3 setting, .second is the CSN_0_1 setting.
-            static const std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
+            // Skip setting up the rank if hte user doesn't want us to
+            if(iv_update_rank)
             {
-                // CS0 L CS1 H => CS2 => H CS3 => H Rank 0
-                { 0b01, 0b11 },
+                // Set the chip selects to be 1's (not active)
+                // We'll fix these up before executing the instructions
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
+                                     TT::ARR0_DDR_CSN_0_1_LEN>(0b11);
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
+                                     TT::ARR0_DDR_CSN_2_3_LEN>(0b11);
+            }
+        }
 
-                // CS0 H CS1 L => CS2 => H CS3 => H Rank 1
-                { 0b10, 0b11 },
+        ///
+        /// @brief Updates the rank based upon the passed in rank configuration encoding
+        /// @param[in] i_target the port target for this instruction - for error logging
+        /// @param[in] i_rank_config the rank configuration
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+        ///
+        fapi2::ReturnCode configure_rank(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+                                         const rank_configuration i_rank_config )
+        {
+            // If this instrunction is set to not update the rank, then don't update the rank
+            if(!iv_update_rank)
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
 
-                // CS0 H CS1 H => CS2 => L CS3 => H Rank 2
-                { 0b11, 0b01 },
-
-                // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
-                { 0b11, 0b10 },
-            };
-
-            // If the rank indicates nothing selected (active low) then we're done.
-            if (i_rank == NO_CHIP_SELECT_ACTIVE)
+            // Regardless of rank configurations, if we have NO_CHIP_SELECT_ACTIVE, deactivate all CS
+            if(iv_rank == NO_CHIP_SELECT_ACTIVE)
             {
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(0b11);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(0b11);
-                return;
+                return fapi2::FAPI2_RC_SUCCESS;
             }
 
-            //
-            // Note: This likely needs to be able to handle all DIMM, stacked, encoded CS_n, etc. This
-            // might not cut it. Turn this in to a dispatched funtion like c_str() and rcd_load() BRS
-            //
+            // First, check rank - we need to make sure that we have a valid rank
+            FAPI_ASSERT(iv_rank < MAX_MRANK_PER_PORT,
+                        fapi2::MSS_INVALID_RANK()
+                        .set_MCA_TARGET(i_target)
+                        .set_RANK(iv_rank)
+                        .set_FUNCTION(ffdc_function_codes::CCS_INST_CONFIGURE_RANK),
+                        "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
 
-            // Direct CS mode - just clear the CS_N you're interested in.
-            // Setup the chip select based on which dimm in the slot and the rank
-            if (mss::index(i_target) == 0)
+            // Now the fun happens and we can deal with the actual encoding
+
+            // If we're quad mode, setup the encoding accordingly
+            if(i_rank_config == rank_configuration::QUAD_ENCODED)
             {
-                // Sanity check the incoming rank. It has to be 0-3 since we're DIMM0
-                // Assert since this is a programming error
-                if (i_rank >= MAX_RANK_PER_DIMM)
-                {
-                    FAPI_ERR("DIMM0 %s CCS instruction looking for bad rank/chip select (%d)",
-                             mss::c_str(i_target), i_rank);
-                    fapi2::Assert(false);
-                    // Not reached but fapi2::Assert isn't [[no return]] so the compiler thinks we're going
-                    // to run off the array but we're not so this makes the compiler happy.
-                    return;
-                }
+                // CS 0/1 are first, while CID0/1 are second
+                // In quad enabled mode, CID acts as a "package select"
+                // It selects R0/2 vs R1/3
+                // CS0 vs CS1 selects the low vs high rank in the package
+                // CS0 will select rank 0/1
+                // CS1 will select rank 2/3
 
+                // Note: this is to workaround a Nimbus CCS bug
+                // 1) Nimbus thinks that CID0 is a CID not part of the CS for encoded mode
+                // 2) CID1 doesn't matter for quad encode
+                // 3) we only access ranks 2,3 in encoded mode
+                // 4) we can fake out parity by adding in another 1, so let's do that with CID1
+                // This is easier than calculating our own parity
+                // CS0 H, CS1 L, CID0-> L => Rank 2
+
+                static const std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
+                {
+                    // CS0 L, CS1 H, CID0-> L => Rank 0
+                    { 0b01, 0b00 },
+
+                    // CS0 L, CS1 H, CID0-> H => Rank 1
+                    { 0b01, 0b11 },
+
+                    // CS0 H, CS1 L, CID0-> L => Rank 2
+                    { 0b10, 0b00 },
+
+                    // CS0 H, CS1 L, CID0-> H => Rank 3
+                    { 0b10, 0b11 },
+                };
+
+                const auto l_dimm_rank = mss::index(iv_rank);
+                const bool l_is_dimm0 = iv_rank < MAX_RANK_PER_DIMM;
+                constexpr uint64_t NON_DIMM_CS = 0b11;
+
+                // Assigns the CS based upon which DIMM we're at
+                const auto CS01 = l_is_dimm0 ? CS_N[l_dimm_rank].first : NON_DIMM_CS;
+                const auto CS23 = l_is_dimm0 ? NON_DIMM_CS : CS_N[l_dimm_rank].first;
+
+                // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
-                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[i_rank].first);
+                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS01);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
-                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[i_rank].second);
+                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS23);
+                arr0.insertFromRight<TT::ARR0_DDR_CID_0_1,
+                                     TT::ARR0_DDR_CID_0_1_LEN>(CS_N[l_dimm_rank].second);
             }
+
+            // Otherwise, setup for dual-direct mode (our only other supported mode at the moment)
             else
             {
-                // DIMM1's ranks are {4,5,6,7} so we subract the mid-point rank to normalize i_rank for DIMM1
-                const uint64_t l_effective_rank = i_rank - RANK_MID_POINT;
-
-                // Sanity check that we don't have more than 2 ranks on DIMM1. Effective Config
-                // should have caught this with the plug rules, but we will select the rank in the
-                // wrong DIMM with this CCS instruction if we blew it, so lets check ... We can assert
-                // our way out of this as this is a code bug in Effective Config, so they should have
-                // reported a real error long ago ...
-                if (l_effective_rank >= MAX_RANKS_DIMM1)
+                // For DIMM0 .first is the CSN_0_1 setting, .second is the CSN_2_3 setting.
+                // For DIMM1 .first is the CSN_2_3 setting, .second is the CSN_0_1 setting.
+                static const std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
                 {
-                    FAPI_ERR("DIMM1 %s CCS instruction looking for bad rank/chip select (%d, %d)",
-                             mss::c_str(i_target), i_rank, l_effective_rank);
-                    fapi2::Assert(false);
-                    // Not reached but fapi2::Assert isn't [[no return]] so the compiler thinks we're going
-                    // to run off the array but we're not so this makes the compiler happy.
-                    return;
-                }
+                    // CS0 L CS1 H => CS2 => H CS3 => H Rank 0
+                    { 0b01, 0b11 },
 
-                // Deselect ranks on DIMM1
+                    // CS0 H CS1 L => CS2 => H CS3 => H Rank 1
+                    { 0b10, 0b11 },
+
+                    // CS0 H CS1 H => CS2 => L CS3 => H Rank 2
+                    { 0b11, 0b01 },
+
+                    // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
+                    { 0b11, 0b10 },
+                };
+
+                const auto l_dimm_rank = mss::index(iv_rank);
+                const bool l_is_dimm0 = iv_rank < MAX_RANK_PER_DIMM;
+
+                // Assigns the CS based upon which DIMM we're at
+                const auto CS01 = l_is_dimm0 ? CS_N[l_dimm_rank].first : CS_N[l_dimm_rank].second;
+                const auto CS23 = l_is_dimm0 ? CS_N[l_dimm_rank].second : CS_N[l_dimm_rank].first;
+
+                // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
-                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[l_effective_rank].second);
+                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS01);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
-                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[l_effective_rank].first);
+                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS23);
+
+                // Check that we don't have a rank out of bounds case here
+                // We can only have that if
+                // 1) we are DIMM1
+                // 2) our DIMM rank is greater than the maximum allowed number of ranks on DIMM1
+                // So, we pass always if we're DIMM0, or if our DIMM rank is less than the maximum number of DIMM's on rank 1
+                FAPI_ASSERT(l_dimm_rank < MAX_RANKS_DIMM1 || l_is_dimm0,
+                            fapi2::MSS_INVALID_RANK()
+                            .set_MCA_TARGET(i_target)
+                            .set_RANK(iv_rank)
+                            .set_FUNCTION(ffdc_function_codes::CCS_INST_CONFIGURE_RANK),
+                            "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
             }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -347,9 +432,29 @@ class instruction_t
         inline bool operator==( const instruction_t<T>& i_rhs ) const
         {
             return arr0 == i_rhs.arr0 &&
-                   arr1 == i_rhs.arr1;
+                   arr1 == i_rhs.arr1 &&
+                   iv_rank == i_rhs.iv_rank &&
+                   iv_update_rank == i_rhs.iv_update_rank;
         }
 };
+
+///
+/// @brief Determines our rank configuration type across all ports
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                  std::vector<rank_configuration>& o_rank_config);
+
+///
+/// @brief Determines our rank configuration type
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                  rank_configuration& o_rank_config);
 
 ///
 /// @brief A class representing a series of CCS instructions, and the
@@ -402,12 +507,10 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 /// @brief Setup activate command instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> act_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint64_t i_rank)
+inline instruction_t<T> act_command( const uint64_t i_rank)
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -432,7 +535,7 @@ inline instruction_t<T> act_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>();
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_2>();
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
@@ -478,14 +581,13 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     .template setBit<TT::ARR0_DDR_BANK_GROUP_0>();
 
     // RCD always goes to the 0th rank on the DIMM; either 0 or 4.
-    return instruction_t<T>(i_target, (mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t<T>((mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
 /// @brief Create, initialize an MRS CCS command
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_mrs the specific MRS
 /// @return the MRS CCS instruction
@@ -494,8 +596,7 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint64_t i_rank,
+inline instruction_t<T> mrs_command (const uint64_t i_rank,
                                      const uint64_t i_mrs )
 {
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
@@ -514,7 +615,7 @@ inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
     mss::swizzle<TT::ARR0_DDR_BANK_0_1, 3, 7>(mrs, rcd_boilerplate_arr0);
     FAPI_DBG("mrs rcd boiler 0x%llx 0x%llx", uint8_t(mrs), uint64_t(rcd_boilerplate_arr0));
-    return instruction_t<T>(i_target, i_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t<T>(i_rank, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
@@ -547,8 +648,9 @@ inline instruction_t<T> des_command(const uint16_t i_idle = 0)
     // RAS, CAS, WE no-care
 
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
-    return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), NO_CHIP_SELECT_ACTIVE,
-                            rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    return instruction_t<T>( NO_CHIP_SELECT_ACTIVE,
+                             rcd_boilerplate_arr0,
+                             rcd_boilerplate_arr1);
 }
 
 ///
@@ -690,8 +792,7 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const uint64_t i_rank,
+inline instruction_t<T> zqcl_command( const uint64_t i_rank,
                                       const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
@@ -714,14 +815,13 @@ inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Insert idle
     l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command helper function
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
@@ -732,8 +832,7 @@ inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIM
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-static fapi2::buffer<uint64_t> read_cmd_boilerplate( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank,
+static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_rank,
         const fapi2::buffer<uint64_t>& i_bank_addr = 0,
         const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
         const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -774,7 +873,6 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const fapi2::Target<fapi2::
 /// @brief Setup write command (Fixed BL8 or BC4) instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
@@ -785,15 +883,13 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const fapi2::Target<fapi2::
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> wr_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint64_t i_rank,
+inline instruction_t<T> wr_command( const uint64_t i_rank,
                                     const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                     const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                     const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
     // WR's and RD's are very similar, so we just use the RD command boiler plate and modify the command to a WR
-    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate<T>(i_target,
-            i_rank,
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = read_cmd_boilerplate<T>(i_rank,
             i_bank_addr,
             i_bank_group_addr,
             i_column_addr);
@@ -804,14 +900,13 @@ inline instruction_t<T> wr_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
     .template clearBit<TT::ARR0_DDR_ADDRESS_14>();
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read command (Fixed BL8 or BC4) instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_bank_addr bank address bits [BA0:BA1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BG0:BG1] = [62:63] (right aligned)
@@ -822,8 +917,7 @@ inline instruction_t<T> wr_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> rd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint64_t i_rank,
+inline instruction_t<T> rd_command( const uint64_t i_rank,
                                     const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                     const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                     const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -831,20 +925,21 @@ inline instruction_t<T> rd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank, i_bank_addr,
-                         i_bank_group_addr, i_column_addr);
+    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_rank,
+                         i_bank_addr,
+                         i_bank_group_addr,
+                         i_column_addr);
 
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup read w/auto precharge command (Fixed BL8 or BC4) instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_bank_addr bank address bits [BG0:BG1] = [62:63] (right aligned)
 /// @param[in] i_bank_group_addr bank group address bits [BA0:BA1] = [62:63] (right aligned)
@@ -855,8 +950,7 @@ inline instruction_t<T> rd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint64_t i_rank,
+inline instruction_t<T> rda_command( const uint64_t i_rank,
                                      const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_column_addr = 0)
@@ -864,20 +958,21 @@ inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank, i_bank_addr,
-                         i_bank_group_addr, i_column_addr);
+    l_boilerplate_arr0 = read_cmd_boilerplate<fapi2::TARGET_TYPE_MCBIST>(i_rank,
+                         i_bank_addr,
+                         i_bank_group_addr,
+                         i_column_addr);
 
     // Setup ADDR10/AP based on read type
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup precharge all banks command instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the precharge all banks command CCS instruction
@@ -886,8 +981,7 @@ inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank,
+inline instruction_t<T> precharge_all_command( const uint64_t i_rank,
         const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
@@ -913,22 +1007,20 @@ inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET
     // From DDR4 Spec table 17:
     // All other bits from the command truth table or 'V', for valid (1 or 0)
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh entry command instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank, const uint16_t i_idle = 0 )
+inline instruction_t<T> self_refresh_entry_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -950,14 +1042,13 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 ///
 /// @brief Setup self-refresh exit using NOP command instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh exit command CCS instruction
@@ -965,8 +1056,7 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank, const uint16_t i_idle = 0 )
+inline instruction_t<T> self_refresh_exit_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -988,7 +1078,7 @@ inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TA
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<T>(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
 //

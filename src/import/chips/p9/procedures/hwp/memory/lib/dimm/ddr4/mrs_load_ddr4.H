@@ -308,7 +308,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                               const uint64_t i_delay_in_cycles,
                               std::vector< ccs::instruction_t<T> >& io_inst )
 {
-    ccs::instruction_t<T> l_inst_a_side = ccs::mrs_command<T>(i_target, i_rank, i_data.iv_mrs);
+    ccs::instruction_t<T> l_inst_a_side = ccs::mrs_command<T>(i_rank, i_data.iv_mrs);
     ccs::instruction_t<T> l_inst_b_side;
     bool l_is_a17 = false;
 
@@ -1914,7 +1914,7 @@ fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targ
     // Right now we only have support for RD and RDA
     // Unclear if we want the API select the type of read command right now
     // Note the auto precharge is ignored with MPR mode on so we just do a read cmd
-    ccs::instruction_t<T> l_inst = ccs::rd_command<T> (i_target, i_rank, i_mpr_loc);
+    ccs::instruction_t<T> l_inst = ccs::rd_command<T> (i_rank, i_mpr_loc);
 
     // In MPR Mode:
     // Reads (back-to-back) from Page 0 may use tCCD_S or tCCD_L timing between read commands
@@ -1959,7 +1959,7 @@ fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
                                  const uint64_t i_rank,
                                  std::vector< ccs::instruction_t<T> >& io_inst )
 {
-    ccs::instruction_t<T> l_inst = ccs::precharge_all_command<T> (i_target, i_rank);
+    ccs::instruction_t<T> l_inst = ccs::precharge_all_command<T> (i_rank);
 
     // From the DDR4 Spec tRP is the precharge command period
     uint8_t l_delay = 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,57 @@ namespace mss
 {
 namespace ccs
 {
+
+///
+/// @brief Determines our rank configuration type across all ports
+/// @param[in] i_target the MCBIST target on which to operate
+/// @param[out] o_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                  std::vector<rank_configuration>& o_rank_config)
+{
+    o_rank_config.clear();
+    // Create one per port, we then use relative indexing to get us the number we need
+    o_rank_config = std::vector<rank_configuration>(PORTS_PER_MCBIST);
+
+    for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        rank_configuration l_config;
+        FAPI_TRY(get_rank_config(l_mca, l_config));
+        o_rank_config[mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(l_mca)] = l_config;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines our rank configuration type
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                  rank_configuration& o_rank_config)
+{
+    constexpr uint8_t QUAD_RANK_ENABLE = 4;
+    o_rank_config = rank_configuration::DUAL_DIRECT;
+
+    uint8_t l_num_master_ranks[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY(mss::eff_num_master_ranks_per_dimm(i_target, l_num_master_ranks));
+
+    // We only need to check DIMM0
+    // Our number of ranks should be the same between DIMM's 0/1
+    // Check if we have the right number for encoded mode
+    o_rank_config = l_num_master_ranks[0] == QUAD_RANK_ENABLE ?
+                    rank_configuration::QUAD_ENCODED :
+                    rank_configuration::DUAL_DIRECT;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Start or stop the CCS engine
@@ -189,6 +240,9 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     auto l_inst_iter = i_program.iv_instructions.begin();
 
+    std::vector<rank_configuration> l_rank_configs;
+    FAPI_TRY(get_rank_config(i_target, l_rank_configs));
+
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
 
@@ -202,75 +256,81 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     while (l_inst_iter != i_program.iv_instructions.end())
     {
-        size_t l_inst_count = 0;
-
-        uint64_t l_total_delay = 0;
-        uint64_t l_delay = 0;
-        uint64_t l_repeat = 0;
-        uint8_t l_current_cke = 0;
-
-        // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
-        for (; l_inst_iter != i_program.iv_instructions.end()
-             && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++l_inst_iter)
-        {
-            l_inst_iter->arr0.extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
-
-            // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
-            // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
-            l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
-                        MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
-            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0), "Error in ccs::execute" );
-            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1), "Error in ccs::execute" );
-
-            // arr1 contains a specification of the delay and repeat after this instruction, as well
-            // as a repeat. Total up the delays as we go so we know how long to wait before polling
-            // the CCS engine for completion
-            l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay);
-            l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT,
-                        MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT>(l_repeat);
-
-            l_total_delay += l_delay * (l_repeat + 1);
-
-            FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
-                     l_inst_count, l_inst_iter->arr0, l_inst_iter->arr1,
-                     CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
-                     l_delay, l_total_delay, mss::c_str(i_target));
-        }
-
-        // Check our program for any delays. If there isn't a iv_initial_delay configured, then
-        // we use the delay we just summed from the instructions.
-        if (i_program.iv_poll.iv_initial_delay == 0)
-        {
-            i_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, l_total_delay);
-        }
-
-        if (i_program.iv_poll.iv_initial_sim_delay == 0)
-        {
-            i_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(l_total_delay);
-        }
-
-        FAPI_INF("executing ccs instructions (%d:%d, %d) for %s",
-                 i_program.iv_instructions.size(), l_inst_count, i_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
-
-        // Deselect
-        l_des.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
-
-        // Insert a DES as our last instruction. DES is idle state anyway and having this
-        // here as an instruction forces the CCS engine to wait the delay specified in
-        // the last instruction in this array (which it otherwise doesn't do.)
-        l_des.arr1.setBit<MCBIST_CCS_INST_ARR1_00_END>();
-        FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0), "Error in ccs::execute" );
-        FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1), "Error in ccs::execute" );
-
-        FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
-                 l_inst_count, l_des.arr0, l_des.arr1,
-                 CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count, mss::c_str(i_target));
 
         // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
         for (const auto& p : i_ports)
         {
-            FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
-            FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)), "Error in ccs execute" );
+            const auto l_port_index = mss::relative_pos<TARGET_TYPE_MCBIST>(p);
+            size_t l_inst_count = 0;
+
+            uint64_t l_total_delay = 0;
+            uint64_t l_delay = 0;
+            uint64_t l_repeat = 0;
+            uint8_t l_current_cke = 0;
+
+            // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
+            for (; l_inst_iter != i_program.iv_instructions.end()
+                 && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++l_inst_iter)
+            {
+                // First, update the current instruction's chip selects for the current port
+                FAPI_TRY(l_inst_iter->configure_rank(p, l_rank_configs[l_port_index]), "Error in rank config");
+
+                l_inst_iter->arr0.extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+
+                // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
+                // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
+                l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
+                            MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
+                FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0), "Error in ccs::execute" );
+                FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1), "Error in ccs::execute" );
+
+                // arr1 contains a specification of the delay and repeat after this instruction, as well
+                // as a repeat. Total up the delays as we go so we know how long to wait before polling
+                // the CCS engine for completion
+                l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay);
+                l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT,
+                            MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT>(l_repeat);
+
+                l_total_delay += l_delay * (l_repeat + 1);
+
+                FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
+                         l_inst_count, l_inst_iter->arr0, l_inst_iter->arr1,
+                         CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
+                         l_delay, l_total_delay, mss::c_str(i_target));
+            }
+
+            // Check our program for any delays. If there isn't a iv_initial_delay configured, then
+            // we use the delay we just summed from the instructions.
+            if (i_program.iv_poll.iv_initial_delay == 0)
+            {
+                i_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, l_total_delay);
+            }
+
+            if (i_program.iv_poll.iv_initial_sim_delay == 0)
+            {
+                i_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(l_total_delay);
+            }
+
+            FAPI_INF("executing ccs instructions (%d:%d, %d) for %s",
+                     i_program.iv_instructions.size(), l_inst_count, i_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
+
+            // Deselect
+            l_des.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+
+            // Insert a DES as our last instruction. DES is idle state anyway and having this
+            // here as an instruction forces the CCS engine to wait the delay specified in
+            // the last instruction in this array (which it otherwise doesn't do.)
+            l_des.arr1.setBit<MCBIST_CCS_INST_ARR1_00_END>();
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0), "Error in ccs::execute" );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1), "Error in ccs::execute" );
+
+            FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
+                     l_inst_count, l_des.arr0, l_des.arr1,
+                     CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count, mss::c_str(i_target));
+
+
+            FAPI_INF("executing CCS array for port %d (%s)", l_port_index, mss::c_str(p));
+            FAPI_TRY( select_ports( i_target, l_port_index), "Error in ccs execute" );
             FAPI_TRY( execute_inst_array(i_target, i_program, p), "Error in ccs execute" );
         }
     }

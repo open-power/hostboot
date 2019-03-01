@@ -69,7 +69,7 @@ fapi2::ReturnCode setup_dram_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
     // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-    l_inst = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_target, i_rank);
+    l_inst = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_rank);
 
     // Doubling tZQ to better margin per lab request
     {

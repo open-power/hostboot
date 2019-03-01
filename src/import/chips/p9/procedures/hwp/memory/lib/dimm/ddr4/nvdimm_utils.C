@@ -527,9 +527,9 @@ fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA
         for ( const auto r : l_ranks)
         {
             FAPI_DBG("precharge_all_command for %s", mss::c_str(d));
-            l_program.iv_instructions.push_back( ccs::precharge_all_command<TARGET_TYPE_MCBIST>(d, r, l_trp[0]) );
+            l_program.iv_instructions.push_back( ccs::precharge_all_command<TARGET_TYPE_MCBIST>(r, l_trp[0]) );
             FAPI_DBG("zqcal_command for %s", mss::c_str(d));
-            l_program.iv_instructions.push_back( ccs::zqcl_command<TARGET_TYPE_MCBIST>(d, r, mss::tzqinit()) );
+            l_program.iv_instructions.push_back( ccs::zqcl_command<TARGET_TYPE_MCBIST>(r, mss::tzqinit()) );
         }
     }// dimms
 
@@ -661,7 +661,7 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Precharge all command
     // All CKE = high, all CSn = low, Reset_n = high, wait tRP
-    l_inst = ccs::precharge_all_command<TARGET_TYPE_MCBIST>(l_dimms[0], 0, l_trp);
+    l_inst = ccs::precharge_all_command<TARGET_TYPE_MCBIST>(0, l_trp);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
     l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
@@ -670,7 +670,7 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Self-refresh entry command
     // All CKE = low, all CSn = low, Reset_n = high, wait tCKSRE
-    l_inst = ccs::self_refresh_entry_command<TARGET_TYPE_MCBIST>(l_dimms[0], 0, mss::tcksre(l_dimms[0]));
+    l_inst = ccs::self_refresh_entry_command<TARGET_TYPE_MCBIST>(0, mss::tcksre(l_dimms[0]));
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(mss::CKE_LOW);
@@ -680,7 +680,7 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Push in an empty instruction for RESETn
     // All CKE = low, all CSn = high (default), Reset_n = low
-    l_inst = ccs::instruction_t<TARGET_TYPE_MCBIST>(l_dimms[0]);
+    l_inst = ccs::instruction_t<TARGET_TYPE_MCBIST>();
     FAPI_INF("Assert RESETn arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
     l_program.iv_instructions.push_back(l_inst);
 

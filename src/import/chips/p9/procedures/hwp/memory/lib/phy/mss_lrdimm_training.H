@@ -122,8 +122,7 @@ inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGE
         FAPI_TRY(l_swizzled_pattern.extract(l_pattern, l_ba * PATTERN_LEN, PATTERN_LEN, ADDR_START), "%s ba%u",
                  mss::c_str(i_target), l_ba);
         {
-            auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( i_target,
-                        i_rank,
+            auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( i_rank,
                         l_ba,
                         MPR_WR_BG,
                         l_pattern);
