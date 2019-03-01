@@ -510,7 +510,7 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Creates the activate and updates the timing for the activate command
     {
         // Creates the instruciton
-        auto l_activate = ccs::act_command<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank);
+        auto l_activate = ccs::act_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
 
         // Gets the command to command timing we need activate to write
         // This is a RAS command to a CAS command, so RAS to CAS delay -> tRCD
@@ -536,7 +536,7 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Creates the write command and updates
     {
         // Creates the instruciton
-        auto l_wr = ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank);
+        auto l_wr = ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
 
         // ODT value buffer
         const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
@@ -583,7 +583,7 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
 
     // Read auto-precharge, so we don't need to send our own precharge command
     {
-        auto l_rd = ccs::rda_command<fapi2::TARGET_TYPE_MCBIST>(i_target, i_rank);
+        auto l_rd = ccs::rda_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
 
         // Wait until we should start our RD ODT's
         uint8_t l_cl = 0;
