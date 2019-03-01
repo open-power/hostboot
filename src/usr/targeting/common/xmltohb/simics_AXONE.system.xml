@@ -345,7 +345,7 @@
     </attribute>
     <attribute>
         <id>EARLY_TESTCASES_ISTEP</id>
-        <default>0x0609</default>
+        <default>0x0E07</default>
     </attribute>
 </targetInstance>
 
