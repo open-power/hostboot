@@ -93,7 +93,8 @@ void* call_mss_scrub (void *io_pArgs)
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     ISTEP::MOD_MSS_SCRUB,
                                     ISTEP::RC_INVALID_TARGET_TYPE,
-                                    masterProcModel, 0 );
+                                    masterProcModel, 0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
         }
         if ( nullptr != errl ) break;
 
