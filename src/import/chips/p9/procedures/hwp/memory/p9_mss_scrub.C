@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 10000);
     uint64_t l_memory_size = 0;
 
-    FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
+    FAPI_TRY( mss::eff_memory_size<mss::mc_type::NIMBUS>(i_target, l_memory_size) );
     l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(i_target, (l_memory_size * mss::BYTES_PER_GB));
 
     FAPI_TRY( mss::is_simulation( l_sim) );

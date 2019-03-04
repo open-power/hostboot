@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,23 +44,46 @@ namespace mss
 {
 
 ///
+/// @brief Return the total memory size behind a DIMM target
+/// @param[in] i_target the DIMM target
+/// @param[out] o_size the size of memory in GB behind the target
+/// @return FAPI2_RC_SUCCESS if ok
+/// @note The purpose of this specialization is to bridge the gap between different accessor functions
+///
+template<>
+fapi2::ReturnCode eff_memory_size<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint64_t& o_size )
+{
+    uint32_t l_size = 0;
+    o_size = 0;
+    FAPI_TRY( mss::eff_dimm_size(i_target, l_size) );
+    o_size = l_size;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Return the total memory size behind an MCA
 /// @param[in] i_target the MCA target
 /// @param[out] o_size the size of memory in GB behind the target
 /// @return FAPI2_RC_SUCCESS if ok
 ///
 template<>
-fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_size )
+fapi2::ReturnCode eff_memory_size<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    uint64_t& o_size )
 {
     // Don't try to get cute and read the attributes once and loop over the array.
     // Cronus honors initToZero which would work, but HB might not and so we might get
     // crap in some of the attributes (which we shouldn't access as there's no DIMM there)
-    uint32_t l_sizes = 0;
+    uint64_t l_sizes = 0;
     o_size = 0;
 
     for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        FAPI_TRY( mss::eff_dimm_size(d, l_sizes) );
+        FAPI_TRY( eff_memory_size<mss::mc_type::NIMBUS>(d, l_sizes) );
         o_size += l_sizes;
     }
 
@@ -75,14 +98,16 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if ok
 ///
 template<>
-fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, uint64_t& o_size )
+fapi2::ReturnCode eff_memory_size<mss::mc_type::NIMBUS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+    uint64_t& o_size )
 {
     o_size = 0;
 
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
         uint64_t l_size = 0;
-        FAPI_TRY( eff_memory_size(p, l_size) );
+        FAPI_TRY( eff_memory_size<mss::mc_type::NIMBUS>(p, l_size) );
         o_size += l_size;
     }
 

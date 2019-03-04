@@ -82,7 +82,9 @@ bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
 /// @return FAPI2_RC_SUCCESS if ok
 ///
 template<>
-fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target, uint64_t& o_size )
+fapi2::ReturnCode eff_memory_size<mss::mc_type::CENTAUR>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+    uint64_t& o_size )
 {
     o_size = 0;
     uint8_t l_sizes[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {};
@@ -116,14 +118,16 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if ok
 ///
 template<>
-fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target, uint64_t& o_size )
+fapi2::ReturnCode eff_memory_size<mss::mc_type::CENTAUR>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+    uint64_t& o_size )
 {
     o_size = 0;
 
     for (const auto& mba : mss::find_targets<fapi2::TARGET_TYPE_MBA>(i_target))
     {
         uint64_t l_mba_size;
-        FAPI_TRY(eff_memory_size(mba, l_mba_size),
+        FAPI_TRY(eff_memory_size<mss::mc_type::CENTAUR>(mba, l_mba_size),
                  "Error from eff_memory_size (mba: %s)", mss::c_str(mba));
         o_size += l_mba_size;
     }// mba

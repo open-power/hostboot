@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <p9n2_mc_scom_addresses.H>
 #include <p9n2_mc_scom_addresses_fld.H>
 #include <map>
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
 
 ///----------------------------------------------------------------------------
@@ -293,7 +294,7 @@ fapi2::ReturnCode getMcMemSize(
                  (uint64_t)fapi2::current_err);
 
         // Get the amount of memory behind this MCA target
-        FAPI_TRY(mss::eff_memory_size(l_mca, l_mcaSize),
+        FAPI_TRY(mss::eff_memory_size<mss::mc_type::NIMBUS>(l_mca, l_mcaSize),
                  "Error returned from eff_memory_size - MCA, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
@@ -327,7 +328,7 @@ fapi2::ReturnCode getMcMemSize(
                  (uint64_t)fapi2::current_err);
 
         // Get the amount of memory behind this DMI target
-        FAPI_TRY(mss::eff_memory_size(l_dmi, l_dmiSize),
+        FAPI_TRY(mss::eff_memory_size<mss::mc_type::CENTAUR>(l_dmi, l_dmiSize),
                  "Error returned from eff_memory_size - DMI, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 

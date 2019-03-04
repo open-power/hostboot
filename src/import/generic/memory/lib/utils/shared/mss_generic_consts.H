@@ -377,6 +377,7 @@ struct procTraits<proc_type::AXONE>
     enum
     {
         EXP_PORTS_PER_OCMB = 1,
+        DIMMS_PER_PORT = 2,
     };
 };
 

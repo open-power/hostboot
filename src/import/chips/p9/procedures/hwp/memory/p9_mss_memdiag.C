@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ extern "C"
         mss::poll_parameters l_poll_parameters(INITIAL_DELAY, INITIAL_SIM_DELAY, DELAY_TIME, SIM_DELAY_TIME, MAX_POLL_COUNT);
         uint64_t l_memory_size = 0;
 
-        FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
+        FAPI_TRY( mss::eff_memory_size<mss::mc_type::NIMBUS>(i_target, l_memory_size) );
         l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(i_target, (l_memory_size * mss::BYTES_PER_GB));
 
         FAPI_TRY( mss::is_simulation( l_sim) );

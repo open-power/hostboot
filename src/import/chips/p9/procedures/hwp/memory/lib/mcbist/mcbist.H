@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,11 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
+#include <lib/shared/mss_const.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <lib/utils/mss_nimbus_conversions.H>
-#include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
 #include <lib/utils/num.H>
 #include <lib/mcbist/patterns.H>
@@ -1866,7 +1867,7 @@ class program
                         constexpr uint64_t l_seconds = SEC_IN_HOUR * BG_SCRUB_IN_HOURS;
 
                         FAPI_TRY( mss::freq(i_target, l_freq) );
-                        FAPI_TRY( mss::eff_memory_size(i_target, l_size) );
+                        FAPI_TRY( mss::eff_memory_size<mss::mc_type::NIMBUS>(i_target, l_size) );
 
                         calculate_min_cmd_gap(i_target, l_freq, l_size, l_min_cmd_gap, l_timebase);
 

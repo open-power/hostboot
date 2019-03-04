@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <p9_mss_eff_grouping.H>
 #include <p9_fbc_utils.H>
 #include <map>
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <lib/mss_attribute_accessors.H>
 
@@ -534,7 +535,7 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
 
     // Get the amount of memory behind this MCA target
     // Note: DIMM must be enabled to be accounted for.
-    FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
+    FAPI_TRY(mss::eff_memory_size<mss::mc_type::NIMBUS>(i_target, iv_dimmSize),
              "Error returned from eff_memory_size, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
@@ -608,7 +609,7 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
         iv_membuf = l_attachedMembuf.front();
 
         // Get the amount of memory behind this DMI target
-        FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
+        FAPI_TRY(mss::eff_memory_size<mss::mc_type::CENTAUR>(i_target, iv_dimmSize),
                  "Error returned from eff_memory_size, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }
@@ -3129,8 +3130,8 @@ fapi2::ReturnCode findMinDeconfigForPortPair(
             {
                 if (l_mba_functional[ii][jj])
                 {
-                    FAPI_TRY(mss::eff_memory_size(l_mba_targets[ii][l_mba_tgt_index[ii][jj]],
-                                                  l_mba_size[ii][jj]),
+                    FAPI_TRY(mss::eff_memory_size<mss::mc_type::CENTAUR>(l_mba_targets[ii][l_mba_tgt_index[ii][jj]],
+                             l_mba_size[ii][jj]),
                              "Error from eff_memory_size");
                     FAPI_DBG("Set MBA size[%d][%d] = %d",
                              ii, jj, l_mba_size[ii][jj]);

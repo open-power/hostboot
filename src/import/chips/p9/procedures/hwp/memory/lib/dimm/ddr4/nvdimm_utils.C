@@ -140,7 +140,7 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
     mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 500);
     uint64_t l_memory_size = 0;
 
-    FAPI_TRY( mss::eff_memory_size(l_mcbist, l_memory_size) );
+    FAPI_TRY( mss::eff_memory_size<mss::mc_type::NIMBUS>(l_mcbist, l_memory_size) );
     l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(l_mcbist, (l_memory_size * mss::BYTES_PER_GB));
 
     {

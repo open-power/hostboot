@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #define _MSS_EFF_MEMORY_SIZE_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
@@ -53,13 +54,63 @@ bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
 
 ///
 /// @brief Return the total memory size behind the target
+/// @tparam MC the type of memory controller (defaults to DEFAULT_MC_TYPE)
 /// @tparam T fapi2 target template parameter
 /// @param[in] i_target the fapi2::Target, typically a port
 /// @param[out] o_size the size of memory in GB behind the target
 /// @return FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode eff_memory_size( const fapi2::Target<T>& i_target, uint64_t& o_size );
+
+///
+/// @brief Return the total memory size behind a MEM_PORT target
+/// @param[in] i_target the port target
+/// @param[out] o_size the size of memory in GB behind the target
+/// @return FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC >
+inline fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint64_t& o_size )
+{
+    // Don't try to get cute and read the attributes once and loop over the array.
+    // Cronus honors initToZero which would work, but HB might not and so we might get
+    // crap in some of the attributes (which we shouldn't access as there's no DIMM there)
+    uint64_t l_sizes = 0;
+    o_size = 0;
+
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        FAPI_TRY( eff_memory_size<MC>(d, l_sizes) );
+        o_size += l_sizes;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the total memory size behind an OCMB_CHIP target
+/// @param[in] i_target the OCMB target
+/// @param[out] o_size the size of memory in GB behind the target
+/// @return FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC >
+inline fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        uint64_t& o_size )
+{
+    o_size = 0;
+
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        uint64_t l_size = 0;
+        FAPI_TRY( eff_memory_size<MC>(p, l_size) );
+        o_size += l_size;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }
 
 #endif
