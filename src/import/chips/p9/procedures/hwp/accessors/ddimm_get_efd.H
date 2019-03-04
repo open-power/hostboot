@@ -47,7 +47,7 @@ namespace fapi2
 }
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_ddimm_get_efd_FP_t)(
+typedef fapi2::ReturnCode (*ddimm_get_efd_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     uint8_t* const,
