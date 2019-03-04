@@ -453,11 +453,12 @@ struct conn_t
             case TYPE_MCC:          order = 21; break;
             case TYPE_OMI:          order = 22; break;
             case TYPE_OCMB_CHIP:    order = 23; break;
-            case TYPE_DMI:          order = 24; break;
-            case TYPE_MEMBUF:       order = 25; break;
-            case TYPE_L4:           order = 26; break;
-            case TYPE_MBA:          order = 27; break;
-            case TYPE_DIMM:         order = 28; break;
+            case TYPE_MEM_PORT:     order = 24; break;
+            case TYPE_DMI:          order = 25; break;
+            case TYPE_MEMBUF:       order = 26; break;
+            case TYPE_L4:           order = 27; break;
+            case TYPE_MBA:          order = 28; break;
+            case TYPE_DIMM:         order = 29; break;
             default: ;
         }
 
@@ -586,7 +587,11 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_OMI,    TYPE_OCMB_CHIP,  TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_OCMB_CHIP, TYPE_OMI,     TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OCMB_CHIP, TYPE_MEM_PORT,TargetService::CHILD_BY_AFFINITY  },
         { TYPE_OCMB_CHIP, TYPE_DIMM,    TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_MEM_PORT, TYPE_OCMB_CHIP,TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MEM_PORT, TYPE_DIMM,     TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
@@ -609,6 +614,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_DIMM,   TYPE_MCA,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_OCMB_CHIP,  TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_MEM_PORT,   TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_MBA,        TargetService::PARENT_BY_AFFINITY },
 
     };
@@ -832,7 +838,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                                (i_connPos == (mcaPos % MAX_MCA_PER_MCS));
                     } );
         }
-        else if ( TYPE_MCA == trgtType && TYPE_DIMM == i_connType )
+        else if ( (TYPE_MCA == trgtType && TYPE_DIMM == i_connType) ||
+                  (TYPE_MEM_PORT == trgtType && TYPE_DIMM == i_connType) )
         {
             // i_connPos is the DIMM select (0-1). Note that we don't use
             // getTargetPosition() on the DIMM because that does not return a
@@ -842,8 +849,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             // will always match the DIMM select. This does not let us match the
             // parent unit like all of the other checks in this functions.
             // Fortunately, it will be very difficult to have a bug where the
-            // getConnected code returns DIMMs on a different MCA target. So
-            // this is an acceptible risk.
+            // getConnected code returns DIMMs on a different MCA/MEM_PORT
+            // target. So this is an acceptable risk.
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     { return ( i_connPos == t->getAttr<ATTR_REL_POS>() ); } );
@@ -893,7 +900,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                     } );
         }
         else if ( (TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType) ||
-                  (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) )
+                  (TYPE_OMI == trgtType && TYPE_OCMB_CHIP == i_connType) ||
+                  (TYPE_OCMB_CHIP == trgtType && TYPE_MEM_PORT == i_connType) )
         {
             // There should only be one in the list.
             PRDF_ASSERT( 1 == list.size() ); // just in case
