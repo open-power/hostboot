@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/header.H>
 #include <sys/task.h>
+#include <arch/ppc.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -363,6 +364,15 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                       PNOR::SectionIdToString(i_id));
         }
 
+        // If hash table exists, need to adjust sizes
+        if (l_info.hasHashTable)
+        {
+            io_rec->hasHashTable = true;
+            l_info.vaddr -= l_info.secureProtectedPayloadSize;
+            l_info.size += l_info.secureProtectedPayloadSize;
+            io_rec->hashTableVaddr = l_info.vaddr;
+        }
+
         l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
         l_info.size += PAGESIZE; // add a page to size to account for the header
 
@@ -643,13 +653,23 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                    SHA512_DIGEST_LENGTH);
         }
 
-        // set permissions on the secured pages to writable
+        // set permissions to be writable
+        // in the case of HPT this is the header + HPT
+        // in the case of no HPT this is the header + text region
         l_errhdl = setPermission(io_rec->secAddr, l_protectedSizeWithHdr,
                                  WRITABLE);
-        if(l_errhdl)
+        if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
-                                  "failed on text section");
+            if (l_info.hasHashTable)
+            {
+                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections set permissions "
+                          "failed on header + hash page table");
+            }
+            else
+            {
+                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections set permissions "
+                          "failed on header + text section");
+            }
             break;
         }
 
@@ -691,10 +711,18 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 break;
             }
 
-
-            l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
-                                       unprotectedPayloadSize,
-                                       WRITABLE | WRITE_TRACKED);
+            if (l_info.hasHashTable)
+            {
+                l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
+                                         unprotectedPayloadSize,
+                                         READ_ONLY);
+            }
+            else
+            {
+                l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
+                                         unprotectedPayloadSize,
+                                         WRITABLE | WRITE_TRACKED);
+            }
             if(l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
@@ -704,8 +732,11 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
             // Register the write tracked memory range to be flushed on
             // shutdown.
-            INITSERVICE::registerBlock(io_rec->secAddr + l_protectedSizeWithHdr,
-                                        unprotectedPayloadSize, SPNOR_PRIORITY);
+            if (!l_info.hasHashTable)
+            {
+                INITSERVICE::registerBlock(io_rec->secAddr + l_protectedSizeWithHdr,
+                                           unprotectedPayloadSize, SPNOR_PRIORITY);
+            }
         }
         else
         {
@@ -736,6 +767,83 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
     }
 
     return l_rc;
+}
+
+int64_t getHashPageTableIndex(const int64_t i_vaddr)
+{
+    return (i_vaddr / static_cast<int64_t>(PAGE_SIZE)) + 1;
+}
+
+
+PAGE_TABLE_ENTRY_t* getHashPageTableEntry(const int64_t i_vaddr,
+                                          const uint64_t i_hash_vaddr)
+{
+    int64_t l_index = getHashPageTableIndex(i_vaddr);
+    int64_t l_offset = l_index * HASH_PAGE_TABLE_ENTRY_SIZE;
+
+    // l_offset is the offset for the start of the hash page table
+    // i_hash_vaddr is the vaddr for the start of the hash in SECURE
+    // subtract off DELTA of 3GB to get into TEMP space
+    return reinterpret_cast<PAGE_TABLE_ENTRY_t*>(l_offset + i_hash_vaddr -
+                                                 VMM_VADDR_SPNOR_DELTA);
+}
+
+errlHndl_t verify_page(const int64_t i_offset_vaddr, const uint64_t i_hash_vaddr,
+                       const uint64_t i_hash_size)
+{
+    errlHndl_t l_errl = nullptr;
+
+    // Get current hash page table entry in TEMP space
+    PAGE_TABLE_ENTRY_t* l_pageTableEntry =
+        getHashPageTableEntry(i_offset_vaddr, i_hash_vaddr);
+
+    // Get previous hash page table entry in TEMP space
+    PAGE_TABLE_ENTRY_t* l_prevPageTableEntry =
+        getHashPageTableEntry(i_offset_vaddr - PAGE_SIZE, i_hash_vaddr);
+
+    // Concatenate previous hash with current page data
+    std::vector< std::pair<void*,size_t> > l_blobs;
+    l_blobs.push_back(std::make_pair<void*,size_t>(l_prevPageTableEntry,
+                                                   HASH_PAGE_TABLE_ENTRY_SIZE));
+
+    // To get to PNOR space, we have the address of the hash in SECURE space and
+    // we add hash table size to get passed the hash page table. Then we add
+    // i_offset_vaddr, the offset of the requested vaddr, to end up at the
+    // requested vaddr in SECURE space. Finally we subtract off 2 DELTAS of
+    // 3GB each to get to the requested vaddr in PNOR space
+    l_blobs.push_back(std::make_pair<void*,size_t>(
+                                        reinterpret_cast<void*>(i_offset_vaddr +
+                                            i_hash_vaddr + i_hash_size -
+                                            2 * VMM_VADDR_SPNOR_DELTA),
+                                            PAGE_SIZE));
+    SHA512_t l_curPageHash = {0};
+    SECUREBOOT::hashConcatBlobs(l_blobs, l_curPageHash);
+
+    // Compare existing hash page table entry with the derived one.
+    if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)
+    {
+        TRACFCOMP(g_trac_pnor, "ERROR:>PNOR::verify_page secureboot verify fail on vaddr 0x%016llX",
+                        i_hash_vaddr + i_hash_size + i_offset_vaddr);
+        /*@
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MOD_SPNORRP_VERIFY_PAGE
+         * @reasoncode      RC_VERIFY_PAGE_FAILED
+         * @userdata1       Kernel RC
+         * @userdata2       Virtual address accessed
+         *
+         * @devdesc         Secureboot page verify failure
+         * @custdesc        Corrupted flash image or firmware error during system boot
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                         MOD_SPNORRP_VERIFY_PAGE,
+                                         RC_VERIFY_PAGE_FAILED,
+                                         TO_UINT64(EACCES),
+                                         i_offset_vaddr,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+    }
+    return l_errl;
 }
 
 
@@ -769,6 +877,7 @@ void SPnorRP::waitForMessage()
 
             // data[0] = virtual address requested
             // data[1] = address to place contents
+            uint64_t requested_vaddr = message->data[0];
             eff_addr = reinterpret_cast<uint8_t*>(message->data[0]);
             user_addr = reinterpret_cast<uint8_t*>(message->data[1]);
 
@@ -819,9 +928,33 @@ void SPnorRP::waitForMessage()
                         TRACDCOMP( g_trac_pnor, "SPnorRP::waitForMessage got a"
                             " request to read from secure space - "
                             "message : user_addr=%p, eff_addr=%p, msgtype=%d, "
-                            "textSize=0x%.16llX secAddr0x%.16llX", user_addr,
+                            "textSize=0x%.16llX secAddr=0x%.16llX", user_addr,
                             eff_addr, message->type, l_rec.textSize,
                                                                l_rec.secAddr);
+
+                        // If record has an associated hash page table, then we
+                        // want to verify the page with the hash table in temp
+                        if (SECUREBOOT::enabled() && l_rec.hasHashTable)
+                        {
+                            // Pass in the offset of just the data
+                            int64_t offset_vaddr = requested_vaddr -
+                                l_rec.hashTableVaddr - l_rec.textSize;
+
+                            // There is no hash table entry when we try to
+                            // verify the header
+                            if (offset_vaddr >= 0) {
+                                l_errhdl = verify_page(offset_vaddr,
+                                                       l_rec.hashTableVaddr,
+                                                       l_rec.textSize);
+                            }
+
+                            if (l_errhdl)
+                            {
+                                SECUREBOOT::handleSecurebootFailure(l_errhdl, false, true);
+                                status_rc = -EFAULT;
+                                break;
+                            }
+                        }
 
                         // determine the source of the data depending on
                         // whether it is part of the secure payload.
@@ -843,8 +976,8 @@ void SPnorRP::waitForMessage()
                         // if the page came from temp space then free up
                         // the temp page now that we're done with it
                         // NOTE: secAddr points to Secure Header
-                        if (eff_addr < ( (l_rec.secAddr + PAGESIZE) +
-                                          l_rec.textSize))
+                        if (!l_rec.hasHashTable && (eff_addr < ( (l_rec.secAddr + PAGESIZE) +
+                                                    l_rec.textSize)))
                         {
                             mm_remove_pages(RELEASE, eff_addr - delta,
                                             PAGESIZE);
@@ -924,7 +1057,6 @@ void SPnorRP::waitForMessage()
 
                             // cache the record to use fields later as hints
                             l_rec = *l_record;
-
                         } while (0);
                     }
                     break;
@@ -936,7 +1068,7 @@ void SPnorRP::waitForMessage()
                         do {
                             // Disallow unload of HBB, HBI and Targeting
                             if (l_id == HB_BASE_CODE ||
-                                l_id == HB_EXT_CODE ||
+                                l_id == HB_EXT_CODE  ||
                                 l_id == HB_DATA)
                             {
                                 TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Secure unload of HBB, HBI, and targeting is not allowed secId=%d", l_id);
@@ -998,7 +1130,7 @@ void SPnorRP::waitForMessage()
                             size_t l_sizeWithHdr = PAGESIZE + l_rec->textSize;
 
                             // if the section has an unsecured portion
-                            if (l_sizeWithHdr != l_rec->infoSize)
+                            if (l_sizeWithHdr != l_rec->infoSize && !l_rec->hasHashTable)
                             {
                                 TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload an unsupported section: 0x%X textsize+hdr: 0x%llX infosize: 0x%llX (the two sizes must be equal)", l_id, l_sizeWithHdr, l_rec->infoSize);
                                 /*@
@@ -1031,6 +1163,40 @@ void SPnorRP::waitForMessage()
                             }
                             TRACDCOMP(g_trac_pnor,"Completely unloading %s", PNOR::SectionIdToString(l_id));
 
+                            if (l_rec->hasHashTable)
+                            {
+                                // remove unprotected pages
+                                l_errhdl = removePages(l_rec->secAddr + PAGE_SIZE + l_rec->textSize,
+                                                       l_rec->infoSize - PAGE_SIZE - l_rec->textSize);
+                                if (l_errhdl)
+                                {
+                                    TRACFCOMP(g_trac_pnor,
+                                        ERR_MRK"SPnorRP::waitForMessage> "
+                                        "removePages failed for address "
+                                        "0x%11X of length 0x%11X",
+                                        l_rec->secAddr + PAGE_SIZE + l_rec->textSize,
+                                        l_rec->infoSize - PAGE_SIZE - l_rec->textSize);
+                                    status_rc = -EFAULT;
+                                    break;
+                                }
+
+                                l_errhdl = setPermission(l_rec->secAddr + PAGE_SIZE + l_rec->textSize,
+                                                         l_rec->infoSize - PAGE_SIZE - l_rec->textSize,
+                                                         NO_ACCESS);
+                                if (l_errhdl)
+                                {
+                                    TRACFCOMP(g_trac_pnor,
+                                        ERR_MRK"SPnorRP::waitForMessage> "
+                                        "setPermission failed for address "
+                                        "0x%11X of length 0x%11X",
+                                        l_rec->secAddr + PAGE_SIZE + l_rec->textSize,
+                                        l_rec->infoSize - PAGE_SIZE - l_rec->textSize);
+
+                                    status_rc = -EFAULT;
+                                    break;
+                                }
+                            }
+
                             l_errhdl = removePages(l_rec->secAddr,
                                                    l_sizeWithHdr);
                             if (l_errhdl)
@@ -1039,21 +1205,21 @@ void SPnorRP::waitForMessage()
                                     ERR_MRK"SPnorRP::waitForMessage> "
                                     "removePages failed for address "
                                     "0x%llX of length 0x%llX", l_rec->secAddr,
-                                                               l_sizeWithHdr);
+                                                                l_sizeWithHdr);
                                 status_rc = -EFAULT;
                                 break;
                             }
 
                             l_errhdl = setPermission(l_rec->secAddr,
-                                                      l_sizeWithHdr,
-                                                      NO_ACCESS);
+                                                     l_sizeWithHdr,
+                                                     NO_ACCESS);
                             if (l_errhdl)
                             {
                                 TRACFCOMP( g_trac_pnor,
                                     ERR_MRK"SPnorRP::waitForMessage> "
                                     "setPermission failed for address "
                                     "0x%llX of length 0x%llX", l_rec->secAddr,
-                                                           l_sizeWithHdr);
+                                                               l_sizeWithHdr);
 
                                 status_rc = -EFAULT;
                                 break;
@@ -1067,7 +1233,7 @@ void SPnorRP::waitForMessage()
                                                    l_sizeWithHdr);
                             if (l_errhdl)
                             {
-                                TRACFCOMP( g_trac_pnor,
+                                TRACFCOMP(g_trac_pnor,
                                     ERR_MRK"SPnorRP::waitForMessage> "
                                     "removePages failed for address "
                                     "0x%llX of length 0x%llX", l_tempAddr,
@@ -1083,16 +1249,15 @@ void SPnorRP::waitForMessage()
                                                                l_sizeWithHdr);
 
                             l_errhdl = setPermission(l_tempAddr,
-                                                      l_sizeWithHdr,
-                                                      NO_ACCESS);
+                                                     l_sizeWithHdr,
+                                                     NO_ACCESS);
                             if (l_errhdl)
                             {
-                                TRACFCOMP( g_trac_pnor,
+                                TRACFCOMP(g_trac_pnor,
                                     ERR_MRK"SPnorRP::waitForMessage> "
                                     "setPermission failed for address "
                                     "0x%llX of length 0x%llX", l_tempAddr,
                                                                l_sizeWithHdr);
-
                                 status_rc = -EFAULT;
                                 break;
                             }

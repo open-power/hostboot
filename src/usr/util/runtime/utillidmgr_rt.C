@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,13 +192,24 @@ errlHndl_t UtilLidMgr::loadLid()
                     UTIL_FT(ERR_MRK"UtilLidMgr::loadLid - setheader failed");
                     break;
                 }
-                iv_lidSize = l_conHdr.payloadTextSize();
 
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section has secure header");
-
-                // Increment by page size to not expose secure header
-                iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
-                               PAGESIZE;
+                if (l_conHdr.sb_flags()->sw_hash)
+                {
+                    // Size of lid has to be size of unprotected data. So we
+                    // need to take out header and hash table sizes
+                    iv_lidSize = l_conHdr.totalContainerSize() - PAGESIZE -
+                        l_conHdr.payloadTextSize();
+                    iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
+                                   PAGESIZE + l_conHdr.payloadTextSize();
+                }
+                else
+                {
+                    iv_lidSize = l_conHdr.payloadTextSize();
+                    // Increment by page size to not expose secure header
+                    iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
+                                   PAGESIZE;
+                }
             }
         }
         else if(iv_isLidInVFS)

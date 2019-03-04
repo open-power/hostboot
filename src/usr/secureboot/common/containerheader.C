@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -514,6 +514,7 @@ void ContainerHeader::parseFlags()
                                  & LAB_OVERRIDE_FLAG);
     iv_sbFlags.hw_key_transition =(  iv_headerInfo.hw_prefix_hdr.flags
                                    & KEY_TRANSITION_FLAG);
+    iv_sbFlags.sw_hash = iv_headerInfo.sw_hdr.flags & HASH_PAGE_TABLE_FLAG;
 }
 
 #ifndef __HOSTBOOT_RUNTIME

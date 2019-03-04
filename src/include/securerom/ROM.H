@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -284,7 +284,7 @@ enum HW_SB_FLAGS
 // SW Security Flags
 enum SW_SB_FLAGS
 {
-    // placeholder
+    HASH_PAGE_TABLE_FLAG = 0x80000000
 };
 
 // Structure to store all hw and sw flag values in a container header
@@ -295,7 +295,8 @@ struct sb_flags_t
         hw_opal(false),
         hw_phyp(false),
         hw_lab_override(false),
-        hw_key_transition(false)
+        hw_key_transition(false),
+        sw_hash(false)
     {
     }
 
@@ -305,6 +306,7 @@ struct sb_flags_t
     bool hw_lab_override;   ///< Whether to enable lab security override;
                             ///< Only applicable for SBE partition
     bool hw_key_transition; ///< Indicates this is a key transition container
+    bool sw_hash;           ///< Indicates presence of hash page table
 };
 
 /**

@@ -74,6 +74,7 @@ use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
 # Flag parameter string passed into signing tools
 # Note spaces before/after are critical.
 use constant OP_SIGNING_FLAG => " --flags ";
+use constant SW_FLAG_HAS_A_HPT => 0x80000000;
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
 use constant FIPS_BUILD_FLAG => 0x40000000;
@@ -464,7 +465,10 @@ sub manipulateImages
 
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
-    my %hashPageTablePartitions = (HBI => 1);
+    # TODO: add back SBE and HCODE as per story 209485
+    my %hashPageTablePartitions = (HBI      => 1,
+                                   WOFDATA  => 1,
+                                   MEMD     => 1);
     if($ENV{'RM_HASH_PAGE_TABLE'})
     {
         undef %hashPageTablePartitions;
@@ -514,24 +518,24 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         my $isNormalSecure = ($eyeCatch eq "HBBL");
-        $isNormalSecure ||= ($eyeCatch eq "SBE");
-        $isNormalSecure ||= ($eyeCatch eq "MEMD");
         $isNormalSecure ||= ($eyeCatch eq "HBRT");
         $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
         $isNormalSecure ||= ($eyeCatch eq "OCC");
         $isNormalSecure ||= ($eyeCatch eq "CAPP");
         $isNormalSecure ||= ($eyeCatch eq "BOOTKERNEL");
-        $isNormalSecure ||= ($eyeCatch eq "HCODE");
-        $isNormalSecure ||= ($eyeCatch eq "CENHWIMG");
-        $isNormalSecure ||= ($eyeCatch eq "WOFDATA");
         $isNormalSecure ||= ($eyeCatch eq "IMA_CATALOG");
         $isNormalSecure ||= ($eyeCatch eq "TESTRO");
         $isNormalSecure ||= ($eyeCatch eq "TESTLOAD");
         $isNormalSecure ||= ($eyeCatch eq "VERSION");
+        $isNormalSecure ||= ($eyeCatch eq "CENHWIMG");
+        $isNormalSecure ||= ($eyeCatch eq "SBE");
+        $isNormalSecure ||= ($eyeCatch eq "HCODE");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
         $isSpecialSecure ||= ($eyeCatch eq "HBI");
+        $isSpecialSecure ||= ($eyeCatch eq "WOFDATA");
+        $isSpecialSecure ||= ($eyeCatch eq "MEMD");
 
         # Used to indicate security is supported in firmware
         my $secureSupported = $isNormalSecure || $isSpecialSecure;
@@ -670,6 +674,9 @@ sub manipulateImages
                             else
                             {
                                 run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
+                                # Hash table generated so need to set sw-flags
+                                my $hex_sw_flag = sprintf("0x%08X", SW_FLAG_HAS_A_HPT);
+                                $CUR_OPEN_SIGN_REQUEST .= " --sw-flags $hex_sw_flag ";
                             }
 
                             run_command("$CUR_OPEN_SIGN_REQUEST "

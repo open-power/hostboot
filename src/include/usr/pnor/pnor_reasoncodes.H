@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -98,8 +98,7 @@ namespace PNOR
         MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
 
         // spnorrp.C
-        // Note: 0xD0 is available, so should be the next one used for spnorrp.
-        // Remove this comment after doing so.
+        MOD_SPNORRP_VERIFY_PAGE         = 0xD0, /**< SPnorRP::verify_page */
         MOD_SPNORRP_DIDSTARTUPFAIL      = 0xD1, /**< didSecureStartupFail(rc) */
         MOD_SPNORRP_ALLOCATE_BLOCK      = 0xD2, /**< SPnorRP::initDaemon */
         MOD_SPNORRP_WAITFORMESSAGE      = 0xD3, /**< SPnorRP::waitForMessage */
@@ -192,7 +191,7 @@ namespace PNOR
         RC_NOT_PAGE_ALIGNED          = PNOR_COMP_ID | 0x3B,
         RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
         RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x3D,
-
+        RC_VERIFY_PAGE_FAILED        = PNOR_COMP_ID | 0x3E,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,
