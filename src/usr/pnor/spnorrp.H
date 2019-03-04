@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,13 +113,16 @@ class SPnorRP
      * Keep track of secured payload size and secure section addresses
      */
     struct LoadRecord{
-        uint8_t* secAddr;
-        size_t textSize;
-        size_t infoSize;
+        uint8_t* secAddr; // virtual address of the start of the record
+        uint64_t hashTableVaddr; // virtual address of the hash table (if it exists)
+        size_t textSize; // size of the protected payload, not including header
+        size_t infoSize; // size of the entire partition
         size_t refCount;
+        bool hasHashTable; // indicates if the record has a hash table
+
         SHA512_t payloadTextHash;
         LoadRecord()
-        :secAddr(nullptr), textSize(0), infoSize(0), refCount(0)
+        :secAddr(nullptr), hashTableVaddr(0), textSize(0), infoSize(0), refCount(0), hasHashTable(false)
         {
             memset(&payloadTextHash[0], 0, SHA512_DIGEST_LENGTH);
         }

@@ -179,7 +179,13 @@ errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
                 // downstream logic from going past the end of the image.
                 // NOTE:  This assumes that any secure lid loaded from PNOR by
                 // UtilLidMgr does not contain an unprotected section
-                iv_lidPnorInfo.size = iv_lidPnorInfo.secureProtectedPayloadSize;
+                // In this case of hash tables, we need to load the entire
+                // partition size because the user data is part of the
+                // unprotected payload
+                if (!iv_lidPnorInfo.hasHashTable)
+                {
+                    iv_lidPnorInfo.size = iv_lidPnorInfo.secureProtectedPayloadSize;
+                }
             }
 #endif
 #endif

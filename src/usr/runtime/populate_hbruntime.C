@@ -854,9 +854,18 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     }
 
 #ifdef CONFIG_SECUREBOOT
-                    memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
-                           reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
-                           l_memd_info.secureProtectedPayloadSize);
+                    if (l_memd_info.hasHashTable)
+                    {
+                        memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
+                               reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
+                               l_memd_info.size);
+                    }
+                    else
+                    {
+                        memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
+                               reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
+                               l_memd_info.secureProtectedPayloadSize);
+                    }
 #else
                     memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
                            reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
@@ -1009,7 +1018,16 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         if (i_secHdrExpected)
         {
             // If section is signed, only the protected size was loaded into memory
-            l_imgSize = l_info.secureProtectedPayloadSize;
+            if (!l_info.hasHashTable)
+            {
+                l_imgSize = l_info.secureProtectedPayloadSize;
+            }
+            else
+            {
+                // Need to expose header and hash table
+                l_pnorVaddr -= l_info.secureProtectedPayloadSize;
+                l_imgSize += l_info.secureProtectedPayloadSize;
+            }
             // Include secure header
             // NOTE: we do not preserve the header in virtual memory when SB
             // is compiled out. So "-PAGESIZE" only works when SB is compiled in

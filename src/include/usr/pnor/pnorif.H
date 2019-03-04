@@ -269,7 +269,6 @@ bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
  *                 False otherwise.
  */
 bool isSectionEmpty(const PNOR::SectionId i_section);
-
 } // PNOR
 
 #endif

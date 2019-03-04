@@ -522,6 +522,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
 
 #ifdef CONFIG_SECUREBOOT
             o_info.secure = iv_TOC[id].secure;
+            o_info.size = iv_TOC[id].size;
             o_info.secureProtectedPayloadSize = 0; // for non secure sections
                                                    // the protected payload size
                                                    // defaults to zero
@@ -591,6 +592,17 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 // was done previously in pnor_common.C
                 o_info.size -= PAGESIZE;
 
+                // Need to change size to accommodate for hash table
+                if (l_conHdr.sb_flags()->sw_hash)
+                {
+                    o_info.vaddr += payloadTextSize;
+                    // Hash page table needs to use containerSize as the base
+                    // and subtract off header and hash table size
+                    o_info.size = l_conHdr.totalContainerSize() - PAGE_SIZE -
+                                  payloadTextSize;
+                    o_info.hasHashTable = true;
+                }
+
                 // cache the value in SectionInfo struct so that we can
                 // parse the container header less often
                 o_info.secureProtectedPayloadSize = payloadTextSize;
@@ -598,11 +610,11 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             else
 #endif
             {
+                o_info.size = iv_TOC[id].size;
                 o_info.vaddr = iv_TOC[id].virtAddr;
             }
 
             o_info.flashAddr = iv_TOC[id].flashAddr;
-            o_info.size = iv_TOC[id].size;
             o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
                                     != 0) ? true : false;
             o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)

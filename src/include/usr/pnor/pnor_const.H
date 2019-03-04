@@ -111,7 +111,8 @@ struct SectionInfo_t
       reprovision(false),
       Volatile(false),
       secure(false),
-      clearOnEccErr(false)
+      clearOnEccErr(false),
+      hasHashTable(false)
       {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
@@ -126,6 +127,7 @@ struct SectionInfo_t
     bool Volatile;   /**< Section loses contents on non HB reboots */
     bool secure;        /**< Indicates if a section is secure */
     bool clearOnEccErr; /**< Indicates on ECC errors, clear and reboot*/
+    bool hasHashTable;  /**< Indicates if there exists a hash page table*/
     size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
                                             that the secure container only
                                             needs to be parsed once */
