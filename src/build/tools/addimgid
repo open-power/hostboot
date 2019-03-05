@@ -6,7 +6,8 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
+# [+] Carey Zhang
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +38,11 @@ $imgBase =~ s/.*\///;
 my $PREFIX = $ENV{'CROSS_PREFIX'};
 my $address = hex `${PREFIX}nm $src -C | grep $imageIdSym | colrm 17`;
 my $imageId = $ENV{'HOSTBOOT_VERSION'};
+if ($imageId eq '')
+{
+    $imageId = $ENV{'HOSTBOOT_P8_VERSION'};
+}
+
 if ($imageId eq '')
 {
     $imageId = `git describe --dirty || echo Unknown-Image \`git rev-parse --short HEAD\``;
