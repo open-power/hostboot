@@ -5543,8 +5543,15 @@ sub packComplexType {
                     # If native "EntityPath" type, process accordingly
                     if($field->{type} eq "EntityPath")
                     {
+                        if( ref($default->{value}) eq "HASH" )
+                        {
+                            #print STDOUT "Skipping empty EntityPath field\n";
+                        }
+                        else
+                        {
                          $binaryData .= packEntityPath($attributes,
                             $default->{value});
+                        }
                     }
                     # If not a defined simple type, process as an enumeration
                     elsif(!exists $simpleTypeProperties->{$field->{type}})
@@ -6418,6 +6425,7 @@ sub generateTargetingImage {
 
     foreach my $targetInstance (@targetsAoH)
     {
+        #print STDOUT "Target=$targetInstance->{id}\n";
         my $data;
         my %attrhash = ();
         my @AoH = ();
@@ -6525,6 +6533,8 @@ sub generateTargetingImage {
                 (keys %attrhash)
             )
         {
+            #print STDOUT "Id=$attributeId\n";
+
             # Save each target's physical + affinity  + parent pervasive
             # path for association processing later on
             if(   ($attributeId eq ATTR_PHYS_PATH)
