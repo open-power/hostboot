@@ -121,11 +121,11 @@ include $(P9_IO_HWP_PATH)/p9_io_dmi_clear_firs.mk
 include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
 include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 
-
 VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
+
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_train.o,)
@@ -136,6 +136,10 @@ OBJS  += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_init.o,)
 OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init.o,)
 OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init_scom.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_omi_io_scom.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_omic_io_scom.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_dccal.o,)
 
 
 include ${ROOTPATH}/config.mk
