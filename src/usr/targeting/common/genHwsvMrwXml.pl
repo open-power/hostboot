@@ -1842,7 +1842,7 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_write_cycle_time' => $cycle_time,
          'i2c_instance_path' => $i->{'instance-path'},
          'i2c_card_id' => $i->{'card-id'},
-         'i2c_part_type' => $i->{'part-type'} } ;
+         'i2c_part_type' => $i->{'part-type'} };
 
     if(( ($i->{'part-type'} eq 'hotplug-controller') &&
              ($i->{'part-id'} eq 'MAX5961')) ||
@@ -1863,13 +1863,21 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
 
 # If proc has a TPM, cache the I2C device index
 my %tpmI2cIndex = ();
+my %ucdI2cIndex = ();
 for my $i ( 0 .. $#I2Cdevices )
 {
+    my $node=$I2Cdevices[$i]{i2cm_node};
+    my $position=$I2Cdevices[$i]{i2cm_pos};
+
     if($I2Cdevices[$i]{i2c_part_type} eq "tpm")
     {
-        my $node=$I2Cdevices[$i]{i2cm_node};
-        my $position=$I2Cdevices[$i]{i2cm_pos};
         $tpmI2cIndex{"n${node}p${position}"}=$i;
+    }
+    elsif(   ($I2Cdevices[$i]{i2c_part_type}   eq "hotplug-controller")
+          && (   ($I2Cdevices[$i]{i2c_part_id} eq "UCD9090")
+              || ($I2Cdevices[$i]{i2c_part_id} eq "UCD90120A")))
+    {
+        push @{$ucdI2cIndex{"n${node}p${position}"}} , $i;
     }
 }
 
@@ -2021,6 +2029,7 @@ my $hash_ax_buses;
 my $axBusesHuidInit = 0;
 
 my $tpmOrdinalId=0;
+my $ucdOrdinalId=0;
 for (my $curnode = 0; $curnode <= $MAXNODE; $curnode++)
 {
 
@@ -2249,6 +2258,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             ++$tpmOrdinalId;
         }
 
+        # Generate UCD targets connected to each proc
+        generate_ucds($proc);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "ex")
     {
@@ -6205,6 +6216,101 @@ sub generate_centaur_dimm
                            $fapiPosHr);
         }
     }
+}
+
+sub generate_ucds
+{
+    my ($proc) = @_;
+
+    if(defined $ucdI2cIndex{"n${node}p${proc}"} )
+    {
+        foreach my $index ( @{$ucdI2cIndex{"n${node}p${proc}"}})
+        {
+            generate_ucd($proc,$ucdOrdinalId++,$index);
+        }
+    }
+}
+
+sub generate_ucd
+{
+    my ($proc,$ordinalId,$i) = @_;
+
+    my $instancePath = $I2Cdevices[$i]{i2c_instance_path};
+
+    # For simplicity, position tracks ordinal ID on ZZ, the only FSP MRW
+    # platform with UCD devices
+    my $position = $ordinalId;
+
+    # Determine the type of target instance to request
+    my $targetType;
+    if($I2Cdevices[$i]{i2c_part_id} eq "UCD9090")
+    {
+        $targetType = "ucd9090";
+    }
+    elsif ($I2Cdevices[$i]{i2c_part_id} eq "UCD90120A")
+    {
+        $targetType = "ucd90120a";
+    }
+    else
+    {
+        die "UCD type " . $I2Cdevices[$i]{i2c_part_id} . " not supported.";
+    }
+
+    # Build the I2C_CONTRL_INFO attribute
+    my %i2cControlInfo = ();
+    $i2cControlInfo{i2cMasterPath} = "physical:sys-0/node-${node}/proc-${proc}";
+    $i2cControlInfo{engine}        = "$I2Cdevices[$i]{i2c_engine}";
+    $i2cControlInfo{port}          = "$I2Cdevices[$i]{i2c_port}";
+    $i2cControlInfo{devAddr}       = "0x$I2Cdevices[$i]{i2c_devAddr}";
+
+    my $i2cControlInfoAttr = "\n";
+    foreach my $field ( sort keys %i2cControlInfo )
+    {
+        $i2cControlInfoAttr .=
+              "            <field>\n"
+            . "                <id>$field</id>\n"
+            . "                <value>$i2cControlInfo{$field}</value>\n"
+            . "            </field>\n";
+    }
+    $i2cControlInfoAttr .= "        ";
+
+    # Compute the remaining attributes
+    my $huidAttr = sprintf("0x%02X3F%04X",${node},$position);
+    my $physPathAttr = "physical:sys-$sys/node-$node/power_sequencer-$position";
+    my $affinityPathAttr = "affinity:sys-$sys/node-$node/proc-$proc/power_sequencer-$position";
+    my $ordinalIdAttr = "$ordinalId";
+    my $instancePathAttr = "$instancePath";
+
+    # Load the attributes into a hash and build the attribute output string
+    my %attrs = ();
+    $attrs{I2C_CONTROL_INFO}{VALUE}="$i2cControlInfoAttr";
+    $attrs{HUID}{VALUE}="$huidAttr";
+    $attrs{PHYS_PATH}{VALUE}="$physPathAttr";
+    $attrs{AFFINITY_PATH}{VALUE}="$affinityPathAttr";
+    $attrs{ORDINAL_ID}{VALUE}="$ordinalIdAttr";
+    $attrs{INSTANCE_PATH}{VALUE}="$instancePathAttr";
+    $attrs{INSTANCE_PATH}{TYPE}="compileAttribute";
+
+    my $attrOutput = "";
+    foreach my $attr ( sort keys %attrs )
+    {
+        my $type = exists $attrs{$attr}{TYPE} ? $attrs{$attr}{TYPE} :
+            "attribute";
+        $attrOutput .=
+              "    <${type}>\n"
+            . "        <id>$attr</id>\n"
+            . "        <default>$attrs{$attr}{VALUE}</default>\n"
+            . "    </${type}>\n";
+    }
+
+    # Output the target
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}power_sequencer$position</id>
+    <type>$targetType</type>\n";
+    print "$attrOutput";
+
+    print "</targetInstance>\n";
 }
 
 sub generate_tpm
