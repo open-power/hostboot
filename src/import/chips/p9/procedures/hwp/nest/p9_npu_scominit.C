@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #include <p9_nv_ref_clk_enable.H>
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
+#include <p9a_misc_scom_addresses.H>
+#include <p9a_misc_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -70,12 +72,18 @@ fapi2::ReturnCode p9_npu_scominit(
         fapi2::ReturnCode l_rc;
         fapi2::buffer<uint64_t> l_atrmiss = 0;
         fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR_Type l_npu_p9n_dd1;
+        fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_AXONE_ADDR_Type l_axone;
 
         // read attribute to determine if P9N DD1 NPU addresses should be used
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR,
                                i_target,
                                l_npu_p9n_dd1),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_AXONE_ADDR,
+                               i_target,
+                               l_axone),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_AXONE_ADDR)");
 
         // apply NPU SCOM inits from initfile
         FAPI_DBG("Invoking p9.npu.scom.initfile...");
@@ -95,16 +103,31 @@ fapi2::ReturnCode p9_npu_scominit(
         l_atrmiss.setBit<PU_NPU_SM2_XTS_ATRMISS_FLAG_MAP>()
         .setBit<PU_NPU_SM2_XTS_ATRMISS_ENA>();
 
-        FAPI_TRY(fapi2::putScomUnderMask(i_target,
-                                         ((l_npu_p9n_dd1) ?
-                                          (PU_NPU_SM2_XTS_ATRMISS) :
-                                          (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)),
-                                         l_atrmiss,
-                                         l_atrmiss),
-                 "Error from putScomUnderMask (0x%08X)",
-                 ((l_npu_p9n_dd1) ?
-                  (PU_NPU_SM2_XTS_ATRMISS) :
-                  (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)));
+        if (!l_axone)
+        {
+            FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                             ((l_npu_p9n_dd1) ?
+                                              (PU_NPU_SM2_XTS_ATRMISS) :
+                                              (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)),
+                                             l_atrmiss,
+                                             l_atrmiss),
+                     "Error from putScomUnderMask (0x%08X)",
+                     ((l_npu_p9n_dd1) ?
+                      (PU_NPU_SM2_XTS_ATRMISS) :
+                      (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)));
+        }
+        else
+        {
+            // Axone
+            // P9A_PU_NPU2_NTL1_XTS_ATRMISS = 0x050112FA
+            FAPI_TRY(fapi2::putScomUnderMask(i_target, P9A_PU_NPU2_NTL1_XTS_ATRMISS, l_atrmiss, l_atrmiss),
+                     "Error from putScomUnderMask (0x%08X)",
+                     P9A_PU_NPU2_NTL1_XTS_ATRMISS);
+            // P9A__NTL1_XTS_ATRMISS = 0x050116FA
+            FAPI_TRY(fapi2::putScomUnderMask(i_target, P9A__NTL1_XTS_ATRMISS, l_atrmiss, l_atrmiss),
+                     "Error from putScomUnderMask (0x%08X)",
+                     P9A__NTL1_XTS_ATRMISS);
+        }
 
         // enable NVLINK refclocks
         FAPI_DBG("Invoking p9_nv_ref_clk_enable...");

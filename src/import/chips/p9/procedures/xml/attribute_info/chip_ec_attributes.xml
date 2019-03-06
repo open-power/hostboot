@@ -6503,6 +6503,23 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_AXONE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Axone only: Use the Axone register addresses for the PHY0 BAR registers, PHY1 BAR registers, and MMIO BAR registers
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_SKEWADJ_P9NDD1_INIT</id>
