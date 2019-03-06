@@ -49,6 +49,7 @@ OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
 OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
+OBJS += fapi2DdimmGetEfdTest.o
 OBJS += getVpdTest.o
 OBJS += p9_pm_get_poundv_bucket.o
 
