@@ -73,16 +73,14 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         fapi2::ReturnCode l_rc;
-
-        // Create an object
-        auto l_set_phy_params = phy_params(l_port, l_rc);
-        FAPI_TRY(l_rc, "Unable to set parameters for target %s", mss::c_str(i_target));
+        const phy_params l_set_phy_params(l_port, l_rc);
+        FAPI_TRY(l_rc, "Unable to instantiate phy_params for target %s", mss::c_str(i_target));
 
         // Set the params by fetching them from the attributes
-        FAPI_TRY(l_set_phy_params.setup_DimmType(l_port, o_phy_params));
-        FAPI_TRY(l_set_phy_params.setup_CsPresent(l_port, o_phy_params));
-        FAPI_TRY(l_set_phy_params.setup_DramDataWidth(l_port, o_phy_params));
-        FAPI_TRY(l_set_phy_params.setup_Height3DS(l_port, o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_DimmType(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_CsPresent(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_DramDataWidth(o_phy_params));
+        FAPI_TRY(l_set_phy_params.setup_Height3DS(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_ActiveDBYTE(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_ActiveNibble(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_AddrMirror(o_phy_params));

@@ -149,47 +149,47 @@ struct phy_params_t
     /// Declare variables to be used
     ///
     uint8_t iv_dimm_type[MAX_DIMM_PER_PORT];
-    uint8_t iv_chip_select;
+    uint16_t iv_chip_select;
     uint8_t iv_dram_data_width[MAX_DIMM_PER_PORT];
-    uint8_t iv_height_3DS;
-    uint16_t iv_dbyte_macro;
-    uint32_t iv_nibble;
+    uint16_t iv_height_3DS;
+    uint16_t iv_dbyte_macro[MAX_DIMM_PER_PORT];
+    uint32_t iv_nibble[MAX_DIMM_PER_PORT];
     uint8_t iv_addr_mirror[MAX_DIMM_PER_PORT];
     uint8_t iv_column_width[MAX_DIMM_PER_PORT];
     uint8_t iv_row_width[MAX_DIMM_PER_PORT];
     uint32_t iv_spdcl_support;
-    uint8_t iv_taa_min;
-    uint8_t iv_rank4_mode;
-    uint8_t iv_ddp_compatible;
-    uint8_t iv_tsv8h;
-    uint8_t iv_mram_support;
-    uint8_t iv_num_pstate;
+    uint16_t iv_taa_min;
+    uint8_t iv_rank4_mode[MAX_DIMM_PER_PORT];
+    uint8_t iv_ddp_compatible[MAX_DIMM_PER_PORT];
+    uint8_t iv_tsv8h[MAX_DIMM_PER_PORT];
+    uint8_t iv_mram_support[MAX_DIMM_PER_PORT];
+    uint8_t iv_num_pstate[MAX_DIMM_PER_PORT];
     uint64_t iv_frequency;
-    uint8_t iv_odt_impedance;
-    uint8_t iv_drv_impedance_pu[MSDG_MAX_PSTATE];
-    uint8_t iv_drv_impedance_pd[MSDG_MAX_PSTATE];
-    uint8_t iv_slew_rate[MSDG_MAX_PSTATE];
-    uint8_t iv_atx_impedance;
-    uint8_t iv_atx_slew_rate;
-    uint8_t iv_ck_tx_impedance;
-    uint8_t iv_ck_tx_slew_rate;
-    uint8_t iv_alert_odt_impedance;
+    uint8_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_atx_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_atx_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_ck_tx_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_ck_tx_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_alert_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_rtt_nom[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_rtt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_rtt_park[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_dram_dic[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t iv_dram_preamble;
-    uint8_t iv_phy_equalization;
+    uint8_t iv_dram_preamble[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_phy_equalization[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_init_vref_dq;
     uint16_t iv_init_phy_vref;
-    uint8_t iv_odt_wr_map_cs;
-    uint8_t iv_odt_rd_map_cs;
-    uint8_t iv_geardown_mode[MAX_DIMM_PER_PORT];
+    uint8_t iv_odt_wr_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_odt_rd_map_cs[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t iv_geardown_mode[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_ca_latency_adder[MAX_DIMM_PER_PORT];
     uint8_t iv_bist_cal_mode[MAX_DIMM_PER_PORT];
     uint8_t iv_bist_ca_parity_latency[MAX_DIMM_PER_PORT];
-    uint8_t iv_rcd_dic;
-    uint8_t iv_rcd_voltage_ctrl;
+    uint16_t iv_rcd_dic;
+    uint16_t iv_rcd_voltage_ctrl;
     uint8_t iv_f0rc7x[MAX_DIMM_PER_PORT];
     uint8_t iv_f1rc00[MAX_DIMM_PER_PORT];
     uint16_t iv_rcd_slew_rate;
@@ -205,82 +205,90 @@ struct phy_params_t
 class phy_params
 {
     private:
+
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_target;
         phy_params_t iv_params;
 
     public:
-        ///
-        /// @brief Delete default constructor
-        ///
+
+        /// default constructor is deleted
         phy_params() = delete;
 
         ///
         /// @brief Constructor to fetch attributes
         ///
         /// @brief fetch the attributes and initialize it to the params
-        /// @param[in] i_port the fapi2 target
+        /// @param[in] i_target the fapi2 target
         /// @param[in,out] o_rc the fapi2 output
         ///
-        phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port, fapi2::ReturnCode o_rc)
+        phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                   fapi2::ReturnCode o_rc):
+            iv_target(i_target)
         {
             // Fetch attributes and populate the member variables
-            FAPI_TRY(mss::attr::get_dimm_type(i_port, iv_params.iv_dimm_type));
-            FAPI_TRY(mss::attr::get_exp_chip_select(i_port, iv_params.iv_chip_select));
-            FAPI_TRY(mss::attr::get_dram_width(i_port, iv_params.iv_dram_data_width));
-            FAPI_TRY(mss::attr::get_3ds_height(i_port, iv_params.iv_height_3DS));
-            FAPI_TRY(mss::attr::get_byte_enables(i_port, iv_params.iv_dbyte_macro));
-            FAPI_TRY(mss::attr::get_nibble_enables(i_port, iv_params.iv_nibble));
-            FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_port, iv_params.iv_addr_mirror));
-            FAPI_TRY(mss::attr::get_dram_column_bits(i_port, iv_params.iv_column_width));
-            FAPI_TRY(mss::attr::get_dram_row_bits(i_port, iv_params.iv_row_width));
-            FAPI_TRY(mss::attr::get_exp_spd_cl(i_port, iv_params.iv_spdcl_support));
-            FAPI_TRY(mss::attr::get_taa_min(i_port, iv_params.iv_taa_min));
-            FAPI_TRY(mss::attr::get_rank4_mode(i_port, iv_params.iv_rank4_mode));
-            FAPI_TRY(mss::attr::get_ddp_compatibility(i_port, iv_params.iv_ddp_compatible));
-            FAPI_TRY(mss::attr::get_tsv8h_support(i_port, iv_params.iv_tsv8h));
-            FAPI_TRY(mss::attr::get_mram_support(i_port, iv_params.iv_mram_support));
-            FAPI_TRY(mss::attr::get_pstates(i_port, iv_params.iv_num_pstate));
-            FAPI_TRY(mss::attr::get_freq(i_port, iv_params.iv_frequency));
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_cntl(i_port, iv_params.iv_odt_impedance));
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(i_port, iv_params.iv_drv_impedance_pu));
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(i_port, iv_params.iv_drv_impedance_pd));
-            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_dq_dqs(i_port, iv_params.iv_slew_rate));
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(i_port, iv_params.iv_atx_impedance));
-            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_cmd_addr(i_port, iv_params.iv_atx_slew_rate));
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_clk(i_port, iv_params.iv_ck_tx_impedance));
-            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_clk(i_port, iv_params.iv_ck_tx_slew_rate));
-            FAPI_TRY(mss::attr::get_si_mc_rcv_imp_alert_n(i_port, iv_params.iv_alert_odt_impedance));
-            FAPI_TRY(mss::attr::get_si_dram_rtt_nom(i_port, iv_params.iv_dram_rtt_nom));
-            FAPI_TRY(mss::attr::get_si_dram_rtt_wr(i_port, iv_params.iv_dram_rtt_wr));
-            FAPI_TRY(mss::attr::get_si_dram_rtt_park(i_port, iv_params.iv_dram_rtt_park));
-            FAPI_TRY(mss::attr::get_si_dram_drv_imp_dq_dqs(i_port, iv_params.iv_dram_dic));
-            FAPI_TRY(mss::attr::get_si_dram_preamble(i_port, iv_params.iv_dram_preamble));
-            FAPI_TRY(mss::attr::get_exp_phy_equalization(i_port, iv_params.iv_phy_equalization));
-            FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_port, iv_params.iv_init_vref_dq));
-            FAPI_TRY(mss::attr::get_exp_init_phy_vref(i_port, iv_params.iv_init_phy_vref));
-            FAPI_TRY(mss::attr::get_exp_odt_map_cs_wr(i_port, iv_params.iv_odt_wr_map_cs));
-            FAPI_TRY(mss::attr::get_exp_odt_map_cs_rd(i_port, iv_params.iv_odt_rd_map_cs));
-            FAPI_TRY(mss::attr::get_geardown_mode(i_port, iv_params.iv_geardown_mode));
-            FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc0f(i_port, iv_params.iv_ca_latency_adder));
-            FAPI_TRY(mss::attr::get_cs_cmd_latency(i_port, iv_params.iv_bist_cal_mode));
-            FAPI_TRY(mss::attr::get_ca_parity_latency(i_port, iv_params.iv_bist_ca_parity_latency));
-            FAPI_TRY(mss::attr::get_exp_rcd_dic(i_port, iv_params.iv_rcd_dic));
-            FAPI_TRY(mss::attr::get_exp_rcd_voltage_ctrl(i_port, iv_params.iv_rcd_voltage_ctrl));
-            FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc7x(i_port, iv_params.iv_f0rc7x));
-            FAPI_TRY(mss::attr::get_dimm_ddr4_f1rc00(i_port, iv_params.iv_f1rc00));
-            FAPI_TRY(mss::attr::get_exp_rcd_slew_rate(i_port, iv_params.iv_rcd_slew_rate));
-            FAPI_TRY(mss::attr::get_exp_firmware_emulation_mode(i_port, iv_params.iv_firmware_mode));
+            FAPI_TRY(mss::attr::get_dimm_type(i_target, iv_params.iv_dimm_type));
+            FAPI_TRY(mss::attr::get_exp_cs_present(i_target, iv_params.iv_chip_select));
+            FAPI_TRY(mss::attr::get_dram_width(i_target, iv_params.iv_dram_data_width));
+            FAPI_TRY(mss::attr::get_exp_3ds_height(i_target, iv_params.iv_height_3DS));
+            FAPI_TRY(mss::attr::get_byte_enables(i_target, iv_params.iv_dbyte_macro));
+            FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_params.iv_nibble));
+            FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, iv_params.iv_addr_mirror));
+            FAPI_TRY(mss::attr::get_dram_column_bits(i_target, iv_params.iv_column_width));
+            FAPI_TRY(mss::attr::get_dram_row_bits(i_target, iv_params.iv_row_width));
+            FAPI_TRY(mss::attr::get_exp_spd_cl_supported(i_target, iv_params.iv_spdcl_support));
+            FAPI_TRY(mss::attr::get_exp_spd_taa_min(i_target, iv_params.iv_taa_min));
+            FAPI_TRY(mss::attr::get_four_rank_mode(i_target, iv_params.iv_rank4_mode));
+            FAPI_TRY(mss::attr::get_ddp_compatibility(i_target, iv_params.iv_ddp_compatible));
+            FAPI_TRY(mss::attr::get_tsv_8h_support(i_target, iv_params.iv_tsv8h));
+            FAPI_TRY(mss::attr::get_mram_support(i_target, iv_params.iv_mram_support));
+            FAPI_TRY(mss::attr::get_pstates(i_target, iv_params.iv_num_pstate));
+            FAPI_TRY(mss::attr::get_freq(i_target, iv_params.iv_frequency));
+            FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, iv_params.iv_odt_impedance));
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(i_target, iv_params.iv_drv_impedance_pu));
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(i_target, iv_params.iv_drv_impedance_pd));
+            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_dq_dqs(i_target, iv_params.iv_slew_rate));
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(i_target, iv_params.iv_atx_impedance));
+            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_cmd_addr(i_target, iv_params.iv_atx_slew_rate));
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_clk(i_target, iv_params.iv_ck_tx_impedance));
+            FAPI_TRY(mss::attr::get_si_mc_drv_slew_rate_clk(i_target, iv_params.iv_ck_tx_slew_rate));
+            FAPI_TRY(mss::attr::get_si_mc_rcv_imp_alert_n(i_target, iv_params.iv_alert_odt_impedance));
+            FAPI_TRY(mss::attr::get_si_dram_rtt_nom(i_target, iv_params.iv_dram_rtt_nom));
+            FAPI_TRY(mss::attr::get_si_dram_rtt_wr(i_target, iv_params.iv_dram_rtt_wr));
+            FAPI_TRY(mss::attr::get_si_dram_rtt_park(i_target, iv_params.iv_dram_rtt_park));
+            FAPI_TRY(mss::attr::get_si_dram_drv_imp_dq_dqs(i_target, iv_params.iv_dram_dic));
+            FAPI_TRY(mss::attr::get_si_dram_preamble(i_target, iv_params.iv_dram_preamble));
+            FAPI_TRY(mss::attr::get_si_mc_rcv_eq_dq_dqs(i_target, iv_params.iv_phy_equalization));
+            FAPI_TRY(mss::attr::get_exp_init_vref_dq(i_target, iv_params.iv_init_vref_dq));
+            FAPI_TRY(mss::attr::get_exp_init_phy_vref(i_target, iv_params.iv_init_phy_vref));
+            FAPI_TRY(mss::attr::get_si_odt_wr(i_target, iv_params.iv_odt_wr_map_cs));
+            FAPI_TRY(mss::attr::get_si_odt_rd(i_target, iv_params.iv_odt_rd_map_cs));
+            FAPI_TRY(mss::attr::get_si_geardown_mode(i_target, iv_params.iv_geardown_mode));
+            FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc0f(i_target, iv_params.iv_ca_latency_adder));
+            FAPI_TRY(mss::attr::get_cs_cmd_latency(i_target, iv_params.iv_bist_cal_mode));
+            FAPI_TRY(mss::attr::get_ca_parity_latency(i_target, iv_params.iv_bist_ca_parity_latency));
+            FAPI_TRY(mss::attr::get_exp_rcd_dic(i_target, iv_params.iv_rcd_dic));
+            FAPI_TRY(mss::attr::get_exp_rcd_voltage_ctrl(i_target, iv_params.iv_rcd_voltage_ctrl));
+            FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc7x(i_target, iv_params.iv_f0rc7x));
+            FAPI_TRY(mss::attr::get_dimm_ddr4_f1rc00(i_target, iv_params.iv_f1rc00));
+            FAPI_TRY(mss::attr::get_exp_rcd_slew_rate(i_target, iv_params.iv_rcd_slew_rate));
+            FAPI_TRY(mss::attr::get_exp_firmware_emulation_mode(i_target, iv_params.iv_firmware_mode));
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
 
         ///
-        /// @brief Constructor for UTs
+        /// @brief Constructor
         ///
-        /// @brief Set params as per the value initialized for the UT
-        /// @param[in] i_phy_params - data struct for UT
+        /// @brief Set params as per the value initialized (useful for testing)
+        /// @param[in] i_target the fapi2 target
+        /// @param[in] i_phy_params explorer specific data structure
         ///
-        phy_params(const phy_params_t& i_phy_params): iv_params(i_phy_params) {}
+        phy_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                   const phy_params_t& i_phy_params):
+            iv_target(i_target),
+            iv_params(i_phy_params)
+        {}
 
         ///
         /// @brief Destructor
@@ -289,12 +297,10 @@ class phy_params
 
         ///
         /// @brief user_input_msdg structure setup for parameter DimmType
-        /// @param[in] i_port the fapi2 target
         /// @param[in,out] io_phy_params the phy params data struct
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode setup_DimmType(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-                                         user_input_msdg& io_phy_params) const
+        fapi2::ReturnCode setup_DimmType(user_input_msdg& io_phy_params) const
         {
             switch (iv_params.iv_dimm_type[0])
             {
@@ -311,14 +317,14 @@ class phy_params
                     break;
 
                 default:
-                    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
+                    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(iv_target);
                     FAPI_ASSERT(false,
                                 fapi2::MSS_EXP_DRAMINIT_UNSUPPORTED_DIMM_TYPE().
                                 set_OCMB_TARGET(l_ocmb).
-                                set_PORT(i_port).
+                                set_PORT(iv_target).
                                 set_TYPE(iv_params.iv_dimm_type[0]),
                                 "%s DIMM0 is not a supported DIMM type (%d)",
-                                mss::c_str(i_port), iv_params.iv_dimm_type[0]);
+                                mss::c_str(iv_target), iv_params.iv_dimm_type[0]);
                     break;
             }
 
@@ -330,12 +336,10 @@ class phy_params
 
         ///
         /// @brief user_input_msdg structure setup for parameter CsPresent
-        /// @param[in] i_port the fapi2 target
         /// @param[in,out] io_phy_params the phy params data struct
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode setup_CsPresent(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-                                          user_input_msdg& io_phy_params) const
+        fapi2::ReturnCode setup_CsPresent(user_input_msdg& io_phy_params) const
         {
             io_phy_params.CsPresent = iv_params.iv_chip_select;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -343,12 +347,10 @@ class phy_params
 
         ///
         /// @brief user_input_msdg structure setup for parameter DramDataWidth
-        /// @param[in] i_port the fapi2 target
         /// @param[in,out] io_phy_params the phy params data struct
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode setup_DramDataWidth(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-                                              user_input_msdg& io_phy_params) const
+        fapi2::ReturnCode setup_DramDataWidth(user_input_msdg& io_phy_params) const
         {
             switch (iv_params.iv_dram_data_width[0])
             {
@@ -365,14 +367,14 @@ class phy_params
                     break;
 
                 default:
-                    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
+                    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(iv_target);
                     FAPI_ASSERT(false,
                                 fapi2::MSS_EXP_DRAMINIT_UNSUPPORTED_DRAM_WIDTH().
                                 set_OCMB_TARGET(l_ocmb).
-                                set_PORT(i_port).
+                                set_PORT(iv_target).
                                 set_DATA_WIDTH(iv_params.iv_dram_data_width[0]),
                                 "%s DRAM Data Width of DIMM0 is not a supported (%d)",
-                                mss::c_str(i_port), iv_params.iv_dram_data_width[0]);
+                                mss::c_str(iv_target), iv_params.iv_dram_data_width[0]);
                     break;
             }
 
@@ -384,40 +386,38 @@ class phy_params
 
         ///
         /// @brief user_input_msdg structure setup for parameter Height3DS
-        /// @param[in] i_port the fapi2 target
         /// @param[in,out] io_phy_params the phy params data struct
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode setup_Height3DS(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-                                          user_input_msdg& io_phy_params) const
+        fapi2::ReturnCode setup_Height3DS(user_input_msdg& io_phy_params) const
         {
             switch (iv_params.iv_height_3DS)
             {
-                case fapi2::ENUM_ATTR_MEM_EFF_3DS_HEIGHT_PLANAR:
+                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_PLANAR:
                     io_phy_params.Height3DS = MSDG_PLANAR;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EFF_3DS_HEIGHT_H2:
+                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H2:
                     io_phy_params.Height3DS = MSDG_H2;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EFF_3DS_HEIGHT_H4:
+                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H4:
                     io_phy_params.Height3DS = MSDG_H4;
                     break;
 
-                case fapi2::ENUM_ATTR_MEM_EFF_3DS_HEIGHT_H8:
+                case fapi2::ENUM_ATTR_MEM_EXP_3DS_HEIGHT_H8:
                     io_phy_params.Height3DS = MSDG_H8;
                     break;
 
                 default:
-                    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
+                    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(iv_target);
                     FAPI_ASSERT(false,
                                 fapi2::MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT().
                                 set_OCMB_TARGET(l_ocmb).
-                                set_PORT(i_port).
+                                set_PORT(iv_target).
                                 set_HEIGHT(iv_params.iv_height_3DS),
                                 "%s 3DS Height is not a supported (%d)",
-                                mss::c_str(i_port), iv_params.iv_height_3DS);
+                                mss::c_str(iv_target), iv_params.iv_height_3DS);
                     break;
             }
 
@@ -434,7 +434,8 @@ class phy_params
         ///
         fapi2::ReturnCode set_ActiveDBYTE(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.ActiveDBYTE = iv_params.iv_dbyte_macro;
+            // TK add checks for same DIMM/RANK info
+            io_phy_params.ActiveDBYTE = iv_params.iv_dbyte_macro[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -445,7 +446,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_ActiveNibble(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.ActiveNibble = iv_params.iv_nibble;
+            io_phy_params.ActiveNibble = iv_params.iv_nibble[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -511,7 +512,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_Rank4Mode(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.Rank4Mode = iv_params.iv_rank4_mode;
+            io_phy_params.Rank4Mode = iv_params.iv_rank4_mode[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -522,7 +523,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_DDPCompatible(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.DDPCompatible = iv_params.iv_ddp_compatible;
+            io_phy_params.DDPCompatible = iv_params.iv_ddp_compatible[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -533,7 +534,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_TSV8HSupport(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.TSV8HSupport = iv_params.iv_tsv8h;
+            io_phy_params.TSV8HSupport = iv_params.iv_tsv8h[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -544,7 +545,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_MRAMSupport(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.MRAMSupport = iv_params.iv_mram_support;
+            io_phy_params.MRAMSupport = iv_params.iv_mram_support[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -555,7 +556,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_NumPStates(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.NumPStates = iv_params.iv_num_pstate;
+            io_phy_params.NumPStates = iv_params.iv_num_pstate[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -577,7 +578,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhyOdtImpedance(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhyOdtImpedance[0] = iv_params.iv_odt_impedance;
+            io_phy_params.PhyOdtImpedance[0] = iv_params.iv_odt_impedance[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -588,7 +589,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhyDrvImpedancePU(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhyDrvImpedancePU[0] = iv_params.iv_drv_impedance_pu[0];
+            io_phy_params.PhyDrvImpedancePU[0] = iv_params.iv_drv_impedance_pu[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -599,7 +600,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhyDrvImpedancePD(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhyDrvImpedancePD[0] = iv_params.iv_drv_impedance_pd[0];
+            io_phy_params.PhyDrvImpedancePD[0] = iv_params.iv_drv_impedance_pd[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -610,7 +611,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhySlewRate(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhySlewRate[0] = iv_params.iv_slew_rate[0];
+            io_phy_params.PhySlewRate[0] = iv_params.iv_slew_rate[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -621,7 +622,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_ATxImpedance(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.ATxImpedance = iv_params.iv_atx_impedance;
+            io_phy_params.ATxImpedance = iv_params.iv_atx_impedance[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -632,7 +633,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_ATxSlewRate(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.ATxSlewRate = iv_params.iv_atx_slew_rate;
+            io_phy_params.ATxSlewRate = iv_params.iv_atx_slew_rate[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -643,7 +644,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_CKTxImpedance(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.CKTxImpedance = iv_params.iv_ck_tx_impedance;
+            io_phy_params.CKTxImpedance = iv_params.iv_ck_tx_impedance[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -654,7 +655,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_CKTxSlewRate(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.CKTxSlewRate = iv_params.iv_ck_tx_slew_rate;
+            io_phy_params.CKTxSlewRate = iv_params.iv_ck_tx_slew_rate[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -665,7 +666,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_AlertOdtImpedance(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.AlertOdtImpedance = iv_params.iv_alert_odt_impedance;
+            io_phy_params.AlertOdtImpedance = iv_params.iv_alert_odt_impedance[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -729,7 +730,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_DramWritePreamble(user_input_msdg& io_phy_params) const
         {
-            fapi2::buffer<uint8_t> l_dram_preamble_buf(iv_params.iv_dram_preamble);
+            fapi2::buffer<uint8_t> l_dram_preamble_buf(iv_params.iv_dram_preamble[0][0]);
             io_phy_params.DramWritePreamble[0] =
                 l_dram_preamble_buf.getBit<fapi2::ENUM_ATTR_MEM_SI_DRAM_PREAMBLE_WRITE_PREAMBLE_BIT>();
             return fapi2::FAPI2_RC_SUCCESS;
@@ -742,7 +743,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_DramReadPreamble(user_input_msdg& io_phy_params) const
         {
-            fapi2::buffer<uint8_t> l_dram_preamble_buf(iv_params.iv_dram_preamble);
+            fapi2::buffer<uint8_t> l_dram_preamble_buf(iv_params.iv_dram_preamble[0][0]);
             io_phy_params.DramReadPreamble[0] =
                 l_dram_preamble_buf.getBit<fapi2::ENUM_ATTR_MEM_SI_DRAM_PREAMBLE_READ_PREAMBLE_BIT>();
             return fapi2::FAPI2_RC_SUCCESS;
@@ -755,7 +756,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_PhyEqualization(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.PhyEqualization = iv_params.iv_phy_equalization;
+            io_phy_params.PhyEqualization = iv_params.iv_phy_equalization[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -790,7 +791,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtWrMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtWrMapCs[0] = iv_params.iv_odt_wr_map_cs;
+            io_phy_params.OdtWrMapCs[0] = iv_params.iv_odt_wr_map_cs[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -801,7 +802,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_OdtRdMapCs(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.OdtRdMapCs[0] = iv_params.iv_odt_rd_map_cs;
+            io_phy_params.OdtRdMapCs[0] = iv_params.iv_odt_rd_map_cs[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -812,7 +813,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_Geardown(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.Geardown[0] = iv_params.iv_geardown_mode[0];
+            io_phy_params.Geardown[0] = iv_params.iv_geardown_mode[0][0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
