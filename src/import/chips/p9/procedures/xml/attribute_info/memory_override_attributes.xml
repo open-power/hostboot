@@ -156,32 +156,6 @@
         <overrideOnly/>
     </attribute>
 
-    <attribute>
-        <id>ATTR_SPD_OVERRIDE</id>
-        <targetType>TARGET_TYPE_DIMM</targetType>
-        <description>
-            Byte-for-byte override for the bucket of data that would
-            normally come from SPD.  If ATTR_SPD_OVERRIDE_ENABLE!=0 then
-            the value of this attribute will be returned to callers of
-            fapi2::getSPD() instead of the actual SPD contents.
-        </description>
-        <valueType>uint8</valueType>
-        <array>4096</array>
-        <platInit/>
-        <overrideOnly/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_OVERRIDE_ENABLE</id>
-        <targetType>TARGET_TYPE_DIMM</targetType>
-        <description>
-            Set equal to 1 to activate the use of ATTR_SPD_OVERRIDE.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <overrideOnly/>
-    </attribute>
-
   <attribute>
     <id>ATTR_MSS_OVERRIDE_MEMDIAGS_BCMODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
