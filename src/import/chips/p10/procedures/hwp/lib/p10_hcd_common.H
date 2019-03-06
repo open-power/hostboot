@@ -185,7 +185,60 @@ enum P10_HCD_PFET_CTRL_CONSTANTS
     HCD_POWER_L3_OFF                         = 0x2, //10
     HCD_POWER_L3_ON                          = 0x3, //11
     HCD_PFET_L3_MASK                         = 0x2, //otherwise cl2
-    HCD_PFET_ON_MASK                         = 0x1  //otherwise off
+    HCD_PFET_ON_MASK                         = 0x1,  //otherwise off
+
+// For SBE, the initial power-on times are not overly time critical so they are
+// hardcoded for the delay necessary when running with the core at 4GHZ which has
+// the QME logic area running off of a 2GHz grid.  When these same values are used
+// with slower nest frequencies, the delays will get longer (more conservative).
+//
+// For istep 15, the delay settings are computed based on the setting of
+// ATTR_FREQ_CORE_CEILING_MHZ.
+//
+// pfet_delay = (1/nest_frequency_mhz)*1000*4 (QME clock period in ns) *
+//               2^(15-pfet_delay_value).
+//
+// or
+//
+//                                                pfet_delay
+// 2^(15-pfet_delay_value) =           ------------------------------
+//                                     (1/nest_frequency_mhz)*1000*4
+//
+//                                     pfet_delay * nest_frequency_mhz
+// 2^(15-pfet_delay_value  =           ------------------------------
+//                                                1000*4
+//
+//                                    ( pfet_delay * nest_frequency_mhz)
+// 15-pfet_delay_value     =      log2(  ------------------------------)
+//                                    (             1000*4             )
+//
+//                                    ( pfet_delay * nest_frequency_mhz)
+// pfet_delay_value        = 15 - log2(  ------------------------------)
+//                                    (             1000*4             )
+//
+//            ( pfet_delay * nest_frequency_mhz)
+// logexp   = (  ------------------------------)
+//            (             1000*4             )
+//
+//          = pfet_delay * nest_frequency_mhz / (1000 * 4)
+//          = pfet_delay * (nest_frequency_mhz / (1000 * 4))
+//          = pfet_delay * (2000 / (1000 * 4))
+//          = pfet_delay * (.5)
+//
+// For core delay of 250ns per step, logexp = 250 * .5 = 125
+//   --> log2(125) = 7 (rounded up to next integer)
+//  -- > pfet_delay_value = 15 - 7 = 8
+//
+    HCD_PFET_DELAY_POWERDOWN                = 0x1,
+#ifndef PRODUCT_DEFAULT_PFET_DELAYS
+    HCD_PFET_DELAY_POWERUP_L3               = 0x1,
+    HCD_PFET_DELAY_POWERUP_CL2              = 0x1,
+    HCD_PFET_DELAY_POWERUP_MMA              = 0x1,
+#else
+    HCD_PFET_DELAY_POWERUP_L3               = 0x8,
+    HCD_PFET_DELAY_POWERUP_CL2              = 0x8,
+    HCD_PFET_DELAY_POWERUP_MMA              = 0x8
+#endif
 };
 
 // Clock Control Constants
@@ -264,7 +317,7 @@ enum SLAVE_CONFIG_DEFS
     CFG_PM_MUX_DISABLE = 7
 };
 
-#define p10_HCD_SCAN_FUNC_REPEAT 1
-#define p10_HCD_SCAN_GPTR_REPEAT 1
+#define P10_HCD_SCAN_FUNC_REPEAT 1
+#define P10_HCD_SCAN_GPTR_REPEAT 1
 
 #endif  // __P10_HCD_COMMON_H__
