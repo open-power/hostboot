@@ -154,7 +154,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
     /**
      *  @brief Test Hostboot specific mutex attribute support
      */
-    void testHbRecursiveMutexAttr()
+    // TODO RTC: 204720 when mutex issues are resolved reable this
+    void _testHbRecursiveMutexAttr()
     {
         TS_TRACE(ENTER_MRK "testHbRecursiveMutexAttr" );
 
@@ -270,7 +271,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
     /**
      *  @brief Test Hostboot specific mutex attribute support
      */
-    void testHbMutexAttr()
+
+    // TODO RTC: 204720 when mutex issues are resolved reable this
+    void _testHbMutexAttr()
     {
         TS_TRACE(ENTER_MRK "testHbMutexAttr" );
 
