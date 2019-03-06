@@ -1,0 +1,139 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_select_ex_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: p10_sbe_tp_arrayinit_errors.xml. -->
+<!-- Halt codes for p10_sbe_tp_arrayinit -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FUSED_NOT_EVEN_ERROR</rc>
+    <description>The first core found in fused mode was not an even core.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_NUM</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FUSED_ODD_ERROR</rc>
+    <description>The first core found in fused mode was even but the companion
+    odd core was not functional.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_NUM</ffdc>
+    <ffdc>FUSED_CORE_NUM_BASE</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>_BACKING_CACHE
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+    <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_INSUFFICIENT_ACTIVE_CORES_ERROR</rc>
+    <description>The requested backing caches were not able to be configured.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_CONFIG</ffdc>
+    <ffdc>ATTR_ACTIVE_CORES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_VEC</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_INSUFFICIENT_BACKING_CACHES_ERROR</rc>
+    <description>The requested backing caches were not able to be configured.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_CONFIG</ffdc>
+    <ffdc>ATTR_ACTIVE_CORES_NUM</ffdc>
+    <ffdc>ATTR_BACKING_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_NUM</ffdc>
+    <ffdc>BACKING_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_VEC</ffdc>
+    <ffdc>BACKING_CACHES_VEC</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_NEEDED_CONFIG_ERROR</rc>
+    <description>Need core configuration cannot be satisified
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>NEEDED_CONFIG</ffdc>
+    <ffdc>CORE_CONFIG</ffdc>
+    <ffdc>ATTR_ACTIVE_CORES_NUM</ffdc>
+    <ffdc>ATTR_BACKING_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_NUM</ffdc>
+    <ffdc>BACKING_CACHES_NUM</ffdc>
+    <ffdc>ACTIVE_CORES_VEC</ffdc>
+    <ffdc>BACKING_CACHES_VEC</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FORCE_FUSED_CORES_DISABLED</rc>
+    <description>Forcing fused core mode has been disabled via eFuses</description>
+  </hwpError>
+</hwpErrors>
