@@ -65,7 +65,7 @@ errlHndl_t mmioSetup()
 {
     errlHndl_t l_err = nullptr;
 
-    TRACDCOMP(g_trac_mmio, ENTER_MRK"mmioSetup");
+    TRACFCOMP(g_trac_mmio, ENTER_MRK"mmioSetup");
     // called from istep 12.3
 
     do
@@ -80,7 +80,7 @@ errlHndl_t mmioSetup()
         getAllChiplets(l_omiTargetList, TARGETING::TYPE_OMI);
         if (l_omiTargetList.size() == 0)
         {
-            TRACDCOMP(g_trac_mmio,
+            TRACFCOMP(g_trac_mmio,
                       INFO_MRK"mmioSetup: Exiting, non-OMI system");
             break;
         }
@@ -170,7 +170,7 @@ errlHndl_t mmioSetup()
             TARGETING::TargetHandleList l_ocmbTargetList;
             l_ocmbTargetList.clear();
             getChildAffinityTargets(l_ocmbTargetList, l_procTarget,
-                              TARGETING::CLASS_UNIT, TARGETING::TYPE_OCMB_CHIP);
+                              TARGETING::CLASS_CHIP, TARGETING::TYPE_OCMB_CHIP);
             for (auto & l_ocmbTarget: l_ocmbTargetList)
             {
                 uint64_t l_ocmbVmAddr = 0;
@@ -192,7 +192,7 @@ errlHndl_t mmioSetup()
         }
     } while(0);
 
-    TRACDCOMP(g_trac_mmio, EXIT_MRK"mmioSetup");
+    TRACFCOMP(g_trac_mmio, EXIT_MRK"mmioSetup");
 
     return l_err;
 }
