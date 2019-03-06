@@ -185,13 +185,62 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_MASTER_CORE</id>
+  <id>ATTR_ACTIVE_CORES_VEC</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    Indicates the master boot core chiplet selected by p10_sbe_select_ex.
+  <description>Bit vector indicating the active boot cores selected by
+  p10_sbe_select_ex.  Bit 0 = Core 0, Bit 1 = Core 1, ..., Bit 31 = Core 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKING_CACHES_VEC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Bit vector indicating the caches used as backing caches selected
+  by p10_sbe_select_ex.  Bit 0 = Cache 0, Bit 1 = Cache 1, ..., Bit 31 = Cache 31.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ACTIVE_CORES_NUM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Number of necessary active boot cores required. Must be set by
+  the platform before calling p10_sbe_select_ex.  If ATTR_ACTIVE_CORES is
+  overridden, this attribute value must be greater than or equal to the number
+  of bits on in ATTR_ACTIVE_CORES_VEC.
   </description>
   <valueType>uint8</valueType>
-  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BACKING_CACHES_NUM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Number of necessary backing caches required. Must be set by
+  the platform before calling p10_sbe_select_ex.  If ATTR_BACKING_CACHES is
+  overridden, this attribute value must be greater than or equal to the number
+  of bits on in ATTR_BACKING_CACHES.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FUSED_CORE_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Summarizes the fused status of cores. This is same for all p10 chips
+    in the system. If a core is in a fused state, attribute should read 1
+    else zero. It needs to be populated during ipl but before istep 15.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> CORE_UNFUSED = 0x0, CORE_FUSED = 0x1 </enum>
+  <platInit/>
+  <default>CORE_UNFUSED</default>
+  <writeable/>   <!-- temp -->
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
