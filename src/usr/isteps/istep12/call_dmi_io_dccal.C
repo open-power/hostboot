@@ -57,6 +57,8 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
+#define POS_0_VECTOR  0x000000FF
+#define BITS_PER_BYTE 8
 
 namespace ISTEP_12
 {
@@ -189,26 +191,26 @@ void cumulus_dccal_setup(IStepError & io_istepError)
 void axone_dccal_setup(IStepError & io_istepError)
 {
     errlHndl_t l_err = nullptr;
-    TARGETING::TargetHandleList l_omicTargetList;
-    getAllChiplets(l_omicTargetList, TYPE_OMIC);
+    TargetHandleList l_omic_target_list;
+    getAllChiplets(l_omic_target_list, TYPE_OMIC);
 
-    for (const auto & l_omic_target : l_omicTargetList)
+    for (const auto & l_omic_target : l_omic_target_list)
     {
         //  call the HWP with each target
         fapi2::Target<fapi2::TARGET_TYPE_OMIC> l_fapi_omic_target
                 (l_omic_target);
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9a_io_omi_scominit HWP target HUID %.8x",
-            TARGETING::get_huid(l_omic_target));
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "p9a_io_omi_scominit HWP target HUID %.8x",
+                  get_huid(l_omic_target));
 
         FAPI_INVOKE_HWP(l_err, p9a_io_omi_scominit, l_fapi_omic_target);
         //  process return code.
         if ( l_err )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9a_io_omi_scominit HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_omic_target) );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X:  p9a_io_omi_scominit HWP on target HUID %.8x",
+                      l_err->reasonCode(), TARGETING::get_huid(l_omic_target) );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_omic_target).addToLog( l_err );
@@ -221,10 +223,68 @@ void axone_dccal_setup(IStepError & io_istepError)
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  p9a_io_omi_scominit HWP on target HUID %.8x",
-                       TARGETING::get_huid(l_omic_target) );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS :  p9a_io_omi_scominit HWP on target HUID %.8x",
+                      TARGETING::get_huid(l_omic_target) );
         }
+
+        TargetHandleList l_omi_target_list;
+
+        getChildOmiTargetsByState(l_omi_target_list,
+                                  l_omic_target,
+                                  CLASS_UNIT,
+                                  TYPE_OMI,
+                                  UTIL_FILTER_FUNCTIONAL);
+
+        uint32_t l_laneVector = 0x00000000;
+
+        for(const auto & l_omi_target : l_omi_target_list)
+        {
+            // The OMI dc calibration HWP requires us to pass in the OMIC target
+            // and then a bit mask representing which positon of OMI we are calibrating.
+            // To get the position of the OMI relative to its parent OMIC, look up
+            // ATTR_OMI_DL_GROUP_POS then shift the POS_0_VECTOR = 0x000000FF by 1 byte to the left
+            // for every position away from 0 OMI_DL_GROUP_POS is.
+            // Therefore
+            // POS_0_VECTOR = 0x000000FF
+            // POS_1_VECTOR = 0x0000FF00
+            // POS_2_VECTOR = 0x00FF0000
+
+            l_laneVector |=
+                  POS_0_VECTOR << (l_omi_target->getAttr<ATTR_OMI_DL_GROUP_POS>() * BITS_PER_BYTE);
+
+        }
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "p9a_io_omi_dccal HWP target HUID %.8x with lane vector 0x%x",
+                  TARGETING::get_huid(l_omic_target), l_laneVector);
+
+        FAPI_INVOKE_HWP(l_err, p9a_io_omi_dccal, l_fapi_omic_target, l_laneVector);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X:  p9a_io_omi_dccal HWP on target HUID %.8x with lane vector 0x%x",
+                      l_err->reasonCode(), TARGETING::get_huid(l_omic_target),  l_laneVector);
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_omic_target).addToLog( l_err );
+            l_err->collectTrace("ISTEPS_TRACE", 256);
+
+            // Create IStep error log and cross reference to error that occurred
+            io_istepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS :  p9a_io_omi_dccal HWP on target HUID %.8x with lane vector 0x%x",
+                      TARGETING::get_huid(l_omic_target), l_laneVector );
+        }
+
     }
 }
 #else

@@ -7416,6 +7416,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7489,6 +7493,10 @@
     </attribute>
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
         <default>1</default>
     </attribute>
 </targetInstance>
@@ -7566,6 +7574,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7640,6 +7652,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>2</default>
     </attribute>
 </targetInstance>
 
@@ -7716,6 +7732,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7790,6 +7810,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -7866,6 +7890,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>6</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7940,6 +7968,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
@@ -8016,6 +8048,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>8</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8090,6 +8126,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8166,6 +8206,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>10</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8240,6 +8284,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>11</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>2</default>
     </attribute>
 </targetInstance>
 
@@ -8316,6 +8364,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>12</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8390,6 +8442,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>13</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -8466,6 +8522,10 @@
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>14</default>
     </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8540,6 +8600,10 @@
     <attribute>
         <id>OMI_REFCLOCK_SWIZZLE</id>
         <default>15</default>
+    </attribute>
+    <attribute>
+        <id>OMI_DL_GROUP_POS</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
