@@ -647,8 +647,10 @@ errlHndl_t discoverTargets()
     {
         // TODO:RTC:151617 Need to find a better way
         // to initialize the target
-        if((target->getAttr<ATTR_TYPE>() == TYPE_SP) ||
-           (target->getAttr<ATTR_TYPE>() == TYPE_BMC))
+        TARGETING::ATTR_INIT_TO_AVAILABLE_type initToAvailable = false;
+        if(   (target->tryGetAttr<TARGETING::ATTR_INIT_TO_AVAILABLE>(
+                   initToAvailable))
+           && (initToAvailable))
         {
             HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
             hwasState.deconfiguredByEid  = 0;
@@ -657,7 +659,8 @@ errlHndl_t discoverTargets()
             hwasState.functional         = true;
             hwasState.dumpfunctional     = false;
             target->setAttr<ATTR_HWAS_STATE>(hwasState);
-        }else
+        }
+        else
         {
             HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
             hwasState.deconfiguredByEid  = 0;

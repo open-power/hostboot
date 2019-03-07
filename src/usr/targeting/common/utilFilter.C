@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,21 @@ void getAllChips( TARGETING::TargetHandleList & o_vector,
     }
 }
 
+void getAllAsics(
+    TARGETING::TargetHandleList& o_asics,
+    const TYPE i_asicType,
+    const bool i_functional)
+{
+    if (i_functional)
+    {
+        _getClassResources(o_asics, CLASS_ASIC, i_asicType,
+                           UTIL_FILTER_FUNCTIONAL);
+    }
+    else
+    {
+        _getClassResources(o_asics, CLASS_ASIC, i_asicType, UTIL_FILTER_ALL);
+    }
+}
 
 void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
                          TYPE i_cardType,

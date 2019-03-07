@@ -33,6 +33,8 @@
 #include <initservice/isteps_trace.H>
 #include <isteps/ucd/updateUcdFlash.H>
 #include <secureboot/trustedbootif.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
 #include "call_update_ucd_flash.H"
 
 namespace POWER_SEQUENCER
@@ -56,8 +58,16 @@ void call_update_ucd_flash(void)
     // Update UCD flash images, if needed
     if (INITSERVICE::spBaseServicesEnabled())
     {
-        // @TODO RTC 201991
-        // break early if no UCD devices
+        TARGETING::TargetHandleList powerSequencers;
+        TARGETING::getAllAsics(powerSequencers,
+                               TARGETING::TYPE_POWER_SEQUENCER,true);
+        if(powerSequencers.empty())
+        {
+            // Continue if no functional power sequencers.  On MPIPL,
+            // previously bad power sequencers will be ignored, and
+            // Hostboot will not generate new errors.
+            break;
+        }
 
         // Load the UCD flash binary via the MCL in load only mode
         MCL::MasterContainerLidMgr mclManager(true);
@@ -71,18 +81,38 @@ void call_update_ucd_flash(void)
         // Make sure TPM queue is flushed before doing any I2C operations
         TRUSTEDBOOT::flushTpmQueue();
 
-        // @TODO RTC 201990 add flash update algorithm and make trace TRACDBIN
-        // call into:
-        //
-        // errlHndl_t updateUcdFlash(
-        //     TARGETING::Target* i_pUcd,
-        //     const void*        i_pFlashImage);
+        // Dump some LID info
         for(const auto& lid : info.lidIds)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"LID ID=0x%08X, "
                 "size=%d, vAddr=%p",
                 lid.id, lid.size, lid.vAddr);
             TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,"LID",lid.vAddr,64);
+        }
+
+        // Update every power sequencer's data flash
+        for(auto powerSequencer : powerSequencers)
+        {
+            do {
+
+            const auto i2cInfo =
+                powerSequencer->getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
+            const auto model = powerSequencer->getAttr<TARGETING::ATTR_MODEL>();
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                "Found functional power sequencer: HUID = 0x%08X, "
+                "Model = 0x%08X, e/p/a = %d/%d/0x%02X",
+                TARGETING::get_huid(powerSequencer),
+                model,
+                i2cInfo.engine, i2cInfo.port, i2cInfo.devAddr);
+
+            // @TODO RTC 201990 add flash update algorithm
+            //
+            // errlHndl_t updateUcdFlash(
+            //     TARGETING::Target* i_pUcd,
+            //     const void*        i_pFlashImage);
+
+            } while(0);
         }
 
         // Destructor automatically unloads the UCD flash binary

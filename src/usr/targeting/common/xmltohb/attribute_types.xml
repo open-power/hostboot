@@ -2684,6 +2684,30 @@
   </attribute>
 
   <attribute>
+    <description>
+      Controls whether target discovery code should assume the target is
+      initially present, functional, and powered on (even though later
+      operations may change this).  Commonly used to avoid having to do presence
+      detect on certain targets.
+          0x00: Do not assume target is initially available
+          0x01: Assume target is initially available
+    </description>
+    <id>INIT_TO_AVAILABLE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+  </attribute>
+
+  <attribute>
     <description>Base Address of Interrupt Presenter</description>
     <id>INTP_BASE_ADDR</id>
     <persistency>volatile-zeroed</persistency>
