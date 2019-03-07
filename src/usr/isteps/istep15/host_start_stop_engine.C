@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,9 @@ void* host_start_stop_engine (void *io_pArgs)
             break;
         }
 #endif
+
+// Skip initializing the PM complex in axone simics for now
+#ifndef CONFIG_AXONE_BRING_UP
         //Use targeting code to get a list of all processors
         TARGETING::TargetHandleList l_procChips;
         getAllChips( l_procChips, TARGETING::TYPE_PROC   );
@@ -98,6 +101,8 @@ void* host_start_stop_engine (void *io_pArgs)
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_start_stop_engine:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
             }
         }
+#endif
+
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         // Starting SGPE in istep15.4 causes OIMR0 register to be improperly
         // reset, which breaks the xstop analysis flow during IPL. A hack
