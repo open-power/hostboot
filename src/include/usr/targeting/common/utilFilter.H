@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,19 @@ void getChipletResources(TARGETING::TargetHandleList & o_vector,
 void getAllChips(TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, bool i_functional = true );
 
+/**
+ * @brief Populate the output target handle list with ASIC target handles based
+ *     on the requested type and functional state.
+ *
+ * @parm[out] o_asics      Reference to a vector holding target pointers
+ * @parm[in]  i_asicType   The type of the ASIC targets to be obtained
+ * @parm[in]  i_functional Set to true to return only functional targets
+ *
+ * @return N/A
+ */
+void getAllAsics(TARGETING::TargetHandleList& o_asics,
+                 TYPE i_asicType,
+                 bool i_functional = true);
 
 /**
  * @brief Populate the o_vector with target chiplet pointers based on the

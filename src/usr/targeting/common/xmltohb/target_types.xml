@@ -1133,6 +1133,10 @@
       <id>I2C_CONTROL_INFO</id>
     </attribute>
     <attribute>
+      <id>INIT_TO_AVAILABLE</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
       <id>TYPE</id>
       <default>POWER_SEQUENCER</default>
     </attribute>
@@ -1378,6 +1382,10 @@
     <attribute>
       <default>SP</default>
       <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <id>INIT_TO_AVAILABLE</id>
+      <default>1</default>
     </attribute>
     <attribute>
       <default>SP</default>
