@@ -798,13 +798,17 @@ fapi2::ReturnCode mrd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
         FAPI_TRY( mpr_load(l_dimm, fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE, l_rank), "%s failed mpr_load %u", mss::c_str(l_dimm),
                   l_rank);
 
-        // 16) Writes the best delays to the buffers using PBA
+        // 16) check errors
+        FAPI_TRY( check_errors(l_dimm, l_dimm_rank, l_final_nibble_delays_buffer), "%s failed check_errors %u",
+                  mss::c_str(l_dimm), l_dimm_rank);
+
+        // 17) Writes the best delays to the buffers using PBA
         FAPI_TRY( mrd_fine::write_result_to_buffers( l_dimm, l_dimm_rank, l_final_nibble_delays_buffer),
-                  "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_rank);
+                  "%s failed write_result_to_buffers %u", mss::c_str(l_dimm), l_dimm_rank);
 
     }//rank loop
 
-    // 17) set for two or four rank dimms
+    // 18) set for two or four rank dimms
     for (const auto& l_dimm : l_dimms)
     {
         uint8_t l_rank_num = 0;
