@@ -53,8 +53,10 @@ fapi2::ReturnCode p10_adu_setup(
     ////////////////////////////////////////////////////////
     // Local variables
     ////////////////////////////////////////////////////////
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     adu_operationFlag l_aduFlag;
     uint32_t l_flags;
+    bool l_aduIsDirty = false;
 
     ////////////////////////////////////////////////////////
     // Read input flags and fix unsupported conditions
@@ -127,24 +129,39 @@ fapi2::ReturnCode p10_adu_setup(
     FAPI_TRY(p10_adu_utils_manage_lock(i_target, l_aduFlag.getLockControl(), true, l_aduFlag.getNumLockAttempts()),
              "Error from p10_adu_utils_manage_lock");
 
+    // Indicate that ADU lock needs to be released in case we fail after this point
+    l_aduIsDirty = true;
+
     FAPI_TRY(p10_adu_utils_setup_adu(i_target, i_address, i_rnw, l_flags),
              "Error from p10_adu_utils_setup_registers");
 
 fapi_try_exit:
 
+    //Append the input data to an error if we got an error back
+#ifndef __PPE__
+
+    if (fapi2::current_err)
+    {
+        p10_adu_utils_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
+    }
+
+#endif
+
     ////////////////////////////////////////////////////////
     // Cleanup ADU registers
-    // Note: Clean up regardless of error/success unless
-    //       flags indicate that the ADU status register
-    //       should be left dirty
+    // Note: Clean up if an error has occurred after the
+    //       ADU was locked unless flags indicate that the
+    //       ADU status register should be left dirty
     ////////////////////////////////////////////////////////
 
-    if (l_aduFlag.getOperFailCleanup())
+    l_rc = fapi2::current_err; // Save current_err
+
+    if (l_rc && l_aduIsDirty && l_aduFlag.getOperFailCleanup())
     {
         (void) p10_adu_utils_reset_adu(i_target);
         (void) p10_adu_utils_manage_lock(i_target, false, false, l_aduFlag.getNumLockAttempts());
     }
 
     FAPI_DBG("Exiting...");
-    return fapi2::current_err;
+    return l_rc;
 }

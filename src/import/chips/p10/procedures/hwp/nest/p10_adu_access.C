@@ -57,11 +57,12 @@ fapi2::ReturnCode p10_adu_access(
     const bool i_lastGranule,
     uint8_t io_data[])
 {
-    FAPI_DBG("Entering ...");
+    FAPI_DBG("Entering...");
 
     ////////////////////////////////////////////////////////
     // Local variables
     ////////////////////////////////////////////////////////
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     adu_operationFlag l_aduFlag;
     bool l_expBusyState;
 
@@ -159,19 +160,31 @@ fapi2::ReturnCode p10_adu_access(
 
 fapi_try_exit:
 
+    //Append the input data to an error if we got an error back
+#ifndef __PPE__
+
+    if (fapi2::current_err)
+    {
+        p10_adu_utils_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
+    }
+
+#endif
+
     ////////////////////////////////////////////////////////
     // Cleanup ADU registers
-    // Note: Clean up regardless of error/success unless
+    // Note: Clean up if an error has occurred unless
     //       flags indicate that the ADU status register
     //       should be left dirty
     ////////////////////////////////////////////////////////
 
-    if (l_aduFlag.getOperFailCleanup())
+    l_rc = fapi2::current_err; // Save current_err
+
+    if (l_rc && l_aduFlag.getOperFailCleanup())
     {
         (void) p10_adu_utils_reset_adu(i_target);
         (void) p10_adu_utils_manage_lock(i_target, false, false, l_aduFlag.getNumLockAttempts());
     }
 
     FAPI_DBG("Exiting...");
-    return fapi2::current_err;
+    return l_rc;
 }
