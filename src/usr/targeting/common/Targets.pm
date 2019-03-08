@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -641,6 +641,7 @@ sub buildAffinity
     my $node            = -1;
     my $proc            = -1;
     my $tpm             = -1;
+    my $ucd             = -1;
     my $bmc             = -1;
     my $sys_phys        = "";
     my $node_phys       = "";
@@ -649,6 +650,7 @@ sub buildAffinity
     my $mcbist          = -1;
     my $num_mc          = 0 ;
     my @tpm_list        = (); # The list of TPMs found on the system
+    my @ucd_list        = (); # The list of UCDs found on the system
 
     $multiNode = 0;
 
@@ -669,10 +671,10 @@ sub buildAffinity
 
     foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
     {
-        my $target_ptr = $self->{data}->{TARGETS}{$target};
-        my $type       = $self->getType($target);
-        my $type_id    = $self->getEnumValue("TYPE", $type);
-        my $pos        = $self->{data}->{TARGETS}{$target}{TARGET}{position};
+        my $target_ptr  = $self->{data}->{TARGETS}{$target};
+        my $type        = $self->getType($target);
+        my $type_id     = $self->getEnumValue("TYPE", $type);
+        my $pos         = $self->{data}->{TARGETS}{$target}{TARGET}{position};
 
         if ($type_id eq "") { $type_id = 0; }
 
@@ -736,8 +738,43 @@ sub buildAffinity
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target, "FAPI_POS",      $pos);
+            # NOTE: Affinity Path is set after this loop so that all procs have
+            #       already been dealt with.
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
             $self->setAttribute($target, "ORDINAL_ID",    $tpm);
+        }
+        elsif ($type eq "POWER_SEQUENCER")
+        {
+
+            my $target_type = $self->getTargetType($target);
+
+            # Strip off the chip- part of the target type name
+            $target_type =~ s/chip\-//g;
+
+            # Currently only UCD9090 and UCD90120A on FSP systems are supported.
+            # Skip over all other UCD types.
+            if (($target_type ne "UCD9090")
+               && ($target_type ne "UCD90120A"))
+            {
+                next;
+            }
+
+            $ucd++;
+            push(@ucd_list, $target);
+
+            $self->{targeting}{SYS}[0]{NODES}[$node]{UCDS}[$ucd]{KEY} = $target;
+
+            my $ucd_phys = $node_phys . "/power_sequencer-$ucd";
+
+            $self->setHuid($target, $sys_pos, $node);
+            # NOTE: Affinity Path is set after this loop so that all procs have
+            #       already been dealt with.
+            $self->setAttribute($target, "PHYS_PATH",     $ucd_phys);
+            $self->setAttribute($target, "ORDINAL_ID",    $ucd);
+            # @TODO RTC 201991: remove these overrides when the MRW is updated
+            $self->setAttribute($target, "CLASS", "ASIC");
+            $self->deleteAttribute($target, "POSITION");
+            $self->deleteAttribute($target, "FRU_ID");
         }
         elsif ($type eq "BMC")
         {
@@ -878,40 +915,76 @@ sub buildAffinity
 
     # Now populate the affinity path of each TPM. Do this after the main loop
     # because we need to make sure that all of the procs have been processed
-    $tpm = 0;
-    foreach my $tpm_target (@tpm_list)
     {
-        my $affinity_path = $self->getTpmAffinityPath($tpm_target, $tpm);
-        $self->
-           setAttribute($tpm_target, "AFFINITY_PATH", $affinity_path);
-        $tpm++;
+        my $type = "";
+        if (@tpm_list != 0)
+        {
+            $type = $self->getAttribute($tpm_list[0], "TYPE");
+        }
+        $tpm = 0;
+        foreach my $tpm_target (@tpm_list)
+        {
+            my $affinity_path = $self->getParentProcAffinityPath($tpm_target,
+                                                                 $tpm,
+                                                                 $type);
+            $self->
+               setAttribute($tpm_target, "AFFINITY_PATH", $affinity_path);
+            $tpm++;
+        }
+    }
+    # Populate the affinity path of each UCD. Do this after the main loop
+    # because we need to make sure that all of the procs have been processed
+    {
+        my $type = "";
+        if (@ucd_list != 0)
+        {
+            $type = $self->getAttribute($ucd_list[0], "TYPE");
+        }
+        $ucd = 0;
+        foreach my $ucd_target (@ucd_list)
+        {
+            my $affinity_path = $self->getParentProcAffinityPath($ucd_target,
+                                                                 $ucd,
+                                                                 $type);
+            $self->
+               setAttribute($ucd_target, "AFFINITY_PATH", $affinity_path);
+            $ucd++;
+        }
     }
 }
 
-
-# Get the affinity path of the passed TPM target. The affinity path
-# is the physical path of the TPM's I2C master (necessarily a PROC)
-# with TPM number appended.
-sub getTpmAffinityPath
+# Get the affinity path of the passed target. The affinity path is the physical
+# path of the target's I2C master which for this function is the parent
+# processor with chip unit number appended.
+sub getParentProcAffinityPath
 {
     my $self   = shift;
     my $target = shift;
-    my $tpm_number = shift;
+    my $chip_unit = shift;
+    my $type_name = shift;
+
+    # Make sure the type_name is all upper-case
+    my $type_name = uc $type_name;
+
+    # Create a lower-case version of the type name
+    my $lc_type_name = lc $type_name;
 
     my $affinity_path = "";
 
-    my $target_type = $self->getAttribute($target, "TYPE");
-    if($target_type ne "TPM")
+    # Only get affinity path for supported types.
+    if(($type_name ne "TPM")
+      && ($type_name ne "POWER_SEQUENCER"))
     {
-        die "Attempted to get TPM affinity path" .
-                                            " on non-TPM target ($target_type)";
+        die "Attempted to get parent processor affinity path" .
+            " on invalid target ($type_name)";
     }
 
     my $parentProcsPtr = $self->findDestConnections($target, "I2C", "");
 
     if($parentProcsPtr eq "")
     {
-        $affinity_path = "affinity:sys-0/node-0/proc-0/tpm-$tpm_number";
+        $affinity_path = "affinity:sys-0/node-0/proc-0/" .
+                         "$lc_type_name-$chip_unit";
     }
     else
     {
@@ -921,22 +994,23 @@ sub getTpmAffinityPath
         if($numConnections != 1)
         {
             die "Incorrect number of parent procs ($numConnections)".
-                " found for TPM$tpm_number";
+                " found for $type_name$chip_unit";
         }
 
-        # TPM is only connected to one proc, so we can fetch just the
+        # The target is only connected to one proc, so we can fetch just the
         # first connection.
         my $parentProc = $parentProcsList[0]{SOURCE_PARENT};
         if($self->getAttribute($parentProc, "TYPE") ne "PROC")
         {
-            die "Upstream I2C connection to TPM$tpm_number is not type PROC!";
+            die "Upstream I2C connection to $type_name" .
+                "$chip_unit is not type PROC!";
         }
 
         # Look at the I2C master's physical path; replace
-        # "physical" with "affinity" and append tpm number
+        # "physical" with "affinity" and append chip unit
         $affinity_path = $self->getAttribute($parentProc, "PHYS_PATH");
         $affinity_path =~ s/physical/affinity/g;
-        $affinity_path = $affinity_path . "/tpm-$tpm_number";
+        $affinity_path = $affinity_path . "/$lc_type_name-$chip_unit";
     }
 
     return $affinity_path;
