@@ -596,6 +596,7 @@ inline fapi2::ReturnCode set_buffer_training(const fapi2::Target<fapi2::TARGET_T
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     FAPI_TRY(mss::ddr4::set_buffer_training(i_target, i_mode, l_program.iv_instructions));
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
 
     FAPI_TRY( ccs::execute(l_mcbist,
                            l_program,

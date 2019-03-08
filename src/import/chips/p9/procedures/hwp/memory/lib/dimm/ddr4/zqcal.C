@@ -40,6 +40,7 @@
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/ccs/ccs.H>
 #include <lib/eff_config/timing.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -150,6 +151,7 @@ fapi2::ReturnCode setup_and_execute_zqcal( const fapi2::Target<fapi2::TARGET_TYP
     }// dimm
 
     // execute ZQCAL instructions
+    mss::ccs::workarounds::hold_cke_high(l_program.iv_instructions);
     FAPI_TRY( mss::ccs::execute(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_program, i_target) );
 
 fapi_try_exit:
