@@ -279,6 +279,8 @@
                 <id>tpmEnabled</id>
                 <value>1</value>
             </field>
+		<field><id>i2cMuxBusSelector</id><value/></field>
+		<field><id>i2cMuxPath</id><value/></field>
         </default>
     </attribute>
     <attribute>
