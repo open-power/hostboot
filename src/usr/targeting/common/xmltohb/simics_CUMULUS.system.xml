@@ -557,13 +557,13 @@
     <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
-            <field><id>baseServices</id><value/></field>
-            <field><id>fsiMasterInit</id><value/></field>
-            <field><id>fsiSlaveInit</id><value/></field>
-            <field><id>hardwareChangeDetection</id><value/></field>
-            <field><id>mailboxEnabled</id><value/></field>
-            <field><id>powerLineDisturbance</id><value/></field>
-            <field><id>reserved</id><value/></field>
+            <field><id>fsiSlaveInit</id><value>0</value></field>
+            <field><id>mailboxEnabled</id><value>0</value></field>
+            <field><id>fsiMasterInit</id><value>0</value></field>
+            <field><id>hardwareChangeDetection</id><value>0</value></field>
+            <field><id>powerLineDisturbance</id><value>0</value></field>
+            <field><id>baseServices</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
     <attribute>

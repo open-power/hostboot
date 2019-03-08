@@ -5902,6 +5902,7 @@
     <id>PRIMARY_CAPABILITIES</id>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -6979,12 +6980,14 @@
 
   <attribute>
     <complexType>
-      <description>Structure which defines a system's SP functions.
+      <description>
+         Structure which defines a system's SP functions.
          Applicable for System target only.  Structure is read-only.
-        </description>
+         Default values match OpenBMC implementation.
+      </description>
       <field>
         <bits>1</bits>
-        <default>1</default>
+        <default>0</default>
         <description>
              If this flag is set then mailboxEnabled MUST also be set
 
@@ -6996,7 +6999,7 @@
       </field>
       <field>
         <bits>1</bits>
-        <default>1</default>
+        <default>0</default>
         <description>
              0b0: SP does not initialize FSI slave logic, Hostboot must;
              0b1: SP does initialize FSI slave logic so Hostboot should not
@@ -7016,7 +7019,7 @@
       </field>
       <field>
         <bits>1</bits>
-        <default>1</default>
+        <default>0</default>
         <description>
              0b0: SP does not initialize FSI master logic, Hostboot must;
              0b1: SP does initialize FSI master logic so Hostboot should not
@@ -7026,7 +7029,7 @@
       </field>
       <field>
         <bits>1</bits>
-        <default>1</default>
+        <default>0</default>
         <description>
              0b0: SP does not perform hardware change detection, Hostboot must;
              0b1: SP does perform hardware change detection (HCDB) so Hostboot should not
@@ -7036,7 +7039,7 @@
       </field>
       <field>
         <bits>1</bits>
-        <default>1</default>
+        <default>0</default>
         <description>
              0b0: SP does not perform Power Line Disturbance (PLD) detection, Hostboot must;
              0b1: SP does perform Power Line Disturbance (PLD) detection so Hostboot should not

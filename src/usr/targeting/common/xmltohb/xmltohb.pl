@@ -5085,6 +5085,13 @@ sub mergeComplexAttributeFields {
         {
             my $foundField = 0;
 
+            # Do not try to merge in a field with no value
+            if (ref($newField->{value}) eq "HASH")
+            {
+                #print STDOUT "Skip $newField->{id}\n";
+                next;
+            }
+
             # Iterate over $mergedFields (really $currentAttrFields) looking
             # for the $newField of $newAttrFields
             foreach my $currentField (@{$mergedFields->{default}->{field}})
@@ -5543,15 +5550,8 @@ sub packComplexType {
                     # If native "EntityPath" type, process accordingly
                     if($field->{type} eq "EntityPath")
                     {
-                        if( ref($default->{value}) eq "HASH" )
-                        {
-                            #print STDOUT "Skipping empty EntityPath field\n";
-                        }
-                        else
-                        {
                          $binaryData .= packEntityPath($attributes,
                             $default->{value});
-                        }
                     }
                     # If not a defined simple type, process as an enumeration
                     elsif(!exists $simpleTypeProperties->{$field->{type}})
