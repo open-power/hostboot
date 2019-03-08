@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -653,6 +653,12 @@ fapi2::ReturnCode mrep::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks),
               "Failed get_ranks_in_pair in mrep::run %s",
               mss::c_str(i_target) );
+
+    // Disable all rank of 2 dimm's before training
+    for (const auto& l_dimm : l_dimms)
+    {
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK));
+    }
 
     // Loops over all ranks within this rank pair
     // MREP is a buffer to DRAM calibration step, so we need to calibrate all ranks seperately

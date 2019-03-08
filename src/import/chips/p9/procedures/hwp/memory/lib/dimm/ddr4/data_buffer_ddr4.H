@@ -176,6 +176,8 @@ inline fapi2::ReturnCode insert_function_space_select(const uint64_t i_func_spac
         const std::vector< cw_info >::iterator& i_iterator,
         std::vector< cw_info >& io_vector)
 {
+    // we use this function for PBA so we need to go with the PBA safe value
+    constexpr uint64_t PBA_SAFE_DELAY = 255;
     FAPI_ASSERT(i_func_space <= MAX_FUNC_SPACE,
                 fapi2::MSS_LRDIMM_INSERT_FUNC_SPACE_OUT_OF_RANGE()
                 .set_MAX_FUNC_SPACE(MAX_FUNC_SPACE)
@@ -184,7 +186,7 @@ inline fapi2::ReturnCode insert_function_space_select(const uint64_t i_func_spac
                 i_func_space, MAX_FUNC_SPACE);
     {
         constexpr uint64_t FUNC_SPACE_LEN = 8;
-        cw_info l_info( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, mss::tmrd(), FUNC_SPACE_LEN, cw_info::BCW );
+        cw_info l_info( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, PBA_SAFE_DELAY, FUNC_SPACE_LEN, cw_info::BCW );
         io_vector.insert(i_iterator, l_info);
     }
     return fapi2::FAPI2_RC_SUCCESS;
