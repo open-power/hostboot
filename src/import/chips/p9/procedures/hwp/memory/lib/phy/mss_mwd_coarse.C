@@ -637,6 +637,12 @@ fapi2::ReturnCode mwd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     // Gets the patterns to use
     FAPI_TRY(mss::lrdimm_training_pattern(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_patterns));
 
+    // Disable all rank of 2 dimm's before training
+    for (const auto& l_dimm : l_dimms)
+    {
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK));
+    }
+
     // Loop through all ranks
     for(const auto l_rank : l_ranks)
     {

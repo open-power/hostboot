@@ -835,6 +835,12 @@ fapi2::ReturnCode mwd_fine::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
              "Failed get_ranks_in_pair in mwd_fine::run %s",
              mss::c_str(i_target));
 
+    // Disable all rank of 2 dimm's before training
+    for (const auto& l_dimm : l_dimms)
+    {
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK));
+    }
+
     // Loops over all ranks within this rank pair
     // MWD is a buffer to DRAM calibration step, so we need to calibrate all ranks seperately
     for (const auto& l_rank : l_ranks)

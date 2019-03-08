@@ -527,6 +527,12 @@ fapi2::ReturnCode mrd_coarse::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     FAPI_TRY(mpr_pattern_wr_all_ranks(i_target, i_rp, l_pattern_set),
              "%s failed setup_mpr_pattern ", mss::c_str(i_target));
 
+    // Disable all rank of 2 dimm's before training
+    for (const auto& l_dimm : l_dimms)
+    {
+        FAPI_TRY(set_rank_presence(l_dimm, RANK_PRESENCE_MASK));
+    }
+
     // Loop over all of our ranks
     for(const auto l_rank : l_ranks)
     {
