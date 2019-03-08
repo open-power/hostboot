@@ -364,6 +364,22 @@ foreach my $target (@targets)
     {
         processTpm($targetObj, $target);
     }
+    elsif ($type eq "POWER_SEQUENCER")
+    {
+        my $target_type = $targetObj->getTargetType($target);
+
+        # Strip off the chip- part of the target type name
+        $target_type =~ s/chip\-//g;
+
+        # Currently only UCD9090 and UCD90120A on FSP systems are supported.
+        # All other UCD types are skipped.
+        if (($target_type eq "UCD9090")
+            || ($target_type eq "UCD90120A"))
+        {
+            processUcd($targetObj, $target);
+        }
+
+    }
 
     processIpmiSensors($targetObj,$target);
 }
@@ -818,6 +834,87 @@ sub processTpm
 
             # All TPM I2C buses must be driven from the same I2C master, so only
             # process the first one
+            last;
+        }
+    }
+}
+
+sub processUcd
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    # Get any connection involving UCD target's child I2C slave targets
+    my $i2cBuses=$targetObj->findDestConnections($target,"I2C","");
+    if ($i2cBuses ne "")
+    {
+        foreach my $i2cBus (@{$i2cBuses->{CONN}})
+        {
+            # On the I2C master side of the connection, ascend one level to the
+            # parent chip
+            my $i2cMasterParentTarget=$i2cBus->{SOURCE_PARENT};
+            my $i2cMasterParentTargetType =
+                $targetObj->getType($i2cMasterParentTarget);
+
+            # Hostboot code assumes UCDs are only connected to processors.
+            if($i2cMasterParentTargetType ne "PROC")
+            {
+                die   "Model integrity error; UCD I2C connections must "
+                    . "originate at a PROC target, not a "
+                    . "$i2cMasterParentTargetType target.\n";
+            }
+
+            # Get the processor's physical path
+            my $i2cMasterParentTargetPath = $targetObj->getAttribute(
+                $i2cMasterParentTarget,"PHYS_PATH");
+
+            # Set the UCD's I2C master path accordingly
+            $targetObj->setAttributeField(
+                $target, "I2C_CONTROL_INFO","i2cMasterPath",
+                $i2cMasterParentTargetPath);
+
+            # Set the UCD's I2C port and engine by accessing the
+            # i2cMaster target and getting the data from it.
+            my $i2cMaster = $i2cBus->{SOURCE};
+            my $i2cPort = $targetObj->getAttribute($i2cMaster, "I2C_PORT");
+            my $i2cEngine = $targetObj->getAttribute($i2cMaster, "I2C_ENGINE");
+
+            $targetObj->setAttributeField($target, "I2C_CONTROL_INFO",
+                                          "port", $i2cPort);
+
+            $targetObj->setAttributeField($target, "I2C_CONTROL_INFO",
+                                          "engine", $i2cEngine);
+
+            # Set the UCD's device address by accessing the bus
+            my $addr = "";
+            if ($targetObj->isBusAttributeDefined(
+                $i2cBus->{SOURCE},$i2cBus->{BUS_NUM},"I2C_ADDRESS"))
+            {
+                $addr = $targetObj->getBusAttribute($i2cBus->{SOURCE},
+                    $i2cBus->{BUS_NUM}, "I2C_ADDRESS");
+            }
+
+            # If bus doesn't have I2C_ADDRESS or default value is not set,
+            # then get it from i2c-slave, if defined.
+            if ($addr eq "")
+            {
+                if (! $targetObj->isBadAttribute($i2cBus->{DEST},"I2C_ADDRESS"))
+                {
+                    $addr = $targetObj->getAttribute($i2cBus->{DEST},
+                                                    "I2C_ADDRESS");
+                }
+            }
+
+            #if the addr is still not defined, then throw an error
+            if ($addr eq "")
+            {
+                print ("ERROR: I2C_ADDRESS is not defined for $i2cBus\n");
+                $targetObj->myExit(4);
+            }
+
+            $targetObj->setAttributeField(
+                $target, "I2C_CONTROL_INFO","devAddr",$addr);
+
             last;
         }
     }
