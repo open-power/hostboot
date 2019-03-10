@@ -34,9 +34,11 @@
 // *HWP Consumed by: FSP:HB
 
 #include <exp_inband.H>
+#include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_draminit_utils.H>
-#include <lib/shared/exp_consts.H>
+#include <lib/phy/exp_train_display.H>
+#include <lib/phy/exp_train_handler.H>
 
 extern "C"
 {
@@ -68,16 +70,45 @@ extern "C"
         // Read the response message from EXP-FW RESP buffer
         {
             host_fw_response_struct l_response;
+            user_response_msdg l_train_response;
+
             std::vector<uint8_t> l_rsp_data;
+            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+
             FAPI_TRY( mss::exp::ib::getRSP(i_target, l_response, l_rsp_data),
                       "Failed getRSP() for  %s", mss::c_str(i_target) );
 
+            // Proccesses the response data
+            FAPI_TRY( mss::exp::read_training_response(i_target, l_rsp_data, l_train_response),
+                      "Failed read_training_response for %s", mss::c_str(i_target));
+
+            // Displays the training response
+            FAPI_TRY( mss::exp::train::display_info(i_target, l_train_response));
+
             // Check if cmd was successful
-            FAPI_TRY(mss::exp::check::response(i_target, l_response),
-                     "Failed check::response() for  %s", mss::c_str(i_target) );
+            l_rc = mss::exp::check::response(i_target, l_response);
+
+            // If not, then we need to process the bad bitmap
+            if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                mss::exp::bad_bit_interface l_interface;
+
+                // Record bad bits should only fail if we have an attributes issue - that's a major issue
+                FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+
+                // Now, go to our true error handling procedure
+                FAPI_TRY(l_rc, "mss::exp::check::response failed for %s", mss::c_str(i_target));
+            }
         }
 
     fapi_try_exit:
+        FAPI_INF("Draminit training - %s %s",
+                 (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported"),
+                 mss::c_str(i_target));
+
+        // TK update this to check FIR's or PLL failures - that will be updated in another commit
+        // For now, return current_err
         return fapi2::current_err;
+
     }
 }

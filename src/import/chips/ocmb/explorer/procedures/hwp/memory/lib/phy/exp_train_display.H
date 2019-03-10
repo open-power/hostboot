@@ -22,3 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_train_display.H
+/// @brief Procedures used to display the training response information
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _EXP_TRAIN_DISPLAY_H_
+#define _EXP_TRAIN_DISPLAY_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/index.H>
+#include <generic/memory/lib/utils/c_str.H>
+#include <exp_data_structs.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace train
+{
+///
+/// @brief Displays all training information
+/// @param[in] i_target the OCMB target
+/// @param[in] i_training_info the training information to display
+/// @return returns FAPI2_RC_SUCCESS iff the procedure executes successfully
+/// @note This is a place holder to help avoid merge conflicts
+///
+inline fapi2::ReturnCode display_info(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const user_response_msdg_t& i_training_info)
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+
+} // ns train
+} // ns exp
+} // ns mss
+#endif

@@ -55,6 +55,14 @@ enum exp_struct_sizes
     ARGUMENT_SIZE = 28,
     SENSOR_CACHE_PADDING_SIZE_0 = 3,
     SENSOR_CACHE_PADDING_SIZE_1 = 15,
+
+    // Training response constants
+    TIMING_RESPONSE_2D_ARRAY_SIZE = 16,
+    TRAINING_RESPONSE_NUM_RANKS = 4,
+    TRAINING_RESPONSE_NUM_DRAM = 20,
+    TRAINING_RESPONSE_NUM_LANES = 80,
+    TRAINING_RESPONSE_NUM_RC = 27,
+    TRAINING_RESPONSE_MR6_SIZE = TRAINING_RESPONSE_NUM_RANKS * TRAINING_RESPONSE_NUM_DRAM,
 };
 
 ///
@@ -604,17 +612,17 @@ typedef struct user_response_timing_msdg
     //DFI rank-to rank space timing must be determined by the actual board delay (DQ/DQS bus turnarounds).
     //PHY firmware training result provide CDD (critical delay difference) information to help to calculate the minimum required timing spacing for memory controllers.
     //Minimal possible gap between rank-to-rank read-read transaction is defined by tCCDmin(R_rank[i], R_rank[j]) = 4 + max(abs(CDD_RR_[i]_[j]));
-    int8_t   CDD_RR[4][4];      // CDD_RR[n][m]: This is a signed integer value. Read to read critical delay difference from cs n to cs m
+    int8_t   CDD_RR[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_RR[n][m]: This is a signed integer value. Read to read critical delay difference from cs n to cs m
     // CDD_RR[0][0], CDD_RR[1][1], CDD_RR[2][2], CDD_RR[3][3] are always 0;
     //Minimal possible gap between rank-to-rank write-write transaction is defined by tCCDmin(W_rank[i], W_rank[j]) = 4 + max(abs(CDD_WW_[i]_[j]));
-    int8_t   CDD_WW[4][4];      // CDD_WW[n][m]: This is a signed integer value. Write to write critical delay difference from cs n to cs m
+    int8_t   CDD_WW[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_WW[n][m]: This is a signed integer value. Write to write critical delay difference from cs n to cs m
     // CDD_WW[0][0], CDD_WW[1][1], CDD_WW[2][2], CDD_WW[3][3] are always 0;
     //Minimal possible gap between rank-to-rank read-write transaction is defined by tCCDmin(R_rank[i], W_rank[j]) = (RL + BL/2 + 1 + WR_PREAMBLE - WL) + max(abs(CDD_RW_[i]_[j]));
     //RL: Read Latency; WL: Write Latency; BL: Burst Length; WR_PREAMBLE: Write Preamble cycles
-    int8_t   CDD_RW[4][4];      // CDD_RW[n][m]This is a signed integer value. Read to write critical delay difference from cs 3 to cs 3
+    int8_t   CDD_RW[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_RW[n][m]This is a signed integer value. Read to write critical delay difference from cs 3 to cs 3
     //Minimal possible gap between rank-to-rank write-read transaction is defined by tCCDmin(W_rank[i], R_rank[j]) = (WL + PL + BL/2 + tWTR_L) + max(abs(CDD_RW_[i]_[j]));
     //WL: Write Latency; BL: Burst Length; PL: CA Parity Latency; tWTR_L: delay from internal write to internal read for same bank group
-    int8_t   CDD_WR[4][4];      // CDD_WR[n][m]This is a signed integer value. Write to read critical delay difference from cs 3 to cs 3
+    int8_t   CDD_WR[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_RANKS];      // CDD_WR[n][m]This is a signed integer value. Write to read critical delay difference from cs 3 to cs 3
 } user_response_timing_msdg_t;
 
 ///
@@ -623,7 +631,7 @@ typedef struct user_response_timing_msdg
 ///
 typedef struct user_response_error_msdg
 {
-    uint16_t Failure_Lane[80]; // error code of DQ[n] on Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
+    uint16_t Failure_Lane[TRAINING_RESPONSE_NUM_LANES]; // error code of DQ[n] on Rank 3,2,1 & 0. Rank 0 is in LS Nibble.
     //Failure status of training. Each uint16_t field contains the training error code of all 4 ranks on 1 DQ lane.
     //4-bit error code reports the training errors:
     //0x0: No Error
@@ -646,12 +654,12 @@ typedef struct user_response_error_msdg
 typedef struct user_response_mrs_msdg_t
 {
     uint16_t MR0;               // Value of DDR mode register MR0 for all ranks, all devices
-    uint16_t MR1[4];            // Value of DDR mode register MR1 for each rank (up to 4 ranks)
-    uint16_t MR2[4];            // Value of DDR mode register MR2 for each rank (up to 4 ranks)
+    uint16_t MR1[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR1 for each rank (up to 4 ranks)
+    uint16_t MR2[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR2 for each rank (up to 4 ranks)
     uint16_t MR3;               // Value of DDR mode register MR3 for all ranks, all devices
     uint16_t MR4;               // Value of DDR mode register MR4 for all ranks, all devices
-    uint16_t MR5[4];            // Value of DDR mode register MR5 for each rank (up to 4 ranks)
-    uint16_t MR6[4][20];        // Value of DDR mode register MR6 for each nibble on each rank
+    uint16_t MR5[TRAINING_RESPONSE_NUM_RANKS];            // Value of DDR mode register MR5 for each rank (up to 4 ranks)
+    uint16_t MR6[TRAINING_RESPONSE_NUM_RANKS][TRAINING_RESPONSE_NUM_DRAM];        // Value of DDR mode register MR6 for each nibble on each rank
     // for X8,X16 DRAMs MR6[i][2n+1] = MR6[i][2n] (n = 0~9)
 } user_response_mrs_msdg_t;
 
@@ -661,16 +669,16 @@ typedef struct user_response_mrs_msdg_t
 ///
 typedef struct user_response_rc_msdg_t
 {
-    uint8_t   F0RC_D0[27];      // RCD control words for DIMM0; Invalid for UDIMM
+    uint8_t   F0RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
     // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
     // F0RC_D0[26:16] BIT [7:0]: 8-bit value of F0RC1x~F0RCBx
-    uint8_t   F1RC_D0[27];      // RCD control words for DIMM0; Invalid for UDIMM
+    uint8_t   F1RC_D0[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM0; Invalid for UDIMM
     // F1RC_D0[15:0] BIT [3:0]: 4-bit value of F1RC00~F1RC0F
     // F1RC_D0[26:16] BIT [7:0]: 8-bit value of F1RC1x~F1RCBx
-    uint8_t   F0RC_D1[27];      // RCD control words for DIMM1; Invalid for UDIMM
+    uint8_t   F0RC_D1[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM1; Invalid for UDIMM
     // F0RC_D0[15:0] BIT [3:0]: 4-bit value of F0RC00~F0RC0F
     // F0RC_D0[26:16] BIT [7:0]: 8-bit value of F0RC1x~F0RCBx
-    uint8_t   F1RC_D1[27];      // RCD control words for DIMM1; Invalid for UDIMM
+    uint8_t   F1RC_D1[TRAINING_RESPONSE_NUM_RC];      // RCD control words for DIMM1; Invalid for UDIMM
     // F1RC_D0[15:0] BIT [3:0]: 4-bit value of F1RC00~F1RC0F
     // F1RC_D0[26:16] BIT [7:0]: 8-bit value of F1RC1x~F1RCBx
 } user_response_rc_msdg_t;
