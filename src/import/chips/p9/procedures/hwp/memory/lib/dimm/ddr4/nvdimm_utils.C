@@ -43,6 +43,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
@@ -116,8 +117,51 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Helper for self_refresh_exit(). Uses memdiag to read the port to force
-/// CKE back to high. Stolen from mss_lab_memdiags.C
+/// @brief change ECC check and correct mode
+/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_target the target associated with this subroutine
+/// @param[in] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< >
+fapi2::ReturnCode change_ecc_check_correct_disable( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const mss::states i_state )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::read_recr_register(i_target, l_data));
+    mss::set_ecc_check_disable(l_data, i_state);
+    FAPI_TRY(mss::write_recr_register(i_target, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief cleanup after targeted scrub
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode targeted_scrub_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    fapi2::buffer<uint64_t> l_data;
+
+    // Clear the command complete to make sure PRD doesn't pick this up later
+    FAPI_TRY(mss::read_mcbfirq(l_mcbist, l_data));
+    mss::clear_mcbist_program_complete(l_data);
+    FAPI_TRY(mss::write_mcbfirq(l_mcbist, l_data));
+
+    // Re-enable ECC check on the given port
+    FAPI_TRY(change_ecc_check_correct_disable(i_target, mss::states::ON_N));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper for self_refresh_exit(). Uses scrub to make 1 address read to force
+/// CKE back to high.
 /// Specialization for TARGET_TYPE_MCA
 /// @param[in] i_target the target associated with this subroutine
 /// @return FAPI2_RC_SUCCESS iff setup was successful
@@ -127,7 +171,8 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
 {
 
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    fapi2::buffer<uint64_t> l_status;
+    fapi2::buffer<uint64_t> l_status, l_recr_buf, l_mcbfirq_buf, l_mcbfirmask_buf;
+    mss::states l_complete_mask = mss::states::LOW, l_wat_debug_attn_mask = mss::states::LOW;
 
     // A small vector of addresses to poll during the polling loop
     const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
@@ -138,27 +183,37 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
     // We'll fill in the initial delay below
     // Heuristically defined and copied from the f/w version of memdiags
     mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 500);
-    uint64_t l_memory_size = 0;
 
-    FAPI_TRY( mss::eff_memory_size<mss::mc_type::NIMBUS>(l_mcbist, l_memory_size) );
-    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(l_mcbist, (l_memory_size * mss::BYTES_PER_GB));
+    // Setting initial delay for 1 read (64 bytes)
+    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(l_mcbist, 64);
+
+    // Need to disable ECC check because we are reading without the proper settings on the DRAMs
+    FAPI_TRY(change_ecc_check_correct_disable(i_target, mss::states::OFF_N));
+
+    // Save the current value to restore later
+    FAPI_TRY(mss::read_mcbfirmask(l_mcbist, l_mcbfirmask_buf));
+    mss::get_mcbist_program_complete_mask(l_mcbfirmask_buf, l_complete_mask);
+    mss::get_mcbist_wat_debug_attn_mask(l_mcbfirmask_buf, l_wat_debug_attn_mask);
+
+    // Mask the command complete so they don't show up in error log
+    mss::set_mcbist_program_complete_mask(l_mcbfirmask_buf, mss::states::ON);
+    mss::set_mcbist_wat_debug_attn_mask(l_mcbfirmask_buf, mss::states::ON);
+    FAPI_TRY(mss::write_mcbfirmask(l_mcbist, l_mcbfirmask_buf));
 
     {
         // Force this to run on the targeted port only
         const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
-        mss::mcbist::address l_start;
+        mss::mcbist::address l_start = 0, l_end = 0;
         mss::mcbist::end_boundary l_end_boundary = mss::mcbist::end_boundary::STOP_AFTER_SLAVE_RANK;
         l_start.set_port(l_port);
         mss::mcbist::stop_conditions l_stop_conditions;
 
-        // Read with super fast read
-        // Set up with mcbist target, stop conditions above
-        // Using defaults for starting at first valid address and stop at end of slave rank
-        FAPI_TRY ( mss::memdiags::sf_read(l_mcbist,
-                                          l_stop_conditions,
-                                          l_start,
-                                          l_end_boundary,
-                                          l_start) );
+        // Read with targeted scrub
+        FAPI_TRY ( mss::memdiags::targeted_scrub(l_mcbist,
+                   l_stop_conditions,
+                   l_start,
+                   l_end,
+                   l_end_boundary) );
 
         bool l_poll_results = mss::poll(l_mcbist, MCBIST_MCBISTFIRQ, l_poll_parameters,
                                         [&l_status](const size_t poll_remaining,
@@ -170,10 +225,23 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
         },
         l_probes);
 
-        FAPI_DBG("memdiags_read poll result: %d", l_poll_results);
+        FAPI_DBG("targeted_scrub poll result: %d", l_poll_results);
+
+        FAPI_ASSERT(l_poll_results,
+                    fapi2::MSS_NVDIMM_TARGETED_SCRUB_STR_EXIT_FAILED_TO_COMPLETE().
+                    set_MCA_TARGET(i_target).
+                    set_MCBIST_TARGET(l_mcbist),
+                    "targeted scrub failed to complete on %s", mss::c_str(i_target));
     }
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    // Clean up the commmand complete and re-enable ECC check and correct
+    FAPI_TRY(targeted_scrub_cleanup(i_target));
+
+    // Restore the mask to the original value
+    FAPI_TRY(mss::read_mcbfirmask(l_mcbist, l_mcbfirmask_buf));
+    mss::set_mcbist_program_complete_mask(l_mcbfirmask_buf, l_complete_mask);
+    mss::set_mcbist_wat_debug_attn_mask(l_mcbfirmask_buf, l_wat_debug_attn_mask);
+    FAPI_TRY(mss::write_mcbfirmask(l_mcbist, l_mcbfirmask_buf));
 
 fapi_try_exit:
     return fapi2::current_err;

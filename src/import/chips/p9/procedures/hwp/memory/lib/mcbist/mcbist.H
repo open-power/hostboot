@@ -102,6 +102,10 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t MCBAMR2A0Q_REG = MCBIST_MCBAMR2A0Q;
         static constexpr uint64_t MCBAMR3A0Q_REG = MCBIST_MCBAMR3A0Q;
 
+        // MCBIST FIR registers
+        static constexpr uint64_t MCBFIRMASK_REG = MCBIST_MCBISTFIRMASK;
+        static constexpr uint64_t MCBFIRQ_REG = MCBIST_MCBISTFIRQ;
+
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = MCBIST_MCBFD0Q;
 
@@ -349,6 +353,12 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             ERROR_LOG_BEAT_LEN = 2,
             ERROR_LOG_TYPE = 46,
             ERROR_LOG_TYPE_LEN = 2,
+
+            //MCBIST FIR mask
+            MCB_PROGRAM_COMPLETE = MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE,
+            MCB_WAT_DEBUG_ATTN = MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
+            MCB_PROGRAM_COMPLETE_MASK = MCB_PROGRAM_COMPLETE,
+            MCB_WAT_DEBUG_ATTN_MASK = MCB_WAT_DEBUG_ATTN,
         };
 
 };
@@ -3263,8 +3273,145 @@ fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<T>& i_target, mcb
     return enable_broadcast_mode(i_target, io_program);
 }
 
-} // namespace
+} // mcbist namespace
 
-} // namespace
+///
+/// @brief Reads the contents of the MCBISTFIRMASK
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode read_mcbfirmask( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    o_data = 0;
+
+    FAPI_TRY( mss::getScom(i_target, TT::MCBFIRMASK_REG, o_data ), "%s failed to read MCBISTFIRMASK regiser",
+              mss::c_str(i_target));
+    FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the contents of the MCBISTFIRMASK
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode write_mcbfirmask( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), "%s failed to write MCBISTFIRMASK regiser",
+              mss::c_str(i_target));
+    FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), i_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the contents of the MCBISTFIRQ
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode read_mcbfirq( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    o_data = 0;
+
+    FAPI_TRY( mss::getScom(i_target, TT::MCBFIRQ_REG, o_data ), "%s failed to read MCBISTFIRQ regiser",
+              mss::c_str(i_target));
+    FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the contents of the MCBISTFIRQ
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode write_mcbfirq( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::MCBFIRQ_REG, i_data ), "%s failed to write MCBISTFIRQ regiser",
+              mss::c_str(i_target));
+    FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), i_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the mask for program complete
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<T> >
+inline void set_mcbist_program_complete_mask( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    io_data.writeBit<TT::MCB_PROGRAM_COMPLETE_MASK>(i_state == mss::states::ON);
+    FAPI_DBG("set_mcbist_program_complete_mask to %d 0x%016lx", i_state, io_data);
+}
+
+///
+/// @brief Sets the mask for WAT debug ATTN
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<T> >
+inline void set_mcbist_wat_debug_attn_mask( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    io_data.writeBit<TT::MCB_WAT_DEBUG_ATTN_MASK>(i_state == mss::states::ON);
+    FAPI_DBG("set_mcbist_wat_debug_attn_mask to %d 0x%016lx", i_state, io_data);
+}
+
+///
+/// @brief Clears the program complete and WAT debug ATTN
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCBIST
+/// @tparam TT traits type defaults to mcbistTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<T> >
+inline void clear_mcbist_program_complete( fapi2::buffer<uint64_t>& io_data )
+{
+    io_data.writeBit<TT::MCB_PROGRAM_COMPLETE>(mss::states::OFF);
+    io_data.writeBit<TT::MCB_WAT_DEBUG_ATTN>(mss::states::OFF);
+    FAPI_DBG("clear_mcbist_program_complete to %d 0x%016lx", mss::states::OFF, io_data);
+}
+
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<T> >
+inline void get_mcbist_program_complete_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::MCB_PROGRAM_COMPLETE>() ? mss::states::HIGH : mss::states::LOW;
+    FAPI_DBG("get_mcbist_program_complete_mask %d", o_state);
+}
+
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = mcbistTraits<T> >
+inline void get_mcbist_wat_debug_attn_mask( const fapi2::buffer<uint64_t> i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::MCB_WAT_DEBUG_ATTN>() ? mss::states::HIGH : mss::states::LOW;
+    FAPI_DBG("mcbist_wat_debug_attn_mask %d", o_state);
+}
+
+} // mss namespace
 
 #endif

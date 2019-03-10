@@ -66,6 +66,24 @@ fapi2::ReturnCode change_maint_addr_mode_en( const fapi2::Target<T>& i_target,
         const mss::states i_state );
 
 ///
+/// @brief change ECC check and correct mode
+/// Specialization for TARGET_TYPE_MCA
+/// @param[in] i_target the target associated with this subroutine
+/// @param[in] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode change_ecc_check_correct_disable( const fapi2::Target<T>& i_target,
+        const mss::states i_state );
+
+///
+/// @brief cleanup after targeted scrub
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode targeted_scrub_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
 /// @brief Helper for self_refresh_exit().
 /// @tparam T the target type associated with this subroutine
 /// @param[in] i_target the target associated with this subroutine

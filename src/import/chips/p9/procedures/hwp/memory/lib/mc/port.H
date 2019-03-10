@@ -284,7 +284,20 @@ class portTraits<mss::mc_type::NIMBUS>
 };
 
 
+///
+/// @brief Sets ecc_check_disable in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in,out] io_data the target data buffer
+/// @param[in] i_value ECC_CHECK_DISABLE value (on or off) to set
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<mss::mc_type::NIMBUS> >
+void set_ecc_check_disable( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
+{
+    FAPI_INF( "Set ECC_CHECK_DISABLE to %lu", i_value);
 
+    io_data.template writeBit<TT::ECC_CHECK_DISABLE>(i_value);
+}
 
 ///
 /// @brief Get the read pointer delay value from RECR
