@@ -53,6 +53,7 @@ void* host_establish_ex_chiplet (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet entry" );
     ISTEP_ERROR::IStepError l_StepError;
+    #ifndef CONFIG_AXONE_BRING_UP
     errlHndl_t l_errl = NULL;
     do {
         //Use targeting code to get a list of all processors
@@ -77,6 +78,7 @@ void* host_establish_ex_chiplet (void *io_pArgs)
             }
         }
     }while(0);
+    #endif
 
     // end task, returning any errorlogs to IStepDisp
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_establish_ex_chiplet exit" );
