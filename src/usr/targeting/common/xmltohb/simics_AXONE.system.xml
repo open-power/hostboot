@@ -214,6 +214,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>MAX_CHIPLETS_PER_PROC</id>
         <default>32</default>
     </attribute>
