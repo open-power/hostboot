@@ -52,10 +52,12 @@
 
 #include <lib/mc/port.H>
 #include <lib/phy/dp16.H>
-#include <lib/dimm/rcd_load.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/pda.H>
 #include <lib/dimm/ddr4/zqcal.H>
+#include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/workarounds/ccs_workarounds.H>
+#include <lib/eff_config/timing.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -66,6 +68,7 @@ namespace mss
 
 namespace nvdimm
 {
+
 
 ///
 /// @brief Wrapper to read MAINT_ADDR_MODE_EN
@@ -171,8 +174,12 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
 {
 
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    fapi2::buffer<uint64_t> l_status, l_recr_buf, l_mcbfirq_buf, l_mcbfirmask_buf;
-    mss::states l_complete_mask = mss::states::LOW, l_wat_debug_attn_mask = mss::states::LOW;
+    fapi2::buffer<uint64_t> l_status;
+    fapi2::buffer<uint64_t> l_recr_buf;
+    fapi2::buffer<uint64_t> l_mcbfirq_buf;
+    fapi2::buffer<uint64_t> l_mcbfirmask_buf;
+    mss::states l_complete_mask = mss::states::LOW;
+    mss::states l_wat_debug_attn_mask = mss::states::LOW;
 
     // A small vector of addresses to poll during the polling loop
     const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
@@ -246,7 +253,6 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Put target into self-refresh
@@ -380,6 +386,225 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Disable powerdown mode in rc09
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+{
+    FAPI_INF("rc09_disable_powerdown %s", mss::c_str(i_target));
+
+    constexpr uint8_t POWER_DOWN_BIT = 4;
+    constexpr bool l_sim = false;
+    constexpr uint8_t FS0 = 0; // Function space 0
+    constexpr uint64_t CKE_HIGH = mss::ON;
+    fapi2::buffer<uint8_t> l_rc09_cw = 0;
+    std::vector<uint64_t> l_ranks;
+
+    FAPI_TRY(mss::eff_dimm_ddr4_rc09(i_target, l_rc09_cw));
+
+    // Clear power down enable bit.
+    l_rc09_cw.clearBit<POWER_DOWN_BIT>();
+
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
+
+    // DES to ensure we exit powerdown properly
+    FAPI_DBG("deselect for %s", mss::c_str(i_target));
+    io_inst.push_back( ccs::des_command<TARGET_TYPE_MCBIST>() );
+
+    static const cw_data l_rc09_4bit_data( FS0, 9, l_rc09_cw, mss::tmrd() );
+
+    // Load RC09
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, l_sim, io_inst, CKE_HIGH),
+              "Failed to load 4-bit RC09 control word for %s",
+              mss::c_str(i_target));
+
+    // Hold the CKE high
+    mss::ccs::workarounds::hold_cke_high(io_inst);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load the rcd control words
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @Note This is similar to rcd_load_ddr4() but with minor changes to support
+///       with NVDIMMs
+///
+fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                   std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+{
+    FAPI_INF("rcd_load_nvdimm %s", mss::c_str(i_target));
+
+    constexpr uint64_t CKE_LOW = mss::OFF;
+    constexpr bool l_sim = false;
+
+    // Per DDR4RCD02, tSTAB is us. We want this in cycles for the CCS.
+    const uint64_t tSTAB = mss::us_to_cycles(i_target, mss::tstab());
+    constexpr uint8_t FS0 = 0; // Function space 0
+
+    // RCD 4-bit data - integral represents rc#
+    static const std::vector< cw_data > l_rcd_4bit_data =
+    {
+        { FS0, 0,  eff_dimm_ddr4_rc00,    mss::tmrd()    },
+        { FS0, 1,  eff_dimm_ddr4_rc01,    mss::tmrd()    },
+        { FS0, 2,  eff_dimm_ddr4_rc02,    tSTAB          },
+        { FS0, 3,  eff_dimm_ddr4_rc03,    mss::tmrd_l()  },
+        { FS0, 4,  eff_dimm_ddr4_rc04,    mss::tmrd_l()  },
+        { FS0, 5,  eff_dimm_ddr4_rc05,    mss::tmrd_l()  },
+        // Note: the tMRC1 timing as it is larger for saftey's sake
+        // The concern is that if geardown mode is ever required in the future, we would need the longer timing
+        { FS0, 6,  eff_dimm_ddr4_rc06_07, mss::tmrc1()   },
+        { FS0, 8,  eff_dimm_ddr4_rc08,    mss::tmrd()    },
+        { FS0, 10, eff_dimm_ddr4_rc0a,    tSTAB          },
+        { FS0, 11, eff_dimm_ddr4_rc0b,    mss::tmrd_l()  },
+        { FS0, 12, eff_dimm_ddr4_rc0c,    mss::tmrd()    },
+        { FS0, 13, eff_dimm_ddr4_rc0d,    mss::tmrd_l2() },
+        { FS0, 14, eff_dimm_ddr4_rc0e,    mss::tmrd()    },
+        { FS0, 15, eff_dimm_ddr4_rc0f,    mss::tmrd_l2() },
+    };
+
+    // RCD 4-bit data - integral represents rc#
+    static const cw_data l_rc09_4bit_data( FS0, 9, eff_dimm_ddr4_rc09, mss::tmrd() );
+
+    // RCD 8-bit data - integral represents rc#
+    static const std::vector< cw_data > l_rcd_8bit_data =
+    {
+        { FS0, 1,  eff_dimm_ddr4_rc_1x, mss::tmrd()   },
+        { FS0, 2,  eff_dimm_ddr4_rc_2x, mss::tmrd()   },
+        { FS0, 3,  eff_dimm_ddr4_rc_3x, tSTAB         },
+        { FS0, 4,  eff_dimm_ddr4_rc_4x, mss::tmrd()   },
+        { FS0, 5,  eff_dimm_ddr4_rc_5x, mss::tmrd()   },
+        { FS0, 6,  eff_dimm_ddr4_rc_6x, mss::tmrd()   },
+        { FS0, 7,  eff_dimm_ddr4_rc_7x, mss::tmrd_l() },
+        { FS0, 8,  eff_dimm_ddr4_rc_8x, mss::tmrd()   },
+        { FS0, 9,  eff_dimm_ddr4_rc_9x, mss::tmrd()   },
+        { FS0, 10, eff_dimm_ddr4_rc_ax, mss::tmrd()   },
+        { FS0, 11, eff_dimm_ddr4_rc_bx, mss::tmrd_l() },
+    };
+
+    // Load 4-bit data
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, l_sim, io_inst, CKE_LOW),
+              "Failed to load 4-bit control words for %s",
+              mss::c_str(i_target));
+
+    // Load 8-bit data
+    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, l_sim, io_inst, CKE_LOW),
+              "Failed to load 8-bit control words for %s",
+              mss::c_str(i_target));
+
+    // Load RC09 with CKE_LOW
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, l_sim, io_inst, CKE_LOW),
+              "Failed to load 4-bit RC09 control word for %s",
+              mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore the rcd after restoring the nvdimm data
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @Note Restoring the RCD after NVDIMM restore requires a special procedure
+///       The procedure from draminit would actually fail to restore the CWs
+///
+fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+    std::vector<uint64_t> l_ranks;
+
+    // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
+    ccs::program<TARGET_TYPE_MCBIST> l_program;
+
+    // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
+    // instructions in the CCS instruction vector
+    l_program.iv_poll.iv_initial_delay = 0;
+    l_program.iv_poll.iv_initial_sim_delay = 0;
+
+    // We expect to come in with the port in STR. Before proceeding with
+    // restoring the RCD, power down needs to be disabled first on the RCD so
+    // the rest of the CWs can be restored with CKE low
+    for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        FAPI_DBG("rc09_disable_powerdown for %s", mss::c_str(d));
+        FAPI_TRY( rc09_disable_powerdown(d, l_program.iv_instructions),
+                  "Failed rc09_disable_powerdown() for %s", mss::c_str(d) );
+    }// dimms
+
+    // Exit STR first so CKE is back to high and rcd isn't ignoring us
+    FAPI_TRY( self_refresh_exit( i_target ) );
+
+    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target),
+              "Failed to execute ccs for %s", mss::c_str(i_target) );
+
+    // Now, drive CKE back to low via STR entry instead of pde (we have data in the drams!)
+    FAPI_TRY( self_refresh_entry( i_target ) );
+
+    l_program = ccs::program<TARGET_TYPE_MCBIST>(); //Reset the program
+
+    // Now, fill the program with instructions to program the RCD
+    for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        FAPI_DBG("rcd_load_nvdimm( for %s", mss::c_str(d));
+        FAPI_TRY( rcd_load_nvdimm(d, l_program.iv_instructions),
+                  "Failed rcd_load_nvdimm() for %s", mss::c_str(d) );
+    }// dimms
+
+    // Restore the rcd
+    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target),
+              "Failed to execute ccs for %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Execute post restore ZQCAL
+/// @param[in] i_target the target associated with this cal
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @Note The original zqcal has delay that violates the refresh interval.
+///       Since we now have data in the DRAMs, the command will execute
+///       with delay following the spec.
+///
+fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+    std::vector<uint64_t> l_ranks;
+    uint8_t l_trp[MAX_DIMM_PER_PORT];
+    ccs::program<TARGET_TYPE_MCBIST> l_program;
+
+    // Get tRP
+    FAPI_TRY(mss::eff_dram_trp(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_trp));
+
+    // Construct the program
+    for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        FAPI_TRY( mss::rank::ranks(d, l_ranks) );
+
+        for ( const auto r : l_ranks)
+        {
+            FAPI_DBG("precharge_all_command for %s", mss::c_str(d));
+            l_program.iv_instructions.push_back( ccs::precharge_all_command<TARGET_TYPE_MCBIST>(d, r, l_trp[0]) );
+            FAPI_DBG("zqcal_command for %s", mss::c_str(d));
+            l_program.iv_instructions.push_back( ccs::zqcl_command<TARGET_TYPE_MCBIST>(d, r, mss::tzqinit()) );
+        }
+    }// dimms
+
+    // execute ZQCAL instructions
+    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target),
+              "Failed to execute ccs for ZQCAL %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Post restore transition to support restoring nvdimm to
 /// a functional state after the restoring the data from NAND flash
 /// to DRAM
@@ -401,8 +626,8 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
         FAPI_TRY(change_maint_addr_mode_en(i_target, mss::states::LOW));
     }
 
-    // Subseqent restore on later nvdimms would go wonky if this goes before STR exit...
-    FAPI_TRY( mss::rcd_load( i_target ) );
+    // Restore the rcd
+    FAPI_TRY( rcd_restore( i_target ) );
 
     // Exit STR
     FAPI_TRY( self_refresh_exit( i_target ) );
@@ -411,13 +636,7 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY( mss::mrs_load( i_target ) );
 
     // Do ZQCAL
-    {
-        fapi2::buffer<uint32_t> l_cal_steps_enabled;
-        l_cal_steps_enabled.setBit<mss::DRAM_ZQCAL>();
-
-        FAPI_DBG("cal steps enabled: 0x%08x ", l_cal_steps_enabled);
-        FAPI_TRY( mss::setup_and_execute_zqcal(i_target, l_cal_steps_enabled), "Error in nvdimm setup_and_execute_zqcal()" );
-    }
+    FAPI_TRY( post_restore_zqcal(i_target) );
 
     // Latch the trained PDA vref values for each dimm under the port
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))

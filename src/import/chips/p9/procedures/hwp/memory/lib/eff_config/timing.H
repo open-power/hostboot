@@ -377,6 +377,32 @@ constexpr uint8_t tadc()
 }
 
 ///
+/// @brief Self Refresh Entry delay
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get clocks
+/// @return max(5nCK,10ns) in clocks
+///
+template< fapi2::TargetType T >
+inline uint64_t tcksre( const fapi2::Target<T>& i_target )
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return mss::max_ck_ns<T>( i_target, 5, 10 );
+}
+
+///
+/// @brief Self Refresh Exit delay
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get clocks
+/// @return max(5nCK,10ns) in clocks
+///
+template< fapi2::TargetType T >
+inline uint64_t tcksrx( const fapi2::Target<T>& i_target )
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return mss::max_ck_ns<T>( i_target, 5, 10 );
+}
+
+///
 /// @brief DQS_t/DQS_n delay after write leveling mode is programmed
 /// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
 /// @param[in] i_target the target used to get tMOD clocks

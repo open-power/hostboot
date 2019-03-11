@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -686,7 +686,8 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const uint64_t i_rank )
+                                      const uint64_t i_rank,
+                                      const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -704,6 +705,9 @@ inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
     // ADDR10/AP is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    // Insert idle
+    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
     return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
@@ -870,6 +874,7 @@ inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
+/// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the precharge all banks command CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
@@ -877,7 +882,8 @@ inline instruction_t<T> rda_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank )
+        const uint64_t i_rank,
+        const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -896,6 +902,9 @@ inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET
     // Setup ADDR10/AP high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
+    // Insert idle
+    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
+
     // From DDR4 Spec table 17:
     // All other bits from the command truth table or 'V', for valid (1 or 0)
 
@@ -908,12 +917,13 @@ inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
+/// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh entry command CCS instruction
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank )
+        const uint64_t i_rank, const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -929,6 +939,9 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
     .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
     .template setBit<TT::ARR0_DDR_ADDRESS_14>();
 
+    // Insert idle
+    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
+
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
@@ -941,13 +954,14 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
+/// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the self-refresh exit command CCS instruction
 /// @note Using NOP in case SDRAM is in gear down mode and max power saving mode exit
 /// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank )
+        const uint64_t i_rank, const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
@@ -962,6 +976,9 @@ inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TA
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>()
     .template setBit<TT::ARR0_DDR_ADDRESS_15>()
     .template setBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    // Insert idle
+    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)

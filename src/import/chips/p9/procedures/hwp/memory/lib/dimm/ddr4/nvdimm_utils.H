@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -123,12 +124,50 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode pda_vref_latch( const fapi2::Target<T>& i_target );
 
 ///
+/// @brief Disable powerdown mode in rc09
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+
+///
+/// @brief Load the rcd control words
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @Note This is similar to rcd_load_ddr4() but with minor changes to support
+///       with NVDIMMs
+///
+fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+
+///
+/// @brief Restore the rcd after restoring the nvdimm data
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @Note Restoring the RCD after NVDIMM restore requires a special procedure
+///       The procedure from draminit would actually fail to restore the CWs
+///
+fapi2::ReturnCode rcd_restore( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief Execute post restore ZQCAL
+/// @param[in] i_target the target associated with this cal
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @Note The original zqcal has delay that violates the refresh interval.
+///       Since we now have data in the DRAMs, the command will be executed
+///       with delay following the spec.
+///
+fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
 /// @brief Full post-restore transition for NVDIMM
 /// @tparam T the target type associated with this subroutine
 /// @param[in] i_target the target associated with this subroutine
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-
 template< fapi2::TargetType T >
 fapi2::ReturnCode post_restore_transition( const fapi2::Target<T>& i_target );
 
