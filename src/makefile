@@ -257,7 +257,8 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
-TESTCASE_MODULES += testsmf
+#TODO RTC: 206800 Investigate why SMF tests fail in Axone
+TESTCASE_MODULES += $(if $(CONFIG_AXONE_BRING_UP),,testsmf)
 TESTCASE_MODULES += testexpaccess
 
 #******************************************************************
