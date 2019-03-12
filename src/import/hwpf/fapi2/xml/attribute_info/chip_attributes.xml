@@ -28,7 +28,6 @@
     <id>ATTR_NAME</id>
     <targetType>
       TARGET_TYPE_PROC_CHIP,
-      TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_OCMB_CHIP
     </targetType>
     <description>
@@ -38,11 +37,8 @@
     <valueType>uint8</valueType>
     <enum>
       NONE = 0x0,
-      CENTAUR = 0x3,
-      NIMBUS = 0x5,
-      CUMULUS = 0x6,
-      AXONE = 0x7,
-      EXPLORER = 0x8
+      EXPLORER = 0x8,
+      P10 = 0xA
     </enum>
     <platInit/>
     <privileged/>
@@ -52,7 +48,6 @@
     <id>ATTR_EC</id>
     <targetType>
       TARGET_TYPE_PROC_CHIP,
-      TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_OCMB_CHIP
     </targetType>
     <description>
@@ -70,7 +65,6 @@
     <id>ATTR_MINI_EC</id>
     <targetType>
       TARGET_TYPE_PROC_CHIP,
-      TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_OCMB_CHIP
     </targetType>
     <description>
