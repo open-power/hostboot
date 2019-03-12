@@ -232,6 +232,7 @@ fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
     const std::vector< cw_info > l_bcw_info =
     {
+
         { FUNC_SPACE_0,  RANK_PRESENCE_CW, i_rank,  mss::tmrc() , CW4_DATA_LEN, cw_info::BCW},
     };
 
@@ -397,6 +398,7 @@ fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                               mrep_dwl_result& io_loop_result,
                               std::vector<std::pair<mrep_dwl_recorder, mrep_dwl_recorder>>& io_results_recorder)
 {
+    const char* CAL_STEP_PRINT = i_calibration == mss::cal_steps::MREP ? "MREP" : "DWL";
     data_response l_data;
     // Get's the MCA
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
@@ -422,13 +424,13 @@ fapi2::ReturnCode get_result( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                     fapi2::MSS_LRDIMM_RECORDER_SIZE_SMALL()
                     .set_TARGET(i_target)
                     .set_BUFFER(l_buffer),
-                    "%s io_results_recorder size: %d smaller than MAX_LRDIMM_BUFFERS",
-                    mss::c_str(i_target), io_results_recorder.size());
+                    "%s %s io_results_recorder size: %d smaller than MAX_LRDIMM_BUFFERS",
+                    mss::c_str(i_target), CAL_STEP_PRINT, io_results_recorder.size());
 
         auto l_it_recorder = io_results_recorder.begin() + l_buffer;
 
-        FAPI_DBG( "%s delay:0x%02x result buffer:%u data:0x%02x N0:0x%02x N1:0x%02x, N0_result:%u, N1_result:%u",
-                  mss::c_str(i_target), i_delay,
+        FAPI_DBG( "%s %s delay:0x%02x result buffer:%u data:0x%02x N0:0x%02x N1:0x%02x, N0_result:%u, N1_result:%u",
+                  mss::c_str(i_target), CAL_STEP_PRINT, i_delay,
                   l_buffer, l_buffer_result,
                   l_result_nibble0, l_result_nibble1, l_result_nibble0_bool, l_result_nibble1_bool);
 
@@ -468,6 +470,7 @@ fapi2::ReturnCode analyze_result_for_each_nibble( const fapi2::Target<fapi2::TAR
     constexpr uint8_t TOLERANCE_NUMBER = 2;
     bool final_delay_found = false;
     uint8_t l_first_transition = NO_TRANSITION_FOUND;
+    const char* CAL_STEP_PRINT = i_calibration == mss::cal_steps::MREP ? "MREP" : "DWL";
 
     // for the 0->1 transition is in 0th delay
     io_recorder.iv_seen0 = i_result_nibble.getBit<0>() && (!(i_result_nibble.getBit < MREP_DWL_MAX_DELAY - 1 > ()));
@@ -538,15 +541,15 @@ fapi2::ReturnCode analyze_result_for_each_nibble( const fapi2::Target<fapi2::TAR
             {
                 io_recorder.iv_delay = l_delay;
                 final_delay_found = true;
-                FAPI_DBG( "%s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x of result 0x%16lx, have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
-                          mss::c_str(i_target), i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
+                FAPI_DBG( "%s %s buffer:%u nibble:%u found a 0->1 transition at delay 0x%02x of result 0x%16lx, have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
+                          mss::c_str(i_target), CAL_STEP_PRINT, i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
             }
             else
             {
                 io_recorder.iv_seen0 = false;
                 io_recorder.iv_seen1 = false;
-                FAPI_DBG( "%s buffer:%u nibble:%u found a wrong 0->1 transition at delay 0x%02x of result 0x%16lx, just have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
-                          mss::c_str(i_target), i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
+                FAPI_DBG( "%s %s buffer:%u nibble:%u found a wrong 0->1 transition at delay 0x%02x of result 0x%16lx, just have 0x%02x continue 0 before it,have 0x%02x continue 1 after it",
+                          mss::c_str(i_target), CAL_STEP_PRINT, i_buffer, i_nibble, l_delay, i_result_nibble, l_continue0, l_continue1 );
             }
         }
 
@@ -570,14 +573,14 @@ fapi2::ReturnCode analyze_result_for_each_nibble( const fapi2::Target<fapi2::TAR
                         .set_CALIBRATION_STEP(i_calibration)
                         .set_CALIBRATION_RAW_DATA(i_result_nibble)
                         .set_NIBBLE(i_nibble),
-                        "%s found a noise result in buffer%u nibble%u , the data is 0x%16lx",
-                        mss::c_str(i_target), i_buffer, i_nibble, i_result_nibble);
+                        "%s %s found a noise result in buffer%u nibble%u , the data is 0x%16lx",
+                        mss::c_str(i_target), CAL_STEP_PRINT, i_buffer, i_nibble, i_result_nibble);
 
         }
 
         // We will callout no 0->1 transitions when we do our full error checking
-        FAPI_INF( "%s buffer:%u nibble:%u can not found a 0->1 transition of result 0x%16lx",
-                  mss::c_str(i_target), i_buffer, i_nibble, i_result_nibble);
+        FAPI_INF( "%s %s buffer:%u nibble:%u can not found a 0->1 transition of result 0x%16lx",
+                  mss::c_str(i_target), CAL_STEP_PRINT, i_buffer, i_nibble, i_result_nibble);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

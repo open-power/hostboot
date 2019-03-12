@@ -510,6 +510,7 @@ class fine_recorder
                 uint16_t& o_eye_size,
                 bool& o_no_pass_region) const
         {
+            const char* CAL_STEP_PRINT = i_calibration == mss::cal_steps::MRD_FINE ? "MRD_FINE" : "MWD_FINE";
             o_delay = 0;
             o_eye_size = 0;
             o_no_pass_region = false;
@@ -538,8 +539,8 @@ class fine_recorder
                 o_no_pass_region = true;
             }
 
-            FAPI_DBG("bit%u found %u eyes. best case eye size%u with setpoint delay of %u from data 0x%08x",
-                     i_bit, l_delay_eyes.size(), o_eye_size, o_delay, l_data);
+            FAPI_DBG("%s %s bit%u found %u eyes. best case eye size%u with setpoint delay of %u from data 0x%08x",
+                     mss::c_str(i_target), CAL_STEP_PRINT, i_bit, l_delay_eyes.size(), o_eye_size, o_delay, l_data);
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -575,8 +576,6 @@ enum errors : uint64_t
 ///
 inline void append_nibble_flags(const bool i_nibble0, const bool i_nibble1, uint32_t& io_bitmap)
 {
-
-
     // Update the bitmap -
     // bit logic shifts the bits to the right then OR's in the given nibble
     // This forces nibble 0 to be the leftmost bit in the flag, while nibble 17 is the right most bit in the flag
@@ -604,7 +603,7 @@ inline void append_dq_flags(const bool i_dq, uint8_t& io_bitmap)
     io_bitmap |= i_dq ? 1 : 0;
 }
 
-//
+///
 /// @brief Appends a nibble's error callouts per-nibble (4 dq) onto the all dq bitmap
 /// @param[in] i_nibble0 flag for nibble 0 - low 4 bit valid ,true is fail
 /// @param[in] i_nibble1 flag for nibble 1 - low 4 bit valid ,true is fail
@@ -977,6 +976,7 @@ fapi_try_exit:
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return fapi2::current_err;
 }
+
 } // ns callout
 
 namespace workarounds

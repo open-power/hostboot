@@ -436,8 +436,10 @@ fapi2::ReturnCode mrd_coarse::set_final_delays_helper(const fapi2::Target<fapi2:
                              l_result.first.iv_final_delay :
                              l_result.second.iv_final_delay;
 
-        FAPI_DBG("%s MRD_COARSE rank%u buffer:%u final values (0x%02x,0x%02x) %s swapped nibble0:0x%02x nibble1:0x%02x",
-                 mss::c_str(l_mca), i_dimm_rank, l_buffer, l_result.first.iv_final_delay, l_result.second.iv_final_delay,
+        FAPI_DBG("%s MRD_COARSE rank%u buffer:%u final results raw data: 0x%02x 0x%02x, results 0x%02x 0x%02x %s swapped nibble0:0x%02x nibble1:0x%02x",
+                 mss::c_str(l_mca), i_dimm_rank, l_buffer,
+                 uint8_t(l_result.first.iv_results), uint8_t(l_result.second.iv_results),
+                 l_result.first.iv_final_delay, l_result.second.iv_final_delay,
                  l_are_nibbles_swapped ? "are" : "not", l_bcw_result0, l_bcw_result1);
 
         l_bcw_result0 = convert_delay_to_bcw(l_bcw_result0);
