@@ -184,4 +184,14 @@
   <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_MASTER_CORE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates the master boot core chiplet selected by p10_sbe_select_ex.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
