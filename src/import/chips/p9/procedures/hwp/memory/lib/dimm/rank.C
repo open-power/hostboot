@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,10 @@ static const std::vector< std::vector< std::vector< uint64_t > > > primary_rank_
 // Nimbus only allows us to have all LR or all RDIMM plugged on a given port, so we're ok having two tables
 // Note: for LRDIMM's we want to have common delay settings for each DIMM (DIMM0 has its settings and DIMM1 has its own settings)
 // As such, we setup the rank pairs to have primary/secondary/tertiary/quaternary for each DIMM on a single rank pair
+//  Primary +  secondary 0/1
+//  Primary +  secondary 2/3
+// Tertiary + quaternary 0/1
+// Tertiary + quaternary 2/3
 static const std::vector< std::vector< rank_pair_data > > lr_rank_pair_assignments =
 {
     {
@@ -190,32 +194,32 @@ static const std::vector< std::vector< rank_pair_data > > lr_rank_pair_assignmen
         {0x1300, 0x0000, 0x5700, 0x0000}, // 0 ranks DIMM 1, 4 ranks DIMM0
     },
     {
-        {0x0090, 0x0000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 0 ranks DIMM0
-        {0x1090, 0x0000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 1 ranks DIMM0
-        {0x1390, 0x0000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 2 ranks DIMM0
-        {0x1390, 0x0000, 0x5000, 0x0000}, // 1 ranks DIMM 1, 3 ranks DIMM0
-        {0x1390, 0x0000, 0x5700, 0x0000}, // 1 ranks DIMM 1, 4 ranks DIMM0
+        {0x0000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 1 ranks DIMM0
+        {0x1300, 0x9000, 0x0000, 0x0000}, // 1 ranks DIMM 1, 2 ranks DIMM0
+        {0x1300, 0x9000, 0x5000, 0x0000}, // 1 ranks DIMM 1, 3 ranks DIMM0
+        {0x1300, 0x9000, 0x5700, 0x0000}, // 1 ranks DIMM 1, 4 ranks DIMM0
     },
     {
-        {0x009B, 0x0000, 0x0000, 0x0000}, // 2 ranks DIMM 1, 0 ranks DIMM0
-        {0x109B, 0x0000, 0x0000, 0x0000}, // 2 ranks DIMM 1, 1 ranks DIMM0
-        {0x139B, 0x0000, 0x0000, 0x0000}, // 2 ranks DIMM 1, 2 ranks DIMM0
-        {0x139B, 0x0000, 0x5000, 0x0000}, // 2 ranks DIMM 1, 3 ranks DIMM0
-        {0x139B, 0x0000, 0x5700, 0x0000}, // 2 ranks DIMM 1, 4 ranks DIMM0
+        {0x0000, 0x9B00, 0x0000, 0x0000}, // 2 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9B00, 0x0000, 0x0000}, // 2 ranks DIMM 1, 1 ranks DIMM0
+        {0x1300, 0x9B00, 0x0000, 0x0000}, // 2 ranks DIMM 1, 2 ranks DIMM0
+        {0x1300, 0x9B00, 0x5000, 0x0000}, // 2 ranks DIMM 1, 3 ranks DIMM0
+        {0x1300, 0x9B00, 0x5700, 0x0000}, // 2 ranks DIMM 1, 4 ranks DIMM0
     },
     {
-        {0x009B, 0x0000, 0x00D0, 0x0000}, // 3 ranks DIMM 1, 0 ranks DIMM0
-        {0x109B, 0x0000, 0x00D0, 0x0000}, // 3 ranks DIMM 1, 1 ranks DIMM0
-        {0x139B, 0x0000, 0x00D0, 0x0000}, // 3 ranks DIMM 1, 2 ranks DIMM0
-        {0x139B, 0x0000, 0x50D0, 0x0000}, // 3 ranks DIMM 1, 3 ranks DIMM0
-        {0x139B, 0x0000, 0x57D0, 0x0000}, // 3 ranks DIMM 1, 4 ranks DIMM0
+        {0x0000, 0x9B00, 0x0000, 0xD000}, // 3 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9B00, 0x0000, 0xD000}, // 3 ranks DIMM 1, 1 ranks DIMM0
+        {0x1300, 0x9B00, 0x0000, 0xD000}, // 3 ranks DIMM 1, 2 ranks DIMM0
+        {0x1300, 0x9B00, 0x5000, 0xD000}, // 3 ranks DIMM 1, 3 ranks DIMM0
+        {0x1300, 0x9B00, 0x5700, 0xD000}, // 3 ranks DIMM 1, 4 ranks DIMM0
     },
     {
-        {0x009B, 0x0000, 0x00DF, 0x0000}, // 4 ranks DIMM 1, 0 ranks DIMM0
-        {0x109B, 0x0000, 0x00DF, 0x0000}, // 4 ranks DIMM 1, 1 ranks DIMM0
-        {0x139B, 0x0000, 0x00DF, 0x0000}, // 4 ranks DIMM 1, 2 ranks DIMM0
-        {0x139B, 0x0000, 0x50DF, 0x0000}, // 4 ranks DIMM 1, 3 ranks DIMM0
-        {0x139B, 0x0000, 0x57DF, 0x0000}, // 4 ranks DIMM 1, 4 ranks DIMM0
+        {0x0000, 0x9B00, 0x0000, 0xDF00}, // 4 ranks DIMM 1, 0 ranks DIMM0
+        {0x1000, 0x9B00, 0x0000, 0xDF00}, // 4 ranks DIMM 1, 1 ranks DIMM0
+        {0x1300, 0x9B00, 0x0000, 0xDF00}, // 4 ranks DIMM 1, 2 ranks DIMM0
+        {0x1300, 0x9B00, 0x5000, 0xDF00}, // 4 ranks DIMM 1, 3 ranks DIMM0
+        {0x1300, 0x9B00, 0x5700, 0xDF00}, // 4 ranks DIMM 1, 4 ranks DIMM0
     },
 };
 
@@ -235,32 +239,32 @@ static const std::vector< std::vector< std::vector< uint64_t > > > lr_primary_ra
         {0}
     },
     {
-        {NO_RANK, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4}
+        {NO_RANK, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4}
     },
     {
-        {NO_RANK, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4}
+        {NO_RANK, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4}
     },
     {
-        {NO_RANK, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4}
+        {NO_RANK, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4}
     },
     {
-        {NO_RANK, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4},
-        {0, 4}
+        {NO_RANK, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4},
+        {0, NO_RANK, 4}
     },
 };
 
