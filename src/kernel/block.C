@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -387,7 +387,7 @@ void Block::castOutPages(uint64_t i_type)
        (iv_baseAddr != VMM_ADDR_EXTEND_BLOCK)) // Skip extended memory.
     {
         size_t rw_constraint = 5;
-        size_t ro_constraint = 3;
+        size_t ro_constraint = 10;
 
         if(i_type == VmmManager::CRITICAL)
         {

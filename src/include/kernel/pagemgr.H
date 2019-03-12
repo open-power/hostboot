@@ -188,14 +188,18 @@ class PageManager
 
         enum
         {
-            KERNEL_HEAP_RESERVED_PAGES = 4,
+            // Always keep this many free pages for the kernel to use
+            KERNEL_HEAP_RESERVED_PAGES = 10,
 
+            // Triggers a NORMAL page castout
 #ifdef CONFIG_P9_VPO_COMPILE // VPO has constrained mem env -> higher threshold
             LOWMEM_NORM_LIMIT = 32,
 #else
             LOWMEM_NORM_LIMIT = 16,
 #endif
-            LOWMEM_CRIT_LIMIT = 5,
+
+            // Triggers CRITICAL page castout
+            LOWMEM_CRIT_LIMIT = KERNEL_HEAP_RESERVED_PAGES+1,
         };
 
         static size_t cv_coalesce_count;        //!< running coalesced counter

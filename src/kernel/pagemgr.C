@@ -318,6 +318,10 @@ void* PageManager::_allocatePage(size_t n, bool userspace)
     {
         printkd("PAGEMANAGER: kernel heap used\n");
         page = iv_heapKernel.allocatePage(n);
+
+        // Any time we dip into the kernel heap we should start
+        //  evicting user pages
+        CpuManager::forceMemoryPeriodic();
     }
 
     // If still not successful, we're out of memory.  Assert.
