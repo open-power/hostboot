@@ -226,6 +226,8 @@ my $resident_modules = {
     "libscom.so"                => '1',
     "libxscom.so"               => '1',
     "libnode_comm.so"           => '1',
+    "libmmio.so"                => '1',
+    "libexpaccess.so"           => '1',
 };
 
 # A list of the dependent libraries in each istep.

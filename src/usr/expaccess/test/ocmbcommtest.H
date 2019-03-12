@@ -67,9 +67,6 @@ typedef struct
 } FW_ADAPTER_PROPERTIES_type;
 
 
-// Testing this code
-const char EXPLORER_LIBRARY_NAME[16]    = "libexpaccess.so";
-
 // Need this module for mss::c_str call in HWP failure path traces
 const char MSS_LIBRARY_NAME[17]         = "libisteps_mss.so";
 
@@ -271,27 +268,18 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     OCMBCommTest() : CxxTest::TestSuite()
     {
-        explorer_module_loaded = false;
         mss_module_loaded = false;
 
         // All modules are loaded by runtime,
         // so testcase loading of modules is not required
 #ifndef __HOSTBOOT_RUNTIME
         errlHndl_t err = nullptr;
-        err = loadModule(explorer_module_loaded, EXPLORER_LIBRARY_NAME);
+
+        err = loadModule(mss_module_loaded, MSS_LIBRARY_NAME);
         if(err)
         {
-            TS_FAIL("OCMBCommTest() - Constuctor: failed to load EXPLORER module");
+            TS_FAIL("OCMBCommTest() - Constuctor: failed to load MSS module");
             errlCommit( err, TARG_COMP_ID );
-        }
-        else
-        {
-          err = loadModule(mss_module_loaded, MSS_LIBRARY_NAME);
-          if(err)
-          {
-              TS_FAIL("OCMBCommTest() - Constuctor: failed to load MSS module");
-              errlCommit( err, TARG_COMP_ID );
-          }
         }
 #endif
     };
@@ -303,15 +291,6 @@ class OCMBCommTest: public CxxTest::TestSuite
     ~OCMBCommTest()
     {
         errlHndl_t err = nullptr;
-        if (explorer_module_loaded)
-        {
-            err = unloadModule(EXPLORER_LIBRARY_NAME);
-            if(err)
-            {
-                TS_FAIL("~OCMBCommTest() - Destructor: failed to unload EXPLORER module");
-                errlCommit( err, TARG_COMP_ID );
-            }
-        }
         if (mss_module_loaded)
         {
             err = unloadModule(MSS_LIBRARY_NAME);
@@ -324,9 +303,8 @@ class OCMBCommTest: public CxxTest::TestSuite
     };
 
     private:
-      // use these to keep track of if we need to unload any
+      // use this to keep track of if we need to unload any
       // modules loaded by this testcase
-      bool explorer_module_loaded;
       bool mss_module_loaded;
 
 };
