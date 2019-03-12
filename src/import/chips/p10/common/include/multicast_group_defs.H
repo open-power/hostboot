@@ -43,13 +43,12 @@ enum MulticastGroup : uint32_t
     MCGROUP_ALL,               ///< All chiplets, good or bad, a.k.a. broadcast
     MCGROUP_GOOD,              ///< All good chiplets
     MCGROUP_GOOD_NO_TP,        ///< All good chiplets except PERV
-    MCGROUP_GOOD_NO_TP_EQ_EC,  ///< All good chiplets except PERV, EQ, EC
-    MCGROUP_NEST,              ///< All nest chiplets (N0..N3)
-    MCGROUP_GOOD_MEMCTL,       ///< All good MC chiplets
-    MCGROUP_GOOD_OBUS,         ///< All good OBUS chiplets
+    MCGROUP_GOOD_MC,           ///< All good MC chiplets
+    MCGROUP_GOOD_IOHS,         ///< All good IOHS chiplets
+    MCGROUP_GOOD_PAU,          ///< All good PAU chiplets
     MCGROUP_GOOD_PCI,          ///< All good PCI chiplets
-    MCGROUP_GOOD_CORE,         ///< All good EC chiplets
-    MCGROUP_GOOD_EQ,           ///< All good EQ chiplets
+    MCGROUP_GOOD_EQ,           ///< All EQ chiplets with at least one good core
+    MCGROUP_ALL_EQ,            ///< All EQ chiplets
 };
 
 }
