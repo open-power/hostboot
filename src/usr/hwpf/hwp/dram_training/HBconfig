@@ -3,6 +3,11 @@ config PALMETTO_VDDR
     help
         Enable the Hostboot DRAM VDDR function for Palmetto
 
+config P8DTU_VDDR
+    default n
+    help
+        Enable the Hostboot DRAM VDDR function for p8dtu
+        
 config PCA95X_8BIT
     default n
     depends on (!PCA95X_16BIT)

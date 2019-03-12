@@ -85,6 +85,7 @@ OBJS += mss_mrs6_DDR4.o
 
 #
 OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o, hbVddrMsg.o)
+OBJS += $(if $(CONFIG_P8DTU_VDDR),p8dtu_vddr.o, hbVddrMsg.o)
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
