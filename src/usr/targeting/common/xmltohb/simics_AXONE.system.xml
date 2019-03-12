@@ -259,7 +259,7 @@
     </attribute>
     <attribute>
         <id>MSS_INTERLEAVE_ENABLE</id>
-        <default>0x06</default>
+        <default>0x07</default>
     </attribute>
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
