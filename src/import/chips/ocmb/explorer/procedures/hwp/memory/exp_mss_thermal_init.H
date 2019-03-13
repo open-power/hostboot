@@ -22,3 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_mss_thermal_init.H
+/// @brief Procedure declaration to initialize thermal sensor
+///
+// *HWP HWP Owner: Sharath Manjunath <shamanj4@in.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef __MSS_EXP_THERMAL_INIT__
+#define __MSS_EXP_THERMAL_INIT__
+
+#include <fapi2.H>
+#include <lib/exp_mss_thermal_init_utils.H>
+
+typedef fapi2::ReturnCode (*exp_mss_thermal_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+///
+/// @brief Initializes thermal sensor
+/// @param[in] i_target the controller target (MCS)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+    fapi2::ReturnCode exp_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+}
+#endif
