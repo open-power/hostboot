@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -191,8 +191,8 @@ echo "Attempting to start simics"
 
 #autosim $VERBOSE --startsim --chkpt standby <<< chkpt not working yet
 max_start_simics_attempts=5
-current_attempts=0
-while [ $current_attempts -lt $max_start_simics_attempts ]; do
+current_attempts=1
+while [ $current_attempts -le $max_start_simics_attempts ]; do
     echo "> Attempt $current_attempts/$max_start_simics_attempts to start simics"
     autosim $NOWIN $VERBOSE --startsim $NRE --notar
     if [ $? -ne 0 ] ; then
@@ -210,6 +210,8 @@ while [ $current_attempts -lt $max_start_simics_attempts ]; do
     fi
     ((current_attempts++))
 done
+
+
 
 waitkb
 
