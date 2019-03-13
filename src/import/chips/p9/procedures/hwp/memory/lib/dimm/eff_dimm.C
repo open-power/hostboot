@@ -4640,53 +4640,43 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dimm_bc00()
 {
-    uint8_t l_decoder_val;
-    constexpr size_t RTT_NOM_MAP_SIZE = 8;
+    // RTT WR has a timing issue for the host interface for LRDIMM, so we set RTT_WR's value into RTT_NOM
+    // RTT_WR mapping -> RTT_NOM's equivalent values
+    static const std::vector< std::pair<uint8_t, uint8_t> > l_rtt_wr_map =
+    {
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE, 0b000 },
+        // Hi-z to disable - best we can do
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ,   0b000 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80,   0b110 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120,  0b010 },
+        { fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240,  0b100 }
+    };
 
     // All LRDIMMS in the eyes of the MC are 1 rank, so say it's rank 0 for calculations
-    uint8_t l_rank = 0;
-    // value to mss::index into rtt_nom_map using rtt_nom attribute
-    size_t l_rtt_nom_index = 0;
+    constexpr uint8_t l_rank = 0;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_bc00[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-    // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
-    // for mss::index 1. So this doesn't correspond directly with the table in the JEDEC spec,
-    // as that's not in "denominator order."
-    //                                                  0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
-    constexpr uint8_t rtt_nom_map[RTT_NOM_MAP_SIZE] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
-
     // Temp holders to grab attributes to then parse into value for this dimm and rank
-    uint8_t l_rtt_nom[MAX_RANK_PER_DIMM] = {};
+    uint8_t l_vpd[MAX_RANK_PER_DIMM] = {};
+    uint8_t l_encoding = 0;
 
-    FAPI_TRY( mss::vpd_mt_dram_rtt_nom(iv_dimm, &(l_rtt_nom[0])) );
+    FAPI_TRY( mss::vpd_mt_dram_rtt_wr(iv_dimm, &(l_vpd[0])) );
 
     // Calculate the value for each rank and store in attribute
-
-    // We have to be careful about 0
-    l_rtt_nom_index = (l_rtt_nom[l_rank] == 0) ?
-                      0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / l_rtt_nom[l_rank];
-
-    // Make sure it's a valid index
-    FAPI_ASSERT( l_rtt_nom_index < RTT_NOM_MAP_SIZE,
-                 fapi2::MSS_INVALID_RTT_NOM_CALCULATIONS()
-                 .set_RANK(l_rank)
-                 .set_RTT_NOM_INDEX(l_rtt_nom_index)
-                 .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)])
-                 .set_DIMM_TARGET(iv_dimm),
-                 "Error calculating RTT_NOM for target %s rank %d, rtt_nom from vpd is %d, index is %d",
+    FAPI_ASSERT( mss::find_value_from_key(l_rtt_wr_map, l_vpd[mss::index(l_rank)], l_encoding),
+                 fapi2::MSS_INVALID_RTT_WR()
+                 .set_RTT_WR(l_vpd[l_rank])
+                 .set_RANK(mss::index(l_rank)),
+                 "unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
+                 l_vpd[mss::index(l_rank)],
                  mss::c_str(iv_dimm),
-                 l_rank,
-                 l_rtt_nom[mss::index(l_rank)],
-                 l_rtt_nom_index);
-
-    // Map from RTT_NOM array to the value in the map
-    l_decoder_val = rtt_nom_map[l_rtt_nom_index];
-    // Store value and move to next rank
+                 mss::index(l_rank));
 
     // Read, modify, write
     FAPI_TRY( eff_dimm_ddr4_bc00(iv_mcs, &l_attrs_dimm_bc00[0][0]) );
-    l_attrs_dimm_bc00[iv_port_index][iv_dimm_index] = l_decoder_val;
+    l_attrs_dimm_bc00[iv_port_index][iv_dimm_index] = l_encoding;
 
     FAPI_INF("%s: BC00 settting: %d", mss::c_str(iv_dimm), l_attrs_dimm_bc00[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_BC00, iv_mcs, l_attrs_dimm_bc00) );
@@ -4704,42 +4694,14 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dimm_bc01()
 {
-    // All LRDIMMS are treated as 1 rank DIMMS from the MC point of view
-    uint8_t l_rank = 0;
-    uint8_t l_encoding = 0;
-    uint8_t l_attrs_dimm_bc01[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Get RTT_WR from VPD
-    uint8_t l_dram_rtt_wr[MAX_RANK_PER_DIMM];
-    FAPI_TRY( mss::vpd_mt_dram_rtt_wr(iv_dimm, &(l_dram_rtt_wr[0])) );
-
-    // Rzq is 240, so calculate from there
-    static const std::vector< std::pair<uint8_t, uint8_t> > l_rtt_wr_map =
-    {
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE, 0b000},
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ, 0b111},
-        // Note: we don't have this value for DDR4 RTT_WR, so we don't have a constant for it
-        {60, 0b001}, // RZQ/4
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80, 0b110}, // RZQ/3
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120, 0b010}, // RZQ/2
-        {fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240, 0b100} // RZQ/1
-    };
-
-    FAPI_ASSERT( mss::find_value_from_key(l_rtt_wr_map, l_dram_rtt_wr[l_rank], l_encoding),
-                 fapi2::MSS_INVALID_RTT_WR()
-                 .set_RTT_WR(l_dram_rtt_wr[l_rank])
-                 .set_RANK(mss::index(l_rank)),
-                 "unknown RTT_WR 0x%x (%s rank %d), dynamic odt off",
-                 l_dram_rtt_wr[mss::index(l_rank)],
-                 mss::c_str(iv_dimm),
-                 l_rank);
+    // LRDIMM has a timing issue for RTT_WR
+    constexpr uint8_t RTT_WR_DISABLE = 0b000;
 
     // Read, modify, write
+    uint8_t l_attrs_dimm_bc01[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_bc01(iv_mcs, &l_attrs_dimm_bc01[0][0]) );
 
-    l_attrs_dimm_bc01[iv_port_index][iv_dimm_index] = l_encoding;
-
-    FAPI_INF("%s: BC01 settting: %d", mss::c_str(iv_dimm), l_attrs_dimm_bc01[iv_port_index][iv_dimm_index] );
+    l_attrs_dimm_bc01[iv_port_index][iv_dimm_index] = RTT_WR_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_BC01, iv_mcs, l_attrs_dimm_bc01) );
 
@@ -4756,6 +4718,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_lrdimm::dimm_bc02()
 {
+    // Due to RTT_WR being set to RTT_NOM, we set RTT_NOM to RTT_PARK
     uint8_t l_decoder_val = 0;
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_bc02[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -4765,13 +4728,13 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc02()
     // for mss::index 1. So this doesn't correspond directly with the table in the JEDEC spec,
     // as that's not in "denominator order."
     constexpr uint64_t RTT_PARK_COUNT = 8;
-    //                                                 0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    //                                                               0     RQZ/1    RQZ/2    RQZ/3   RQZ/4    RQZ/5    RQZ/6    RQZ/7
     constexpr uint8_t rtt_park_map[RTT_PARK_COUNT] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
 
     uint8_t l_rtt_park[MAX_RANK_PER_DIMM];
     uint8_t l_rtt_park_index = 0;
 
-    FAPI_TRY( mss::vpd_mt_dram_rtt_park(iv_dimm, &(l_rtt_park[0])) );
+    FAPI_TRY( mss::vpd_mt_dram_rtt_nom(iv_dimm, &(l_rtt_park[0])) );
 
     // We have to be careful about 0
     l_rtt_park_index = (l_rtt_park[l_rank] == 0) ?
@@ -5976,18 +5939,17 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
     constexpr uint8_t DRAM_ODT_VALUES[NUM_VALID_RANKS_CONFIGS][MAX_RANK_PER_DIMM] =
     {
         { 0x44, 0x88, 0x00, 0x00, }, // 2 ranks per DIMM
-        { 0xcc, 0xcc, 0xcc, 0xcc, }, // 4 ranks per DIMM
+        { 0x44, 0x88, 0x44, 0x88, }, // 4 ranks per DIMM
     };
 
     // Masks on the ODT for a specific DIMM
     constexpr uint8_t DIMM_ODT_MASK[MAX_DIMM_PER_PORT] = { 0xf0, 0x0f };
 
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
-    // Gets the VPD value
+    // Due to our RTT_WR->NOM->PARK swap, we just want to issue ODT's only to our DIMM
+    // As the ODT values above do that for us, we're good to go (minus the DIMM masking)
     FAPI_TRY( eff_odt_wr( iv_mcs, &(l_mcs_attr[0][0][0])) );
-    FAPI_TRY( mss::vpd_mt_odt_wr(iv_dimm, &(l_vpd_odt[0])));
 
     // Loops through and sets/updates all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
@@ -5996,15 +5958,8 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
         // We do a bitwise mask here to only get the ODT for the current DIMM
         const auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
 
-        // For the host side ODT, we want to get the ODT from the VPD and do a bitwise or to only get the ODT for the opposite DIMM
-        // If we include the ODT for this DIMM, we could end up over terminating the DRAM side ODT
-        // The buffer's or the ODT together AND all of our LRDIMM values include ODT, so we will get the ODT we need for the host-> buffer interface
-        // We also use the 0th position for the host side ODT as we use the 1R termination settings for LRDIMM
-        const auto l_opposite_dimm_index = (iv_dimm_index + 1) % MAX_DIMM_PER_PORT;
-        const auto l_host_odt = l_vpd_odt[0] & DIMM_ODT_MASK[l_opposite_dimm_index];
-
         // Do the final bitwise or
-        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt | l_host_odt;
+        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_ODT_WR, iv_mcs, l_mcs_attr) );
@@ -6143,12 +6098,12 @@ fapi2::ReturnCode eff_lrdimm::odt_rd()
     constexpr uint8_t DIMM_ODT_MASK[MAX_DIMM_PER_PORT] = { 0xf0, 0x0f };
 
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
     // Gets the VPD value
-    FAPI_TRY( mss::vpd_mt_odt_rd(iv_dimm, &(l_vpd_odt[0])));
     FAPI_TRY( eff_odt_rd( iv_mcs, &(l_mcs_attr[0][0][0])) );
 
+    // Due to our RTT_WR->NOM->PARK swap, we just want to issue ODT's only to our DIMM
+    // As the ODT values above do that for us, we're good to go (minus the DIMM masking)
     // Loops through and sets/updates all ranks
     for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
@@ -6156,15 +6111,8 @@ fapi2::ReturnCode eff_lrdimm::odt_rd()
         // We do a bitwise mask here to only get the ODT for the current DIMM
         const auto l_dram_odt = DRAM_ODT_VALUES[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
 
-        // For the host side ODT, we want to get the ODT from the VPD and do a bitwise or to only get the ODT for the opposite DIMM
-        // If we include the ODT for this DIMM, we could end up over terminating the DRAM side ODT
-        // The buffer's or the ODT together AND all of our LRDIMM values include ODT, so we will get the ODT we need for the host-> buffer interface
-        // We also use the 0th position for the host side ODT as we use the 1R termination settings for LRDIMM
-        const auto l_opposite_dimm_index = (iv_dimm_index + 1) % MAX_DIMM_PER_PORT;
-        const auto l_host_odt = l_vpd_odt[0] & DIMM_ODT_MASK[l_opposite_dimm_index];
-
         // Do the final bitwise or
-        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt | l_host_odt;
+        l_mcs_attr[iv_port_index][iv_dimm_index][l_rank] = l_dram_odt;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_ODT_RD, iv_mcs, l_mcs_attr) );
