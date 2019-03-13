@@ -1869,6 +1869,13 @@ sub processXbus
             $config = $targetObj->getBusAttribute($target,0,"CONFIG_APPLY");
         }
 
+        # Validate a value was provided, if not use the default value
+        if ($config eq "")
+        {
+            print STDOUT "No value found for CONFIG_APPLY, default to using default value ($default_config)\n";
+            $config = $default_config;
+        }
+
         #If CONFIG_APPLY doesn't match the system configuration we are
         #running for, then mark the peers null.
         #For example, in wrap config, CONFIG_APPLY is expected to have "w"
