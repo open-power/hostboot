@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,8 +60,6 @@ const uint64_t PCI_NFIR_MASK_REG    = 0x0030001C00000000ULL;
 const uint8_t PEC_PBCQ_HWCFG_HANG_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_DATA_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_HANG_PE_SCALE = 0x1;
-const uint8_t PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE = 0x3;
-const uint8_t PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE = 0x3;
 
 // PCI AIB Hardware Configuration Register field definitions
 const uint8_t PEC_AIB_HWCFG_OSBM_HOL_BLK_CNT = 0x7;
@@ -97,6 +95,8 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_CHIP_EC_FEATURE_HW363246_Type l_hw363246;
     fapi2::ATTR_CHIP_EC_FEATURE_HW410503_Type l_hw410503;
     fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1_Type l_hw423589_option1;
+    fapi2::ATTR_PROC_PCIE_CACHE_INJ_MODE_Type l_cache_inject_mode;
+    fapi2::ATTR_PROC_PCIE_CACHE_INJ_THROTTLE_Type l_cache_inject_throttle;
     fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -259,20 +259,41 @@ fapi2::ReturnCode p9_pcie_config(
 
         }
 
-        // Enable P9 Style cache injects if chip is group.
+        //Attribute to control the cache inject mode.
+        // DISABLE_CI = 0x0 - Disable cache inject completely. (Reset value default)
+        // P7_STYLE_CI = 0x1 - Use cache inject design from Power7.
+        // PCITLP_STYLE_CI = 0x2 - Use PCI TLP Hint bits in packet to perform the cache inject.
+        // P9_STYLE_CI = 0x3 - Initial attempt as cache inject. Power9 style. (Attribute default)
+        //
+        // Different cache inject modes will affect DMA write performance. The attribute default was
+        // selected based on various workloads and was to be the most optimal settings for Power9.
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_CACHE_INJ_MODE, l_pec_chiplet, l_cache_inject_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_CACHE_INJ_MODE)");
+
+        //Attribute to control the cache inject throttling when cache inject is enable.
+        // DISABLE   = 0x0 - Disable cache inject throttling. (Reset value default)
+        // 16_CYCLES = 0x1 - Perform 1 cache inject every 16 clock cycles.
+        // 32_CYCLES = 0x3 - Perform 1 cache inject every 32 clock cycles. (Attribute default)
+        // 64_CYCLES = 0x7 - Perform 1 cache inject every 32 clock cycles.
+
+        // Different throttle rates will affect DMA write performance. The attribute default settings
+        // were optimal settings found across various workloads.
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_CACHE_INJ_THROTTLE, l_pec_chiplet, l_cache_inject_throttle),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_CACHE_INJ_THROTTLE)");
+
+        // Disable P9 Style cache injects if chip is node.
         // CHIP_IS_NODE  = 0x01
         // CHIP_IS_GROUP = 0x02
-        if (l_fabric_pump_mode != 0x1)
+        if ((l_fabric_pump_mode != fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
+            && (l_cache_inject_mode != fapi2::ENUM_ATTR_PROC_PCIE_CACHE_INJ_MODE_DISABLE_CI))
         {
-            l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
-                                  PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
-                                      PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
+            l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE, PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>
+            (l_cache_inject_mode);
 
             if (l_hw410503)
             {
-                l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE,
-                                      PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN>(
-                                          PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE);
+                l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE, PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN>
+                (l_cache_inject_throttle);
             }
         }
 

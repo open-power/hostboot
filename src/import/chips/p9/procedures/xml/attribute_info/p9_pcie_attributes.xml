@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -622,6 +622,46 @@
     </description>
     <valueType>uint16</valueType>
     <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_CACHE_INJ_MODE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Attribute to control the cache inject mode.
+	DISABLE_CI      = 0x0 - Disable cache inject completely. (Reset value default)
+	P7_STYLE_CI     = 0x1 - Use cache inject design from Power7.
+	PCITLP_STYLE_CI = 0x2 - Use PCI TLP Hint bits in packet to perform the cache inject.
+	P9_STYLE_CI     = 0x3 - Initial attempt as cache inject. Power9 style. (Attribute default)
+
+	Different cache inject modes will affect DMA write performance. The attribute default was
+	selected based on various workloads and was the most optimal setting for Power9.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE_CI = 0x0, P7_STYLE_CI = 0x1, PCITLP_STYLE_CI = 0x2, P9_STYLE_CI = 0x3</enum>
+    <default>P9_STYLE_CI</default>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_CACHE_INJ_THROTTLE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Attribute to control the cache inject throttling when cache inject is enable.
+	DISABLE   = 0x0 - Disable cache inject throttling. (Reset value default)
+	16_CYCLES = 0x1 - Perform 1 cache inject every 16 clock cycles.
+	32_CYCLES = 0x3 - Perform 1 cache inject every 32 clock cycles. (Attribute default)
+	64_CYCLES = 0x7 - Perform 1 cache inject every 32 clock cycles.
+
+	Different throttle rates will affect DMA write performance. The attribute default settings
+	were optimal settings found across various workloads. 
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, 16_CYCLES = 0x1, 32_CYCLES = 0x3, 64_CYCLES = 0x7</enum>
+    <default>32_CYCLES</default>
     <platInit/>
     <persistRuntime/>
   </attribute>
