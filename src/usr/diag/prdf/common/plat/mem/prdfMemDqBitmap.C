@@ -559,9 +559,10 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
         }
 
         // Spare is not available.
-        if ( noSpare == spareConfig || !spareSupported )
+        if ( !spareSupported )
         {
             o_dramSpare = false;
+            o_eccSpare  = false;
             break;
         }
 
