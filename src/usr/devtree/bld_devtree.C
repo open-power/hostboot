@@ -2769,6 +2769,9 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
         dtOffset_t rootNode = i_dt->findNode("/");
         dtOffset_t vpdNode = i_dt->addNode(rootNode, "vpd");
 
+        i_dt->addPropertyCell32(vpdNode, "#size-cells", 0);
+        i_dt->addPropertyCell32(vpdNode, "#address-cells", 1);
+
         // Grab a system object to work with
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
@@ -2790,6 +2793,10 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
             uint32_t l_procId = getProcChipId(l_pProc);
             dtOffset_t procNode = i_dt->addNode(vpdNode, "processor",
                                                l_procId);
+
+            i_dt->addPropertyCell32(procNode, "reg", l_procId);
+            i_dt->addPropertyCell32(procNode, "#size-cells", 0);
+            i_dt->addPropertyCell32(procNode, "#address-cells", 1);
 
             // Read entire VINI record to stuff in devtree
             // Note: First read with NULL for o_buffer sets vpdSize to the
@@ -2864,6 +2871,7 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
                 dtOffset_t exNode = i_dt->addNode(procNode, "cpu",
                                                     pir.word);
 
+                i_dt->addPropertyCell32(exNode, "reg", pir.word);
                 i_dt->addPropertyBytes(exNode, "frequency-voltage",
                                      reinterpret_cast<uint8_t*>( &l_poundVdata),
                                      sizeof(fapi::voltageBucketData_t));
@@ -2895,6 +2903,7 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
 
             dtOffset_t dimmNode = i_dt->addNode(vpdNode, "dimm",
                                                 l_huid);
+            i_dt->addPropertyCell32(dimmNode, "reg", l_huid);
 
             // Read entire SPD record to stuff in devtree
             // Note: First read with NULL for o_buffer sets spdSize to the
