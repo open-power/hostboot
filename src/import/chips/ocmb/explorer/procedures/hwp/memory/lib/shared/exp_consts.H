@@ -132,6 +132,7 @@ enum generic_consts
 namespace i2c
 {
 
+///
 /// @brief List of explorer I2C commands
 ///
 enum cmd_id : uint8_t
@@ -260,10 +261,10 @@ enum cmd_and_response_id
     EXP_FW_DDR_PHY_INIT = 0x02,
 
     // read temperature sensor
-    EXP_FW_FW_TEMP_SENSOR_PASS_THROUGH_READ = 0x03,
+    EXP_FW_TEMP_SENSOR_PASS_THROUGH_READ = 0x03,
 
     // configure temperature sensor
-    EXP_FW_FW_TEMP_SENSOR_PASS_THROUGH_WRITE = 0x04,
+    EXP_FW_TEMP_SENSOR_PASS_THROUGH_WRITE = 0x04,
 
     // configure interval read mechanism
     EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ = 0x05,
@@ -289,6 +290,7 @@ enum cmd_and_response_id
 
 ///
 /// @brief Command flag definitions
+///
 enum cmd_flags
 {
     NO_FLAGS = 0,
@@ -305,7 +307,6 @@ enum response_arg
 };
 
 }// omi
-
 }// exp
 }// mss
 

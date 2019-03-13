@@ -606,7 +606,7 @@
     <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
   </attribute>
 
- <attribute>
+  <attribute>
     <id>ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -737,5 +737,4 @@
     <initToZero/>
     <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
   </attribute>
-
 </attributes>
