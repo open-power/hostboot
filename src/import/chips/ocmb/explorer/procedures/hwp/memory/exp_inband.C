@@ -274,15 +274,19 @@ fapi2::ReturnCode putCMD(
 
     // Clear the doorbell
     l_scom.setBit<EXPLR_MMIO_MDBELLC_MDBELL_MDBELL>();
-    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELLC, l_scom));
+    FAPI_DBG("Clearing the inbound doorbell...");
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELLC, l_scom), "Failed to clear inbound doorbell register");
 
     // Set the command
-    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_CMD_ADDR, BUFFER_TRANSACTION_SIZE, l_data))
+    FAPI_DBG("Writing the command...");
+    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_CMD_ADDR, BUFFER_TRANSACTION_SIZE, l_data),
+             "Failed to write to the command buffer");
 
     // Ring the doorbell - aka the bit that interrupts the microchip FW and tells it to do the thing
     l_scom.flush<0>();
     l_scom.setBit<EXPLR_MMIO_MDBELL_MDBELL>();
-    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELL, l_scom));
+    FAPI_DBG("Setting the inbound doorbell...");
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_MDBELL, l_scom), "Failed to set inbound doorbell bit");
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -538,11 +542,11 @@ fapi2::ReturnCode getRSP(
     // Polls for the response to be ready first
     FAPI_TRY(poll_for_response_ready(i_target));
 
-    FAPI_INF("Reading the response buffer...");
+    FAPI_DBG("Reading the response buffer...");
     FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
     FAPI_TRY(host_fw_response_struct_from_little_endian(i_target, l_data, o_rsp));
 
-    FAPI_INF("Checking if we have response data...");
+    FAPI_DBG("Checking if we have response data...");
 
     // If response data in buffer portion, return that too
     if (o_rsp.response_length > 0)
@@ -550,14 +554,14 @@ fapi2::ReturnCode getRSP(
         // make sure expected size is a multiple of 8
         const uint32_t l_padding = ((o_rsp.response_length % 8) > 0) ? (8 - (o_rsp.response_length % 8)) : 0;
         o_data.resize( o_rsp.response_length + l_padding );
-        FAPI_INF("Reading response data...");
+        FAPI_DBG("Reading response data...");
 
         FAPI_TRY( fapi2::getMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, o_data) );
         FAPI_TRY( correctMMIOEndianForStruct(o_data) );
     }
     else
     {
-        FAPI_INF("No response data returned...");
+        FAPI_DBG("No response data returned...");
         // make sure no buffer data is returned
         o_data.clear();
     }
@@ -691,7 +695,7 @@ fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data)
         io_data.erase(io_data.begin(), io_data.begin() + BUFFER_TRANSACTION_SIZE);
     }
 
-    // Because of how the OpenCapi interface breaks up the transaction, we also need to swap 32-bit word order
+    // Because of how the AXI bridge in Explorer breaks up the transaction, we also need to swap 32-bit word order
     for (size_t l_idx = 0; l_idx < io_data.size(); l_idx += BUFFER_TRANSACTION_SIZE)
     {
         for (size_t l_bidx = l_idx; l_bidx < l_idx + BUFFER_TRANSACTION_SIZE / 2; l_bidx++)
