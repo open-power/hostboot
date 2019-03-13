@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ HCD_CONST(OCC_SRAM_OCC_REGION_SIZE,             (512 * ONE_KB))
 
 HCD_CONST(OCC_SRAM_BEFORE_PGPE_REGION_SIZE_TOTAL,
           (OCC_SRAM_IPC_REGION_SIZE + OCC_SRAM_GPE0_REGION_SIZE + OCC_SRAM_GPE1_REGION_SIZE))
+
 
 //--------------------------------------------------------------------------------------
 
@@ -192,5 +193,7 @@ HCD_CONST( OCC_SRAM_PGPE_TRACE_START,
            (OCC_SRAM_PGPE_HEADER_ADDR + PGPE_HEADER_SIZE));
 
 
+HCD_CONST(OCC_SRAM_SHARED_DATA_BASE_ADDR,
+          (OCC_SRAM_PGPE_BASE_ADDR + OCC_SRAM_PGPE_REGION_SIZE - PGPE_OCC_SHARED_SRAM_SIZE))
 
 #endif /* __P9_HCD_MEMMAP_OCC_SRAM_H__ */
