@@ -32,13 +32,19 @@ namespace UCD_RC
 
     enum UcdModuleId
     {
-        MOD_UCD_INIT              = 0x01,
+        MOD_UCD_INIT                    = 0x01,
+        MOD_UPDATE_ALL_UCD_FLASH_IMAGES = 0x02,
     };
 
     enum UcdReasonCode
     {
         RC_DEVICE_READ_UNEXPECTED_SIZE_DEVICE_ID      = UCD_COMP_ID | 0x01,
         RC_DEVICE_READ_UNEXPECTED_SIZE_MFR_REVISION   = UCD_COMP_ID | 0x02,
+        UCD_INVALID_EYECATCHER                        = UCD_COMP_ID | 0x03,
+        UCD_INVALID_MAJOR_VER                         = UCD_COMP_ID | 0x04,
+        UCD_TOC_ENTRY_TOO_SMALL                       = UCD_COMP_ID | 0x05,
+        UCD_UNSUPPORTED_DEVICE_ID                     = UCD_COMP_ID | 0x06,
+        UCD_EOF                                       = UCD_COMP_ID | 0x07,
     };
 
 }; // namespace UCD

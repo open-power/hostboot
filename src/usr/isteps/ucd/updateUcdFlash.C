@@ -42,6 +42,9 @@
 #include <trace/interface.H>
 #include <string.h>
 #include <hbotcompid.H>
+#include <util/utilmem.H>
+#include <util/utilstream.H>
+#include <errl/errludstring.H>
 
 namespace POWER_SEQUENCER
 {
@@ -59,8 +62,8 @@ private:
 
     enum DEVICE_OP_LENGTH : size_t
     {
-        MFR_REVISION_SIZE = 12,
-        DEVICE_ID_SIZE = 32,
+        MFR_REVISION_MAX_SIZE = 12,
+        DEVICE_ID_MAX_SIZE = 32,
     };
 
     enum COMMAND : uint8_t
@@ -144,7 +147,7 @@ public:
 
         do
         {
-            char deviceIdBuffer[DEVICE_ID_SIZE]{};
+            char deviceIdBuffer[DEVICE_ID_MAX_SIZE]{};
 
             // Get the I2C info for this UCD.
             const auto i2cInfo = iv_pUcd->
@@ -179,16 +182,16 @@ public:
                 break;
             }
 
-            // Verify that the buffer is the size the we expected to get.
-            if (size != DEVICE_ID_SIZE)
+            // Verify that the buffer is not larger than the MAX_SIZE we expect
+            // (It is possible to receive a smaller size than MAX_SIZE)
+            if (size > DEVICE_ID_MAX_SIZE)
             {
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initialize(): Read from "
-                          "UCD 0x%.8X returned "
-                          "size different than requested. "
+                          "UCD 0x%.8X for DEVICE_ID returned "
+                          "size larger than expected. "
                           "Actual %d, expected %d",
                           get_huid(iv_pUcd),
-                          size, DEVICE_ID_SIZE);
-
+                          size, DEVICE_ID_MAX_SIZE);
                 /*@
                  * @errortype
                  * @severity           ERRL_SEV_UNRECOVERABLE
@@ -206,7 +209,7 @@ public:
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                               UCD_RC::MOD_UCD_INIT,
                               UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_DEVICE_ID,
-                              TWO_UINT32_TO_UINT64(DEVICE_ID_SIZE, size),
+                              TWO_UINT32_TO_UINT64(DEVICE_ID_MAX_SIZE, size),
                               get_huid(iv_pUcd)
                           );
 
@@ -224,9 +227,9 @@ public:
             }
 
             // Verify there is a null terminator at the end of the buffer.
-            if (deviceIdBuffer[DEVICE_ID_SIZE-1] != '\0')
+            if (deviceIdBuffer[DEVICE_ID_MAX_SIZE-1] != '\0')
             {
-                deviceIdBuffer[DEVICE_ID_SIZE-1] = '\0';
+                deviceIdBuffer[DEVICE_ID_MAX_SIZE-1] = '\0';
             }
 
             // Since the format of the buffer will be: Device Id|..|..|..
@@ -256,10 +259,10 @@ public:
                 uint16_t value;
                 // The MFR Revision represented as ASCII characters excluding
                 // null terminator.
-                uint8_t str[MFR_REVISION_SIZE];
+                uint8_t str[MFR_REVISION_MAX_SIZE];
             } mfrBuf;
 
-            size = MFR_REVISION_SIZE;
+            size = MFR_REVISION_MAX_SIZE;
 
             // Read the MFR revision from the UCD device.
             err = deviceOp(DeviceFW::READ,
@@ -284,16 +287,16 @@ public:
                 break;
             }
 
-            // Verify that the buffer is the size the we expected to get.
-            if (size != MFR_REVISION_SIZE)
+            // Verify that the buffer is not larger than the MAX_SIZE we expect
+            // (It is possible to receive a smaller size than MAX_SIZE)
+            if (size > MFR_REVISION_MAX_SIZE)
             {
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initialize(): Read from UCD "
-                          "0x%.8X returned "
-                          "size different than requested. "
+                          "0x%.8X for MFR Revision returned "
+                          "size larger than expected. "
                           "Actual %d, expected %d",
                           get_huid(iv_pUcd),
-                          size, MFR_REVISION_SIZE);
-
+                          size, MFR_REVISION_MAX_SIZE);
                 /*@
                  * @errortype
                  * @severity         ERRL_SEV_UNRECOVERABLE
@@ -311,7 +314,7 @@ public:
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             UCD_RC::MOD_UCD_INIT,
                             UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_MFR_REVISION,
-                            TWO_UINT32_TO_UINT64(MFR_REVISION_SIZE, size),
+                            TWO_UINT32_TO_UINT64(MFR_REVISION_MAX_SIZE, size),
                             get_huid(iv_pUcd));
 
                 err->addI2cDeviceCallout(i2cMaster,
@@ -363,6 +366,463 @@ public:
 
 };
 
+/**
+ *  @brief Header for the UCD flash image content
+ */
+struct TocHeader
+{
+    uint64_t eyecatcher;   //< Eyecatcher, see TOC_CONSTS::EYECATCHER
+    uint32_t majorVersion; //< Major header version; increases for incompatible
+                           //< changes
+    uint32_t minorVersion; //< Minor version; increases for compatible changes
+                           //< relative to a major version
+    uint32_t tocEntries;   //< Number of TOC entries
+    uint32_t tocEntrySize; //< Size of TOC entry in bytes
+    uint32_t tocOffset;    //< Offset of 0th TOC entry from beginning of
+                           //< flash image
+
+    /**
+     *  @brief TOC header constructor
+     */
+    TocHeader()
+        : eyecatcher(0),
+          majorVersion(0),
+          minorVersion(0),
+          tocEntries(0),
+          tocEntrySize(0),
+          tocOffset(0)
+    {
+    }
+};
+
+/**
+ *  @brief Enumeration of UCD sub-flash image types
+ */
+enum IMAGE_TYPE : uint8_t
+{
+    DATA_FLASH_IMAGE = 0x00, ///< UCD data sub-flash image
+    UNKNOWN          = 0xFF, ///< Unknown UCD sub-flash image type
+};
+
+/**
+ *  @brief Miscellaneous constants used by the UCD flash image TOC and TOC
+ *      entries
+ */
+enum TOC_CONSTS : uint64_t
+{
+    EYECATCHER                = 0x554344464C534800ULL, //< UCDFLSH + 0x00
+    DEVICE_ID_NULL_BYTE_INDEX = 31, //< Max size of device ID not including NULL
+    DEVICE_ID_MAX_SIZE        = DEVICE_ID_NULL_BYTE_INDEX+1, //< Max size of
+                                                             //< device ID
+    CURRENT_VERSION           = 0x01, //< First supported version is 0x01
+};
+
+/**
+ *  @brief Table of contents entry used by UCD flash image
+ */
+struct TocEntry
+{
+    char       deviceId[DEVICE_ID_MAX_SIZE]; //< NULL terminated ASCII device ID
+                                             //< string
+    IMAGE_TYPE imageType;    //< Type of sub-flash image
+    uint8_t    procPosition; //< Position of processor acting as I2C master
+    uint8_t    i2cEngine;    //< Engine driving the I2C device relative to
+                             //< the I2C master target
+    uint8_t    i2cPort;      //< Port driving the I2C device relative to its
+                             //< engine
+    uint8_t    i2cAddress;   //< I2C address the device responds at
+    uint8_t    reserved1;    //< Reserved for future use
+    uint16_t   mfrRevision;  //< A vendor supplied set of two ASCII
+                             //< bytes which versions the flash content.
+                             //< Hostboot updates the device's flash image
+                             //< whenever the MFR_REVISION of the device differs
+                             //< from the one in the TOC entry.
+    uint32_t   imageOffset;  //< Offset of sub-flash image from start of flash
+                             //< image, in bytes
+    uint32_t   imageSize;    //< Size of sub-flash image, in bytes
+
+    /**
+     *  TOC entry constructor
+     */
+    TocEntry()
+        : imageType(UNKNOWN),
+          procPosition(0),
+          i2cEngine(0),
+          i2cPort(0),
+          i2cAddress(0),
+          reserved1(0),
+          mfrRevision(0),
+          imageOffset(0),
+          imageSize(0)
+    {
+        memset(deviceId,0x00,sizeof(deviceId));
+    }
+};
+
+errlHndl_t updateAllUcdFlashImages(
+    const TARGETING::TargetHandleList& i_powerSequencers,
+          UtilMem&                     i_image)
+{
+    TRACFCOMP(g_trac_ucd, ENTER_MRK
+              "updateAllUcdFlashImages: # UCDs = %d",
+              i_powerSequencers.size());
+
+    errlHndl_t pError = nullptr;
+
+    do {
+
+    // Read in the critical portions of the header
+    TocHeader header;
+    i_image.read(&header.eyecatcher,sizeof(header.eyecatcher));
+    i_image >> header.majorVersion >> header.minorVersion;
+    pError=i_image.getLastError();
+    if(pError)
+    {
+        TRACFCOMP(g_trac_ucd,ERR_MRK
+            "updateAllUcdFlashImages: Failed to read enough data from UCD "
+            "flash image to populate the minor version in the TOC header. "
+            "Image size reported as %d",i_image.size());
+        break;
+    }
+
+    // Validate eyecatcher, major, minor
+    if(header.eyecatcher != EYECATCHER)
+    {
+        TRACFCOMP(g_trac_ucd,ERR_MRK
+            "updateAllUcdFlashImages: UCD flash image has bad eyecatcher; "
+            "Expected 0x%16llX but found 0x%016llX",
+            EYECATCHER,header.eyecatcher);
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @reasoncode UCD_RC::UCD_INVALID_EYECATCHER
+         * @moduleid   UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES
+         * @userdata1  Expected eyecatcher
+         * @userdata2  Actual eyecatcher
+         * @devdesc    The UCD flash image's eyecatcher did not match
+         *     the expected value
+         * @custdesc   Unexpected IPL firmware data format error
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES,
+            UCD_RC::UCD_INVALID_EYECATCHER,
+            EYECATCHER,
+            header.eyecatcher,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    if(header.majorVersion != CURRENT_VERSION)
+    {
+        TRACFCOMP(g_trac_ucd,ERR_MRK
+            "updateAllUcdFlashImages: UCD flash image version not supported. "
+            "Image version is 0x%08X but boot firmware only supports 0x%08X",
+            header.majorVersion,
+            CURRENT_VERSION);
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @reasoncode UCD_RC::UCD_INVALID_MAJOR_VER
+         * @moduleid   UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES
+         * @userdata1  Current major version supported
+         * @userdata2  Advertised major version
+         * @devdesc    The UCD flash image's major version number is
+         *     not supported.
+         * @custdesc   Unexpected IPL firmware data format error
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES,
+            UCD_RC::UCD_INVALID_MAJOR_VER,
+            CURRENT_VERSION,
+            header.majorVersion,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    // Placeholder for future minor version checks.  Currently should
+    // be able to handle any minor version when major version is 1
+
+    // Read in the TOC info
+    i_image >> header.tocEntries >> header.tocEntrySize >> header.tocOffset;
+    pError=i_image.getLastError();
+    if(pError)
+    {
+        TRACFCOMP(g_trac_ucd,ERR_MRK
+            "updateAllUcdFlashImages: Failed to read enough data from UCD "
+            "flash image to populate full TOC header");
+        break;
+    }
+
+    // Each TOC entry should be at least the size of the entry that major
+    // version 1 knows about.  This code can, however, handle larger entries if
+    // needed
+    if(header.tocEntrySize < sizeof(TocEntry))
+    {
+        TRACFCOMP(g_trac_ucd,ERR_MRK
+            "updateAllUcdFlashImages: TOC entry size %d smaller than minimum "
+            "of %d",
+            header.tocEntrySize, sizeof(TocEntry));
+        /*@
+         * @errortype
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @reasoncode UCD_RC::UCD_TOC_ENTRY_TOO_SMALL
+         * @moduleid   UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES
+         * @userdata1  Minimum required TOC entry size
+         * @userdata2  Advertised TOC entry size
+         * @devdesc    The UCD flash image's TOC entry size is smaller
+         *     than expected.
+         * @custdesc   Unexpected IPL firmware data format error
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES,
+            UCD_RC::UCD_TOC_ENTRY_TOO_SMALL,
+            sizeof(TocEntry),
+            header.tocEntrySize,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    // Check to see if each power sequencer needs to be updated
+    for(auto powerSequencer : i_powerSequencers)
+    {
+        const auto model = powerSequencer->getAttr<TARGETING::ATTR_MODEL>();
+
+        do {
+
+        // If we ever let new UCDs into the object model of a type
+        // not supported, we'd want to introduce some attribute here
+        // indicating if it supports firmware update/etc.  For now
+        // the model only has UCDs that can be updatable.
+
+        const auto i2cInfo =
+            powerSequencer->getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
+
+        const char* pMasterPath = i2cInfo.i2cMasterPath.toString();
+        TRACFCOMP(g_trac_ucd, INFO_MRK
+            "updateAllUcdFlashImages: Found functional power sequencer: "
+            "HUID = 0x%08X, Model = 0x%08X, I2C master = %s, "
+            "e/p/a = %d/%d/0x%02X",
+            TARGETING::get_huid(powerSequencer),
+            model,
+            pMasterPath, i2cInfo.engine, i2cInfo.port, i2cInfo.devAddr);
+        free(const_cast<char*>(pMasterPath));
+        pMasterPath = nullptr;
+
+        auto pI2cMasterTarget =
+            TARGETING::targetService().toTarget(i2cInfo.i2cMasterPath);
+        assert(pI2cMasterTarget != nullptr,"nullptr I2C master target for UCD "
+            "with HUID of 0x%08X",
+            TARGETING::get_huid(powerSequencer));
+
+        const auto position = pI2cMasterTarget->
+            getAttr<TARGETING::ATTR_POSITION>();
+
+        // @TODO RTC 205982 Reset UCD if needed to put it in a good state
+
+        Ucd ucd(powerSequencer);
+        pError=ucd.initialize();
+        if(pError)
+        {
+            TRACFCOMP(g_trac_ucd,ERR_MRK
+                "updateAllUcdFlashImages: Failed in Ucd::initialize() for UCD "
+                "with HUID of 0x%08X",
+                TARGETING::get_huid(powerSequencer));
+            // @TODO: RTC 205982 mark non-functional, more FFDC
+            pError->collectTrace(UCD_COMP_NAME);
+            errlCommit(pError,UCD_COMP_ID);
+            break;
+        }
+
+        const auto* const deviceId = ucd.getDeviceId();
+
+        const auto mfrRevision = ucd.getMfrRevision();
+
+        i_image.seek(header.tocOffset,UtilStream::START);
+
+        for(size_t entry = 0 ; entry < header.tocEntries; ++entry)
+        {
+            bool nextUcd=false;
+
+            do {
+
+            TocEntry tocEntry;
+            i_image.read(&tocEntry,sizeof(TocEntry));
+            pError=i_image.getLastError();
+            if(pError)
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK
+                    "updateAllUcdFlashImages: Failed to read enough data from "
+                    "UCD flash image to populate TOC entry %d. ",
+                    entry);
+                break;
+            }
+
+            if(   (tocEntry.procPosition != position)
+               || (tocEntry.i2cEngine    != i2cInfo.engine)
+               || (tocEntry.i2cPort      != i2cInfo.port)
+               || (tocEntry.i2cAddress   != i2cInfo.devAddr))
+            {
+                // Did not find the UCD, move on to next TOC entry
+                break;
+            }
+
+            // No matter what, last byte has to be 0 to prevent runaway
+            // parsing
+            tocEntry.deviceId[DEVICE_ID_NULL_BYTE_INDEX] = 0x00;
+
+            if(strncmp(tocEntry.deviceId,deviceId,
+               sizeof(tocEntry.deviceId))!=0)
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK
+                    "updateAllUcdFlashImages: Mismatched device ID for UCD "
+                    "with HUID of 0x%08X. "
+                    "Expected device ID %s, got device ID of %s",
+                    TARGETING::get_huid(powerSequencer),
+                    tocEntry.deviceId,deviceId);
+                /*@
+                 * @errortype
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @reasoncode UCD_RC::UCD_UNSUPPORTED_DEVICE_ID
+                 * @moduleid   UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES
+                 * @userdata1  UCD's HUID
+                 * @devdesc    The UCD device's device ID did not match the
+                 *     expected device ID from the UCD sub-flash image.  This
+                 *     likely implies an escape of new parts into systems
+                 *     that are not supported by firmware.  UCD will be
+                 *     marked as non-functional.
+                 * @custdesc   Unsupported device found during firmware IPL
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES,
+                    UCD_RC::UCD_UNSUPPORTED_DEVICE_ID,
+                    TARGETING::get_huid(powerSequencer),
+                    0,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                ERRORLOG::ErrlUserDetailsStringSet deviceIds;
+                deviceIds.add("Expected device ID",tocEntry.deviceId);
+                deviceIds.add("Actual device ID",deviceId);
+                deviceIds.addToLog(pError);
+                // @TODO: RTC 205982 set non-functional, deconfig
+                pError->collectTrace(UCD_COMP_NAME);
+                errlCommit(pError,UCD_COMP_ID);
+                nextUcd=true;
+                break;
+            }
+
+            if(tocEntry.mfrRevision == mfrRevision)
+            {
+               TRACFCOMP(g_trac_ucd,INFO_MRK
+                    "updateAllUcdFlashImages: Device has MFR revision of "
+                    "0x%04X which matches incoming UCD sub-flash image "
+                    "version, so inhibit flash update",
+                    mfrRevision);
+                nextUcd=true;
+                break;
+            }
+
+            // Turns out doing the check via UtilMem is not that easy,
+            // so for feeding the image to the updater, use manual
+            // calculation
+            if(tocEntry.imageOffset+tocEntry.imageSize > i_image.size())
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK
+                    "updateAllUcdFlashImages: UCD sub-flash image exceeds "
+                    "upper boundary of UCD flash image. Offset=0x%08X, "
+                    "size=0x%08X, lID size = 0%08X",
+                    tocEntry.imageOffset,tocEntry.imageSize,i_image.size());
+                /*@
+                 * @errortype
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @reasoncode UCD_RC::UCD_EOF
+                 * @moduleid   UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES
+                 * @userdata1  UCD's HUID
+                 * @devdesc    Advertised UCD sub-flash image offset+size would
+                 *     pass the end of the UCD flash image.
+                 * @custdesc   Unexpected boot firmware data format error
+                 */
+                pError = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    UCD_RC::MOD_UPDATE_ALL_UCD_FLASH_IMAGES,
+                    UCD_RC::UCD_EOF,
+                    TARGETING::get_huid(powerSequencer),
+                    0,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                break;
+            }
+
+            // Either way we'll be advancing to next UCD after the update
+            // attempt
+            nextUcd=true;
+
+            // Update the UCD data flash
+            // @TODO RTC 205979 - Call this function
+            //pError = updateUcdFlash(
+            //             powerSequencer,
+            //               reinterpret_cast<const uint8_t*>(i_image.base())
+            //             + tocEntry.imageOffset,
+            //             tocEntry.imageSize);
+            if(pError)
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK
+                    "updateAllUcdFlashImages: Failed in call to "
+                    "updateUcdFlash for UCD with HUID of "
+                    " 0x%08X.",
+                    TARGETING::get_huid(powerSequencer));
+                // @TODO: RTC 205982  Deconfigure UCD, call it out, etc.
+                pError->collectTrace(UCD_COMP_NAME);
+                errlCommit(pError,UCD_COMP_ID);
+                break;
+            }
+
+            TRACFCOMP(g_trac_ucd,INFO_MRK
+                "updateAllUcdFlashImages: Successfully updated UCD "
+                "with HUID of 0x%08X.",
+                TARGETING::get_huid(powerSequencer));
+
+            } while(0); // End do/while processing individual TOC entry
+
+            if(pError || nextUcd)
+            {
+                break;
+            }
+
+            // Eat the delta between end of our TOC entry knowledge and the
+            // indicated TOC size
+            i_image.seek(header.tocEntrySize-sizeof(TocEntry),
+                         UtilStream::CURRENT);
+
+        } // End for loop searching for matching TOC entry
+
+        if(pError)
+        {
+            break;
+        }
+
+        // If failed to find TOC entry ...
+
+        } while(0); // End do/while processing individual power sequencer
+
+        if(pError)
+        {
+            break;
+        }
+
+    } // End loop through all power sequencers
+
+    } while(0);
+
+    // Seek back to the beginning so caller gets identical state back
+    i_image.seek(0,UtilStream::START);
+
+    TRACFCOMP(g_trac_ucd, EXIT_MRK
+              "updateAllUcdFlashImages");
+
+    return pError;
+}
 
 errlHndl_t updateUcdFlash(
           TARGETING::Target* i_pUcd,
