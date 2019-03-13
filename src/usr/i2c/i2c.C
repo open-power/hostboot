@@ -5602,8 +5602,8 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                       TARGETING::Target * i_target,
                       const misc_args_t & i_args)
 {
-    assert(i_err != nullptr, "Bug! The supplied error log is nullptr.");
-    assert(i_target != nullptr, "Bug! The supplied target is nullptr.");
+    assert(i_err != nullptr, "Error log must not be nullptr");
+    assert(i_target != nullptr, "i2cMaster target must not be nullptr.");
 
     if (!INITSERVICE::spBaseServicesEnabled())
     {
@@ -5637,10 +5637,11 @@ void addHwCalloutsI2c(errlHndl_t i_err,
             {
                 TRACFCOMP(g_trac_i2c,
                     "Unresponsive TPM found: "
-                    "Engine=%d, masterPort=%d "
+                    "Engine=%d, masterPort=%d, address=0x%X "
                     "huid for its i2c master is 0x%.8X",
                     l_tpmInfo.engine,
                     l_tpmInfo.port,
+                    l_tpmInfo.devAddrLocality0,
                     TARGETING::get_huid(i_target));
                 i_err->addHwCallout(tpm,
                                   HWAS::SRCI_PRIORITY_HIGH,
@@ -5651,13 +5652,54 @@ void addHwCalloutsI2c(errlHndl_t i_err,
             }
         }
 
-      // Could also be an issue with Processor or its bus
-      // -- both on the same FRU
-      i_err->addHwCallout( i_target,
-                           l_devFound? HWAS::SRCI_PRIORITY_MED:
-                               HWAS::SRCI_PRIORITY_HIGH,
-                           HWAS::NO_DECONFIG,
-                           HWAS::GARD_NULL );
+        if (!l_devFound)
+        {
+            // Loop thru the UCDs in the system and match physical path,
+            // engine, and port to the i2c master.
+
+            TARGETING::TargetHandleList allUcds;
+            TARGETING::getAllChips(allUcds,
+                                   TARGETING::TYPE_POWER_SEQUENCER,
+                                   false);
+
+            for(const auto &ucd: allUcds)
+            {
+                const auto l_ucdInfo = ucd->
+                    getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
+
+                if ((l_ucdInfo.i2cMasterPath == l_physPath) &&
+                    (l_ucdInfo.engine == i_args.engine) &&
+                    (l_ucdInfo.port == i_args.port) &&
+                    (l_ucdInfo.devAddr == i_args.devAddr))
+                {
+                    TRACFCOMP(g_trac_i2c,
+                        "Unresponsive UCD found: "
+                        "Engine=%d, masterPort=%d, address=0x%X "
+                        "huid for its i2c master is 0x%.8X",
+                        l_ucdInfo.engine,
+                        l_ucdInfo.port,
+                        l_ucdInfo.devAddr,
+                        TARGETING::get_huid(i_target));
+
+                    i_err->addHwCallout(ucd,
+                                      HWAS::SRCI_PRIORITY_HIGH,
+                                      HWAS::NO_DECONFIG,
+                                      HWAS::GARD_NULL);
+
+                    l_devFound = true;
+                    break;
+                }
+            }
+        }
+
+        // Could also be an issue with Processor or its bus
+        // -- both on the same FRU
+        i_err->addHwCallout(i_target,
+                            l_devFound ?
+                                HWAS::SRCI_PRIORITY_MED :
+                                HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
     }
 }
 

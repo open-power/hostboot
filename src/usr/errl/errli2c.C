@@ -113,6 +113,18 @@ I2cDevInfos::I2cDevInfos()
                                      getDepth(l_tgt)});
             }
         }
+        // UCD
+        {
+            TARGETING::ATTR_I2C_CONTROL_INFO_type u;
+            if (l_tgt->tryGetAttr<TARGETING::ATTR_I2C_CONTROL_INFO>(u))
+            {
+                // String literal is used for comparison below, must stay sync'd
+                iv_i2cdvs.push_back({u.i2cMasterPath, u.engine, u.port,
+                                     u.devAddr, 0,
+                                     EEPROM::INVALID_CHIP_TYPE, l_tgt,
+                                     getDepth(l_tgt)});
+            }
+        }
     }
 }
 
@@ -136,7 +148,8 @@ void handleI2cDeviceCalloutWithinHostboot(
 
     auto l_devFound = false;
 
-    const auto l_i2cmPhysPath = i_i2cMaster->getAttr<TARGETING::ATTR_PHYS_PATH>();
+    const auto l_i2cmPhysPath = i_i2cMaster->
+        getAttr<TARGETING::ATTR_PHYS_PATH>();
 
     // determine default priority to be one below what was passed in, or if
     // LOW was passed in, then LOW. Its use is described below.
@@ -156,7 +169,15 @@ void handleI2cDeviceCalloutWithinHostboot(
     // try to find a device match in the list of matching infos
     for (auto& i2cd : i2cdvs)
     {
-        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: chipType %d Engine=%d, Port=%d, addr=0x%X, i2cMasterHuid=0x%X huid=0x%X w/ %d chips ...", i2cd.chipType, i2cd.engine, i2cd.port, i2cd.devAddr, TARGETING::get_huid(tS.toTarget(i2cd.i2cMasterPath)), TARGETING::get_huid(i2cd.tgt), i2cd.chipCount);
+        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: chipType "
+                 "%d Engine=%d, Port=%d, addr=0x%X, "
+                 "i2cMasterHuid=0x%X huid=0x%X w/ %d chips",
+                 i2cd.chipType,
+                 i2cd.engine,
+                 i2cd.port,
+                 i2cd.devAddr,
+                 TARGETING::get_huid(tS.toTarget(i2cd.i2cMasterPath)),
+                 TARGETING::get_huid(i2cd.tgt), i2cd.chipCount);
 
         // match the master path, engine and port
         if (l_i2cmPhysPath == i2cd.i2cMasterPath &&
@@ -181,7 +202,16 @@ void handleI2cDeviceCalloutWithinHostboot(
                     l_priority = i_priority; // priority passed in
                     l_devFound = true;
                 }
-                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: Match found! Adding part callout for chipType %d Engine=%d, Port=%d, addr=0x%X, i2cMasterHuid=0x%X w/ %d chips", i2cd.chipType, i2cd.engine, i2cd.port, i2cd.devAddr, TARGETING::get_huid(i2cd.tgt), i2cd.chipCount);
+                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+                          "Match found! Adding part callout for chipType %d "
+                          "Engine=%d, Port=%d, addr=0x%X, i2cMasterHuid=0x%X "
+                          "w/ %d chips",
+                          i2cd.chipType,
+                          i2cd.engine,
+                          i2cd.port,
+                          i2cd.devAddr,
+                          TARGETING::get_huid(i2cd.tgt),
+                          i2cd.chipCount);
 
                 // add VPD or SBE part callout depending on chip type
                 i_errl->addPartCallout(i2cd.tgt,
@@ -209,7 +239,15 @@ void handleI2cDeviceCalloutWithinHostboot(
                            i2cd.devAddr == matchedBefore.devAddr;
                 });
 
-                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: i2cdev chipType=%d  Engine=%d, Port=%d, addr=0x%X, i2cHuid=0x%X, i2cd.targetAncestryDepth=%d", i2cd.chipType, i2cd.engine, i2cd.port, i2cd.devAddr, TARGETING::get_huid(i2cd.tgt), i2cd.targetAncestryDepth);
+                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+                          "i2cdev chipType=%d  Engine=%d, Port=%d, addr=0x%X, "
+                          "i2cHuid=0x%X, i2cd.targetAncestryDepth=%d",
+                          i2cd.chipType,
+                          i2cd.engine,
+                          i2cd.port,
+                          i2cd.devAddr,
+                          TARGETING::get_huid(i2cd.tgt),
+                          i2cd.targetAncestryDepth);
 
                 if(dupItr == i2chwcos.end())
                 {
@@ -221,7 +259,17 @@ void handleI2cDeviceCalloutWithinHostboot(
                     // dereference the duplicate device from its iterator
                     auto dupDev = *dupItr;
 
-                    TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: dupdev chipType=%d  Engine=%d, Port=%d, addr=0x%X, i2cHuid=0x%X, dupDev.targetAncestryDepth=%d", dupDev.chipType, dupDev.engine, dupDev.port, dupDev.devAddr, TARGETING::get_huid(dupDev.tgt), dupDev.targetAncestryDepth);
+                    TRACDCOMP(g_trac_errl,
+                              "handleI2cDeviceCalloutWithinHostboot: "
+                              "dupdev chipType=%d  Engine=%d, Port=%d, "
+                              "addr=0x%X, i2cHuid=0x%X, "
+                              "dupDev.targetAncestryDepth=%d",
+                              dupDev.chipType,
+                              dupDev.engine,
+                              dupDev.port,
+                              dupDev.devAddr,
+                              TARGETING::get_huid(dupDev.tgt),
+                              dupDev.targetAncestryDepth);
 
                     // we need to replace it if we found a device with more
                     // seniority (in other words less depth) than the duplicate
@@ -250,7 +298,9 @@ void handleI2cDeviceCalloutWithinHostboot(
             l_priority = i_priority;
             l_devFound = true;
         }
-        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: Match found! Adding Hw callout for huid 0x%X", TARGETING::get_huid(i2cd.tgt));
+        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+                  "Match found! Adding Hw callout for huid 0x%X",
+                  TARGETING::get_huid(i2cd.tgt));
         i_errl->addHwCallout(i2cd.tgt,
                              l_priority,
                              HWAS::NO_DECONFIG,

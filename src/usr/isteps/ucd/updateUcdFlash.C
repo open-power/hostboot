@@ -83,6 +83,50 @@ private:
     TARGETING::I2cControlInfo iv_i2cInfo;
 
     /*
+     *  @brief         This function creates a new ErrlEntry with the supplied
+     *                 parameters, adds an I2C callout, a software callout, and
+     *                 collects traces for UCD_COMP_NAME.
+     *
+     * @param[in]   i_sev           Log's severity. See errltypes.H for
+     *                              available values
+     * @param[in]   i_modId         The module (interface) where this log is
+     *                              created from.
+     * @param[in]   i_reasonCode    Bits 00-07: Component Id
+     *                              Bits 08-15: Reason code
+     * @param[in]   i_user1         64 bits of user data which are placed
+     *                              in the primary SRC. Defaults to zero.
+     * @param[in]   i_user2         64 bits of user data which are placed
+     *                              in the secondary SRC. Defaults to zero.
+     */
+    errlHndl_t ucdError(const ERRORLOG::errlSeverity_t i_sev,
+                        const uint8_t i_modId,
+                        const uint16_t i_reasonCode,
+                        const uint64_t i_user1,
+                        const uint64_t i_user2)
+    {
+        errlHndl_t err = nullptr;
+
+        err = new ERRORLOG::ErrlEntry(i_sev,
+                                      i_modId,
+                                      i_reasonCode,
+                                      i_user1,
+                                      i_user2);
+
+        // Add a callout for the I2C master.
+        err->addI2cDeviceCallout(iv_pI2cMaster,
+                                 iv_i2cInfo.engine,
+                                 iv_i2cInfo.port,
+                                 iv_i2cInfo.devAddr,
+                                 HWAS::SRCI_PRIORITY_HIGH);
+
+        // Add a callout for hostboot code.
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
+
+        return err;
+    }
+
+    /*
      *  Delete Copy Constructor
      */
     Ucd(const Ucd&) = delete;
@@ -198,7 +242,7 @@ public:
                           size, DEVICE_ID_MAX_SIZE);
                 /*@
                  * @errortype
-                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @severity           ERRL_SEV_PREDICTIVE
                  * @moduleid           UCD_RC::MOD_UCD_INIT
                  * @reasoncode         UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_DEVICE_ID
                  * @devdesc            A device read from the UCD didn't read
@@ -209,23 +253,11 @@ public:
                  * @userdata1[32:63]   Actual read size
                  * @userdata2          HUID of the UCD
                  */
-                err = new ERRORLOG::ErrlEntry(
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              UCD_RC::MOD_UCD_INIT,
-                              UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_DEVICE_ID,
-                              TWO_UINT32_TO_UINT64(DEVICE_ID_MAX_SIZE, size),
-                              get_huid(iv_pUcd)
-                          );
-
-                err->addI2cDeviceCallout(iv_pI2cMaster,
-                                         iv_i2cInfo.engine,
-                                         iv_i2cInfo.port,
-                                         iv_i2cInfo.devAddr,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_LOW);
-
+                err = ucdError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                               UCD_RC::MOD_UCD_INIT,
+                               UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_DEVICE_ID,
+                               TWO_UINT32_TO_UINT64(DEVICE_ID_MAX_SIZE, size),
+                               get_huid(iv_pUcd));
 
                 break;
             }
@@ -303,7 +335,7 @@ public:
                           size, MFR_REVISION_MAX_SIZE);
                 /*@
                  * @errortype
-                 * @severity         ERRL_SEV_UNRECOVERABLE
+                 * @severity         ERRL_SEV_PREDICTIVE
                  * @moduleid         UCD_RC::MOD_UCD_INIT
                  * @reasoncode       UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_MFR_REVISION
                  * @devdesc          A device read from the UCD didn't read
@@ -314,21 +346,12 @@ public:
                  * @userdata1[32:63] Actual read size
                  * @userdata2        HUID of the UCD
                  */
-                err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                err = ucdError(ERRORLOG::ERRL_SEV_PREDICTIVE,
                             UCD_RC::MOD_UCD_INIT,
                             UCD_RC::RC_DEVICE_READ_UNEXPECTED_SIZE_MFR_REVISION,
                             TWO_UINT32_TO_UINT64(MFR_REVISION_MAX_SIZE, size),
                             get_huid(iv_pUcd));
 
-                err->addI2cDeviceCallout(iv_pI2cMaster,
-                                         iv_i2cInfo.engine,
-                                         iv_i2cInfo.port,
-                                         iv_i2cInfo.devAddr,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_LOW);
                 break;
             }
 
@@ -380,8 +403,8 @@ public:
 
 
     /*
-     * @brief                     Gets the Device ID for the UCD member of this
-     *                            struct.
+     * @brief                     Gets the Device ID from the UCD member of this
+     *                            class.
      *
      * @return                    A constant pointer to the device id string.
      *
@@ -391,8 +414,8 @@ public:
         return iv_deviceId;
     }
 
-    /* @brief                     Will get the MFR Revision for the UCD member
-     *                            of this struct.
+    /* @brief                     Gets the MFR Revision from the UCD member
+     *                            of this class.
      *
      * @return                    The ASCII MFR revision as a uint16_t.
      */
