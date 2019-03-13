@@ -66,6 +66,7 @@ namespace ISTEP
         MOD_APPLY_HCODE_GEN_CPU_REGS                      = 0x23,
         MOD_GET_LANEMASK_FROM_HX_KEYWORD                  = 0x24,
         MOD_MSS_SCRUB                                     = 0x25,
+        MOD_CALL_UPDATE_UCD_FLASH                         = 0x26,
     };
 
     /**
@@ -138,6 +139,7 @@ namespace ISTEP
         RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
         RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
         RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
+        RC_UCD_IMG_NOT_IN_CONTAINER              = ISTEP_COMP_ID | 0x4F,
     };
 
 };

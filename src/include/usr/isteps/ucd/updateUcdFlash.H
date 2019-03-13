@@ -27,6 +27,7 @@
 #define __UPDATE_UCD_FLASH_H
 
 #include <targeting/common/target.H>
+#include <util/utilmem.H>
 #include <errl/errlentry.H>
 
 namespace POWER_SEQUENCER
@@ -37,6 +38,29 @@ namespace TI // Texas Instruments
 
 namespace UCD // UCD series
 {
+
+/**
+ *  @brief Applies UCD data flash image updates (if needed) to the requested
+ *      UCDs
+ *
+ *  @param[in] i_powerSequencers Fixed vector of PowerSequencer targets to
+ *      update flash image on
+ *  @param[in] i_image Reference to UtilMem buffer holding the UCD flash image
+ *      contents (including header, TOC entries, and flash images).  Note: the
+ *      implementation will not alter the buffer content, and will seek back
+ *      to the beginning before handing control back.
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Successfully took action against all requested UCDs.  It's
+ *      possible an individual UCD update failed, in which case the error is
+ *      committed.
+ *  @retval !nullptr Failed to take action against one or more requested UCDs.
+ *      Typically this is due to a firmware problem.  Handle points to valid
+ *      error log
+ */
+errlHndl_t updateAllUcdFlashImages(
+    const TARGETING::TargetHandleList& i_powerSequencers,
+          UtilMem&                     i_image);
 
 /**
  *  @brief Updates a UCD target's flash image
