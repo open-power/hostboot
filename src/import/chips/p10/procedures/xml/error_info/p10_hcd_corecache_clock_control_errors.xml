@@ -1,0 +1,165 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_hcd_corecache_clock_control_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_hcd_cache_startclocks procedures -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORECACHE_CLK_CTRL_SL_FAILED</rc>
+    <description>
+        core/cache clock start/stop failed in SL thold.
+    </description>
+    <ffdc>CLK_STAT_SL</ffdc>
+    <ffdc>CLK_COMMAND</ffdc>
+    <ffdc>CLK_REGIONS</ffdc>
+    <ffdc>QUAD_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORECACHE_CLK_CTRL_NSL_FAILED</rc>
+    <description>
+        core/cache clock start/stop failed in NSL thold.
+    </description>
+    <ffdc>CLK_STAT_NSL</ffdc>
+    <ffdc>CLK_COMMAND</ffdc>
+    <ffdc>CLK_REGIONS</ffdc>
+    <ffdc>QUAD_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORECACHE_CLK_CTRL_ARY_FAILED</rc>
+    <description>
+        core/cache clock start/stop failed in ARY thold.
+    </description>
+    <ffdc>CLK_STAT_ARY</ffdc>
+    <ffdc>CLK_COMMAND</ffdc>
+    <ffdc>CLK_REGIONS</ffdc>
+    <ffdc>QUAD_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CORECACHE_CLK_CTRL_TIMEOUT</rc>
+    <description>
+        core/cache clock start/stop timed out.
+    </description>
+    <ffdc>CLK_CTRL_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CPLT_STAT0</ffdc>
+    <ffdc>CLK_COMMAND</ffdc>
+    <ffdc>CLK_REGIONS</ffdc>
+    <ffdc>QUAD_TARGET</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
