@@ -66,9 +66,9 @@ namespace mcbist
 /// @param[in,out] the MCBIST program to check for read/display replacement
 /// @note Useful for testing
 ///
-void replace_read_helper(mss::mcbist::program<TARGET_TYPE_MCBIST>& io_program)
+void replace_read_helper(mss::mcbist::program<>& io_program)
 {
-    using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
+    using TT = mss::mcbistTraits<>;
 
     io_program.change_maint_broadcast_mode(mss::OFF);
     io_program.change_end_boundary(mss::mcbist::end_boundary::STOP_AFTER_ADDRESS);
@@ -99,9 +99,9 @@ void replace_read_helper(mss::mcbist::program<TARGET_TYPE_MCBIST>& io_program)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                               mss::mcbist::program<TARGET_TYPE_MCBIST>& io_program )
+                               mss::mcbist::program<>& io_program )
 {
-    using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
+    using TT = mss::mcbistTraits<>;
 
     // If we don't need the mcbist work-around, we're done.
     if (! mss::chip_ec_feature_mcbist_end_of_rank(i_target) )

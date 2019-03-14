@@ -22,3 +22,26 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file exp_settings.H
+/// @brief MCBIST settings, like stop conditions, thresholds, etc
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_MCBIST_EXP_SETTINGS_H_
+#define _MSS_MCBIST_EXP_SETTINGS_H_
+
+#include <fapi2.H>
+
+#include <lib/shared/exp_consts.H>
+#include <lib/ecc/ecc_traits.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+
+// This file is still necessary to put traits and generic code together
+
+#endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,7 +258,7 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
     // CE counts found in the per-symbol counters. Therefore, all we need to do
     // is tell the hardware which CE types to count.
 
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
 
     switch ( iv_phase )
     {

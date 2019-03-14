@@ -22,3 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_mcbist.H
+/// @brief Run and manage the MCBIST engine
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_EXP_MCBIST_H_
+#define _MSS_EXP_MCBIST_H_
+
+#include <fapi2.H>
+
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
+
+#include <lib/shared/exp_consts.H>
+#include <lib/ecc/ecc_traits.H>
+#include <lib/mc/exp_port.H>
+#include <lib/utils/mss_exp_conversions.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
+#include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/memory_size.H>
+#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
+
+// This file is still necessary to put traits and generic code together
+
+#endif

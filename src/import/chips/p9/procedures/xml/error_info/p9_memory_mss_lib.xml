@@ -349,16 +349,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
-    <description>MCBIST program larger than currently supported size</description>
-    <ffdc>PROGRAM_LENGTH</ffdc>
-    <callout>
-        <procedure>CODE</procedure>
-        <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_APB_INVALID_ADDRESS</rc>
     <description>PHY APB interface is reporting an invalid address was read or written</description>
     <ffdc>PORT_POSITION</ffdc>

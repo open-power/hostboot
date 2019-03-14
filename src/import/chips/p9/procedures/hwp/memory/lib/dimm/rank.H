@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/num.H>
+#include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/shared/mss_const.H>
 #include <lib/phy/phy_cntrl.H>

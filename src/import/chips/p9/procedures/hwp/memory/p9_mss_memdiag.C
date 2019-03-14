@@ -42,11 +42,10 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
-#include <lib/mcbist/patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/mc/port.H>
-#include <lib/mcbist/sim.H>
 #include <lib/ecc/ecc.H>
 #include <lib/fir/memdiags_fir.H>
 

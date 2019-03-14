@@ -75,6 +75,10 @@ template<>
 class portTraits<mss::mc_type::NIMBUS>
 {
     public:
+
+        // PORT_TYPE
+        static constexpr enum fapi2::TargetType PORT_TYPE = fapi2::TARGET_TYPE_MCA;
+
         static constexpr uint64_t FARB0Q_REG = MCA_MBA_FARB0Q;
         static constexpr uint64_t FARB1Q_REG = MCA_MBA_FARB1Q;
         static constexpr uint64_t FARB5Q_REG = MCA_MBA_FARB5Q;
@@ -957,127 +961,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Configures the write reorder queue for MCBIST operations
-/// @param[in] i_target the target to effect
-/// @param[in] i_state to set the bit too
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-inline fapi2::ReturnCode configure_wrq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const mss::states i_state)
-{
-    typedef portTraits<mss::mc_type::NIMBUS> TT;
-
-    fapi2::buffer<uint64_t> l_data;
-
-    // Gets the reg
-    FAPI_TRY(mss::getScom(i_target, TT::WRQ_REG, l_data), "%s failed to getScom from MCA_MBA_WRQ0Q", mss::c_str(i_target));
-
-    // Sets the bit
-    l_data.writeBit<TT::WRQ_FIFO_MODE>(i_state == mss::states::ON);
-
-    // Sets the regs
-    FAPI_TRY(mss::putScom(i_target, TT::WRQ_REG, l_data), "%s failed to putScom to MCA_MBA_WRQ0Q", mss::c_str(i_target));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-///
-/// @brief Configures the write reorder queue bit
-/// @param[in] i_target the target to effect
-/// @param[in] i_state to set the bit too
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-inline fapi2::ReturnCode configure_wrq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                       const mss::states i_state)
-{
-    // Loops through all MCA targets, hitting all the registers
-    for( const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
-    {
-        FAPI_TRY(configure_wrq(l_mca, i_state));
-    }
-
-    // In case we don't have any MCA's
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Configures the read reorder queue for MCBIST operations
-/// @param[in] i_target the target to effect
-/// @param[in] i_state to set the bit too
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-inline fapi2::ReturnCode configure_rrq(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const mss::states i_state)
-{
-    typedef portTraits<mss::mc_type::NIMBUS> TT;
-
-    fapi2::buffer<uint64_t> l_data;
-
-    // Gets the reg
-    FAPI_TRY(mss::getScom(i_target, TT::RRQ_REG, l_data), "%s failed to getScom from MCA_MBA_RRQ0Q", mss::c_str(i_target));
-
-    // Sets the bit
-    l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
-
-    // Sets the regs
-    FAPI_TRY(mss::putScom(i_target, TT::RRQ_REG, l_data), "%s failed to putScom to MCA_MBA_RRQ0Q", mss::c_str(i_target));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Configures the read reorder queue bit
-/// @param[in] i_target the target to effect
-/// @param[in] i_state to set the bit too
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-inline fapi2::ReturnCode configure_rrq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                       const mss::states i_state)
-{
-    // Loops through all MCA targets, hitting all the registers
-    for( const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
-    {
-        FAPI_TRY(configure_rrq(l_mca, i_state));
-    }
-
-    // In case we don't have any MCA's
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Resets the write/read reorder queue values - needs to be called after MCBIST execution
-/// @tparam T, the fapi2 target type of the target
-/// @param[in] i_target the target to effect
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-template< fapi2::TargetType T>
-fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
-{
-    uint8_t l_reorder_queue = 0;
-    FAPI_TRY(reorder_queue_setting(i_target, l_reorder_queue));
-
-    // Changes the reorder queue settings
-    {
-        // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
-        const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MSS_REORDER_QUEUE_SETTING_FIFO) ?
-                                     mss::states::ON : mss::states::OFF);
-        FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
-        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
-    }
-
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Convert a bitmap from the BAD_DQ_BITMAP attribute to a vector of bad DQ indexes
 /// @param[in] i_bad_bits an 8-bit bitmap of bad bits
 /// @param[in] i_nibble which nibble of the bitmap to convert
@@ -1507,6 +1390,21 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode restore_repairs( const fapi2::Target<T>& i_target,
                                    fapi2::buffer<uint8_t>& o_repairs_applied,
                                    fapi2::buffer<uint8_t>& o_repairs_exceeded);
+
+/// @brief Get the attributes for the reorder queue setting
+/// @param[in] const ref to the mc target
+/// @param[out] uint8_t& reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Contains the settings for write/read reorder
+/// queue
+///
+template< >
+inline fapi2::ReturnCode reorder_queue_setting<mss::mc_type::NIMBUS>(const
+        fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        uint8_t& o_value)
+{
+    return mss::reorder_queue_setting(i_target, o_value);
+}
 
 }// mss
 

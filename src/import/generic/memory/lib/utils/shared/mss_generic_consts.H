@@ -59,6 +59,26 @@ enum common_consts
 };
 
 ///
+/// @brief Common mcbist constants
+///
+enum mcbist_common_consts
+{
+    CYCLES_PER_CMD  = 4,      ///< Best case cycles per MCBIST command
+    MAX_RANK_PER_DIMM = 4,
+
+    BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
+    T_PER_MT     = 1000000,         ///< Multiplier to go from MT/s to T/s
+
+    // Number of double words in...
+    NUM_DW_IN_128B = 16,
+    NUM_DW_IN_64B = 8,
+
+    BG_SCRUB_IN_HOURS       = 12,
+    CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap
+    MAX_CMD_GAP             = 4095,     ///< Represents the maximum (non-multplied) time for MCBIST inter cmd gap
+};
+
+///
 /// @brief Common timings
 ///
 enum common_timings
@@ -245,6 +265,169 @@ enum states
     _INVALID_ = 0xFF,
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
+
+namespace mcbist
+{
+
+enum broadcast_timebase
+{
+    // Number of 1024 2:1 cycle timebases to wait starting MCBIST
+    // for SRQs to get synced for broadcast mode
+    TB_COUNT_2     = 0b0000001,
+    TB_COUNT_4     = 0b0000011,
+    TB_COUNT_8     = 0b0000111,
+    TB_COUNT_16    = 0b0001111,
+    TB_COUNT_32    = 0b0011111,
+    TB_COUNT_64    = 0b0111111,
+    TB_COUNT_128   = 0b1111111,
+};
+
+enum rmw_address
+{
+    // 32B block addresses into the maint portion of the rmw buffer
+    DW0            = 0b111110000,
+    DW1            = 0b111110001,
+    DW2            = 0b111110010,
+    DW3            = 0b111110011,
+    DW4            = 0b111110100,
+    DW5            = 0b111110101,
+    DW6            = 0b111110110,
+    DW7            = 0b111110111,
+    DW8            = 0b111111000,
+    DW9            = 0b111111001,
+    DWA            = 0b111111010,
+    DWB            = 0b111111011,
+    DWC            = 0b111111100,
+    DWD            = 0b111111101,
+    DWE            = 0b111111110,
+    DWF            = 0b111111111,
+};
+
+enum data_rotate_mode
+{
+    // MCBIST data rotate modes refer to register MCBDRCR bits 0:3
+    ROTATE_0_BITS  = 0b0000,
+    ROTATE_1_BITS  = 0b0001,
+    ROTATE_2_BITS  = 0b0010,
+    ROTATE_3_BITS  = 0b0011,
+    ROTATE_4_BITS  = 0b0100,
+    ROTATE_5_BITS  = 0b0101,
+    ROTATE_6_BITS  = 0b0110,
+    ROTATE_7_BITS  = 0b0111,
+    ROTATE_8_BITS  = 0b1000,
+    ROTATE_9_BITS  = 0b1001,
+    ROTATE_10_BITS = 0b1010,
+    ROTATE_11_BITS = 0b1011,
+    ROTATE_12_BITS = 0b1100,
+    ROTATE_13_BITS = 0b1101,
+    ROTATE_14_BITS = 0b1110,
+    ROTATE_15_BITS = 0b1111,
+};
+
+enum data_seed_mode
+{
+    // MCBIST data seed modes refer to register MCBDRCR bits 21:22
+    ALL_UNIQUE        = 0b00,
+    REPEAT_SEED_0     = 0b01,
+    REPEAT_SEED_1     = 0b10,
+    REPEAT_SEED_2     = 0b11,
+};
+
+enum data_mode
+{
+    // MCBIST test data modes
+    FIXED_DATA_MODE   = 0b000,
+    RAND_FWD_MODE     = 0b001,
+    RAND_REV_MODE     = 0b010,
+    RAND_FWD_MAINT    = 0b011,
+    RAND_REV_MAINT    = 0b100,
+    DATA_EQ_ADDR      = 0b101,
+    ROTATE_LEFT_MODE  = 0b110,
+    ROTATE_RIGHT_MODE = 0b111,
+};
+
+// 0:3  Operation Type
+enum op_type
+{
+    WRITE            = 0b0000, // fast, with no concurrent traffic
+    READ             = 0b0001, // fast, with no concurrent traffic
+    READ_WRITE       = 0b0010,
+    WRITE_READ       = 0b0011,
+    READ_WRITE_READ  = 0b0100,
+    READ_WRITE_WRITE = 0b0101,
+    RAND_SEQ         = 0b0110,
+    READ_READ_WRITE  = 0b1000,
+    SCRUB_RRWR       = 0b1001,
+    STEER_RW         = 0b1010,
+    ALTER            = 0b1011, // (W)
+    DISPLAY          = 0b1100, // (R, slow)
+    CCS_EXECUTE      = 0b1111,
+
+    // if bits 9:11 (Data Mode bits)  = 000  (bits 4:8 used to specify which subtest to go to)
+    // Refresh only cmd if bits 9:11 (Data Mode bits) /= 000
+    GOTO_SUBTEST_N = 0b0111,
+};
+
+
+enum test_type
+{
+    USER_MODE = 0,
+    CENSHMOO = 1,
+    SUREFAIL = 2,
+    MEMWRITE = 3,
+    MEMREAD = 4,
+    CBR_REFRESH = 5,
+    MCBIST_SHORT = 6,
+    SHORT_SEQ = 7,
+    DELTA_I = 8,
+    DELTA_I_LOOP = 9,
+    SHORT_RAND = 10,
+    LONG1 = 11,
+    BUS_TAT = 12,
+    SIMPLE_FIX = 13,
+    SIMPLE_RAND = 14,
+    SIMPLE_RAND_2W = 15,
+    SIMPLE_RAND_FIXD = 16,
+    SIMPLE_RA_RD_WR = 17,
+    SIMPLE_RA_RD_R = 18,
+    SIMPLE_RA_FD_R = 19,
+    SIMPLE_RA_FD_R_INF = 20,
+    SIMPLE_SA_FD_R = 21,
+    SIMPLE_RA_FD_W = 22,
+    INFINITE = 23,
+    WR_ONLY = 24,
+    W_ONLY = 25,
+    R_ONLY = 26,
+    W_ONLY_RAND = 27,
+    R_ONLY_RAND = 28,
+    R_ONLY_MULTI = 29,
+    SHORT = 30,
+    SIMPLE_RAND_BARI = 31,
+    W_R_INFINITE = 32,
+    W_R_RAND_INFINITE = 33,
+    R_INFINITE1 = 34,
+    R_INFINITE_RF = 35,
+    MARCH = 36,
+    SIMPLE_FIX_RF = 37,
+    SHMOO_STRESS = 38,
+    SIMPLE_RAND_RA = 39,
+    SIMPLE_FIX_RA = 40,
+    SIMPLE_FIX_RF_RA = 41,
+    TEST_RR = 42,
+    TEST_RF = 43,
+    W_ONLY_INFINITE_RAND = 44,
+    MCB_2D_CUP_SEQ = 45,
+    MCB_2D_CUP_RAND = 46,
+    SHMOO_STRESS_INFINITE = 47,
+    HYNIX_1_COL = 48,
+    RMWFIX = 49,
+    RMWFIX_I = 50,
+    W_INFINITE = 51,
+    R_INFINITE = 52,
+};
+
+
+} // namespace mcbist
 
 ///
 /// @brief Supported DIMM speed equality deliberations

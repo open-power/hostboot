@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace mcbist
 /// @param[in] the MCBIST program to check for read/display replacement
 /// @note Useful for testing
 ///
-void replace_read_helper(mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_program);
+void replace_read_helper(mss::mcbist::program<>& i_program);
 
 ///
 /// @brief End of rank work around
@@ -69,7 +69,7 @@ void replace_read_helper(mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_prog
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode end_of_rank( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                               mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_program );
+                               mss::mcbist::program<>& i_program );
 
 ///
 /// @brief WAT debug attention

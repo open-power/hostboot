@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -558,7 +558,7 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<
 inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
 {
     // construct fwms::address from mcbist::address
-    const auto l_addr = address<T>(i_address);
+    const auto l_addr = address<>(i_address);
     io_data.insert<TT::FIRMWARE_MS_ADDRESS, TT::FIRMWARE_MS_ADDRESS_LEN, TT::FIRMWARE_MS_ADDRESS>(l_addr);
     FAPI_INF("set_address: 0x%016lx", uint64_t(l_addr));
 }
@@ -574,7 +574,7 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<
 inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
 {
     // construct fwms::address from i_data
-    const auto l_addr = address<T>(uint64_t(i_data));
+    const auto l_addr = address<>(uint64_t(i_data));
     // construct mcbist::address from fwms::address
     o_address = mcbist::address(l_addr);
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));

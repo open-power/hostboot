@@ -1243,7 +1243,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         else if (TYPE_MCBIST == trgtType)
         {
             fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-            mss::mcbist::stop_conditions stopCond;
+            mss::mcbist::stop_conditions<> stopCond;
 
             switch(workItem)
             {
@@ -1307,7 +1307,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         {
             /* TODO RTC 201293 - uncomment with hwp support
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-            mss::mcbist::stop_conditions stopCond;
+            mss::mcbist::stop_conditions<> stopCond;
 
             switch(workItem)
             {

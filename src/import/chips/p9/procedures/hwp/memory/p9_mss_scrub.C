@@ -40,9 +40,8 @@
 #include <lib/dimm/rank.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/mcbist.H>
-#include <lib/mcbist/patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
 #include <lib/mcbist/memdiags.H>
-#include <lib/mcbist/sim.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/fir/memdiags_fir.H>
 
@@ -133,7 +132,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
     // Start background scrub
     FAPI_TRY ( mss::memdiags::background_scrub( i_target,
-               mss::mcbist::stop_conditions(),
+               mss::mcbist::stop_conditions<>(),
                mss::mcbist::speed::BG_SCRUB,
                mss::mcbist::address() ) );
 

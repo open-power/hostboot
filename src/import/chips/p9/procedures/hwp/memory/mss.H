@@ -52,7 +52,7 @@
 
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/utils/num.H>
+#include <generic/memory/lib/utils/num.H>
 
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
@@ -60,7 +60,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <lib/utils/checker.H>
-#include <lib/utils/dump_regs.H>
+#include <generic/memory/lib/utils/dump_regs.H>
 
 #include <lib/ccs/ccs.H>
 #include <lib/mcbist/mcbist.H>

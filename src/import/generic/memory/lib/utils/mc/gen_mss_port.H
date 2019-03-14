@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -411,6 +411,116 @@ fapi2::ReturnCode apply_mark_store( const fapi2::Target<T>& i_target )
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Configures the write reorder queue bit
+/// @tparam MC the memory controller type
+/// @tparam T, the mc
+/// @tparam TT, the class traits for the port
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+inline fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
+                                       const mss::states i_state)
+{
+    // Loops through all port targets, hitting all the registers
+    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the reg
+        FAPI_TRY(mss::getScom(l_port, TT::WRQ_REG, l_data), "%s failed to getScom from WRQ0Q", mss::c_str(l_port));
+
+        // Sets the bit
+        l_data.writeBit<TT::WRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+        // Sets the regs
+        FAPI_TRY(mss::putScom(l_port, TT::WRQ_REG, l_data), "%s failed to putScom to WRQ0Q", mss::c_str(l_port));
+    }
+
+    // In case we don't have any port's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the read reorder queue bit
+/// @tparam MC the memory controller type
+/// @tparam T, the mc
+/// @tparam TT, the class traits for the port
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+inline fapi2::ReturnCode configure_rrq(const fapi2::Target<T>& i_target, const mss::states i_state)
+{
+    // Loops through all port targets, hitting all the registers
+    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the reg
+        FAPI_TRY(mss::getScom(l_port, TT::RRQ_REG, l_data), "%s failed to getScom from RRQ0Q", mss::c_str(l_port));
+
+        // Sets the bit
+        l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+        // Sets the regs
+        FAPI_TRY(mss::putScom(l_port, TT::RRQ_REG, l_data), "%s failed to putScom to RRQ0Q", mss::c_str(l_port));
+    }
+
+    // In case we don't have any port's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/// @brief Get the attributes for the reorder queue setting
+/// @tparam MC the memory controller type
+/// @tparam T, the mc
+/// @param[in] const ref to the mc target
+/// @param[out] uint8_t& reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Contains the settings for write/read reorder queue
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
+inline fapi2::ReturnCode reorder_queue_setting(const fapi2::Target<T>& i_target, uint8_t& o_value);
+
+///
+/// @brief Resets the write/read reorder queue values - needs to be called after MCBIST execution
+/// @tparam MC the memory controller type
+/// @tparam T, the mc
+/// @tparam TT, the class traits for the port
+/// @param[in] i_target the target to effect
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = portTraits<MC> >
+inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
+{
+    uint8_t l_reorder_queue = 0;
+    FAPI_TRY(reorder_queue_setting<MC>(i_target, l_reorder_queue));
+
+    // Changes the reorder queue settings
+    {
+        // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
+        const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MSS_REORDER_QUEUE_SETTING_FIFO) ?
+                                     mss::states::ON : mss::states::OFF);
+        FAPI_TRY(configure_rrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
+        FAPI_TRY(configure_wrq(i_target, l_state), "%s failed to reset read reorder queue settings", mss::c_str(i_target));
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 }// ns mss
 

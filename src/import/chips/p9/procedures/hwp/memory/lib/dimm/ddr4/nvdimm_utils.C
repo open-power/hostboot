@@ -37,6 +37,7 @@
 #include <fapi2.H>
 #include <vector>
 
+#include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <lib/mc/mc.H>
 #include <lib/ccs/ccs.H>
@@ -82,7 +83,7 @@ fapi2::ReturnCode get_maint_addr_mode_en( const fapi2::Target<fapi2::TARGET_TYPE
         mss::states& o_state )
 {
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+    typedef mcbistTraits<> TT;
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_TRY( mss::getScom(l_mcbist, TT::MCBAGRAQ_REG, l_data),
@@ -105,7 +106,7 @@ fapi2::ReturnCode change_maint_addr_mode_en( const fapi2::Target<fapi2::TARGET_T
         const mss::states i_state )
 {
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+    typedef mcbistTraits<> TT;
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_TRY( mss::getScom(l_mcbist, TT::MCBAGRAQ_REG, l_data),
@@ -213,7 +214,7 @@ fapi2::ReturnCode self_refresh_exit_helper( const fapi2::Target<fapi2::TARGET_TY
         mss::mcbist::address l_start = 0, l_end = 0;
         mss::mcbist::end_boundary l_end_boundary = mss::mcbist::end_boundary::STOP_AFTER_SLAVE_RANK;
         l_start.set_port(l_port);
-        mss::mcbist::stop_conditions l_stop_conditions;
+        mss::mcbist::stop_conditions<> l_stop_conditions;
 
         // Read with targeted scrub
         FAPI_TRY ( mss::memdiags::targeted_scrub(l_mcbist,

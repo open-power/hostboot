@@ -22,3 +22,53 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file ecc_traits_explorer.H
+/// @brief Traits class for the MC ECC syndrome registers
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_ECC_TRAITS_EXPLORER_H_
+#define _MSS_ECC_TRAITS_EXPLORER_H_
+
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
+
+
+namespace mss
+{
+
+///
+/// @class eccTraits
+/// @brief a collection of traits associated with the MC ECC interface
+/// @tparam T fapi2::TargetType representing the memory controller
+///
+template< fapi2::TargetType T >
+class eccTraits;
+
+///
+/// @class eccTraits
+/// @brief a collection of traits associated with the OCMB explorer MC ECC interface
+///
+// TODO: Need to implement this
+template<>
+class eccTraits<fapi2::TARGET_TYPE_MEM_PORT>
+{
+
+    public:
+        // Fields, can be any size.
+        enum
+        {
+            FIRMWARE_MS_ADDRESS = EXPLR_RDF_FWMS0_ADDRESS,
+            FIRMWARE_MS_ADDRESS_LEN = EXPLR_RDF_FWMS0_ADDRESS_LEN,
+        };
+};
+
+} // close namespace mss
+
+#endif

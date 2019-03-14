@@ -22,3 +22,44 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gen_mss_mcbist_traits.H
+/// @brief Run and manage the MCBIST engine
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _GEN_MSS_MCBIST_TRAITS_H_
+#define _GEN_MSS_MCBIST_TRAITS_H_
+
+#include <fapi2.H>
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mcbist/gen_address.H>
+
+namespace mss
+{
+
+///
+/// @class mcbistMCTraits
+/// @tparam MC the mc type
+/// @brief A MC to MC_TARGET_TYPE mapping
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE >
+class mcbistMCTraits;
+
+///
+/// @class mcbistTraits
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @brief a collection of traits associated with the MCBIST engine or hardware
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>
+class mcbistTraits;
+
+}// mss
+#endif
