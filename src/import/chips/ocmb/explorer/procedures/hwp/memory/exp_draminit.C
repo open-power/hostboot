@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,12 +103,12 @@ extern "C"
 
     fapi_try_exit:
         FAPI_INF("Draminit training - %s %s",
-                 (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported"),
+                 (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported - trying to blame FIR's"),
                  mss::c_str(i_target));
 
-        // TK update this to check FIR's or PLL failures - that will be updated in another commit
-        // For now, return current_err
-        return fapi2::current_err;
-
+        // Due to the RAS/PRD requirements, we need to check for FIR's
+        // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
+        // So, let PRD retrigger this step to see if we can resolve the issue
+        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, fapi2::current_err);
     }
 }

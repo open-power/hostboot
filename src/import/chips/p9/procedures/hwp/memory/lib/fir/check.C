@@ -231,7 +231,7 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
 fapi_try_exit:
 
     // Handle any fails seen above accordingly
-    return mss::check::fir_or_pll_fail( l_mca, fapi2::current_err, l_check_fir);
+    return mss::check::fir_or_pll_fail<mss::mc_type::NIMBUS>( l_mca, fapi2::current_err, l_check_fir);
 }
 
 // Declares FIR registers that are re-used between multiple functions
@@ -378,7 +378,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2:
     // Note: we return out if any FIR is bad
     for(const auto& l_fir_reg : MCBIST_FIR_REGS)
     {
-        FAPI_TRY(fir_with_mask(i_target, l_fir_reg, o_fir_error));
+        FAPI_TRY(fir_with_mask<mss::mc_type::NIMBUS>(i_target, l_fir_reg, o_fir_error));
 
         // Log the error if need be
         log_fir_helper(i_target, o_fir_error, io_rc);
@@ -395,7 +395,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2:
     {
         for(const auto& l_fir_reg : MCA_FIR_REGS)
         {
-            FAPI_TRY(fir_with_mask(l_mca, l_fir_reg, o_fir_error));
+            FAPI_TRY(fir_with_mask<mss::mc_type::NIMBUS>(l_mca, l_fir_reg, o_fir_error));
 
             // Log the error if need be
             log_fir_helper(l_mca, o_fir_error, io_rc);
@@ -441,7 +441,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2:
     // Note: we return out if any FIR is bad
     for(const auto& l_fir_reg : MCBIST_FIR_REGS)
     {
-        FAPI_TRY(fir_with_mask(l_mcbist, l_fir_reg, o_fir_error));
+        FAPI_TRY(fir_with_mask<mss::mc_type::NIMBUS>(l_mcbist, l_fir_reg, o_fir_error));
 
         // Log the error if need be
         log_fir_helper(l_mcbist, o_fir_error, io_rc);
@@ -456,7 +456,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2:
     // Loop through all MCA FIR's
     for(const auto& l_fir_reg : MCA_FIR_REGS)
     {
-        FAPI_TRY(fir_with_mask(i_target, l_fir_reg, o_fir_error));
+        FAPI_TRY(fir_with_mask<mss::mc_type::NIMBUS>(i_target, l_fir_reg, o_fir_error));
 
         // Log the error if need be
         log_fir_helper(i_target, o_fir_error, io_rc);
