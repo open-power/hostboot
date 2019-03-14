@@ -38,6 +38,11 @@
 #include <mss.H>
 #include <lib/ccs/ccs.H>
 #include <lib/fir/check.H>
+#include <lib/phy/mss_lrdimm_training.H>
+
+#ifdef LRDIMM_CAPABLE
+    #include <lib/workarounds/quad_encode_workarounds.H>
+#endif
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -334,6 +339,19 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             FAPI_TRY( execute_inst_array(i_target, i_program, p), "Error in ccs execute" );
         }
     }
+
+#if LRDIMM_CAPABLE
+
+    if(mss::workarounds::contains_command_mrs(i_program.iv_instructions))
+    {
+        // Get ranks in pair bombs out if we can't get any ranks in this pair, so we should be safe here
+        for (const auto& p : i_ports)
+        {
+            FAPI_TRY(mss::workarounds::fix_shadow_register_corruption(p));
+        }
+    }
+
+#endif
 
 fapi_try_exit:
     i_program.iv_instructions.clear();

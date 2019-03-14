@@ -207,6 +207,7 @@ enum ffdc_function_codes
     // LR helper functions
     FINE_RECORDER_ADD_RESULTS = 119,
     FINE_RECORDER_FIND_EYE = 120,
+    FIX_SHADOW_REGISTER = 121,
 
     // LR training function
     DWL_CALL_OUT = 130,
