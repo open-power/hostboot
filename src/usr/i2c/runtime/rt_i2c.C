@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/hberrltypes.H>
 #include <devicefw/driverif.H>
 #include <i2c/i2creasoncodes.H>
 #include <runtime/interface.h>
@@ -81,6 +82,11 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     //  Address, Port, Engine, Device Addr.
     // Other args set below
     misc_args_t args;
+
+    // Read in the sub-operation
+    const auto subop =
+        static_cast<DeviceFW::I2C_SUBOP>(va_arg(i_args,uint64_t));
+
     args.port = va_arg( i_args, uint64_t );
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
@@ -111,22 +117,30 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         }
         else
         {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"Invalid Offset length: 0x%.8X."
+                "Previous parameters: i2c subop 0x%.8X, "
+                "port 0x%.8X, engine 0x%.8X, deviceAddr 0x%.8X",
+                args.offset_length, subop,
+                args.port, args.engine, args.devAddr);
             /*@
             * @errortype
             * @moduleid     I2C_PERFORM_OP
             * @reasoncode   I2C_RUNTIME_INVALID_OFFSET_LENGTH
             * @userdata1    Offset length
-            * @userdata2    Op type
+            * @userdata2[0:31]  Operation Type
+            * @userdata2[32:64] Target
             * @devdesc      I2C offset length is invalid
             */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                           I2C_PERFORM_OP,
                                           I2C_RUNTIME_INVALID_OFFSET_LENGTH,
                                           args.offset_length,
-                                          i_opType);
+                                          TWO_UINT32_TO_UINT64(i_opType,
+                                                TARGETING::get_huid(i_target)));
 
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                      HWAS::SRCI_PRIORITY_HIGH);
+            return err;
         }
     }
 

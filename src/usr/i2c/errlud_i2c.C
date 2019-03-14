@@ -71,8 +71,13 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     // N bytes  : I2C MUX path in string form
 
     // Cache the MUX path in string form for reference and easy access
-    char *l_muxPath = i_args.i2cMuxPath->toString();
-
+    char* l_muxPath{nullptr};
+    size_t l_muxPathSize = 0;
+    if (i_args.i2cMuxPath)
+    {
+        l_muxPath = i_args.i2cMuxPath->toString();
+        l_muxPathSize = strlen(l_muxPath);
+    }
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)*2
                                         +sizeof(uint32_t)
@@ -84,7 +89,7 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
                                         +sizeof(uint16_t)
                                         +sizeof(uint64_t)*2
                                         +sizeof(uint8_t)
-                                        +(strlen(l_muxPath) +1) ) );
+                                        +l_muxPathSize + 1) );
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
     uint16_t tmp16 = 0;
@@ -166,13 +171,18 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
-    memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
-    l_pBuf += strlen(l_muxPath);
-    l_pBuf = '\0';   // add a terminator for ease of parsing
-    ++l_pBuf;
+    if (l_muxPathSize > 0)
+    {
+        memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
+        l_pBuf += strlen(l_muxPath);
 
-    free(l_muxPath);
-    l_muxPath = nullptr;
+        // done with muxPath so free it here
+        free(l_muxPath);
+        l_muxPath = nullptr;
+        l_muxPathSize = 0;
+    }
+    *l_pBuf = '\0';   // add a terminator for ease of parsing
+    ++l_pBuf;
 }
 
 //------------------------------------------------------------------------------
@@ -308,7 +318,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
 
     memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
     l_pBuf += strlen(l_muxPath);
-    l_pBuf = '\0';   // add a terminator for ease of parsing
+    *l_pBuf = '\0';   // add a terminator for ease of parsing
     ++l_pBuf;
 
     free(l_muxPath);
