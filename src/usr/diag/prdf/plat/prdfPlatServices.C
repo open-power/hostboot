@@ -761,7 +761,7 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     // Get the stop conditions.
     // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
     //       background scrubbing never stops.
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
 
     // AUEs are checkstop attentions. Unfortunately, MCBIST commands do not stop
     // when the system checkstops. Therefore, we must set the stop condition for
@@ -855,7 +855,7 @@ template<>
 uint32_t startTdScrub<TYPE_MCA>( ExtensibleChip * i_chip,
                                  const MemRank & i_rank,
                                  AddrRangeType i_rangeType,
-                                 mss::mcbist::stop_conditions i_stopCond )
+                                 mss::mcbist::stop_conditions<> i_stopCond )
 {
     #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MCA>] "
 
@@ -1334,7 +1334,7 @@ uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
     // Get the stop conditions.
     // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
     //       background scrubbing never stops.
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
 
     // AUEs are checkstop attentions. Unfortunately, MCBIST commands do not stop
     // when the system checkstops. Therefore, we must set the stop condition for
@@ -1429,7 +1429,7 @@ template<>
 uint32_t startTdScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
                                       const MemRank & i_rank,
                                       AddrRangeType i_rangeType,
-                                      mss::mcbist::stop_conditions i_stopCond )
+                                      mss::mcbist::stop_conditions<> i_stopCond )
 {
     #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MEM_PORT>] "
 

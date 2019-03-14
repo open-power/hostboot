@@ -1162,7 +1162,7 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
     // the per-symbol counters. Therefore, all we need to do is tell the
     // hardware which CE types to count.
 
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
 
     switch ( iv_phase )
     {

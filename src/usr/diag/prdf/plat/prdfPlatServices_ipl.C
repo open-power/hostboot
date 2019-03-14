@@ -315,7 +315,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
 
     // Get the stop conditions.
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
     stopCond.set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
             .set_pause_on_aue(mss::ON)
@@ -877,7 +877,7 @@ uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
     fapi2::Target<fapi2::TYPE_OCMB_CHIP> fapiTrgt ( ocmbChip->getTrgt() );
 
     // Get the stop conditions.
-    mss::mcbist::stop_conditions stopCond;
+    mss::mcbist::stop_conditions<> stopCond;
     stopCond.set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
             .set_pause_on_aue(mss::ON)

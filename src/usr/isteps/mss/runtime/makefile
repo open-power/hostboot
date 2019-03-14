@@ -68,6 +68,7 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/spd/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/shared/
 MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/freq/
+MSS_LIB += ${IMPORT_PATH}/generic/memory/lib/utils/mcbist
 
 # Axone
 MSS_LIB += ${IMPORT_PATH}/chips/p9a/procedures/hwp/memory/lib/utils/
@@ -86,10 +87,9 @@ OBJS += axone_c_str.o
 OBJS += nimbus_c_str.o
 OBJS += mcbist.o
 OBJS += mcbist_workarounds.o
-OBJS += sim.o
 OBJS += rank.o
 OBJS += memory_size.o
-OBJS += patterns.o
+OBJS += gen_patterns.o
 OBJS += axone_pos.o
 OBJS += nimbus_pos.o
 
