@@ -128,17 +128,17 @@ Layout Description
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Hostboot Extended image (6.46MB)</description>
+        <description>Hostboot Extended image (7.11MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x10A000</physicalOffset>
-        <physicalRegionSize>0x676000</physicalRegionSize>
+        <physicalRegionSize>0x800000</physicalRegionSize>
         <side>sideless</side>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Centaur Hw Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x780000</physicalOffset>
+        <physicalOffset>0x90A000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>

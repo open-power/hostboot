@@ -139,10 +139,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Extended image (15MB)</description>
+        <description>Hostboot Extended image (14.22MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x451000</physicalOffset>
-        <physicalRegionSize>0xF00000</physicalRegionSize>
+        <physicalRegionSize>0x1000000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -150,7 +150,7 @@ Layout Description
     <section>
         <description>SBE-IPL (Staging Area) (752K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0x1351000</physicalOffset>
+        <physicalOffset>0x1451000</physicalOffset>
         <physicalRegionSize>0xBC000</physicalRegionSize>
         <sha512perEC/>
         <sha512Version/>
@@ -160,7 +160,7 @@ Layout Description
     <section>
         <description>HCODE Ref Image (1.125MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0x140D000</physicalOffset>
+        <physicalOffset>0x150D000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -169,7 +169,7 @@ Layout Description
     <section>
         <description>Hostboot Runtime Services for Sapphire (7.0MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0x152D000</physicalOffset>
+        <physicalOffset>0x162D000</physicalOffset>
         <physicalRegionSize>0x700000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -178,7 +178,7 @@ Layout Description
     <section>
         <description>Payload (19.875MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0x1C2D000</physicalOffset>
+        <physicalOffset>0x1D2D000</physicalOffset>
         <physicalRegionSize>0x13E0000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -187,7 +187,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x300D000</physicalOffset>
+        <physicalOffset>0x310D000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <side>sideless</side>
@@ -198,7 +198,7 @@ Layout Description
              from skipping header. Signing is forced in build pnor phase -->
         <description>Special PNOR Test Space with Header (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalOffset>0x3016000</physicalOffset>
+        <physicalOffset>0x3116000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
@@ -209,7 +209,7 @@ Layout Description
     <section>
         <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x301F000</physicalOffset>
+        <physicalOffset>0x311F000</physicalOffset>
         <!-- Physical Size includes Header rounded to ECC valid size -->
         <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
         <physicalRegionSize>0x7000</physicalRegionSize>
@@ -220,7 +220,7 @@ Layout Description
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x3026000</physicalOffset>
+        <physicalOffset>0x3126000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -228,7 +228,7 @@ Layout Description
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x302F000</physicalOffset>
+        <physicalOffset>0x312F000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -236,7 +236,7 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x3034000</physicalOffset>
+        <physicalOffset>0x3134000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -244,7 +244,7 @@ Layout Description
     <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x3038000</physicalOffset>
+        <physicalOffset>0x3138000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -255,7 +255,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x3158000</physicalOffset>
+        <physicalOffset>0x3258000</physicalOffset>
         <physicalRegionSize>0xC00000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -264,7 +264,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x3D58000</physicalOffset>
+        <physicalOffset>0x3E58000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -272,7 +272,7 @@ Layout Description
     <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x3D5B000</physicalOffset>
+        <physicalOffset>0x3E5B000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -281,7 +281,7 @@ Layout Description
     <section>
         <description>Secureboot Test Load (12K)</description>
         <eyeCatch>TESTLOAD</eyeCatch>
-        <physicalOffset>0x3D7B000</physicalOffset>
+        <physicalOffset>0x3E7B000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -290,7 +290,7 @@ Layout Description
     <section>
         <description>Centaur Hw Ref Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x3D7E000</physicalOffset>
+        <physicalOffset>0x3E7E000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -299,7 +299,7 @@ Layout Description
     <section>
         <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalOffset>0x3D81000</physicalOffset>
+        <physicalOffset>0x3E81000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -308,7 +308,7 @@ Layout Description
     <section>
         <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalOffset>0x3DA5000</physicalOffset>
+        <physicalOffset>0x3EA5000</physicalOffset>
         <physicalRegionSize>0x4B000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -318,7 +318,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3DF0000</physicalOffset>
+        <physicalOffset>0x3EF0000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -327,7 +327,7 @@ Layout Description
     <section>
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x3DF4000</physicalOffset>
+        <physicalOffset>0x3EF4000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -335,7 +335,7 @@ Layout Description
     <section>
         <description>Ultravisor XSCOM White/Blacklist (64K)</description>
         <eyeCatch>UVBWLIST</eyeCatch>
-        <physicalOffset>0x3E74000</physicalOffset>
+        <physicalOffset>0x3F74000</physicalOffset>
         <physicalRegionSize>0x10000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
