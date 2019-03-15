@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_adu_constants.H>
+#include <p10_fbc_utils.H>
 
 extern"C"
 {

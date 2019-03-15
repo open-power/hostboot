@@ -89,9 +89,6 @@ const uint32_t PROC_ADU_UTILS_ADU_STATUS_HW_NS_DELAY     = 100;
 const uint32_t PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY = 20000;
 const uint32_t PROC_ADU_UTILS_ADU_STATUS_MAX_WAIT_POLLS  = 10;
 
-// TODO: Replace checks with definition from fbc_utils when imported (RTC 205266)
-const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -164,24 +161,12 @@ fapi2::ReturnCode p10_adu_utils_check_fbc_state(
 {
     FAPI_DBG("Entering...");
 
-    fapi2::buffer<uint64_t> l_data;
-
     bool fbc_initialized = false;
     bool fbc_running = false;
 
-    // TODO: Replace checks with function from fbc_utils when imported (RTC 205266)
-
-    //// Get the state of the fabric
-    //FAPI_TRY(p10_fbc_utils_get_fbc_state(i_target, fbc_initialized, fbc_running),
-    //         "Error from p10_fbc_utils_get_fbc_state");
-
-    // TODO: Scom access to check pb_init not working on vbu model yet, placeholder code below (RTC 205266)
-    //FAPI_TRY(getScom(i_target, PU_PB_ES3_MODE, l_data), "Error reading pb_init from Powerbus ES3 Mode Config Register");
-    //fbc_initalized = l_data.getBit<PU_PB_ES3_MODE_PBIXXX_INIT>();
-    fbc_initialized = true;
-
-    FAPI_TRY(getScom(i_target, PU_SND_MODE_REG, l_data), "Error reading pb_stop from pMisc Mode Register");
-    fbc_running = !(l_data.getBit<PU_SND_MODE_REG_PB_STOP>());
+    // Get the state of the fabric
+    FAPI_TRY(p10_fbc_utils_get_fbc_state(i_target, fbc_initialized, fbc_running),
+             "Error reading pb_init/pb_stop via p10_fbc_utils_get_fbc_state");
 
     // Make sure the fabric is initialized and running, otherwise set an error
     FAPI_ASSERT(fbc_initialized && fbc_running,

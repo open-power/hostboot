@@ -24,5 +24,6 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_adu_setup
 OBJS+=p10_adu_utils.o
+OBJS+=p10_fbc_utils.o
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include)
 $(call BUILD_PROCEDURE)
