@@ -47,7 +47,7 @@
 #include <lib/mcbist/mcbist.H>
 #include <lib/mc/port.H>
 #include <lib/ecc/ecc.H>
-#include <lib/fir/memdiags_fir.H>
+#include <lib/fir/unmask.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_SYSTEM;

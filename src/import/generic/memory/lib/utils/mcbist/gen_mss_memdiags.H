@@ -44,10 +44,14 @@
 #include <generic/memory/lib/utils/mcbist/gen_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/find_magic.H>
+#include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/poll.H>
+
 
 namespace mss
 {
@@ -1103,7 +1107,145 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-} // namespace
+///
+/// @brief Begin scrub helper
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MCBIST
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_scrub_helper(const fapi2::Target<T>& i_target )
+{
+    FAPI_INF("Start mss_scrub_helper for %s", mss::c_str(i_target));
 
-} // namespace
+    // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+    // attributes for the PHY, etc.
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("... skipping scrub for %s - no DIMM ...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we're running in the simulator, we want to only touch the addresses which training touched
+    uint8_t l_sim = 0;
+    bool l_poll_results = false;
+    fapi2::buffer<uint64_t> l_status;
+
+    // A small vector of addresses to poll during the polling loop
+    const std::vector<mss::poll_probe<T>> l_probes =
+    {
+        {i_target, "mcbist current address", TT::LAST_ADDR_REG},
+    };
+
+    // We'll fill in the initial delay below
+    mss::poll_parameters l_poll_parameters(0, 200, 100 * mss::DELAY_1MS, 200, 10000);
+    uint64_t l_memory_size = 0;
+
+    FAPI_TRY( mss::eff_memory_size<MC>(i_target, l_memory_size) );
+    l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay<MC>(i_target, (l_memory_size * mss::BYTES_PER_GB));
+
+    FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
+    if (l_sim)
+    {
+        FAPI_INF("running mss sim init in place of scrub for %s", mss::c_str(i_target));
+
+        // Use some sort of pattern in sim in case the verification folks need to look for something
+        // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
+        // have a good pattern for verification defined.
+        auto l_rc = mss::mcbist::sim::sf_init<MC>(i_target, mss::mcbist::PATTERN_0);
+
+        // Unmask firs and turn off FIFO mode before returning
+        FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
+        FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+        FAPI_TRY ( mss::reset_reorder_queue_settings<MC>(i_target) );
+
+        return l_rc;
+    }
+
+    // In Cronus on hardware (which is how we got here - f/w doesn't call this) we want
+    // to call sf_init (0's)
+    // TK we need to check FIR given the way this is right now, we should adjust with better stop
+    // conditions when we learn more about what we want to find in the lab
+    FAPI_TRY( mss::memdiags::sf_init<MC>(i_target, mss::mcbist::PATTERN_0) );
+
+    // Poll for completion.
+    l_poll_results = mss::poll(i_target, TT::FIRQ_REG, l_poll_parameters,
+                               [&l_status](const size_t poll_remaining,
+                                           const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        l_status = stat_reg;
+        return l_status.getBit<TT::MCB_PROGRAM_COMPLETE>() == true;
+    },
+    l_probes);
+
+    FAPI_ASSERT( l_poll_results == true,
+                 fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                 "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
+
+    // Unmask firs after memdiags and turn off FIFO mode
+    FAPI_TRY ( mss::unmask::after_memdiags<MC>( i_target ) );
+    FAPI_TRY ( mss::reset_reorder_queue_settings<MC>(i_target) );
+
+    // Start background scrub
+    FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
+               mss::mcbist::stop_conditions<MC>(),
+               mss::mcbist::speed::BG_SCRUB,
+               mss::mcbist::address() ) );
+
+    // Unmask firs after background scrub is started
+    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Begin background scrub helper
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MCBIST
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target )
+{
+    FAPI_INF("Start mss_background_scrub_helper b on: %s", mss::c_str( i_target ));
+
+    // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+    // attributes for the PHY, etc.
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("... skipping background scrub for %s - no DIMM ...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we're running in the simulator, we want to only touch the addresses which training touched
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_sim) );
+
+    // Kick off background scrub if we are not running in sim
+    if (!(l_sim))
+    {
+        // Start background scrub
+        FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
+                   mss::mcbist::stop_conditions<MC>(),
+                   mss::mcbist::speed::BG_SCRUB,
+                   mss::mcbist::address() ) );
+    }
+
+    // Unmask firs after background scrub is started
+    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace memdiags
+
+} // namespace mss
 #endif

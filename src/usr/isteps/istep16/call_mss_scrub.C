@@ -32,7 +32,8 @@
 #include    <diag/prdf/prdfMain.H>
 
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
+#include <lib/shared/nimbus_defaults.H> // Needed before unmask.H
+#include <lib/fir/unmask.H> // for mss::unmask::after_background_scrub
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;

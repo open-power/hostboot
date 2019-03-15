@@ -22,3 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file exp_fir.H
+/// @brief Memory subsystem FIR support
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_EXP_FIR_H_
+#define _MSS_EXP_FIR_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+// FIR Register Traits for Explorer will be here sooner or later.
+
+}
+#endif

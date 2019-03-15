@@ -62,7 +62,7 @@ fapi2::ReturnCode freq<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(
         return attr::get_freq(l_port, o_value);
     }
 
-    // Should never reach here
+    o_value = 0;
     return ~fapi2::FAPI2_RC_SUCCESS;
 }
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -44,6 +44,7 @@ $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
 $(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/generic/memory/lib)
 endef
 MODULE = mss
 OBJS += $(MSS_MODULE_OBJS)

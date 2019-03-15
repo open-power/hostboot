@@ -259,6 +259,21 @@
         <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
     </attribute>
 
+  <attribute>
+      <id>ATTR_MSS_EXP_REORDER_QUEUE_SETTING</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Contains the settings for write/read reorder queue
+      </description>
+      <default>REORDER</default>
+      <initToZero></initToZero>
+      <writeable/>
+      <enum>REORDER = 0, FIFO = 1</enum>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>
+  </attribute>
+
     <attribute>
         <id>ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>

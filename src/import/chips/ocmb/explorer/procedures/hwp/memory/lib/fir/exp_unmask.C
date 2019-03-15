@@ -22,3 +22,98 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file unmask.C
+/// @brief Subroutines for unmasking and setting up MSS FIR
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#include <lib/shared/exp_defaults.H>
+#include <fapi2.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
+#include <generic/memory/lib/utils/scom.H>
+#include <lib/fir/exp_fir.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+
+namespace mss
+{
+
+namespace unmask
+{
+
+///
+/// @brief Unmask and setup actions performed after draminit_mc
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions performed after draminit_training
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions performed after mss_scominit
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions performed after mss_ddr_phy_reset
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_phy_reset<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions for memdiags related FIR
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// TODO: Need to implement this function
+template<>
+fapi2::ReturnCode after_background_scrub<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+}
+}

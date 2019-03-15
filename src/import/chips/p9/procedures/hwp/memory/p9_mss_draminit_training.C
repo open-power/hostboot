@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <mss.H>
 #include <vector>
@@ -212,7 +213,7 @@ extern "C"
         // We do it here in order to train every port
         FAPI_TRY( mss::draminit_training_error_handler(l_fails) );
         // Unmask FIR
-        FAPI_TRY( mss::unmask::after_draminit_training<mss::mc_type::NIMBUS>(i_target), "Error in p9_mss_draminit" );
+        FAPI_TRY( mss::unmask::after_draminit_training(i_target), "Error in p9_mss_draminit" );
 
     fapi_try_exit:
         FAPI_INF("End draminit training");

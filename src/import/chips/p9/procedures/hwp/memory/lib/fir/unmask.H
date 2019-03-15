@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,57 @@ namespace mss
 namespace unmask
 {
 
+///
+/// @brief Unmask and setup actions performed after draminit_mc
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_draminit_mc<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
+///
+/// @brief Unmask and setup actions performed after draminit_training
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_draminit_training<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
+        i_target );
+
+///
+/// @brief Unmask and setup actions performed after mss_scominit
+/// (yeah, it's clearing bits - it's ok)
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_scominit<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Unmask and setup actions performed after mss_ddr_phy_reset
+/// @param[in] i_target the fapi2::Target of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_phy_reset<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+
+///
+/// @brief Unmask and setup actions for memdiags related FIR
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_memdiags<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_background_scrub<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
+        i_target );
 
 }
 }

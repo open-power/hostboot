@@ -22,3 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_background_scrub.C
+/// @brief Begin background scrub
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#include <lib/shared/exp_defaults.H>
+#include <exp_background_scrub.H>
+#include <lib/mcbist/exp_memdiags.H>
+
+extern "C"
+{
+
+    ///
+    /// @brief Begin background scrub
+    /// @param[in] i_target OCMB chip
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_background_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    {
+        FAPI_INF("Start exp background scrub for %s", mss::c_str(i_target));
+        FAPI_TRY(mss::memdiags::mss_background_scrub_helper(i_target));
+
+    fapi_try_exit:
+        FAPI_INF("End exp background scrub for %s", mss::c_str(i_target));
+        return fapi2::current_err;
+    }
+
+}

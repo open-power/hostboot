@@ -33,8 +33,8 @@
 #include <util/misc.H>
 
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-#include <lib/shared/nimbus_defaults.H> // Needed before memdiags_fir.H
-#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
+#include <lib/shared/nimbus_defaults.H> // Needed before unmask.H
+#include <lib/fir/unmask.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
 
 #if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)

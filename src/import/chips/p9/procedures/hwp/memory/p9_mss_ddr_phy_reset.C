@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <stdint.h>
 #include <string.h>
 
@@ -198,7 +199,7 @@ extern "C"
         // The algorithm is 'good path do after_phy_reset, all paths (error or not) perform the checks
         // which are defined in during_phy_reset'. We won't run after_phy_reset (unmask of FIR) unless
         // we're done with a success.
-        FAPI_TRY( mss::unmask::after_phy_reset<mss::mc_type::NIMBUS>(i_target), "%s Error in p9_mss_ddr_phy_reset.C",
+        FAPI_TRY( mss::unmask::after_phy_reset(i_target), "%s Error in p9_mss_ddr_phy_reset.C",
                   mss::c_str(i_target)  );
 
         // Leave as we're all good and checked the FIR already ...

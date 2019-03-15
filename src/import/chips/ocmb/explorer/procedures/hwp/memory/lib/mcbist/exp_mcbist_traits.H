@@ -77,7 +77,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         // Multi-ports, dimms
         static constexpr mss::states MULTI_PORTS = mss::states::NO;
-        static constexpr mss::states MULTI_DIMMS = mss::states::NO;
+        static constexpr mss::states MULTI_DIMMS = mss::states::YES;
 
         // Subtest
         static constexpr size_t SUBTEST_PER_REG = 4;
@@ -85,8 +85,8 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr size_t BITS_IN_SUBTEST = 16; // 2 Bytes
         static constexpr size_t LEFT_SHIFT = (sizeof(uint64_t) * 8) - BITS_IN_SUBTEST;
 
-        // LARGEST_ADDRESS. port select (bit0~1) and dimm select (bit2) are always 0 so shift 3 more bits.
-        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 3);
+        // LARGEST_ADDRESS. port select (bit0~1) are always 0 so shift 2 more bits.
+        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
 
         /// MCBIST "memory registers" - config for subtests.
         static constexpr uint64_t MCBMR0_REG = EXPLR_MCBIST_MCBMR0Q;
@@ -134,6 +134,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t RANDOM_DATA_SEED0 = EXPLR_MCBIST_MCBRDS0Q;
         static constexpr uint64_t RANDOM_DATA_SEED1 = EXPLR_MCBIST_MCBRDS1Q;
 
+        static constexpr uint64_t  MBSTRQ_CFG_PAUSE_ON_MPE = EXPLR_MCBIST_MBSTRQ_CFG_PAUSE_ON_MPE;
 
         // MCBIST Compare Masks, used to setup the ECC traps
         static constexpr uint64_t COMPARE_MASK = EXPLR_RDF_MCBCM;
@@ -249,6 +250,8 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
             UE_COUNT = EXPLR_MCBIST_MBSEC1Q_UE_COUNT,
             UE_COUNT_LEN = EXPLR_MCBIST_MBSEC1Q_UE_COUNT_LEN,
+
+            MBSTRQ_CFG_MAINT_RCE_WITH_CE = EXPLR_MCBIST_MBSTRQ_CFG_MAINT_RCE_WITH_CE,
 
             CFG_AMAP_DIMM_SELECT = EXPLR_MCBIST_MCBAMR0A0Q_CFG_AMAP_DIMM_SELECT,
             CFG_AMAP_DIMM_SELECT_LEN = EXPLR_MCBIST_MCBAMR0A0Q_CFG_AMAP_DIMM_SELECT_LEN,
@@ -407,6 +410,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             ERROR_LOG_BEAT_LEN = 2,
             ERROR_LOG_TYPE = 46,
             ERROR_LOG_TYPE_LEN = 2,
+
+            //MCBIST FIR mask
+            MCB_PROGRAM_COMPLETE = EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE,
+            MCB_WAT_DEBUG_ATTN = EXPLR_MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
         };
 
         // MCBIST error log related registers
