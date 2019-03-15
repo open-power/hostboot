@@ -3330,7 +3330,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             }
 
             // Display ECC spare information for X4 DRAMs
-            if ( usrData.header.isX4Dram )
+            if ( usrData.header.isEccSp )
             {
                 getDramRepairSymbolStr( rankEntry.eccSpare, symbolStr, 10 );
                 snprintf(temp, 64, "%s EccSp: %s", data, symbolStr);

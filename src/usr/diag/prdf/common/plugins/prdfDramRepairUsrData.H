@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@ namespace FSP
 struct DramRepairDataHdr
 {
     uint8_t rankCount   : 4; // Number of ranks with DRAM Repair data
-    uint8_t isX4Dram    : 1; // Is this mba connected in x4 mode
+    uint8_t isEccSp     : 1; // Is ecc spare available for use.
     uint8_t isSpareDram : 1; // Is spare DRAM supported on DIMMS attached
                              // to this MBA.
     uint8_t reserved    : 2; // Future use
@@ -67,7 +67,7 @@ struct DramRepairDataHdr
                                    DramRepairDataHdr& i_right )
     {
         i_left << ( uint8_t )(i_right.rankCount << 4
-                   | i_right.isX4Dram << 3
+                   | i_right.isEccSp << 3
                    | i_right.isSpareDram << 2
                    | i_right.reserved )
                << i_right.wiringType;
@@ -87,7 +87,7 @@ struct DramRepairDataHdr
         i_left >> temp >> i_right.wiringType;
 
         i_right.rankCount = temp >> 4;
-        i_right.isX4Dram = temp >> 3;
+        i_right.isEccSp = temp >> 3;
         i_right.isSpareDram = temp >> 2;
         i_right.reserved = temp;
 
