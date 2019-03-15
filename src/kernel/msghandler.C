@@ -165,7 +165,10 @@ int MessageHandler::recvMessage(msg_t* i_msg)
         {
             // Successful response, resume task.
 
-            if (!restored_task) // Immediately execute first deferred task.
+            // Immediately execute first deferred task unless it is pinned,
+            // in which case it must go back onto the queue of the CPU it's
+            // pinned to (and may take slightly longer to dispatch)
+            if (!restored_task && !deferred_task->affinity_pinned)
             {
                 restored_task = true;
                 TaskManager::setCurrentTask(deferred_task);
