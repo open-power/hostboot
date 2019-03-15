@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -219,10 +219,11 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< >
-fapi2::ReturnCode make_ccs_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
-                                   const uint64_t i_rank,
-                                   ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+inline fapi2::ReturnCode make_ccs_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
+    const uint64_t i_rank,
+    ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
 {
     FAPI_TRY( i_data.iv_func(i_target, io_inst, i_rank),
               "Failed making a CCS instruction for mrs_data<TARGET_TYPE_MCBIST> specialization. MR%d rank %d on %s",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,6 +144,8 @@ fapi2::ReturnCode p9c_mss_volt(const std::vector<fapi2::Target<fapi2::TARGET_TYP
     // note: only support DDR3=1.35V and DDR4=1.2xV
 
     // Mixed Dimms, Deconfig the DDR4.
+    // note: Running DDR4 at DDR3 voltage will damage the DDR4, so deconfig the
+    // DDR3 DIMMs.
     if (l_dram_ddr3_found_flag && l_dram_ddr4_found_flag)
     {
         // Iterate through the list of centaurs
@@ -162,9 +164,9 @@ fapi2::ReturnCode p9c_mss_volt(const std::vector<fapi2::Target<fapi2::TARGET_TYP
                 {
                     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_DRAM_DEVICE_TYPE, l_dimm, l_spd_dramtype));
 
-                    FAPI_ASSERT(l_spd_dramtype = ! fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4,
+                    FAPI_ASSERT(l_spd_dramtype == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4,
                                 fapi2::CEN_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED().
-                                set_DIMM_DDR4_TARGET(l_dimm).
+                                set_DIMM_DDR3_TARGET(l_dimm).
                                 set_DEVICE_TYPE(l_spd_dramtype),
                                 "mss_volt: DDR3 and DDR4 mixing not allowed");
                 }//end of dimms loop

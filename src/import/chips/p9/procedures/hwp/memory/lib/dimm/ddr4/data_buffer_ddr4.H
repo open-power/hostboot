@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -313,9 +313,10 @@ fapi_try_exit:
 /// @param[out] o_setting bc07 settings
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-static fapi2::ReturnCode rank_presence_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_num_package_ranks,
-        uint64_t& o_setting)
+static inline fapi2::ReturnCode rank_presence_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const uint64_t i_num_package_ranks,
+    uint64_t& o_setting )
 {
     switch(i_num_package_ranks)
     {

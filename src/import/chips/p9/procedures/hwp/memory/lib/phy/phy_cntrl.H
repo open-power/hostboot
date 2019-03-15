@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -422,7 +422,7 @@ fapi_try_exit:
 /// @note Since the these indicators are a summary of all DLLs, all must be started to make
 /// them valid.
 ///
-static mss::states dll_cal_status_helper( const bool l_good,
+static inline mss::states dll_cal_status_helper( const bool l_good,
         const bool l_error,
         const bool l_error_fine )
 {

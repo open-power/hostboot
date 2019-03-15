@@ -2545,7 +2545,7 @@ class facade final
 /// @param[in,out] io_spd_decoder reference to std::vector of SPD facades
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-static fapi2::ReturnCode add_decoder_to_list( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+static inline fapi2::ReturnCode add_decoder_to_list( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const std::vector<uint8_t>& i_spd_data,
         std::vector< facade >& io_spd_decoder )
 {

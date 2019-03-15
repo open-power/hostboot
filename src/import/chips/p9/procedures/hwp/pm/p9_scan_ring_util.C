@@ -277,75 +277,143 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             iv_instRingMap[ringIndex] = l_quadSpecRings[ringIndex];
         }
 
-        iv_ringName[ eq_fure ]                  =   (char*)"eq_fure             ";
-        iv_ringName[ eq_gptr ]                  =   (char*)"eq_gptr             ";
-        iv_ringName[ eq_time ]                  =   (char*)"eq_time             ";
-        //eq_inex_bucket_1 is just a place holder. Actual ring bucket to be placed
-        //gets decided at the time of HOMER build.
-        iv_ringName[ eq_inex_bucket_1 ]         =   (char*)"eq_inex             ";
-        iv_ringName[ ex_l3_fure ]               =   (char*)"ex_l3_fure          ";
-        iv_ringName[ ex_l3_gptr ]               =   (char*)"ex_l3_gptr          ";
-        iv_ringName[ ex_l3_time ]               =   (char*)"ex_l3_time          ";
-        iv_ringName[ ex_l2_mode ]               =   (char*)"ex_l2_mode          ";
-        iv_ringName[ ex_l2_fure ]               =   (char*)"ex_l2_fure          ";
-        iv_ringName[ ex_l2_gptr ]               =   (char*)"ex_l2_gptr          ";
-        iv_ringName[ ex_l2_time ]               =   (char*)"ex_l2_time          ";
-        iv_ringName[ ex_l3_refr_fure ]          =   (char*)"ex_l3_refr_fure     ";
-        iv_ringName[ ex_l3_refr_gptr ]          =   (char*)"ex_l3_refr_gptr     ";
-        iv_ringName[ eq_ana_func ]              =   (char*)"eq_ana_func         ";
-        iv_ringName[ eq_ana_gptr ]              =   (char*)"eq_ana_gptr         ";
-        iv_ringName[ eq_dpll_func ]             =   (char*)"eq_dpll_func        ";
-        iv_ringName[ eq_dpll_gptr ]             =   (char*)"eq_dpll_gptr        ";
-        iv_ringName[ eq_dpll_mode ]             =   (char*)"eq_dpll_mode        ";
-        iv_ringName[ eq_ana_bndy_bucket_0 ]     =   (char*)"eq_ana_bndy_bucket_0";
-        iv_ringName[ eq_ana_bndy_bucket_1 ]     =   (char*)"eq_ana_bndy_bucket_1";
-        iv_ringName[ eq_ana_bndy_bucket_2 ]     =   (char*)"eq_ana_bndy_bucket_2";
-        iv_ringName[ eq_ana_bndy_bucket_3 ]     =   (char*)"eq_ana_bndy_bucket_3";
-        iv_ringName[ eq_ana_bndy_bucket_4 ]     =   (char*)"eq_ana_bndy_bucket_4";
-        iv_ringName[ eq_ana_bndy_bucket_5 ]     =   (char*)"eq_ana_bndy_bucket_5";
-        iv_ringName[ eq_ana_bndy_bucket_6 ]     =   (char*)"eq_ana_bndy_bucket_6";
-        iv_ringName[ eq_ana_bndy_bucket_7 ]     =   (char*)"eq_ana_bndy_bucket_7";
-        iv_ringName[ eq_ana_bndy_bucket_8 ]     =   (char*)"eq_ana_bndy_bucket_8";
-        iv_ringName[ eq_ana_bndy_bucket_9 ]     =   (char*)"eq_ana_bndy_bucket_9";
-        iv_ringName[ eq_ana_bndy_bucket_10 ]    =   (char*)"eq_ana_bndy_bucket_10";
-        iv_ringName[ eq_ana_bndy_bucket_11 ]    =   (char*)"eq_ana_bndy_bucket_11";
-        iv_ringName[ eq_ana_bndy_bucket_12 ]    =   (char*)"eq_ana_bndy_bucket_12";
-        iv_ringName[ eq_ana_bndy_bucket_13 ]    =   (char*)"eq_ana_bndy_bucket_13";
-        iv_ringName[ eq_ana_bndy_bucket_14 ]    =   (char*)"eq_ana_bndy_bucket_14";
-        iv_ringName[ eq_ana_bndy_bucket_15 ]    =   (char*)"eq_ana_bndy_bucket_15";
-        iv_ringName[ eq_ana_bndy_bucket_16 ]    =   (char*)"eq_ana_bndy_bucket_16";
-        iv_ringName[ eq_ana_bndy_bucket_17 ]    =   (char*)"eq_ana_bndy_bucket_17";
-        iv_ringName[ eq_ana_bndy_bucket_18 ]    =   (char*)"eq_ana_bndy_bucket_18";
-        iv_ringName[ eq_ana_bndy_bucket_19 ]    =   (char*)"eq_ana_bndy_bucket_19";
-        iv_ringName[ eq_ana_bndy_bucket_20 ]    =   (char*)"eq_ana_bndy_bucket_20";
-        iv_ringName[ eq_ana_bndy_bucket_21 ]    =   (char*)"eq_ana_bndy_bucket_21";
-        iv_ringName[ eq_ana_bndy_bucket_22 ]    =   (char*)"eq_ana_bndy_bucket_22";
-        iv_ringName[ eq_ana_bndy_bucket_23 ]    =   (char*)"eq_ana_bndy_bucket_23";
-        iv_ringName[ eq_ana_bndy_bucket_24 ]    =   (char*)"eq_ana_bndy_bucket_24";
-        iv_ringName[ eq_ana_bndy_bucket_25 ]    =   (char*)"eq_ana_bndy_bucket_25";
-        iv_ringName[ eq_ana_bndy_bucket_l3dcc ] =   (char*)"eq_ana_bndy_bucket_l3dcc";
-        iv_ringName[ eq_ana_mode ]              =   (char*)"eq_ana_mode          ";
-        iv_ringName[ eq_ana_bndy_bucket_26 ]    =   (char*)"eq_ana_bndy_bucket_26";
-        iv_ringName[ eq_ana_bndy_bucket_27 ]    =   (char*)"eq_ana_bndy_bucket_27";
-        iv_ringName[ eq_ana_bndy_bucket_28 ]    =   (char*)"eq_ana_bndy_bucket_28";
-        iv_ringName[ eq_ana_bndy_bucket_29 ]    =   (char*)"eq_ana_bndy_bucket_29";
-        iv_ringName[ eq_ana_bndy_bucket_30 ]    =   (char*)"eq_ana_bndy_bucket_30";
-        iv_ringName[ eq_ana_bndy_bucket_31 ]    =   (char*)"eq_ana_bndy_bucket_31";
-        iv_ringName[ eq_ana_bndy_bucket_32 ]    =   (char*)"eq_ana_bndy_bucket_32";
-        iv_ringName[ eq_ana_bndy_bucket_33 ]    =   (char*)"eq_ana_bndy_bucket_33";
-        iv_ringName[ eq_ana_bndy_bucket_34 ]    =   (char*)"eq_ana_bndy_bucket_34";
-        iv_ringName[ eq_ana_bndy_bucket_35 ]    =   (char*)"eq_ana_bndy_bucket_35";
-        iv_ringName[ eq_ana_bndy_bucket_36 ]    =   (char*)"eq_ana_bndy_bucket_36";
-        iv_ringName[ eq_ana_bndy_bucket_37 ]    =   (char*)"eq_ana_bndy_bucket_37";
-        iv_ringName[ eq_ana_bndy_bucket_38 ]    =   (char*)"eq_ana_bndy_bucket_38";
-        iv_ringName[ eq_ana_bndy_bucket_39 ]    =   (char*)"eq_ana_bndy_bucket_39";
-        iv_ringName[ eq_ana_bndy_bucket_40 ]    =   (char*)"eq_ana_bndy_bucket_40";
-        iv_ringName[ eq_ana_bndy_bucket_41 ]    =   (char*)"eq_ana_bndy_bucket_41";
-        iv_ringName[ eq_repr ]                  =   (char*)"eq_repr              ";
-        iv_ringName[ ex_l3_repr ]               =   (char*)"ex_l3_repr           ";
-        iv_ringName[ ex_l2_repr ]               =   (char*)"ex_l2_repr           ";
-        iv_ringName[ ex_l3_refr_repr ]          =   (char*)"ex_l3_refr_repr      ";
-        iv_ringName[ ex_l3_refr_time ]          =   (char*)"ex_l3_refr_time      ";
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_fure,
+                            (char*)"eq_fure             "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_gptr,
+                            (char*)"eq_gptr             "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_time,
+                            (char*)"eq_time             "));
+        // eq_inex_bucket_1 is just a place holder. Actual ring bucket to be
+        // placed gets decided at the time of HOMER build.
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_inex_bucket_1,
+                            (char*)"eq_inex             "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_fure,
+                            (char*)"ex_l3_fure          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_gptr,
+                            (char*)"ex_l3_gptr          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_time,
+                            (char*)"ex_l3_time          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l2_mode,
+                            (char*)"ex_l2_mode          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l2_fure,
+                            (char*)"ex_l2_fure          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l2_gptr,
+                            (char*)"ex_l2_gptr          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l2_time,
+                            (char*)"ex_l2_time          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_refr_fure,
+                            (char*)"ex_l3_refr_fure     "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_refr_gptr,
+                            (char*)"ex_l3_refr_gptr     "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_func,
+                            (char*)"eq_ana_func         "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_gptr,
+                            (char*)"eq_ana_gptr         "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_dpll_func,
+                            (char*)"eq_dpll_func        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_dpll_gptr,
+                            (char*)"eq_dpll_gptr        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_dpll_mode,
+                            (char*)"eq_dpll_mode        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_0,
+                            (char*)"eq_ana_bndy_bucket_0"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_1,
+                            (char*)"eq_ana_bndy_bucket_1"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_2,
+                            (char*)"eq_ana_bndy_bucket_2"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_3,
+                            (char*)"eq_ana_bndy_bucket_3"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_4,
+                            (char*)"eq_ana_bndy_bucket_4"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_5,
+                            (char*)"eq_ana_bndy_bucket_5"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_6,
+                            (char*)"eq_ana_bndy_bucket_6"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_7,
+                            (char*)"eq_ana_bndy_bucket_7"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_8,
+                            (char*)"eq_ana_bndy_bucket_8"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_9,
+                            (char*)"eq_ana_bndy_bucket_9"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_10,
+                            (char*)"eq_ana_bndy_bucket_10"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_11,
+                            (char*)"eq_ana_bndy_bucket_11"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_12,
+                            (char*)"eq_ana_bndy_bucket_12"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_13,
+                            (char*)"eq_ana_bndy_bucket_13"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_14,
+                            (char*)"eq_ana_bndy_bucket_14"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_15,
+                            (char*)"eq_ana_bndy_bucket_15"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_16,
+                            (char*)"eq_ana_bndy_bucket_16"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_17,
+                            (char*)"eq_ana_bndy_bucket_17"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_18,
+                            (char*)"eq_ana_bndy_bucket_18"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_19,
+                            (char*)"eq_ana_bndy_bucket_19"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_20,
+                            (char*)"eq_ana_bndy_bucket_20"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_21,
+                            (char*)"eq_ana_bndy_bucket_21"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_22,
+                            (char*)"eq_ana_bndy_bucket_22"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_23,
+                            (char*)"eq_ana_bndy_bucket_23"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_24,
+                            (char*)"eq_ana_bndy_bucket_24"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_25,
+                            (char*)"eq_ana_bndy_bucket_25"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_l3dcc,
+                            (char*)"eq_ana_bndy_bucket_l3dcc"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_mode,
+                            (char*)"eq_ana_mode          "));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_26,
+                            (char*)"eq_ana_bndy_bucket_26"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_27,
+                            (char*)"eq_ana_bndy_bucket_27"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_28,
+                            (char*)"eq_ana_bndy_bucket_28"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_29,
+                            (char*)"eq_ana_bndy_bucket_29"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_30,
+                            (char*)"eq_ana_bndy_bucket_30"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_31,
+                            (char*)"eq_ana_bndy_bucket_31"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_32,
+                            (char*)"eq_ana_bndy_bucket_32"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_33,
+                            (char*)"eq_ana_bndy_bucket_33"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_34,
+                            (char*)"eq_ana_bndy_bucket_34"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_35,
+                            (char*)"eq_ana_bndy_bucket_35"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_36,
+                            (char*)"eq_ana_bndy_bucket_36"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_37,
+                            (char*)"eq_ana_bndy_bucket_37"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_38,
+                            (char*)"eq_ana_bndy_bucket_38"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_39,
+                            (char*)"eq_ana_bndy_bucket_39"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_40,
+                            (char*)"eq_ana_bndy_bucket_40"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_ana_bndy_bucket_41,
+                            (char*)"eq_ana_bndy_bucket_41"));
+        iv_ringName.insert( std::pair<RingID, RingName>(eq_repr,
+                            (char*)"eq_repr              "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_repr,
+                            (char*)"ex_l3_repr           "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l2_repr,
+                            (char*)"ex_l2_repr           "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_refr_repr,
+                            (char*)"ex_l3_refr_repr      "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ex_l3_refr_time,
+                            (char*)"ex_l3_refr_time      "));
+
     }
     else if( PLAT_CME == i_plat )
     {
@@ -397,12 +465,19 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             iv_instRingMap[ringIndex] = l_coreSpecRings[ringIndex];
         }
 
-        iv_ringName[ ec_func ]      =   (char*)"ec_func        ";
-        iv_ringName[ ec_gptr ]      =   (char*)"ec_gptr        ";
-        iv_ringName[ ec_time ]      =   (char*)"ec_time        ";
-        iv_ringName[ ec_mode ]      =   (char*)"ec_mode        ";
-        iv_ringName[ ec_repr ]      =   (char*)"ec_repr        ";
-        iv_ringName[ ec_abst ]      =   (char*)"ec_abst        ";
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_func,
+                            (char*)"ec_func        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_gptr,
+                            (char*)"ec_gptr        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_time,
+                            (char*)"ec_time        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_mode,
+                            (char*)"ec_mode        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_repr,
+                            (char*)"ec_repr        "));
+        iv_ringName.insert( std::pair<RingID, RingName>(ec_abst,
+                            (char*)"ec_abst        "));
+
     }
 }
 

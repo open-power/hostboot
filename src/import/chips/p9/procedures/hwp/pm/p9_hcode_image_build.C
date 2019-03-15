@@ -2544,9 +2544,6 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
 
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // use the heap for this large struct
-    PstateSuperStructure * pStateSupStruct = nullptr;
-
     if( i_imgType.pgpePstateParmBlockBuild )
     {
 
@@ -2569,14 +2566,15 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         uint32_t sizePStateBlock = 0;
         uint32_t wofTableSize = i_sizeBuf1;
 
-        // Allocate struct onto heap and initialize its memory to zeroes
-        pStateSupStruct = new PstateSuperStructure();
+        // Allocate struct onto stack
+        PstateSuperStructure stateSupStruct;
+        // Clearing i_pBuf1
         memset(i_pBuf1,0x00,i_sizeBuf1);
 
         //Building P-State Parameter block info by calling a HWP
         FAPI_DBG("Generating P-State Parameter Block" );
         FAPI_EXEC_HWP( retCode, p9_pstate_parameter_block, i_procTgt,
-                       pStateSupStruct, (uint8_t*)i_pBuf1, wofTableSize );
+                       &stateSupStruct, (uint8_t*)i_pBuf1, wofTableSize );
         FAPI_TRY(retCode);
 
         //Check if WOF Table is copied properly even if WOF is disabled.
@@ -2601,7 +2599,7 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         //parameter block individually.
 
         FAPI_DBG("Copying Local P-State Parameter Block into CPMR" );
-        memcpy( pLocalPState, &(pStateSupStruct->localppb), sizePStateBlock );
+        memcpy( pLocalPState, &(stateSupStruct.localppb), sizePStateBlock );
 
         ALIGN_DBWORD( sizeAligned, sizePStateBlock )
         uint32_t localPStateBlock = sizeAligned;
@@ -2625,7 +2623,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
                      "Size of Global Parameter Block Exceeds Max Size Allowed" );
 
         FAPI_DBG("GPPBB pgpeRunningOffset 0x%08x", pgpeRunningOffset );
-        memcpy( &pPpmr->pgpeSramImage[pgpeRunningOffset], &(pStateSupStruct->globalppb), sizePStateBlock );
+        memcpy( &pPpmr->pgpeSramImage[pgpeRunningOffset],
+                &(stateSupStruct.globalppb), sizePStateBlock );
 
         ALIGN_DBWORD( sizeAligned, sizePStateBlock )
         FAPI_DBG("GPSPB Actual size 0x%08x After Alignment 0x%08x", sizePStateBlock, sizeAligned  );
@@ -2663,7 +2662,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_oppb_length = sizeAligned;
         FAPI_DBG("OPPB ppmrRunningOffset 0x%08x", io_ppmrHdr.g_ppmr_oppb_offset);
 
-        memcpy( &pPpmr->occParmBlock, &(pStateSupStruct->occppb), sizePStateBlock );
+        memcpy( &pPpmr->occParmBlock, &(stateSupStruct.occppb),
+                sizePStateBlock );
 
         //-------------------------- OCC P-State Parameter Block Ends ------------------------------
 
@@ -2719,8 +2719,6 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
 
 fapi_try_exit:
     FAPI_INF("<< buildParameterBlock");
-
-    delete pStateSupStruct;
 
     return fapi2::current_err;
 }
