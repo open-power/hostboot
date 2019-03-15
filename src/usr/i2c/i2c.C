@@ -4597,12 +4597,17 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     {
                         case I2C_OP_RESET:
                         {
+
+                            i2c_reset_level reset_level =
+                                setResetLevelViaStickyBit(tgt, engine);
+
                             TRACFCOMP( g_trac_i2c,INFO_MRK
-                                  "i2cProcessActiveMasters: reset engine: %d",
-                                  engine );
+                                  "i2cProcessActiveMasters: reset engine: %d, "
+                                  "reset_level=%d",
+                                  engine, reset_level );
 
                             err = i2cReset ( tgt, io_args,
-                                     FORCE_UNLOCK_RESET);
+                                             reset_level );
                             if( err )
                             {
                                 TRACFCOMP( g_trac_i2c,ERR_MRK
@@ -5655,5 +5660,68 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                            HWAS::GARD_NULL );
     }
 }
+
+i2c_reset_level setResetLevelViaStickyBit(TARGETING::Target * i_target,
+                                          uint8_t i_engine)
+{
+    TRACDCOMP(g_trac_i2c,ENTER_MRK"setResetLevelViaStickyBit: "
+              "i_target=0x%.8X, i_engine=%d",
+              TARGETING::get_huid(i_target), i_engine);
+
+    i2c_reset_level o_reset_level =  FORCE_UNLOCK_RESET;
+
+    do
+    {
+
+    if ((i_target==nullptr) ||
+        (TARGETING::TYPE_PROC != i_target->getAttr<TARGETING::ATTR_TYPE>()) ||
+        (i_engine != 1))
+    {
+        // No-op - just return default of FORCE_UNLOCK_RESET
+        break;
+    }
+
+    // Get Processor Target's Security Switch Register
+    uint64_t switch_reg_value = 0x0;
+    errlHndl_t err = SECUREBOOT::getSecuritySwitch(switch_reg_value, i_target);
+    if (err)
+    {
+        // Commit Error Log and return BASIC_RESET to be safe
+        o_reset_level = BASIC_RESET;
+        TRACFCOMP(g_trac_i2c,ERR_MRK"setResetLevelViaStickyBit: "
+            "Error returned from SECUREBOOT::getSecuritySwitch(): plid=0x%X. "
+            "Committing error here and returning o_reset_level=%d",
+            err->plid(), o_reset_level);
+
+        err->collectTrace( I2C_COMP_NAME, 256);
+        errlCommit(err, I2C_COMP_ID);
+
+        break;
+    }
+
+    // Check if SUL bit is set in the security switch register
+    if (switch_reg_value &
+        static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit))
+    {
+        // Since SUL bit is set return BASIC_RESET to be safe
+        o_reset_level = BASIC_RESET;
+        TRACFCOMP(g_trac_i2c,INFO_MRK"setResetLevelViaStickyBit: "
+            "SUL bit in Security Switch Register (0x%.16llx) is set - "
+            "o_reset_level=%d",
+            switch_reg_value, o_reset_level);
+
+        break;
+    }
+    // else: return default FORCE_UNLOCK_RESET
+
+    } while (0);
+
+    TRACDCOMP(g_trac_i2c,EXIT_MRK"setResetLevelViaStickyBit: "
+              "returning o_reset_level=%d",
+              o_reset_level);
+
+    return o_reset_level;
+}
+
 
 }; // end namespace I2C

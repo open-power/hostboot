@@ -969,6 +969,34 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                       TARGETING::Target * i_target,
                       const misc_args_t & i_args);
 
+
+/**
+ * @brief This function checks the 'Seeprom Update Lock" (aka SUL) bit in
+ *        the input processor target's Security Switch Register and if
+ *        enabled will choose a BASIC_RESET level versus the more complex
+ *        FORCE_RESET_UNLOCK
+ *
+ * @param[in] i_target - Processor I2C Master Target
+ *                       No-op if nullptr
+ *                       No-op if not Processor Type
+ *
+ * @param[in] i_engine - I2C Engine off of the Processor I2C Master Target
+ *                       No-op if engine does not equal 1
+ *
+ * @note - For all no-op conditions above, FORCE_RESET_UNLOCK will be returned
+ *
+ * @note - Any error logs will be handled internally
+ *
+ * @note - The sticky bit setting only matters for accessing the MVPD and
+ *         SBE Seeproms, and thererfore will only change the reset level for
+ *         engine == to 1.
+ *
+ * @return i2c_reset_level - Max Reset Level Allowed for This Target
+ */
+i2c_reset_level setResetLevelViaStickyBit(TARGETING::Target * i_target,
+                                          uint8_t i_engine);
+
+
 namespace SMBUS
 {
 
