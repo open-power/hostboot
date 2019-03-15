@@ -23,21 +23,20 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_hcd_common.H
+/// @file p10_hcd_common.H
 /// @brief common hcode includes
 
-// *HWP HWP Owner          : David Du         <daviddu@us.ibm.com>
-// *HWP Backup HWP Owner   : Greg Still       <stillgs@us.ibm.com>
-// *HWP FW Owner           : Prem Shanker Jha <premjha2@in.ibm.com>
+// *HWP HWP Owner          : David Du               <daviddu@us.ibm.com>
+// *HWP Backup HWP Owner   : Greg Still             <stillgs@us.ibm.com>
+// *HWP FW Owner           : Prasad Brahmasamurdra  <prasadbgr@in.ibm.com>
 // *HWP Team               : PM
-// *HWP Consumed by        : SBE:SGPE:CME
+// *HWP Consumed by        : SBE:QME
 // *HWP Level              : 2
 
-#ifndef __P9_HCD_COMMON_H__
-#define __P9_HCD_COMMON_H__
+#ifndef __P10_HCD_COMMON_H__
+#define __P10_HCD_COMMON_H__
 
-
-// TODO RTC 207122 removed when scomdef address header is merged
+// TODO RTC 207122 remove when scomdef address header is merged
 #define  G_CPLT_CTRL0                 0x20000000
 #define  G_CPLT_CTRL0_OR              0x20000010
 #define  G_CPLT_CTRL0_CLR             0x20000020
@@ -62,9 +61,6 @@
 #define  G_QME_CPMS_CGCSR             0x200E0E00
 #define  G_QME_CPMS_CGCSR_CLR         0x200E0E02
 #define  G_QME_CPMS_CGCSR_OR          0x200E0E03
-
-
-
 
 //-------------------------
 // Macros
@@ -152,10 +148,11 @@
 // Do NOT put any namespace in this or any Hcode related header or source files
 // for general comptiablity to C source based code in PPE image
 // Instead of namespace protection, here will always use unique HCD prefix
-// in ALL namings that shouldn't be used outside of Hcode team.
+// in ALL namings that shouldnt be used outside of Hcode team.
+
 
 // Constants to calculate hcd poll timeout intervals
-enum P9_HCD_TIMEOUT_CONSTANTS
+enum P10_HCD_TIMEOUT_CONSTANTS
 {
     CYCLES_PER_MS       = 500000, // PPE FREQ 500MHZ
     INSTS_PER_POLL_LOOP = 8       //
@@ -167,7 +164,7 @@ enum P9_HCD_TIMEOUT_CONSTANTS
 //        | Cache  | 2GHz    | 2      | 500ps  |
 //        | PPE    | 500MHz  | 0.5    | 2ns    |
 // Refclk | Refclk | 100Mhz  | 0.1    | 10ns   |
-enum P9_HCD_DELAY_CONSTANTS
+enum P10_HCD_DELAY_CONSTANTS
 {
     SIM_CYCLE_1U1D        = 2,   // fastest internal oscillator
     SIM_CYCLE_4U4D        = 8,   // 4Ghz   ideal dpll
@@ -178,6 +175,17 @@ enum P9_HCD_DELAY_CONSTANTS
     CLK_PERIOD_CORE2CACHE = 2,
     CLK_PERIOD_CORE2PPE   = 8,
     CLK_PERIOD_CORE2REF   = 40
+};
+
+// PFET Control Constants
+enum P10_HCD_PFET_CTRL_CONSTANTS
+{
+    HCD_POWER_CL2_OFF                        = 0x0, //00
+    HCD_POWER_CL2_ON                         = 0x1, //01
+    HCD_POWER_L3_OFF                         = 0x2, //10
+    HCD_POWER_L3_ON                          = 0x3, //11
+    HCD_PFET_L3_MASK                         = 0x2, //otherwise cl2
+    HCD_PFET_ON_MASK                         = 0x1  //otherwise off
 };
 
 // Clock Control Constants
@@ -198,7 +206,7 @@ enum P10_HCD_CLK_CTRL_CONSTANTS
 };
 
 // Scan Type Constants
-enum P9_HCD_SCAN_TYPE_CONSTANTS
+enum P10_HCD_SCAN_TYPE_CONSTANTS
 {
     SCAN_TYPE_FUNC                          = BIT64(48),
     SCAN_TYPE_CFG                           = BIT64(49),
@@ -215,7 +223,7 @@ enum P9_HCD_SCAN_TYPE_CONSTANTS
 };
 
 // Scan Flush Constants
-enum P9_HCD_SCAN0_CONSTANTS
+enum P10_HCD_SCAN0_CONSTANTS
 {
     SCAN0_REGION_ALL                         = 0x7FF,
     SCAN0_REGION_ALL_BUT_PLL                 = 0x7FE,
@@ -256,7 +264,7 @@ enum SLAVE_CONFIG_DEFS
     CFG_PM_MUX_DISABLE = 7
 };
 
-#define P9_HCD_SCAN_FUNC_REPEAT 1
-#define P9_HCD_SCAN_GPTR_REPEAT 1
+#define p10_HCD_SCAN_FUNC_REPEAT 1
+#define p10_HCD_SCAN_GPTR_REPEAT 1
 
-#endif  // __P9_HCD_COMMON_H__
+#endif  // __P10_HCD_COMMON_H__
