@@ -961,6 +961,14 @@
     </attribute>
   </targetType>
 
+  <!-- This special PMIC target adapts the MRW to Hostboot's specific PMIC
+      target.  All attributes should be declared against the parent
+      target. -->
+  <targetType>
+    <id>chip-vreg-generic</id>
+    <parent>pmic</parent>
+  </targetType>
+
   <targetType>
     <id>enc-node-power9</id>
     <parent>base</parent>
@@ -1349,6 +1357,46 @@
     <attribute>
       <default>PANEL</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>pmic</id>
+    <parent>asic</parent>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <default>0x00000031</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>PMIC</default>
     </attribute>
   </targetType>
 

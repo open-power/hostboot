@@ -1134,7 +1134,8 @@ void i2cSetSwitches( TARGETING::Target * i_target,
 // i2cGetI2cMuxTarget
 // ------------------------------------------------------------------
 errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
-                                TARGETING::Target * &o_target )
+                                TARGETING::Target * &o_target,
+                                bool i_noError )
 {
     errlHndl_t l_err(nullptr);
 
@@ -1155,34 +1156,37 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
 
         if ( nullptr == o_target )
         {
-            TRACFCOMP( g_trac_i2c,
-                       ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX Entity Path (%s)"
-                               " could not be converted to a target.",
-                               l_muxPath );
+            if (!i_noError)
+            {
+                TRACFCOMP( g_trac_i2c,
+                    ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX Entity Path (%s)"
+                            " could not be converted to a target.",
+                            l_muxPath );
 
 
-            /*@
-             * @errortype
-             * @reasoncode  I2C_MUX_TARGET_NOT_FOUND
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    I2C_ACCESS_MUX
-             * @devdesc     I2C mux path target is null
-             * @custdesc    Unexpected boot firmware error
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                I2C_ACCESS_MUX,
-                                I2C_MUX_TARGET_NOT_FOUND,
-                                0,
-                                0,
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                /*@
+                 * @errortype
+                 * @reasoncode  I2C_MUX_TARGET_NOT_FOUND
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    I2C_ACCESS_MUX
+                 * @devdesc     I2C mux path target is null
+                 * @custdesc    Unexpected boot firmware error
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    I2C_ACCESS_MUX,
+                                    I2C_MUX_TARGET_NOT_FOUND,
+                                    0,
+                                    0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
-            // Collect the MUX entity path info
-            ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
+                // Collect the MUX entity path info
+                ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
 
-            l_err->collectTrace( I2C_COMP_NAME, 256);
+                l_err->collectTrace( I2C_COMP_NAME, 256);
 
-            break;
+                break;
+            }
         }
 
         // Is the target functional
@@ -1192,31 +1196,34 @@ errlHndl_t i2cGetI2cMuxTarget ( const TARGETING::EntityPath & i_i2cMuxPath,
              !l_hwasState.present    ||
              !l_hwasState.functional )
         {
-            TRACFCOMP( g_trac_i2c,
-                       ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX target (0x%X) "
-                               "is non functional.",
-                               TARGETING::get_huid(o_target) );
-            /*@
-             * @errortype
-             * @reasoncode     I2C_MUX_TARGET_NON_FUNCTIONAL
-             * @severity       ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid       I2C_ACCESS_MUX
-             * @userdata1      I2C MUX Target Huid
-             * @devdesc        I2C mux path target is not functional
-             * @custdesc       Unexpected boot firmware error
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                I2C_ACCESS_MUX,
-                                I2C_MUX_TARGET_NON_FUNCTIONAL,
-                                TARGETING::get_huid(o_target),
-                                0,
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            if (!i_noError)
+            {
+                TRACFCOMP( g_trac_i2c,
+                        ERR_MRK "i2cGetI2cMuxTarget() - I2C MUX target (0x%X) "
+                                "is non functional.",
+                                TARGETING::get_huid(o_target) );
+                /*@
+                 * @errortype
+                 * @reasoncode     I2C_MUX_TARGET_NON_FUNCTIONAL
+                 * @severity       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       I2C_ACCESS_MUX
+                 * @userdata1      I2C MUX Target Huid
+                 * @devdesc        I2C mux path target is not functional
+                 * @custdesc       Unexpected boot firmware error
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    I2C_ACCESS_MUX,
+                                    I2C_MUX_TARGET_NON_FUNCTIONAL,
+                                    TARGETING::get_huid(o_target),
+                                    0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
-            // Collect the MUX entity path info
-            ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
+                // Collect the MUX entity path info
+                ERRORLOG::ErrlUserDetailsString(l_muxPath).addToLog(l_err);
 
-            l_err->collectTrace( I2C_COMP_NAME, 256);
+                l_err->collectTrace( I2C_COMP_NAME, 256);
+            }
 
             // Don't return a non functional target
             o_target = nullptr;
@@ -1264,7 +1271,7 @@ errlHndl_t i2cAccessMux( TARGETING::Target*           i_masterTarget,
         TARGETING::TargetHandle_t l_i2cMuxTarget(nullptr);
 
         l_err = i2cGetI2cMuxTarget( i_i2cMuxPath,
-                                    l_i2cMuxTarget);
+                                    l_i2cMuxTarget, false);
 
         // If an issue getting the MUX target, then return error
         if (l_err)
@@ -2278,6 +2285,22 @@ bool i2cPresence( TARGETING::Target * i_target,
         // Set the MUX selector (if there is one) for the MUX before continuing
         if (I2C_MUX::NOT_APPLICABLE != i_i2cMuxBusSelector)
         {
+            // Check that Mux exists first
+            TARGETING::TargetHandle_t l_i2cMuxTarget(nullptr);
+
+            bool noError = true;  // just return nullptr target if mux doesn't exist
+            err = i2cGetI2cMuxTarget( i_i2cMuxPath,
+                                      l_i2cMuxTarget,
+                                      noError );
+            if (err || (l_i2cMuxTarget == nullptr))
+            {
+                // exit early if mux does not exist
+                TRACFCOMP(g_trac_i2c,
+                    ERR_MRK"i2cPresence() - XML appears to be wrong since "
+                    "i2cMuxSelector 0x%02X != NOT_APPLICABLE for non-existent "
+                    "I2C MUX target", i_i2cMuxBusSelector);
+                break;
+            }
             err = i2cAccessMux(i_target, i_i2cMuxBusSelector, i_i2cMuxPath );
 
             if ( err )

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -489,6 +489,8 @@ const char* EntityPath::pathElementTypeAsString(
 //            return "CFAM";
 //        case TYPE_ENGINE:
 //            return "Engine";
+        case TYPE_PMIC:
+            return "PMIC";
         default:
             return "Unknown path type";
     }

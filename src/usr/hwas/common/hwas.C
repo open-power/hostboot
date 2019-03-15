@@ -640,12 +640,14 @@ errlHndl_t discoverTargets()
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
         PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
+        PredicateCTM predPmic(CLASS_ASIC, TYPE_PMIC);
         // We can ignore chips of TYPE_I2C_MUX because they
         // were already detected above in discoverMuxTargetsAndEnable
         PredicateCTM predMux(CLASS_CHIP, TYPE_I2C_MUX);
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
-                  push(&predMcs).Or().push(&predMux).Not().And();
+                  push(&predMcs).Or().push(&predPmic).Or().
+                  push(&predMux).Not().And();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
