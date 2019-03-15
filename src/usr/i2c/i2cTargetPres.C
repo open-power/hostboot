@@ -337,4 +337,10 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        TARGETING::TYPE_I2C_MUX,
                        basicI2CPresencePerformOp );
 
+// Register the pmic vrm presence detect function with the device framework
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::PRESENT,
+                       TARGETING::TYPE_PMIC,
+                       basicI2CPresencePerformOp );
+
 }

@@ -8146,8 +8146,12 @@
       <value>77</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>PMIC</name>
       <value>78</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>79</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>
