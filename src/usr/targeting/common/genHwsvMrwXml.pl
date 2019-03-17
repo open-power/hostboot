@@ -7152,7 +7152,12 @@ sub addI2cBusSpeedArray
                          ( ($I2Cdevices[$i]{i2c_part_id}
                            eq "MAX5961") ||
                            ($I2Cdevices[$i]{i2c_part_id}
-                           eq "PCA9551") )
+                           eq "PCA9551") ||
+                           ($I2Cdevices[$i]{i2c_part_id}
+                           eq "UCD90120A") ||
+                           ($I2Cdevices[$i]{i2c_part_id}
+                           eq "UCD9090")
+                         )
                        )
                     ) ||
                     ($I2Cdevices[$i]{i2cm_node} != $node) ||
