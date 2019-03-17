@@ -702,7 +702,7 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                 l_dimm1_kind = &k;
             }
 
-            l_rank_count += k.iv_master_ranks;
+            l_rank_count += k.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ? 1 : k.iv_master_ranks;
         }
 
         // If we get here and we see there's no DIMM in slot 0, we did something very wrong. We shouldn't have

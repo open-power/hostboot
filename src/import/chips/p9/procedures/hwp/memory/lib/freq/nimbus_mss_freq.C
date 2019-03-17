@@ -331,6 +331,19 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::NIMBUS>(const fapi2:
 }
 
 ///
+/// @brief Gets the DIMM type for a specific DIMM - specialization for the NIMBUS processor type
+/// @param[in] i_target DIMM target
+/// @param[out] o_dimm_type DIMM type on the DIMM target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_dimm_type<mss::proc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_dimm_type)
+{
+    return mss::eff_dimm_type(i_target, o_dimm_type);
+}
+
+///
 /// @brief Calls out the target if no DIMM frequencies are supported - specialization for NIMBUS and MCBIST
 /// @param[in] i_target target on which to operate
 /// @param[in] i_supported_freq true if any FREQ's are supported

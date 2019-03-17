@@ -63,6 +63,17 @@ fapi2::ReturnCode num_master_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TY
         uint8_t& o_master_ranks);
 
 ///
+/// @brief Gets the DIMM type for a specific DIMM
+/// @tparam P mss::proc_type on which to operate
+/// @param[in] i_target DIMM target
+/// @param[out] o_dimm_type DIMM type on the DIMM target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::proc_type P>
+fapi2::ReturnCode get_dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                uint8_t& o_dimm_type);
+
+///
 /// @brief Gets the attribute for the maximum allowed dimm frequency
 /// @tparam P mss::proc_type on which to operate
 /// @param[out] o_allowed_dimm_freq allowed dimm frequency
@@ -583,8 +594,11 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
         for (const auto& d : l_dimms)
         {
             uint8_t l_num_master_ranks = 0;
+            uint8_t l_dimm_type = 0;
+            uint8_t l_rank_index = 0;
             size_t l_index = 0xFF;
             FAPI_TRY( num_master_ranks_per_dimm<P>(d, l_num_master_ranks) );
+            FAPI_TRY( get_dimm_type<P>(d, l_dimm_type));
 
             // Just a quick check but we're in deep yogurt if this triggers
             FAPI_ASSERT( (l_num_master_ranks <= TT::MAX_PRIMARY_RANK_PER_DIMM),
@@ -595,7 +609,11 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
                          l_dimms_on_port,
                          mss::c_str(d));
 
-            l_index = l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1];
+            // If we have an LRDIMM, it's treated as a one rank DIMM from the memory controller's perspective
+            l_rank_index = l_dimm_type == TT::LRDIMM_TYPE ? 0 : l_num_master_ranks - 1;
+            l_index = l_indexes[l_dimms_on_port - 1][l_rank_index];
+            FAPI_INF("%s is %s. rank_index%u index:%u", spd::c_str(d), l_dimm_type == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM",
+                     l_rank_index, l_index);
 
             FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
                          fapi2::MSS_FREQ_INDEX_TOO_LARGE()
@@ -609,7 +627,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
 
             FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
                      mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
-                     l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1],
+                     l_indexes[l_dimms_on_port - 1][l_rank_index],
                      i_max_mrw_freqs[l_index] );
 
             l_port_max_freq = std::min(l_port_max_freq, i_max_mrw_freqs[l_index]);
