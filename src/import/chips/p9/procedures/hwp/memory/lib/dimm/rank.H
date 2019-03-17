@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,14 +351,52 @@ struct rank_pair_data
 };
 
 ///
+/// @brief Return the *port relative position* of the DIMM which posesses this rank
+/// @param[in] i_rank the rank number.
+/// @return the relative position of the DIMM which contains this rank.
+///
+size_t get_dimm_from_rank(const uint64_t i_rank);
+
+///
+/// @brief Helper function to determine if we are in quad encoded CS mode
+/// @param[in] i_target the MCA target on which to operate
+/// @param[in] i_rank the rank which to check for encoded CS mode
+/// @param[out] o_is_quad_encoded true IFF we're in quad encoded mode
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+inline fapi2::ReturnCode is_quad_encoded( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rank,
+        bool& o_is_quad_encoded )
+{
+
+    constexpr uint8_t RC_DA1 = 6;
+    constexpr uint8_t RC_DA0 = 7;
+    uint8_t l_quad_encoding[MAX_DIMM_PER_PORT] = {0};
+    fapi2::buffer<uint8_t> l_encoded_mode;
+    FAPI_TRY( eff_dimm_ddr4_rc0d(i_target, l_quad_encoding) );
+
+    l_encoded_mode = l_quad_encoding[get_dimm_from_rank(i_rank)];
+
+    // We're in quad encoded mode if RC0D has DA0/1 high - taken from the RCD JEDEC spec
+    o_is_quad_encoded = l_encoded_mode.getBit<RC_DA1>() && l_encoded_mode.getBit<RC_DA0>();
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
+/// @tparam fapi2::TargetType T the port target type for the mapping
 /// @param[in] i_count the number of DIMM to be considered
 /// @param[in] i_rank the rank number to be mapped
+/// @param[in] i_is_quad_encoded true if the rank is in quad encoded mode
 /// @return the mapped value
 // i_rank passed by value to save a local variable in the caller
 ///
 template <fapi2::TargetType T>
-inline uint64_t map_rank_ordinal_to_phy( const size_t i_count, const uint64_t i_rank );
+inline uint64_t map_rank_ordinal_to_phy( const size_t i_count,
+        const uint64_t i_rank,
+        const bool i_is_quad_encoded );
 
 ///
 /// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
@@ -368,7 +406,9 @@ inline uint64_t map_rank_ordinal_to_phy( const size_t i_count, const uint64_t i_
 // i_rank passed by value to save a local
 ///
 template <>
-inline uint64_t map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count, const uint64_t i_rank )
+inline uint64_t map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_count,
+        const uint64_t i_rank,
+        const bool i_is_quad_encoded )
 {
     if (i_count == 0)
     {
@@ -376,6 +416,19 @@ inline uint64_t map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_
         fapi2::Assert(false);
     }
 
+    const auto l_dimm_rank = mss::index(i_rank);
+    FAPI_INF("count:%u rank%u encoded? %s", i_count, i_rank, i_is_quad_encoded ? "yes" : "no");
+
+    // Quad encoded case - we want to pass back zeros for the ranks that the PHY can't see (2/3, 6/7)
+    // For the valid PHY ranks on DIMM1 (4/5), we need to pass these back as 2/3, so we can just pass on to the rest of the logic
+    if(i_is_quad_encoded && l_dimm_rank >= MAX_RANKS_DIMM1)
+    {
+        // Rank isn't valid from the PHY perspective, return NO_RANK
+        return NO_RANK;
+    }
+
+    // If we got here, rank is valid from the PHY perspective, let the below logic handle this appropriately
+    // Non encoded case - dual drop
     if ((i_count == MAX_DIMM_PER_PORT) && (i_rank >= RANK_MID_POINT))
     {
         return i_rank - MAX_RANKS_DIMM1;
@@ -389,26 +442,18 @@ inline uint64_t map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>( const size_t i_
 /// @brief Maps a rank's canonical number to the proper ordinal number for the PHY
 /// @param[in] i_target the fapi2 target of the MCA
 /// @param[in] i_rank the rank number to be mapped
-/// @return the mapped value
-// i_rank passed by value to save a local
+/// @param[out] o_ordinal the rank from the PHY perspective
+/// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-inline uint64_t map_rank_ordinal_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rank )
+inline fapi2::ReturnCode map_rank_ordinal_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rank, uint64_t& o_ordinal )
 {
-    return map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rank);
-}
+    bool l_is_quad_encoded = false;
+    FAPI_TRY(is_quad_encoded( i_target, i_rank, l_is_quad_encoded ))
+    o_ordinal = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(count_dimm(i_target), i_rank, l_is_quad_encoded);
 
-///
-/// @brief Maps a ranks canonical number to the proper ordinal number
-/// for the PHY
-/// @param[in] i_target the fapi2 target of the MBA
-/// @param[in] i_rank the rank number to be mapped
-/// @return the mapped value
-// i_rank passed by value to save a local
-///
-inline uint64_t map_rank_ordinal_to_phy( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target, const uint64_t i_rank )
-{
-    // NOOP for Centaur
-    return i_rank;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -522,7 +567,6 @@ inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_rp_reg_value,
         fapi2::buffer<uint64_t>& io_data );
 
-
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
 /// @param[in] i_target the fapi2 target of the MCA
@@ -552,21 +596,50 @@ inline fapi2::ReturnCode map_rank_pair_to_phy( const fapi2::Target<fapi2::TARGET
     // No mapping necessary if single drop
     if (i_count != 1)
     {
+        uint64_t l_phy_rank = 0;
         i_rp_reg_value.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
-        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
-        io_data.insertFromRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY(map_rank_ordinal_to_phy(i_target, l_rank, l_phy_rank));
+
+        // Setup the PHY registers only if we have valid ranks
+        if(l_phy_rank != NO_RANK)
+        {
+            io_data.insertFromRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_phy_rank);
+        }
+
+        io_data.writeBit<EVEN_PRIMARY_VALID>(io_data.getBit<EVEN_PRIMARY_VALID>() && (l_phy_rank != NO_RANK));
 
         i_rp_reg_value.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
-        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
-        io_data.insertFromRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY(map_rank_ordinal_to_phy(i_target, l_rank, l_phy_rank));
+
+        // Setup the PHY registers only if we have valid ranks
+        if(l_phy_rank != NO_RANK)
+        {
+            io_data.insertFromRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_phy_rank);
+        }
+
+        io_data.writeBit<EVEN_SECONDARY_VALID>(io_data.getBit<EVEN_SECONDARY_VALID>() && (l_phy_rank != NO_RANK));
 
         i_rp_reg_value.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
-        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
-        io_data.insertFromRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY(map_rank_ordinal_to_phy(i_target, l_rank, l_phy_rank));
+
+        // Setup the PHY registers only if we have valid ranks
+        if(l_phy_rank != NO_RANK)
+        {
+            io_data.insertFromRight<ODD_PRIMARY_RANK, RANK_LEN>(l_phy_rank);
+        }
+
+        io_data.writeBit<ODD_PRIMARY_VALID>(io_data.getBit<ODD_PRIMARY_VALID>() && (l_phy_rank != NO_RANK));
 
         i_rp_reg_value.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
-        l_rank = map_rank_ordinal_to_phy<fapi2::TARGET_TYPE_MCA>(i_count, l_rank);
-        io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY(map_rank_ordinal_to_phy(i_target, l_rank, l_phy_rank));
+
+        // Setup the PHY registers only if we have valid ranks
+        if(l_phy_rank != NO_RANK)
+        {
+            io_data.insertFromRight<ODD_SECONDARY_RANK, RANK_LEN>(l_phy_rank);
+        }
+
+        io_data.writeBit<ODD_SECONDARY_VALID>(io_data.getBit<ODD_SECONDARY_VALID>() && (l_phy_rank != NO_RANK));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -728,13 +801,6 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<T>& i_target, std::vector< 
 /// @return true iff i_rank is a rank on i_target
 ///
 bool is_rank_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank);
-
-///
-/// @brief Return the *port relative position* of the DIMM which posesses this rank
-/// @param[in] i_rank the rank number.
-/// @return the relative position of the DIMM which contains this rank.
-///
-size_t get_dimm_from_rank(const uint64_t i_rank);
 
 ///
 /// @brief Return the DIMM target which posesses this rank on a given port
@@ -1262,17 +1328,20 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
 {
     static_assert(RP < MAX_RANK_PER_DIMM, "Passed in Rank Pair is too high");
 
+    // RP's 2/3 are in different registers than RP's 0/1
+    // We use the following bit to deterimine whic hregisters to analyze
+    constexpr bool LOWER_REG_SELECTION = RP < 2;
+
     o_ranks.clear();
 
-    // Read the rank pair register(s)
-    fapi2::buffer<uint64_t> l_reg;
+    // Read the rank pair information
+    rank_pair_data l_rp_data;
     std::vector<fapi2::buffer<uint64_t>> l_data;
 
     // Use the reg API here so we get the PHY to MC rank conversion
-    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 0 >(i_target, l_reg)) );
-    l_data.push_back(l_reg);
-    FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 1 >(i_target, l_reg)) );
-    l_data.push_back(l_reg);
+    FAPI_TRY(get_rank_pair_assignments(i_target, l_rp_data));
+    l_data.push_back(static_cast<uint64_t>(LOWER_REG_SELECTION ? l_rp_data.iv_rp_reg0 : l_rp_data.iv_rp_reg1));
+    l_data.push_back(static_cast<uint64_t>(LOWER_REG_SELECTION ? l_rp_data.iv_rp_reg2 : l_rp_data.iv_rp_reg3));
 
     // Get data
     for (uint64_t l_ordinal = 0; l_ordinal < TT::NUM_RANKS_IN_PAIR; ++l_ordinal)
@@ -1352,7 +1421,9 @@ fapi2::ReturnCode is_mirrored( const fapi2::Target<T>& i_target,
                                bool& o_mirrored )
 {
     uint8_t l_mirror[MAX_DIMM_PER_PORT] = {0};
+    bool l_is_encoded_mode = false;
     FAPI_TRY( eff_dimm_rcd_mirror_mode(i_target, l_mirror) );
+    FAPI_TRY( is_quad_encoded(i_target, i_rank, l_is_encoded_mode) );
 
     o_mirrored = false;
 
@@ -1360,9 +1431,11 @@ fapi2::ReturnCode is_mirrored( const fapi2::Target<T>& i_target,
     //  - the rank is valid
     //  - the rank is odd
     //  - the mirror mode attribute is set for the rank's DIMM
+    //  - We are not in quad encoded mode (so not 0bxx11 for RC0D
     if (i_valid &&
         mss::is_odd(i_rank) &&
-        (l_mirror[get_dimm_from_rank(i_rank)] == fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON))
+        (l_mirror[get_dimm_from_rank(i_rank)] == fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON) &&
+        !l_is_encoded_mode)
     {
         o_mirrored = true;
     }
