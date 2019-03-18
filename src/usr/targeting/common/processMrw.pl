@@ -44,8 +44,43 @@ my $debug           = 0;
 my $report          = 0;
 my $sdr_file        = "";
 my $build           = "hb";
-my $system_config    = "";
+my $system_config   = "";
 my $output_filename = "";
+
+# Map for omi to omic parent
+# OMI   |   OMIC
+# --------------
+# 1     |   2
+# 2     |   1
+# 3     |   1
+# 4     |   0
+# 5     |   0
+# 6     |   0
+# 7     |   1
+# 8     |   2
+# 9     |   2
+# 10    |   1
+# 11    |   1
+# 12    |   0
+# 13    |   0
+# 14    |   0
+# 15    |   1
+my %omi_map         = (4  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
+                       5  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
+                       6  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
+                       7  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
+                       2  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
+                       3  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
+                       0  => "physical:sys-0/node-0/proc-0/mc-0/omic-2",
+                       1  => "physical:sys-0/node-0/proc-0/mc-0/omic-2",
+                       12 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
+                       13 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
+                       14 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
+                       15 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
+                       10 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
+                       11 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
+                       8  => "physical:sys-0/node-0/proc-0/mc-1/omic-2",
+                       9  => "physical:sys-0/node-0/proc-0/mc-1/omic-2");
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
@@ -1656,6 +1691,10 @@ sub processMc
         {
             processMi($targetObj, $child);
         }
+        elsif ($child_type eq "OMIC")
+        {
+            processOmic($targetObj, $child);
+        }
     }
 
     {
@@ -1669,7 +1708,95 @@ sub processMc
     }
 }
 
+#--------------------------------------------------
+## MCC
+##
+##
+sub processMcc
+{
+    my $targetObj   = shift;
+    my $target      = shift;
 
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing MCC child: $child Type: $child_type");
+
+        if ($child_type eq "OMI")
+        {
+            processOmi($targetObj, $child);
+        }
+    }
+
+    {
+        use integer;
+        # There are a total of four MCC units on an MC unit. So, to
+        # determine which MC an MCC belongs to, the CHIP_UNIT of the MCC can
+        # be divided by the number of units per MC to arrive at the correct
+        # offset to add to the pervasive MCC parent offset.
+        my $numberOfMccPerMc = 4;
+        my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+        my $value = sprintf("0x%x",
+                            Targets::PERVASIVE_PARENT_MI_OFFSET
+                            + ($chip_unit / $numberOfMccPerMc));
+
+        $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    }
+}
+
+#--------------------------------------------------
+## OMI
+##
+##
+sub processOmi
+{
+    my $targetObj   = shift;
+    my $target      = shift;
+
+    use integer;
+    # There are a total of eight OMI units on an MC unit. So, to
+    # determine which MC an OMI belongs to, the CHIP_UNIT of the OMI can
+    # be divided by the number of units per MC to arrive at the correct
+    # offset to add to the pervasive OMI parent offset.
+    my $numberOfOmiPerMc = 8;
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_MI_OFFSET
+                        + ($chip_unit / $numberOfOmiPerMc));
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+
+    $value = $omi_map{$chip_unit};
+    $targetObj->setAttribute( $target, "OMIC_PARENT", $value);
+}
+
+#--------------------------------------------------
+## OMIC
+##
+##
+sub processOmic
+{
+    my $targetObj   = shift;
+    my $target      = shift;
+
+    use integer;
+    # There are a total of three OMIC units on an MC unit. So, to
+    # determine which MC an OMIC belongs to, the CHIP_UNIT of the OMIC can
+    # be divided by the number of units per MC to arrive at the correct
+    # offset to add to the pervasive OMIC parent offset.
+    my $numberOfOmicPerMc = 3;
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+
+    my $value = sprintf("0x%x",
+                        Targets::PERVASIVE_PARENT_MI_OFFSET
+                        + ($chip_unit / $numberOfOmicPerMc));
+
+    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+}
 #--------------------------------------------------
 ## MI
 ##
@@ -1689,6 +1816,10 @@ sub processMi
         if ($child_type eq "DMI")
         {
             processDmi($targetObj, $child);
+        }
+        elsif ($child_type eq "MCC")
+        {
+            processMcc($targetObj, $child);
         }
     }
 
