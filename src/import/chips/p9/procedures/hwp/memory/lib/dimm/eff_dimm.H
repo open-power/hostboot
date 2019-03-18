@@ -352,6 +352,20 @@ class eff_dimm
         fapi2::ReturnCode calculate_chip_ids( qsid& o_qs);
 
         ///
+        /// @brief Determines how many chip select ID bits are needed for the iv_dimm on the input to the RCD
+        /// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode calculate_chip_ids_inputs( qsid& o_qs);
+
+        ///
+        /// @brief Determines how many chip select ID bits are needed for the iv_dimm on the output from the RCD
+        /// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode calculate_chip_ids_outputs( qsid& o_qs);
+
+        ///
         /// @brief Determines & sets effective config for DIMM RC08
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///

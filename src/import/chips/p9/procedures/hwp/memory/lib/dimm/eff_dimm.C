@@ -273,7 +273,8 @@ enum rc0a_encode : uint8_t
 ///
 enum rc0d_encode : uint8_t
 {
-    DIRECT_CS_MODE = 0, ///< Direct DualCS mode: Register uses two DCS_n inputes
+    DUAL_DIRECT_CS_MODE = 0b00, ///< Direct DualCS mode: Register uses two DCS_n inputs
+    QUAD_ENCODE_CS_MODE = 0b11, ///< Direct DualCS mode: Register uses two DCS_n inputs
     LRDIMM = 0,
     RDIMM = 1,
 };
@@ -1762,8 +1763,7 @@ fapi2::ReturnCode eff_dimm::calculate_chip_ids( qsid& o_qs)
     {
         case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP:
         case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP:
-            // Don't need the chip ID signals enabled because no slave ranks
-            FAPI_INF("Disabling chip IDs");
+            FAPI_INF("%s Disabling CID's", mss::c_str(iv_dimm));
             o_qs = ALL_DISABLE;
             break;
 
@@ -1841,6 +1841,51 @@ fapi2::ReturnCode eff_dimm::calculate_chip_ids( qsid& o_qs)
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Determines how many chip select ID bits are needed for the iv_dimm on the output from the RCD
+/// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::calculate_chip_ids_outputs( qsid& o_qs)
+{
+    // So, CID's on the output side of the RCD function as dual-purpose signals
+    // They function as either CID's or as CS2/3 depending upon the rawcard in question and the RCD's configuration
+    // If we have 4 master ranks, we need to go into quad encoded mode
+    // At that point, CID 0/1's outputs become CS2/3
+    // Here, we override the output values to enable CID0/1 if we have 4 ranks
+    // If not, we just pass back the value we already calculated
+    uint8_t l_master_ranks = 0;
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+    FAPI_TRY(calculate_chip_ids(o_qs));
+    o_qs = l_master_ranks == 4 ? ZERO_ONE_ENABLE : o_qs;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines how many chip select ID bits are needed for the iv_dimm on the input to the RCD
+/// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::calculate_chip_ids_inputs( qsid& o_qs)
+{
+    // So, CID's on the input side of the RCD function as dual-purpose signals
+    // They function as either CID's or as CS2/3 depending upon the board wiring in question and the RCD's configuration
+    // If we have 4 master ranks, we need to go into quad encoded mode
+    // At that point, CID 0 becomes used as part of the encoded CS
+    // Here, we override the output values to enable CID0 if we have 4 ranks
+    // If not, we just pass back the value we already calculated
+    uint8_t l_master_ranks = 0;
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+    FAPI_TRY(calculate_chip_ids(o_qs));
+    o_qs = l_master_ranks == 4 ? ZERO_ENABLE : o_qs;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Determines & sets effective config for DIMM RC08
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -1852,7 +1897,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
     fapi2::buffer<uint8_t> l_buffer = 0;
 
     qsid l_qs_enabled = ALL_DISABLE;
-    FAPI_TRY( eff_dimm::calculate_chip_ids(l_qs_enabled) );
+    FAPI_TRY( eff_dimm::calculate_chip_ids_outputs(l_qs_enabled) );
     l_buffer.insertFromRight<CID_START, CID_LENGTH>(l_qs_enabled);
 
     // Let's set the other bits
@@ -2078,12 +2123,15 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
     uint8_t l_attrs_dimm_rc0d[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     fapi2::buffer<uint8_t> l_buffer;
 
-    // TODO - RTC 160116: Fix RC0D chip select setting for LRDIMMs
-    constexpr uint8_t l_cs_mode = rc0d_encode::DIRECT_CS_MODE;
     uint8_t l_mirror_mode = 0;
     uint8_t l_dimm_type = 0;
     uint8_t l_rc0d_dimm_type = 0;
 
+    uint8_t l_master_ranks = 0;
+
+    // Number of master ranks taken from attribute since we need mapped value
+    // and not the encoded raw value from SPD.
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
     FAPI_TRY(mss::eff_dimm_type(iv_dimm, l_dimm_type));
 
     l_rc0d_dimm_type = (l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
@@ -2105,6 +2153,11 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
         // MIRROR mode
         constexpr size_t MIRROR_START = 4;
         constexpr size_t MIRROR_LEN = 1;
+
+        // 4rank DIMM's need to use quad encoded CS mode, otherwise we're dual direct
+        const auto l_cs_mode = l_master_ranks == 4 ?
+                               rc0d_encode::QUAD_ENCODE_CS_MODE :
+                               rc0d_encode::DUAL_DIRECT_CS_MODE;
 
         l_buffer.insertFromRight<CS_START, CS_LEN>(l_cs_mode)
         .insertFromRight<DIMM_TYPE_START, DIMM_TYPE_LEN>(l_rc0d_dimm_type)
@@ -2486,7 +2539,7 @@ fapi2::ReturnCode eff_dimm::dimm_rcbx()
     uint8_t l_attrs_dimm_rc_bx[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     qsid l_qs_enabled = ALL_DISABLE;
-    FAPI_TRY( eff_dimm::calculate_chip_ids( l_qs_enabled) );
+    FAPI_TRY( eff_dimm::calculate_chip_ids_inputs( l_qs_enabled) );
 
     switch (l_qs_enabled)
     {
