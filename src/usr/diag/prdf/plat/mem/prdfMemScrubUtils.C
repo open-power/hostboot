@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,25 @@ uint32_t clearCmdCompleteAttn<TYPE_MCA>( ExtensibleChip * i_chip )
     ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
 
     return clearCmdCompleteAttn<TYPE_MCBIST>( mcbChip );
+}
+
+template<>
+uint32_t clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    // Clear MCBISTFIR[10].
+    return __clearFir<TYPE_OCMB_CHIP>( i_chip, "MCBISTFIR_AND",
+                                       0xffdfffffffffffffull );
+}
+
+template<>
+uint32_t clearCmdCompleteAttn<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
+
+    return clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ocmbChip );
 }
 
 template<>

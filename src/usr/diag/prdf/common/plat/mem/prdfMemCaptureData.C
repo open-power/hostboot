@@ -97,6 +97,10 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
                 {
                     getDimmDqAttr<TYPE_DIMM>(partList[0], extMemMru.dqMapping);
                 }
+                else if ( TYPE_MEM_PORT == getTargetType(trgt) )
+                {
+                    getDimmDqAttr<TYPE_MEM_PORT>( trgt, extMemMru.dqMapping );
+                }
                 else
                 {
                     PRDF_ERR( PRDF_FUNC "Invalid target type." );

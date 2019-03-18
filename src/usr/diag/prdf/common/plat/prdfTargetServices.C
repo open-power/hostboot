@@ -1471,6 +1471,8 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
    bool o_dramWidthX4 = false;
 
    PRDF_ASSERT( nullptr != i_trgt );
+   //uint8_t dramWidths = 0;
+
    switch ( getTargetType(i_trgt) )
    {
         case TYPE_MCA:
@@ -1480,6 +1482,15 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
         case TYPE_MBA:
             o_dramWidthX4 = ( fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 ==
                               i_trgt->getAttr<ATTR_CEN_EFF_DRAM_WIDTH>() );
+            break;
+
+        case TYPE_DIMM:
+            // TODO RTC 207273 - attribute not in TARGETING code yet
+            //TargetHandle_t memPort = getConnectedParent(i_trgt, TYPE_MEM_PORT);
+            //dramWidths = memPort->getAttr<ATTR_MEM_EFF_DRAM_WIDTH>();
+            //uint8_t dimmSlct = getDimmSlct( i_trgt );
+            //o_dramWidthX4 =
+            //  (fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 == dramWidths[dimmSlct]);
             break;
 
         default:
@@ -1571,6 +1582,15 @@ void getMasterRanks<TYPE_MBA>( TargetHandle_t i_trgt,
     //       select will be the same for each DIMM select. There is no need to
     //       iterate on both port selects.
     __getMasterRanks<TYPE_MBA>( i_trgt, o_ranks, 0, i_ds );
+}
+
+template<>
+void getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+                                    std::vector<MemRank> & o_ranks,
+                                    uint8_t i_ds )
+{
+    // TODO RTC 207273 - no support for ATTR_EFF_DIMM_RANKS_CONFIGED attr yet
+    //__getMasterRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, 0, i_ds );
 }
 
 //------------------------------------------------------------------------------

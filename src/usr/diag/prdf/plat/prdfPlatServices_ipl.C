@@ -79,9 +79,11 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
 
     PRDF_ASSERT( nullptr != i_trgt );
 
-    // Only MCBIST and MBA supported.
+    // Only MCBIST, MBA, and OCMB_CHIP supported.
     TYPE trgtType = getTargetType( i_trgt );
-    PRDF_ASSERT( TYPE_MCBIST == trgtType || TYPE_MBA == trgtType );
+    PRDF_ASSERT( TYPE_MCBIST == trgtType ||
+                 TYPE_MBA == trgtType    ||
+                 TYPE_OCMB_CHIP );
 
     // MDIA must be running.
     PRDF_ASSERT( isInMdiaMode() );
@@ -206,6 +208,39 @@ uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
     return o_rc;
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t mssRestoreDramRepairs<TYPE_MEM_PORT>( TargetHandle_t i_target,
+                                               uint8_t & o_repairedRankMask,
+                                               uint8_t & o_badDimmMask )
+{
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 207273 - no HWP support yet
+    errlHndl_t errl = NULL;
+
+
+    fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
+    FAPI_INVOKE_HWP( errl, mss::restore_repairs,
+                     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>( i_target ),
+                     tmpRepairedRankMask, tmpBadDimmMask );
+
+    if ( NULL != errl )
+    {
+        PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
+                  "restore_repairs() failed. HUID: 0x%08x",
+                  getHuid(i_target) );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
+    o_badDimmMask = (uint8_t)tmpBadDimmMask;
+    */
+
+    return o_rc;
+}
 
 //------------------------------------------------------------------------------
 uint32_t mssIplUeIsolation( TargetHandle_t i_mba, const MemRank & i_rank,
@@ -801,6 +836,119 @@ uint32_t resumeTdSteerCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+//##############################################################################
+//##                Explorer/Axone Maintenance Command wrappers
+//##############################################################################
+
+template<>
+bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    /* TODO RTC 207273 - no HWP support yet
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
+
+    mss::states l_ret = mss::states::NO;
+    FAPI_CALL_HWP( l_ret, mss::mcbist::is_broadcast_capable, fapiTrgt );
+    return ( mss::states::YES == l_ret );
+    */
+    return false;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startSfRead<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
+                                     const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MCA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_memPort );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_memPort->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 207273 - no HWP support yet
+    // Get the OCMB_CHIP fapi target
+    ExtensibleChip * ocmbChip = getConnectedParent( i_memPort, TYPE_OCMB_CHIP );
+    fapi2::Target<fapi2::TYPE_OCMB_CHIP> fapiTrgt ( ocmbChip->getTrgt() );
+
+    // Get the stop conditions.
+    mss::mcbist::stop_conditions stopCond;
+    stopCond.set_pause_on_mpe(mss::ON)
+            .set_pause_on_ue(mss::ON)
+            .set_pause_on_aue(mss::ON)
+            .set_nce_inter_symbol_count_enable(mss::ON)
+            .set_nce_soft_symbol_count_enable( mss::ON)
+            .set_nce_hard_symbol_count_enable( mss::ON);
+
+    // Stop on hard CEs if MNFG CE checking is enabled.
+    if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
+
+    do
+    {
+        // Get the first address of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_memPort, i_rank, saddr, eaddr,
+                                               SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_memPort->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( ocmbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      ocmbChip->getHuid() );
+            break;
+        }
+
+        // Start the super fast read command.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond,
+                         saddr );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
+                      ocmbChip->getHuid(), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// This specialization only exists to avoid a lot of extra code in some classes.
+// The input chip must still be an MEM_PORT chip.
+template<>
+uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_memPort,
+                                      const MemRank & i_rank )
+{
+    return startSfRead<TYPE_MEM_PORT>( i_memPort, i_rank );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
+{
+    return SUCCESS; // Not needed for MCBIST commands.
+}
 //------------------------------------------------------------------------------
 
 } // end namespace PlatServices

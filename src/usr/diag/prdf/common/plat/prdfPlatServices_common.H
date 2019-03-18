@@ -225,7 +225,7 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_mba        Target MBA/MCA
+ * @param  i_trgt       Target MBA/MCA/MEM_PORT
  * @param  i_rank       Target rank.
  * @param  o_port0Spare A symbol associated with the spare on port 0.
  * @param  o_port1Spare A symbol associated with the spare on port 1.
@@ -233,13 +233,13 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
-                        MemSymbol & o_port0Spare, MemSymbol & o_port1Spare,
-                        MemSymbol & o_eccSpare );
+int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_trgt,
+                        const MemRank & i_rank, MemSymbol & o_port0Spare,
+                        MemSymbol & o_port1Spare, MemSymbol & o_eccSpare );
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_mba        Target MBA.
+ * @param  i_trgt       Target MBA/MEM_PORT.
  * @param  i_rank       Target rank.
  * @param  i_symbol     A symbol associated with the DRAM to be spared.
  * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
@@ -247,12 +247,13 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
-                        const MemSymbol & i_symbol, bool i_x4EccSpare );
+int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_trgt,
+                        const MemRank & i_rank, const MemSymbol & i_symbol,
+                        bool i_x4EccSpare );
 
 /**
  * @brief   Get spare DRAM information on a DIMM.
- * @param   i_mba MBA/MCA target.
+ * @param   i_trgt MBA/MCA/MEM_PORT target.
  * @param   i_rank Rank.
  * @param   i_ps MBA port select.
  * @param   o_spareConfig Spare DRAM config information.
@@ -262,12 +263,12 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
  *          populate spare config information in o_spareConfig.
  */
 template<TARGETING::TYPE T>
-int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, MemRank i_rank,
+int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
 
 /**
  * @brief Checks if DRAM sparing is enabled.
- * @param i_trgt        Target MBA
+ * @param i_trgt        Target MBA/MEM_PORT
  * @param i_rank        Target rank
  * @param i_ps          MBA Port select
  * @param o_spareEnable Whether DRAM sparing is enabled or not.
@@ -279,7 +280,7 @@ uint32_t isDramSparingEnabled( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 /**
  * @brief Checks to see if the spares are available on given target and port.
- * @param i_trgt     Target MBA
+ * @param i_trgt     Target MBA/MEM_PORT
  * @param i_rank     Target rank
  * @param i_ps       Port select
  * @param o_spAvail  If the spare on inputted port select is available
