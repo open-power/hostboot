@@ -223,9 +223,17 @@ sub printTarget
         return;
     }
 
+    my $target_TYPE = $self->getAttribute($target, "TYPE");
+
+    # Only allow OMI types with MCC parent
+    # OMIC_PARENT only exists on an OMI target with MCC parent
+    if ($target_TYPE eq "OMI" && !defined($target_ptr->{ATTRIBUTES}->{"OMIC_PARENT"}->{default}))
+    {
+        return;
+    }
+
     print $fh "<targetInstance>\n";
     my $target_id = $self->getAttribute($target, "PHYS_PATH");
-    my $target_TYPE = $self->getAttribute($target, "TYPE");
     $target_id = substr($target_id, 9);
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
@@ -643,6 +651,8 @@ sub buildAffinity
     my $tpm             = -1;
     my $ucd             = -1;
     my $bmc             = -1;
+    my $mcc             = -1;
+    my $omi             = -1;
     my $sys_phys        = "";
     my $node_phys       = "";
     my $node_aff        = "";
@@ -775,6 +785,29 @@ sub buildAffinity
             $self->setAttribute($target, "CLASS", "ASIC");
             $self->deleteAttribute($target, "POSITION");
             $self->deleteAttribute($target, "FRU_ID");
+        }
+        elsif ($type eq "MCC")
+        {
+            $mcc++;
+
+            my $proc_num = ($mcc / 8) % 2;
+            my $mc_num = ($mcc / 4) % 2;
+            my $mi_num = ($mcc / 2) % 2;
+            my $mcc_num = ($mcc / 1) % 2;
+            my $mcc_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num";
+            $self->setAttribute($target, "AFFINITY_PATH", $mcc_aff);
+        }
+        elsif ($type eq "OMI")
+        {
+            $omi++;
+
+            my $proc_num = ($omi / 16) % 2;
+            my $mc_num = ($omi / 8) % 2;
+            my $mi_num = ($omi / 4) % 2;
+            my $mcc_num = ($omi / 2) % 2;
+            my $omi_num = ($omi / 1) % 2;
+            my $omi_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num";
+            $self->setAttribute($target, "AFFINITY_PATH", $omi_aff);
         }
         elsif ($type eq "BMC")
         {
