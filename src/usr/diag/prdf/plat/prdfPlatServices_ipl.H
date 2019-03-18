@@ -57,7 +57,7 @@ bool isInMdiaMode();
 
 /**
  * @brief  Sends a MCBIST/maintenance event message to MDIA.
- * @param  i_trgt      An MCBIST or MBA target.
+ * @param  i_trgt      An MCBIST, MBA, or OCMB_CHIP target.
  * @param  i_eventType MDIA event type
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
@@ -66,7 +66,7 @@ int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Initiates a reconfig loop due to an RCD parity error.
- * @param  i_trgt An MCA target.
+ * @param  i_trgt An MCA or MEM_PORT target.
  * @return True if the number of allowed reconfig loops has been exceeded.
  *         False otherwise.
  */
@@ -104,7 +104,7 @@ uint32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
  * @brief  Determines if the given target is capable of running in broadcast
  *         mode. Super fast commands will always run in broadcast mode if it is
  *         possible.
- * @param  i_chip MCBIST chip.
+ * @param  i_chip MCBIST or OCMB chip.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
@@ -113,7 +113,7 @@ bool isBroadcastModeCapable( ExtensibleChip * i_chip );
 /**
  * @brief  Starts a super fast read command from the first address of the given
  *         rank to the end of memory.
- * @param  i_chip MCBIST/MCA or MBA chip.
+ * @param  i_chip MCBIST/MCA, MBA, or MEM_PORT chip.
  * @param  i_rank Will start the command on the first address of this slave
  *         rank. To ensure the command is started on a master rank boundary,
  *         make sure the slave rank value is 0.
@@ -125,7 +125,7 @@ uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
 /**
  * @brief  If necessary, this will do the necessary cleanup for the superfast
  *         command when the command is complete.
- * @param  i_chip MCBIST or MBA chip.
+ * @param  i_chip MCBIST, MBA, or OCMB chip.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>

@@ -405,6 +405,112 @@ uint32_t resumeTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 }
 
 //##############################################################################
+//##                Explorer/Axone Maintenance Command wrappers
+//##############################################################################
+
+template<>
+uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t rc = SUCCESS;
+
+    /* TODO RTC 207273 - no HWP support yet
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
+
+    errlHndl_t errl;
+    FAPI_INVOKE_HWP( errl, mss::memdiags::stop, fapiTrgt );
+
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "mss::memdiags::stop(0x%08x) failed", i_chip->getHuid());
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        rc = FAIL;
+    }
+    */
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t stopBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    ExtensibleChip* ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
+    return stopBgScrub<TYPE_OCMB_CHIP>( ocmbChip );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 207273 - no hwp support yet
+
+    // Get the OCMB_CHIP fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
+
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Resume the command on the next address.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt );
+
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::continue_cmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    ExtensibleChip* ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
+    return resumeBgScrub<TYPE_OCMB_CHIP>( ocmbChip );
+}
+
+//##############################################################################
 //##                       Line Delete Functions
 //##############################################################################
 int32_t extractL3Err( TargetHandle_t i_exTgt,

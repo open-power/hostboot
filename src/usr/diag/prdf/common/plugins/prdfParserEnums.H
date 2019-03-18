@@ -112,7 +112,7 @@ enum PositionBounds
 
     MAX_OCMB_PER_OMI    = 1,
 
-    MAX_MEM_PORT        = 2,
+    MAX_SUB_PORT        = 2,
 
     MAX_NPU_PER_PROC    = 3,
 

@@ -406,7 +406,7 @@ uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   checks dram width ( x4 )
- * @param   i_trgt MCA or MBA target
+ * @param   i_trgt MCA, MBA, or DIMM target
  * @return  true if DRAM width is X4, false otherwise
  */
 bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);

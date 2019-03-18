@@ -387,6 +387,48 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank,
+                                         mss::mcbist::address & o_startAddr,
+                                         mss::mcbist::address & o_endAddr,
+                                         AddrRangeType i_rangeType )
+{
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MEM_PORT>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    /* TODO RTC 207273 - no HWP support yet
+    uint32_t port = i_chip->getPos() % MAX_PORT_PER_OCMB;
+
+    if ( SLAVE_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_srank_range,
+                                port, i_rank.getDimmSlct(),
+                                i_rank.getRankSlct(), i_rank.getSlave(),
+                                o_startAddr, o_endAddr );
+    }
+    else if ( MASTER_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_mrank_range,
+                                port, i_rank.getDimmSlct(),
+                                i_rank.getRankSlct(), o_startAddr, o_endAddr );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "unsupported range type %d", i_rangeType );
+        PRDF_ASSERT(false);
+    }
+    */
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
                                     fapi2::buffer<uint64_t> & o_startAddr,
@@ -466,6 +508,27 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
     mss::mcbist::address saddr, eaddr;
     uint32_t o_rc = getMemAddrRange<TYPE_MCA>( i_chip, i_rank, saddr, eaddr,
                                                i_rangeType );
+    if ( SUCCESS == o_rc )
+    {
+        o_startAddr = __convertMssMcbistAddr( saddr );
+        o_endAddr   = __convertMssMcbistAddr( eaddr );
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank,
+                                         MemAddr & o_startAddr,
+                                         MemAddr & o_endAddr,
+                                         AddrRangeType i_rangeType )
+{
+    mss::mcbist::address saddr, eaddr;
+    uint32_t o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_chip, i_rank, saddr,
+                                                    eaddr, i_rangeType );
     if ( SUCCESS == o_rc )
     {
         o_startAddr = __convertMssMcbistAddr( saddr );
@@ -566,6 +629,18 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     MemAddr & o_startAddr, MemAddr & o_endAddr,
                                     uint8_t i_dimmSlct );
 
+template
+uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                         mss::mcbist::address & o_startAddr,
+                                         mss::mcbist::address & o_endAddr,
+                                         uint8_t i_dimmSlct );
+
+template
+uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                         MemAddr & o_startAddr,
+                                         MemAddr & o_endAddr,
+                                         uint8_t i_dimmSlct );
+
 //------------------------------------------------------------------------------
 
 template<>
@@ -618,6 +693,50 @@ bool isRowRepairEnabled<TYPE_MCA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     return false; // Not supported at this time.
+}
+
+template<>
+bool isRowRepairEnabled<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::isRowRepairEnabled<TYPE_MEM_PORT>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    bool o_isEnabled = false;
+
+    /* TODO RTC 207273 - no HWP support yet
+    do
+    {
+        // Don't do row repair if DRAM repairs is disabled.
+        if ( areDramRepairsDisabled() ) break;
+
+        // The HWP will check both DIMMs on rank pair. So we could can use
+        // either one.
+        TargetHandleList list = getConnectedDimms( i_chip->getTrgt(), i_rank );
+        PRDF_ASSERT( !list.empty() );
+
+        TargetHandle_t dimm = list.front();
+
+        errlHndl_t errl = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> fapiDimm(dimm);
+        FAPI_INVOKE_HWP( errl, is_sPPR_supported, fapiDimm, o_isEnabled );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "is_sPPR_supported(0x%08x) failed",
+                      getHuid(dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_isEnabled = false; // just in case
+            break;
+        }
+
+    }while(0);
+    */
+
+    return o_isEnabled;
+
+    #undef PRDF_FUNC
 }
 
 //##############################################################################
@@ -1187,6 +1306,185 @@ uint32_t incMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip,
 
     } while (0);
 
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//##                Explorer/Axone Maintenance Command wrappers
+//##############################################################################
+
+template<>
+uint32_t startBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_memPort,
+                                      const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MEM_PORT>] "
+
+    PRDF_ASSERT( nullptr != i_memPort );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_memPort->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 207273 - no HWP support yet
+    // Get the OCMB fapi target
+    ExtensibleChip * ocmbChip = getConnectedParent( i_memPort, TYPE_OCMB_CHIP );
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (ocmbChip->getTrgt());
+
+    // Get the stop conditions.
+    // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
+    //       background scrubbing never stops.
+    mss::mcbist::stop_conditions stopCond;
+
+    // AUEs are checkstop attentions. Unfortunately, MCBIST commands do not stop
+    // when the system checkstops. Therefore, we must set the stop condition for
+    // AUEs so that we can use the MCBMCAT register to determine where the error
+    // occurred. Note that there isn't a stop condition specifically for IAUEs.
+    // Instead, there is the RCE threshold. Unfortunately, the RCE counter is a
+    // combination of IUE, IAUE, IMPE, and IRCD errors. It is possible to use
+    // this threshold and simply restart background scrubbing each time there is
+    // an IUE, IMPE, or IRCD but there is concern that PRD might get stuck
+    // handling those attentions on every address even after thresholds have
+    // been reached. Therefore, we simplified the design and will simply call
+    // out both DIMMs for maintenance IAUEs.
+    stopCond.set_pause_on_aue(mss::ON);
+
+    #ifdef CONFIG_HBRT_PRD
+
+    stopCond.set_thresh_nce_int(1)
+            .set_thresh_nce_soft(1)
+            .set_thresh_nce_hard(1)
+            .set_pause_on_mpe(mss::ON)
+            .set_pause_on_ue(mss::ON)
+            .set_nce_inter_symbol_count_enable(mss::ON)
+            .set_nce_soft_symbol_count_enable(mss::ON)
+            .set_nce_hard_symbol_count_enable(mss::ON);
+
+    // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs.
+    if ( mfgMode() ) stopCond.set_thresh_rce(1);
+
+    #endif
+
+    // Get the scrub speed.
+    mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
+                                                        : mss::mcbist::BG_SCRUB;
+
+    do
+    {
+        // Get the first address of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_memPort, i_rank, saddr, eaddr,
+                                               SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_memPort->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( ocmbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      ocmbChip->getHuid() );
+            break;
+        }
+
+        // Start the background scrub command.
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, mss::memdiags::background_scrub, fapiTrgt,
+                         stopCond, scrubSpeed, saddr );
+
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::background_scrub(0x%08x,%d) "
+                      "failed", ocmbChip->getHuid(), i_rank.getMaster() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    */
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// This specialization only exists to avoid a lot of extra code in some classes.
+// The input chip must still be a MEM_PORT.
+template<>
+uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_memPort,
+                                       const MemRank & i_rank )
+{
+    return startBgScrub<TYPE_MEM_PORT>( i_memPort, i_rank );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTdScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                      const MemRank & i_rank,
+                                      AddrRangeType i_rangeType,
+                                      mss::mcbist::stop_conditions i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MEM_PORT>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 207273 - no HWP support yet
+    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
+    // for the reasons why.
+    i_stopCond.set_pause_on_aue(mss::ON);
+
+    do
+    {
+        // Get the address range of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_chip, i_rank, saddr, eaddr,
+                                               i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Get the OCMB_CHIP fapi target.
+        ExtensibleChip * ocmbChip = getConnectedParent(i_chip, TYPE_OCMB_CHIP);
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+            fapiTrgt(ocmbChip->getTrgt());
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( ocmbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start targeted scrub command.
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, mss::memdiags::targeted_scrub, fapiTrgt,
+                         i_stopCond, saddr, eaddr, mss::mcbist::NONE );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::targeted_scrub(0x%08x,0x%02x) "
+                      "failed", ocmbChip->getHuid(),  i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    */
     return o_rc;
 
     #undef PRDF_FUNC
