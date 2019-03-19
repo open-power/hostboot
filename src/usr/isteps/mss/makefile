@@ -24,8 +24,9 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-IMPORT_PATH        = ${ROOTPATH}/src/import
-PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9/procedures
+IMPORT_PATH             = ${ROOTPATH}/src/import
+PROCEDURES_PATH         = ${IMPORT_PATH}/chips/p9/procedures
+AXONE_PROCEDURES_PATH   = ${IMPORT_PATH}/chips/p9a/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
@@ -34,6 +35,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -61,6 +65,10 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/freq/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -140,6 +148,13 @@ MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_SOURCE))
 MSS_PATH_GENERIC_MEMORY := ${ROOTPATH}/src/import/generic/memory/lib
 MSS_GENERIC_MEMORY_SOURCE := $(shell find $(MSS_PATH_GENERIC_MEMORY) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
+
+ MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
+ MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
+ # TODO RTC:206774 remove when MSS team changes filename
+ MSS_AXONE_SOURCE := $(filter-out sync.o,$(MSS_AXONE_SOURCE))
+ MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_AXONE_SOURCE))
+
 
 MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)
