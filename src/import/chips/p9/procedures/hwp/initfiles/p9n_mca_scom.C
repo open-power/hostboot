@@ -180,6 +180,8 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, TGT3, l_TGT3_ATTR_MSS_MRW_DRAM_2N_MODE));
         fapi2::ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET_Type l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET, TGT2, l_TGT2_ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET));
+        uint64_t l_def_MASTER_RANKS_DIMM0 = l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0];
+        uint64_t l_def_MASTER_RANKS_DIMM1 = l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1];
         uint64_t l_def_SLOT1_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] ==
                                              literal_0x0) | l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1]);
         uint64_t l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] /
@@ -659,13 +661,17 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             l_scom_buffer.insert<6, 3, 61, uint64_t>(literal_0b010 );
             l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_0b110 );
 
-            if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
+            if (((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8) && (l_def_MASTER_RANKS_DIMM0 != literal_4)))
             {
                 l_scom_buffer.insert<12, 3, 61, uint64_t>(literal_0b001 );
             }
-            else if ((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8))
+            else if (((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8) && (l_def_MASTER_RANKS_DIMM0 != literal_4)))
             {
                 l_scom_buffer.insert<12, 3, 61, uint64_t>(literal_0b000 );
+            }
+            else if ((l_def_MASTER_RANKS_DIMM0 == literal_4))
+            {
+                l_scom_buffer.insert<12, 3, 61, uint64_t>(literal_0b100 );
             }
 
             if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
@@ -700,13 +706,17 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             l_scom_buffer.insert<30, 3, 61, uint64_t>(literal_0b010 );
             l_scom_buffer.insert<33, 3, 61, uint64_t>(literal_0b110 );
 
-            if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
+            if (((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8) && (l_def_MASTER_RANKS_DIMM1 != literal_4)))
             {
                 l_scom_buffer.insert<36, 3, 61, uint64_t>(literal_0b001 );
             }
-            else if ((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8))
+            else if (((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8) && (l_def_MASTER_RANKS_DIMM1 != literal_4)))
             {
                 l_scom_buffer.insert<36, 3, 61, uint64_t>(literal_0b000 );
+            }
+            else if ((l_def_MASTER_RANKS_DIMM1 == literal_4))
+            {
+                l_scom_buffer.insert<36, 3, 61, uint64_t>(literal_0b100 );
             }
 
             if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
@@ -883,6 +893,21 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x7010934ull, l_scom_buffer ));
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
+            {
+                if ((l_def_MASTER_RANKS_DIMM0 == literal_4))
+                {
+                    constexpr auto l_MCP_PORT0_SRQ_PC_MBARPC0Q_CFG_QUAD_RANK_ENC_ON = 0x1;
+                    l_scom_buffer.insert<21, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_PC_MBARPC0Q_CFG_QUAD_RANK_ENC_ON );
+                }
+                else if ((l_def_MASTER_RANKS_DIMM0 != literal_4))
+                {
+                    constexpr auto l_MCP_PORT0_SRQ_PC_MBARPC0Q_CFG_QUAD_RANK_ENC_OFF = 0x0;
+                    l_scom_buffer.insert<21, 1, 63, uint64_t>(l_MCP_PORT0_SRQ_PC_MBARPC0Q_CFG_QUAD_RANK_ENC_OFF );
+                }
+            }
 
             if ((l_def_MSS_FREQ_EQ_1866 == literal_1))
             {

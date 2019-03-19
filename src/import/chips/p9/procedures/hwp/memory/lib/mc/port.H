@@ -75,8 +75,9 @@ template<>
 class portTraits<mss::mc_type::NIMBUS>
 {
     public:
-        static constexpr uint64_t FARB5Q_REG = MCA_MBA_FARB5Q;
         static constexpr uint64_t FARB0Q_REG = MCA_MBA_FARB0Q;
+        static constexpr uint64_t FARB1Q_REG = MCA_MBA_FARB1Q;
+        static constexpr uint64_t FARB5Q_REG = MCA_MBA_FARB5Q;
         static constexpr uint64_t REFRESH_REG = MCA_MBAREF0Q;
         static constexpr uint64_t ECC_REG = MCA_RECR;
         static constexpr uint64_t CAL0Q_REG = MCA_MBA_CAL0Q;
@@ -255,6 +256,9 @@ class portTraits<mss::mc_type::NIMBUS>
             DSM0Q_WRDONE_DLY_LEN = MCA_MBA_DSM0Q_CFG_WRDONE_DLY_LEN,
             FARB0Q_RCD_PROTECTION_TIME = MCA_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME,
             FARB0Q_RCD_PROTECTION_TIME_LEN = MCA_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME_LEN,
+
+
+            FARB1Q_CFG_DDR4_PARITY_ON_CID_DIS = MCA_MBA_FARB1Q_CFG_DDR4_PARITY_ON_CID_DIS,
 
             PER_ZCAL_ENA_RANK = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK,
             PER_ZCAL_ENA_RANK_LEN = MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0_ENA_RANK_LEN,
@@ -580,6 +584,110 @@ fapi2::ReturnCode write_farb0q_register( const fapi2::Target<T>& i_target, const
     FAPI_INF( "Change FARB0Q_REG to 0x%016lx for %s", uint64_t(i_time), mss::c_str(i_target) );
 
     FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, i_time) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read to FARB1Q register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_time the buffer to read the register data into
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<mss::mc_type::NIMBUS> >
+fapi2::ReturnCode read_farb1q_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_time )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::FARB1Q_REG, o_time) );
+
+    FAPI_INF( "FARB1Q is %d for %s", uint64_t(o_time), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write to FARB1Q register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_delay the buffer containing the data to be written
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<mss::mc_type::NIMBUS> >
+fapi2::ReturnCode write_farb1q_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t> i_time )
+{
+    FAPI_INF( "Change FARB1Q_REG to 1x%116lx for %s", uint64_t(i_time), mss::c_str(i_target) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::FARB1Q_REG, i_time) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the CID parity disable value from the buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the DSM0Q register
+/// @param[out] o_value the CID parity value - use OFF_N or ON_N
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<mss::mc_type::NIMBUS> >
+void get_cid_parity( const fapi2::buffer<uint64_t>& i_data, mss::states& o_value )
+{
+    const auto l_value = i_data.template getBit<TT::FARB1Q_CFG_DDR4_PARITY_ON_CID_DIS>();
+    o_value = l_value ? mss::states::OFF_N : mss::states::ON_N;
+
+    FAPI_INF( "CID_PARITY value: %s ", l_value ? "disabled" : "enabled" );
+}
+
+///
+/// @brief Sets the CID parity disable value in the buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_value the CID parity disable value to set - use ON_N or OFF_N
+/// @param[in,out] io_data the target data buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<mss::mc_type::NIMBUS> >
+void set_cid_parity( const mss::states i_value, fapi2::buffer<uint64_t>& io_data )
+{
+    FAPI_DBG( "Set CID_PARITY to %d ",  i_value);
+
+    io_data.template writeBit<TT::FARB1Q_CFG_DDR4_PARITY_ON_CID_DIS>(i_value == mss::states::OFF_N ? true : false);
+}
+
+
+///
+/// @brief Configures the CID parity disable value
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<mss::mc_type::NIMBUS> >
+fapi2::ReturnCode configure_cid_parity( const fapi2::Target<T>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    mss::states l_state = mss::states::ON_N;
+    uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY(eff_num_master_ranks_per_dimm(i_target, l_master_ranks));
+
+    // If we have either DIMM having four ranks, we need to disable parity mode
+    if((l_master_ranks[0] == 4) || (l_master_ranks[1] == 4))
+    {
+        l_state = mss::states::OFF_N;
+    }
+
+    FAPI_DBG( "Change RDTAG_DLY to %d for %s",  l_state, mss::c_str(i_target) );
+
+    FAPI_TRY( read_farb1q_register(i_target, l_data) );
+    set_cid_parity<T>(l_state, l_data);
+    FAPI_TRY( write_farb1q_register(i_target, l_data) );
+
+    FAPI_INF( "FARB1Q_REG 0x%016lx for %s", uint64_t(l_data), mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
