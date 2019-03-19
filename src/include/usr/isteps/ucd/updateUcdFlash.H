@@ -62,27 +62,11 @@ errlHndl_t updateAllUcdFlashImages(
     const TARGETING::TargetHandleList& i_powerSequencers,
           UtilMem&                     i_image);
 
-/**
- *  @brief Updates a UCD target's flash image
- *
- *  @param[in] i_pUcd UCD's target; must not be nullptr
- *  @param[in] i_pFlashImage pointer to the start of the data flash
- *      image (its table of contents).  Must not be nullptr.
- *
- *  @return errlHndl_t Error log handle
- *  @retval nullptr Successfully updated the UCD's data flash image
- *  @retval !nullptr Failed to update the UCD's data flash image.  Handle
- *      points to valid error log
- */
-errlHndl_t updateUcdFlash(
-          TARGETING::Target* i_pUcd,
-    const void*              i_pFlashImage);
-
-} // End namespace POWER_SEQUENCER
+} // End namespace UCD
 
 } // End namespace TI
 
-} // End namespace UCD
+} // End namespace POWER_SEQUENCER
 
 #endif // __UPDATE_UCD_FLASH_H
 
