@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9a/procedures/hwp/memory/lib/freq/sync.C $  */
+/* $Source: src/import/chips/p9a/procedures/hwp/memory/lib/freq/axone_sync.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
