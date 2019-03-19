@@ -34,6 +34,7 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <attributetraits.H>
 
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -63,7 +64,7 @@ private:
     enum DEVICE_OP_LENGTH : size_t
     {
         MFR_REVISION_MAX_SIZE = 12,
-        DEVICE_ID_MAX_SIZE = 32,
+        DEVICE_ID_MAX_SIZE    = 32,
     };
 
     enum COMMAND : uint8_t
@@ -78,6 +79,8 @@ private:
     const TARGETING::TargetHandle_t iv_pUcd;
     char* iv_deviceId;
     uint16_t iv_mfrRevision;
+    TARGETING::TargetHandle_t iv_pI2cMaster;
+    TARGETING::I2cControlInfo iv_i2cInfo;
 
     /*
      *  Delete Copy Constructor
@@ -115,6 +118,17 @@ public:
         assert(i_ucd->getAttr<TARGETING::ATTR_TYPE>()
                 == TARGETING::TYPE_POWER_SEQUENCER,
                 "i_ucd must be of type POWER_SEQUENCER");
+
+        // Get the I2C info for this UCD.
+        memset(&iv_i2cInfo, 0, sizeof(iv_i2cInfo));
+        iv_i2cInfo = iv_pUcd->getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
+
+        iv_pI2cMaster =
+            TARGETING::targetService().toTarget(iv_i2cInfo.i2cMasterPath);
+
+        assert(iv_pI2cMaster != nullptr, "i2cMaster for UCD 0x%.8X was nullptr",
+                  get_huid(iv_pUcd));
+
     }
 
     /* @brief           Destructor that cleans up the iv_deviceId instance
@@ -149,28 +163,18 @@ public:
         {
             char deviceIdBuffer[DEVICE_ID_MAX_SIZE]{};
 
-            // Get the I2C info for this UCD.
-            const auto i2cInfo = iv_pUcd->
-                getAttr<TARGETING::ATTR_I2C_CONTROL_INFO>();
-
-            TARGETING::TargetHandle_t i2cMaster =
-                TARGETING::targetService().toTarget(i2cInfo.i2cMasterPath);
-
-           assert(i2cMaster != nullptr, "i2cMaster for UCD 0x%.8X was nullptr",
-                  get_huid(iv_pUcd));
-
             size_t size = sizeof(deviceIdBuffer);
 
             err = deviceOp(DeviceFW::READ,
-                           i2cMaster,
+                           iv_pI2cMaster,
                            deviceIdBuffer,
                            size,
-                           DEVICE_I2C_SMBUS_BLOCK(i2cInfo.engine,
-                                                  i2cInfo.port,
-                                                  i2cInfo.devAddr,
+                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
+                                                  iv_i2cInfo.port,
+                                                  iv_i2cInfo.devAddr,
                                                   DEVICE_ID,
-                                                  i2cInfo.i2cMuxBusSelector,
-                                                  &i2cInfo.i2cMuxPath)
+                                                  iv_i2cInfo.i2cMuxBusSelector,
+                                                  &iv_i2cInfo.i2cMuxPath)
                           );
 
             // @TODO RTC 205982: Handle the PEC byte if it exists.
@@ -213,10 +217,10 @@ public:
                               get_huid(iv_pUcd)
                           );
 
-                err->addI2cDeviceCallout(i2cMaster,
-                                         i2cInfo.engine,
-                                         i2cInfo.port,
-                                         i2cInfo.devAddr,
+                err->addI2cDeviceCallout(iv_pI2cMaster,
+                                         iv_i2cInfo.engine,
+                                         iv_i2cInfo.port,
+                                         iv_i2cInfo.devAddr,
                                          HWAS::SRCI_PRIORITY_HIGH);
 
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -266,15 +270,15 @@ public:
 
             // Read the MFR revision from the UCD device.
             err = deviceOp(DeviceFW::READ,
-                           i2cMaster,
+                           iv_pI2cMaster,
                            mfrBuf.str,
                            size,
-                           DEVICE_I2C_SMBUS_BLOCK(i2cInfo.engine,
-                                                  i2cInfo.port,
-                                                  i2cInfo.devAddr,
+                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
+                                                  iv_i2cInfo.port,
+                                                  iv_i2cInfo.devAddr,
                                                   MFR_REVISION,
-                                                  i2cInfo.i2cMuxBusSelector,
-                                                  &i2cInfo.i2cMuxPath)
+                                                  iv_i2cInfo.i2cMuxBusSelector,
+                                                  &iv_i2cInfo.i2cMuxPath)
                           );
 
             // @TODO RTC 205982: Need to handle the case where a bad PEC byte
@@ -317,10 +321,10 @@ public:
                             TWO_UINT32_TO_UINT64(MFR_REVISION_MAX_SIZE, size),
                             get_huid(iv_pUcd));
 
-                err->addI2cDeviceCallout(i2cMaster,
-                                         i2cInfo.engine,
-                                         i2cInfo.port,
-                                         i2cInfo.devAddr,
+                err->addI2cDeviceCallout(iv_pI2cMaster,
+                                         iv_i2cInfo.engine,
+                                         iv_i2cInfo.port,
+                                         iv_i2cInfo.devAddr,
                                          HWAS::SRCI_PRIORITY_HIGH);
 
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -340,7 +344,40 @@ public:
         } while(0);
 
         return err;
-    }
+    } // end of initialize()
+
+
+    /**
+     *  @brief Updates a UCD target's flash image
+     *
+     *  @param[in] i_pFlashImage pointer to the start of the data flash
+     *      image for this UCD target.  Must not be nullptr.
+     *  @param[in] i_size Size of i_pFlashImage
+     *
+     *  @return errlHndl_t Error log handle
+     *  @retval nullptr Successfully updated the UCD's data flash image
+     *  @retval !nullptr Failed to update the UCD's data flash image.  Handle
+     *      points to valid error log
+     */
+    errlHndl_t updateUcdFlash(const void*  i_pFlashImage,
+                                    size_t i_size)
+    {
+        errlHndl_t pError = nullptr;
+
+        // Stub for future additional support
+        TRACFCOMP(g_trac_ucd, ENTER_MRK"updateUcdFlash: ucd_tgt=0x%.08X, "
+                  "i2cInfo: e%d/p%d/da=0x%X. i_pFlashImage=%p, i_size=0x%X",
+                  TARGETING::get_huid(iv_pUcd),
+                  iv_i2cInfo.engine, iv_i2cInfo.port, iv_i2cInfo.devAddr,
+                  i_pFlashImage, i_size);
+
+        TRACFBIN(g_trac_ucd,"updateUcdFlash: Start of i_pFlashImage",
+                 i_pFlashImage, 64);
+
+        return pError;
+
+    } // end of updateUcdFlash()
+
 
     /*
      * @brief                     Gets the Device ID for the UCD member of this
@@ -364,7 +401,7 @@ public:
         return iv_mfrRevision;
     }
 
-};
+}; // end of class Ucd
 
 /**
  *  @brief Header for the UCD flash image content
@@ -759,12 +796,10 @@ errlHndl_t updateAllUcdFlashImages(
             nextUcd=true;
 
             // Update the UCD data flash
-            // @TODO RTC 205979 - Call this function
-            //pError = updateUcdFlash(
-            //             powerSequencer,
-            //               reinterpret_cast<const uint8_t*>(i_image.base())
-            //             + tocEntry.imageOffset,
-            //             tocEntry.imageSize);
+            pError = ucd.updateUcdFlash(
+                           reinterpret_cast<const uint8_t*>(i_image.base())
+                             + tocEntry.imageOffset,
+                           tocEntry.imageSize);
             if(pError)
             {
                 TRACFCOMP(g_trac_ucd,ERR_MRK
@@ -820,17 +855,6 @@ errlHndl_t updateAllUcdFlashImages(
 
     TRACFCOMP(g_trac_ucd, EXIT_MRK
               "updateAllUcdFlashImages");
-
-    return pError;
-}
-
-errlHndl_t updateUcdFlash(
-          TARGETING::Target* i_pUcd,
-    const void*              i_pFlashImage)
-{
-    errlHndl_t pError = nullptr;
-
-    // Stub for future additional support
 
     return pError;
 }

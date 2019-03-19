@@ -170,7 +170,7 @@ void call_update_ucd_flash(void)
 
         // Destructor automatically unloads the UCD flash binary
 
-    } // End valid machine and not-simcis for UCD updates
+    } // End valid machine and not-simics check for UCD updates
 
     } while(0);
 
