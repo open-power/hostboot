@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -739,11 +739,15 @@ namespace INTR
 
             /**
              * Set correct PSIHB Regs to route + enable LSI interrupts from
-             * non-master proc to correct address on master proc
+             * any proc to correct address on master proc.
+             *
+             * This is used on the master proc as a workaround for a HW bug
+             * involving lsi triggers on the local wire. This forces the lsi
+             * trigger over the PSIHB working around the HW issue
              * @param[in] i_proc, the proc intrp handler
              * @return void
              */
-            void enableSlaveProcInterruptRouting(intr_hdlr_t* i_proc);
+            void routeLSIInterrupts(intr_hdlr_t* i_proc);
 
             /**
              * Initialize the IRSCReg to enable PSI to present interrupts

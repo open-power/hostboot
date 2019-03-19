@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -234,8 +234,8 @@ errlHndl_t IntrRp::resetIntpForMpipl()
         {
             if (*targ_itr != iv_masterHdlr)
             {
-                TRACDCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Setting up Slave Proc Interrupt Routing for proc %lx", get_huid((*targ_itr)->proc));
-                enableSlaveProcInterruptRouting(*targ_itr);
+                TRACDCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Setting up LSI Interrupt Routing for proc %lx", get_huid((*targ_itr)->proc));
+                routeLSIInterrupts(*targ_itr);
             }
         }
 
@@ -528,6 +528,11 @@ errlHndl_t IntrRp::_init()
                 break;
             }
 
+            //Route LSI interrupt events over PSIHB instead of local wire
+            // This is a HW Bug Workaround for slaves using the PSIHB and
+            // the master using the local wire
+            routeLSIInterrupts(l_procIntrHdlr);
+
             enableLsiInterrupts();
         }
         else
@@ -541,6 +546,11 @@ errlHndl_t IntrRp::_init()
                 TRACFCOMP(g_trac_intr, "IntrRp::_init() Error masking all interrupt sources.");
                 break;
             }
+
+            //Route LSI interrupt events over PSIHB instead of local wire
+            // This is a HW Bug Workaround for slaves using the PSIHB and
+            // the master using the local wire
+            routeLSIInterrupts(l_procIntrHdlr);
 
             enableLsiInterrupts();
 
@@ -987,7 +997,7 @@ errlHndl_t IntrRp::enableInterrupts(intr_hdlr_t *i_proc)
     return err;
 }
 
-void IntrRp::enableSlaveProcInterruptRouting(intr_hdlr_t *i_proc)
+void IntrRp::routeLSIInterrupts(intr_hdlr_t *i_proc)
 {
     PSIHB_SW_INTERFACES_t * l_psihb_ptr = i_proc->psiHbBaseAddr;
 
@@ -3562,9 +3572,9 @@ errlHndl_t INTR::IntrRp::enableSlaveProcInterrupts(TARGETING::Target * i_target)
             break;
         }
 
-        //Setup the PSIHB interrupt routing to route interrupts from nom-master
+        //Setup the PSIHB interrupt routing to route interrupts from non-master
         //  proc back to master proc
-        enableSlaveProcInterruptRouting(l_procIntrHdlr);
+        routeLSIInterrupts(l_procIntrHdlr);
 
     } while(0);
 
