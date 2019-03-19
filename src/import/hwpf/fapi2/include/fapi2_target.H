@@ -379,6 +379,19 @@ class Target
         getChipletNumber(void) const;
 
         ///
+        /// @brief Returns the core select vector associated with a Core target
+        /// @return The core select value for the target. For unicast core targets
+        /// the return value will have exactly one bit set. For multicast core
+        /// targets it will have between one and four bits set.
+        ///
+        inline MulticastCoreSelect
+        getCoreSelect(void) const
+        {
+            static_assert(K & TARGET_TYPE_CORE, "getCoreSelect is only applicable to TARGET_TYPE_CORE targets");
+            return _getCoreSelect();
+        }
+
+        ///
         /// @brief Copy from a Target<O, MO> to a Target<K, M>
         /// @tparam O the target type of the other
         /// @tparam MO the multicast type of the other
@@ -410,7 +423,10 @@ class Target
         V iv_handle;
 
         /// @brief if iv_handle is a multicast target, update its multicast type to M
-        inline void mcUpdateHandle();
+        inline void mcUpdateHandle(void);
+
+        /// @brief Internal implementation of getCoreSelect, filtered for CORE targets
+        inline MulticastCoreSelect _getCoreSelect(void) const;
 };
 
 // EX threads map to CORE threads:
