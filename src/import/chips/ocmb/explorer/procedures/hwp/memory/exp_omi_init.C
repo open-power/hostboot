@@ -242,7 +242,7 @@ fapi2::ReturnCode omiCheckSupportedBit(const fapi2::buffer<uint32_t>& i_data, co
     }
 
 fapi_try_exit:
-    FAPI_ERR("extractToRight failed return code : 0x%08X", (uint64_t) fapi2::current_err);
+    FAPI_DBG("Exit with return code : 0x%08X", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
@@ -273,7 +273,7 @@ fapi2::ReturnCode omiCheckSupportedPacing(const fapi2::buffer<uint32_t>& i_data,
     }
 
 fapi_try_exit:
-    FAPI_ERR("extractToRight failed return code : 0x%08X", (uint64_t) fapi2::current_err);
+    FAPI_DBG("Exit with return code : 0x%08X", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
 
