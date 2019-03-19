@@ -157,6 +157,36 @@ inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
 fapi2::ReturnCode preload_ccs_for_epow( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
                                         ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program);
 
+namespace nvdimm
+{
+
+///
+/// @brief Execute a set of CCS instructions
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the vector of instructions
+/// @param[in] i_port The port target that the array is for
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note This is a copy of execute() with minor tweaks to the namespace and single port only
+///
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                           mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                           const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port);
+
+///
+/// @brief Execute the contents of the CCS array with ccs_addr_mux_sel control
+/// @param[in] i_target The MCBIST containing the array
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @param[in] i_port The port target that the array is for
+/// @return FAPI2_RC_SUCCESS iff success
+/// @note This is the exact same copy of execute_inst_array() in ccs.H with changes
+///       to ccs_addr_mux_sel before and after the execute. This is required to ensure
+///       CCS can properly drive the bus during the nvdimm post-restore sequence.
+///
+fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                                     fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port);
+}
+
 namespace wr_lvl
 {
 

@@ -620,6 +620,14 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
 {
     // Loops through the DRAMs to check and creates a vector of bad DRAMs and their associated starting delays
     std::vector<std::pair<uint64_t, uint64_t>> l_bad_drams;
+    uint8_t l_hybrid[mss::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_hybrid_type[mss::MAX_DIMM_PER_PORT] = {};
+
+    // Get the hybrid type
+    FAPI_TRY(mss::eff_hybrid(i_target, &l_hybrid[0]),
+             "%s failed to access DIMM hybrid type", mss::c_str(i_target));
+    FAPI_TRY(mss::eff_hybrid_memory_type(i_target, &l_hybrid_type[0]),
+             "%s failed to access DIMM hybrid memory type", mss::c_str(i_target));
 
     // Checking all of the DRAMs that had been good before WR VREF
     // If any of them have gone bad, then note it and run the workaround
@@ -748,6 +756,22 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
         }
 
         // Re-runs WR VREF
+        FAPI_TRY(run( i_target,
+                      i_rp,
+                      i_abort_on_error,
+                      false ));
+    }
+
+    // If this port has nvdimm, run the workaround. When we do the restore we cannot do the
+    // pda wr vref latch because it will break the refresh timing with multiple ccs sequences.
+    // As such, let's run the nvdimm with rank median vref value so later on we can just load
+    // the vref in 1 ccs sequence.
+    if ((l_hybrid[0] ==  fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID) &&
+        (l_hybrid_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM) && !iv_wr_vref)
+    {
+        FAPI_TRY(mss::workarounds::wr_vref::nvdimm_workaround(i_target, i_rp, i_abort_on_error));
+
+        // Rerun the centering with the median vref
         FAPI_TRY(run( i_target,
                       i_rp,
                       i_abort_on_error,

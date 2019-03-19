@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -818,6 +818,14 @@
     <target>TARGET</target>
     <priority>HIGH</priority>
   </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_RP_OUT_OF_RANGE</rc>
+  <description>
+    An informational callout for rank-pair value out of range
+  </description>
+  <ffdc>RP</ffdc>
 </hwpError>
 
 </hwpErrors>

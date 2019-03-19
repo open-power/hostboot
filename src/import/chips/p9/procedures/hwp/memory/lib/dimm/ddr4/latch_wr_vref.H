@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,13 +73,14 @@ fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_
 /// @param[in] i_rank_pair, rank pair on which to latch MRS 06 - hits all ranks in the rank pair
 /// @param[in] i_train_range, VREF range to setup
 /// @param[in] i_train_value, VREF value to setup
-/// @param[in,out] a vector of CCS instructions we should add to
+/// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rank_pair,
         const uint8_t i_train_range,
-        const uint8_t i_train_value);
+        const uint8_t i_train_value,
+        const bool i_nvdimm_workaround = false);
 
 ///
 /// @brief enables VREF train enable in an MRS06 class

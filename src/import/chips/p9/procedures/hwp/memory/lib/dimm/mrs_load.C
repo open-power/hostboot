@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <mss.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -51,10 +52,12 @@ namespace mss
 ///
 /// @brief Perform the mrs_load operations - TARGET_TYPE_MCA specialization
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCA>
+/// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const bool i_nvdimm_workaround )
 {
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
 
@@ -75,7 +78,17 @@ fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA
     // We have to configure the CCS engine to let it know which port these instructions are
     // going out (or whether it's broadcast ...) so lets execute the instructions we presently
     // have so that we kind of do this by port
-    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target) );
+    // Run the NVDIMM-specific execute procedure if this is for nvdimm workaround.
+    // Otherwise, execute as usual.
+    if (i_nvdimm_workaround)
+    {
+        FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s",
+                  mss::c_str(i_target) );
+    }
+    else
+    {
+        FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s", mss::c_str(i_target) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -84,10 +97,12 @@ fapi_try_exit:
 ///
 /// @brief Perform the mrs_load operations - TARGET_TYPE_MCBIST specialization
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+        const bool i_nvdimm_workaround )
 {
     for ( const auto& p : find_targets<TARGET_TYPE_MCA>(i_target) )
     {

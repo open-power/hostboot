@@ -37,6 +37,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/mss_const.H>
 #include <lib/ccs/ccs.H>
+#include <lib/phy/dp16.H>
 
 namespace mss
 {
@@ -114,16 +115,6 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode self_refresh_exit( const fapi2::Target<T>& i_target );
 
 ///
-/// @brief Latch write vref at per-dram basis
-/// @tparam T the target type associated with this subroutine
-/// @param[in] i_target the target associated with this subroutine
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-
-template< fapi2::TargetType T >
-fapi2::ReturnCode pda_vref_latch( const fapi2::Target<T>& i_target );
-
-///
 /// @brief Disable powerdown mode in rc09
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
@@ -163,6 +154,13 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
 fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
 
 ///
+/// @brief Latch write vref
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
 /// @brief Full post-restore transition for NVDIMM
 /// @tparam T the target type associated with this subroutine
 /// @param[in] i_target the target associated with this subroutine
@@ -179,6 +177,40 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<T>& i_target );
 ///       should only be called after all the draminit.
 ///
 fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+namespace wr_vref
+{
+
+///
+/// @brief Helper to extract the values and ranges from wr_vref_value reg, and
+///        convert JEDEC value to composite
+/// @param[in] i_data - wr vref reg data
+/// @param[out] o_values - vector of composite value
+///
+inline void get_wr_vref_composite_value_helper(const fapi2::buffer<uint64_t> i_data,
+        std::vector<uint64_t>& o_values)
+{
+    FAPI_DBG("get_wr_vref_composite_value_helper() i_data = 0x%016lx", i_data);
+    const std::vector<uint64_t> DRAMS = {0, 1};
+
+    for (const auto l_dram : DRAMS)
+    {
+        uint64_t l_wr_vref_val = 0;
+        bool l_wr_vref_range = 0;
+        uint64_t l_composite_vref = 0;
+
+        mss::dp16::wr_vref::get_wr_vref_value(i_data, l_dram, l_wr_vref_val);
+        mss::dp16::wr_vref::get_wr_vref_range(i_data, l_dram, l_wr_vref_range);
+
+        l_composite_vref = mss::dp16::wr_vref::compute_composite_value(l_wr_vref_range, l_wr_vref_val);
+
+        FAPI_DBG("l_composite_vref: 0x%016lx", l_composite_vref);
+
+        o_values.push_back(l_composite_vref);
+    }
+}
+
+}//ns wr_vref
 
 }//ns nvdimm
 

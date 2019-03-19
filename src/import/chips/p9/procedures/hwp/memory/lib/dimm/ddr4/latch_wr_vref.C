@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/dimm/rank.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -96,13 +97,14 @@ fapi_try_exit:
 /// @param[in] i_rank_pair, rank pair on which to latch MRS 06 - hits all ranks in the rank pair
 /// @param[in] i_train_range, VREF range to setup
 /// @param[in] i_train_value, VREF value to setup
-/// @param[in,out] a vector of CCS instructions we should add to
+/// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rank_pair,
         const uint8_t i_train_range,
-        const uint8_t i_train_value)
+        const uint8_t i_train_value,
+        const bool i_nvdimm_workaround)
 {
     // Declares variables
     const auto l_mcbist = find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
@@ -141,7 +143,17 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
     }
 
     // Executes the CCS commands
-    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s", mss::c_str(i_target) );
+    // Run the NVDIMM-specific execute procedure if this is for nvdimm workaround.
+    // Otherwise, execute as usual.
+    if (i_nvdimm_workaround)
+    {
+        FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s",
+                  mss::c_str(i_target) );
+    }
+    else
+    {
+        FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s", mss::c_str(i_target) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

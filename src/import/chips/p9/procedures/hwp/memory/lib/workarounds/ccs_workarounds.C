@@ -37,7 +37,9 @@
 #include <lib/dimm/rank.H>
 #include <p9_mc_scom_addresses.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/eff_config/timing.H>
+#include <lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -212,6 +214,176 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace nvdimm
+{
+
+///
+/// @brief Execute the contents of the CCS array with ccs_addr_mux_sel control
+/// @param[in] i_target The MCBIST containing the array
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @param[in] i_port The port target that the array is for
+/// @return FAPI2_RC_SUCCESS iff success
+/// @note This is the exact same copy of execute_inst_array() in ccs.H with changes
+///       to ccs_addr_mux_sel before and after the execute. This is required to ensure
+///       CCS can properly drive the bus during the nvdimm post-restore sequence.
+///
+fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                                     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port)
+{
+    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+
+    fapi2::buffer<uint64_t> status;
+
+    // Change ccs_add_mux_sel to high to make sure the CCS logic is driving the bus
+    FAPI_TRY(mss::change_addr_mux_sel(i_port, mss::HIGH));
+
+    FAPI_TRY(mss::ccs::start_stop(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
+
+    mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
+              [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("ccs statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        status = stat_reg;
+        return status.getBit<TT::CCS_IN_PROGRESS>() != 1;
+    },
+    i_program.iv_probes);
+
+    // ccs_add_mux_sel back to low to give control back to mainline
+    FAPI_TRY(mss::change_addr_mux_sel(i_port, mss::LOW));
+
+    // Check for done and success. DONE being the only bit set.
+    if (status == STAT_QUERY_SUCCESS)
+    {
+        FAPI_INF("%s CCS Executed Successfully.", mss::c_str(i_port) );
+        goto fapi_try_exit;
+    }
+
+    // So we failed or we're still in progress. Mask off the fail bits
+    // and run this through the FFDC generator.
+    // TK: Put the const below into a traits class? -- JLH
+    FAPI_TRY( mss::ccs::fail_type(i_target, status & 0x1C00000000000000, i_port), "Error in execute_inst_array" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Execute a set of CCS instructions
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the vector of instructions
+/// @param[in] i_port The port target that the array is for
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note This is a copy of execute() with minor tweaks to the namespace and single port only
+///
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                           mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                           const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port)
+{
+    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+
+    // Subtract one for the idle we insert at the end
+    constexpr size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
+    constexpr uint64_t CCS_ARR0_ZERO = MCBIST_CCS_INST_ARR0_00;
+    constexpr uint64_t CCS_ARR1_ZERO = MCBIST_CCS_INST_ARR1_00;
+
+    mss::ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> l_des = ccs::des_command<fapi2::TARGET_TYPE_MCBIST>();
+
+    FAPI_INF("loading ccs instructions (%d) for %s", i_program.iv_instructions.size(), mss::c_str(i_target));
+
+    auto l_inst_iter = i_program.iv_instructions.begin();
+
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( mss::ccs::start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
+
+    FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
+                           [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
+    }),
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target) );
+
+    while (l_inst_iter != i_program.iv_instructions.end())
+    {
+        size_t l_inst_count = 0;
+
+        uint64_t l_total_delay = 0;
+        uint64_t l_delay = 0;
+        uint64_t l_repeat = 0;
+        uint8_t l_current_cke = 0;
+
+        // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
+        for (; l_inst_iter != i_program.iv_instructions.end()
+             && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++l_inst_iter)
+        {
+            l_inst_iter->arr0.extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+
+            // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
+            // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
+            l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
+                        MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0), "Error in ccs::execute" );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1), "Error in ccs::execute" );
+
+            // arr1 contains a specification of the delay and repeat after this instruction, as well
+            // as a repeat. Total up the delays as we go so we know how long to wait before polling
+            // the CCS engine for completion
+            l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay);
+            l_inst_iter->arr1.extractToRight<MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT,
+                        MCBIST_CCS_INST_ARR1_00_REPEAT_CMD_CNT>(l_repeat);
+
+            l_total_delay += l_delay * (l_repeat + 1);
+
+            FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
+                     l_inst_count, l_inst_iter->arr0, l_inst_iter->arr1,
+                     CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
+                     l_delay, l_total_delay, mss::c_str(i_target));
+        }
+
+        // Check our program for any delays. If there isn't a iv_initial_delay configured, then
+        // we use the delay we just summed from the instructions.
+        if (i_program.iv_poll.iv_initial_delay == 0)
+        {
+            i_program.iv_poll.iv_initial_delay = cycles_to_ns(i_target, l_total_delay);
+        }
+
+        if (i_program.iv_poll.iv_initial_sim_delay == 0)
+        {
+            i_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(l_total_delay);
+        }
+
+        FAPI_INF("executing ccs instructions (%d:%d, %d) for %s",
+                 i_program.iv_instructions.size(), l_inst_count, i_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
+
+        // Deselect
+        l_des.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+
+        // Insert a DES as our last instruction. DES is idle state anyway and having this
+        // here as an instruction forces the CCS engine to wait the delay specified in
+        // the last instruction in this array (which it otherwise doesn't do.)
+        l_des.arr1.setBit<MCBIST_CCS_INST_ARR1_00_END>();
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0), "Error in ccs::execute" );
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1), "Error in ccs::execute" );
+
+        FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
+                 l_inst_count, l_des.arr0, l_des.arr1,
+                 CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count, mss::c_str(i_target));
+
+        // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
+        FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_port),
+                 mss::c_str(i_port));
+        FAPI_TRY( mss::ccs::select_ports( i_target, mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_port)),
+                  "Error in ccs execute" );
+        FAPI_TRY( execute_inst_array(i_target, i_program, i_port), "Error in ccs execute" );
+    }
+
+fapi_try_exit:
+    i_program.iv_instructions.clear();
+    return fapi2::current_err;
+}
+
+} // ns nvdimm
 
 namespace wr_lvl
 {

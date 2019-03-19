@@ -53,8 +53,8 @@
 #include <lib/mc/port.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/mrs_load.H>
-#include <lib/dimm/ddr4/pda.H>
 #include <lib/dimm/ddr4/zqcal.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/eff_config/timing.H>
@@ -322,70 +322,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief PDA support for post restore transition
-/// Specialization for TARGET_TYPE_DIMM
-/// @param[in] i_target the target associated with this subroutine
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode pda_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
-{
-    std::vector<uint64_t> l_ranks;
-    const auto& l_mca = mss::find_target<TARGET_TYPE_MCA>(i_target);
-    fapi2::buffer<uint8_t> l_value, l_range;
-    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-
-    // Creates the MRS container class
-    mss::ddr4::pda::commands<mss::ddr4::mrs06_data> l_container;
-
-    // Get all the ranks in the dimm
-    mss::rank::ranks(i_target, l_ranks);
-
-    // Get the number of DRAMs
-    uint8_t l_width = 0;
-    mss::eff_dram_width(i_target, l_width);
-    const uint64_t l_num_drams = (l_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? MAX_DRAMS_X8 : MAX_DRAMS_X4;
-
-    for (const auto& l_rank : l_ranks)
-    {
-
-        uint64_t l_rp = 0;
-        uint64_t l_wr_vref_value = 0;
-        bool l_wr_vref_range = 0;
-        fapi2::buffer<uint64_t> l_data ;
-
-        mss::rank::get_pair_from_rank(l_mca, l_rank, l_rp);
-
-        // create mrs06
-        mss::ddr4::mrs06_data l_mrs(i_target, l_rc);
-
-        // loop through all the dram
-        for(uint64_t l_dram = 0; l_dram < l_num_drams; l_dram++)
-        {
-            mss::dp16::wr_vref::read_wr_vref_register( l_mca, l_rp, l_dram, l_data);
-            mss::dp16::wr_vref::get_wr_vref_range( l_data, l_dram, l_wr_vref_range);
-            mss::dp16::wr_vref::get_wr_vref_value( l_data, l_dram, l_wr_vref_value);
-
-            l_mrs.iv_vrefdq_train_value[mss::index(l_rank)] = l_wr_vref_value;
-            l_mrs.iv_vrefdq_train_range[mss::index(l_rank)] = l_wr_vref_range;
-            l_container.add_command(i_target, l_rank, l_mrs, l_dram);
-        }
-    }
-
-    // Disable refresh
-    FAPI_TRY( mss::change_refresh_enable(l_mca, states::LOW) );
-
-    // execute_wr_vref_latch(l_container)
-    FAPI_TRY( mss::ddr4::pda::execute_wr_vref_latch(l_container) )
-
-    // Enable refresh
-    FAPI_TRY( mss::change_refresh_enable(l_mca, states::HIGH) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Disable powerdown mode in rc09
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
@@ -540,7 +476,7 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
     // Exit STR first so CKE is back to high and rcd isn't ignoring us
     FAPI_TRY( self_refresh_exit( i_target ) );
 
-    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target),
+    FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target),
               "Failed to execute ccs for %s", mss::c_str(i_target) );
 
     // Now, drive CKE back to low via STR entry instead of pde (we have data in the drams!)
@@ -557,7 +493,7 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
     }// dimms
 
     // Restore the rcd
-    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target),
+    FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target),
               "Failed to execute ccs for %s", mss::c_str(i_target) );
 
 fapi_try_exit:
@@ -597,8 +533,48 @@ fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA
     }// dimms
 
     // execute ZQCAL instructions
-    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target),
+    FAPI_TRY( mss::ccs::workarounds::nvdimm::execute(l_mcbist, l_program, i_target),
               "Failed to execute ccs for ZQCAL %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Latch write vref
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    std::vector<uint64_t> l_pairs;
+    const bool NVDIMM_WORKAROUND = true;
+
+    // We are latching in the averaged value and we should have the averaged value
+    // (this step should be run after all the draminit) so just the first dram is fine
+    constexpr uint64_t l_dram = 0;
+
+    // Get our rank pairs.
+    FAPI_TRY( mss::rank::get_rank_pairs(i_target, l_pairs) );
+
+    for (const auto& l_rp : l_pairs)
+    {
+        FAPI_INF("NVDIMM wr_vref_latch on rp %d %s", l_rp, mss::c_str(i_target));
+        fapi2::buffer<uint64_t> l_data ;
+        uint64_t l_wr_vref_value = 0;
+        bool l_wr_vref_range = 0;
+
+        mss::dp16::wr_vref::read_wr_vref_register( i_target, l_rp, l_dram, l_data);
+        mss::dp16::wr_vref::get_wr_vref_range( l_data, l_dram, l_wr_vref_range);
+        mss::dp16::wr_vref::get_wr_vref_value( l_data, l_dram, l_wr_vref_value);
+
+        FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair(i_target,
+                  l_rp,
+                  l_wr_vref_range,
+                  l_wr_vref_value,
+                  NVDIMM_WORKAROUND) );
+
+    }// rank pairs
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -616,6 +592,7 @@ template<>
 fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     mss::states l_maint_addr_enabled = mss::states::LOW;
+    const bool NVDIMM_WORKAROUND = true;
 
     FAPI_TRY(get_maint_addr_mode_en(i_target, l_maint_addr_enabled));
 
@@ -633,16 +610,13 @@ fapi2::ReturnCode post_restore_transition( const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY( self_refresh_exit( i_target ) );
 
     // Load the MRS
-    FAPI_TRY( mss::mrs_load( i_target ) );
+    FAPI_TRY( mss::mrs_load( i_target, NVDIMM_WORKAROUND ) );
 
     // Do ZQCAL
     FAPI_TRY( post_restore_zqcal(i_target) );
 
-    // Latch the trained PDA vref values for each dimm under the port
-    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        FAPI_TRY( pda_vref_latch( l_dimm ) );
-    }
+    // Latch in the rank averaged vref value
+    FAPI_TRY(wr_vref_latch(i_target));
 
     //Restore main_addr_mode_en to previous setting
     FAPI_TRY(change_maint_addr_mode_en(i_target, l_maint_addr_enabled));

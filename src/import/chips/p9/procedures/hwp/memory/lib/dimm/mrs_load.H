@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,10 +111,11 @@ struct mrs_data
 /// @brief Perform the mrs_load operations
 /// @tparam T, the fapi2::TargetType of i_target
 /// @param[in] i_target, a fapi2::Target
+/// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode mrs_load( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode mrs_load( const fapi2::Target<T>& i_target, const bool i_nvdimm_workaround = false );
 
 //
 // Implement the polymorphism for mrs_load

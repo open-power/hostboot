@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,17 @@ fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target
                            const bool i_wr_vref_enabled,
                            uint8_t& o_vrefdq_train_range,
                            uint8_t& o_vrefdq_train_value );
+
+///
+/// @brief Executes the nvdimm workaround
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode nvdimm_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint8_t i_abort_on_error );
 
 } // close namespace wr_vref
 } // close namespace workarounds

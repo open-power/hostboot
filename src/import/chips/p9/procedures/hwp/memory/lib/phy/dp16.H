@@ -2499,6 +2499,14 @@ inline void get_wr_vref_value( const fapi2::buffer<uint64_t> i_data,
     i_data.extractToRight(o_value, l_value_pos, TT::WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN);
 }
 
+///
+/// @brief Gets the write vref registers by rank pair
+/// @param[in] i_rp - rank pair, to make sure the dram and rp are within bounds
+/// @param[out] o_regs - the dp16 wr_vref registers for the rank pair
+///
+fapi2::ReturnCode get_wr_vref_regs_by_rp(const uint64_t i_rp,
+        std::vector<std::pair<uint64_t, uint64_t>>& o_reg);
+
 } // close namespace wr_vref
 
 ///

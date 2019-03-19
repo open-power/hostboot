@@ -1235,6 +1235,18 @@ fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, const bool i_sta
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 fapi2::ReturnCode status_query( const fapi2::Target<T>& i_target, std::pair<uint64_t, uint64_t>& io_status );
 
+///
+/// @brief Determine the CCS failure type
+/// @param[in] i_target MCBIST target
+/// @param[in] i_type the failure type
+/// @param[in] i_mca The port the CCS instruction is training
+/// @return ReturnCode associated with the fail.
+/// @note FFDC is handled here, caller doesn't need to do it
+///
+fapi2::ReturnCode fail_type( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                             const uint64_t& i_type,
+                             const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_mca );
+
 } // ends namespace ccs
 }
 
