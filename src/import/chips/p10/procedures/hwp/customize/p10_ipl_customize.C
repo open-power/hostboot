@@ -39,7 +39,7 @@
     #include "endian.h"
     #include "win_sim_fapi.h"
 #else
-    #include <p9_get_mvpd_ring.H>
+    #include <p10_get_mvpd_ring.H>
 #endif
 
 #include <p10_ipl_customize.H>
@@ -47,7 +47,7 @@
 #include <p9_ring_identification.H>
 #include <p10_tor.H>
 #include <p9_scan_compression.H>
-#include <p9_infrastruct_help.H>
+#include <p10_infrastruct_help.H>
 
 enum MvpdRingStatus
 {

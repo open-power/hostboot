@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/utils/imageProcs/p10_tor.mk $
+# $Source: src/import/chips/p10/procedures/hwp/accessors/p10_mvpd_ring_funcs.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,9 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p10_tor
-lib$(PROCEDURE)_DEPLIBS += common_ringId
-lib$(PROCEDURE)_DEPLIBS += p10_ringId
+
+# Include the macros and things for MVPD ring procedures
+PROCEDURE=p10_mvpd_ring_funcs
+lib$(PROCEDURE)_DEPLIBS+=p10_ringId
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/accessors)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
 $(call BUILD_PROCEDURE)
