@@ -37,20 +37,11 @@
 #define _MSS_EFF_MEMORY_SIZE_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
-///
-/// @brief Check if a given DIMM is functional
-/// @param[in] i_valid_dimm_bitmap from ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR
-/// @param[in] i_port port index [0:1]
-/// @param[in] i_dimm dimm index [0:1]
-/// @return true if dimm is functional, false otherwise
-///
-bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
-                        const uint8_t i_port,
-                        const uint8_t i_dimm);
 
 ///
 /// @brief Return the total memory size behind the target

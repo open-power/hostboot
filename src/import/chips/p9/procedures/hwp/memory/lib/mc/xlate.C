@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/mss_attribute_accessors.H>
-
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/mc/mc.H>
 #include <lib/mc/xlate.H>
 #include <generic/memory/lib/utils/scom.H>

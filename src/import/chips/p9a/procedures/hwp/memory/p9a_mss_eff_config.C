@@ -67,6 +67,8 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         uint64_t l_freq = 0;
         FAPI_TRY( mss::attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq) );
 
+        FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(dimm) );
+
         // Quick hack to get the index until DIMM level attrs work
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_REL_POS, dimm, l_dimm_index) );
 

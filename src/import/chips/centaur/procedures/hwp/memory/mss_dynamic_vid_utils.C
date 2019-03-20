@@ -33,8 +33,7 @@
 
 #include <mss_dynamic_vid_utils.H>
 #include <generic/memory/lib/utils/find.H>
-
-
+#include <generic/memory/lib/utils/c_str.H>
 
 ///
 /// @brief Checks centaur configurations and outputs DRAM device type

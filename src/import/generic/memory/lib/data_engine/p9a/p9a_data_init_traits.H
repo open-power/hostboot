@@ -39,14 +39,76 @@
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/spd/spd_facade.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_attribute_setters.H>
 
 namespace mss
 {
 
 ///
+/// @brief Helper function to get dimm_type from SPD
+/// @param[in] i_spd_data SPD data
+/// @param[in] i_setting value we want to set attr with
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode get_dimm_type(const spd::facade& i_spd_data,
+                                       uint8_t& o_setting)
+{
+    // =========================================================
+    // DDR4 SPD Document Release 4
+    // Byte 3 (0x003): Key Byte / Module Type
+    // =========================================================
+    static const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
+    {
+        //{key byte, dimm type}
+        {1, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM},
+        {2, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM},
+        {10, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
+        // All others reserved or not supported
+    };
+
+    const auto l_dimm = i_spd_data.get_dimm_target();
+    uint8_t l_base_module_type = 0;
+    FAPI_TRY(i_spd_data.base_module(l_base_module_type));
+    FAPI_TRY(lookup_table_check(l_dimm, BASE_MODULE_TYPE_MAP, SET_ATTR_DIMM_TYPE, l_base_module_type, o_setting));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to get dram_gen from SPD
+/// @param[in] i_spd_data SPD data
+/// @param[in] i_setting value we want to set attr with
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode get_dram_gen(const spd::facade& i_spd_data,
+                                      uint8_t& o_setting)
+{
+    // =========================================================
+    // DDR4 SPD Document Release 4
+    // Byte 2 (0x002): Key Byte / DRAM Device Type
+    // =========================================================
+    static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_GEN_MAP =
+    {
+        //{key value, dram gen}
+        {0x0C, fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4}
+        // Other key bytes reserved or not supported
+    };
+
+    const auto l_dimm = i_spd_data.get_dimm_target();
+    uint8_t l_device_type = 0;
+    FAPI_TRY(i_spd_data.device_type(l_device_type));
+    FAPI_TRY(lookup_table_check(l_dimm, DRAM_GEN_MAP, SET_ATTR_DRAM_GEN, l_device_type, o_setting));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, DIMM_TYPE specialization
+/// @note pre_data_init_fields, DIMM_TYPE specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, DIMM_TYPE>
@@ -58,26 +120,26 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_TYPE>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_TYPE, i_target, o_setting);
+        return mss::attr::get_dimm_type(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_TYPE, i_target, i_setting);
+        return mss::attr::set_dimm_type(i_target, i_setting);
     }
 
     ///
@@ -89,33 +151,14 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_TYPE>
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        // =========================================================
-        // DDR4 SPD Document Release 4
-        // Byte 3 (0x003): Key Byte / Module Type
-        // =========================================================
-        static const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
-        {
-            //{key byte, dimm type}
-            {1, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM},
-            {2, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM},
-            {10, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
-            // All others reserved or not supported
-        };
-
-        uint8_t l_base_module_type = 0;
-        FAPI_TRY(i_spd_data.base_module(l_base_module_type));
-        FAPI_TRY(lookup_table_check(i_spd_data.get_dimm_target(), BASE_MODULE_TYPE_MAP, SET_ATTR_DIMM_TYPE, l_base_module_type,
-                                    o_setting));
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return get_dimm_type(i_spd_data, o_setting);
     }
 };
 
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, DRAM_GEN specialization
+/// @note pre_data_init_fields, DRAM_GEN specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, DRAM_GEN>
@@ -127,26 +170,26 @@ struct attrEngineTraits<pre_data_init_fields, DRAM_GEN>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_GEN, i_target, o_setting);
+        return mss::attr::get_dram_gen(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_GEN, i_target, i_setting);
+        return mss::attr::set_dram_gen(i_target, i_setting);
     }
 
     ///
@@ -158,30 +201,14 @@ struct attrEngineTraits<pre_data_init_fields, DRAM_GEN>
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        // =========================================================
-        // DDR4 SPD Document Release 4
-        // Byte 2 (0x002): Key Byte / DRAM Device Type
-        // =========================================================
-        static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_GEN_MAP =
-        {
-            //{key value, dram gen}
-            {0x0C, fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4}
-            // Other key bytes reserved or not supported
-        };
-
-        uint8_t l_device_type = 0;
-        FAPI_TRY(i_spd_data.device_type(l_device_type));
-        FAPI_TRY(lookup_table_check(i_spd_data.get_dimm_target(), DRAM_GEN_MAP, SET_ATTR_DRAM_GEN, l_device_type, o_setting));
-
-    fapi_try_exit:
-        return fapi2::current_err;
+        return get_dram_gen(i_spd_data, o_setting);
     }
 };
 
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, HYBRID specialization
+/// @note pre_data_init_fields, HYBRID specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, HYBRID>
@@ -193,26 +220,26 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_HYBRID, i_target, o_setting);
+        return mss::attr::get_hybrid(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_HYBRID, i_target, i_setting);
+        return mss::attr::set_hybrid(i_target, i_setting);
     }
 
     ///
@@ -248,7 +275,7 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, HYBRID_MEDIA specialization
+/// @note pre_data_init_fields, HYBRID_MEDIA specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, HYBRID_MEDIA>
@@ -260,26 +287,26 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID_MEDIA>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE, i_target, o_setting);
+        return mss::attr::get_hybrid_memory_type(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE, i_target, i_setting);
+        return mss::attr::set_hybrid_memory_type(i_target, i_setting);
     }
 
     ///
@@ -350,7 +377,7 @@ fapi_try_exit:
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, MRANKS specialization
+/// @note pre_data_init_fields, MRANKS specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, MRANKS>
@@ -362,26 +389,26 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, o_setting);
+        return mss::attr::get_num_master_ranks_per_dimm(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, i_setting);
+        return mss::attr::set_num_master_ranks_per_dimm(i_target, i_setting);
     }
 
     ///
@@ -403,7 +430,7 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note AXONE, DIMM_RANKS_CNFG specialization
+/// @note pre_data_init_fields, DIMM_RANKS_CNFG specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, DIMM_RANKS_CNFG>
@@ -415,26 +442,26 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_RANKS_CNFG>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED, i_target, o_setting);
+        return mss::attr::get_dimm_ranks_configed(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the MCS target
+    /// @param[in] i_target the attr target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED, i_target, i_setting);
+        return mss::attr::set_dimm_ranks_configed(i_target, i_setting);
     }
 
     ///

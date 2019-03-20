@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/pos.H>
 
 namespace mss
 {

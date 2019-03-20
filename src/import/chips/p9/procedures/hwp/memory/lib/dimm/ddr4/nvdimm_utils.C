@@ -49,7 +49,7 @@
 #include <lib/mcbist/mcbist.H>
 #include <lib/mcbist/settings.H>
 #include <lib/utils/mss_nimbus_conversions.H>
-
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/mc/port.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/mrs_load.H>

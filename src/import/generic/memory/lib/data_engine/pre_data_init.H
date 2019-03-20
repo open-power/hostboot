@@ -250,10 +250,23 @@ class pre_data_engine
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template <mss::proc_type P>
-fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const spd::facade& i_spd_decoder )
+inline fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const spd::facade& i_spd_decoder );
+
+///
+/// @brief Sets pre_eff_config attributes - NIMBUS specialization
+/// @param[in] i_target the DIMM target
+/// @param[in] i_spd_decoder SPD decoder
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template <>
+inline fapi2::ReturnCode set_pre_init_attrs<mss::proc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_target,
+        const spd::facade& i_spd_decoder )
 {
-    mss::pre_data_engine<P> l_data_engine(i_target, i_spd_decoder);
+    // TK explicitly forcing this API to only run in Nimbus, need to move pre_data_engine to Nimbus chip path,
+    // using template recursive algorithm moving forward
+    mss::pre_data_engine<mss::proc_type::NIMBUS> l_data_engine(i_target, i_spd_decoder);
 
     // Set attributes needed before eff_config
     // DIMM type and DRAM gen are needed for c_str to aid debugging
@@ -269,6 +282,8 @@ fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIM
     FAPI_TRY(l_data_engine.set_master_ranks(), "Failed to set Master ranks %s", mss::spd::c_str(i_target) );
     FAPI_TRY(l_data_engine.set_dimm_ranks_configured(), "Failed to set DIMM ranks configured %s",
              mss::spd::c_str(i_target) );
+
+    FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;

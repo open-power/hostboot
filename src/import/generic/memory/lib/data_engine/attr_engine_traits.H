@@ -70,7 +70,7 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_WIDTH>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, i_target, o_setting);
+        return mss::attr::get_dram_width(i_target, o_setting);
     }
 
     ///
@@ -82,7 +82,7 @@ struct attrEngineTraits<attr_eff_engine_fields, DRAM_WIDTH>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, i_target, i_setting);
+        return mss::attr::set_dram_width(i_target, i_setting);
     }
 
     ///
@@ -158,7 +158,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS, i_target, o_setting);
+        return mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, o_setting);
     }
 
     ///
@@ -170,7 +170,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_DQ_DQS>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS, i_target, i_setting);
+        return mss::attr::set_si_mc_rcv_imp_dq_dqs(i_target, i_setting);
     }
 
     ///
@@ -208,7 +208,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(i_target, o_setting);
     }
 
     ///
@@ -220,7 +220,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_UP>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_imp_dq_dqs_pull_up(i_target, i_setting);
     }
 
     ///
@@ -258,7 +258,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(i_target, o_setting);
     }
 
     ///
@@ -270,7 +270,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_imp_dq_dqs_pull_down(i_target, i_setting);
     }
 
     ///
@@ -309,7 +309,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_DQ_DQS>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_slew_rate_dq_dqs(i_target, o_setting);
     }
 
     ///
@@ -321,7 +321,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_DQ_DQS>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_DQ_DQS, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_slew_rate_dq_dqs(i_target, i_setting);
     }
 
     ///
@@ -359,7 +359,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_imp_cmd_addr(i_target, o_setting);
     }
 
     ///
@@ -371,7 +371,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CMD_ADDR>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_imp_cmd_addr(i_target, i_setting);
     }
 
     ///
@@ -409,7 +409,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CMD_ADDR>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_slew_rate_cmd_addr(i_target, o_setting);
     }
 
     ///
@@ -421,7 +421,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CMD_ADDR>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CMD_ADDR, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_slew_rate_cmd_addr(i_target, i_setting);
     }
 
     ///
@@ -459,7 +459,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CLK>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_CLK, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_imp_clk(i_target, o_setting);
     }
 
     ///
@@ -471,7 +471,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_IMP_CLK>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_IMP_CLK, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_imp_clk(i_target, i_setting);
     }
 
     ///
@@ -509,7 +509,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CLK>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_slew_rate_clk(i_target, o_setting);
     }
 
     ///
@@ -521,7 +521,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_SLEW_RATE_CLK>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_SLEW_RATE_CLK, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_slew_rate_clk(i_target, i_setting);
     }
 
     ///
@@ -559,7 +559,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_RCV_IMP_ALERT_N, i_target, o_setting);
+        return mss::attr::get_si_mc_rcv_imp_alert_n(i_target, o_setting);
     }
 
     ///
@@ -571,7 +571,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_RCV_IMP_ALERT_N>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_RCV_IMP_ALERT_N, i_target, i_setting);
+        return mss::attr::set_si_mc_rcv_imp_alert_n(i_target, i_setting);
     }
 
     ///
@@ -609,7 +609,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_NOM>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_RTT_NOM, i_target, o_setting);
+        return mss::attr::get_si_dram_rtt_nom(i_target, o_setting);
     }
 
     ///
@@ -621,7 +621,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_NOM>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_DRAM_RTT_NOM, i_target, i_setting);
+        return mss::attr::set_si_dram_rtt_nom(i_target, i_setting);
     }
 
     ///
@@ -659,7 +659,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_WR>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_RTT_WR, i_target, o_setting);
+        return mss::attr::get_si_dram_rtt_wr(i_target, o_setting);
     }
 
     ///
@@ -671,7 +671,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_WR>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_DRAM_RTT_WR, i_target, i_setting);
+        return mss::attr::set_si_dram_rtt_wr(i_target, i_setting);
     }
 
     ///
@@ -709,7 +709,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_PARK>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_RTT_PARK, i_target, o_setting);
+        return mss::attr::get_si_dram_rtt_park(i_target, o_setting);
     }
 
     ///
@@ -721,7 +721,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_RTT_PARK>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_DRAM_RTT_PARK, i_target, i_setting);
+        return mss::attr::set_si_dram_rtt_park(i_target, i_setting);
     }
 
     ///
@@ -759,7 +759,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_PREAMBLE>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_PREAMBLE, i_target, o_setting);
+        return mss::attr::get_si_dram_preamble(i_target, o_setting);
     }
 
     ///
@@ -771,7 +771,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_PREAMBLE>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_DRAM_PREAMBLE, i_target, i_setting);
+        return mss::attr::set_si_dram_preamble(i_target, i_setting);
     }
 
     ///
@@ -810,7 +810,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS, i_target, o_setting);
+        return mss::attr::get_si_mc_drv_eq_dq_dqs(i_target, o_setting);
     }
 
     ///
@@ -822,7 +822,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_MC_DRV_EQ_DQ_DQS>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_MC_DRV_EQ_DQ_DQS, i_target, i_setting);
+        return mss::attr::set_si_mc_drv_eq_dq_dqs(i_target, i_setting);
     }
 
     ///
@@ -860,7 +860,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS, i_target, o_setting);
+        return mss::attr::get_si_dram_drv_imp_dq_dqs(i_target, o_setting);
     }
 
     ///
@@ -872,7 +872,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_DRAM_DRV_IMP_DQ_DQS>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_DRAM_DRV_IMP_DQ_DQS, i_target, i_setting);
+        return mss::attr::set_si_dram_drv_imp_dq_dqs(i_target, i_setting);
     }
 
     ///
@@ -910,7 +910,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_RANGE>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE, i_target, o_setting);
+        return mss::attr::get_si_vref_dq_train_range(i_target, o_setting);
     }
 
     ///
@@ -922,7 +922,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_RANGE>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_RANGE, i_target, i_setting);
+        return mss::attr::set_si_vref_dq_train_range(i_target, i_setting);
     }
 
     ///
@@ -960,7 +960,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_VALUE>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE, i_target, o_setting);
+        return mss::attr::get_si_vref_dq_train_value(i_target, o_setting);
     }
 
     ///
@@ -972,7 +972,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_VREF_DQ_TRAIN_VALUE>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_VREF_DQ_TRAIN_VALUE, i_target, o_setting);
+        return mss::attr::set_si_vref_dq_train_value(i_target, o_setting);
     }
 
     ///
@@ -1010,7 +1010,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_WR>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, i_target, o_setting);
+        return mss::attr::get_si_odt_wr(i_target, o_setting);
     }
 
     ///
@@ -1022,7 +1022,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_WR>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_ODT_WR, i_target, i_setting);
+        return mss::attr::set_si_odt_wr(i_target, i_setting);
     }
 
     ///
@@ -1095,7 +1095,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_RD>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_RD, i_target, o_setting);
+        return mss::attr::get_si_odt_rd(i_target, o_setting);
     }
 
     ///
@@ -1107,7 +1107,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_ODT_RD>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_ODT_RD, i_target, i_setting);
+        return mss::attr::set_si_odt_rd(i_target, i_setting);
     }
 
     ///
@@ -1179,7 +1179,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_GEARDOWN_MODE>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_GEARDOWN_MODE, i_target, o_setting);
+        return mss::attr::get_si_geardown_mode(i_target, o_setting);
     }
 
     ///
@@ -1191,7 +1191,7 @@ struct attrEngineTraits<attr_si_engine_fields, SI_GEARDOWN_MODE>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_GEARDOWN_MODE, i_target, i_setting);
+        return mss::attr::set_si_geardown_mode(i_target, i_setting);
     }
 
     ///

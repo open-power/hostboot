@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <p9c_mss_rowRepairFuncs.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 using namespace fapi2;
 

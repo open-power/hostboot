@@ -26,11 +26,10 @@
 #include <fapi2.H>
 
 #include <lib/shared/dimmConsts.H>
+#include <p9c_mss_funcs.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <generic/memory/lib/utils/find.H>
-
-namespace mss
-{
+#include <generic/memory/lib/utils/c_str.H>
 
 ///
 /// @brief Check if a given DIMM is functional
@@ -74,6 +73,8 @@ bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
     return fapi2::buffer<uint8_t>(i_valid_dimm_bitmap).getBit(VALID_DIMM_POS[i_port][i_dimm]);
 }
 
+namespace mss
+{
 
 ///
 /// @brief Return the total memory size behind an MBA

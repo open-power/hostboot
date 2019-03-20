@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@
 #include <lib/workarounds/dll_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/phy/mss_training.H>
-
+#include <generic/memory/lib/utils/find_magic.H>
 #include <generic/memory/lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/dump_regs.H>

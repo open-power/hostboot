@@ -49,6 +49,7 @@
 #include <lib/rosetta_map/rosetta_map.H>
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/eff_config/timing.H>
+#include <generic/memory/lib/utils/pos.H>
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_lrdimm_training_helper.H>

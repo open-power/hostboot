@@ -236,6 +236,27 @@ struct attr_eff_engine
     }
 };
 
+///
+/// @brief Data structure to set effective config EFF data
+/// @class attr_derived_engine
+/// @tparam ET attr fields enum type
+///
+template < typename ET, typename TT = attrEnumTraits<ET> >
+struct attr_derived_engine
+{
+    using attr_eng_t = gen::attr_engine<ET, static_cast<ET>(TT::DISPATCHER)>;
+
+    ///
+    /// @brief Sets attr fields denoted by an eum list
+    /// @param[in] i_target the DIMM target
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    static fapi2::ReturnCode set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+    {
+        return attr_eng_t::set(i_target);
+    }
+};
+
 }// mss
 
 #endif

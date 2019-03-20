@@ -164,7 +164,10 @@ enum generic_ffdc_codes
     SET_SI_ODT_WR = 0x1059,
     SET_SI_ODT_RD = 0x1060,
     SET_SI_GEARDOWN_MODE = 0x1061,
-    PRE_DATA_ENGINE_CTOR = 0x1062
+    PRE_DATA_ENGINE_CTOR = 0x1062,
+    SET_DRAM_GEN_METADATA = 0x1063,
+    SET_DIMM_TYPE_METADATA = 0x1064,
+    SET_DIMM_POS_METADATA = 0x1065,
 };
 
 ///
@@ -343,16 +346,17 @@ enum class throttle_type
 };
 
 ///
-/// @brief Trait classes for proc_type
+/// @brief Trait classes for mc_type
+/// @tparam MC the mc_type
 ///
-template< proc_type P >
-class procTraits;
+template< mc_type MC >
+class mcTypeTraits;
 
 ///
-/// @brief Trait classes for proc_type - NIMBUS specialization
+/// @brief Trait classes for mc_type - NIMBUS specialization
 ///
 template< >
-struct procTraits<proc_type::NIMBUS>
+struct mcTypeTraits<mc_type::NIMBUS>
 {
     enum
     {
@@ -368,15 +372,19 @@ struct procTraits<proc_type::NIMBUS>
 };
 
 ///
-/// @brief Trait classes for proc_type - AXONE specialization
+/// @brief Trait classes for mc_type - EXPLORER specialization
 ///
-/// TODO: Need to add mc_type
 template< >
-struct procTraits<proc_type::AXONE>
+struct mcTypeTraits<mc_type::EXPLORER>
 {
     enum
     {
-        EXP_PORTS_PER_OCMB = 1,
+        MC_PER_PROC = 2,
+        MI_PER_MC = 2,
+        MCC_PER_MI = 2,
+        OMI_PER_MCC = 2,
+        OCMB_PER_OMI = 1,
+        PORTS_PER_OCMB = 1,
         DIMMS_PER_PORT = 2,
     };
 };

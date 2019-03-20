@@ -45,11 +45,29 @@ namespace mss
 ///
 /// @brief enum list of preliminary data fields
 ///
+enum generic_metadata_fields
+{
+    // Template recursive base case
+    ATTR_METADATA_BASE_CASE = 0,
+
+    // Attrs to set
+    DIMM_TYPE_METADATA = 1,
+    DRAM_GEN_METADATA = 2,
+    DIMM_POS_METADATA = 3,
+
+    // Dispatcher set to last enum value
+    ATTR_METADATA_DISPATCHER = DIMM_POS_METADATA,
+};
+
+///
+/// @brief enum list of preliminary data fields
+///
 enum pre_data_init_fields
 {
     // Template recursive base case
     ATTR_PRE_DATA_ENGINE_CASE = 0,
 
+    // Attrs to set
     DIMM_TYPE = 1,
     DRAM_GEN = 2,
     HYBRID = 3,
@@ -119,6 +137,13 @@ enum attr_si_engine_fields
 template< proc_type T, pre_data_init_fields TT >
 class preDataInitTraits;
 
+///
+/// @brief Traits associated with DIMM positioning
+/// @class dimmPosTraits
+/// @tparam MC the MC type
+///
+template< mss::mc_type MC >
+class dimmPosTraits;
 
 ///
 /// @brief Forward declartion of traits for attrEngineTraits
@@ -139,7 +164,7 @@ template < typename ET, ET T >
 struct setTimingTraits;
 
 ///
-/// @brief Forward declartion of traits for attr_engine
+/// @brief Forward declartion of traits for attrEnumTraits
 /// @class attrEnumTraits
 /// @tparam ET enum type
 ///
