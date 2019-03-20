@@ -37,9 +37,6 @@
 // includes
 #include <stdint.h>
 
-//@thi-TODO: Need to revisit the following items once design is finalized:
-//           PPE, IOHS, PAU, MI, MCC, OMI, OMIC
-
 extern "C"
 {
     /// Constants
@@ -166,6 +163,7 @@ extern "C"
         PBPAU57_0_RING_ID   = 0x8,
         PBPAU57_1_RING_ID   = 0x9,
         PAU_TL_RING_ID      = 0xA,
+        PAU_IOPPE_RING_ID   = 0xB,
         PAU_DLP_RING_ID     = 0xC,
     } p10_PAU_RingId_t;
 
@@ -462,6 +460,49 @@ extern "C"
                 iv_addr &= 0xFFFFFFFFFFFFFFC0ULL;
                 iv_addr |= (i_sat_offset & 0x3F);
                 return;
+            }
+
+            /// @brief Get the OBUS Super Wrapper Group address (bits 22:26) of
+            ///        an indirect scom address
+            /// @retval uint8_t Group address
+            inline uint8_t getIoGroupAddr() const
+            {
+                return ((iv_addr >> 37) & 0x1F);
+            }
+
+            /// @brief Set the OBUS Super Wrapper Group address (bits 22:26) of
+            ///        an indirect scom address
+            /// @param[in] i_group_addr Group address value to write
+            /// @retval none
+            inline void setIoGroupAddr(const uint8_t i_group_addr)
+            {
+                iv_addr &= 0xFFFFFC1FFFFFFFFFULL;
+                iv_addr |= ( ((uint64_t)i_group_addr & 0x1F) << 37 );
+                return;
+            }
+
+            /// @brief Get  Super Wrapper Register address (bits 12:20)
+            ///        of an indirect scom address
+            /// @retval uint32_t Register address
+            inline uint32_t getIoRegAddr() const
+            {
+                return ((iv_addr >> 43) & 0x1FF);
+            }
+
+            /// @brief Get the OBUS Super Wrapper TX/RX bit (bit 21)
+            ///        of an indirect scom address
+            /// @retval uint8_t TX/RX bit
+            inline uint32_t getIoTxRxBit() const
+            {
+                return ((iv_addr >> 42) & 0x1);
+            }
+
+            /// @brief Get the OBUS Super Wrapper Lane (bits 27:31)
+            ///        of an indirect scom address
+            /// @retval uint8_t Lane
+            inline uint32_t getIoLane() const
+            {
+                return ((iv_addr >> 32) & 0x1F);
             }
 
             /// @brief Determine if SCOM address is valid/well-formed

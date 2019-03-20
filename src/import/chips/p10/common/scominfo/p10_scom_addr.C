@@ -36,9 +36,6 @@
 
 #define P10_SCOM_ADDR_C
 
-//@thi-TODO: Need to revisit the following items once design is finalized:
-//           PPE, IOHS, PAU, MI, MCC, OMI, OMIC
-
 extern "C"
 {
     /// See function description in header file
@@ -340,31 +337,40 @@ extern "C"
     {
         bool l_iohsTarget = false;
 
-        // associate perv target resources with AXON
+        // IOHS can be targeted by AXON or PAU chiplets (indirect scom),
+
+        // Associate perv target resources with AXON
         if ( (getChipletId() >= AXON0_CHIPLET_ID) &&       // 0x18
              (getChipletId() <= AXON7_CHIPLET_ID) )        // 0x1F
         {
             l_iohsTarget = isPervTarget();
-        }
-        // Endpoint must be PSCOM
-        else if ( getEndpoint() == PSCOM_ENDPOINT)
-        {
-            // If chiplet ID is of AXON chiplets, then RingId must be 1-5
-            if ( (getChipletId() >= AXON0_CHIPLET_ID) &&      // 0x18
-                 (getChipletId() <= AXON7_CHIPLET_ID) )       // 0x1F
+
+            // If not a PERV target check for IOHS target that uses AXON chiplet
+            if (l_iohsTarget == false)
             {
-                if ( (getRingId() >= AXONE_PERV_RING_ID) &&   // 0x1
+                if ( (getEndpoint() == PSCOM_ENDPOINT) &&
+                     (getRingId() >= AXONE_PERV_RING_ID) &&   // 0x1
                      (getRingId() <= AXONE_PDL_RING_ID) )     // 0x5
                 {
                     l_iohsTarget = true;
                 }
             }
-            // else if chiplet ID is of PAU chiplets, then RingId must be 10 or 12
-            else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
-                      (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
+        }
+
+        // Target via PAU chiplets
+        else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                  (getChipletId() <= PAU3_CHIPLET_ID) )   // 0x13
+        {
+            // Endpoint must be PSCOM and RingID is IOPPE
+            if ( (getEndpoint() == PSCOM_ENDPOINT) &&
+                 (getRingId() == PAU_IOPPE_RING_ID) )     // 0xB
             {
-                if ( (getRingId() == PAU_TL_RING_ID) ||   // 0xA
-                     (getRingId() == PAU_DLP_RING_ID) )   // 0xC
+                // Group address (bits 22:26 of upper address)
+                // must be 0b00000 or 0b00001
+                // Group 0: IOHS[0]
+                // Group 1: IOHS[1]
+                if ( (getIoGroupAddr() == 0b00000) ||
+                     (getIoGroupAddr() == 0b00001) )
                 {
                     l_iohsTarget = true;
                 }
@@ -379,16 +385,35 @@ extern "C"
     {
         uint8_t l_instance = 0;
 
-        // Assume chiplet ID is of AXON
-        l_instance = getChipletId() - AXON0_CHIPLET_ID;
-
-        // If chiplet ID is of PAU then get instance for PAU
-        if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
-             (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
+        // Chiplet ID is AXON
+        if ( (getChipletId() >= AXON0_CHIPLET_ID) &&
+             (getChipletId() <= AXON7_CHIPLET_ID) )
         {
-            //@thi-TODO: Need to update this to distinguish between
-            // instance 0 and 1, 2 and 3, etc...  Need more info.
-            l_instance = ( (getChipletId() - PAU0_CHIPLET_ID) * 2) + 1;
+            l_instance = getChipletId() - AXON0_CHIPLET_ID;
+        }
+        // Chiplet ID is PAU
+        else
+        {
+            // If chiplet ID is PAU then this is indirect address.
+            // Use PAU and Group address (bits 22:26) to calculate instance.
+            //   PAU0 (lower right) -> IOHS0 + IOHS1
+            //   PAU1 (upper right) -> IOHS2 + IOHS3
+            //   PAU2 (lower left)  -> IOHS4 + IOHS5
+            //   PAU3 (upper left)  -> IOHS6 + IOHS7
+            //
+            // Group address bits (22:26) of upper 32-bit
+            //   Group 0: IOHS[0]
+            //   Group 1: IOHS[1]
+            if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
+                 (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
+            {
+                l_instance = (getChipletId() - PAU0_CHIPLET_ID) * 2;
+
+                if (getIoGroupAddr() == 0b00001)
+                {
+                    l_instance += 1;
+                }
+            }
         }
 
         return l_instance;
@@ -571,19 +596,37 @@ extern "C"
     {
         bool l_omiTarget = false;
 
-        // Chiplet ID must belong to MCs, Endpoint = PSCOM_ENDPOINT,
-        // and ringID = one of MC controller ring IDs
-        if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
-             (getChipletId() <= MC3_CHIPLET_ID) &&    // 0x0F
-             (getEndpoint() == PSCOM_ENDPOINT) )      // 0x1
+        // OMI can be targeted by MC or PAU chiplets (indirect scom)
+
+        // End point must be PSCOM
+        if ( (getEndpoint() == PSCOM_ENDPOINT) )      // 0x1
         {
-            // Check RingId
-            if ( (getRingId() == OMI0_RING_ID) ||  // 0x3
-                 (getRingId() == IOO0_RING_ID) ||  // 0x5
-                 (getRingId() == OMI1_RING_ID) ||  // 0x4
-                 (getRingId() == IOO1_RING_ID) )   // 0x6
+            // MC chiplet IDs
+            if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
+                 (getChipletId() <= MC3_CHIPLET_ID) )     // 0x0F
             {
-                l_omiTarget = true;
+                // Check Ring IDs
+                if ( (getRingId() == OMI0_RING_ID) ||  // 0x3
+                     (getRingId() == IOO0_RING_ID) ||  // 0x5
+                     (getRingId() == OMI1_RING_ID) ||  // 0x4
+                     (getRingId() == IOO1_RING_ID) )   // 0x6
+                {
+                    l_omiTarget = true;
+                }
+
+            }
+            // PAU chiplet, IOPPE ringId (indirect scom)
+            else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                      (getChipletId() <= PAU3_CHIPLET_ID) &&   // 0x13
+                      (getRingId() == PAU_IOPPE_RING_ID) )     // 0xB
+            {
+                // Group address (bits 22:26 of upper address)
+                // must be 0b00010 or 0b00011
+                if ( (getIoGroupAddr() == 0b00010) ||
+                     (getIoGroupAddr() == 0b00011) )
+                {
+                    l_omiTarget = true;
+                }
             }
         }
 
@@ -593,20 +636,75 @@ extern "C"
     // #####################################
     uint8_t p10_scom_addr::getOmiTargetInstance()
     {
-        // Instances 0, 4, 8, 12
-        uint8_t l_instance = (getChipletId() - MC0_CHIPLET_ID) * 4;
+        uint8_t l_instance = 0;
 
-        // Instances 2, 6, 10, 14
-        if ( (getRingId() == OMI1_RING_ID) ||  // 0x4
-             (getRingId() == IOO1_RING_ID) )   // 0x6
+        // Chiplet ID is MC
+        if ( (getChipletId() >= MC0_CHIPLET_ID) &&
+             (getChipletId() <= MC3_CHIPLET_ID) )
         {
-            l_instance += 2;
+            // Instances 0, 4, 8, 12
+            l_instance = (getChipletId() - MC0_CHIPLET_ID) * 4;
+
+            // Instances 2, 6, 10, 14
+            if ( (getRingId() == OMI1_RING_ID) ||  // 0x4
+                 (getRingId() == IOO1_RING_ID) )   // 0x6
+            {
+                l_instance += 2;
+            }
+
+            // Instances 1, 3, 5, 7, 9, 11, 13, 15
+            if (getSatId() == 1)
+            {
+                l_instance += 1;
+            }
         }
-
-        // Instances 1, 3, 5, 7, 9, 11, 13, 15
-        if (getSatId() == 1)
+        // Chiplet ID is PAU
+        else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
+                  (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
         {
-            l_instance += 1;
+            // If chiplet ID is PAU then this is indirect address.
+            // Use PAU and Group address (bits 22:26) to calculate instance.
+
+            ///  PAU0 (lower right) -> MC0 (OMI 0/1/2/3)
+            ///  PAU1 (upper right) -> MC2 (OMI 8/9/10/11)
+            ///  PAU2 (lower left) ->  MC1 (OMI 4/5/6/7)
+            ///  PAU3 (upper left) ->  MC3 (OMI 12/13/14/15)
+            ///
+            ///   From the OMI Link point of view, two DLs will target the same OMI PHY Group
+            ///     Group 2: OMIPHY[0] Lanes 0-7  (OMI DL0 x8)
+            ///     Group 2: OMIPHY[0] Lanes 8-15 (OMI DL1 x8)
+            ///     Group 3: OMIPHY[1] Lanes 0-7  (OMI DL2 x8)
+            ///     Group 3: OMIPHY[1] Lanes 8-15 (OMI DL3 x8)
+            //
+            // NOTE: Because two DLs will target the same OMI PHY Group,
+            //       returned instance (even number) covers that instance
+            //       and that instance+1 OMI.
+            //       Ex: Instance 0 represents instances 0 and 1
+            //                   14 represents instances 14 and 15
+
+            // Get first OMI instance in PAUx
+            if ( getChipletId() == PAU0_CHIPLET_ID)
+            {
+                l_instance = 0;
+            }
+            else if ( getChipletId() == PAU1_CHIPLET_ID)
+            {
+                l_instance = 8;
+            }
+            else if ( getChipletId() == PAU2_CHIPLET_ID)
+            {
+                l_instance = 4;
+            }
+            else
+            {
+                l_instance = 12;
+            }
+
+            // Taks group address into account
+            if (getIoGroupAddr() == 0b00011)
+            {
+                l_instance += 2;
+            }
         }
 
         return l_instance;

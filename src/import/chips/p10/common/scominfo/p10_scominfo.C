@@ -38,8 +38,6 @@
 
 #define P10_SCOMINFO_C
 
-//@thi-TODO: Need to revisit the following items once design is finalized:
-//           PPE, IOHS, PAU, MI, MCC, OMI, OMIC
 extern "C"
 {
 
@@ -77,11 +75,83 @@ extern "C"
     }
 
     //################################################################################
+    /// @brief Translate the upper 32-bit of an indirect scom address.
+    ///        IOHS and OMI chip units can be targeted using PAU chiplets with
+    ///        indirect SCOM addresses.
+    ///
+    /// @param[in] i_p10CU         Chip unit type
+    /// @param[in] i_ecLevel       Chip EC level
+    /// @param[in] i_chipUnitNum   Instance number of the chip unit
+    /// @param[in] i_scomAddr      P10 SCOM address object
+    /// @param[in] i_mode          Translation mode, specifying different addr translation methods.
+    /// @retval Non-zero if error
+    ///
+    uint8_t xlateIoUpperAddr(
+        const p10ChipUnits_t i_p10CU,
+        const uint8_t i_ecLevel,
+        const uint8_t i_chipUnitNum,
+        p10_scom_addr& i_scomAddr,
+        const uint32_t i_mode)
+    {
+        uint8_t l_rc = 0;
+
+        do
+        {
+            ///
+            ///  PAU0 (lower right) -> MC0 (OMI 0/1/2/3) + IOHS0 + IOHS1
+            ///  PAU1 (upper right) -> MC2 (OMI 8/9/10/11) + IOHS2 + IOHS3
+            ///  PAU2 (lower left) -> MC1 (OMI 4/5/6/7) + IOHS4 + IOHS5
+            ///  PAU3 (upper left) -> MC3 (OMI 12/13/14/15) + IOHS6 + IOHS7
+            ///
+            ///  Group address bits (22:26) of upper 32-bit
+            ///    Group 0: IOHS[0]
+            ///    Group 1: IOHS[1]
+            ///
+            ///   From the OMI Link point of view, two DLs will target the same OMI PHY Group
+            ///     Group 2: OMIPHY[0] Lanes 0-7  (OMI DL0 x8)
+            ///     Group 2: OMIPHY[0] Lanes 8-15 (OMI DL1 x8)
+            ///     Group 3: OMIPHY[1] Lanes 0-7  (OMI DL2 x8)
+            ///     Group 3: OMIPHY[1] Lanes 8-15 (OMI DL3 x8)
+
+            // IOHS target
+            if (i_p10CU == PU_IOHS_CHIPUNIT)
+            {
+                // Group address = 0b00000 for IOHS0
+                //               = 0b00001 for IOHS1
+                i_scomAddr.setIoGroupAddr(i_chipUnitNum % 2);
+            }
+            // OMI target
+            else if (i_p10CU == PU_OMI_CHIPUNIT)
+            {
+                // Group address = 0b00010 for OMI0 and OMI1
+                //               = 0b00011 for OMI2 and OMI3
+                if ( (i_chipUnitNum % 4 <= 1) ) // OMI DL 0&1
+                {
+                    i_scomAddr.setIoGroupAddr(0b00010);
+                }
+                else // OMI DL 2&3
+                {
+                    i_scomAddr.setIoGroupAddr(0b00011);
+                }
+            }
+            else
+            {
+                l_rc = 1;
+            }
+
+        }
+        while (0);
+
+        return l_rc;
+    }
+
+    //################################################################################
     /// @brief Get the chiplet ID for a chip unit instance based on given
     ///        address and chip unit type
-    /// @param[in] i_addr          SCOM address
-    /// @param[in] i_chipUnitNum   Instance number
-    /// @param[in] i_chipUnitType  Chip unit type
+    /// @param[in]  i_addr          SCOM address
+    /// @param[in]  i_chipUnitNum   Instance number
+    /// @param[in]  i_chipUnitType  Chip unit type
+    /// @param[out] o_chipletId     Output chiplet id
     /// @retval Non-zero if error
     uint8_t getChipletId(const uint64_t i_addr,
                          const uint8_t i_chipUnitNum,
@@ -92,7 +162,6 @@ extern "C"
 
         do
         {
-
             p10_scom_addr l_scom(i_addr);
 
             switch (i_chipUnitType)
@@ -141,9 +210,18 @@ extern "C"
                     {
                         o_chipletId = AXON0_CHIPLET_ID + i_chipUnitNum;
                     }
-                    else // input address is of PAU chiplets
+                    else if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&
+                              (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )
                     {
+                        // PAU0 --> IOHS0, IOHS1
+                        // PAU1 --> IOHS2, IOHS3
+                        // PAU2 --> IOHS4, IOHS5
+                        // PAU3 --> IOHS6, IOHS7
                         o_chipletId = (i_chipUnitNum / 2) + PAU0_CHIPLET_ID;
+                    }
+                    else
+                    {
+                        l_rc = 1;
                     }
 
                     break;
@@ -159,7 +237,39 @@ extern "C"
                     break;
 
                 case PU_OMI_CHIPUNIT:
-                    o_chipletId = (i_chipUnitNum / 4) + MC0_CHIPLET_ID;
+                    if ( (l_scom.getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
+                         (l_scom.getChipletId() <= MC3_CHIPLET_ID) )     // 0x0F
+                    {
+                        o_chipletId = (i_chipUnitNum / 4) + MC0_CHIPLET_ID;
+                    }
+                    else // input address is of PAU chiplets
+                    {
+                        // PAU0 --> OMI 0/1/2/3
+                        // PAU1 --> OMI 8/9/10/11
+                        // PAU2 --> OMI 4/5/6/7
+                        // PAU3 --> OMI 12/13/14/15
+                        if (i_chipUnitNum >= 0 && i_chipUnitNum <= 3)
+                        {
+                            o_chipletId = PAU0_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 4 && i_chipUnitNum <= 7)
+                        {
+                            o_chipletId = PAU2_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 8 && i_chipUnitNum <= 11)
+                        {
+                            o_chipletId = PAU1_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 12 && i_chipUnitNum <= 15)
+                        {
+                            o_chipletId = PAU3_CHIPLET_ID;
+                        }
+                        else
+                        {
+                            l_rc = 1;
+                        }
+                    }
+
                     break;
 
                 case PU_PPE_CHIPUNIT:
@@ -194,11 +304,12 @@ extern "C"
     }
 
     // See header file for function description
-    uint64_t p10_scominfo_createChipUnitScomAddr(const p10ChipUnits_t i_p10CU,
-            const uint8_t i_ecLevel,
-            const uint8_t i_chipUnitNum,
-            const uint64_t i_scomAddr,
-            const uint32_t i_mode)
+    uint64_t p10_scominfo_createChipUnitScomAddr(
+        const p10ChipUnits_t i_p10CU,
+        const uint8_t i_ecLevel,
+        const uint8_t i_chipUnitNum,
+        const uint64_t i_scomAddr,
+        const uint32_t i_mode)
     {
         uint8_t l_rc = 0;
         p10_scom_addr l_scom(i_scomAddr);
@@ -456,6 +567,24 @@ extern "C"
                     break;
             }
 
+            // Break out if error
+            if (l_rc)
+            {
+                break;
+            }
+
+            // Translate upper 32-bit of indirect scom address
+            if ( (l_chipletId >= PAU0_CHIPLET_ID) &&
+                 (l_chipletId <= PAU3_CHIPLET_ID) &&
+                 l_scom.isIndirect() )
+            {
+                l_rc = xlateIoUpperAddr(i_p10CU, i_ecLevel, i_chipUnitNum, l_scom, i_mode);
+
+                if (l_rc)
+                {
+                    break;
+                }
+            }
         }
         while(0);
 
