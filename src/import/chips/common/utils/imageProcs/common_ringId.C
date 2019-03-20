@@ -24,11 +24,11 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <common_ringId.H>
 
-namespace P9_RID
+namespace P10_RID
 {
-#include <p9_ringId.H>
+#include <p10_ringId.H>
 };
-#include <p9_infrastruct_help.H>
+#include <p10_infrastruct_help.H>
 
 
 // These strings must adhere precisely to the enum of RingVariant.
@@ -215,11 +215,8 @@ int ringid_get_num_ring_ids( ChipId_t   i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            *o_numRingIds = P9_RID::NUM_RING_IDS;
+            *o_numRingIds = P10_RID::NUM_RING_IDS;
             break;
 
         default:
@@ -238,24 +235,21 @@ int ringid_get_num_chiplets( ChipId_t  i_chipId,
 {
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
                  i_torMagic == TOR_MAGIC_OVLY ||
                  i_torMagic == TOR_MAGIC_DYN )
             {
-                *o_numChiplets = P9_RID::SBE_NUM_CHIPLETS;
+                *o_numChiplets = P10_RID::SBE_NUM_CHIPLETS;
             }
             else if ( i_torMagic == TOR_MAGIC_QME )
             {
-                *o_numChiplets = P9_RID::CME_NUM_CHIPLETS;
+                *o_numChiplets = P10_RID::QME_NUM_CHIPLETS;
             }
             else
             {
-                MY_ERR("ringid_get_num_chiplets(): Invalid torMagic(=0x%08x) for chipId(=CID_P9x=%d)\n", i_torMagic, i_chipId);
+                MY_ERR("ringid_get_num_chiplets(): Invalid torMagic(=0x%08x) for chipId(=CID_P10x=%d)\n", i_torMagic, i_chipId);
                 return TOR_INVALID_MAGIC_NUMBER;
             }
 
@@ -279,11 +273,8 @@ int ringid_get_ringProps( ChipId_t           i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            *o_ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
+            *o_ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
             break;
 
         default:
@@ -307,16 +298,13 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
                  i_torMagic == TOR_MAGIC_OVLY ||
                  i_torMagic == TOR_MAGIC_DYN )
             {
-                rc = P9_RID::ringid_get_chiplet_properties(
+                rc = P10_RID::ringid_get_chiplet_properties(
                          i_chipletType,
                          o_chipletData);
 
@@ -327,12 +315,6 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
 
                 *o_numVariants = (*o_chipletData)->numCommonRingVariants;
 
-                if ( i_torVersion < 7 &&
-                     (i_chipletType == P9_RID::EQ_TYPE || i_chipletType == P9_RID::EC_TYPE) )
-                {
-                    *o_numVariants = *o_numVariants - 3;
-                }
-
                 if ( i_torMagic == TOR_MAGIC_OVRD ||
                      i_torMagic == TOR_MAGIC_OVLY )
                 {
@@ -341,17 +323,12 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
             }
             else if ( i_torMagic == TOR_MAGIC_QME )
             {
-                *o_chipletData        = (ChipletData_t*)&P9_RID::EC::g_chipletData;
+                *o_chipletData        = (ChipletData_t*)&P10_RID::EQ::g_chipletData;
                 *o_numVariants        = (*o_chipletData)->numCommonRingVariants;
-
-                if (i_torVersion < 7)
-                {
-                    *o_numVariants = *o_numVariants - 3;
-                }
             }
             else
             {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P9x=%d\n", i_torMagic, i_chipId);
+                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P10x=%d\n", i_torMagic, i_chipId);
                 return TOR_INVALID_MAGIC_NUMBER;
             }
 
@@ -376,20 +353,17 @@ int ringid_get_scanScomAddr( ChipId_t   i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            if (i_ringId >= P9_RID::NUM_RING_IDS)
+            if (i_ringId >= P10_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_get_scanScomAddr(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not"
                        " allowed\n",
-                       i_ringId, P9_RID::NUM_RING_IDS);
+                       i_ringId, P10_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
                 break;
             }
 
-            l_scanScomAddr = P9_RID::RING_PROPERTIES[i_ringId].scanScomAddr;
+            l_scanScomAddr = P10_RID::RING_PROPERTIES[i_ringId].scanScomAddr;
             break;
 
         default:
@@ -413,19 +387,16 @@ int ringid_get_ringClass( ChipId_t      i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            if (i_ringId >= P9_RID::NUM_RING_IDS)
+            if (i_ringId >= P10_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_get_ringClass(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, P9_RID::NUM_RING_IDS);
+                       i_ringId, P10_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
                 break;
             }
 
-            l_ringClass = P9_RID::RING_PROPERTIES[i_ringId].ringClass;
+            l_ringClass = P10_RID::RING_PROPERTIES[i_ringId].ringClass;
             break;
 
         default:
@@ -447,14 +418,11 @@ int ringid_check_ringId( ChipId_t  i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            if ( i_ringId >= P9_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
+            if ( i_ringId >= P10_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
             {
                 MY_ERR("ringid_check_ringId(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, P9_RID::NUM_RING_IDS);
+                       i_ringId, P10_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
                 break;
             }
@@ -480,16 +448,13 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
                  i_torMagic == TOR_MAGIC_OVLY ||
                  i_torMagic == TOR_MAGIC_DYN )
             {
-                if ( i_chipletType < P9_RID::SBE_NUM_CHIPLETS )
+                if ( i_chipletType < P10_RID::SBE_NUM_CHIPLETS )
                 {
                     *o_chipletIndex = i_chipletType;
                 }
@@ -500,7 +465,7 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
             }
             else if ( i_torMagic == TOR_MAGIC_QME )
             {
-                if ( i_chipletType == P9_RID::EC_TYPE )
+                if ( i_chipletType == P10_RID::EQ_TYPE )
                 {
                     *o_chipletIndex = 0;
                 }
@@ -511,7 +476,7 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
             }
             else
             {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P9x=%d\n", i_torMagic, i_chipId);
+                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P10x=%d\n", i_torMagic, i_chipId);
                 return TOR_INVALID_MAGIC_NUMBER;
             }
 
@@ -532,9 +497,6 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 // Mapping from the shared [initCompiler] chipId to the chipType name
 std::map <ChipId_t, std::string> chipIdToTypeMap
 {
-    { (ChipId_t)CID_P9N, "p9n" },
-    { (ChipId_t)CID_P9C, "p9c" },
-    { (ChipId_t)CID_P9A, "p9a" },
     { (ChipId_t)CID_P10, "p10" },
     { (ChipId_t)CID_EXPLORER, "explorer" }
 };
@@ -542,9 +504,6 @@ std::map <ChipId_t, std::string> chipIdToTypeMap
 // Mapping from chipType name to the shared [initCompiler] chipId (reverse of above map)
 std::map <std::string, ChipId_t> chipTypeToIdMap
 {
-    { "p9n", (ChipId_t)CID_P9N },
-    { "p9c", (ChipId_t)CID_P9C },
-    { "p9a", (ChipId_t)CID_P9A },
     { "p10", (ChipId_t)CID_P10 },
     { "explorer", (ChipId_t)CID_EXPLORER }
 };
@@ -563,12 +522,9 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
-            numRingIds = P9_RID::NUM_RING_IDS;
+            ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
+            numRingIds = P10_RID::NUM_RING_IDS;
             break;
 
         case CID_EXPLORER:
@@ -592,49 +548,13 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
                 {
                     if (bFound)
                     {
-                        // Special allowance for multiple addr match for mc_{iom,omi} rings
-                        // - mc_iom rings are in effect only for P9N/C
-                        // - mc_omi rings are in effect only for P9A
-                        if ( ( strncmp("mc_iom", ringProps[iRingId].ringName, 6) == 0 ) &&
-                             ( strncmp("mc_omi", ringProps[l_ringId].ringName, 6) == 0 ) )
-                        {
-                            if (i_chipId == CID_P9A)
-                            {
-                                // Return mc_omi ring and thus current l_ringId
-                                break;
-                            }
-                            else
-                            {
-                                // Return mc_iom ring and thus iRingId
-                                l_ringId = iRingId;
-                                break;
-                            }
-                        }
-                        else if ( ( strncmp("mc_iom", ringProps[l_ringId].ringName, 6) == 0 ) &&
-                                  ( strncmp("mc_omi", ringProps[iRingId].ringName, 6) == 0 ) )
-                        {
-                            if (i_chipId == CID_P9A)
-                            {
-                                // Return mc_omi ring and thus iRingId
-                                l_ringId = iRingId;
-                                break;
-                            }
-                            else
-                            {
-                                // Return mc_iom ring and thus iRingId
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            MY_ERR("ringidGetRootRingId(): Two rings w/same addr cannot both be"
-                                   " ROOT_RING.  Fix RING_PROPERTIES list for chipId=%d at"
-                                   " ringId=0x%x and ringId=0x%x\n",
-                                   i_chipId, l_ringId, iRingId);
-                            rc = INFRASTRUCT_RC_CODE_BUG;
-                            l_ringId = UNDEFINED_RING_ID;
-                            break;
-                        }
+                        MY_ERR("ringidGetRootRingId(): Two rings w/same addr cannot both be"
+                               " ROOT_RING.  Fix RING_PROPERTIES list for chipId=%d at"
+                               " ringId=0x%x and ringId=0x%x\n",
+                               i_chipId, l_ringId, iRingId);
+                        rc = INFRASTRUCT_RC_CODE_BUG;
+                        l_ringId = UNDEFINED_RING_ID;
+                        break;
                     }
                     else
                     {
@@ -682,12 +602,9 @@ int ringidGetRingId1( ChipId_t     i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
-            numRingIds = P9_RID::NUM_RING_IDS;
+            ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
+            numRingIds = P10_RID::NUM_RING_IDS;
             break;
 
         default:
@@ -766,12 +683,9 @@ int ringidGetRingId2( ChipId_t       i_chipId,
     // with only one chiplet, to a valid chipletType
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
-            numRingIds = P9_RID::NUM_RING_IDS;
+            ringProps = (RingProperties_t*)&P10_RID::RING_PROPERTIES;
+            numRingIds = P10_RID::NUM_RING_IDS;
 
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
@@ -782,11 +696,11 @@ int ringidGetRingId2( ChipId_t       i_chipId,
             }
             else if ( i_torMagic == TOR_MAGIC_QME )
             {
-                l_chipletType = P9_RID::EC_TYPE;
+                l_chipletType = P10_RID::EQ_TYPE;
             }
             else
             {
-                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P9x=%d\n", i_torMagic, i_chipId);
+                MY_ERR("Invalid torMagic(=0x%08x) for chipId=CID_P10x=%d\n", i_torMagic, i_chipId);
                 return TOR_INVALID_MAGIC_NUMBER;
             }
 
@@ -884,19 +798,16 @@ int ringidGetRingName( ChipId_t     i_chipId,
 
     switch (i_chipId)
     {
-        case CID_P9N:
-        case CID_P9C:
-        case CID_P9A:
         case CID_P10:
-            if (i_ringId >= P9_RID::NUM_RING_IDS)
+            if (i_ringId >= P10_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringidGetRingName(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
-                       i_ringId, P9_RID::NUM_RING_IDS);
+                       i_ringId, P10_RID::NUM_RING_IDS);
                 rc = TOR_INVALID_RING_ID;
                 break;
             }
 
-            l_ringName = (std::string)P9_RID::RING_PROPERTIES[i_ringId].ringName;
+            l_ringName = (std::string)P10_RID::RING_PROPERTIES[i_ringId].ringName;
             break;
 
         default:
