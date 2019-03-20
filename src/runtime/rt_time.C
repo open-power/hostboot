@@ -25,6 +25,8 @@
 #include <sys/time.h>
 #include <runtime/interface.h>
 
+#define BITS_32_TO_63_MASK 0x00000000FFFFFFFF
+
 void nanosleep(uint64_t sec, uint64_t nsec)
 {
     if (g_hostInterfaces && g_hostInterfaces->nanosleep)
@@ -36,9 +38,19 @@ void nanosleep(uint64_t sec, uint64_t nsec)
 int clock_gettime(clockid_t i_clkId, timespec_t* o_tp)
 {
     int l_rc = -1;
+
     if (g_hostInterfaces && g_hostInterfaces->clock_gettime)
     {
         l_rc = g_hostInterfaces->clock_gettime(i_clkId, o_tp);
+
+        // If the back-half (bits 32:63) are all 0's then the
+        // nanoseconds are stored in the first 32 bits of the tv_nsec
+        // member of the timespec_t struct. We must shift over so later
+        // hostboot code interprets this correctly
+        if( (o_tp->tv_nsec & BITS_32_TO_63_MASK) == 0x0)
+        {
+            o_tp->tv_nsec = o_tp->tv_nsec >> 32;
+        }
     }
     return l_rc;
 }
