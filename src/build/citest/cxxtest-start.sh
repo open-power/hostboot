@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,14 @@ then
 fi
 
 HOSTBOOT_IMAGE=img/hbicore_test.bin
+
+# do not set this for anything prior to axone
+if [ "$MACHINE" != "NIMBUS" ] && [ "$MACHINE" != "CUMULUS" ] && \
+   [ "$MACHINE" != "CUMULUS_CDIMM" ] && [ "$MACHINE" != "FSPBUILD" ];
+then
+    export PATH=$PATH:$SANDBOXBASE/simics/
+    export START_SIMICS_CMD="runsim -m $MACHINE hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/axone.pnor sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/99a8c3fe4e5c74798f5bd4212f3d9a2a"
+fi
 
 #   Front end to autocitest - script to execute unit tests under simics.
 #
