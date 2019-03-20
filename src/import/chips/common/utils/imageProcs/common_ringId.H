@@ -133,13 +133,10 @@ enum TorMagicNum
 
 
 //
-// Chip types and List to represent p9n, p9c, p9a)
+// Chip ID list
 //
 enum ChipId
 {
-    CID_P9N = 0x5,
-    CID_P9C = 0x6,
-    CID_P9A = 0x7,
     CID_EXPLORER = 0x8,
     CID_P10 = 0xA,
 };
@@ -230,7 +227,6 @@ typedef struct
     uint8_t numChipletInstances;      // Num of chiplet instances
     uint8_t numCommonRings;           // Num of common rings
     uint8_t numInstanceRings;         // Num of instance rings (w/different ringId values)
-    uint8_t numInstanceRingsScanAddr; // Num of instance rings for (w/diff ringId && diff scanAddrs)
     uint8_t numCommonRingVariants;    // Num of Common rings variants. Only one for Instance rings
     RingVariant_t  ringVariantOrder[NUM_RING_VARIANTS]; // Order of ring variants in ring section
 } ChipletData_t;
@@ -350,9 +346,6 @@ extern std::map <std::string, ChipId_t> chipTypeToIdMap;
 //   the ringName instead of the scanScomAddr.
 // - Setting bTest=true will test if more than one root ring exist for a given scanScomAddr and
 //   produce an error.
-// - We have a special case for the mc_{omi,iom} rings which are both listed in our ring Id lists
-//   but which share scanScomAddr. However, the mc_iom rings are only in effect for P9N/C and the
-//   mc_omi rings are only in effect for P9A.
 //
 int ringidGetRootRingId( ChipId_t   i_chipId,
                          uint32_t   i_scanScomAddr,
