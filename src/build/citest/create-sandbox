@@ -73,8 +73,20 @@ fi
 
 # Run start_simics to populate simics directories.
 echo "----Setting up simics."
-execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
-                   "ppc" || exit -1
+
+if [ "$MACHINE" != "NIMBUS" ] && [ "$MACHINE" != "CUMULUS" ] && \
+   [ "$MACHINE" != "CUMULUS_CDIMM" ] && [ "$MACHINE" != "FSPBUILD" ];
+then
+    SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
+    echo "mkdir -p ${SANDBOXBASE}/simics"
+    execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
+    echo "tar ${SIMICS_LEVEL}  -C ${SANDBOXBASE}/simics/"
+    execute_in_sandbox "tar -xf ${SIMICS_LEVEL} -C ${SANDBOXBASE}/simics/" "ppc"
+    execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./INSTALL.sh" "ppc"
+else
+    execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
+                      "ppc" || exit -1
+fi
 
 # Run postsimsetup workarounds.
 echo "----Running postsimsetup workarounds."
