@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -172,6 +173,17 @@
   <valueType>uint8</valueType>
   <platInit/>
   <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RISK_LEVEL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
+      HWPs</description>
+  <valueType>uint8</valueType>
+  <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2,RL3 = 0x3,RL4 = 0x4, RL5 = 0x5</enum>
+  <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
