@@ -36,8 +36,14 @@ constexpr uint64_t literal_0b00000000000000000000001111111011111111111111 =
 constexpr uint64_t literal_0b10000000000000000 = 0b10000000000000000;
 constexpr uint64_t literal_0b10000000001000000000000000000100000000000000 =
     0b10000000001000000000000000000100000000000000;
+constexpr uint64_t literal_0b100000000000000000000000000000000000000000000000 =
+    0b100000000000000000000000000000000000000000000000;
+constexpr uint64_t literal_0b11111111111111111111111111111111111111111111 =
+    0b11111111111111111111111111111111111111111111;
+constexpr uint64_t literal_0b10000010000000000 = 0b10000010000000000;
 constexpr uint64_t literal_0b11110000000 = 0b11110000000;
 constexpr uint64_t literal_0b00001000000000000000 = 0b00001000000000000000;
+constexpr uint64_t literal_0b00010000000000000000 = 0b00010000000000000000;
 constexpr uint64_t literal_0b100 = 0b100;
 constexpr uint64_t literal_0b0100 = 0b0100;
 
@@ -65,6 +71,19 @@ fapi2::ReturnCode p9n_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
             FAPI_TRY(fapi2::putScom(TGT0, 0x7012383ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701238full, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0b100000000000000000000000000000000000000000000000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701238full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x7012390ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 44, 20, uint64_t>(literal_0b11111111111111111111111111111111111111111111 );
+            l_scom_buffer.insert<44, 17, 47, uint64_t>(literal_0b10000010000000000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x7012390ull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x70123e0ull, l_scom_buffer ));
 
             constexpr auto l_MCP_MCBIST_MBA_SCOMFIR_MCBCFGQ_CFG_LOG_COUNTS_IN_TRACE_OFF = 0x0;
@@ -90,6 +109,7 @@ fapi2::ReturnCode p9n_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
             FAPI_TRY(fapi2::getScom( TGT0, 0x70123eaull, l_scom_buffer ));
 
             l_scom_buffer.insert<20, 20, 44, uint64_t>(literal_0b00001000000000000000 );
+            l_scom_buffer.insert<0, 20, 44, uint64_t>(literal_0b00010000000000000000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x70123eaull, l_scom_buffer));
         }
         {
@@ -97,6 +117,7 @@ fapi2::ReturnCode p9n_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
 
             l_scom_buffer.insert<23, 3, 61, uint64_t>(literal_0b100 );
             l_scom_buffer.insert<37, 4, 60, uint64_t>(literal_0b0100 );
+            l_scom_buffer.insert<20, 3, 61, uint64_t>(literal_0b100 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x70123ebull, l_scom_buffer));
         }
 
