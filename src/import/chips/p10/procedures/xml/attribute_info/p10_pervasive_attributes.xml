@@ -43,6 +43,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -86,6 +87,7 @@
   <valueType>uint8</valueType>
   <array>4</array>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -95,6 +97,7 @@
   <valueType>uint8</valueType>
   <array>8</array>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -104,6 +107,7 @@
     To skip the locking sequence and check for lock of CP filter1 PLL
   </description>
   <valueType>uint8</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -114,6 +118,7 @@
     To skip the locking sequence and check for lock of CP filter2 PLL
   </description>
   <valueType>uint8</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -124,6 +129,7 @@
     To skip the locking sequence and check for lock of CP filter3 PLL
   </description>
   <valueType>uint8</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -134,6 +140,7 @@
     To skip the locking sequence and check for lock of CP filter4 PLL
   </description>
   <valueType>uint8</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -145,6 +152,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -156,6 +164,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -167,6 +176,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -180,6 +190,7 @@
     The EQ is always functional, so this field only tracks core state
   </description>
   <valueType>uint32</valueType>
+  <writeable/>
   <platInit/>
   <mrwHide/>
 </attribute>
