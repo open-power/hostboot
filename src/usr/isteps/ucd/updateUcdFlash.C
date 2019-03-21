@@ -123,6 +123,8 @@ private:
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_LOW);
 
+        err->collectTrace(UCD_COMP_NAME);
+        err->collectTrace(I2C_COMP_NAME);
         return err;
     }
 
