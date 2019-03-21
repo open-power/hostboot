@@ -65,6 +65,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Core boot frequency multiplier</description>
   <valueType>uint16</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -119,6 +120,7 @@
   <description>PAU frequency multiplier</description>
   <valueType>uint16</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -140,6 +142,7 @@
     Ref clock I2C bus divider consumed by code running out of OTPROM
   </description>
   <valueType>uint16</valueType>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
