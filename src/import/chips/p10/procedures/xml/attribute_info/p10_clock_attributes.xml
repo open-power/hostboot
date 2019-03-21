@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -51,6 +52,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>setup clock mux settings</description>
   <valueType>uint64</valueType>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

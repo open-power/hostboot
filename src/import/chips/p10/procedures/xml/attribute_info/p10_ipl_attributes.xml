@@ -96,6 +96,7 @@
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <default>FALSE</default>
+  <writeable/>
   <platInit/>
   <mrwHide/>
 </attribute>
@@ -132,6 +133,7 @@
     Bit 28-31 : Reserved
   </description>
   <valueType>uint32</valueType>
+  <writeable/>
   <platInit/>
   <mrwHide/>
 </attribute>
@@ -145,6 +147,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>ALL_CORES = 0x1, NOT_ALL_CORES = 0x0</enum>
+  <writeable/>
   <platInit/>
   <overrideOnly/>
 </attribute>
@@ -155,6 +158,7 @@
   <description>Holds the state of Security Access Bit (SAB)</description>
   <valueType>uint8</valueType>
   <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
