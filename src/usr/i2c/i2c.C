@@ -4962,6 +4962,9 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
                         (i_args.engine * P9_ENGINE_SCOM_OFFSET);
             op_size=8;
 
+            TRACUCOMP( g_trac_i2c,
+                       "i2cRegisterOp() op_addr: 0x%lx  io_data_64: 0x%lx",op_addr, *io_data_64 );
+
             err = DeviceFW::deviceOp( i_opType,
                                       i_target,
                                       io_data_64,
