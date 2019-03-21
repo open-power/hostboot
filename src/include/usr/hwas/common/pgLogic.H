@@ -696,10 +696,10 @@ namespace PARTIAL_GOOD
                         NO_SPECIAL_RULE
                     ),
                     // OBUS Rule 3: pbioo1 unit on chiplet N1 must be checked
-                    //              for Cumulus OBUSes (chip unit 1 and 2).
+                    //              for Cumulus and Axone OBUSes (chip unit 1 and 2).
                     new PartialGoodRule
                     (
-                        {&PREDICATE_CUMULUS},
+                        {&PREDICATE_CUMULUS, &PREDICATE_AXONE},
                         OBUS_R3_PG_MASK,
                         ALL_OFF_AG_MASK,
                         N1_PG_INDEX,
