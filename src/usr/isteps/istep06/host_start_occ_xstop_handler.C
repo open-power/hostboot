@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,17 +126,6 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 #endif
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        // TODO - RTC 190807 - Skip OCC Start in MPIPL path in OPAL
-        // Revisit this to enable the OCC loading in 6.11 once PM related
-        // issue is resolved
-        if (TARGETING::is_sapphire_load())
-        {
-            if(l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
-            {
-                break;
-            }
-        }
-
         void* l_homerVirtAddrBase = reinterpret_cast<void*>
           (VmmManager::INITIAL_MEM_SIZE);
         uint64_t l_homerPhysAddrBase = mm_virt_to_phys(l_homerVirtAddrBase);
