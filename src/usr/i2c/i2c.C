@@ -5617,8 +5617,9 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                                    HWAS::SRCI_PRIORITY_HIGH);
     }
     // For FSP systems which don't yet have special handling for
-    // i2c device callouts we still need to handle the TPM search
-    // to avoid regression back to the "non TPM aware" behavior.
+    // i2c device callouts we still need to handle the TPM and UCD
+    // search to avoid regression back to the "non TPM aware" and
+    // "non UCD aware" behavior.
     else
     {
         // Loop thru TPMs in the system and match physical path,
@@ -5655,6 +5656,8 @@ void addHwCalloutsI2c(errlHndl_t i_err,
             }
         }
 
+        // Right now we are assuming that we never have a UCD on the same bus
+        // as a TPM
         if (!l_devFound)
         {
             // Loop thru the UCDs in the system and match physical path,
