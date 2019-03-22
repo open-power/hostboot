@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -714,6 +714,17 @@
     <attribute>
         <id>ATTR_SKIP_WAKEUP</id>
         <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <!-- The cache injection property is based on the MTM, so
+         it needs to be written by the FSP code. -->
+    <attribute>
+        <id>ATTR_PROC_PCIE_CACHE_INJ_MODE</id>
+        <writeable/>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_PCIE_CACHE_INJ_THROTTLE</id>
+        <writeable/>
     </attribute>
 
     <!-- Make this writeable so we can choose the value based on our CONFIG -->
