@@ -1465,7 +1465,7 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
     memset(l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect, 0,
            sizeof(l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect));
 
-    for(size_t i = PCR_0; i <= FW_USED_PCR_COUNT; ++i)
+    for(size_t i = PCR_0; i < FW_USED_PCR_COUNT; ++i)
     {
         l_cmd->quoteData.pcrSelection.pcrSelections[0].pcrSelect[i/8] |=
             0x01 << (i % 8);
