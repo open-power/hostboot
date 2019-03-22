@@ -39,9 +39,12 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/hberrltypes.H>
+#include <errl/errludstring.H>
 
 #include <trace/interface.H>
 #include <string.h>
+#include <sys/time.h>
+#include <stdlib.h>
 #include <hbotcompid.H>
 #include <util/utilmem.H>
 #include <util/utilstream.H>
@@ -56,6 +59,10 @@ namespace UCD // UCD Series
 
 trace_desc_t* g_trac_ucd = nullptr;
 TRAC_INIT(&g_trac_ucd, UCD_COMP_NAME, 2*KILOBYTE);
+
+// Switch to turn on and off debug traces:
+#define TRACUCOMP(args...)  TRACDCOMP(args)
+
 
 class Ucd
 {
@@ -371,6 +378,106 @@ public:
         return err;
     } // end of initialize()
 
+    /**
+     *  @brief smbus_op_t struct to hold on SMBUS operation
+     */
+    struct smbus_op_t
+    {
+        uint64_t  addr;
+        uint64_t  cmd;
+        uint64_t  pec_byte;
+        std::vector<uint8_t> vData;
+
+        /**
+         *  @brief smbus_op_t constructor
+         */
+        smbus_op_t()
+        : addr(0),
+          cmd(0),
+          pec_byte(0)
+        {
+        }
+
+    };
+
+    /**
+     *  @brief Processes a command line from a UCD update file for
+     *         WriteByte, WriteWord, and BlockWrite operations
+     *
+     *  @param[in]  i_str  Pointer to the start of the 2nd field of the command
+     *                     NOTE: This parameter is not a const - it is updated
+     *  @param[out] o_op   Output structure with the derived info
+     *
+     *  @note There is an expected layout for the 2nd, 3rd, and 4th fields for
+     *        these operations.  Any detected deviation will result in an assert
+     *
+     *  @return void
+     */
+    void convertStringToOp(char * i_str, smbus_op_t & o_op)
+    {
+        // PEC byte is calculated on all message bytes, including
+        //  addresses and Read/Write bit.
+        // SMBus Fields are Request,Address,Command,Data with PEC byte
+        // For reads, the last field is what is expected back from the device
+        assert(i_str != nullptr, "convertStringToOp: i_str is nullptr");
+
+        // Second Field is Address
+        auto pDelimiter = strchr(i_str, ',' );
+        if (pDelimiter != nullptr)
+        {
+            *pDelimiter = '\0';
+        }
+        else
+        {
+            assert(false,"convertStringToOp: pDelimiter for 2nd field is nullptr");
+        }
+        o_op.addr = strtoul(i_str, nullptr, 16);
+
+        // Move Past Second Field
+        i_str = pDelimiter+1;
+
+        // Third Field is Command
+        pDelimiter = strchr(i_str, ',' );
+        if (pDelimiter != nullptr)
+        {
+            *pDelimiter = '\0';
+        }
+        else
+        {
+            assert(false,"convertStringToOp: pDelimiter for 3rd field is nullptr");
+        }
+        o_op.cmd = strtoul(i_str, nullptr, 16 );
+
+        // Move Past Third Field
+        i_str = pDelimiter+1;
+
+        // Fourth field is Data + PEC byte
+        // - should already have '\0' at it from above
+        o_op.vData.clear();
+        char char_byte[] = "\0\0\0";
+
+        // Skip the expected "0x" at the start of the data stream
+        i_str += 2;
+
+        while (*i_str != '\0')
+        {
+            char_byte[0] = *(i_str++);  // Get 1st nibble then increment
+            char_byte[1] = *(i_str++);  // Get 2nd nibble then increment
+            o_op.vData.push_back(strtoul(char_byte, nullptr, 16));
+        }
+
+        // Last byte is pec byte
+        o_op.pec_byte = o_op.vData.back();
+        o_op.vData.pop_back();
+
+        // Ignore checking pec byte for now as SMBUS Device Op calculates it
+
+        // Setup data
+        TRACDCOMP(g_trac_ucd,"convertStringToOp: data size=%d, byte0=0x%.2X",
+                  o_op.vData.size(), o_op.vData[0]);
+
+        return;
+    }
 
     /**
      *  @brief Updates a UCD target's flash image
@@ -387,19 +494,340 @@ public:
     errlHndl_t updateUcdFlash(const void*  i_pFlashImage,
                                     size_t i_size)
     {
-        errlHndl_t pError = nullptr;
+        errlHndl_t err = nullptr;
 
-        // Stub for future additional support
         TRACFCOMP(g_trac_ucd, ENTER_MRK"updateUcdFlash: ucd_tgt=0x%.08X, "
                   "i2cInfo: e%d/p%d/da=0x%X. i_pFlashImage=%p, i_size=0x%X",
                   TARGETING::get_huid(iv_pUcd),
                   iv_i2cInfo.engine, iv_i2cInfo.port, iv_i2cInfo.devAddr,
                   i_pFlashImage, i_size);
 
-        TRACFBIN(g_trac_ucd,"updateUcdFlash: Start of i_pFlashImage",
-                 i_pFlashImage, 64);
+        TRACDBIN(g_trac_ucd,"updateUcdFlash: Start of i_pFlashImage",
+                 i_pFlashImage, 128);
 
-        return pError;
+        size_t char_count = 0;
+        size_t op_count = 1;
+        char * tmp_str = reinterpret_cast<char*>(
+                              const_cast<void*>(i_pFlashImage));
+
+        while (char_count < i_size)
+        {
+            size_t size=0;
+            size_t expSize = 0;
+
+            // Each op is one line in the processed .csv file
+            auto pDelimiter = strchr(tmp_str, '\n' );
+            if (pDelimiter != nullptr)
+            {
+                *pDelimiter = '\0';
+            }
+            else
+            {
+                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%d: "
+                          "found nullptr: tmp_str=%p, pDelimiter=%p",
+                          op_count, tmp_str, pDelimiter);
+                /*@
+                 * @errortype
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @reasoncode UCD_RC::UCD_INVALID_COMMANDLINE
+                 * @moduleid   UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE
+                 * @userdata1  HUID of UCD Target
+                 * @userdata2  The order of this operation
+                 * @devdesc    A 'new line' character was not found while
+                 *             processing this UCD flash image's command line
+                 * @custdesc   Unexpected IPL firmware data format error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE,
+                    UCD_RC::UCD_INVALID_COMMANDLINE,
+                    TARGETING::get_huid(iv_pUcd),
+                    op_count,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                break;
+            }
+
+            size_t op_str_length = strlen(tmp_str);
+            char_count += op_str_length+1;
+
+            TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s "
+                      "(len=%d, count=%d, total=%d)",
+                      op_count, tmp_str, op_str_length, char_count, i_size);
+            char * next_op = tmp_str + op_str_length + 1;
+
+            // Process First Field - the Operation Type (or "Request")
+            pDelimiter = strchr(tmp_str, ',' );
+            if (pDelimiter != nullptr)
+            {
+                *pDelimiter = '\0';
+            }
+            else
+            {
+                assert(false,"updateUcdFlash: pDelimiter for 1st field is nullptr");
+            }
+            // Save start for if-check and tracing purposes
+            char * op_type = tmp_str;
+
+            // Move past first field
+            tmp_str = pDelimiter+1;
+
+            // Majority of ops need this structure
+            smbus_op_t op{};
+
+            // Look for expected Operation Types
+            if (strcmp(op_type,"WriteByte") == 0)
+            {
+                // Convert the other fields to address, command, and data
+                convertStringToOp(tmp_str, op);
+
+                // Data size == 1 is checked by SMBUS Device Operation
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X, "
+                          "pec=0x%.2X", op_count, op_type, op.addr, op.cmd,
+                          op.vData.size(), op.vData[0], op.pec_byte);
+
+                size = op.vData.size();
+                expSize = size;
+
+                err = deviceOp(DeviceFW::WRITE,
+                           iv_pI2cMaster,
+                           reinterpret_cast<void*>(op.vData.data()),
+                           size,
+                           DEVICE_I2C_SMBUS_BYTE(iv_i2cInfo.engine,
+                                                 iv_i2cInfo.port,
+                                                 iv_i2cInfo.devAddr,
+                                                 op.cmd,
+                                                 iv_i2cInfo.i2cMuxBusSelector,
+                                                 &iv_i2cInfo.i2cMuxPath));
+
+                if (err)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                          "DEVICE_I2C_SMBUS_BYTE Failed: err plid=0x%.8X. "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X, "
+                          "pec=0x%.2X", op_count, op_type, err->plid(),
+                          op.addr, op.cmd, op.vData.size(), op.vData[0],
+                          op.pec_byte);
+                    break;
+                }
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BYTE size mismatch: returned %d, but expected %d",
+                       size, expSize);
+            }
+            else if (strcmp(op_type,"WriteWord") == 0)
+            {
+                // Convert the other fields to address, command, and data
+                convertStringToOp(tmp_str, op);
+
+                // Data size == 2 is checked by SMBUS Device Operation
+
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, "
+                          "data=0x%.2X 0x%.2X, pec=0x%.2X",
+                          op_count, op_type, op.addr, op.cmd, op.vData.size(),
+                          op.vData[0], op.vData[1], op.pec_byte);
+
+                size = op.vData.size();
+                expSize = size;
+
+                err = deviceOp(DeviceFW::WRITE,
+                           iv_pI2cMaster,
+                           reinterpret_cast<void*>(op.vData.data()),
+                           size,
+                           DEVICE_I2C_SMBUS_WORD(iv_i2cInfo.engine,
+                                                 iv_i2cInfo.port,
+                                                 iv_i2cInfo.devAddr,
+                                                 op.cmd,
+                                                 iv_i2cInfo.i2cMuxBusSelector,
+                                                 &iv_i2cInfo.i2cMuxPath));
+
+                if (err)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                          "DEVICE_I2C_SMBUS_WORD Failed: err plid=0x%.8X. "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X "
+                          "0x%.2X, pec=0x%.2X", op_count, op_type, err->plid(),
+                          op.addr, op.cmd, op.vData.size(), op.vData[0],
+                          op.vData[1], op.pec_byte);
+                    break;
+                }
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_WORD size mismatch: returned %d, but expected %d",
+                       size, expSize);
+            }
+            else if (strcmp(op_type,"BlockWrite") == 0)
+            {
+                // Convert the other fields to address, command, and data
+                convertStringToOp(tmp_str, op);
+
+                // Flash image file for BlockWrite has length as the first data
+                // element, but that element should not get passed into the
+                // I2C Device Driver calls as it already calculates the proper
+                // length based on what is being passed in.  Also, this element
+                // needs to be removed so that the I2C DD can calculate the PEC
+                // byte correctly.
+                op.vData.erase(op.vData.begin());
+
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data0=0x%.2X, "
+                          "pec=0x%X", op_count, op_type, op.addr, op.cmd,
+                          op.vData.size(), op.vData[0], op.pec_byte);
+
+                size = op.vData.size();
+                expSize = size;
+
+                err = deviceOp(DeviceFW::WRITE,
+                           iv_pI2cMaster,
+                           reinterpret_cast<void*>(op.vData.data()),
+                           size,
+                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
+                                                  iv_i2cInfo.port,
+                                                  iv_i2cInfo.devAddr,
+                                                  op.cmd,
+                                                  iv_i2cInfo.i2cMuxBusSelector,
+                                                  &iv_i2cInfo.i2cMuxPath));
+
+                if (err)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                          "DEVICE_I2C_SMBUS_BLOCK Failed. err plid=0x%.8X. "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data0=0x%.2X, "
+                          "pec=0x%X", op_count, op_type, err->plid(), op.addr,
+                          op.cmd, op.vData.size(), op.vData[0], op.pec_byte);
+                    break;
+                }
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BLOCK size mismatch: returned %d, but expected %d",
+                       size, expSize);
+            }
+            else if (strcmp(op_type,"SendByte") == 0)
+            {
+                // Second Field is Address
+                pDelimiter = strchr(tmp_str, ',' );
+                if (pDelimiter != nullptr)
+                {
+                    *pDelimiter = '\0';
+                }
+                else
+                {
+                    assert(false,"updateUcdFlash: SendByte: pDelimiter for 2nd field is nullptr");
+                }
+                uint64_t addr = strtoul(tmp_str, nullptr, 16);
+
+                // Move Past Second Field
+                tmp_str = pDelimiter+1;
+
+                // Third Field is Command and ends with a nullptr already
+                uint8_t cmd = strtoul(tmp_str, nullptr, 16 );
+
+                // There is no additional data, which is why convertStringToOp()
+                // is not being used
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
+                          "addr=0x%.2X, cmd=0x%.2X",
+                          op_count, op_type, addr, cmd);
+
+                // For this operation, the 'cmd' is the actual data sent, but
+                // we use the following API without the cmd field
+                size = sizeof(uint8_t);
+                expSize = size;
+
+                err = deviceOp(DeviceFW::WRITE,
+                           iv_pI2cMaster,
+                           &cmd,
+                           size,
+                           DEVICE_I2C_SMBUS_SEND_OR_RECV(iv_i2cInfo.engine,
+                                                  iv_i2cInfo.port,
+                                                  iv_i2cInfo.devAddr,
+                                                  iv_i2cInfo.i2cMuxBusSelector,
+                                                  &iv_i2cInfo.i2cMuxPath));
+
+                if (err)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                          "DEVICE_I2C_SMBUS_SEND_OR_RECV Failed. err plid="
+                          "0x%.8X. addr=0x%.2X, cmd=0x%.2X",
+                          op_count, op_type, err->plid(), op.addr, op.cmd);
+                    break;
+                }
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_SEND_OR_RECV size mismatch: returned %d, but expected %d",
+                       size, expSize);
+            }
+            else if (strcmp(op_type,"Pause") == 0)
+            {
+                // 2nd field is decimal value of ms to wait
+                pDelimiter = strchr(tmp_str, ',' );
+                if (pDelimiter != nullptr)
+                {
+                    *pDelimiter = '\0';
+                }
+                else
+                {
+                    assert(false,"updateUcdFlash: Pause: pDelimiter for 2nd field is nullptr");
+                }
+
+                // NOTE: Hostboot's implementation of strtoul only supports
+                // base 16 so have to do this in a clunky way
+                uint64_t sleep_ms = 0;
+
+                while (*tmp_str != '\0')
+                {
+                    // Another numeral found so shift previous result
+                    // by multiplying by 10 and then add in the current
+                    // value, where *tmp_str will be in ASCII so you need
+                    // to subtract ASCII '0' which is 0x30
+                    sleep_ms = (10 * sleep_ms) + (*(tmp_str++) - 0x30);
+                }
+
+                // Important to trace this pause so users know why there is a
+                // gap in the trace output
+                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
+                          "Sleep for %d ms", op_count, op_type, sleep_ms);
+                nanosleep(0, sleep_ms * NS_PER_MSEC);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: "
+                          "Unrecognized Requested Operation: %s",
+                          op_count, op_type);
+
+                /*@
+                 * @errortype
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @reasoncode UCD_RC::UCD_UNSUPPORTED_OPERATION_REQUEST
+                 * @moduleid   UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE
+                 * @userdata1  HUID of UCD Target
+                 * @userdata2  The order of the operation
+                 * @devdesc    The UCD flash image commandline is not supported
+                 * @custdesc   Unexpected IPL firmware data format error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE,
+                    UCD_RC::UCD_UNSUPPORTED_OPERATION_REQUEST,
+                    TARGETING::get_huid(iv_pUcd),
+                    op_count,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                ERRORLOG::ErrlUserDetailsString(op_type).addToLog(err);
+                break;
+            }
+
+            // Set up tmp_str for next op
+            ++op_count;
+            tmp_str = next_op;
+
+        }  // end of while loop
+
+        if (err)
+        {
+            err->collectTrace(UCD_COMP_NAME);
+        }
+
+
+        TRACFCOMP(g_trac_ucd,"updateUcdFlash: End of op loop: "
+                  "op_count=%d, char_count=%d, total=%d): %s",
+                  op_count, char_count, i_size,
+                  err ? "ERROR" : "No Error")
+
+        return err;
 
     } // end of updateUcdFlash()
 
@@ -800,6 +1228,14 @@ errlHndl_t updateAllUcdFlashImages(
                 nextUcd=true;
                 break;
             }
+            else
+            {
+              TRACFCOMP(g_trac_ucd,INFO_MRK
+                    "updateAllUcdFlashImages: Device has different MFR revision"
+                    " (0x%04X) than the incoming UCD sub-flash image "
+                    "version (0x%04X), so perform flash update",
+                    mfrRevision, tocEntry.mfrRevision);
+            }
 
             // Turns out doing the check via UtilMem is not that easy,
             // so for feeding the image to the updater, use manual
@@ -885,6 +1321,7 @@ errlHndl_t updateAllUcdFlashImages(
         {
             break;
         }
+
 
     } // End loop through all power sequencers
 

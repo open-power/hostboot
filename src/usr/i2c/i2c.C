@@ -1452,7 +1452,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                     || (i_args.subop == DeviceFW::I2C_SMBUS_WORD)))
         {
             // Note: The SMBUS spec calls a 2 byte value a "word"
-
             TRACUCOMP(g_trac_i2c, INFO_MRK
                       "I2C SMBUS Write %s: Command code = 0x%02X, "
                       "Use PEC = %d.",
@@ -1542,9 +1541,9 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         {
             TRACUCOMP(g_trac_i2c, INFO_MRK
                       "I2C SMBUS Block Write: Command code = 0x%02X, "
-                      "Use PEC = %d.",
+                      "Use PEC = %d. io_buflen = %d",
                       i_args.smbus.commandCode,
-                      i_args.smbus.usePec);
+                      i_args.smbus.usePec, io_buflen);
 
             // If requested length is for < 1 byte or > 255 bytes for a block
             // write transaction, throw an error.
@@ -1622,7 +1621,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                     || (i_args.subop == DeviceFW::I2C_SMBUS_WORD)))
         {
             // Note: The SMBUS spec calls a 2 byte value a "word"
-
             TRACUCOMP(g_trac_i2c, INFO_MRK
                       "I2C SMBUS Read %s: Command code = 0x%02X, "
                       "Use PEC = %d",
@@ -2671,7 +2669,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
             break;
         }
 
-        for( bytesWritten = 0x0; bytesWritten < io_buflen; bytesWritten++ )
+        for( bytesWritten = 0x0; bytesWritten < io_buflen; ++bytesWritten )
         {
             // Wait for FIFO space to be available for the write
             err = i2cWaitForFifoSpace( i_target,
