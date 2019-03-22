@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,6 @@
 #define _MSS_POWER_DECODER__
 
 #include <fapi2.H>
-#include <mss.H>
 #include <lib/dimm/kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 namespace mss

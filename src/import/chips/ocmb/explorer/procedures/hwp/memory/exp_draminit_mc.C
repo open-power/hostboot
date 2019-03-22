@@ -34,6 +34,7 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/exp_defaults.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>

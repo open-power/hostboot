@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB Memory Lab
 
+#include <lib/shared/nimbus_defaults.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/rank.H>
 #include <p9_mc_scom_addresses.H>

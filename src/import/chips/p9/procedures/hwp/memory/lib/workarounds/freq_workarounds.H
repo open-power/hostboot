@@ -35,8 +35,6 @@
 
 #include <fapi2.H>
 
-#include <mss.H>
-
 namespace mss
 {
 

@@ -36,6 +36,7 @@
 #ifndef _GEN_MSS_FREQ_H_
 #define _GEN_MSS_FREQ_H_
 
+#include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/spd/spd_facade.H>

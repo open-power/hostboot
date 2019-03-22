@@ -37,9 +37,9 @@
 #define _GEN_MSS_VOLT_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/voltage/gen_mss_voltage_traits.H>
 
 namespace mss

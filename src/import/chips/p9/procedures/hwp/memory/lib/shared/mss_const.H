@@ -43,8 +43,6 @@
 namespace mss
 {
 
-constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::NIMBUS;
-
 enum sizes
 {
     PORTS_PER_MCS = 2,

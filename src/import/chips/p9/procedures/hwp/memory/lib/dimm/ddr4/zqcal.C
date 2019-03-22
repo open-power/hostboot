@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <vector>
 #include <fapi2.H>
 

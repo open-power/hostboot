@@ -39,11 +39,4 @@
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
-namespace mss
-{
-
-constexpr mss::proc_type DEFAULT_PROC_TYPE = mss::proc_type::AXONE;
-
-}// mss
-
 #endif

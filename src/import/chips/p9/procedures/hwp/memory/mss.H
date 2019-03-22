@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,11 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+
+// This is ok here so long as we don't include this header in any other header,
+// unless it's in a non-firmware path (lab, unit tests, etc).
+// This is to prevent our DEFAULTs from spilling over where we don't want them.
+#include <lib/shared/nimbus_defaults.H>
 
 #include <lib/shared/mss_const.H>
 #include <lib/shared/mss_kind.H>

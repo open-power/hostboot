@@ -27,6 +27,7 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
+#include <lib/shared/nimbus_defaults.H>
 #include <math.h>
 
 // fapi2

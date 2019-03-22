@@ -35,7 +35,6 @@
 
 #include <fapi2.H>
 
-#include <mss.H>
 #include <lib/dimm/rcd_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 

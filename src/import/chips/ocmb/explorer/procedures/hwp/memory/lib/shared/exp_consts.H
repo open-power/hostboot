@@ -41,8 +41,6 @@
 namespace mss
 {
 
-constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
-
 namespace exp
 {
 

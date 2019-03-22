@@ -22,3 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file nimbus_defaults.H
+/// @brief default types associated with Nimbus system
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_NIMBUS_DEFAULTS_H_
+#define _MSS_NIMBUS_DEFAULTS_H_
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::NIMBUS;
+
+} // ns mss
+
+#endif

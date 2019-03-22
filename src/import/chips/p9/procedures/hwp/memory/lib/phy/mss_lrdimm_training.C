@@ -35,6 +35,7 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/phy/mss_lrdimm_training.H>

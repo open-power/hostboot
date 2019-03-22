@@ -22,3 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_defaults.H
+/// @brief default types associated with Nimbus system
+///
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
+#ifndef _MSS_NIMBUS_DEFAULTS_H_
+#define _MSS_NIMBUS_DEFAULTS_H_
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
+
+} // ns mss
+
+#endif

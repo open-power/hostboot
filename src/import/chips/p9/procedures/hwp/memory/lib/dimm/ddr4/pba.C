@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB Memory Lab
 
+#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/c_str.H>

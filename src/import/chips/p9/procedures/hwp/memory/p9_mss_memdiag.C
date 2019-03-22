@@ -33,6 +33,7 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <p9_mss_memdiag.H>
 

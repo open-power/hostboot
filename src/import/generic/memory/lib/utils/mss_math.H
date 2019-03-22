@@ -31,6 +31,7 @@
 #ifndef _MSS_MATH_H_
 #define _MSS_MATH_H_
 
+#include <fapi2.H>
 #include <cstdint>
 
 namespace mss

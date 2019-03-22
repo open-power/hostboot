@@ -34,6 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
 #include <exp_check_for_ready.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/lib/utils/poll.H>

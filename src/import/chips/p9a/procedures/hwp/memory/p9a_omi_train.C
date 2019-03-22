@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: Memory
 
+#include <lib/shared/axone_defaults.H>
 #include <p9a_omi_train.H>
 
 #include <fapi2.H>
