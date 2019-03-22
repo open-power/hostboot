@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,6 +146,16 @@ inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
         hold_cke_high_helper( l_cke, l_inst );
     }
 }
+
+///
+/// @brief Preload the CCS program for epow
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the vector of instructions
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note This is written specifically to support EPOW on NVDIMM
+///
+fapi2::ReturnCode preload_ccs_for_epow( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program);
 
 namespace wr_lvl
 {

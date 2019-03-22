@@ -521,13 +521,14 @@ inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// @brief Create, initialize a JEDEC Device Deselect CCS command
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the Device Deselect CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> des_command()
+inline instruction_t<T> des_command(const uint16_t i_idle = 0)
 {
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
@@ -538,6 +539,9 @@ inline instruction_t<T> des_command()
 
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
     rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+
+    // Insert idle
+    rcd_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
 
     // ACT is high no-care
     // RAS, CAS, WE no-care
@@ -679,6 +683,7 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
+/// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the MRS CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included

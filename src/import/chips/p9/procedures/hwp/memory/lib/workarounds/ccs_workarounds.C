@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,83 @@ fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Preload the CCS program for epow
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the vector of instructions
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note This is written specifically to support EPOW on NVDIMM
+///       This function loads the input program to the CCS arrays
+///       without execute as opposed to ccs::execute(). The actual
+///       ccs program execution will be handled by OCC
+///
+fapi2::ReturnCode preload_ccs_for_epow( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program)
+{
+    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+
+    // Subtract one for the idle we insert at the end
+    constexpr size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
+    constexpr uint64_t CCS_ARR0_ZERO = MCBIST_CCS_INST_ARR0_00;
+    constexpr uint64_t CCS_ARR1_ZERO = MCBIST_CCS_INST_ARR1_00;
+
+    FAPI_INF("loading ccs instructions (%d) for epow on %s", i_program.iv_instructions.size(), mss::c_str(i_target));
+
+    auto l_inst_iter = i_program.iv_instructions.begin();
+
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::workarounds::preload_ccs_for_epow" );
+
+    FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
+                           [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
+    }),
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target) );
+
+    while (l_inst_iter != i_program.iv_instructions.end())
+    {
+        size_t l_inst_count = 0;
+
+        // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
+        for (; l_inst_iter != i_program.iv_instructions.end()
+             && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++l_inst_iter)
+        {
+            // If we are on the last instruction we want to stay there. If we exit
+            // the sequencer could take back the control. This is also the reason
+            // we are not adding up the delays here.
+            if (l_inst_iter + 1 == i_program.iv_instructions.end())
+            {
+                l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
+                            MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count);
+            }
+            else
+            {
+                l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
+                            MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
+            }
+
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0),
+                      "Error in ccs::workarounds::preload_ccs_for_epow" );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1),
+                      "Error in ccs::workarounds::preload_ccs_for_epow" );
+
+            FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx)",
+                     l_inst_count, l_inst_iter->arr0, l_inst_iter->arr1,
+                     CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
+                     mss::c_str(i_target));
+        }
+    }
+
+    // No need to set the ports here. This will be done by OCC before poking the start bit
+
+fapi_try_exit:
+    i_program.iv_instructions.clear();
+    return fapi2::current_err;
+}
+
 
 namespace wr_lvl
 {

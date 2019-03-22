@@ -171,6 +171,15 @@ fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA
 template< fapi2::TargetType T >
 fapi2::ReturnCode post_restore_transition( const fapi2::Target<T>& i_target );
 
+///
+/// @brief Preload the CCS with the EPOW sequence
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @note This is written specifically to support EPOW on NVDIMM and
+///       should only be called after all the draminit.
+///
+fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
 }//ns nvdimm
 
 }//ns mss

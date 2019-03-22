@@ -651,6 +651,75 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Preload the CCS with the EPOW sequence
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+/// @note This is written specifically to support EPOW on NVDIMM and
+///       should only be called after all the draminit.
+///
+fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+    const auto& l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
+    constexpr uint64_t CS_N_ACTIVE = 0b00;
+    uint8_t l_trp = 0;
+    uint16_t l_trfc = 0;
+    std::vector<uint64_t> l_ranks;
+    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst;
+
+    // Get tRP and tRFC
+    FAPI_TRY(mss::eff_dram_trp(i_target, l_trp));
+    FAPI_TRY(mss::eff_dram_trfc(i_target, l_trfc));
+
+    l_program.iv_poll.iv_initial_delay = 0;
+    l_program.iv_poll.iv_initial_sim_delay = 0;
+
+    // Start the program with DES and wait for tRFC
+    // All CKE = high, all CSn = high, Reset_n = high, wait tRFC
+    l_inst = ccs::des_command<TARGET_TYPE_MCBIST>(l_trfc);
+    l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
+    FAPI_INF("des_command() arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
+    l_program.iv_instructions.push_back(l_inst);
+
+    // Precharge all command
+    // All CKE = high, all CSn = low, Reset_n = high, wait tRP
+    l_inst = ccs::precharge_all_command<TARGET_TYPE_MCBIST>(l_dimms[0], 0, l_trp);
+    l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
+    l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
+    l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
+    FAPI_INF("precharge_all_command() arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
+    l_program.iv_instructions.push_back(l_inst);
+
+    // Self-refresh entry command
+    // All CKE = low, all CSn = low, Reset_n = high, wait tCKSRE
+    l_inst = ccs::self_refresh_entry_command<TARGET_TYPE_MCBIST>(l_dimms[0], 0, mss::tcksre(l_dimms[0]));
+    l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
+    l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
+    l_inst.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(mss::CKE_LOW);
+    l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
+    FAPI_INF("self_refresh_entry_command() arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
+    l_program.iv_instructions.push_back(l_inst);
+
+    // Push in an empty instruction for RESETn
+    // All CKE = low, all CSn = high (default), Reset_n = low
+    l_inst = ccs::instruction_t<TARGET_TYPE_MCBIST>(l_dimms[0]);
+    FAPI_INF("Assert RESETn arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
+    l_program.iv_instructions.push_back(l_inst);
+
+    // Load the program
+    FAPI_TRY( mss::ccs::workarounds::preload_ccs_for_epow(l_mcbist, l_program),
+              "Failed to preload the ccs for epow %s", mss::c_str(i_target) );
+
+    // The actual execution of this program will be trigger by EPOW. When EPOW occurs,
+    // OCC will change the mux and hit the go button to execute CCS
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }//ns nvdimm
 
 }//ns mss
