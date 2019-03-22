@@ -2085,10 +2085,11 @@ void ErrlEntry::removeDuplicateTraces()
         if( (FIPS_ERRL_COMP_ID   == (*sectionVectorIt)->iv_header.iv_compId)
           && (FIPS_ERRL_UDT_HB_TRACE == (*sectionVectorIt)->iv_header.iv_sst) )
         {
-            char* l_data = static_cast<char*>((*sectionVectorIt)->data());
+            char* l_dataPtr = static_cast<char*>((*sectionVectorIt)->data());
+            char* l_dataEndPtr = l_dataPtr + (*sectionVectorIt)->dataSize();
 
             TRACE::trace_buf_head_t* l_trace_buf_head =
-                reinterpret_cast<TRACE::trace_buf_head_t*>(l_data);
+                reinterpret_cast<TRACE::trace_buf_head_t*>(l_dataPtr);
 
             // Look for the component id in the map to insert trace entries
             // or insert a new component id into the map to insert trace entries
@@ -2103,22 +2104,50 @@ void ErrlEntry::removeDuplicateTraces()
                 it = traceUD_map.find(l_compName);
             }
 
-            // Add all trace entries to map for the current component id.
-            l_data += l_trace_buf_head->hdr_len;
+            //Start at end of trace header
+            l_dataPtr += l_trace_buf_head->hdr_len;
 
+            //verify that hdr_len doesn't extend outside the user data section
+            if(l_dataPtr > l_dataEndPtr)
+            {
+                TRACFCOMP( g_trac_errl,
+                    ERR_MRK"removeDuplicateTraces: header extends oustide UD section (hdr_len = %u)",
+                    l_trace_buf_head->hdr_len);
+
+                //skip this section and go to the next one
+                continue;
+            }
+
+            // Add all trace entries to map for the current component id.
             for (size_t traceCount = 0; traceCount < l_trace_buf_head->te_count;
                  traceCount++)
             {
                 TRACE::trace_bin_entry_t* l_trace_entry =
-                    reinterpret_cast<TRACE::trace_bin_entry_t*>(l_data);
+                    reinterpret_cast<TRACE::trace_bin_entry_t*>(l_dataPtr);
 
-                it->second->push_back(l_trace_entry);
-
+                // Find the size of this entry plus padding.
                 // fsp-trace entries have an extra 4 bytes at the end of them
                 // hence the sizeof(uint32_t)
-                l_data += sizeof(TRACE::trace_bin_entry_t)
-                        + ALIGN_8(l_trace_entry->head.length)
-                        + sizeof(uint32_t);
+                const size_t l_traceSize =
+                            sizeof(TRACE::trace_bin_entry_t) +
+                            ALIGN_8(l_trace_entry->head.length) +
+                            sizeof(uint32_t);
+
+                // Move pointer to start of next trace
+                l_dataPtr += l_traceSize;
+
+                // verify that this trace entry is contained within this user
+                // data section
+                if(l_dataPtr > l_dataEndPtr)
+                {
+                    TRACFCOMP( g_trac_errl,
+                        ERR_MRK"removeDuplicateTraces: entry oustide UD section. length[%u] traceCount[%u] te_count[%u]",
+                        l_traceSize, traceCount, l_trace_buf_head->te_count);
+                    break;
+                }
+
+                // ok to add trace now that it passed our size check
+                it->second->push_back(l_trace_entry);
             }
         }
     }
@@ -2207,7 +2236,7 @@ void ErrlEntry::removeDuplicateTraces()
         header->endian_flg = 'B';
         memcpy(&header->comp[0], it.first, TRAC_COMP_SIZE);
         header->times_wrap = 0;
-        header->te_count = it.second->size();
+        header->te_count = 0;
         header->size = uniqueSize;
         header->next_free = uniqueSize;
 
@@ -2222,11 +2251,24 @@ void ErrlEntry::removeDuplicateTraces()
                              + ALIGN_8((*uniqueIt)->head.length)
                              + sizeof(uint32_t);
 
+            // don't allow writing outside our allocated space
+            if((l_pos + entrySize) > uniqueSize)
+            {
+                TRACFCOMP( g_trac_errl,
+                    ERR_MRK"removeDuplicateTraces: trace len[%u] + pos[%u] > uniqueSize[%u]!!! te_count[%u]",
+                    entrySize, l_pos, uniqueSize, header->te_count);
+                break;
+            }
+
             memcpy(&l_pBuffer[l_pos], (*uniqueIt), entrySize);
 
             l_pos += entrySize;
 
+            // Keep count of how many entries were actually copied into
+            // the buffer.
+            header->te_count++;
         }
+        header->next_free = l_pos;
 
         ErrlUD* l_udSection = new ErrlUD( l_pBuffer,
                                           uniqueSize,
