@@ -82,6 +82,21 @@ class STLIntegralTest : public CxxTest::TestSuite
                 TS_FAIL("false_type is not false.");
             }
         }
+
+        void testTypes()
+        {
+            if (!std::is_same<std::true_type,
+                std::integral_constant<bool, true> >::value)
+            {
+                TS_FAIL("true_type and integral_constant<bool, true> are not the same type.");
+            }
+
+            if (!std::is_same<std::false_type,
+                std::integral_constant<bool, false> >::value)
+            {
+                TS_FAIL("true_type and integral_constant<bool, false> are not the same type.");
+            }
+        }
 };
 
 #endif

@@ -27,11 +27,12 @@ ROOTPATH = ../../../..
 MODULE = testsyslib
 #@TODO-RTC:151185-Turn enable all test cases
 #TESTS = *.H
-TESTS = stltest.H
 #TODO RTC:204720
 #TESTS += synctest.H
-TESTS += tls.H
 
+TESTS = stltest.H
+TESTS += tls.H
+TESTS += integral.H
 SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
