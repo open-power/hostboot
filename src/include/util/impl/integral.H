@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/util/traits/integral.H $                          */
+/* $Source: src/include/util/impl/integral.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -38,9 +38,8 @@ namespace std
         constexpr value_type operator()() const { return value; }
     };
 
-    struct true_type : integral_constant<bool, true> {};
-    struct false_type : integral_constant<bool, false> {};
-
+    typedef integral_constant<bool, true> true_type;
+    typedef integral_constant<bool, false> false_type;
 }
 #endif
 /* vim: set filetype=cpp : */
