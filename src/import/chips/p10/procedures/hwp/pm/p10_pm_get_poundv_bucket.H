@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -61,7 +62,7 @@ typedef struct
     uint16_t core_freq_gb_sort;
     uint16_t vdd_vmin;
     uint16_t ivdd_powr_cur_act;
-    uint16_t core_powr_temp;
+    uint8_t core_powr_temp;
     uint8_t  spare[3];
 } poundV_entry_pts_t;
 
@@ -89,12 +90,16 @@ typedef struct
     uint16_t VPCISrtSocPow;
     uint16_t TSrtSocPowAct;
     uint16_t IDDRdpLmt;
-    uint8_t VddTdpWofIndx;
-    uint8_t VcsTdpWofIndx_VioTdpWofIndx;
-    uint8_t ModeIntrPlt;
-    uint8_t RdpSrtPwrTmp;
-    uint8_t TdpSrtPwrTmp;
-    uint8_t rsvd[9];
+    uint8_t  VddTdpWofIndx;
+    uint8_t  VcsTdpWofIndx;
+    uint8_t  VioTdpWofIndx;
+    uint8_t  AmbTdpWofIndx;
+    uint8_t  ModeIntrPlt;
+    uint8_t  RdpSrtPwrTmp;
+    uint8_t  TdpSrtPwrTmp;
+    uint16_t VddTdpWofCoreFreq;
+    uint16_t FxdFreqMdeCoreFreq;
+    uint8_t rsvd[3];
 } poundV_other_info_t;
 //Represents the data contained within a single #V (version=1) bucket
 //Note: This structure should not be assumed to be binary identical
