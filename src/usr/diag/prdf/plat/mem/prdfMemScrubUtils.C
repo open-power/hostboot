@@ -27,6 +27,10 @@
  *  @brief Define the functionality necessary to start initial background scrub
  */
 
+// HWP includes
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/mcbist/memdiags.H>
+
 // Framework includes
 #include <prdfMemScrubUtils.H>
 #include <prdfExtensibleChip.H>
@@ -36,7 +40,6 @@
 #include <fapi2.H>
 #include <prdfTargetServices.H>
 #include <prdfRegisterCache.H>
-#include <lib/mcbist/memdiags.H>
 
 // Platform includes
 #include <prdfMemThresholds.H>
