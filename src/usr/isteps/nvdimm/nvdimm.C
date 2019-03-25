@@ -35,6 +35,7 @@
 #include <usr/devicefw/userif.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <lib/mc/port.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>

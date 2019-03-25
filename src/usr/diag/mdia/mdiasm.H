@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <util/threadpool.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <lib/mcbist/memdiags.H>
 #include "sys/sync.h"
 #include "mdiafwd.H"
