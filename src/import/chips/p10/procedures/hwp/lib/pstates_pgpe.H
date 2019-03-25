@@ -100,6 +100,11 @@ typedef union
 #define RESCLK_FREQ_REGIONS 8
 #define RESCLK_STEPS        64
 #define RESCLK_L3_STEPS     4
+/// These define the Run-time rails that are controlled by the PGPE during
+/// Pstate operations.
+#define RUNTIME_RAILS       2
+#define RUNTIME_RAIL_VDD    0
+#define RUNTIME_RAIL_VCS    1
 
 /// Resonant Clock Setup
 typedef struct
@@ -113,7 +118,7 @@ typedef struct
 
 } ResClkSetup_t;
 
-/// #W Entry Data Points
+/// #W Entry Data Points as per V19
 typedef struct
 {
     union
@@ -123,23 +128,39 @@ typedef struct
         {
 
 #ifdef _BIG_ENDIAN
-            uint64_t insrtn_dely   : 8;
-            uint64_t spare1        : 2;
+            uint64_t spare1        : 6;
             uint64_t calb_adj      : 2;
+            uint64_t insrtn_dely   : 8;
             uint64_t spare2        : 1;
-            uint64_t window_offset : 3;
-            uint64_t mux_select    : 36;
-            uint64_t dlt_time_set  : 8;
-            uint64_t spare3        : 4;
+            uint64_t trip_offset   : 3;
+            uint64_t data0_select  : 4;
+            uint64_t data1_select  : 4;
+            uint64_t data2_select  : 4;
+            uint64_t large_droop   : 4;
+            uint64_t small_droop   : 4;
+            uint64_t slopeA_start  : 4;
+            uint64_t slopeA_end    : 4;
+            uint64_t slopeB_start  : 4;
+            uint64_t slopeB_end    : 4;
+            uint64_t slopeA_cycles : 4;
+            uint64_t slopeB_cycles : 4;
 #else
-            uint64_t spare3        : 4;
-            uint64_t dlt_time_set  : 8;
-            uint64_t mux_select    : 36;
-            uint64_t window_offset : 3;
+            uint64_t slopeB_cycles : 4;
+            uint64_t slopeA_cycles : 4;
+            uint64_t slopeB_end    : 4;
+            uint64_t slopeB_start  : 4;
+            uint64_t slopeA_end    : 4;
+            uint64_t slopeA_start  : 4;
+            uint64_t small_droop   : 4;
+            uint64_t large_droop   : 4;
+            uint64_t data2_select  : 4;
+            uint64_t data1_select  : 4;
+            uint64_t data0_select  : 4;
+            uint64_t trip_offset   : 3;
             uint64_t spare2        : 1;
-            uint64_t calb_adj      : 2;
-            uint64_t spare1        : 2;
             uint64_t insrtn_dely   : 8;
+            uint64_t calb_adj      : 2;
+            uint64_t spare1        : 6;
 #endif
         } fields;
     } digital_droop_sensor_config;
@@ -186,15 +207,10 @@ typedef struct
 /// Part specific data to manage the Digital Droop Sensor (DDS)
 typedef struct
 {
-    PoundWEntry_t           entry[NUM_OP_POINTS];
+    PoundWEntry_t           entry[MAXIMUM_CORES][NUM_PV_POINTS];
     PoundWOther_t           other;
     uint8_t                 rsvd[256];
 } PoundW_t;
-/// These define the Run-time rails that are controlled by the PGPE during
-/// Pstate operations.
-#define RUNTIME_RAILS       2
-#define RUNTIME_RAIL_VDD    0
-#define RUNTIME_RAIL_VCS    1
 
 /// Voltage Regulation Module (VRM) Control Settings
 typedef struct
@@ -222,6 +238,8 @@ typedef struct
     /// External VRM transition step size
     uint32_t step_size_mv[RUNTIME_RAILS];
 } VRMParms_t;
+
+
 
 /// @todo Need to define the DDS control block
 
@@ -255,10 +273,10 @@ typedef struct
     /// Frequencies are in MHz, voltages are specified in units of 1mV, currents
     /// are specified in units of 10mA, and temperatures are specified in 0.5
     /// degrees C.
-    PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_OP_POINTS];
+    PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
     uint32_t            spare0[16];             // 128B word-aligned
 
-    PoundVBias_t        poundv_biases_0p05pct[NUM_OP_POINTS];  // Values in 0.5%
+    PoundVBias_t        poundv_biases_0p05pct[NUM_PV_POINTS];  // Values in 0.5%
 
     SysPowerDistParms_t vdd_sysparm;
     SysPowerDistParms_t vcs_sysparm;
@@ -297,10 +315,11 @@ typedef struct
     uint32_t vcs_vratio_weight;
 
     // Biased Compare VID operating points
-    // CompareVIDPoints_t vid_point_set[NUM_OP_POINTS];
+    // @todo RTC 201083 Add DDS GPPB values
+    // CompareVIDPoints_t vid_point_set[NUM_PV_POINTS];
 
     // Biased Threshold operation points
-    // uint8_t threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
+    // uint8_t threshold_set[NUM_PV_POINTS][NUM_THRESHOLD_POINTS];
 
     // pstate-volt compare slopes
     // int16_t ps_vid_compare_slopes[VPD_NUM_SLOPES_REGION];
@@ -309,12 +328,12 @@ typedef struct
     // int16_t ps_dds_thresh_slopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
 
     // Jump value operating points
-    // uint8_t jump_value_set[NUM_OP_POINTS][NUM_JUMP_VALUES];
+    // uint8_t jump_value_set[NUM_PV_POINTS][NUM_JUMP_VALUES];
 
     // Jump-value slopes
     // int16_t ps_dds_jump_slopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
 
-//} GlobalPstateParmBlock_t __attribute__((packed, aligned(1024)));
+//} __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
 
 
