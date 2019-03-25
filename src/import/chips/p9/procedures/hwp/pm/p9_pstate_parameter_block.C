@@ -664,7 +664,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
                 break;
         }
 
-        i_occppb->pstate_min = pstate_min;
+        i_occppb->pstate_min = revle32(pstate_min);
         FAPI_INF("l_occppb.pstate_min 0x%x (%u)", pstate_min, pstate_min);
 
 
