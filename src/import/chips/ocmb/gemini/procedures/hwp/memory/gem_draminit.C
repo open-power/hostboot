@@ -22,3 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gem_draminit.C
+/// @brief Procedure definition to initialize DRAM
+///
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/gem_draminit_utils.H>
+
+extern "C"
+{
+    ///
+    /// @brief Initializes DRAM
+    /// @param[in] i_target the OCMB chip (Gemini)
+    /// @return FAPI2_RC_SUCCESS iff ok, else fapi2::current_err
+    ///
+    fapi2::ReturnCode gem_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    {
+        FAPI_TRY(mss::gem::gem_draminit_check_memory_size(i_target));
+        FAPI_TRY(mss::gem::gem_draminit_poll_check_calibration(i_target));
+
+        return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+} // extern "C"

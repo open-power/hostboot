@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gem_draminit.H
+/// @brief Procedure definition to initialize DRAM
+///
+// *HWP HWP Owner: Mark Pizzutillo <Mark.Pizzutillo@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef __MSS_GEM_DRAMINIT__
+#define __MSS_GEM_DRAMINIT__
+
+#include <fapi2.H>
+
+// Required for Cronus
+typedef fapi2::ReturnCode (*gem_draminit_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+///
+/// @brief Initializes DRAM
+/// @param[in] i_target the controller
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+    fapi2::ReturnCode gem_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+}// extern C
+#endif

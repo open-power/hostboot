@@ -22,3 +22,19 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+MSS_GEM_INCLUDES := $(GENPATH)
+MSS_GEM_INCLUDES += $(ROOTPATH)
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/gemini/procedures/hwp/memory/
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/gemini/procedures/hwp/memory/lib/
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/explorer/common/include
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory/
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory/lib/i2c
+MSS_GEM_INCLUDES += $(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory/lib/
+MSS_GEM_INCLUDES += $(ROOTPATH)/generic/memory/lib
+
+CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
+
+# ADD_EXP_MEMORY_INCDIRS
+#     This macro will add additional include paths for all memory modules
+ADD_GEM_MEMORY_INCDIRS = $(call __ADD_MODULE_INCDIR,$(1),$(MSS_GEM_INCLUDES))

@@ -22,3 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 00gemini_common.mk
+
+PROCEDURE=gem_getecid
+$(eval $(call ADD_GEM_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)

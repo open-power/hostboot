@@ -22,3 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef __MSS_GEM_GETECID__
+#define __MSS_GEM_GETECID__
+
+#include <fapi2.H>
+
+// Required for Cronus
+typedef fapi2::ReturnCode (*gem_getecid_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+///
+/// @brief Gets gemini ECID
+/// @param[in] i_target the controller
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+    fapi2::ReturnCode gem_getecid(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+}// extern C
+#endif

@@ -22,3 +22,42 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gem_draminit_utils.H
+/// @brief Procedure definition to initialize DRAM
+///
+// *HWP HWP Owner: Mark Pizzutillo <aamarin@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef __MSS_GEM_DRAMINIT_UTILS__
+#define __MSS_GEM_DRAMINIT_UTILS__
+
+#include <fapi2.H>
+
+namespace mss
+{
+namespace gem
+{
+
+///
+/// @brief Checks that DIMM sizes are 32GB
+/// @param[in] i_target the controller
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode gem_draminit_check_memory_size(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Polls DRAM calibration register to check for complete
+/// @param[in] i_target the controller
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode gem_draminit_poll_check_calibration(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+}// exp
+}// mss
+
+#endif

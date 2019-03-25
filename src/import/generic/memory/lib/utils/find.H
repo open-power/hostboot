@@ -117,6 +117,7 @@ static inline fapi2::Target<M> find_target_impl( const fapi2::Target<T>& i_targe
 /// @tparam M the target type to be returned
 /// @tparam T the fapi2 target type of the argument
 /// @param[in] i_target the fapi2 target T
+/// @param[in] std::true_type tag dispatch if T == M
 /// @return an M target.
 /// @note Only works for valid parent-child relationships
 ///

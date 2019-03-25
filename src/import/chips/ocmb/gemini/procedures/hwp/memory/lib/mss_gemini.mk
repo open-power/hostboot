@@ -22,3 +22,33 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+#
+# Makefile to build the MSS libraries.
+#
+
+# Add common and generated parts to object list.
+
+MSS_GEMINI_LIB_PATH := $(ROOTPATH)/chips/ocmb/gemini/procedures/hwp/memory/lib
+
+MSS_GEM_SOURCE := $(shell find $(MSS_GEMINI_LIB_PATH) -name '*.C' -exec basename {} \;)
+
+MSS_GEM_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GEM_SOURCE))
+
+MSS_GEM_SOURCE_DIRS := $(shell find $(MSS_GEMINI_LIB_PATH) -type d)
+
+# Define common source and include paths.
+define MSS_GEM_MODULE_INCLUDES
+$(foreach dir, $(MSS_GEM_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/ocmb/gemini/procedures/hwp/memory)
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/ocmb/explorer/procedures/hwp/memory)
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/generic/memory/lib)
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
+$(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH))
+endef
+MODULE = mss_gemini
+OBJS += $(MSS_GEM_MODULE_OBJS)
+
+$(eval $(call MSS_GEM_MODULE_INCLUDES,$(MODULE)))
+$(call BUILD_MODULE)

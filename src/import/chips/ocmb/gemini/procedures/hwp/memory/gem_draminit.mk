@@ -22,3 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Include the macros and things for MSS GEMINI procedures
+-include 00gem_common.mk
+
+PROCEDURE=gem_draminit
+$(eval $(call ADD_GEM_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)
