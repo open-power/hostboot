@@ -1208,14 +1208,12 @@
     <id>ATTR_POUNDV_BUCKET_DATA</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Power Management data for Quad targets. Stored as an array of bytes. The
-    is read
-    directly from #V VPD and stored in this attribute without being altered.
-
+    The keyword data is read directly from #V VPD and stored in this 
+    attribute without being altered
     NOTE: you may need to handle correcting endianness if you are using this
     </description>
     <valueType>uint8</valueType>
-    <array>210</array>
+    <array>281</array>
     <platinit/>
     <initToZero/>
     <group>vpd</group>
@@ -1226,10 +1224,8 @@
     <id>ATTR_POUNDW_BUCKET_DATA</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Power Management data for Quad targets. Stored as an array of bytes. The
-    is read
-    directly from #W VPD and stored in this attribute without being altered.
-
+    The keyword data is read directly from #W VPD and stored in this 
+    attribute without being altered
     NOTE: you may need to handle correcting endianness if you are using this
     </description>
     <valueType>uint8</valueType>
