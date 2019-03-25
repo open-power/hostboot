@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -327,11 +327,12 @@ namespace HBPM
             //  include it in if so
             void* l_ringOverrides = nullptr;
             l_errl = HBPM::getRingOvd(l_ringOverrides);
-            if(l_errl)
+            if (l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadHcode(): Error in call to getRingOvd!");
-                break;
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, ISTEP_COMP_ID);
             }
 
             FAPI_INVOKE_HWP( l_errl,
