@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <util/misc.H>
 
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
+#include <lib/shared/nimbus_defaults.H> // Needed before memdiags_fir.H
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
 
