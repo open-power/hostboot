@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
+#include <lib/shared/nimbus_defaults.H> // Memory HWP constant defs
 #include <lib/mcbist/memdiags.H> // MCBIST command interfaces
 #include <p9c_mss_maint_cmds.H>  // MBA command interfaces
 
