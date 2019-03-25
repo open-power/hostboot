@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,14 +95,24 @@ void* host_gard( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: MPIPL mode");
 
-            // we only want EX units to be processed
+            TARGETING::PredicateCTM l_coreFilter(TARGETING::CLASS_UNIT,
+                                                 TARGETING::TYPE_CORE);
             TARGETING::PredicateCTM l_exFilter(TARGETING::CLASS_UNIT,
-                                           TARGETING::TYPE_EX);
-            l_err = HWAS::collectGard(&l_exFilter);
-            if (l_err)
+                                               TARGETING::TYPE_EX);
+            TARGETING::PredicateCTM l_eqFilter(TARGETING::CLASS_UNIT,
+                                               TARGETING::TYPE_EQ);
+
+            TARGETING::PredicatePostfixExpr l_coreExEq;
+            l_coreExEq.push(&l_coreFilter)
+                      .push(&l_exFilter)
+                      .push(&l_eqFilter).Or().Or();
+
+            l_err = HWAS::collectGard(&l_coreExEq);
+            if(l_err)
             {
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-                               "collectGard returned error; breaking out");
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
+                          "collectGard for core, EX, or EQ targets returned "
+                          "error; breaking out");
                 break;
             }
         }
