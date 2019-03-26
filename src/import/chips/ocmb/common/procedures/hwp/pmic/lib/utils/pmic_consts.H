@@ -36,6 +36,8 @@
 #ifndef MSS_PMIC_CONSTS_H
 #define MSS_PMIC_CONSTS_H
 
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
 namespace mss
 {
 namespace pmic
@@ -184,7 +186,18 @@ enum ffdc_codes
     SET_DRAM_MODULE_HEIGHT                  = 0x1086,
 };
 
+namespace i2c
+{
 
+///
+/// @brief common PMIC sizes
+///
+enum sizes
+{
+    DATA_LENGTH = 1,
+};
+
+}// i2c
 } // pmic
 } // mss
 

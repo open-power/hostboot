@@ -23,4 +23,25 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_I2C_PMIC_INVALID_READ_SIZE</rc>
+    <description>
+       The number of bytes returned from the read did not match
+       the expected value.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>SIZE_RETURNED</ffdc>
+    <ffdc>SIZE_REQUESTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
