@@ -81,6 +81,7 @@
 #include <vmmconst.h>
 #include <runtime/customize_attrs_for_payload.H>
 #include <isteps/mem_utils.H>
+
 namespace RUNTIME
 {
 
@@ -1202,7 +1203,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
             }
             // Opal data goes at top_of_mem
-            l_topMemAddr = ISTEP::get_top_mem_addr();
+            l_topMemAddr = ISTEP::get_top_homer_mem_addr();
             assert (l_topMemAddr != 0,
                     "populate_HbRsvMem: Top of memory was 0!");
 
@@ -1337,7 +1338,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         if(TARGETING::is_phyp_load())
         {
             l_startAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                + l_mirrorBase + VMM_HB_DATA_TOC_START_OFFSET;
+                          + l_mirrorBase
+                          + VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {

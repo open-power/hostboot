@@ -193,13 +193,13 @@ errlHndl_t copyArchitectedRegs(void)
         }
 
         // Map processor dump area destination address to VA addresses
-        procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr); 
+        procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr);
         pDstAddrBase = getPhysAddr(procTableEntry->dstArrayAddr);
         vMapDstAddrBase = mm_block_map(pDstAddrBase,
                                        procTableEntry->dstArraySize);
 
         // Map architected register reserved memory to VA addresses
-        uint64_t srcAddr = ISTEP::get_top_mem_addr() -
+        uint64_t srcAddr = ISTEP::get_top_homer_mem_addr() -
                            VMM_ARCH_REG_DATA_SIZE_ALL_PROC -
                      			   VMM_ALL_HOMER_OCC_MEMORY_SIZE;
         pSrcAddrBase = reinterpret_cast<void * const>(srcAddr);
@@ -216,7 +216,7 @@ errlHndl_t copyArchitectedRegs(void)
         procTableEntry->capArraySize = 0;
         for (const auto & procChip: procChips)
         {
-            uint8_t procNum = procChip->getAttr<TARGETING::ATTR_POSITION>(); 
+            uint8_t procNum = procChip->getAttr<TARGETING::ATTR_POSITION>();
             // Base addresses w.r.t PROC positions. This is static here
             // and used for reference below to calculate all other addresses
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
@@ -228,7 +228,7 @@ errlHndl_t copyArchitectedRegs(void)
             uint16_t regCount = sbeProcHdr->reg_cnt;
 
             //Validate the structure versions used by SBE and HB for sharing the
-            //data 
+            //data
             if( sbeProcHdr->version != REG_DUMP_SBE_HB_STRUCT_VER )
             {
                 /*@
@@ -239,7 +239,7 @@ errlHndl_t copyArchitectedRegs(void)
                  * @userdata2    Structure version supported by HB
                  * @devdesc      Mismatch between the version of structure
                  *               supported by both SBE and HB.
-                 *               
+                 *
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -259,7 +259,7 @@ errlHndl_t copyArchitectedRegs(void)
 
             procTableEntry->threadRegSize = sizeof(hostArchRegDataHdr)+
                                       (regCount * sizeof(hostArchRegDataEntry));
-            procTableEntry->capArraySize = procTableEntry->capArraySize + 
+            procTableEntry->capArraySize = procTableEntry->capArraySize +
                                           (procTableEntry->threadRegSize
                                            * threadCount);
             if (procTableEntry->dstArraySize < procTableEntry->capArraySize)
@@ -269,9 +269,9 @@ errlHndl_t copyArchitectedRegs(void)
                  * @moduleid     DUMP::DUMP_ARCH_REGS
                  * @reasoncode   DUMP::DUMP_PDAT_INSUFFICIENT_SPACE
                  * @userdata1    Hypervisor reserved memory size
-                 * @userdata2    Memory needed to copy architected 
+                 * @userdata2    Memory needed to copy architected
                  *               register data
-                 * @devdesc      Insufficient space to copy architected 
+                 * @devdesc      Insufficient space to copy architected
                  *               registers
                  */
                 l_err = new ERRORLOG::ErrlEntry(
@@ -288,10 +288,10 @@ errlHndl_t copyArchitectedRegs(void)
             // Total Number of Threads possible in one Proc
             for(uint32_t idx = 0; idx < threadCount; idx++)
             {
-                sbeArchRegDumpThreadHdr_t *sbeTdHdr = 
+                sbeArchRegDumpThreadHdr_t *sbeTdHdr =
                      reinterpret_cast<sbeArchRegDumpThreadHdr_t *>(procSrcAddr);
 
-                hostArchRegDataHdr *hostHdr = 
+                hostArchRegDataHdr *hostHdr =
                      reinterpret_cast<hostArchRegDataHdr *>(dstTempAddr);
 
                 // Fill thread header info
@@ -300,16 +300,16 @@ errlHndl_t copyArchitectedRegs(void)
                 hostHdr->iv_regArrayHdr.hdatOffset =
                                               sizeof(HDAT::hdatHDIFDataArray_t);
                 hostHdr->iv_regArrayHdr.hdatArrayCnt = regCount;
-                hostHdr->iv_regArrayHdr.hdatAllocSize = 
+                hostHdr->iv_regArrayHdr.hdatAllocSize =
                                               sizeof(hostArchRegDataEntry);
-                hostHdr->iv_regArrayHdr.hdatActSize = 
+                hostHdr->iv_regArrayHdr.hdatActSize =
                                               sizeof(hostArchRegDataEntry);
 
-                dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr + 
+                dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
                                                     sizeof(hostArchRegDataHdr));
                 //Update SBE data source address to point to the register data
                 //related to the current thread.
-                procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr + 
+                procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
                                              sizeof(sbeArchRegDumpThreadHdr_t));
 
                 //Validate the CoreState to find if the buffer has register data
@@ -322,7 +322,6 @@ errlHndl_t copyArchitectedRegs(void)
                     continue;
                 }
 
-    
                 // Fill register data
                 for(uint8_t cnt = 0; cnt < regCount; cnt++)
                 {
@@ -335,15 +334,15 @@ errlHndl_t copyArchitectedRegs(void)
                     hostRegData->regNum  = sbeRegData->regNum;
                     hostRegData->regVal  = sbeRegData->regVal;
 
-                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr + 
+                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
                                                   sizeof(hostArchRegDataEntry));
                     //Update the SBE data source address to point to the
                     //next register data related to the same thread.
-                    procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr + 
+                    procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
                                                sizeof(sbeArchRegDumpEntries_t));
                     if( sbeRegData->isLastReg )
                     {
-                        //Skip the FFDC for now  
+                        //Skip the FFDC for now
                         if(sbeRegData->isFfdcPresent)
                         {
                             //Move the source address to skip theFFDC
@@ -354,7 +353,7 @@ errlHndl_t copyArchitectedRegs(void)
                             if(remaingRegCount)
                             {
                                 dstTempAddr = reinterpret_cast<uint64_t>(
-                                               dstTempAddr + (remaingRegCount * 
+                                               dstTempAddr + (remaingRegCount *
                                                sizeof(hostArchRegDataEntry)));
                             }
                         }
@@ -366,7 +365,7 @@ errlHndl_t copyArchitectedRegs(void)
         // Update Process Dump Area tuple
         procTableEntry->threadRegVersion = REG_DUMP_HDAT_STRUCT_VER;
         procTableEntry->capArrayAddr = procTableEntry->dstArrayAddr;
- 
+
         // Update the PDA Table Entries to Attribute to be fetched in istep 21
         TARGETING::TargetService& targetService = TARGETING::targetService();
         TARGETING::Target* l_sys = NULL;
