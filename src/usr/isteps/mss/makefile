@@ -141,6 +141,29 @@ define gen_exp_accessors_RUN
 endef
 
 $(call BUILD_GENERATED)
+
+GENERATED = gen_p9a_accessors
+COMMAND= gen_accessors.pl
+$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+
+OUTPATH = ${ROOTPATH}/obj/genfiles/chips/p9a/procedures/hwp/memory/lib/
+FILE_PREFIX = mss_p9a
+
+SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_io_attributes.xml
+SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_setup_bars.xml
+SOURCES += $(ROOTPATH)/chips/p9/procedures/xml/attribute_info/p9a_omi_init.xml
+
+CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_getters.H
+CLEAN_TARGETS += ${OUTPATH}/mss_p9a_attribute_setters.H
+CLEAN_TARGETS += ${OUTPATH}/.gen_p9a_accessors.built
+
+define gen_p9a_accessors_RUN
+		$(C1) mkdir $(OUTPATH) -p
+		$(C1) $$< --system=AXONE --output-dir=$(OUTPATH) --output-file-prefix=$(FILE_PREFIX) $$(filter-out $$<,$$^)
+endef
+
+$(call BUILD_GENERATED)
+
 # Add common and generated parts to object list.
 
 MSS_PATH := $(PROCEDURES_PATH)/hwp/memory/lib
