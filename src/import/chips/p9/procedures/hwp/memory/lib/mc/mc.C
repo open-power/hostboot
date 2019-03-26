@@ -34,6 +34,8 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+
+#include <lib/shared/nimbus_defaults.H>
 #include <generic/memory/lib/utils/dump_regs.H>
 #include <lib/mc/mc.H>
 #include <generic/memory/lib/utils/find.H>
