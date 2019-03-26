@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -441,7 +441,7 @@ void* host_build_stop_image (void *io_pArgs)
         //If running Sapphire need to place this at the top of memory instead
         if(is_sapphire_load())
         {
-            l_memBase = get_top_mem_addr();
+            l_memBase = get_top_homer_mem_addr();
             assert (l_memBase != 0,
                     "host_build_stop_image: Top of memory was 0!");
             l_memBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;

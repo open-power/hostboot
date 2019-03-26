@@ -135,6 +135,7 @@ const DepModInfo  g_istep21Dependancies = {
 #ifdef CONFIG_UCD_FLASH_UPDATES
         DEP_LIB(libucd.so),
 #endif
+        DEP_LIB(libsmf.so),
         NULL
     }
 };
