@@ -231,7 +231,8 @@ void IpmiRP::timeoutThread(void)
 
         if (now >= timeout)
         {
-            IPMI_TRAC("timeout: %x:%x", msg->iv_netfun, msg->iv_cmd);
+            IPMI_TRAC("timeout: %x:%x, seq=x%X",
+                      msg->iv_netfun, msg->iv_cmd, msg->iv_seq );
 
             // This little bugger timed out. Get him off the timeoutq
             iv_timeoutq.pop_front();
