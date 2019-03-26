@@ -679,6 +679,21 @@ errlHndl_t updateAllUcdFlashImages(
             "with HUID of 0x%08X",
             TARGETING::get_huid(powerSequencer));
 
+        // Check that pI2cMasterTarget is functional because otherwise the UCD
+        // can't be accessed
+        TARGETING::HwasState l_hwasState =
+            pI2cMasterTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if (l_hwasState.functional != true)
+        {
+            TRACFCOMP(g_trac_ucd, INFO_MRK
+            "updateAllUcdFlashImages: Skipping update on power sequencer HUID "
+            "= 0x%08X because its I2C Master HUID = 0x%08X is non-functional",
+            TARGETING::get_huid(powerSequencer),
+            TARGETING::get_huid(pI2cMasterTarget));
+
+            break;
+        }
+
         const auto position = pI2cMasterTarget->
             getAttr<TARGETING::ATTR_POSITION>();
 
