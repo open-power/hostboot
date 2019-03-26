@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
@@ -44,7 +45,7 @@
 #include <lib/mc/xlate.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
@@ -59,7 +60,7 @@ static const std::vector<xlate_setup> xlate_map =
 {
     // 1R 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -72,7 +73,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -85,7 +86,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -98,7 +99,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -111,7 +112,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -124,7 +125,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -137,7 +138,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -150,7 +151,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -163,7 +164,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -176,7 +177,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -189,7 +190,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -202,7 +203,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -215,7 +216,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -228,7 +229,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -241,7 +242,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -254,7 +255,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -267,7 +268,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -280,7 +281,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -299,7 +300,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -312,7 +313,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -325,7 +326,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -338,7 +339,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -351,7 +352,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -364,7 +365,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 2H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -377,7 +378,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -390,7 +391,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -403,7 +404,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -416,7 +417,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -429,7 +430,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -442,7 +443,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 4H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -455,7 +456,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -468,7 +469,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -481,7 +482,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -494,7 +495,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -507,7 +508,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -520,7 +521,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 1R 8H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -533,7 +534,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -546,7 +547,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -559,7 +560,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -572,7 +573,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -585,7 +586,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -598,7 +599,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -611,7 +612,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -624,7 +625,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -637,7 +638,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -650,7 +651,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -663,7 +664,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -676,7 +677,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -689,7 +690,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 4Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -702,7 +703,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 4Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -715,7 +716,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 8Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -728,7 +729,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 8Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -741,7 +742,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 16Gbx8 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
@@ -754,7 +755,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8H 3DS 16Gbx4 DDR4 RDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -773,7 +774,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 8Gbx4 32GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -786,7 +787,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 4R 8Gbx4 64GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -803,7 +804,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 8Gbx4 64GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -816,7 +817,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 8Gbx4 64GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -829,7 +830,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 2H 3DS 16Gbx4 128GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -842,7 +843,7 @@ static const std::vector<xlate_setup> xlate_map =
 
     // 2R 4H 3DS 16Gbx4 256GB DDR4 LRDIMM
     {
-        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        dimm::kind<>(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
         fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
         fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G,
         fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4,
@@ -867,7 +868,7 @@ static bool all_slots_1R_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
     const auto& l_mca = mss::find_target<TARGET_TYPE_MCA>(i_target);
     const auto& l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(l_mca);
 
-    const std::vector<dimm::kind> l_dimm_kinds = dimm::kind::vector(l_dimms);
+    const std::vector<dimm::kind<>> l_dimm_kinds = dimm::kind<>::vector(l_dimms);
     bool l_all_slots_1R = false;
 
     // If we only have 1 DIMM, we don't have two slots with 1R DIMM. If we need to check, iterate
@@ -993,7 +994,7 @@ fapi_try_exit:
 /// @note Called for 2R4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1038,7 +1039,7 @@ fapi_try_exit:
 /// @note Called for 2R 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1075,7 +1076,7 @@ fapi_try_exit:
 /// @note Called for 2R 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1112,7 +1113,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1142,7 +1143,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1175,7 +1176,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1208,7 +1209,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1238,7 +1239,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1271,7 +1272,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1304,7 +1305,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T4Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1341,7 +1342,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T8Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1374,7 +1375,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1408,7 +1409,7 @@ fapi_try_exit:
 /// @note Called for 1R 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1510,7 +1511,7 @@ fapi_try_exit:
 /// @note Called for 1R 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1547,7 +1548,7 @@ fapi_try_exit:
 /// @note Called for 1R 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1584,7 +1585,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1615,7 +1616,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1648,7 +1649,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1681,7 +1682,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1718,7 +1719,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1751,7 +1752,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1784,7 +1785,7 @@ fapi_try_exit:
 /// @note Called for 1R 8H 3DS 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1819,7 +1820,7 @@ fapi_try_exit:
 /// @note Called for 1R 8H 3DS 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1852,7 +1853,7 @@ fapi_try_exit:
 /// @note Called for 1R 8H 3DS 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1885,7 +1886,7 @@ fapi_try_exit:
 /// @note Called for 4R 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T4Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T4Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1920,7 +1921,7 @@ fapi_try_exit:
 /// @note Called for 4R 8Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T8Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T8Gbx4( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1953,7 +1954,7 @@ fapi_try_exit:
 /// @note Called for 4R 16Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T16Gbx4( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T16Gbx4( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -1983,7 +1984,7 @@ fapi_try_exit:
 /// @param[out] fapi2::buffer<uint64_t> io_xlate2  - xlt register 2's value
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds,
+fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind<>>& io_dimm_kinds,
         fapi2::buffer<uint64_t>& io_xlate0,
         fapi2::buffer<uint64_t>& io_xlate1,
         fapi2::buffer<uint64_t>& io_xlate2 )
@@ -1999,7 +2000,8 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds
     // However, we need to set that DIMM's D bit in the location of the largest DIMM's D-bit map (I know that's
     // hard to grok - set the D bit in the smallest DIMM but in the location mapped for the largest.) So we
     // keep track of the largest DIMM so when we set it up, we make sure to set the D-bit in the other.
-    std::sort(io_dimm_kinds.begin(), io_dimm_kinds.end(), [](const dimm::kind & a, const dimm::kind & b) -> bool
+    std::sort(io_dimm_kinds.begin(), io_dimm_kinds.end(), [](const dimm::kind<>& a,
+              const dimm::kind<>& b) -> bool
     {
         return a.iv_size > b.iv_size;
     });
@@ -2106,7 +2108,7 @@ fapi2::ReturnCode setup_xlate_map(const fapi2::Target<TARGET_TYPE_MCA>& i_target
     const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
 
     // We need to keep around specifications of both DIMM as we set the D bit based on the sizes of the DIMM
-    std::vector<dimm::kind> l_dimm_kinds = dimm::kind::vector(l_dimms);
+    std::vector<dimm::kind<>> l_dimm_kinds = dimm::kind<>::vector(l_dimms);
 
     FAPI_INF("Setting up xlate registers for MCA%d (%d)", mss::pos(i_target), mss::index(i_target));
 
@@ -2131,7 +2133,7 @@ fapi_try_exit:
 /// @note Called for 1R 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2156,7 +2158,7 @@ fapi_try_exit:
 /// @note Called for 1R 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2181,7 +2183,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 3DS 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2206,7 +2208,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 3DS 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2231,7 +2233,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 3DS 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2256,7 +2258,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 3DS 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2281,7 +2283,7 @@ fapi_try_exit:
 /// @note Called for 1R 8H 3DS 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2306,7 +2308,7 @@ fapi_try_exit:
 /// @note Called for 1R 8H 3DS 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2331,7 +2333,7 @@ fapi_try_exit:
 /// @note Called for 2R 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2356,7 +2358,7 @@ fapi_try_exit:
 /// @note Called for 2R16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2381,7 +2383,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2406,7 +2408,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2431,7 +2433,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2456,7 +2458,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2481,7 +2483,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 8Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T8Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2506,7 +2508,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2531,7 +2533,7 @@ fapi_try_exit:
 /// @note Called for 4R 4Gbx4 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T8Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T8Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2556,7 +2558,7 @@ fapi_try_exit:
 /// @note Called for 4R 16Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T16Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T16Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2581,7 +2583,7 @@ fapi_try_exit:
 /// @note Called for 1R 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R1T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R1T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2609,7 +2611,7 @@ fapi_try_exit:
 /// @note Called for 1R 2H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R2T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R2T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2640,7 +2642,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R4T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R4T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2671,7 +2673,7 @@ fapi_try_exit:
 /// @note Called for 1R 4H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_1R8T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_1R8T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2702,7 +2704,7 @@ fapi_try_exit:
 /// @note Called for 2R 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R2T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R2T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2733,7 +2735,7 @@ fapi_try_exit:
 /// @note Called for 2R 2H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R4T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R4T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2764,7 +2766,7 @@ fapi_try_exit:
 /// @note Called for 2R 4H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R8T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R8T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2795,7 +2797,7 @@ fapi_try_exit:
 /// @note Called for 2R 8H 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_2R16T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_2R16T4Gbx8( const dimm::kind<>& i_kind,
         const uint64_t i_offset,
         const bool i_largest,
         fapi2::buffer<uint64_t>& io_xlate0,
@@ -2826,7 +2828,7 @@ fapi_try_exit:
 /// @note Called for 4R 4Gbx8 DDR4 RDIMM
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode xlate_dimm_4R4T4Gbx8( const dimm::kind& i_kind,
+fapi2::ReturnCode xlate_dimm_4R4T4Gbx8( const dimm::kind<>& i_kind,
                                         const uint64_t i_offset,
                                         const bool i_largest,
                                         fapi2::buffer<uint64_t>& io_xlate0,

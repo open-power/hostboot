@@ -43,7 +43,7 @@
 #include <lib/mss_attribute_accessors.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <lib/workarounds/mcbist_workarounds.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/fir/fir.H>
@@ -110,8 +110,9 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     }
 
     // First things first - lets find out if we have an 1R DIMM on our side of the chip.
-    const auto l_dimm_kinds = dimm::kind::vector( mss::find_targets<TARGET_TYPE_DIMM>(i_target) );
-    const auto l_kind = std::find_if(l_dimm_kinds.begin(), l_dimm_kinds.end(), [](const dimm::kind & k) -> bool
+    const auto l_dimm_kinds = dimm::kind<>::vector( mss::find_targets<TARGET_TYPE_DIMM>(i_target) );
+    const auto l_kind = std::find_if(l_dimm_kinds.begin(),
+                                     l_dimm_kinds.end(), [](const dimm::kind<>& k) -> bool
     {
         // If total ranks are 1, we have a 1R DIMM, SDP. This is the fellow of concern
         return k.iv_total_ranks == 1;

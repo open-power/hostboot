@@ -307,7 +307,7 @@ const mss::states is_broadcast_capable(const fapi2::Target<fapi2::TARGET_TYPE_MC
 
         // 2) Check that all of the DIMM kinds are equal - if they are, then we can do broadcast mode
         const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
-        const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
+        const auto l_dimm_kinds = mss::dimm::kind<>::vector(l_dimms);
         const auto l_dimm_kind_check = is_broadcast_capable(l_dimm_kinds);
 
         // 3) if both 1/2 are true, then broadcastable, otherwise false
@@ -329,7 +329,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @return l_capable - yes iff these vector of targets are broadcast capable
 ///
-const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds)
+const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds)
 {
     // If we don't have any DIMM kinds exit out
     if(i_kinds.size() == 0)
@@ -345,7 +345,7 @@ const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kin
     // Now, find if we have any kinds that differ from our first kind
     // Note: starts on the next DIMM kind due to the fact that something always equals itself
     const auto l_kind_it = std::find_if(i_kinds.begin() + 1,
-                                        i_kinds.end(), [&l_expected_kind]( const mss::dimm::kind & i_rhs) -> bool
+                                        i_kinds.end(), [&l_expected_kind]( const mss::dimm::kind<>& i_rhs) -> bool
     {
         // If they're different, we found a DIMM that is differs
         return (l_expected_kind != i_rhs);

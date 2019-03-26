@@ -389,7 +389,7 @@ class decoder
     public:
 
         //IVs for all of the attributes per MCS
-        const mss::dimm::kind iv_kind;
+        const mss::dimm::kind<MC> iv_kind;
 
         //Left in here rather than calculating during encode for testing
         uint8_t iv_dimms_per_port;
@@ -412,7 +412,7 @@ class decoder
         /// @brief Constructor
         /// @param[in] dimm::kind to call power thermal stuff on
         ///
-        decoder( const mss::dimm::kind& i_kind):
+        decoder( const mss::dimm::kind<MC>& i_kind):
             iv_kind(i_kind)
         {
             iv_dimms_per_port = mss::count_dimm (find_target<TT::PORT_TARGET_TYPE>(iv_kind.iv_target));

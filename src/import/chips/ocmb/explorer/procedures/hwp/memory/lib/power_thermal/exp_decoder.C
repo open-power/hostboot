@@ -213,7 +213,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_port))
     {
         const auto l_dimm_pos = mss::index (l_dimm);
-        mss::dimm::kind l_kind (l_dimm);
+        mss::dimm::kind<> l_kind (l_dimm);
         mss::power_thermal::decoder<> l_decoder(l_kind);
 
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(l_dimm) );

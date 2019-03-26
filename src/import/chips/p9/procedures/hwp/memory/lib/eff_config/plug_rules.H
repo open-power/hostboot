@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 #include <cstdint>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 
 namespace mss
 {
@@ -106,7 +106,7 @@ fapi2::ReturnCode empty_slot_zero(const fapi2::Target<T>& i_target);
 /// @return std::pair representing the type and the count.
 /// @note the vector of kinds comes back sorted by DIMM type.
 ///
-std::pair<uint8_t, uint64_t> dimm_type_helper(std::vector<dimm::kind>& io_kinds);
+std::pair<uint8_t, uint64_t> dimm_type_helper(std::vector<dimm::kind<>>& io_kinds);
 
 ///
 /// @brief Rank violation helper
@@ -142,7 +142,7 @@ inline void rank_violation(const fapi2::Target<T>& i_target, const uint8_t l_dim
 /// @note This function will commit error logs representing the mixing failure
 ///
 fapi2::ReturnCode dimm_type_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const std::vector<dimm::kind>& i_kinds);
+                                   const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforce rank configs
@@ -155,7 +155,7 @@ fapi2::ReturnCode dimm_type_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const std::vector<dimm::kind>& i_kinds,
+                                    const std::vector<dimm::kind<>>& i_kinds,
                                     const uint64_t i_ranks_override);
 
 ///
@@ -167,7 +167,7 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 /// @note The DIMM kind should be a DIMM on the MCA
 ///
 fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const dimm::kind& i_kind,
+        const dimm::kind<>& i_kind,
         const fapi2::buffer<uint8_t>& i_mrw_supported_list);
 
 ///
@@ -179,7 +179,7 @@ fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::T
 /// This function will commit error logs if a DIMM has an unsupported DRAM width
 ///
 fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const std::vector<dimm::kind>& i_kinds);
+        const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforce DRAM width checks
@@ -190,7 +190,7 @@ fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::T
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const std::vector<dimm::kind>& i_kinds);
+                                   const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforce DRAM stack type checks
@@ -201,7 +201,7 @@ fapi2::ReturnCode check_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const std::vector<dimm::kind>& i_kinds);
+                                   const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforce hybrid DIMM checks
@@ -212,7 +212,7 @@ fapi2::ReturnCode check_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const std::vector<dimm::kind>& i_kinds);
+                               const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforces that NVDIMM are plugged in the proper location
@@ -223,7 +223,7 @@ fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const std::vector<dimm::kind>& i_kinds);
+                               const std::vector<dimm::kind<>>& i_kinds);
 
 ///
 /// @brief Enforce the NVDIMM pairing per MCS
@@ -232,7 +232,7 @@ fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
 ///
 fapi2::ReturnCode check_nvdimm_pairing(const fapi2::Target<fapi2::TARGET_TYPE_MCS> i_target,
-                                       const std::vector<dimm::kind>& l_kinds);
+                                       const std::vector<dimm::kind<>>& l_kinds);
 
 // Adding in code based plug rules - as supporting code gets added, the following checks can be deleted
 namespace code
@@ -244,7 +244,7 @@ namespace code
 /// @return fapi2::FAPI2_RC_SUCCESS if no LRDIMM, otherwise a MSS_PLUG_RULE error code
 /// @note This function will commit error logs representing the mixing failure
 ///
-fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds );
+fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind<>>& i_kinds );
 
 ///
 /// @brief Enforce equivalent rank and row configs
@@ -255,7 +255,7 @@ fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds );
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_xlate_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                     const std::vector<dimm::kind>& i_kinds);
+                                     const std::vector<dimm::kind<>>& i_kinds);
 
 } // code
 

@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 
@@ -485,7 +485,7 @@ fapi2::ReturnCode calculate_perf2(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 /// @param[out] fapi2::buffer<uint64_t> o_xlate2  - xlt register 2's value
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& i_dimm_kinds,
+fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind<>>& i_dimm_kinds,
         fapi2::buffer<uint64_t>& o_xlate0,
         fapi2::buffer<uint64_t>& o_xlate1,
         fapi2::buffer<uint64_t>& o_xlate2 );

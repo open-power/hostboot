@@ -42,6 +42,7 @@
 #include <fapi2.H>
 
 // mss lib
+#include <lib/shared/nimbus_defaults.H>
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/checker.H>

@@ -46,7 +46,7 @@
 #include <lib/mc/port.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/utils/bit_count.H>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <lib/mcbist/mcbist_traits.H>
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/poll.H>
@@ -101,7 +101,7 @@ const mss::states is_broadcast_capable(const std::vector<fapi2::Target<T>>& i_ta
 /// @param[in] i_target the target to effect
 /// @return o_capable - yes iff these vector of targets are broadcast capable
 ///
-const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds);
+const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds);
 
 
 ///

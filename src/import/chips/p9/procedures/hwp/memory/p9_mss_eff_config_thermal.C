@@ -40,7 +40,6 @@
 #include <p9_mss_bulk_pwr_throttles.H>
 #include <lib/power_thermal/throttle.H>
 #include <lib/power_thermal/decoder.H>
-#include <lib/dimm/kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/shared/mss_const.H>
 #include <mss.H>

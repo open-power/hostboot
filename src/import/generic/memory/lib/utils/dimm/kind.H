@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file dimm.H
+/// @file kind.H
 /// @brief Encapsulation for dimms of all types
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
@@ -33,13 +33,14 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_DIMM_H_
-#define _MSS_DIMM_H_
+#ifndef _GEN_MSS_KIND_H_
+#define _GEN_MSS_KIND_H_
 
 #include <fapi2.H>
 
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -49,8 +50,10 @@ namespace dimm
 
 ///
 /// @class mss::dimm::kind
+/// @tparam MC the MC type
 /// @brief A class containing information about a dimm like ranks, density, configuration - what kind of dimm is it?
 ///
+template<mss::mc_type MC = DEFAULT_MC_TYPE>
 class kind
 {
     public:

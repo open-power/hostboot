@@ -46,8 +46,8 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
-#include <lib/dimm/kind.H>
-#include <lib/shared/mss_const.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
+
 
 namespace mss
 {
@@ -262,7 +262,7 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
         const auto l_mca_pos = mss::index (find_target<fapi2::TARGET_TYPE_MCA>(l_dimm));
         const auto l_dimm_pos = mss::index (l_dimm);
 
-        mss::dimm::kind l_kind (l_dimm);
+        mss::dimm::kind<> l_kind (l_dimm);
         mss::power_thermal::decoder<> l_decoder(l_kind);
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
 

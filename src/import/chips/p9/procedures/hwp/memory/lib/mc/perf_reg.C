@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
@@ -42,7 +43,6 @@
 #include <lib/shared/mss_const.H>
 #include <lib/mc/mc.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/dimm/kind.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 

@@ -68,7 +68,7 @@
 #include <lib/dimm/rcd_load.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/rank.H>
-#include <lib/dimm/kind.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/dp16.H>

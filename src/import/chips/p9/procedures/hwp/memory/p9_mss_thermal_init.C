@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/nimbus_defaults.H>
 #include <lib/mc/mc.H>
 #include <generic/memory/lib/utils/find.H>
 #include <p9_mss_thermal_init.H>
