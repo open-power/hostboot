@@ -29,6 +29,10 @@ P9_IO_HWP_PATH     = $(P9_PROCEDURES_PATH)/hwp/io
 P9_PERV_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/perv
 P9_NEST_HWP_PATH   = $(P9_PROCEDURES_PATH)/hwp/nest
 P9_INITFILE_PATH   = $(P9_PROCEDURES_PATH)/hwp/initfiles
+P9_MEMORY_HWP_PATH = $(P9_PROCEDURES_PATH)/hwp/memory
+
+P9A_MSS_HWP_PATH      = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
+P9A_MSS_ACCESSOR_PATH = ${ROOTPATH}/obj/genfiles/chips/p9a/procedures/hwp/memory/lib/
 
 P9A_MSS_HWP_PATH   = ${ROOTPATH}/src/import/chips/p9a/procedures/hwp/memory/
 EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
@@ -56,12 +60,14 @@ EXTRAINCDIR += $(P9_IO_HWP_PATH)
 EXTRAINCDIR += $(P9_NEST_HWP_PATH)
 EXTRAINCDIR += $(P9_PERV_HWP_PATH)
 EXTRAINCDIR += $(P9_INITFILE_PATH)
+EXTRAINCDIR += ${P9_MEMORY_HWP_PATH}
 EXTRAINCDIR += $(CENT_MEM_HWP_PATH)
 EXTRAINCDIR += $(CENT_INITFILE_PATH)
 EXTRAINCDIR += $(CENT_IO_HWP_PATH)
 EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_INC_PATH}
+EXTRAINCDIR += ${P9A_MSS_ACCESSOR_PATH}
 
 VPATH += $(P9_NEST_HWP_PATH)
 VPATH += $(P9_PERV_HWP_PATH)
@@ -119,14 +125,17 @@ include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
-
-OBJS += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
-OBJS += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
-OBJS += $(if $(CONFIG_AXONE),exp_omi_train.o,)
-OBJS += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
-OBJS += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)
-OBJS += $(if $(CONFIG_AXONE),p9a_omi_setup_bars.o,)
-OBJS += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
+VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
+OBJS  += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
+OBJS  += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
+OBJS  += $(if $(CONFIG_AXONE),exp_omi_train.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_omi_setup_bars.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_addr_ext.o,)
+OBJS  += $(if $(CONFIG_AXONE),exp_omi_init.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init.o,)
+OBJS  += $(if $(CONFIG_AXONE),p9a_omi_init_scom.o,)
 
 
 include ${ROOTPATH}/config.mk
