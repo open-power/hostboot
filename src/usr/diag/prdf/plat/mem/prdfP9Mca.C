@@ -428,57 +428,57 @@ uint32_t __analyzeHealthStatus0Reg( STEP_CODE_DATA_STRUCT & io_sc,
         if ( bitList.count(0) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VoltRegFail );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 1: VDD Lost
         if ( bitList.count(1) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VddLost );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 2: VPP Lost
         if ( bitList.count(2) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VppLost );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 3: VTT Lost
         if ( bitList.count(3) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_VttLost );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 4: DRAM not Self Refresh
         if ( bitList.count(4) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NotSelfRefr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 5: Controller HW Error
         if ( bitList.count(5) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_CtrlHwErr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 6: NVM Controller Error
         if ( bitList.count(6) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NvmCtrlErr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 7: NVM Lifetime Error
         if ( bitList.count(7) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_NvmLifeErr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
 
     }while(0);
@@ -539,15 +539,15 @@ uint32_t __analyzeHealthStatus1Reg( STEP_CODE_DATA_STRUCT & io_sc,
         if ( bitList.count(1) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_InvFwErr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 2: Configuration Data Error
         if ( bitList.count(2) )
         {
             io_sc.service_data->AddSignatureList( i_dimm, PRDFSIG_CnfgDataErr );
-            // Callout NVDIMM on 1st, gard
-            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH );
+            // Callout NVDIMM on 1st, no gard
+            io_sc.service_data->SetCallout( i_dimm, MRU_HIGH, NO_GARD );
         }
         // BIT 3: No Energy Source
         if ( bitList.count(3) )
