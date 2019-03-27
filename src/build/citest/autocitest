@@ -94,7 +94,7 @@ function    runtraceHB()
         exit 1
     fi
 
-    mv ${SANDBOXBASE}/simics/traceHB.log ${SBXHOME}/traceHB.log
+    find ${SANDBOXBASE} -type f -name "traceHB.log" | xargs mv -t ${SBXHOME}
 }
 
 
