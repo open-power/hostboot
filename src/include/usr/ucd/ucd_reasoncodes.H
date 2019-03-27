@@ -35,6 +35,7 @@ namespace UCD_RC
         MOD_UCD_INIT                    = 0x01,
         MOD_UPDATE_ALL_UCD_FLASH_IMAGES = 0x02,
         MOD_UPDATE_UCD_FLASH_IMAGE      = 0x03,
+        MOD_VERIFY_UPDATE               = 0x04,
     };
 
     enum UcdReasonCode
@@ -48,6 +49,8 @@ namespace UCD_RC
         UCD_EOF                                       = UCD_COMP_ID | 0x07,
         UCD_UNSUPPORTED_OPERATION_REQUEST             = UCD_COMP_ID | 0x08,
         UCD_INVALID_COMMANDLINE                       = UCD_COMP_ID | 0x09,
+        UCD_ERROR_STORING_TO_FLASH                    = UCD_COMP_ID | 0x0A,
+        UCD_TIMEDOUT_STORING_TO_FLASH                 = UCD_COMP_ID | 0x0B,
     };
 
 }; // namespace UCD
