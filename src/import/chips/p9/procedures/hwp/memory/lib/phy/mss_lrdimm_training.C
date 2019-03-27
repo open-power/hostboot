@@ -807,9 +807,11 @@ void deconfigure_steps(const uint8_t i_dimm_type,
     // If the DIMM type is an LRDIMM, configure for LRDIMM
     if(i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
     {
-        FAPI_INF("LRDIMM: deconfigure WR VREF 2D");
+        FAPI_INF("LRDIMM: deconfigure WR VREF 2D and RD VREF 2D");
         // We clear WRITE_CTR_2D_VREF as the HW calibration algorithm will not work with LRDIMM
-        io_cal_steps.clearBit<WRITE_CTR_2D_VREF>();
+        // Same for RD VREF
+        io_cal_steps.clearBit<WRITE_CTR_2D_VREF>()
+        .clearBit<READ_CTR_2D_VREF>();
         return;
     }
 
