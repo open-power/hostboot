@@ -50,7 +50,7 @@
 #include <map>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <chips/ocmb/explorer/procedures/hwp/memory/exp_inband.H>
+#include <exp_inband.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions

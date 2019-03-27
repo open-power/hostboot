@@ -49,6 +49,7 @@ EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
