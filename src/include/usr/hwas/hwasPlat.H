@@ -63,6 +63,12 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
     {};
 #endif
 
+/**
+ * @brief Helper function to check if HB is running
+ *        from an NVDIMM and not a regular DIMM
+ */
+errlHndl_t checkForHbOnNvdimm();
+
 // default unknown EC level
 constexpr TARGETING::ATTR_EC_type INVALID__ATTR_EC = 0xFF;
 

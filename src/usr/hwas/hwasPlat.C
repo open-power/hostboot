@@ -40,6 +40,7 @@
 #include <vpd/mvpdenums.H>
 #include <stdio.h>
 #include <sys/mm.h>
+#include <sys/misc.h>
 
 #include <pnor/pnorif.H>
 
@@ -74,6 +75,7 @@ class RegisterHWASFunctions
 RegisterHWASFunctions registerHWASFunctions;
 
 using   namespace   TARGETING;
+
 
 //******************************************************************************
 // platReadIDEC function
@@ -696,28 +698,194 @@ void markTargetChanged(TARGETING::TargetHandle_t i_target)
 //  platCheckMinimumHardware()
 //******************************************************************************
 void platCheckMinimumHardware(uint32_t & io_plid,
-                            const TARGETING::ConstTargetHandle_t i_node,
-                            bool *o_bootable)
+                              const TARGETING::ConstTargetHandle_t i_node,
+                              bool *o_bootable)
 {
-    //errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = NULL;
 
-    //  nothing to do yet...
+    Target* l_pMasterProcChip = NULL;
+    targetService().masterProcChipTargetHandle(l_pMasterProcChip);
 
-    //  if you add something here, don't forget to
-    //      add a procedure callout
-    //l_errl->addProcedureCallout( EPUB_PRC_FIND_DECONFIGURED_PART,
-    //                             SRCI_PRIORITY_HIGH);
+    // NVDIMM only supported on Nimbus
+    ATTR_MODEL_type l_model = l_pMasterProcChip->getAttr<ATTR_MODEL>();
+    if (l_model == MODEL_NIMBUS)
+    {
+        l_errl = checkForHbOnNvdimm();
+        if (l_errl)
+        {
+            HWAS_ERR("platCheckMinimumHardware::checkForHbOnNvdimm() failed.");
 
-    //      and update the common plid
-    //if (io_plid != 0)
-    //{
-    //    l_errl->plid(io_plid) ;
-    //}
-    //else
-    //{
-    //    io_plid = l_errl->plid();
-    //}
+            if(o_bootable)
+            {
+                *o_bootable = false;
+            }
+
+            // Add procedure callout, update common plid, commit
+            hwasErrorAddProcedureCallout(l_errl,
+                                        EPUB_PRC_FIND_DECONFIGURED_PART,
+                                        SRCI_PRIORITY_HIGH);
+            hwasErrorUpdatePlid(l_errl, io_plid);
+            errlCommit(l_errl, HWAS_COMP_ID);
+        }
+    }
+
 }
 
+//******************************************************************************
+//  checkForHbOnNvdimm()
+//******************************************************************************
+errlHndl_t checkForHbOnNvdimm(void)
+{
+    errlHndl_t l_errl = nullptr;
+
+    do
+    {
+        HWAS_DBG("Check if HB is running on a proc with only NVDIMMs.");
+
+        // Get all functional proc chip targets
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TARGETING::TYPE_PROC);
+        assert(l_procList.size() != 0, "Empty proc list returned!");
+
+        // Use the hrmor to find which proc HB is running on
+        const auto l_hbHrmor = cpu_spr_value(CPU_SPR_HRMOR);
+
+        // Use the MemBases and MemSizes to find which group
+        // includes the hrmor
+        ATTR_PROC_MEM_BASES_type l_memBases = {0};
+        ATTR_PROC_MEM_SIZES_type l_memSizes = {0};
+        size_t l_numGroups = sizeof(ATTR_PROC_MEM_SIZES_type)/sizeof(uint64_t);
+
+        // checkMinimumHardware may be called before the groups are set up
+        // If the MemSizes are all zero the groups are not set up yet
+        // Break out of the check
+        bool l_memSizesAllZero = true;
+
+        // Save the HB proc target and group number
+        Target *l_hbProc = nullptr;
+        uint32_t l_hbGroup = 0;
+
+        for (auto l_pProc : l_procList)
+        {
+            // Get the memory group ranges under this proc
+            assert(l_pProc->tryGetAttr<ATTR_PROC_MEM_BASES>(l_memBases),
+                "Unable to get ATTR_PROC_MEM_BASES attribute");
+            assert(l_pProc->tryGetAttr<ATTR_PROC_MEM_SIZES>(l_memSizes),
+                "Unable to get ATTR_PROC_MEM_SIZES attribute");
+
+
+            for (size_t l_grp=0; l_grp < l_numGroups; l_grp++)
+            {
+                // Non-zero size means that there is memory present
+                if (l_memSizes[l_grp])
+                {
+                    l_memSizesAllZero = false;
+                    // Check if hrmor is in this group's memory range
+                    if ( (l_hbHrmor >= l_memBases[l_grp]) &&
+                         (l_hbHrmor < (l_memBases[l_grp] +
+                                       l_memSizes[l_grp])) )
+                    {
+                        l_hbProc = l_pProc;
+                        l_hbGroup = l_grp;
+                        break;
+                    }
+                }
+            }
+            if (l_hbProc != nullptr)
+            {
+                break;
+            }
+        }
+
+        if (l_memSizesAllZero)
+        {
+            break;
+        }
+
+        if (l_hbProc != nullptr)
+        {
+            // Found the proc/group HB is running in, now check the dimms
+            // If we find a regular dimm then we assume that is where
+            // HB is running
+            bool l_foundNonNvdimm = false;
+
+            // Get the array of mcas/group from the attribute
+            // The attr contains 8 8-bit entries, one entry per group
+            // The bits specify which mcas are included in the group
+            ATTR_MSS_MEM_MC_IN_GROUP_type l_memMcGroup = {0};
+            assert(l_hbProc->tryGetAttr<ATTR_MSS_MEM_MC_IN_GROUP>(l_memMcGroup),
+                "Unable to get ATTR_MSS_MEM_MC_IN_GROUP attribute");
+
+            // Get list of mcas under this proc
+            TargetHandleList l_mcaList;
+            getChildAffinityTargets( l_mcaList,
+                                     l_hbProc,
+                                     CLASS_UNIT,
+                                     TYPE_MCA );
+
+            // Loop through the mcas on this proc
+            for (const auto & l_mcaTarget : l_mcaList)
+            {
+                // Get the chip unit for this mca
+                ATTR_CHIP_UNIT_type l_mcaUnit = 0;
+                l_mcaUnit = l_mcaTarget->getAttr<ATTR_CHIP_UNIT>();
+
+                // Check if this mca is included in the hb memory group
+                const uint8_t l_mcMask = 0x80;
+                if (l_memMcGroup[l_hbGroup] & (l_mcMask >> l_mcaUnit))
+                {
+                    // Get the list of dimms under this mca
+                    TargetHandleList l_dimmList;
+                    getChildAffinityTargets( l_dimmList,
+                                             l_mcaTarget,
+                                             CLASS_NA,
+                                             TYPE_DIMM );
+                    for (const auto & l_dimmTarget : l_dimmList)
+                    {
+                        if (!isNVDIMM(l_dimmTarget))
+                        {
+                            // Found a regular dimm, exit
+                            l_foundNonNvdimm = true;
+                            break;
+                        }
+                    }
+                }
+                if (l_foundNonNvdimm)
+                {
+                    break;
+                }
+            }
+
+            // If only nvdimms then error
+            if (!l_foundNonNvdimm)
+            {
+                HWAS_ERR("checkForHbOnNvdimm: HB is running on a proc with only NVDIMMS.");
+                /*@
+                * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid     HWAS::MOD_CHECK_HB_NVDIMM
+                * @reasoncode   HWAS::RC_HB_PROC_ONLY_NVDIMM
+                * @userdata1    Hostboot Proc Target HUID
+                * @userdata2    Hostboot Memory Group
+                * @devdesc      Hostboot running on proc with only NVDIMMs
+                * @custdesc     Insufficient DIMM resources
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    HWAS::MOD_CHECK_HB_NVDIMM,
+                                    HWAS::RC_HB_PROC_ONLY_NVDIMM,
+                                    get_huid(l_hbProc),
+                                    l_hbGroup);
+            }
+        }
+        else
+        {
+            // Should never get here, would be caught elsewhere
+            HWAS_ERR("checkForHbOnNvdimm: HB execution proc not found.");
+        }
+
+    } while(0);
+
+    return l_errl;
+}
 
 } // namespace HWAS

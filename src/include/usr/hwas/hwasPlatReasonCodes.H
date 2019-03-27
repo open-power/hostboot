@@ -38,6 +38,7 @@ namespace HWAS
         MOD_PLAT_DECONFIG_GARD    = 0x81,
         MOD_PLAT_READIDEC         = 0x82,
         MOD_PLAT_READLX           = 0x83,
+        MOD_CHECK_HB_NVDIMM       = 0x84,
     };
 
     enum HwasPlatReasonCode
@@ -52,6 +53,7 @@ namespace HWAS
         RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
         RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
         RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
+        RC_HB_PROC_ONLY_NVDIMM              = HWAS_COMP_ID | 0x88,
     };
 
 };
