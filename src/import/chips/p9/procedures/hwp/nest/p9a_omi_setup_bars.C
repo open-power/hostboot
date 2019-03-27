@@ -45,7 +45,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9a_misc_scom_addresses.H>
 #include <p9a_misc_scom_addresses_fld.H>
-#include <chips/ocmb/explorer/procedures/hwp/memory/exp_inband.H>
+#include <exp_inband.H>
 
 //-----------------------------------------------------------------------------------
 // Function definitions
