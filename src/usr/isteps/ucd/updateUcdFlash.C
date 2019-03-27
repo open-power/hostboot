@@ -41,6 +41,8 @@
 #include <errl/hberrltypes.H>
 #include <errl/errludstring.H>
 
+#include <i2c/i2creasoncodes.H>
+
 #include <trace/interface.H>
 #include <string.h>
 #include <sys/time.h>
@@ -48,7 +50,6 @@
 #include <hbotcompid.H>
 #include <util/utilmem.H>
 #include <util/utilstream.H>
-#include <errl/errludstring.H>
 
 namespace POWER_SEQUENCER
 {
@@ -94,6 +95,7 @@ private:
         DEVICE_ID    = 0xFD, // Common. max 32 ASCII bytes
     };
 
+    static const uint8_t UCD_MAX_RETRIES = 2;
     const TARGETING::TargetHandle_t iv_pUcd;
     char* iv_deviceId;
     uint16_t iv_mfrRevision;
@@ -144,6 +146,129 @@ private:
         err->collectTrace(UCD_COMP_NAME);
         err->collectTrace(I2C_COMP_NAME);
         return err;
+    }
+
+    /*
+    * @brief       This function takes the parameters and finds the appropriate
+    *              deviceOp to call and calls it.
+    *
+    * @param[in]        i_opType            Operation type to perform; a read or
+    *                                       write.
+    *
+    * @param[in]        i_smbusOpType       The i2c sub-operation to perform.
+    *
+    * @param[in,out]    io_buffer           Data buffer for operation. Must not
+    *                                       be nullptr.
+    *
+    * @param[in,out]    io_bufferLength     Length of buffer.
+    *
+    * @param[in]        i_cmd               A pointer to the command code byte
+    *                                       for the operation or nullptr if a
+    *                                       device operation doesn't use one.
+    *                                       Default is nullptr.
+    *
+    * @return           errlHndl_t          An error log handle. nullptr on
+    *                                       success. Otherwise, an error
+    *                                       occurred.
+    */
+    errlHndl_t performDeviceOp(const DeviceFW::OperationType i_opType,
+                               const DeviceFW::I2C_SUBOP     i_smbusOpType,
+                               void * const                  io_buffer,
+                               size_t&                       io_bufferLength,
+                         const uint8_t * const               i_cmd = nullptr)
+    {
+        assert(io_buffer != nullptr, "io_buffer must not be nullptr");
+        errlHndl_t err = nullptr;
+
+        // Look for expected operation types
+        if ((i_cmd != nullptr)
+            && (  (i_smbusOpType == DeviceFW::I2C_SMBUS_BYTE)
+               || (i_smbusOpType == DeviceFW::I2C_SMBUS_WORD)
+               || (i_smbusOpType == DeviceFW::I2C_SMBUS_BLOCK)))
+        {
+            err = deviceOp(i_opType,
+                           iv_pI2cMaster,
+                           io_buffer,
+                           io_bufferLength,
+                           DeviceFW::I2C,
+                           I2C_SMBUS_RW_W_CMD_PARAMS(
+                               i_smbusOpType,
+                               iv_i2cInfo.engine,
+                               iv_i2cInfo.port,
+                               iv_i2cInfo.devAddr,
+                               *i_cmd,
+                               iv_i2cInfo.i2cMuxBusSelector,
+                               &iv_i2cInfo.i2cMuxPath));
+
+        }
+        else if ((i_cmd == nullptr)
+                && (i_smbusOpType == DeviceFW::I2C_SMBUS_SEND_OR_RECV))
+        {
+            err = deviceOp(i_opType,
+                       iv_pI2cMaster,
+                       io_buffer,
+                       io_bufferLength,
+                       DEVICE_I2C_SMBUS_SEND_OR_RECV(iv_i2cInfo.engine,
+                                              iv_i2cInfo.port,
+                                              iv_i2cInfo.devAddr,
+                                              iv_i2cInfo.i2cMuxBusSelector,
+                                              &iv_i2cInfo.i2cMuxPath));
+        }
+        else
+        {
+            uint32_t cmd = 0;
+
+            if (i_cmd != nullptr)
+            {
+                cmd = *i_cmd;
+            }
+
+            /*@
+             * @errortype
+             * @severity           ERRL_SEV_UNRECOVERABLE
+             * @moduleid           UCD_RC::MOD_PERFORM_DEVICE_OP
+             * @reasoncode         UCD_RC::UCD_INVALID_DEVICE_OP
+             * @devdesc            A combination of arguments passed to
+             *                     ucdDeviceOp were not able to form a valid
+             *                     deviceOp() call.
+             * @custdesc           A problem occurred during the IPL of the
+             *                     system: Internal Firmware Error
+             * @userdata1[00:31]   command or 0x0 if none provided
+             * @userdata1[32:63]   smbus operation type
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          UCD_RC::MOD_PERFORM_DEVICE_OP,
+                                          UCD_RC::UCD_INVALID_DEVICE_OP,
+                                          TWO_UINT32_TO_UINT64(cmd,
+                                              i_smbusOpType));
+        }
+
+        return err;
+
+    }
+
+    /*
+     * @brief A helper function for attemptDeviceOp that will look at the RC of
+     *        an error coming from performDeviceOp and determine if that error
+     *        is retryable.
+     *
+     * @param[in]       i_reasonCode        The reason code from the error log.
+     *
+     * @return          boolean             true if the error is retryable.
+     *                                      Otherwise, false.
+     */
+    bool errorIsRetryable(const uint16_t i_reasonCode)
+    {
+        //@TODO RTC 205982 Handle Bad PEC byte.
+        bool retryable = false;
+
+        if (   (i_reasonCode == I2C::I2C_NACK_ONLY_FOUND)
+            || (i_reasonCode == I2C::I2C_CMD_COMP_TIMEOUT))
+        {
+            retryable = true;
+        }
+
+        return retryable;
     }
 
     /*
@@ -537,20 +662,14 @@ public:
             char deviceIdBuffer[DEVICE_ID_MAX_SIZE]{};
 
             size_t size = sizeof(deviceIdBuffer);
+            uint8_t cmd = DEVICE_ID;
 
-            err = deviceOp(DeviceFW::READ,
-                           iv_pI2cMaster,
-                           deviceIdBuffer,
-                           size,
-                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
-                                                  iv_i2cInfo.port,
-                                                  iv_i2cInfo.devAddr,
-                                                  DEVICE_ID,
-                                                  iv_i2cInfo.i2cMuxBusSelector,
-                                                  &iv_i2cInfo.i2cMuxPath)
-                          );
+            err = attemptDeviceOp(DeviceFW::READ,
+                                  DeviceFW::I2C_SMBUS_BLOCK,
+                                  deviceIdBuffer,
+                                  size,
+                                  &cmd);
 
-            // @TODO RTC 205982: Handle the PEC byte if it exists.
             if (err)
             {
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initialize(): Could not "
@@ -628,22 +747,14 @@ public:
             } mfrBuf;
 
             size = MFR_REVISION_MAX_SIZE;
-
+            cmd = MFR_REVISION;
             // Read the MFR revision from the UCD device.
-            err = deviceOp(DeviceFW::READ,
-                           iv_pI2cMaster,
-                           mfrBuf.str,
-                           size,
-                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
-                                                  iv_i2cInfo.port,
-                                                  iv_i2cInfo.devAddr,
-                                                  MFR_REVISION,
-                                                  iv_i2cInfo.i2cMuxBusSelector,
-                                                  &iv_i2cInfo.i2cMuxPath)
-                          );
+            err = attemptDeviceOp(DeviceFW::READ,
+                                  DeviceFW::I2C_SMBUS_BLOCK,
+                                  mfrBuf.str,
+                                  size,
+                                  &cmd);
 
-            // @TODO RTC 205982: Need to handle the case where a bad PEC byte
-            //                   is returned
             if (err)
             {
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initializei(): Could not "
@@ -703,9 +814,9 @@ public:
      */
     struct smbus_op_t
     {
-        uint64_t  addr;
-        uint64_t  cmd;
-        uint64_t  pec_byte;
+        uint8_t  addr;
+        uint8_t  cmd;
+        uint8_t  pec_byte;
         std::vector<uint8_t> vData;
 
         /**
@@ -910,16 +1021,11 @@ public:
                 size = op.vData.size();
                 expSize = size;
 
-                err = deviceOp(DeviceFW::WRITE,
-                           iv_pI2cMaster,
-                           reinterpret_cast<void*>(op.vData.data()),
-                           size,
-                           DEVICE_I2C_SMBUS_BYTE(iv_i2cInfo.engine,
-                                                 iv_i2cInfo.port,
-                                                 iv_i2cInfo.devAddr,
-                                                 op.cmd,
-                                                 iv_i2cInfo.i2cMuxBusSelector,
-                                                 &iv_i2cInfo.i2cMuxPath));
+                err = attemptDeviceOp(DeviceFW::WRITE,
+                                      DeviceFW::I2C_SMBUS_BYTE,
+                                      reinterpret_cast<void*>(op.vData.data()),
+                                      size,
+                                      &op.cmd);
 
                 if (err)
                 {
@@ -950,16 +1056,11 @@ public:
                 size = op.vData.size();
                 expSize = size;
 
-                err = deviceOp(DeviceFW::WRITE,
-                           iv_pI2cMaster,
-                           reinterpret_cast<void*>(op.vData.data()),
-                           size,
-                           DEVICE_I2C_SMBUS_WORD(iv_i2cInfo.engine,
-                                                 iv_i2cInfo.port,
-                                                 iv_i2cInfo.devAddr,
-                                                 op.cmd,
-                                                 iv_i2cInfo.i2cMuxBusSelector,
-                                                 &iv_i2cInfo.i2cMuxPath));
+                err = attemptDeviceOp(DeviceFW::WRITE,
+                                      DeviceFW::I2C_SMBUS_WORD,
+                                      reinterpret_cast<void*>(op.vData.data()),
+                                      size,
+                                      &op.cmd);
 
                 if (err)
                 {
@@ -995,16 +1096,11 @@ public:
                 size = op.vData.size();
                 expSize = size;
 
-                err = deviceOp(DeviceFW::WRITE,
-                           iv_pI2cMaster,
-                           reinterpret_cast<void*>(op.vData.data()),
-                           size,
-                           DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
-                                                  iv_i2cInfo.port,
-                                                  iv_i2cInfo.devAddr,
-                                                  op.cmd,
-                                                  iv_i2cInfo.i2cMuxBusSelector,
-                                                  &iv_i2cInfo.i2cMuxPath));
+                err = attemptDeviceOp(DeviceFW::WRITE,
+                                      DeviceFW::I2C_SMBUS_BLOCK,
+                                      reinterpret_cast<void*>(op.vData.data()),
+                                      size,
+                                      &op.cmd);
 
                 if (err)
                 {
@@ -1049,15 +1145,10 @@ public:
                 size = sizeof(uint8_t);
                 expSize = size;
 
-                err = deviceOp(DeviceFW::WRITE,
-                           iv_pI2cMaster,
-                           &cmd,
-                           size,
-                           DEVICE_I2C_SMBUS_SEND_OR_RECV(iv_i2cInfo.engine,
-                                                  iv_i2cInfo.port,
-                                                  iv_i2cInfo.devAddr,
-                                                  iv_i2cInfo.i2cMuxBusSelector,
-                                                  &iv_i2cInfo.i2cMuxPath));
+                err = attemptDeviceOp(DeviceFW::WRITE,
+                                      DeviceFW::I2C_SMBUS_SEND_OR_RECV,
+                                      &cmd,
+                                      size);
 
                 if (err)
                 {
@@ -1150,6 +1241,186 @@ public:
         return err;
 
     } // end of updateUcdFlash()
+
+    //@TODO RTC 205982 Include bad pec byte RC in description
+    /*
+    * @brief       This function will attempt to perform a deviceOp three times
+    *              using the supplied parameters to select the appropriate
+    *              operation. If an error is encountered during an attempt it
+    *              will be handled in terms of retryable versus non-retryable.
+    *              A retryable error has a return code of either:
+    *              I2C_NACK_ONLY_FOUND, I2C_CMD_COMP_TIMEOUT, or a bad pec byte.
+    *              If these errors are encountered they will not be returned by
+    *              the function unless the operation fails three times then the
+    *              final error will be returned as a non-retryable error.
+    *
+    * @param[in]        i_opType            Operation type to perform; a read or
+    *                                       write.
+    *
+    * @param[in]        i_smbusOpType       The i2c sub-operation to perform.
+    *
+    * @param[in,out]    io_buffer           Data buffer for operation. Must not
+    *                                       be nullptr.
+    *
+    * @param[in,out]    io_bufferLength     Length of buffer.
+    *
+    * @param[in]        i_cmd               A pointer to the command code byte
+    *                                       for the operation or nullptr if a
+    *                                       device operation doesn't use one.
+    *                                       Default is nullptr.
+    *
+    * @return           errlHndl_t          An error log handle.
+    * @retval           nullptr             The operation succeeded, even if it
+    *                                       may have been attempted multiple
+    *                                       times.
+    * @retval           !nullptr            Failed to perform device operation
+    *                                       such that further retries are not
+    *                                       possible since the error encountered
+    *                                       was not a retryable error. Handle
+    *                                       points to a valid error log.
+    */
+    errlHndl_t attemptDeviceOp(const DeviceFW::OperationType i_opType,
+                               const DeviceFW::I2C_SUBOP     i_smbusOpType,
+                               void * const                  io_buffer,
+                               size_t&                       io_bufferLength,
+                         const uint8_t * const               i_cmd = nullptr)
+    {
+        assert(io_buffer != nullptr, "io_buffer must not be nullptr");
+
+        errlHndl_t pNonRetryableError = nullptr;
+        errlHndl_t pRetryableError    = nullptr;
+        errlHndl_t pUcdError          = nullptr;
+
+        for (uint8_t retry = 0; retry <= UCD_MAX_RETRIES; ++retry)
+        {
+            // Perform deviceOp
+            pUcdError = performDeviceOp(i_opType,
+                                    i_smbusOpType,
+                                    io_buffer,
+                                    io_bufferLength,
+                                    i_cmd);
+
+            if (   (pUcdError != nullptr)
+                && !errorIsRetryable(pUcdError->reasonCode()))
+            {
+                // Only retry on errors that are retryable.
+                // Collect trace and exit retry loop. Error will be returned
+                TRACFCOMP(g_trac_ucd, ERR_MRK"attemptDeviceOp: "
+                          "Non-Retryable Error: rc=0x%X, retry=%d",
+                          pUcdError->reasonCode(),
+                          retry);
+
+                pUcdError->collectTrace(UCD_COMP_NAME);
+                pNonRetryableError = pUcdError;
+                pUcdError = nullptr;
+                break;
+            }
+
+
+            // Retry Error Handling Section
+            if (pUcdError == nullptr)
+            {
+                // Operation completed successfully break out of retry loop.
+                break;
+            }
+            else // Handle the retryable error
+            {
+                if (retry < UCD_MAX_RETRIES)
+                {
+                    // Only save original retryable error
+                    if (pRetryableError == nullptr)
+                    {
+                        pRetryableError = pUcdError;
+                        pUcdError = nullptr;
+
+                        TRACFCOMP(g_trac_ucd, ERR_MRK"attemptDeviceOp: "
+                                  "Retryable Error: rc=0x%X, eid=0x%X, "
+                                  "retry/MAX=%d/%d. Save error and retry.",
+                                  pRetryableError->reasonCode(),
+                                  pRetryableError->eid(),
+                                  retry, UCD_MAX_RETRIES);
+
+                        pRetryableError->collectTrace(UCD_COMP_NAME);
+                    }
+                    else
+                    {
+                        // Add data to the original retryable error
+                        TRACFCOMP(g_trac_ucd, ERR_MRK"attemptDeviceOp: "
+                                  "Another Retryable Error: rc=0x%X, eid=0x%X, "
+                                  "plid=0x%X, retry/MAX=%d/%d. Delete error "
+                                  "and retry.",
+                                  pUcdError->reasonCode(),
+                                  pUcdError->eid(),
+                                  pUcdError->plid(),
+                                  retry, UCD_MAX_RETRIES);
+
+                        ERRORLOG::ErrlUserDetailsString(
+                                "Another Retryable ERROR Found")
+                                .addToLog(pRetryableError);
+
+                        pRetryableError->collectTrace(UCD_COMP_NAME);
+
+                        // Delete this new retryable error
+                        delete pUcdError;
+                        pUcdError = nullptr;
+                    }
+
+                    // retry
+                    continue;
+                }
+                else // No more retries
+                {
+                    TRACFCOMP(g_trac_ucd, ERR_MRK"attemptDeviceOp: "
+                              "Error: rc=0x%X, eid=0x%X, No More Retries "
+                              "(retry/MAX=%d/%d). Returning Error",
+                              pUcdError->reasonCode(),
+                              pUcdError->eid(),
+                              retry, UCD_MAX_RETRIES);
+
+                    pUcdError->collectTrace(UCD_COMP_NAME);
+                    pNonRetryableError = pUcdError;
+                    pUcdError = nullptr;
+
+                    // break from retry loop.
+                    break;
+                }
+
+            } // End handling of retryable error section
+
+        } // End of retry ucdDeviceOp loop
+
+        // Handle any remaining errors if any.
+        if (pRetryableError != nullptr)
+        {
+            if (pNonRetryableError == nullptr)
+            {
+                // Since the operation eventually succeeded, delete the original
+                // retryable error
+                TRACFCOMP(g_trac_ucd, INFO_MRK"attemptDeviceOp: "
+                          "Successfully performed device operation. "
+                          "Deleting saved retryable error eid=0x%X, plid=0x%X",
+                          pRetryableError->eid(),
+                          pRetryableError->plid());
+
+                delete pRetryableError;
+                pRetryableError = nullptr;
+            }
+            else
+            {
+                // Change retryable error PLID to non-retryable error PLID
+                pRetryableError->plid(pNonRetryableError->plid());
+
+                TRACFCOMP(g_trac_ucd, "attemptDeviceOp: "
+                          "Committing retryable error eid=0x%X with plid "
+                          "of Non-Retryable error: 0x%X",
+                          pRetryableError->eid(), pNonRetryableError->plid());
+
+                errlCommit(pRetryableError, UCD_COMP_ID);
+            }
+        }
+
+        return pNonRetryableError;
+    }
 
 
     /*
