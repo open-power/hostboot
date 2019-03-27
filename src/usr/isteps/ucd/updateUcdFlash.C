@@ -74,12 +74,23 @@ private:
         DEVICE_ID_MAX_SIZE    = 32,
     };
 
+    /**
+     *  @brief Range enumerations for the PAGE command
+     */
+    enum PAGE_CMD_RESTRICTIONS : uint8_t
+    {
+        INVALID_PAGE_RANGE_MIN = 12,  ///< First invalid page
+        INVALID_PAGE_RANGE_MAX = 254, ///< Last invalid page
+    };
+
     enum COMMAND : uint8_t
     {
         // PMBUS Specificiation
+        PAGE         = 0x00, // Common, 1 byte page ID
         MFR_REVISION = 0x9B, // Common, max 12 ASCII bytes
 
         // Manufacturer specific (0xD0-> 0xFD)
+        MFR_STATUS   = 0xF3, // Page, 4 bytes for UCD9090 and UCD90120A
         DEVICE_ID    = 0xFD, // Common. max 32 ASCII bytes
     };
 
@@ -155,7 +166,316 @@ private:
      */
     Ucd& operator=(Ucd&&) = delete;
 
+    /**
+     *  @brief Write the UCD page
+     *
+     *  @par Detailed Description:
+     *      Writes the UCD page, an index that selects a specific voltage
+     *      rail (or 'all' voltage rails) to receive later write requests.
+     *      Status not specific to a rail is available for read on any
+     *      valid page (other than the 'all' page).
+     *
+     *      Page to rail decoding (see section 6.1 of
+     *          http://www.ti.com/lit/ug/slvu352f/slvu352f.pdf):
+     *
+     *        Page 0 => Output rail 1
+     *        ...
+     *        Page 11 => Output rail 12
+     *        Page 12-254 => Always invalid (enforced by assertion)
+     *        Page 255 => All rails (but only for writes, this is never valid
+     *            for any read operations)
+     *
+     *  @param[in] i_page Page to switch to
+     *
+     *  @return errlHndl_t Error handle indicating success or failure
+     *  @retval nullptr Set the requested page successfully
+     *  @retval !nullptr Error setting the requested page; handle points to
+     *      valid error log
+     */
+    errlHndl_t writePage(const uint8_t i_page) const
+    {
+        errlHndl_t pError = nullptr;
+
+        do {
+
+        assert((   (i_page < INVALID_PAGE_RANGE_MIN)
+                || (i_page > INVALID_PAGE_RANGE_MAX)),
+               "Invalid page request of %d; must be < %d or > %d",
+               i_page,INVALID_PAGE_RANGE_MIN,INVALID_PAGE_RANGE_MAX);
+
+        auto page = i_page;
+        size_t size = sizeof(page);
+        const auto expSize = size;
+
+        pError = deviceOp(DeviceFW::WRITE,
+                          iv_pI2cMaster,
+                          &page,
+                          size,
+                          DEVICE_I2C_SMBUS_BYTE(iv_i2cInfo.engine,
+                                                iv_i2cInfo.port,
+                                                iv_i2cInfo.devAddr,
+                                                PAGE,
+                                                iv_i2cInfo.i2cMuxBusSelector,
+                                                &iv_i2cInfo.i2cMuxPath));
+
+        // @TODO RTC 205982: Handle the PEC byte if it exists.
+        if(pError)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::writePage(): Could not write PAGE %d to UCD with "
+                "HUID of 0x%08X", page, get_huid(iv_pUcd));
+            break;
+        }
+
+        assert(size == expSize, "Ucd::writePage(): Actual size written of %lu "
+            "did not match expected size of %lu ",size,expSize);
+
+        } while(0);
+
+        return pError;
+    }
+
 public:
+
+    /**
+     *  @brief MFR_STATUS bits
+     *
+     *  @note: See http://www.ti.com/lit/ug/slvu352f/slvu352f.pdf
+     *      table 90
+     */
+    struct MfrStatus
+    {
+        // UCD bit 0 is rightmost bit in the uint32_t
+        uint32_t Reserved_31_24          : 8; // Bit 31-24
+        uint32_t GPI8Fault               : 1; // Bit 23
+        uint32_t GPI7Fault               : 1; // Bit 22
+        uint32_t GPI6Fault               : 1; // Bit 21
+        uint32_t GPI5Fault               : 1; // Bit 20
+        uint32_t GPI4Fault               : 1; // Bit 19
+        uint32_t GPI3Fault               : 1; // Bit 18
+        uint32_t GPI2Fault               : 1; // Bit 17
+        uint32_t GPI1Fault               : 1; // Bit 16
+        uint32_t Reserved_15_13          : 3; // Bit 15-13
+        uint32_t NEW_LOGGED_FAULT_DETAIL : 1; // Bit 12
+        uint32_t SYSTEM_WATCHDOG_TIMEOUT : 1; // Bit 11
+        uint32_t STORE_DEFAULT_ALL_ERROR : 1; // Bit 10
+        uint32_t STORE_DEFAULT_ALL_DONE  : 1; // Bit 9
+        uint32_t WATCHDOG_TIMEOUT        : 1; // Bit 8
+        uint32_t INVALID_LOGS            : 1; // Bit 7
+        uint32_t LOGGED_FAULT_DETAIL_FULL: 1; // Bit 6
+        uint32_t RESEQUENCE_ERROR        : 1; // Bit 5
+        uint32_t PKGID_MISMATCH          : 1; // Bit 4
+        uint32_t HARDCODED_PARMS         : 1; // Bit 3
+        uint32_t SEQ_OFF_TIMEOUT         : 1; // Bit 2
+        uint32_t SEQ_ON_TIMEOUT          : 1; // Bit 1
+        uint32_t SAVED_FAULT             : 1; // Bit 0
+
+    } PACKED;
+
+    /**
+     *  @brief Union simplifying manipulation of the MFR_STATUS value
+     */
+    union MfrStatusUnion
+    {
+        uint32_t value;   // Raw MFR_STATUS value
+        MfrStatus status; // Struct breaking out all status bits of MFR_STATUS
+
+        /**
+         *  @brief Constructor
+         */
+        MfrStatusUnion()
+            : value(0)
+        {
+        }
+
+    } PACKED;
+
+    /**
+     *  @brief Read UCD MFR_STATUS
+     *
+     *  @par Detailed Description:
+     *      Reads the UCD MFR_STATUS register which return various errors/faults
+     *      for the UCD.
+     *
+     *  @note: Output variable is always cleared to all 0's
+     *
+     *  @param[out] o_mfrStatus Bit field containing the MFR_STATUS bits
+     *
+     *  @return errlHndl_t Error handle indicating success or failure
+     *  @retval nullptr Returned MFR_STATUS bit field is valid
+     *  @retval !nullptr Error reading MFR_STATUS; handle points to valid error
+     *      log
+     */
+    errlHndl_t readMfrStatus(MfrStatus& o_mfrStatus) const
+    {
+        errlHndl_t pError = nullptr;
+
+        MfrStatusUnion mfrStatus;
+        o_mfrStatus = mfrStatus.status;
+
+        do {
+
+        // Assumption is that reading the bits for confirming flash update
+        // success will work from any valid rail 1-12 (page 0-11), so
+        // arbitrarily use the lowest valid page of 0.  If Hostboot ever needs
+        // status from from specific voltage rails, the API/function must change
+        // to accept a rail ID.
+        pError = writePage(0);
+        if(pError)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::readMfrStatus(): failed in call to writePage(0) for "
+                "UCD with HUID of 0x%08X",
+                TARGETING::get_huid(iv_pUcd));
+            break;
+        }
+
+        size_t size = sizeof(mfrStatus.value);
+        const auto expSize = size;
+
+        pError = deviceOp(DeviceFW::READ,
+                          iv_pI2cMaster,
+                          &mfrStatus.value,
+                          size,
+                          DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
+                                                 iv_i2cInfo.port,
+                                                 iv_i2cInfo.devAddr,
+                                                 MFR_STATUS,
+                                                 iv_i2cInfo.i2cMuxBusSelector,
+                                                 &iv_i2cInfo.i2cMuxPath));
+
+        // @TODO RTC 205982: Handle the PEC byte if it exists.
+        if (pError)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::readMfrStatus(): Could not read MFR_STATUS from UCD with "
+                "HUID of 0x%08X", get_huid(iv_pUcd));
+            break;
+        }
+
+        assert(size == expSize, "Ucd::readMfrStatus(): Actual size read of %lu "
+            "did not match expected size of %lu",size,expSize);
+
+        o_mfrStatus = mfrStatus.status;
+
+        } while(0);
+
+        return pError;
+    }
+
+    /**
+     *  @brief Verify that the UCD flash updated correctly, according to
+     *      manufacturer recommendations
+     *
+     *  @par Detailed Description:
+     *      Checks the MFR_STATUS to determine if the flash update completed,
+     *      and if so, whether it completed with an error or not.  If it
+     *      completed successfully, the UCD update is considered complete.
+     *      Otherwise, return an error.  See section 6.3 of
+     *      http://www.ti.com/lit/ug/slvu352f/slvu352f.pdf for discussion of
+     *      this check.
+     *
+     *  @return errlHndl_t Error handle indicating success or failure
+     *  @retval nullptr Verified that UCD flash updated correctly
+     *  @retval !nullptr UCD flash update error; handle points to valid error
+     *      log
+     */
+    errlHndl_t verifyUpdate(void) const
+    {
+        TRACFCOMP(g_trac_ucd, ENTER_MRK "Ucd::verifyUpdate");
+
+        errlHndl_t pError = nullptr;
+
+        do {
+
+        MfrStatusUnion mfrStatus;
+        pError = readMfrStatus(mfrStatus.status);
+        if(pError)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::verifyUpdate(): failed in call to readMfrStatus() for "
+                "UCD with HUID of 0x%08X",
+                TARGETING::get_huid(iv_pUcd));
+            break;
+        }
+
+        TRACFCOMP(g_trac_ucd, INFO_MRK
+            "Ucd::verifyUpdate(): Got MFR_STATUS of 0x%08X for "
+            "UCD with HUID of 0x%08X.  Store done = %d, store error = %d",
+            mfrStatus.value,
+            TARGETING::get_huid(iv_pUcd),
+            mfrStatus.status.STORE_DEFAULT_ALL_DONE,
+            mfrStatus.status.STORE_DEFAULT_ALL_ERROR);
+
+        if(!mfrStatus.status.STORE_DEFAULT_ALL_DONE)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::verifyUpdate(): UCD with HUID of 0x%08X did not complete "
+                "flash update.  Status = 0x%08X",
+                TARGETING::get_huid(iv_pUcd),
+                mfrStatus.value);
+
+            /*@
+             * @errortype
+             * @severity   ERRL_SEV_PREDICTIVE
+             * @moduleid   UCD_RC::MOD_VERIFY_UPDATE
+             * @reasoncode UCD_RC::UCD_TIMEDOUT_STORING_TO_FLASH
+             * @devdesc    The "store default all" operation, which commits
+             *     configuration changes to the UCD flash, did not complete
+             * @custdesc   PCIE hotplug controller flash update failure
+             * @userdata1[00:31] MFR_STATUS value
+             * @userdata2        HUID of the UCD
+             */
+            pError = ucdError(
+                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                UCD_RC::MOD_VERIFY_UPDATE,
+                UCD_RC::UCD_TIMEDOUT_STORING_TO_FLASH,
+                TWO_UINT32_TO_UINT64(mfrStatus.value, 0),
+                get_huid(iv_pUcd));
+            break;
+        }
+
+        if(mfrStatus.status.STORE_DEFAULT_ALL_ERROR)
+        {
+            TRACFCOMP(g_trac_ucd, ERR_MRK
+                "Ucd::verifyUpdate(): UCD with HUID of 0x%08X completed "
+                "flash update with errors.  Status = 0x%08X",
+                TARGETING::get_huid(iv_pUcd),
+                mfrStatus.value);
+
+            /*@
+             * @errortype
+             * @severity   ERRL_SEV_PREDICTIVE
+             * @moduleid   UCD_RC::MOD_VERIFY_UPDATE
+             * @reasoncode UCD_RC::UCD_ERROR_STORING_TO_FLASH
+             * @devdesc    The "store default all" operation, which commits
+             *     configuration changes to the UCD flash, completed but with
+             *     errors
+             * @custdesc   PCIE hotplug controller flash update failure
+             * @userdata1[00:31] MFR_STATUS value
+             * @userdata2        HUID of the UCD
+             */
+            pError = ucdError(
+                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                UCD_RC::MOD_VERIFY_UPDATE,
+                UCD_RC::UCD_ERROR_STORING_TO_FLASH,
+                TWO_UINT32_TO_UINT64(mfrStatus.value, 0),
+                get_huid(iv_pUcd));
+            break;
+        }
+
+        TRACFCOMP(g_trac_ucd, INFO_MRK
+            "Ucd::verifyUpdate(): UCD with HUID of 0x%08X completed "
+            "flash update with no update specific errors.  Status = 0x%08X",
+            TARGETING::get_huid(iv_pUcd),
+            mfrStatus.value);
+
+        } while(0);
+
+        TRACFCOMP(g_trac_ucd, EXIT_MRK "Ucd::verifyUpdate");
+
+        return pError;
+    }
 
     /* @brief      Constructor that takes a UCD target and sets up all of the
      *             instance variables. Will assert if a nullptr is given or if
@@ -1287,6 +1607,18 @@ errlHndl_t updateAllUcdFlashImages(
                 pError->collectTrace(UCD_COMP_NAME);
                 errlCommit(pError,UCD_COMP_ID);
                 break;
+            }
+
+            pError = ucd.verifyUpdate();
+            if(pError)
+            {
+                TRACFCOMP(g_trac_ucd,ERR_MRK
+                    "updateAllUcdFlashImages: Failed in call to "
+                    "Ucd::verifyUpdate() for UCD with HUID of "
+                    " 0x%08X.",
+                    TARGETING::get_huid(powerSequencer));
+                pError->collectTrace(UCD_COMP_NAME);
+                errlCommit(pError,UCD_COMP_ID);
             }
 
             TRACFCOMP(g_trac_ucd,INFO_MRK
