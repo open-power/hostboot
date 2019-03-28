@@ -88,6 +88,15 @@ class PreVerifiedLidMgr
         bool      i_firstLid,
         uint64_t& o_resvMemAddr);
 
+    /**
+     * @brief Returns the next available address in hostboot reserved memory.
+     *        The underlying math depends on the payload kind.
+     *
+     * @param[in] i_size the desired size of the reserved region
+     * @return uint64_t next available reserved memory address
+     */
+    static uint64_t getNextResMemAddr(size_t i_size);
+
   protected:
 
     /**

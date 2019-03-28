@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -595,4 +595,9 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
     TRACDCOMP( g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::loadImage");
 
     return l_errl;
+}
+
+uint64_t PreVerifiedLidMgr::getNextResMemAddr(const size_t i_size)
+{
+    return Singleton<PreVerifiedLidMgr>::instance().getNextAddress(i_size);
 }

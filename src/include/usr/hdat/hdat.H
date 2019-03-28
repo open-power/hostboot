@@ -226,6 +226,7 @@ enum hdatMsVpdRhbAddrRangeType : uint8_t
     RHB_TYPE_HOMER_OCC       = 4,
     RHB_TYPE_VERIFIED_PNOR   = 5,
     RHB_TYPE_UNSECURE_HOMER  = 6,
+    RHB_TYPE_UVBWLIST        = 7,
 
     RHB_TYPE_INVALID         = 0xFF
 };
