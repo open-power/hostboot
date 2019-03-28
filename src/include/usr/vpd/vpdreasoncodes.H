@@ -157,6 +157,7 @@ enum vpdReasonCode
     VPD_BAD_REC_NUM                     = VPD_COMP_ID | 0x3e,
     VPD_INVALID_MASTER_I2C_PATH         = VPD_COMP_ID | 0x3f,
     VPD_NULL_I2C_MASTER                 = VPD_COMP_ID | 0x40,
+    VPD_MOD_SPECIFIC_MISMATCH_DDIMM     = VPD_COMP_ID | 0x41,
 };
 
 

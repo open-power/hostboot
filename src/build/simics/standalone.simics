@@ -47,21 +47,6 @@ if ($hb_skip_vpd_preload == 0) {
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 }
 
-# If Axone and Beyond, load VPD into DDIMM VPD
-if ($hb_mode == 0){
-            $dimmSpd  = $hb_script_location + "/dimmspd.dat"
-
-            $hb_masterproc.seeprom0_image.load-file $vpd_proc
-            echo "    - loaded MVPD to seeprom0"
-
-            $hb_masterproc.seeprom2_image.load-file $vpd_proc
-            echo "    - loaded MVPD to seeprom2"
-
-            foreach $dimm in (($hb_masterproc).get-dimms) {
-                $dimm.VPD_0_image.load-file $dimmSpd
-            }
-            echo "    - loaded SPD to all dimms on master proc"
-}
 
 # Turn on all processor cec-chips
 if ($hb_mode == 1) {
