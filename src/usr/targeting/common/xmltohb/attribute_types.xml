@@ -8105,6 +8105,20 @@
   </enumerationType>
 
   <attribute>
+    <id>UCD_MFR_REVISION_OVERRIDE</id>
+    <description>
+        If non-zero then use value as the discovered MFR_REVISION value from
+        the UCD device rather than the actual value from the device.
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
       The ultra turbo frequency in MHz.
       This is the same for all cores in the system.

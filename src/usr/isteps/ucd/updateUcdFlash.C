@@ -1798,9 +1798,31 @@ errlHndl_t updateAllUcdFlashImages(
                 break;
             }
 
-            if(tocEntry.mfrRevision == mfrRevision)
+            // If ATTR_UCD_MFR_REVISION_OVERRIDE is non-zero use its value
+            // instead of tocEntry.mfrRevision
+            auto mfrRevisionCheck = 0;
+            auto mfrRevisionOverride =
+                powerSequencer->getAttr<
+                    TARGETING::ATTR_UCD_MFR_REVISION_OVERRIDE>();
+
+            if (mfrRevisionOverride != 0)
             {
-               TRACFCOMP(g_trac_ucd,INFO_MRK
+                mfrRevisionCheck = mfrRevisionOverride;
+                TRACFCOMP(g_trac_ucd,INFO_MRK
+                    "updateAllUcdFlashImages: Using "
+                    "ATTR_UCD_MFR_REVISION_OVERRIDE value of 0x%04X rather "
+                    "than TOC Entry MFR Revision of (0x%04X) for incoming UCD "
+                    "sub-flash image",
+                    mfrRevisionCheck, tocEntry.mfrRevision);
+            }
+            else
+            {
+                mfrRevisionCheck = tocEntry.mfrRevision;
+            }
+
+            if(mfrRevisionCheck == mfrRevision)
+            {
+                TRACFCOMP(g_trac_ucd,INFO_MRK
                     "updateAllUcdFlashImages: Device has MFR revision of "
                     "0x%04X which matches incoming UCD sub-flash image "
                     "version, so inhibit flash update",
@@ -1810,11 +1832,11 @@ errlHndl_t updateAllUcdFlashImages(
             }
             else
             {
-              TRACFCOMP(g_trac_ucd,INFO_MRK
+                TRACFCOMP(g_trac_ucd,INFO_MRK
                     "updateAllUcdFlashImages: Device has different MFR revision"
                     " (0x%04X) than the incoming UCD sub-flash image "
                     "version (0x%04X), so perform flash update",
-                    mfrRevision, tocEntry.mfrRevision);
+                    mfrRevision, mfrRevisionCheck);
             }
 
             // Turns out doing the check via UtilMem is not that easy,
