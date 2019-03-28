@@ -1697,7 +1697,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
             }
 
-            // Also add unsecure HOMER to the reserved mem if in SMF mode
             if(SECUREBOOT::SMF::isSmfEnabled())
             {
                 auto l_unsecureHomerSize = l_sys->
@@ -1725,6 +1724,31 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                                               l_unsecureHomerAddr,
                                               l_unsecureHomerSize,
                                               HBRT_RSVD_MEM__UNSEC_HOMER);
+                if(l_elog)
+                {
+                    break;
+                }
+
+                // Now get the UVBWLIST from the SBE
+                uint64_t l_uvbwlistAddr =
+                            PreVerifiedLidMgr::getNextResMemAddr(UVBWLIST_SIZE);
+                assert(l_uvbwlistAddr,
+                       "populate_HbRsvMem: Ultravisor XSCOM white/blacklist address is 0");
+                TRACFCOMP(g_trac_runtime,
+                          "populate_HbRsvMem: Ultravisor XSCOM white/blacklist address = 0x%.16llX",
+                          l_uvbwlistAddr);
+                l_elog =SBEIO::sendPsuSecurityListBinDumpRequest(l_uvbwlistAddr,
+                                                                  l_masterProc);
+                if(l_elog)
+                {
+                    break;
+                }
+
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_UVBWLIST,
+                                              i_nodeId,
+                                              l_uvbwlistAddr,
+                                              UVBWLIST_SIZE,
+                                              HBRT_RSVD_MEM__UVBWLIST);
                 if(l_elog)
                 {
                     break;

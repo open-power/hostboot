@@ -31,7 +31,8 @@
 
 // The maximum size of the unsecure HOMER region in reserved memory
 #define MAX_UNSECURE_HOMER_SIZE (1 * PAGESIZE)
-
+// The size of the Ultravisor white/blacklist
+#define UVBWLIST_SIZE (32 * KILOBYTE)
 namespace SMF_TRACE
 {
     extern trace_desc_t* g_trac_smf;
