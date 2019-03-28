@@ -1,0 +1,161 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_sbe_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- p10_sbe_attributes.xml -->
+<!--    This file defines the subset of attributes from the larger pool of  -->
+<!--    defined attributes that will be included in the SBE platform.       -->
+<!--    Additionally, build time initial values can also be optionally      -->
+<!--    defined.                                                            -->
+<entries>
+  <entry>
+           <name>ATTR_EC</name>
+           <!-- The value needs to be changed as per the EC level  -->
+           <value>0x10</value>
+  </entry>
+
+  <entry>
+           <name>ATTR_NAME</name>
+           <value>0x5</value>
+  </entry>
+
+  <entry>
+           <name>ATTR_SECURITY_MODE</name>
+           <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_CHIP_UNIT_POS</name>
+      <virtual/>
+  </entry>
+
+  <entry>
+         <name>ATTR_BOOT_FLAGS</name>
+         <value>0x00000000</value>
+  </entry>
+
+  <entry>
+    <name>ATTR_IS_MPIPL</name>
+    <value>0x00</value>
+  </entry>
+
+  <entry>
+    <name>ATTR_SYS_FORCE_ALL_CORES</name>
+    <value>0x00</value>
+  </entry>
+
+  <entry>
+    <name>ATTR_PROC_SBE_MASTER_CHIP</name>
+    <value>0x01</value>
+  </entry>
+  <entry>
+    <name>ATTR_DISABLE_HBBL_VECTORS</name>
+    <value>0x1</value>
+  </entry>
+
+  <entry>
+      <!-- The values here are per pervasive chiplet in the order of the chiplet
+      numbers Bit 3 (in the 16-bit representation) is used to indicate
+      partial good. If this bit is 1, the region is bad, else it is good.
+      Bits 0,1,2 are don't care. For nimbus, pervasive chiplets 10 and 11 are
+      not used (OB1 and OB2), therefore the value for them is 0xFFFF -->
+            <name>ATTR_PG</name> <!-- As per SOA_SC model config of Nimbus chip-->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xE07D</value> <!-- PERV -->
+            <value>0xE03F</value> <!-- N0 -->
+            <value>0xE03F</value> <!-- N1 -->
+            <value>0xE03F</value> <!-- N2 -->
+            <value>0xE01F</value> <!-- N3 -->
+            <value>0xE44D</value> <!-- XB -->
+            <value>0xE1FD</value> <!-- MC01 -->
+            <value>0xE1FD</value> <!-- MC23 -->
+            <value>0xE1FD</value> <!-- OB0 -->
+            <value>0xFFFF</value> <!-- OB1 -->
+            <value>0xFFFF</value> <!-- OB2 -->
+            <value>0xE1FD</value> <!-- OB3 -->
+            <value>0xE1FD</value> <!-- PCI0 -->
+            <value>0xE0FD</value> <!-- PCI1 -->
+            <value>0xE07D</value> <!-- PCI2 -->
+            <value>0xE001</value> <!-- EP0 -->
+            <value>0xE001</value> <!-- EP1 -->
+            <value>0xE001</value> <!-- EP2 -->
+            <value>0xE289</value> <!-- EP3 -->
+            <value>0xE001</value> <!-- EP4 -->
+            <value>0xE001</value> <!-- EP5 -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xE1FF</value> <!-- EC00 -->
+            <value>0xE1FF</value> <!-- EC01 -->
+            <value>0xE1FF</value> <!-- EC02 -->
+            <value>0xE1FF</value> <!-- EC03 -->
+            <value>0xE1FF</value> <!-- EC04 -->
+            <value>0xE1FF</value> <!-- EC05 -->
+            <value>0xE1FF</value> <!-- EC06 -->
+            <value>0xE1FF</value> <!-- EC07 -->
+            <value>0xE1FF</value> <!-- EC08 -->
+            <value>0xE1FF</value> <!-- EC09 -->
+            <value>0xE1FF</value> <!-- EC10 -->
+            <value>0xE1FF</value> <!-- EC11 -->
+            <value>0xE1FF</value> <!-- EC12 -->
+            <value>0xE1FF</value> <!-- EC13 -->
+            <value>0xE1FF</value> <!-- EC14 -->
+            <value>0xE1FF</value> <!-- EC15 -->
+            <value>0xE1FF</value> <!-- EC16 -->
+            <value>0xE1FF</value> <!-- EC17 -->
+            <value>0xE1FF</value> <!-- EC18 -->
+            <value>0xE1FF</value> <!-- EC19 -->
+            <value>0xE1FF</value> <!-- EC20 -->
+            <value>0xE1FF</value> <!-- EC21 -->
+            <value>0xE1FF</value> <!-- EC22 -->
+            <value>0xE1FF</value> <!-- EC23 -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+            <value>0xFFFF</value> <!-- Unused -->
+  </entry>
+  <entry>
+           <name>ATTR_SECURITY_ENABLE</name>
+           <value>0x0</value>
+  </entry>
+
+  <entry>
+        <name>ATTR_IS_SP_MODE</name>
+        <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_BACKUP_SEEPROM_SELECT</name>
+      <value>0x0</value>
+  </entry>
+</entries>
