@@ -1885,6 +1885,51 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                 break;
             }
         }
+        else if(DDIMM == modType)
+        {
+            if ((DDIMM != i_kwdData.modSpec) &&
+                (ALL != i_kwdData.modSpec) )
+            {
+                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
+                           "Keyword (0x%04x) is not valid with DDIMM modules!",
+                           i_kwdData.keyword );
+                /*@
+                 * @errortype
+                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_DDIMM
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
+                 * @userdata1[0:31]  Module Type (byte 3[3:0])
+                 * @userdata1[32:63] Memory Type (byte 2)
+                 * @userdata2[0:31]  SPD Keyword
+                 * @userdata2[32:63] Module Specific flag
+                 * @devdesc          Keyword requested was not LRMM Module
+                 *                   specific.
+                 * @custdesc         A problem occurred during the IPL
+                 *                    of the system.
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                    VPD::VPD_MOD_SPECIFIC_MISMATCH_DDIMM,
+                    TWO_UINT32_TO_UINT64( modType, i_memType ),
+                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
+                                          i_kwdData.modSpec ) );
+
+                // HB code asked for an unsupprted keyword for this Module
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_HIGH);
+
+                // Or user could have installed a bad/unsupported dimm
+                err->addHwCallout( i_target,
+                                   HWAS::SRCI_PRIORITY_LOW,
+                                   HWAS::DECONFIG,
+                                   HWAS::GARD_NULL );
+
+                err->collectTrace( "SPD", 256);
+
+                break;
+            }
+        }
         else
         {
             TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
@@ -2033,6 +2078,10 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
             else if (MOD_TYPE_DDR4_LRDIMM == modTypeVal)
             {
                 o_modType = LRMM;
+            }
+            else if( MOD_TYPE_DDIMM == modTypeVal)
+            {
+                o_modType = DDIMM;
             }
         }
 
