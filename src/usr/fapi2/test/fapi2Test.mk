@@ -51,13 +51,16 @@ OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
 OBJS += p9_pm_get_poundv_bucket.o
-OBJS += fapi2PlatGetVpdOcmbChipTest.o
+
+# TODO RTC:207707 Enable when we get better VPD for OCMB chips
+#OBJS += fapi2PlatGetVpdOcmbChipTest.o
 
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 ################################################################################
 ## Remove non-runtime tests (grep -v testname.H)
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+         grep -v fapi2PlatGetVpdOcmbChipTest.H | \
          grep -v fapi2I2cAccessTest.H | \
          grep -v fapi2MmioAccessTest.H | \
          sort | xargs}
@@ -66,9 +69,11 @@ TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
 
 else
 
+# TODO RTC:207707 Enable when we get better VPD for OCMB chips
 ################################################################################
 ## All hostboot IPL time tests
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+         grep -v fapi2PlatGetVpdOcmbChipTest.H | \
          sort | xargs}
 OBJS += p9_i2ctests.o
 OBJS += p9_mmiotests.o
