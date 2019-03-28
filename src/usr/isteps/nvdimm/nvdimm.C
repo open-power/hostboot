@@ -1308,6 +1308,51 @@ errlHndl_t nvdimmGetTimeoutVal(Target* i_nvdimm)
 }
 
 #ifndef __HOSTBOOT_RUNTIME
+
+/**
+ * @brief Call the HWP to pre-load the epow sequence into CCS
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ */
+errlHndl_t nvdimmEpowSetup(TargetHandleList &i_nvdimmList)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmEpowSetup()");
+
+    errlHndl_t l_err = nullptr;
+    do
+    {
+        // Loop through each target
+        for (TargetHandleList::iterator it = i_nvdimmList.begin();
+             it != i_nvdimmList.end();)
+        {
+            TARGETING::TargetHandleList l_mcaList;
+            getParentAffinityTargets(l_mcaList, *it, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
+            assert(l_mcaList.size(), "nvdimmEpowSetup() failed to find parent MCA.");
+
+            fapi2::Target<fapi2::TARGET_TYPE_MCA> l_fapi_mca(l_mcaList[0]);
+
+            // Loads CCS with the EPOW sequence. This basically does bunch of scoms to
+            // CCS array
+            FAPI_INVOKE_HWP(l_err, mss::nvdimm::preload_epow_sequence, l_fapi_mca);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmEpowSetup() HUID[%X] failed to setup epow!",
+                          TARGETING::get_huid(*it));
+
+                nvdimmSetStatusFlag(*it, NSTD_ERR_NOPRSV);
+                break;
+            }
+            it++;
+        }
+
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmEpowSetup()");
+    return l_err;
+}
+
 /**
  * @brief Entry function to NVDIMM restore
  *        - Restore image from NVDIMM NAND flash to DRAM
@@ -1389,6 +1434,17 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
         }
 
     }while(0);
+
+    // At the end, pre-load CCS with commands for EPOW. This will stage the CCS
+    // with the require commands to trigger the save on NVDIMMs. The actual
+    // triggering will be done by OCC when EPOW is detected.
+    l_err = nvdimmEpowSetup(i_nvdimmList);
+
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() - Failing nvdimmEpowSetup()");
+        errlCommit( l_err, NVDIMM_COMP_ID );
+    }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
 }
