@@ -406,39 +406,6 @@ void* host_update_master_tpm( void *io_pArgs )
                        "Backup TPM unavailable "
                        "since it's not in the system blueprint.");
         }
-        else
-        {
-            auto l_backupHwasState = pBackupTpm->getAttr<
-                                                  TARGETING::ATTR_HWAS_STATE>();
-            TPMDD::tpm_info_t tpmInfo;
-            memset(&tpmInfo, 0, sizeof(tpmInfo));
-            errlHndl_t tmpErr = TPMDD::tpmReadAttributes(
-                                 pBackupTpm,
-                                 tpmInfo,
-                                 TPM_LOCALITY_0);
-            if (nullptr != tmpErr || !tpmInfo.tpmEnabled ||
-                (l_backupHwasState.functional && l_backupHwasState.present))
-            // If the backup state is functional and present then we are
-            // in MPIPL scenario and we need to reset the states
-            {
-                TRACFCOMP( g_trac_trustedboot,INFO_MRK
-                           "host_update_master_tpm() "
-                           "Marking backup TPM unavailable until "
-                           "powerbus is available.");
-
-                l_backupHwasState.present = false;
-                l_backupHwasState.functional = false;
-                pBackupTpm->setAttr<
-                    TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
-
-                if (nullptr != tmpErr)
-                {
-                    // Ignore attribute read failure
-                    delete tmpErr;
-                    tmpErr = nullptr;
-                }
-            }
-        }
 
     } while ( 0 );
 
@@ -1411,26 +1378,46 @@ void doInitBackupTpm()
                                                   TARGETING::ATTR_HWAS_STATE>();
         // Presence-detect the secondary TPM
         TARGETING::TargetHandleList l_targetList;
-        l_targetList.push_back(l_backupTpm);
-        l_errl = HWAS::platPresenceDetect(l_targetList);
-        if(l_errl)
-        {
-            errlCommit(l_errl, SECURE_COMP_ID);
-            break;
-        }
 
-        // The TPM target would have been deleted from the list if it's
-        // not present.
-        if(l_targetList.size())
+        TARGETING::Target* pSysTarget = nullptr;
+        TARGETING::targetService().getTopLevelTarget(pSysTarget);
+        assert(pSysTarget, "doInitBackupTpm(): System target was nullptr");
+        const auto mpipl = pSysTarget->getAttr<
+                               TARGETING::ATTR_IS_MPIPL_HB>();
+        if(mpipl)
         {
-            l_backupHwasState.present = true;
-            l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
+            // If previously determined not to be available, nothing to do
+            if(   (!l_backupHwasState.present)
+               || (!l_backupHwasState.functional) )
+            {
+                break;
+            }
         }
         else
         {
-            l_backupHwasState.present = false;
-            l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
-            break;
+            l_targetList.push_back(l_backupTpm);
+            l_errl = HWAS::platPresenceDetect(l_targetList);
+            if(l_errl)
+            {
+                errlCommit(l_errl, SECURE_COMP_ID);
+                break;
+            }
+
+            // The TPM target would have been deleted from the list if it's
+            // not present.
+            if(l_targetList.size())
+            {
+                l_backupHwasState.present = true;
+                l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(
+                    l_backupHwasState);
+            }
+            else
+            {
+                l_backupHwasState.present = false;
+                l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(
+                    l_backupHwasState);
+                break;
+            }
         }
 
         mutex_lock(l_backupTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
