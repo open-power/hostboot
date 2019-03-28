@@ -122,7 +122,7 @@ private:
                         const uint8_t i_modId,
                         const uint16_t i_reasonCode,
                         const uint64_t i_user1,
-                        const uint64_t i_user2)
+                        const uint64_t i_user2) const
     {
         errlHndl_t err = nullptr;
 
@@ -175,7 +175,7 @@ private:
                                const DeviceFW::I2C_SUBOP     i_smbusOpType,
                                void * const                  io_buffer,
                                size_t&                       io_bufferLength,
-                         const uint8_t * const               i_cmd = nullptr)
+                         const uint8_t * const               i_cmd = nullptr) const
     {
         assert(io_buffer != nullptr, "io_buffer must not be nullptr");
         errlHndl_t err = nullptr;
@@ -257,13 +257,13 @@ private:
      * @return          boolean             true if the error is retryable.
      *                                      Otherwise, false.
      */
-    bool errorIsRetryable(const uint16_t i_reasonCode)
+    bool errorIsRetryable(const uint16_t i_reasonCode) const
     {
-        //@TODO RTC 205982 Handle Bad PEC byte.
         bool retryable = false;
 
         if (   (i_reasonCode == I2C::I2C_NACK_ONLY_FOUND)
-            || (i_reasonCode == I2C::I2C_CMD_COMP_TIMEOUT))
+            || (i_reasonCode == I2C::I2C_CMD_COMP_TIMEOUT)
+            || (i_reasonCode == I2C::I2C_BAD_PEC_BYTE))
         {
             retryable = true;
         }
@@ -331,19 +331,14 @@ private:
         auto page = i_page;
         size_t size = sizeof(page);
         const auto expSize = size;
+        uint8_t cmd = PAGE;
 
-        pError = deviceOp(DeviceFW::WRITE,
-                          iv_pI2cMaster,
-                          &page,
-                          size,
-                          DEVICE_I2C_SMBUS_BYTE(iv_i2cInfo.engine,
-                                                iv_i2cInfo.port,
-                                                iv_i2cInfo.devAddr,
-                                                PAGE,
-                                                iv_i2cInfo.i2cMuxBusSelector,
-                                                &iv_i2cInfo.i2cMuxPath));
+        pError = attemptDeviceOp(DeviceFW::WRITE,
+                                 DeviceFW::I2C_SMBUS_BYTE,
+                                 &page,
+                                 size,
+                                 &cmd);
 
-        // @TODO RTC 205982: Handle the PEC byte if it exists.
         if(pError)
         {
             TRACFCOMP(g_trac_ucd, ERR_MRK
@@ -457,19 +452,14 @@ public:
 
         size_t size = sizeof(mfrStatus.value);
         const auto expSize = size;
+        uint8_t cmd = MFR_STATUS;
 
-        pError = deviceOp(DeviceFW::READ,
-                          iv_pI2cMaster,
-                          &mfrStatus.value,
-                          size,
-                          DEVICE_I2C_SMBUS_BLOCK(iv_i2cInfo.engine,
-                                                 iv_i2cInfo.port,
-                                                 iv_i2cInfo.devAddr,
-                                                 MFR_STATUS,
-                                                 iv_i2cInfo.i2cMuxBusSelector,
-                                                 &iv_i2cInfo.i2cMuxPath));
+        pError = attemptDeviceOp(DeviceFW::READ,
+                                 DeviceFW::I2C_SMBUS_BLOCK,
+                                 &mfrStatus.value,
+                                 size,
+                                 &cmd);
 
-        // @TODO RTC 205982: Handle the PEC byte if it exists.
         if (pError)
         {
             TRACFCOMP(g_trac_ucd, ERR_MRK
@@ -1242,14 +1232,16 @@ public:
 
     } // end of updateUcdFlash()
 
-    //@TODO RTC 205982 Include bad pec byte RC in description
     /*
     * @brief       This function will attempt to perform a deviceOp three times
     *              using the supplied parameters to select the appropriate
     *              operation. If an error is encountered during an attempt it
     *              will be handled in terms of retryable versus non-retryable.
-    *              A retryable error has a return code of either:
-    *              I2C_NACK_ONLY_FOUND, I2C_CMD_COMP_TIMEOUT, or a bad pec byte.
+    *              A retryable error has a return code of:
+    *                   > I2C_NACK_ONLY_FOUND
+    *                   > I2C_CMD_COMP_TIMEOUT
+    *                   > I2C_BLOCK_READ_BAD_PEC_BYTE
+    *                   > I2C_READ_BYTE_WORD_BAD_PEC_BYTE
     *              If these errors are encountered they will not be returned by
     *              the function unless the operation fails three times then the
     *              final error will be returned as a non-retryable error.
@@ -1283,7 +1275,7 @@ public:
                                const DeviceFW::I2C_SUBOP     i_smbusOpType,
                                void * const                  io_buffer,
                                size_t&                       io_bufferLength,
-                         const uint8_t * const               i_cmd = nullptr)
+                         const uint8_t * const               i_cmd = nullptr) const
     {
         assert(io_buffer != nullptr, "io_buffer must not be nullptr");
 
@@ -1315,7 +1307,6 @@ public:
                 pUcdError = nullptr;
                 break;
             }
-
 
             // Retry Error Handling Section
             if (pUcdError == nullptr)
@@ -1716,17 +1707,15 @@ errlHndl_t updateAllUcdFlashImages(
         const auto position = pI2cMasterTarget->
             getAttr<TARGETING::ATTR_POSITION>();
 
-        // @TODO RTC 205982 Reset UCD if needed to put it in a good state
-
         Ucd ucd(powerSequencer);
-        pError=ucd.initialize();
+        pError = ucd.initialize();
         if(pError)
         {
             TRACFCOMP(g_trac_ucd,ERR_MRK
                 "updateAllUcdFlashImages: Failed in Ucd::initialize() for UCD "
                 "with HUID of 0x%08X",
                 TARGETING::get_huid(powerSequencer));
-            // @TODO: RTC 205982 mark non-functional, more FFDC
+
             pError->collectTrace(UCD_COMP_NAME);
             errlCommit(pError,UCD_COMP_ID);
             break;
@@ -1802,7 +1791,7 @@ errlHndl_t updateAllUcdFlashImages(
                 deviceIds.add("Expected device ID",tocEntry.deviceId);
                 deviceIds.add("Actual device ID",deviceId);
                 deviceIds.addToLog(pError);
-                // @TODO: RTC 205982 set non-functional, deconfig
+
                 pError->collectTrace(UCD_COMP_NAME);
                 errlCommit(pError,UCD_COMP_ID);
                 nextUcd=true;
@@ -1874,7 +1863,7 @@ errlHndl_t updateAllUcdFlashImages(
                     "updateUcdFlash for UCD with HUID of "
                     " 0x%08X.",
                     TARGETING::get_huid(powerSequencer));
-                // @TODO: RTC 205982  Deconfigure UCD, call it out, etc.
+
                 pError->collectTrace(UCD_COMP_NAME);
                 errlCommit(pError,UCD_COMP_ID);
                 break;
@@ -1890,6 +1879,8 @@ errlHndl_t updateAllUcdFlashImages(
                     TARGETING::get_huid(powerSequencer));
                 pError->collectTrace(UCD_COMP_NAME);
                 errlCommit(pError,UCD_COMP_ID);
+
+                break;
             }
 
             TRACFCOMP(g_trac_ucd,INFO_MRK

@@ -66,8 +66,8 @@ enum i2cModuleId
     READ_I2C_ATTRIBUTES                 = 0x10,
     I2C_ACCESS_MUX                      = 0x11,
     I2C_GENERIC_PRES_DETECT             = 0x12,
+    I2C_BAD_PEC_BYTE_ERROR              = 0x13,
 };
-
 
 /**
  * @enum i2cReasonCode
@@ -106,6 +106,7 @@ enum i2cReasonCode
     I2C_INVALID_BLOCK_WRITE_LENGTH        = I2C_COMP_ID | 0x1A,   // Invalid block write length
     I2C_INVALID_READ_BYTE_OR_WORD_LENGTH  = I2C_COMP_ID | 0x1B,   // Invalid read byte/word length
     I2C_INVALID_BLOCK_READ_LENGTH         = I2C_COMP_ID | 0x1C,   // Invalid block read length
+    I2C_BAD_PEC_BYTE                      = I2C_COMP_ID | 0x1D,   // Bad PEC byte
 };
 
 
