@@ -1916,6 +1916,9 @@
       <id>MODEL</id>
       <default>UCD90120A</default>
     </attribute>
+    <attribute>
+      <id>UCD_MFR_REVISION_OVERRIDE</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -1924,6 +1927,9 @@
     <attribute>
       <id>MODEL</id>
       <default>UCD9090</default>
+    </attribute>
+    <attribute>
+      <id>UCD_MFR_REVISION_OVERRIDE</id>
     </attribute>
   </targetType>
 
