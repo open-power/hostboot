@@ -214,6 +214,61 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        TARGETING::TYPE_MEMBUF,
                        i2cPerformOp );
 
+/*
+ * @brief     A helper function for i2cCommonOp that commonizes error handling
+ *            for a bad PEC byte for a power sequencer.
+ *
+ * @param[in]      i_expectedPec  The value of the expected PEC byte.
+ *
+ * @param[in]      i_actualPec    The value of the actual PEC byte.
+ *
+ * @param[in]      i_i2cMaster    The i2c master for the power sequencer.
+ *
+ * @param[in]      i_args         The i2c info for the power sequencer.
+ *
+ * @return         errlHndl_t     A pointer to an error log.
+ */
+errlHndl_t badPecByteError(const uint8_t                      i_expectedPec,
+                           const uint8_t                      i_actualPec,
+                           const TARGETING::TargetHandle_t&   i_i2cMaster,
+                           const misc_args_t                  i_args)
+{
+    /*@
+    * @errortype
+    * @severity             ERRL_SEV_PREDICTIVE
+    * @moduleid             I2C_BAD_PEC_BYTE_ERROR
+    * @reasoncode           I2C_BAD_PEC_BYTE
+    * @devdesc              A bad PEC byte was found during the
+    *                       device operation.
+    * @custdesc             Unexpected firmware error
+    * @userdata1[00:31]     Expected PEC byte
+    * @userdata1[32:63]     Actual PEC byte
+    */
+    errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                             I2C_BAD_PEC_BYTE_ERROR,
+                                             I2C_BAD_PEC_BYTE,
+                                             TWO_UINT32_TO_UINT64(
+                                                 i_expectedPec,
+                                                 i_actualPec));
+
+    // Add a callout for the I2C master.
+    err->addI2cDeviceCallout(i_i2cMaster,
+                             i_args.engine,
+                             i_args.port,
+                             i_args.devAddr,
+                             HWAS::SRCI_PRIORITY_HIGH);
+
+    // Add a callout for hostboot code.
+    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_LOW);
+
+    err->collectTrace(I2C_COMP_NAME);
+
+    return err;
+
+}
+
+
 /**
  *
  * @brief A useful utility to dump (trace out) the TARGETING::FapiI2cControlInfo
@@ -1758,8 +1813,12 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                               "but received 0x%02X.  # PEC bytes = %d",
                               expectedPec,readByteOrWord.pec,pecBytes);
 
-                    // @TODO RTC 201990 support bad PEC handling
-                    // Right now just ignore it
+                    err = badPecByteError(expectedPec,
+                                          readByteOrWord.pec,
+                                          i_target,
+                                          i_args);
+
+                    break;
                 }
             }
 
@@ -1927,6 +1986,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                     + blockRead.blockCount;
                 const auto expectedPec = I2C::SMBUS::calculatePec(
                     reinterpret_cast<uint8_t*>(&blockRead),pecBytes);
+
                 if(blockRead.pec != expectedPec)
                 {
                     TRACFCOMP(g_trac_i2c, ERR_MRK
@@ -1934,8 +1994,12 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                               "but received 0x%02X.  # PEC bytes = %d",
                               expectedPec,blockRead.pec,pecBytes);
 
-                    // @TODO RTC 201990 support bad PEC handling
-                    // Right now just ignore it
+                    err = badPecByteError(expectedPec,
+                                          blockRead.pec,
+                                          i_target,
+                                          i_args);
+
+                    break;
                 }
             }
 
