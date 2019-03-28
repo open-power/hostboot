@@ -88,6 +88,24 @@ void getTPMs(
         TARGETING::TYPE_TPM,
         (i_filter == TPM_FILTER::ALL_IN_BLUEPRINT) ? false : true);
 
+    if(i_filter == TPM_FILTER::ALL_FUNCTIONAL)
+    {
+        // From functional TPMs, remove any TPMs that are not actually
+        // initialized.  This prevents Hostboot from using the backup TPM
+        // in an MPIPL when it's considered "functional" but hasn't been
+        // initialized  yet.
+        o_tpmList.erase(
+            std::remove_if(
+                o_tpmList.begin(),
+                o_tpmList.end(),
+                [](TARGETING::Target* i_pTpm)
+                {
+                    return !i_pTpm->getAttr<
+                               TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>();
+                }),
+            o_tpmList.end());
+    }
+
     TRACUCOMP(g_trac_trustedboot,EXIT_MRK "getTPMs(): Found %d TPMs",
         o_tpmList.size());
 }

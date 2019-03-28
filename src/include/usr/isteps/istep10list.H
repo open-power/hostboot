@@ -292,7 +292,7 @@ const   TaskInfo    g_istep10[]  =   {
         {
                 ISTEPNAME(10,14,"host_update_redundant_tpm"),
                 ISTEP_10::call_host_update_redundant_tpm,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
 };
 
