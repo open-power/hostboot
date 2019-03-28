@@ -35,6 +35,7 @@
 #define __P9_PSTATES_CME_H__
 
 #include <p9_pstates_common.h>
+#include <p9_hcd_memmap_base.H>
 
 
 /// @}
@@ -161,6 +162,23 @@ typedef struct
     uint16_t r_core_header;
 } resistance_entry_t;
 
+typedef struct __attribute__((packed))
+{
+    uint16_t r_package_common;
+    uint16_t r_quad;
+    uint16_t r_core;
+    uint16_t r_quad_header;
+    uint16_t r_core_header;
+    uint8_t  r_vdm_cal_version;
+    uint8_t  r_avg_min_scale_fact;
+    uint16_t r_undervolt_vmin_floor_limit;
+    uint8_t  r_min_bin_protect_pc_adder;
+    uint8_t  r_min_bin_protect_bin_adder;
+    uint8_t  r_undervolt_allowed;
+    uint8_t  reserve[10];
+}
+resistance_entry_per_quad_t;
+
 typedef struct
 {
     poundw_entry_t poundw[NUM_OP_POINTS];
@@ -178,6 +196,35 @@ typedef struct
     PoundW_data vpd_w_data;
 } LP_VDMParmBlock;
 
+typedef struct __attribute__((packed))
+{
+    uint16_t ivdd_tdp_ac_current_10ma;
+    uint16_t ivdd_tdp_dc_current_10ma;
+    uint8_t  vdm_overvolt_small_thresholds;
+    uint8_t  vdm_large_extreme_thresholds;
+    uint8_t  vdm_normal_freq_drop;   // N_S and N_L Drop
+    uint8_t  vdm_normal_freq_return; // L_S and S_N Return
+    uint8_t  vdm_vid_compare_per_quad[MAX_QUADS_PER_CHIP];
+    uint8_t  vdm_cal_state_avg_min_per_quad[MAX_QUADS_PER_CHIP];
+    uint16_t vdm_cal_state_vmin;
+    uint8_t  vdm_cal_state_avg_core_dts;
+    uint16_t vdm_cal_state_avg_core_current;
+    uint16_t vdm_spare;
+}
+poundw_entry_per_quad_t;
+
+typedef struct __attribute__((packed))
+{
+    poundw_entry_per_quad_t poundw[NUM_OP_POINTS];
+    resistance_entry_per_quad_t resistance_data;
+}
+PoundW_data_per_quad;
+
+
+typedef struct
+{
+    PoundW_data_per_quad vpd_w_data;
+} LP_VDMParmBlock_PerQuad;
 
 /// The layout of the data created by the Pstate table creation firmware for
 /// comsumption by the Pstate GPE.  This data will reside in the Quad

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ typedef struct __attribute__((__packed__))  vdmData
     // bucket Id
     uint8_t bucketId;
     // VDM data
-    uint8_t vdmData[PW_VER_2_VDMDATA_SIZE];
+    uint8_t vdmData[PW_VER_30_VDMDATA_SIZE];
 } vdmData_t;
 
 }

@@ -42,7 +42,7 @@
 #include <p9_pstates_occ.h>
 #include "p9_pm_get_poundv_bucket.H"
 #include "p9_pm_get_poundw_bucket.H"
-
+#include <p9_hcd_memmap_base.H>
 
 //Pstate SuperStructure
 typedef struct
@@ -54,7 +54,7 @@ typedef struct
     GlobalPstateParmBlock globalppb;
 
     // CME content
-    LocalPstateParmBlock localppb;
+    LocalPstateParmBlock localppb[MAX_QUADS_PER_CHIP];
 
     // OCC content
     OCCPstateParmBlock occppb;
@@ -247,21 +247,21 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize VPD data
-        // @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        //  @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode vpd_init();
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize resclk data
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode resclk_init();
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize WOF data
         /// @param[out]     o_buf points to WOF data
-        /// @param[inout]  io_size size of the wof  table
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @param[inout]   io_size size of the wof  table
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode wof_init(
             uint8_t* o_buf,
@@ -269,19 +269,19 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize global pstate parameter block
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode gppb_init( GlobalPstateParmBlock* i_globalppb);
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize local pstate parameter block
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode lppb_init(LocalPstateParmBlock* i_localppb);
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize occ pstate parameter block
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode oppb_init(OCCPstateParmBlock* i_occppb);
 
@@ -289,11 +289,11 @@ class PlatPmPPB
         /// @brief VDM initializtion based on #W data
         /// @return none
         /// -----------------------------------------------------------------------
-        void vdm_init( void );
+        fapi2::ReturnCode vdm_init( void );
 
         /// -----------------------------------------------------------------------
         /// @brief Safe mode frquency and voltage init
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode safe_mode_init( void );
 
@@ -301,7 +301,7 @@ class PlatPmPPB
         /// @brief VFRT data initialization from WOF data
         /// @param[in]     i_pBuffer WOF data buffer
         /// @param[inout]  o_vfrt_data  vfrt data
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode update_vfrt(
             uint8_t* i_pBuffer,
@@ -309,43 +309,43 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Compute and apply biased values
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_extint_bias();
 
         /// -----------------------------------------------------------------------
         /// @brief apply biased values for #V data
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode apply_biased_values();
 
         /// -----------------------------------------------------------------------
         /// @brief Read IQ vpd data
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_iddq( void );
 
         /// -----------------------------------------------------------------------
         /// @brief Read #W(VDM) vpd data
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_poundW (void);
 
         /// -----------------------------------------------------------------------
         /// @brief Read IVRM data from attributes
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_ivrm_parms ();
 
         /// -----------------------------------------------------------------------
         /// @brief Set resclk attribute values
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode set_resclk_table_attrs();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute and setup resclk values
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode res_clock_setup (void);
 
@@ -358,7 +358,7 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         /// @brief Compute safe mode values
         /// @param[in]    i_action  voltage config action (Compute/set)
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode compute_boot_safe(
             const VoltageConfigActions_t i_action);
@@ -373,7 +373,7 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief This will set the pstate feature attrbutes(VDM,RESCLK,VRM,WOF)
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode set_global_feature_attributes();
 
@@ -410,14 +410,14 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Read #V data form module vpd
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_poundV();
 
         /// -----------------------------------------------------------------------
         /// @brief Validate #V data
         /// @param[in]     i_biased_state present/nonpresent
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode chk_valid_poundv(
             const bool i_biased_state);
@@ -431,8 +431,9 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         /// @brief Converts frequency value to pstate number
         /// @param[in]     i_freq_khz input frequency
-        /// @param[out]     o_pstate pstate output for a given inut frequency
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @param[out]    pstate pstate output for a given inut frequency
+        /// @param[in]     i_round p-state rounding strategy
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         int freq2pState (const uint32_t freq_khz,
                          Pstate* pstate,
@@ -440,9 +441,9 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Compute safe mode values
-        /// @param[in]     i_pstate  pstate value
+        /// @param[in]     i_ps_state  pstate value
         /// @param[out]    o_safe_mode_values safe mode freq/voltage values
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode safe_mode_computation(
             const Pstate i_ps_pstate,
@@ -451,7 +452,7 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         /// @brief Convert pstate to voltage
         /// @param[in]     i_pstate  pstate value that needs to be converted
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         uint32_t ps2v_mv(const Pstate i_pstate);
 
@@ -474,16 +475,16 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         /// @brief Compute VID compare slope values for a given pstate
         /// @param[in]     i_pstate  pstate value
-        /// @return none
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void compute_PsVIDCompSlopes_slopes(
+        fapi2::ReturnCode compute_PsVIDCompSlopes_slopes(
             uint8_t* i_pstate);
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VDM threshold points for different regions
-        /// @return none
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        void compute_vdm_threshold_pts();
+        fapi2::ReturnCode compute_vdm_threshold_pts();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute bias value for pre-defined percentage unit
@@ -685,8 +686,10 @@ class PlatPmPPB
         }
 #endif
 
+    private: //function
+        fapi2::ReturnCode validate_quad_spec_data( );
 
-    private:
+    private: //data
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > iv_procChip;  // processor chip target
         AttributeList             iv_attrs;           // Pstate attributes list
         VpdOperatingPoint         iv_raw_vpd_pts[NUM_OP_POINTS];  // Raw vpd operating points
@@ -718,14 +721,14 @@ class PlatPmPPB
         VpdPoint                  iv_attr_mvpd_poundV_raw[5];
         VpdPoint                  iv_attr_mvpd_poundV_biased[5];
 
-        PoundW_data               iv_poundW_data;
+        PoundW_data_per_quad      iv_poundW_data;
         IddqTable                 iv_iddqt;
         GP_VDMParmBlock           iv_vdmpb;
         IvrmParmBlock             iv_ivrmpb;
         ResonantClockingSetup     iv_resclk_setup;
-        CompareVIDPoints          iv_vid_point_set[NUM_OP_POINTS];
+        CompareVIDPoints          iv_vid_point_set[MAX_QUADS_PER_CHIP][NUM_OP_POINTS];
         uint8_t                   iv_threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
-        int16_t                   iv_PsVIDCompSlopes[VPD_NUM_SLOPES_REGION];
+        int16_t                   iv_PsVIDCompSlopes[MAX_QUADS_PER_CHIP][VPD_NUM_SLOPES_REGION];
         int16_t                   iv_PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
         uint8_t                   iv_jump_value_set[NUM_OP_POINTS][NUM_JUMP_VALUES];
         int16_t                   iv_PsVDMJumpSlopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
@@ -747,10 +750,10 @@ extern "C"
 /// -------------------------------------------------------------------
 /// @brief  Print a GlobalPstateParameterBlock structure on a given stream
 /// @param[in]  i_gppb    The Global Pstate Parameter Block to print
-/// @return void
+/// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// -------------------------------------------------------------------
-    void
-    gppb_print(GlobalPstateParmBlock* i_gppb);
+    fapi2::ReturnCode gppb_print(GlobalPstateParmBlock* i_gppb,
+                                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
 
 /// -------------------------------------------------------------------
@@ -778,7 +781,7 @@ extern "C"
 /// @param[inout] *io_pss           => pointer to pstate superstructure
 /// @param[out]   *o_buf            => wof table data
 /// @param[inout] &io_size          => wof table data size
-/// @return   FAPI2::SUCCESS
+/// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// -------------------------------------------------------------------
     fapi2::ReturnCode
     p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,

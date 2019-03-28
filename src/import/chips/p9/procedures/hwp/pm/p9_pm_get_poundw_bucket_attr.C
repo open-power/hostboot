@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     uint8_t* l_fullVpdData = nullptr;
     uint32_t l_vpdSize = 0;
     uint8_t l_bucketId;
-    uint8_t l_bucketSize = 0;
+    uint8_t l_bucketSize = PW_VER_30_VDMDATA_SIZE;
 
     //To read MVPD we will need the proc parent of the inputted EQ target
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procParent =
@@ -115,6 +115,10 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     {
         //Set the size of the bucket
         l_bucketSize = POUNDW_BUCKETID_SIZE + PW_VER_2_VDMDATA_SIZE;
+    }
+    else if ( ( *l_fullVpdData ) >= POUNDW_VERSION_30 )
+    {
+        l_bucketSize    =  POUNDW_BUCKETID_SIZE + PW_VER_30_VDMDATA_SIZE;
     }
     else
     {
