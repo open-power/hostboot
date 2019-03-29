@@ -64,7 +64,10 @@
 #include    <p9c_mss_volt.H>
 #include    <p9c_mss_volt_vddr_offset.H>
 #include    <p9c_mss_volt_dimm_count.H>
+
+#ifdef CONFIG_AXONE
 #include    <p9a_mss_volt.H>
+#endif
 
 namespace   ISTEP_07
 {
@@ -362,6 +365,7 @@ void* call_mss_volt( void *io_pArgs )
                 }
             }
         }
+#ifdef CONFIG_AXONE
         else if( l_procModel ==  MODEL_AXONE)
         {
             TargetHandleList l_memportTargetList;
@@ -406,9 +410,8 @@ void* call_mss_volt( void *io_pArgs )
 
                 l_memportFapiTargetsList.clear();
             }
-
-
         }
+#endif
    }while(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_volt exit" );

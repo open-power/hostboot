@@ -68,9 +68,6 @@ VPATH += $(P9_INITFILE_PATH)
 VPATH += $(CENT_MEM_HWP_PATH)
 VPATH += $(CENT_INITFILE_PATH)
 VPATH += $(CENT_IO_HWP_PATH)
-VPATH += ${P9A_MSS_HWP_PATH}
-VPATH += ${EXPLORER_HWP_PATH}
-VPATH += ${EXPLORER_OMI_HWP_PATH}
 VAPTH += ${ROOTPATH}/src/usr/fapi2
 
 OBJS += call_mss_getecid.o
@@ -95,7 +92,6 @@ OBJS+=p9c_mss_unmask_errors.o
 
 # HWP files we do not have .mks for
 
-OBJS+=exp_omi_utils.o
 
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -119,10 +115,20 @@ include $(CENT_IO_HWP_PATH)/p9_io_cen_pdwn_lanes.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_clear_firs.mk
 include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
 include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
+
+
+ifdef CONFIG_AXONE_BRINGUP
+VPATH += ${P9A_MSS_HWP_PATH}
+VPATH += ${EXPLORER_HWP_PATH}
+VPATH += ${EXPLORER_OMI_HWP_PATH}
+
+OBJS+=exp_omi_utils.o
+
 include ${EXPLORER_HWP_PATH}/exp_omi_setup.mk
 include ${EXPLORER_HWP_PATH}/exp_omi_train.mk
 include ${P9A_MSS_HWP_PATH}/p9a_omi_train.mk
 include ${P9A_MSS_HWP_PATH}/p9a_omi_train_check.mk
+endif
 
 
 include ${ROOTPATH}/config.mk

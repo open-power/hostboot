@@ -93,8 +93,11 @@
 
 //HWP
 #include <p9_update_security_ctrl.H>
+
+#ifdef CONFIG_AXONE
 #include <p9a_ocmb_enable.H>
 #include <exp_check_for_ready.H>
+#endif
 
 // secureboot
 #include <secureboot/service.H>
@@ -1014,6 +1017,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                     "completed ok");
         }
 
+#ifdef CONFIG_AXONE
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "START : p9a_ocmb_enable"
                     "starting on 0x%.08X", TARGETING::get_huid( *l_proc_iter ));
@@ -1086,8 +1090,7 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                           "completed ok");
             }
         }
-
-
+#endif
 
     }   // endfor
 

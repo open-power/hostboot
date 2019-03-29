@@ -59,8 +59,11 @@
 #include    <p9c_mss_eff_config.H>
 #include    <p9c_mss_eff_mb_interleave.H>
 #include    <p9c_mss_eff_config_thermal.H>
+
+#ifdef CONFIG_AXONE
 #include    <p9a_mss_eff_config.H>
 #include    <p9a_mss_eff_config_thermal.H>
+#endif
 
 #include    <hbotcompid.H>
 
@@ -295,6 +298,7 @@ void*    call_mss_eff_config( void *io_pArgs )
             }
         } // end mcs loop
     }
+#ifdef CONFIG_AXONE
     else if(l_procModel == TARGETING::MODEL_AXONE)
     {
         // Get all functional MEM_PORT chiplets
@@ -336,6 +340,7 @@ void*    call_mss_eff_config( void *io_pArgs )
             }
         } // end mem_port list
     }
+#endif
 
     if(!l_StepError.isNull())
     {
@@ -463,6 +468,7 @@ void*    call_mss_eff_config( void *io_pArgs )
             }
         }
     }
+#ifdef CONFIG_AXONE
     else if(l_procModel == TARGETING::MODEL_AXONE)
     {
         if(l_fapi_memport_targets.size() > 0)
@@ -497,6 +503,7 @@ void*    call_mss_eff_config( void *io_pArgs )
                       "No MEM_PORT targets found, skipping p9a_mss_eff_config_thermal HWP");
         }
     }
+#endif
 
 
     if (!l_StepError.isNull())

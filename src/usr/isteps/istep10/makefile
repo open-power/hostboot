@@ -89,7 +89,7 @@ VPATH += ${PROCEDURES_PATH}/hwp/io
 VPATH += ${PROCEDURES_PATH}/hwp/pm
 VPATH += ${PROCEDURES_PATH}/hwp/lib
 VPATH +=  ${HWP_ACC_PATH}
-VPATH +=  ${OCMB_HWP_PATH}
+
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
@@ -121,11 +121,13 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 # p9_cen_ref_clk_enable : Centaur Ref Clock Enable
 include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
 
+ifdef CONFIG_AXONE_BRINGUP
+VPATH +=  ${OCMB_HWP_PATH}
 # p9a_ocmb_enable
 include ${PERV_HWP_PATH}/p9a_ocmb_enable.mk
-
 # exp_check_for_ready
 OBJS+=exp_check_for_ready.o
+endif
 
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10

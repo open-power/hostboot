@@ -45,8 +45,11 @@
 
 //HWP
 #include    <p9_io_dmi_linktrain.H>
+
+#ifdef CONFIG_AXONE
 #include    <exp_omi_setup.H>
 #include    <exp_omi_train.H>
+#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -105,6 +108,7 @@ void* call_dmi_io_run_training (void *io_pArgs)
 
     }
 
+#ifdef CONFIG_AXONE
     TARGETING::TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
@@ -168,6 +172,7 @@ void* call_dmi_io_run_training (void *io_pArgs)
 
     }
 
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training exit" );
 
