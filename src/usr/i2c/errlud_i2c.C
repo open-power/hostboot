@@ -76,7 +76,10 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
     if (i_args.i2cMuxPath)
     {
         l_muxPath = i_args.i2cMuxPath->toString();
-        l_muxPathSize = strlen(l_muxPath);
+        if (l_muxPath != nullptr)
+        {
+            l_muxPathSize = strlen(l_muxPath);
+        }
     }
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)*2
@@ -173,16 +176,14 @@ UdI2CParms::UdI2CParms( uint8_t i_opType,
 
     if (l_muxPathSize > 0)
     {
-        memcpy(l_pBuf, l_muxPath, strlen(l_muxPath));
-        l_pBuf += strlen(l_muxPath);
-
-        // done with muxPath so free it here
-        free(l_muxPath);
-        l_muxPath = nullptr;
-        l_muxPathSize = 0;
+        memcpy(l_pBuf, l_muxPath, l_muxPathSize);
+        l_pBuf += l_muxPathSize;
     }
     *l_pBuf = '\0';   // add a terminator for ease of parsing
     ++l_pBuf;
+
+    free(l_muxPath);
+    l_muxPath = nullptr;
 }
 
 //------------------------------------------------------------------------------
