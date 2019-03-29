@@ -222,7 +222,8 @@ typedef struct
 
     /// Magic Number
     ///   Set to ASCII  "WFTH___x" where x is the version of the VRT structure
-    union magic_number
+
+    union magic_number_t
     {
         uint32_t value;
         struct
@@ -230,7 +231,7 @@ typedef struct
             uint32_t text                       : 24;
             uint32_t version                    : 8;
         } fields;
-    };
+    } magic_number;
 
     uint8_t  reserved0[3];
 
