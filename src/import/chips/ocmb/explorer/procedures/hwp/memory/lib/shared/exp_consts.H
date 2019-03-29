@@ -226,17 +226,40 @@ namespace omi
 ///
 enum cmd_and_response_id
 {
-    FW_DDR_INTERFACE_INIT = 0x01,
-    FW_TEMP_SENSOR_INIT = 0x02,
-    FW_ERR_LOGGING_INTERFACE_INIT = 0x03,
-    FW_GO_COMMAND = 0x04,
-    FW_ADAPTER_PROPERTIES_GET = 0x05,
-    FW_STATUS_GET = 0x06,
-    FW_TEMPERATURE_GET = 0x07,
-    FW_ERROR_LOG_GET = 0x08,
-    FW_SPD_DATA_SET = 0x09,
-    FW_BINARY_UPGRADE = 0x0A,
-    FW_FLASH_LOADER_VERSION_INFO = 0x0B,
+    // initialize the DDR PHY controller when Step-by-Step BOOT mode
+    //  is selected
+    EXP_FW_PHY_STEP_BY_STEP_INIT = 0x01,
+
+    // sent by the Host along with PHY initialization data copied
+    //  into data buffer for FW to use for configuring DDR PHY interface.
+    EXP_FW_DDR_PHY_INIT = 0x02,
+
+    // read temperature sensor
+    EXP_FW_FW_TEMP_SENSOR_PASS_THROUGH_READ = 0x03,
+
+    // configure temperature sensor
+    EXP_FW_FW_TEMP_SENSOR_PASS_THROUGH_WRITE = 0x04,
+
+    // configure interval read mechanism
+    EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ = 0x05,
+
+    // transition the FW into runtime mode when Step-by-Step BOOT mode
+    //  is selected
+    EXP_FW_GO_COMMAND = 0x06,
+
+    // determine various configurations related to controller
+    EXP_FW_ADAPTER_PROPERTIES_GET = 0x07,
+
+    // sent by Host along with latest FW executable code, which is
+    //  copied into data buffer location so that existing FW can
+    //  upgrade the FW image
+    EXP_FW_BINARY_UPGRADE = 0x08,
+
+    // find the flash loader version information
+    EXP_FW_FLASH_LOADER_VERSION_INFO = 0x09,
+
+    // read the error logs from various modules of Explorer block
+    EXP_FW_ERROR_LOG_GET = 0x0A,
 };
 
 ///

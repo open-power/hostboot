@@ -48,7 +48,7 @@ namespace exp
 void setup_cmd_params(const uint32_t i_cmd_data_crc, host_fw_command_struct& o_cmd)
 {
     // Issue full boot mode cmd though EXP-FW REQ buffer
-    o_cmd.cmd_id = mss::exp::omi::FW_SPD_DATA_SET;
+    o_cmd.cmd_id = mss::exp::omi::EXP_FW_DDR_PHY_INIT;
     o_cmd.cmd_flags = 0;
 
     // TK - Fabricated value need to figure out if we'll be creating req_id tables
