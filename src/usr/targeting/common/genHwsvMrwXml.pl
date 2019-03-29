@@ -6142,6 +6142,7 @@ sub generate_is_dimm
         # Add EEPROM_NV_INFO i2c config
         # Base address for the NV controller is 0x80
         # piggybacking the last nibble of devAddr from $dimmI2C to build the device address
+        # NOTE: writeCycleTime is not used for NV as code update needs it at a faster rate then msec
         print "
     <attribute>
         <id>EEPROM_NV_INFO</id>
@@ -6154,7 +6155,7 @@ sub generate_is_dimm
             <field><id>maxMemorySizeKB</id><value>0x01</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>writePageSize</id><value>0x01</value></field>
-            <field><id>writeCycleTime</id><value>0x05</value></field>
+            <field><id>writeCycleTime</id><value>0xFFBADFFBADFFBADF</value></field>
         </default>
     </attribute>
     ";
@@ -7125,7 +7126,7 @@ sub addI2cBusSpeedArray
     my $tmp_ct eq "";
 
     # bus_speed_array[engine][port] is 4x13 array
-    # Hardcoding speed_array[3][1] for nvdimm as NVDIMM is current 
+    # Hardcoding speed_array[3][1] for nvdimm as NVDIMM is current
     # not in mrw for ZZ (last gen of serverwiz1)
     my @speed_array =  (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
