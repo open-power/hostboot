@@ -1282,14 +1282,22 @@ public:
         errlHndl_t pNonRetryableError = nullptr;
         errlHndl_t pRetryableError    = nullptr;
         errlHndl_t pUcdError          = nullptr;
+        size_t size = 0;
 
         for (uint8_t retry = 0; retry <= UCD_MAX_RETRIES; ++retry)
         {
+            // If an error occurs during the deviceOp then it's possible the
+            // size will be overwritten. So, create a local variable with the
+            // requested size. Regardless of success or failure the size
+            // returned from the final deviceOp will be written to
+            // io_bufferLength.
+            size = io_bufferLength;
+
             // Perform deviceOp
             pUcdError = performDeviceOp(i_opType,
                                     i_smbusOpType,
                                     io_buffer,
-                                    io_bufferLength,
+                                    size,
                                     i_cmd);
 
             if (   (pUcdError != nullptr)
@@ -1409,6 +1417,10 @@ public:
                 errlCommit(pRetryableError, UCD_COMP_ID);
             }
         }
+
+        // Regardless of success or failure, update io_bufferLength with final
+        // size returned from performDeviceOp().
+        io_bufferLength = size;
 
         return pNonRetryableError;
     }
