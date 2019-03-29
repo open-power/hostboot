@@ -256,7 +256,7 @@ Layout Description
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
         <physicalOffset>0x3258000</physicalOffset>
-        <physicalRegionSize>0xC00000</physicalRegionSize>
+        <physicalRegionSize>0x600000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>
@@ -264,7 +264,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x3E58000</physicalOffset>
+        <physicalOffset>0x3858000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -272,7 +272,7 @@ Layout Description
     <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x3E5B000</physicalOffset>
+        <physicalOffset>0x385B000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -281,7 +281,7 @@ Layout Description
     <section>
         <description>Secureboot Test Load (12K)</description>
         <eyeCatch>TESTLOAD</eyeCatch>
-        <physicalOffset>0x3E7B000</physicalOffset>
+        <physicalOffset>0x387B000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -290,7 +290,7 @@ Layout Description
     <section>
         <description>Centaur Hw Ref Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x3E7E000</physicalOffset>
+        <physicalOffset>0x387E000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -299,7 +299,7 @@ Layout Description
     <section>
         <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalOffset>0x3E81000</physicalOffset>
+        <physicalOffset>0x3881000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -308,7 +308,7 @@ Layout Description
     <section>
         <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalOffset>0x3EA5000</physicalOffset>
+        <physicalOffset>0x38A5000</physicalOffset>
         <physicalRegionSize>0x4B000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -318,7 +318,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3EF0000</physicalOffset>
+        <physicalOffset>0x38F0000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -327,18 +327,9 @@ Layout Description
     <section>
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x3EF4000</physicalOffset>
+        <physicalOffset>0x38F4000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
-    </section>
-    <section>
-        <description>Ultravisor XSCOM White/Blacklist (64K)</description>
-        <eyeCatch>UVBWLIST</eyeCatch>
-        <physicalOffset>0x3F74000</physicalOffset>
-        <physicalRegionSize>0x10000</physicalRegionSize>
-        <side>sideless</side>
-        <sha512Version/>
-        <readOnly/>
     </section>
 </pnor>
