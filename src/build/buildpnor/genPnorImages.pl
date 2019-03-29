@@ -406,9 +406,6 @@ foreach my $binFilesCSV (@systemBinFiles)
 
     #Perform any data integrity manipulation (ECC, sha-hash, etc)
     manipulateImages(\%pnorLayout, \%binFiles, $system_target);
-
-    # Make sure provided files will fit in their sections
-    checkSpaceConstraints(\%pnorLayout, \%binFiles, $testRun);
 }
 
 ################################################################################
