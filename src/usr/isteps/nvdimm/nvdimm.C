@@ -711,6 +711,9 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
             // Failure setting the energy source policy could mean error on the
             // battery or even the cabling
             l_err->addPartCallout( i_nvdimm,
+                                   HWAS::BPM_PART_TYPE,
+                                   HWAS::SRCI_PRIORITY_HIGH);
+            l_err->addPartCallout( i_nvdimm,
                                    HWAS::BPM_CABLE_PART_TYPE,
                                    HWAS::SRCI_PRIORITY_HIGH);
         }

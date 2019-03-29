@@ -223,8 +223,9 @@ enum partTypeEnum
     PCI_REF_CLOCK                   = 11,
     // @TODO 195920 Remove SMP_CABLE once HWSV code no longer references it
     SMP_CABLE                       = 12, //Target is SMPGROUP
-    BPM_CABLE_PART_TYPE             = 13, //Backup Power Module for NVDIMM
-    NV_CONTROLLER_PART_TYPE         = 14,
+    BPM_CABLE_PART_TYPE             = 13, //Backup Power Module Cable for NVDIMM
+    NV_CONTROLLER_PART_TYPE         = 14, //Controller for NVDIMM
+    BPM_PART_TYPE                   = 15, //Backup Power Module for NVDIMM
 };
 
 enum sensorTypeEnum

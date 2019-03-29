@@ -349,7 +349,7 @@ uint32_t __addBpmCallout( TargetHandle_t i_dimm,
             break;
         }
 
-        mainErrl->addPartCallout( i_dimm, HWAS::BPM_CABLE_PART_TYPE,
+        mainErrl->addPartCallout( i_dimm, HWAS::BPM_PART_TYPE,
                                   i_priority );
 
     }while(0);
