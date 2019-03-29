@@ -785,13 +785,8 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
                                       fw_img_data_len,
                                       region_size,
                                       0x00000000),
-                                   ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             l_err->collectTrace( NVDIMM_COMP_NAME, 256 );
-            l_err->addPartCallout( iv_dimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_HIGH );
-            l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                        HWAS::SRCI_PRIORITY_LOW );
             break;
         }
 
@@ -1344,13 +1339,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                                           max_blocks_per_region*BYTES_PER_BLOCK,
                                           blocks_per_region,
                                           max_blocks_per_region),
-                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-                l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-                l_err->addPartCallout( iv_dimm,
-                                       HWAS::NV_CONTROLLER_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_HIGH );
-                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                            HWAS::SRCI_PRIORITY_LOW );
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
                 break;
             }
         }
@@ -1385,13 +1374,7 @@ errlHndl_t NvdimmInstalledImage::byteRegionBlockTransfer(const uint8_t * i_data,
                                         BYTES_PER_BLOCK*blocks_per_region,
                                         blocks_per_region,
                                         BYTES_PER_BLOCK),
-                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
-            l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-            l_err->addPartCallout( iv_dimm,
-                                   HWAS::NV_CONTROLLER_PART_TYPE,
-                                   HWAS::SRCI_PRIORITY_HIGH );
-            l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                        HWAS::SRCI_PRIORITY_LOW );
+                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             break;
         }
 
@@ -1999,25 +1982,7 @@ bool NvdimmsUpdate::runUpdate(void)
             TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdate() -  "
                 "spBaseServices not running, therefore NVDIMM LID images "
                 "cannot be accessed");
-            /*
-             *@errortype
-             *@reasoncode       NVDIMM_BASE_SERVICES_NOT_READY
-             *@moduleid         NVDIMM_RUN_UPDATE
-             *@userdata1        NVDIMM_16GB_type list size
-             *@userdata2        NVDIMM_32GB_type list size
-             *@devdesc          spBaseServices not available
-             *@custdesc         NVDIMM not updated
-             */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                          NVDIMM_RUN_UPDATE,
-                                          NVDIMM_BASE_SERVICES_NOT_READY,
-                                          v_NVDIMM_16GB_list.size(),
-                                          v_NVDIMM_32GB_list.size(),
-                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-            l_err->collectTrace(NVDIMM_COMP_NAME, 256 );
-            l_err->collectTrace(NVDIMM_UPD, 256);
-            ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
-            o_no_error_found = false;
+            // potential openpower support in future, so don't throw an error
             break;
         }
     } while (0); // end of flash update section
@@ -2060,6 +2025,43 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
                 TRACFCOMP(g_trac_nvdimm_upd,
                     "isUpdateNeeded(): failed to find version of NVDIMM[%X]",
                     TARGETING::get_huid(l_dimm));
+                break;
+            }
+
+            // Put a check here for non-updateable SMART NVDIMMs.
+            // Anything before 0x0030 should bypass the update, as update
+            // would fail due to a bug in the backlevel firmware on the
+            // nvdimm card
+            if (le16toh(curVersion) < 0x0030)
+            {
+                TRACFCOMP(g_trac_nvdimm_upd,
+                    "isUpdateNeeded(): non-updatable SMART NVDIMM 0x%.8X "
+                    "(0x%04X)",
+                    TARGETING::get_huid(l_dimm), le16toh(curVersion));
+                /*
+                 *@errortype
+                 *@reasoncode       NVDIMM_UPDATE_NOT_SUPPORTED
+                 *@moduleid         NVDIMM_IS_UPDATE_NEEDED
+                 *@userdata1[0:31]  NVDIMM version level
+                 *@userdata1[32:63] NVDIMM Target Huid
+                 *@userdata2        NVDIMM type (manufacturer and product)
+                 *@devdesc          Unable to update an NVDIMM at this code level
+                 *@custdesc         NVDIMM not updated
+                 */
+                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           NVDIMM_IS_UPDATE_NEEDED,
+                                           NVDIMM_UPDATE_NOT_SUPPORTED,
+                                           TWO_UINT32_TO_UINT64(
+                                               curVersion,
+                                               TARGETING::get_huid(l_dimm)),
+                                           curType,
+                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+                l_err->collectTrace( NVDIMM_UPD, 256 );
+                l_err->addPartCallout( l_dimm,
+                                       HWAS::NV_CONTROLLER_PART_TYPE,
+                                       HWAS::SRCI_PRIORITY_HIGH );
+                l_err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_LOW );
                 break;
             }
 

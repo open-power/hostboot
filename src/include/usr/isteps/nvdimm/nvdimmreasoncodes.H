@@ -84,6 +84,7 @@ enum nvdimmModuleId
     CLEAR_FW_DATA_BLOCK                     = 0x22,
     VALIDATE_FW_IMAGE                       = 0x23,
     WAIT_FW_OPS_BLOCK_RECEIVED              = 0x24,
+    NVDIMM_IS_UPDATE_NEEDED                 = 0x25,
 };
 
 /**
@@ -133,7 +134,7 @@ enum nvdimmReasonCode
     NVDIMM_DATA_SIZE_INVALID                = NVDIMM_COMP_ID | 0x24,   // Data size is invalid
     NVDIMM_BLOCK_NOT_RECEIVED               = NVDIMM_COMP_ID | 0x25,   // Block data not received
     NVDIMM_FW_OPS_NOT_SUCCESSFUL            = NVDIMM_COMP_ID | 0x26,   // Unsuccessful Firmware Operation
-    NVDIMM_BASE_SERVICES_NOT_READY          = NVDIMM_COMP_ID | 0x27,   // spBaseServices not ready for LID access
+    NVDIMM_UPDATE_NOT_SUPPORTED             = NVDIMM_COMP_ID | 0x27,   // NV controller cannot be updated
 };
 
 enum UserDetailsTypes
