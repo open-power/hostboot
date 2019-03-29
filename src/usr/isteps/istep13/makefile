@@ -97,9 +97,6 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcbist_scom.mk
 
-include ${EXP_PROCEDURES_PATH}/hwp/memory/exp_scominit.mk
-include ${OCMB_PROCEDURES_PATH}/hwp/initfiles/explorer_scom.mk
-
 #Dram init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
@@ -143,5 +140,11 @@ VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/initfiles
+
+ifdef CONFIG_AXONE_BRINGUP
+include ${EXP_PROCEDURES_PATH}/hwp/memory/exp_scominit.mk
+include ${OCMB_PROCEDURES_PATH}/hwp/initfiles/explorer_scom.mk
+
 VPATH    += ${EXP_PROCEDURES_PATH}/hwp/memory
 VPATH    += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
+endif

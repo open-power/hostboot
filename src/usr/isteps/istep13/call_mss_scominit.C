@@ -44,7 +44,9 @@
 #include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
 #include    <p9c_mss_scominit.H>
+#ifdef CONFIG_AXONE
 #include    <exp_scominit.H>
+#endif
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -155,7 +157,7 @@ void* call_mss_scominit (void *io_pArgs)
                       "target HUID %.8X", TARGETING::get_huid(l_membuf_target));
             }
         }
-
+#ifdef CONFIG_AXONE
          // Get all OCMB targets
         TARGETING::TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
@@ -204,6 +206,7 @@ void* call_mss_scominit (void *io_pArgs)
         {
             break;
         }
+#endif
 
     } while (0);
 

@@ -24,9 +24,10 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-IMPORT_PATH             = ${ROOTPATH}/src/import
-PROCEDURES_PATH         = ${IMPORT_PATH}/chips/p9/procedures
-AXONE_PROCEDURES_PATH   = ${IMPORT_PATH}/chips/p9a/procedures
+IMPORT_PATH              = ${ROOTPATH}/src/import
+PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p9/procedures
+AXONE_PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9a/procedures
+EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
@@ -35,7 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
@@ -46,8 +47,6 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
@@ -67,10 +66,20 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory/lib/freq/
-MSS_LIB += ${AXONE_PROCEDURES_PATH}/hwp/memory
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/utils/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/freq/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/omi/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/i2c/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -174,11 +183,19 @@ MSS_PATH_GENERIC_MEMORY := ${ROOTPATH}/src/import/generic/memory/lib
 MSS_GENERIC_MEMORY_SOURCE := $(shell find $(MSS_PATH_GENERIC_MEMORY) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 
- MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
- MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
- MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_AXONE_SOURCE))
+ifdef CONFIG_AXONE_BRINGUP
+MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
+MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
+MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_AXONE_SOURCE))
 
-
+MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
+MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
+# TODO RTC: 207832 Remove filter-out commands when new lib files come
+MSS_EXPLORER_SOURCE := $(filter-out memdiags.C,$(MSS_EXPLORER_SOURCE))
+MSS_EXPLORER_SOURCE := $(filter-out mcbist.C,$(MSS_EXPLORER_SOURCE))
+MSS_EXPLORER_SOURCE := $(filter-out memory_size.C,$(MSS_EXPLORER_SOURCE))
+MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE))
+endif
 MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)
 $(call BUILD_MODULE)

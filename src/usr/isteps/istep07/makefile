@@ -90,7 +90,7 @@ include $(HWP_PATH_CEN)/p9c_mss_volt.mk
 include $(HWP_PATH_CEN)/p9c_mss_volt_vddr_offset.mk
 include $(HWP_PATH_CEN)/p9c_mss_volt_dimm_count.mk
 include $(HWP_PATH_CEN)/mss_dynamic_vid_utils.mk
-include $(HWP_PATH_P9A)/p9a_mss_volt.mk
+
 
 #mss_freq : Calc dimm frequency
 include $(HWP_PATH_P9)/p9_mss_freq.mk
@@ -103,10 +103,15 @@ include $(HWP_PATH_CEN)/p9c_mss_eff_config.mk
 include $(HWP_PATH_CEN)/p9c_mss_eff_config_thermal.mk
 include $(HWP_PATH_CEN)/p9c_mss_bulk_pwr_throttles.mk
 include $(HWP_PATH_CEN)/p9c_mss_eff_mb_interleave.mk
+
+
+ifdef CONFIG_AXONE_BRINGUP
+include $(HWP_PATH_P9A)/p9a_mss_volt.mk
 include $(HWP_PATH_P9A)/p9a_mss_freq.mk
 include $(HWP_PATH_P9A)/p9a_mss_freq_system.mk
 include $(HWP_PATH_P9A)/p9a_mss_eff_config.mk
 include $(HWP_PATH_P9A)/p9a_mss_eff_config_thermal.mk
+endif
 
 #host_mss_attr_cleanup : MSS ATTR Cleanup
 include $(HWP_PATH_CEN)/p9c_mss_attr_cleanup.mk

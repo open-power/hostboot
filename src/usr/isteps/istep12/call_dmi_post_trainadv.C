@@ -45,7 +45,10 @@
 
 //HWP
 #include    <p9_io_dmi_post_trainadv.H>
+
+#ifdef CONFIG_AXONE
 #include    <p9a_omi_train_check.H>
+#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -125,6 +128,7 @@ void* call_dmi_post_trainadv (void *io_pArgs)
 
     }
 
+#ifdef CONFIG_AXONE
     // Find omi targets
     TARGETING::TargetHandleList l_omiTargetList;
     getAllChiplets(l_omiTargetList, TYPE_OMI);
@@ -162,7 +166,7 @@ void* call_dmi_post_trainadv (void *io_pArgs)
                        TARGETING::get_huid(l_omi_target));
         }
     }
-
+#endif
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp

@@ -58,8 +58,11 @@
 #include    <p9_mss_freq.H>
 #include    <p9_mss_freq_system.H>
 #include    <p9c_mss_freq.H>
+
+#ifdef CONFIG_AXONE
 #include    <p9a_mss_freq.H>
 #include    <p9a_mss_freq_system.H>
+#endif
 
 namespace   ISTEP_07
 {
@@ -188,6 +191,7 @@ void*    call_mss_freq( void *io_pArgs )
                 }
             } // End mcs loop
         }
+#ifdef CONFIG_AXONE
         else if(l_procModel == TARGETING::MODEL_AXONE)
         {
             TARGETING::TargetHandleList l_memportTargetList;
@@ -235,6 +239,7 @@ void*    call_mss_freq( void *io_pArgs )
                 break;
             }
         }
+#endif
 
         // PB frequency was set in istep 6 for non MC SYNC mode
         // allow it to change here
@@ -307,6 +312,7 @@ void*    call_mss_freq( void *io_pArgs )
                 }
             }
         }
+#ifdef CONFIG_AXONE
         else if(l_procModel == TARGETING::MODEL_AXONE)
         {
             TARGETING::TargetHandleList l_mcTargetList;
@@ -340,6 +346,7 @@ void*    call_mss_freq( void *io_pArgs )
                 }
             }
         }
+#endif
 
         if(l_StepError.getErrorHandle() != NULL)
         {
