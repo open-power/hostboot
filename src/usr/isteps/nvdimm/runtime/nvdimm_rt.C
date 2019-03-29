@@ -316,6 +316,9 @@ errlHndl_t nvdimmCheckArmSuccess(TARGETING::Target *i_nvdimm)
                                HWAS::NV_CONTROLLER_PART_TYPE,
                                HWAS::SRCI_PRIORITY_HIGH);
         l_err->addPartCallout( i_nvdimm,
+                               HWAS::BPM_PART_TYPE,
+                               HWAS::SRCI_PRIORITY_MED);
+        l_err->addPartCallout( i_nvdimm,
                                HWAS::BPM_CABLE_PART_TYPE,
                                HWAS::SRCI_PRIORITY_MED);
     }
