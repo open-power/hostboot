@@ -9898,6 +9898,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>0</default>
     </attribute>
@@ -9943,6 +9947,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -9993,6 +10001,10 @@
         <default>2</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>2</default>
     </attribute>
@@ -10039,6 +10051,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -10089,6 +10105,10 @@
         <default>4</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>4</default>
     </attribute>
@@ -10135,6 +10155,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -10189,6 +10213,10 @@
         <default>6</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -10231,6 +10259,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -10281,6 +10313,10 @@
         <default>8</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>8</default>
     </attribute>
@@ -10329,6 +10365,10 @@
         <default>9</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>9</default>
     </attribute>
@@ -10369,6 +10409,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>10</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -10413,6 +10457,10 @@
         <default>11</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>11</default>
     </attribute>
@@ -10453,6 +10501,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -10497,6 +10549,10 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>13</default>
     </attribute>
@@ -10539,6 +10595,10 @@
         <default>14</default>
     </attribute>
     <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>VPD_REC_NUM</id>
         <default>14</default>
     </attribute>
@@ -10579,6 +10639,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
