@@ -177,7 +177,8 @@ inline fapi2::ReturnCode set_buffer_training( const fapi2::Target<fapi2::TARGET_
         std::vector< ccs::instruction_t >& io_inst )
 {
     // This doesn't need to be reused so it is left local to this function scope
-    static const std::vector< std::pair<training, uint64_t> > BUFF_TRAINING =
+    // Static appears to be playing havoc with HB's compile for some reason
+    const std::vector< std::pair<training, uint64_t> > BUFF_TRAINING =
     {
         { NORMAL, 0 },
         { MREP, 1   },

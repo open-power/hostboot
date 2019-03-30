@@ -236,6 +236,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mc/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
+prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/dimm/ddr4/
 prd_obj_no_sim += hwp_wrappers_nim.o
 prd_obj_no_sim += hwp_wrappers_exp.o
 prd_obj_no_sim += nimbus_pos.o
@@ -288,6 +289,14 @@ prd_obj_no_sim += exp_port.o
 prd_obj_no_sim += port.o
 prd_obj_no_sim += exp_kind.o
 prd_obj_no_sim += nimbus_kind.o
+prd_obj_no_sim += mss_lrdimm_training_helper.o
+prd_obj_no_sim += pba.o
+prd_obj_no_sim += mss_dwl.o
+prd_obj_no_sim += mss_mrd_coarse.o
+prd_obj_no_sim += mss_mwd_fine.o
+prd_obj_no_sim += mss_mrd_fine.o
+prd_obj_no_sim += mss_mwd_coarse.o
+prd_obj_no_sim += quad_encode_workarounds.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

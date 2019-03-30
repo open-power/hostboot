@@ -41,6 +41,14 @@
 #include <lib/phy/mss_training.H>
 #include <lib/phy/mss_lrdimm_training_helper.H>
 
+//
+// Note: The LRDIMM support has NOT been characterized or qualified by IBM
+// LRDIMM development was done in conjunction with an OpenPower partner and is being released to all of OpenPower
+// As IBM has not characterized or qualified LRDIMM, IBM will not be able to offer technical expertise to debug any LRDIMM side issues
+// As such, the OpenPower partner using LRDIMM assumes ownership and associated risk for using LRDIMM's in their system
+// Additionally, LRDIMM will see a large IPL time increase compared to RDIMM, as all of the LRDIMM training has to be enabled in software
+//
+
 namespace mss
 {
 
@@ -52,6 +60,7 @@ namespace lrdimm
 
 ///
 /// @brief MRD_FINE training step
+/// @note Will take a long time to run as this step is done via a software algorithm
 ///
 class mrd_fine : public step
 {

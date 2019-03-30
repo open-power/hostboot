@@ -55,18 +55,10 @@
 #include <lib/phy/ddr_phy.H>
 #include <map>
 
-// Disables LRDIMM support for HB
-#ifndef __HOSTBOOT_MODULE
-    #define CONFIG_LRDIMM_CAPABLE 1
-#endif
+// Enables LRDIMM support
+#define LRDIMM_CAPABLE 1
 
-#ifdef CONFIG_LRDIMM_CAPABLE
-    #define LRDIMM_CAPABLE 1
-#endif
-
-#ifdef LRDIMM_CAPABLE
-    #include <lib/phy/mss_lrdimm_training_helper.H>
-#endif
+#include <lib/phy/mss_lrdimm_training_helper.H>
 
 namespace mss
 {

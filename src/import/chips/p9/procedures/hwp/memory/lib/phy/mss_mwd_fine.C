@@ -56,6 +56,13 @@
 #include <lib/phy/mss_mwd_fine.H>
 #include <lib/phy/mss_lrdimm_training_helper.H>
 
+//
+// Note: The LRDIMM support has NOT been characterized or qualified by IBM
+// LRDIMM development was done in conjunction with an OpenPower partner and is being released to all of OpenPower
+// As IBM has not characterized or qualified LRDIMM, IBM will not be able to offer technical expertise to debug any LRDIMM side issues
+// As such, the OpenPower partner using LRDIMM assumes ownership and associated risk for using LRDIMM's in their system
+// Additionally, LRDIMM will see a large IPL time increase compared to RDIMM, as all of the LRDIMM training has to be enabled in software
+//
 
 namespace mss
 {
@@ -231,7 +238,6 @@ fapi2::ReturnCode mwd_fine::analyze_mwd_result( const fapi2::Target<fapi2::TARGE
 {
     // Reads out the data results from the MWD
     data_response l_data;
-    static constexpr uint64_t MAX_NUM_BEATS = 8;
     FAPI_TRY(l_data.read(i_target), "%s failed to read MWD data response delay:0x%02x", mss::c_str(i_target), i_delay);
 
 #ifndef __HOSTBOOT_MODULE
@@ -239,6 +245,8 @@ fapi2::ReturnCode mwd_fine::analyze_mwd_result( const fapi2::Target<fapi2::TARGE
     // Displays all of the data here - just.in.case.
     for(uint8_t l_buffer_loop = 0; l_buffer_loop < MAX_LRDIMM_BUFFERS; ++l_buffer_loop)
     {
+        static constexpr uint64_t MAX_NUM_BEATS = 8;
+
         for(uint8_t i = 0; i < MAX_NUM_BEATS; ++i)
         {
             FAPI_DBG("%s delay:0x%02x MWD result buffer%u BEAT%u data:0x%02x",
