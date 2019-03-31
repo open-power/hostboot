@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,13 +65,15 @@ p9_query_core_access_state(
     bool& o_is_scanable)
 {
 
-    fapi2::buffer<uint64_t> l_csshsrc, l_cpfetsense, l_sisr, l_netCtrl0;
+    fapi2::buffer<uint64_t> l_csshsrc, l_sisr, l_netCtrl0;
     fapi2::buffer<uint64_t> l_data64;
-    uint32_t l_coreStopLevel = 0;
-    uint8_t  vdd_pfet_disable_core = 0;
-    uint8_t  c_exec_hasclocks = 0;
-    uint8_t  c_pc_hasclocks = 0;
-    uint8_t  l_chpltNumber = 0;
+    uint32_t l_coreStopLevel        =   0;
+    uint8_t  c_exec_hasclocks       =   0;
+    uint8_t  c_pc_hasclocks         =   0;
+    uint8_t  l_chpltNumber          =   0;
+    o_is_scomable                   =   false;
+    o_is_scanable                   =   false;
+    fapi2::ReturnCode   l_tempRc    =   fapi2::FAPI2_RC_SUCCESS;
 
 
     FAPI_INF("> p9_query_core_access_state...");
@@ -84,26 +86,22 @@ p9_query_core_access_state(
 
     if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
     {
-        o_is_scomable = 0;
-        o_is_scanable = 0;
-        return fapi2::current_err;
+        goto fapi_try_exit;
     }
 
     FAPI_TRY(fapi2::getScom(i_target, C_PPM_PFSNS, l_data64),
-             "Error reading data from C_PPM_PFSNS");
+             "Error reading data from C_PPM_PFSNS" );
 
     if (l_data64.getBit<C_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
     {
-        o_is_scomable = 0;
-        o_is_scanable = 0;
-        return fapi2::current_err;
+        goto fapi_try_exit;
     }
 
-
+    o_is_scanable       =   true;
 
     // Get the stop state from the SSHRC in the CPPM
-    FAPI_TRY(fapi2::getScom(i_target, C_PPM_SSHSRC, l_csshsrc), "Error reading data from CPPM SSHSRC");
-
+    FAPI_TRY(fapi2::getScom(i_target, C_PPM_SSHSRC, l_csshsrc),
+             "Error reading data from CPPM SSHSRC" );
 
     // A unit is scomable if clocks are running
     // A unit is scannable if the unit is powered up.
@@ -119,11 +117,10 @@ p9_query_core_access_state(
         // Double check the core isn't in stop 1
         auto l_ex_target = i_target.getParent<fapi2::TARGET_TYPE_EX>();
 
-        FAPI_TRY(fapi2::getScom(l_ex_target, EX_CME_LCL_SISR_SCOM, l_sisr), "Error reading data from CME SISR register");
+        FAPI_TRY(fapi2::getScom(l_ex_target, EX_CME_LCL_SISR_SCOM, l_sisr),
+                 "Error reading data from CME SISR register" );
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
-                 "ERROR: Failed to get the position of the Core:0x%08X",
-                 i_target);
+        FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber);
 
         uint32_t l_pos = l_chpltNumber % 2;
 
@@ -136,41 +133,15 @@ p9_query_core_access_state(
         {
             l_sisr.extractToRight<uint32_t>(l_coreStopLevel, EX_CME_LCL_SISR_PM_STATE_C1, EX_CME_LCL_SISR_PM_STATE_C1_LEN);
         }
-
-
     }
 
     FAPI_INF("Core Stop State: C(%d)", l_coreStopLevel);
 
-    // Set both attributes to 1, then clear them based on the stop state
-    o_is_scomable = 1;
-    o_is_scanable = 1;
-
-
     // STOP1 - NAP
     //  VSU, ISU are clocked off
-    if (l_coreStopLevel >= 1)
+    if (l_coreStopLevel < 1)
     {
-        o_is_scomable = 0;
-    }
-
-    // STOP2 - Fast Sleep
-    //   VSU, ISU are clocked off
-    //   IFU, LSU are clocked off
-    //   PC, Core EPS are clocked off
-    if (l_coreStopLevel >= 2)
-    {
-        o_is_scomable = 0;
-    }
-
-
-    // STOP4 - Deep Sleep  (special exception for stop 9 - lab use only)
-    //   VSU, ISU are powered off
-    //   IFU, LSU are powered off
-    //   PC, Core EPS are powered off
-    if (l_coreStopLevel >= 4 && l_coreStopLevel != 9)
-    {
-        o_is_scanable = 0;
+        o_is_scomable   =   1;
     }
 
     //----------------------------------------------------------------------------------
@@ -178,65 +149,66 @@ p9_query_core_access_state(
     // If we trust the stop state history, this could be removed to save on code size
     //----------------------------------------------------------------------------------
 
+    // By this time we know core is powered.
+    // Get the fence bit for this core from C_NET_CTRL0
+    l_tempRc    =   fapi2::getScom(i_target, C_NET_CTRL0, l_netCtrl0);
 
-    FAPI_DBG("   Read CPPM PFETSENSE");
-    FAPI_TRY(fapi2::getScom(i_target, C_PPM_PFSNS, l_cpfetsense), "Error reading data from CPPM PFSNS");
-
-    // Extract out the disabled bits
-    l_cpfetsense.extractToRight<uint8_t>(vdd_pfet_disable_core, 1, 1);
-
-    FAPI_INF("Core PFET_DISABLE(%d)", vdd_pfet_disable_core);
-
-
-    // Read clocks running registers
-    if (vdd_pfet_disable_core == 0)
+    if( l_tempRc != fapi2::FAPI2_RC_SUCCESS )
     {
-        // Get the fence bit for this core from C_NET_CTRL0
-        FAPI_TRY(fapi2::getScom(i_target, C_NET_CTRL0, l_netCtrl0), "Error reading data from C_NET_CTRL0");
+        FAPI_INF( "Error reading data from C_NET_CTRL0" );
+        //unable to read fence status. Set core state to Non-Scomable.
+        o_is_scomable       =   false;
+        goto fapi_try_exit;
+    }
 
-        if (l_netCtrl0.getBit<NET_CTRL0_FENCED>() == 0)
-        {
-            FAPI_DBG("   Read Core EPS clock status for core");
-            FAPI_TRY(fapi2::getScom(i_target, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
+    if (l_netCtrl0.getBit<NET_CTRL0_FENCED>() == 0)
+    {
+        FAPI_DBG(" Read Core EPS clock status for core" );
+        l_tempRc    =   fapi2::getScom(i_target, C_CLOCK_STAT_SL,  l_data64) ;
 
-            l_data64.extractToRight<uint8_t>(c_exec_hasclocks, 6, 1);
-            // Inverted logic in the HW
-            c_exec_hasclocks = !c_exec_hasclocks;
-            l_data64.extractToRight<uint8_t>(c_pc_hasclocks,   5, 1);
-            // Inverted logic in the HW
-            c_pc_hasclocks = !c_pc_hasclocks;
-        }
-        else
+        if( l_tempRc != fapi2::FAPI2_RC_SUCCESS )
         {
-            FAPI_INF("Core Fences are up, so skipped reading the C_CLOCK_STAT_SL Register");
+            FAPI_ERR( "Error reading data from C_CLOCK_STAT_SL" );
+            //unable to read fence status. Set core state to Non-Scomable.
+            o_is_scomable       =   false;
+            goto fapi_try_exit;
         }
+
+        l_data64.extractToRight<uint8_t>(c_exec_hasclocks, 6, 1);
+        l_data64.extractToRight<uint8_t>(c_pc_hasclocks,   5, 1);
+
+        // Inverted logic in the HW
+        c_exec_hasclocks = !c_exec_hasclocks;
+        c_pc_hasclocks   = !c_pc_hasclocks;
+    }
+    else
+    {
+        FAPI_INF("Core Fences are up, so skipped reading the C_CLOCK_STAT_SL Register");
     }
 
     FAPI_INF("Core Clock Status : PC_HASCLOCKS(%d) EXEC_HASCLOCKS(%d)", c_pc_hasclocks, c_exec_hasclocks);
+    FAPI_DBG("Core Is Scanable STOP_STATE(%d)  ", o_is_scanable );
 
-    FAPI_DBG("Comparing Stop State vs Actual HW settings");
+    FAPI_DBG("Comparing Stop State vs Actual HW settings for scomable state");
 
-    FAPI_DBG("Core Is Scomable STOP_STATE(%d)  CLKSTAT(%d)", o_is_scomable, c_pc_hasclocks && c_exec_hasclocks);
-    FAPI_DBG("Core Is Scanable STOP_STATE(%d)  PFET(%d)", o_is_scanable, !vdd_pfet_disable_core);
+    FAPI_DBG("Core Is Scomable STOP_STATE(%d)  CLKSTAT(%d)", o_is_scomable, (c_pc_hasclocks && c_exec_hasclocks));
 
     //----------------------------------------------------------------------------------
     // Compare Hardware status vs stop state status.   If there is a mismatch, the HW value overrides the stop state
     //----------------------------------------------------------------------------------
 
+    //If we could reach this far, we know core is powered and hence scanable.
 
-    if (o_is_scomable != ( c_pc_hasclocks && c_exec_hasclocks))
+    //Let us revalidate SCOMable status
+
+    if ( o_is_scomable != ( c_pc_hasclocks && c_exec_hasclocks ) )
     {
         FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-        o_is_scomable = ( c_pc_hasclocks && c_exec_hasclocks);
-    }
-
-    if (o_is_scanable != (vdd_pfet_disable_core == 0))
-    {
-        FAPI_INF("PFET status didn't match stop state, overriding is_scanable status");
-        o_is_scanable = (vdd_pfet_disable_core == 0);
+        o_is_scomable = (c_pc_hasclocks && c_exec_hasclocks);
     }
 
 fapi_try_exit:
     FAPI_INF("< p9_query_core_access_state...");
+    fapi2::current_err  =   fapi2::FAPI2_RC_SUCCESS;
     return fapi2::current_err;
 }
