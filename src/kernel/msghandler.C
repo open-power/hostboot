@@ -33,7 +33,7 @@
 #include <kernel/console.H>
 #include <kernel/doorbell.H>
 #include <kernel/misc.H>
-
+#include <kernel/vmmmgr.H>
 
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
@@ -186,7 +186,12 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             printk("Unhandled msg rc %d (%s) for key %p on task %d @ %p\n",
                     msg_rc, ErrnoToString(msg_rc), key, deferred_task->tid,
                     deferred_task->context.nip);
-            KernelMisc::printkBacktrace(deferred_task);
+            // Kernel will deadlock if the message handler has the VMM spinlock
+            // locked and then attempts to print the backtrace
+            if(VmmManager::getLock() != iv_lock)
+            {
+                KernelMisc::printkBacktrace(deferred_task);
+            }
             MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
             endTaskList.insert(deferred_task);
         }
