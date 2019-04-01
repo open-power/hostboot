@@ -935,8 +935,12 @@ void IpmiRP::queueForResponse(IPMI::Message& i_msg)
     mutex_lock(&iv_mutex);
 
     // BMC request-to-response times are always seconds, 1 - 30.
-    // And I don't think we care about roll over here.
-    i_msg.iv_timeout.tv_sec += iv_bmc_timeout;
+    // And I don't think we care about roll over here. Enforce the
+    // timeout as a timeout per-message. Meaning if there are 2
+    // messages on the timeout queue, make the timeout of this message
+    // iv_bmc_timeout + iv_bmc_timeout*2
+    i_msg.iv_timeout.tv_sec +=
+                  (iv_bmc_timeout + (iv_bmc_timeout*iv_timeoutq.size()) );
 
     // Put this message on the response queue so we can find it later
     // for a response and on the timeout queue so if it times out
@@ -944,9 +948,7 @@ void IpmiRP::queueForResponse(IPMI::Message& i_msg)
     // timeout - mostly. Every message sent before the BMC tells us
     // the timeout (at least one message) will have the shortest possible
     // timeout. The BMC might lengthen the timeout, but can not shorten
-    // it. All messages after that will have the same timeout. So the
-    // timeout queue is "sorted."
-
+    // it.
     iv_respondq[i_msg.iv_seq] = i_msg.iv_msg;
     iv_timeoutq.push_back(i_msg.iv_msg);
 
