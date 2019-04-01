@@ -88,6 +88,13 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         // LARGEST_ADDRESS. port select (bit0~1) are always 0 so shift 2 more bits.
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
 
+        // Size
+        static constexpr size_t PORTS_PER_MCBIST = 1;
+        static constexpr size_t MAX_DQ_BITS = 80;
+        static constexpr size_t MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE;
+        static constexpr size_t MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE;
+        static constexpr size_t MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE;
+
         /// MCBIST "memory registers" - config for subtests.
         static constexpr uint64_t MCBMR0_REG = EXPLR_MCBIST_MCBMR0Q;
         static constexpr uint64_t MCBMR1_REG = EXPLR_MCBIST_MCBMR1Q;
@@ -414,6 +421,18 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             //MCBIST FIR mask
             MCB_PROGRAM_COMPLETE = EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE,
             MCB_WAT_DEBUG_ATTN = EXPLR_MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
+
+            //XLT address valid offset
+            XLT0_SLOT1_D_VALUE     = EXPLR_MCBIST_MBXLT0Q_SLOT1_D_VALUE,
+            XLT0_SLOT0_M1_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_M1_VALID,
+            XLT0_SLOT0_M0_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_M0_VALID,
+            XLT0_SLOT0_S2_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_S2_VALID,
+            XLT0_SLOT0_S1_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_S1_VALID,
+            XLT0_SLOT0_S0_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_S0_VALID,
+            XLT0_SLOT0_ROW17_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT0_ROW17_VALID,
+            XLT0_SLOT0_ROW16_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT0_ROW16_VALID,
+            XLT0_SLOT0_ROW15_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT0_ROW15_VALID,
+
         };
 
         // MCBIST error log related registers
@@ -448,6 +467,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
         static constexpr uint64_t RMW_WRT_BUF_DATA_REG = EXPLR_WDF_AADR;
         static constexpr uint64_t RMW_WRT_BUF_ECC_REG = EXPLR_WDF_AAER;
 
+        static constexpr uint64_t XLTATE0 = EXPLR_MCBIST_MBXLT0Q;
+        static constexpr uint64_t XLTATE1 = EXPLR_MCBIST_MBXLT1;
+        static constexpr uint64_t XLTATE2 = EXPLR_MCBIST_MBXLT2;
+
         enum
         {
             // Register field constants
@@ -459,6 +482,9 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
             RMW_WRT_ADDRESS_LEN = EXPLR_WDF_AACR_ADDRESS_LEN,
             RMW_WRT_AUTOINC = EXPLR_WDF_AACR_AUTOINC,
             RMW_WRT_ECCGEN = EXPLR_WDF_AACR_ECCGEN,
+
+            XLTATE_SLOT0_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT0_VALID,
+            XLTATE_SLOT1_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT1_VALID,
 
             // Constants used for field settings
             SELECT_RMW_BUFFER = 0,

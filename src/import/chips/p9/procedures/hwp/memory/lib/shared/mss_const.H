@@ -94,14 +94,6 @@ enum sizes
 
     // Largest size a VPD keyword can be
     VPD_KEYWORD_MAX = 255,
-
-    // MCBIST polling constant for actual HW
-    // The specific value here is not important, only that it is very large to avoid polling timeouts,
-    // but not to avoid any actual hardware timeouts
-    // Note: ~0 is not used as that would cause MCBIST to never timeout even if the hardware is in an infinite loop
-    // You can't get greater than ~0, so you'd never timeout
-    // TODO RTC:166340 - Clean up MCBIST polling
-    OVERLY_LARGE_NUMBER_OF_POLLS = 5000000000000,
 };
 
 enum times
@@ -257,44 +249,6 @@ enum voltages : uint64_t
     DDR4_VPP_VOLTAGE = 2500,
 };
 
-
-enum port_select
-{
-    // Port selects for MCBIST and CCS
-    // Select for 1 port
-    PORT0            = 0b1000,
-    PORT1            = 0b0100,
-    PORT2            = 0b0010,
-    PORT3            = 0b0001,
-    // Selects for 2 port combinations
-    PORT01           = PORT0 | PORT1,
-    PORT02           = PORT0 | PORT2,
-    PORT03           = PORT0 | PORT3,
-    PORT12           = PORT1 | PORT2,
-    PORT13           = PORT1 | PORT3,
-    PORT23           = PORT2 | PORT3,
-    // Selects for 3 port combinations
-    PORT012          = PORT0 | PORT1 | PORT2,
-    PORT013          = PORT0 | PORT1 | PORT3,
-    PORT023          = PORT0 | PORT2 | PORT3,
-    PORT123          = PORT1 | PORT2 | PORT3,
-    // Select all
-    PORT0123         = PORT0 | PORT1 | PORT2 | PORT3,
-    // Maybe a better name for disabling all
-    PORT_NONE        = 0b0000,
-};
-
-enum dimm_select
-{
-    // Dimm selects for MCBIST and CCS
-    // Select for 1 dimm
-    DIMM0            = 0b10,
-    DIMM1            = 0b01,
-    // Selects for 2 dimm combinations
-    DIMM01           = DIMM0 | DIMM1,
-    // Maybe a better name for disabling all
-    DIMM_NONE        = 0b00,
-};
 
 // Possible values for power domains in MBARPC0Q
 enum min_max_domains : uint64_t

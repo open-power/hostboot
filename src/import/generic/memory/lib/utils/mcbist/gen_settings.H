@@ -42,6 +42,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_address.H>
 #include <generic/memory/lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
 
 namespace mss
 {

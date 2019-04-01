@@ -87,6 +87,14 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
         // LARGEST_ADDRESS
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> mss::mcbist::address::MAGIC_PAD;
 
+        // Size
+        static constexpr size_t PORTS_PER_MCBIST = 4;
+        static constexpr size_t MAX_DQ_BITS = 72;
+        static constexpr size_t MAX_DQ_NIBBLES = MAX_DQ_BITS /
+                BITS_PER_NIBBLE; ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
+        static constexpr size_t MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE; ///< For x8's there are 9 DRAM for 72 bits
+        static constexpr size_t MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE; ///< For x4's there are 18 DRAM for 72 bits
+
         /// MCBIST "memory registers" - config for subtests.
         static constexpr uint64_t MCBMR0_REG = MCBIST_MCBMR0Q;
         static constexpr uint64_t MCBMR1_REG = MCBIST_MCBMR1Q;
@@ -414,7 +422,20 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
             MCB_WAT_DEBUG_ATTN = MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
             MCB_PROGRAM_COMPLETE_MASK = MCB_PROGRAM_COMPLETE,
             MCB_WAT_DEBUG_ATTN_MASK = MCB_WAT_DEBUG_ATTN,
+
+            //XLT address valid offset
+            XLT0_SLOT1_D_VALUE     = MCS_PORT13_MCP0XLT0_SLOT1_D_VALUE,
+            XLT0_SLOT0_M1_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_M1_VALID,
+            XLT0_SLOT0_M0_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_M0_VALID,
+            XLT0_SLOT0_S2_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_S2_VALID,
+            XLT0_SLOT0_S1_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_S1_VALID,
+            XLT0_SLOT0_S0_VALID    = MCS_PORT13_MCP0XLT0_SLOT0_S0_VALID,
+            XLT0_SLOT0_ROW17_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW17_VALID,
+            XLT0_SLOT0_ROW16_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW16_VALID,
+            XLT0_SLOT0_ROW15_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW15_VALID,
+
         };
+
 
 };
 
@@ -433,6 +454,11 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t RMW_WRT_BUF_DATA_REG = MCA_AADR;
         static constexpr uint64_t RMW_WRT_BUF_ECC_REG = MCA_AAER;
 
+        // XLT registers
+        static constexpr uint64_t XLTATE0 = MCA_MBA_MCP0XLT0;
+        static constexpr uint64_t XLTATE1 = MCA_MBA_MCP0XLT1;
+        static constexpr uint64_t XLTATE2 = MCA_MBA_MCP0XLT2;
+
         enum
         {
             // Register field constants
@@ -444,6 +470,9 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCA>
             RMW_WRT_ADDRESS_LEN = MCA_WREITE_AACR_ADDRESS_LEN,
             RMW_WRT_AUTOINC = MCA_WREITE_AACR_AUTOINC,
             RMW_WRT_ECCGEN = MCA_WREITE_AACR_ECCGEN,
+
+            XLTATE_SLOT0_VALID = MCS_PORT02_MCP0XLT0_SLOT0_VALID,
+            XLTATE_SLOT1_VALID = MCS_PORT02_MCP0XLT0_SLOT1_VALID,
 
             // Constants used for field settings
             SELECT_RMW_BUFFER = 0,

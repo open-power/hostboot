@@ -214,11 +214,10 @@ fapi2::ReturnCode update_runtime_throttle(const fapi2::Target<T>& i_target)
         l_run_port = (l_calc_port != 0) ?
                      std::min(l_run_port, l_calc_port) : l_run_port;
 
-        FAPI_INF("New runtime throttles for %s for slot are %d, port are  %d for %s",
+        FAPI_INF("New runtime throttles for %s for slot are %d, port are  %d",
                  mss::c_str(l_port),
                  l_run_slot,
-                 l_run_port,
-                 mss::c_str(l_port));
+                 l_run_port);
 
         FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_port(l_port, l_run_port) );
         FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot) );
@@ -492,14 +491,13 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
         iv_port_power_limit += l_dimm_limit;
     }
 
-    FAPI_INF("Setting up throttle for target %s, Values are: max databus is %d, uplifts are %d %d, runtime throttles are %d %d for %s",
+    FAPI_INF("Setting up throttle for target %s, Values are: max databus is %d, uplifts are %d %d, runtime throttles are %d %d",
              mss::c_str(iv_target),
              iv_databus_port_max,
              iv_power_uplift,
              iv_power_uplift_idle,
              iv_runtime_n_slot,
-             iv_runtime_n_port,
-             mss::c_str(iv_target));
+             iv_runtime_n_port);
 
     FAPI_INF("The dimm power limit is %d, dram clocks are %d, dimm power curve slopes are %d %d for %s",
              iv_port_power_limit,
@@ -684,8 +682,7 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
                         iv_dimm_thermal_limit[l_pos],
                         l_calc_util[l_pos]);
 
-        FAPI_INF("THERMAL throttles: %s dram databus utilization is %f for %s", mss::c_str(l_dimm), l_calc_util[l_pos],
-                 mss::c_str(l_dimm));
+        FAPI_INF("THERMAL throttles: %s dram databus utilization is %f", mss::c_str(l_dimm), l_calc_util[l_pos]);
 
         l_temp_n_slot = power_thermal::throttled_cmds (l_calc_util[l_pos], iv_m_clocks);
 
@@ -1045,13 +1042,12 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
         o_util_dimm_max[(!l_high_pos)] = (l_count_dimms == TT::DIMMS_PER_PORT) ? (i_util_port - o_util_dimm_max[l_high_pos]) :
                                          0;
 
-        FAPI_INF("Split utilization for target %s, DIMM in %d gets %f, DIMM in %d gets %f for %s",
+        FAPI_INF("Split utilization for target %s, DIMM in %d gets %f, DIMM in %d gets %f",
                  mss::c_str(iv_target),
                  l_high_pos,
                  o_util_dimm_max[l_high_pos],
                  !l_high_pos,
-                 o_util_dimm_max[!l_high_pos],
-                 mss::c_str(iv_target));
+                 o_util_dimm_max[!l_high_pos]);
     }
     else
     {
