@@ -54,8 +54,6 @@ constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_0b1010 = 0b1010;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b00 = 0b00;
-constexpr uint64_t literal_0b01010000 = 0b01010000;
-constexpr uint64_t literal_0b00110111 = 0b00110111;
 constexpr uint64_t literal_0b0010111 = 0b0010111;
 constexpr uint64_t literal_0b00010 = 0b00010;
 constexpr uint64_t literal_0b0010 = 0b0010;
@@ -4241,13 +4239,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008c0600701103full, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x8008d0600701103full, l_scom_buffer ));
-
-            l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01010000 );
-            l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b00110111 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x8008d0600701103full, l_scom_buffer));
-        }
-        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800970600701103full, l_scom_buffer ));
 
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_RC_ENABLE_CTLE_1ST_LATCH_OFFSET_CAL_ON = 0x1;
@@ -4368,7 +4359,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF );
             constexpr auto l_IOMP_RX3_RXCTL_DATASM_DATASM_REGS_RX_PG_DATASM_SPARE_MODE_0_ON = 0x1;
             l_scom_buffer.insert<48, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_DATASM_DATASM_REGS_RX_PG_DATASM_SPARE_MODE_0_ON );
-            l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800b80600701103full, l_scom_buffer));
         }
         {
