@@ -95,6 +95,22 @@ private:
         DEVICE_ID    = 0xFD, // Common. max 32 ASCII bytes
     };
 
+    /**
+     *  @brief Enums used in functions below to indicate which field
+     *         was being processed when a parsing error occurred.
+     */
+    enum FIELD_LOCATION_PARSE_ERROR
+    {
+        NO_PARSE_ERROR                      = 0,
+        CONVERT_STRING_TO_OP_FIELD_2        = 1,
+        CONVERT_STRING_TO_OP_FIELD_3        = 2,
+        UPDATE_UCD_FLASH_FIELD_1            = 3,
+        UPDATE_UCD_FLASH_SEND_BYTE_FIELD_2  = 4,
+        UPDATE_UCD_FLASH_PAUSE_FIELD_2      = 5,
+    };
+
+
+
     static const uint8_t UCD_MAX_RETRIES = 2;
     const TARGETING::TargetHandle_t iv_pUcd;
     char* iv_deviceId;
@@ -675,7 +691,7 @@ public:
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initialize(): Read from "
                           "UCD 0x%.8X for DEVICE_ID returned "
                           "size larger than expected. "
-                          "Actual %d, expected %d",
+                          "Actual %lu, expected %lu",
                           get_huid(iv_pUcd),
                           size, DEVICE_ID_MAX_SIZE);
                 /*@
@@ -760,7 +776,7 @@ public:
                 TRACFCOMP(g_trac_ucd, ERR_MRK"Ucd::Initialize(): Read from UCD "
                           "0x%.8X for MFR Revision returned "
                           "size larger than expected. "
-                          "Actual %d, expected %d",
+                          "Actual %lu, expected %lu",
                           get_huid(iv_pUcd),
                           size, MFR_REVISION_MAX_SIZE);
                 /*@
@@ -800,7 +816,7 @@ public:
     } // end of initialize()
 
     /**
-     *  @brief smbus_op_t struct to hold on SMBUS operation
+     *  @brief smbus_op_t struct to hold a SMBUS operation
      */
     struct smbus_op_t
     {
@@ -827,77 +843,133 @@ public:
      *
      *  @param[in]  i_str  Pointer to the start of the 2nd field of the command
      *                     NOTE: This parameter is not a const - it is updated
+     *                     Assert if i_str is nullptr.
+     *
+     *  @param[in]  i_op_count  Which operation is being processed
+     *                          NOTE: This is only used as a detail to add to
+     *                          error log in case of a fail
+     *
      *  @param[out] o_op   Output structure with the derived info
      *
      *  @note There is an expected layout for the 2nd, 3rd, and 4th fields for
      *        these operations.  Any detected deviation will result in an assert
      *
-     *  @return void
+     * @return  errlHndl_t  nullptr on success. Otherwise, a error that occurred
+     *
      */
-    void convertStringToOp(char * i_str, smbus_op_t & o_op)
+    errlHndl_t convertStringToOp(char * i_str,
+                                 const size_t i_op_count,
+                                 smbus_op_t & o_op)
     {
+        errlHndl_t err = nullptr;
+        FIELD_LOCATION_PARSE_ERROR field_location = NO_PARSE_ERROR;
+
         // PEC byte is calculated on all message bytes, including
         //  addresses and Read/Write bit.
         // SMBus Fields are Request,Address,Command,Data with PEC byte
         // For reads, the last field is what is expected back from the device
+        // NOTE: For BlockWrite, 0th data byte is actually # of data bytes
+        //       to send.  This needs to be handled by BlockWrite code - it
+        //       will not be handled here as the Operation/Request is not
+        //       passed in.
         assert(i_str != nullptr, "convertStringToOp: i_str is nullptr");
 
-        // Second Field is Address
-        auto pDelimiter = strchr(i_str, ',' );
-        if (pDelimiter != nullptr)
+        do
         {
-            *pDelimiter = '\0';
-        }
-        else
+            // Second Field is Address
+            auto pDelimiter = strchr(i_str, ',' );
+            if (pDelimiter != nullptr)
+            {
+                *pDelimiter = '\0';
+            }
+            else
+            {
+                field_location = CONVERT_STRING_TO_OP_FIELD_2;
+                TRACFCOMP(g_trac_ucd,"convertStringToOp: "
+                          "pDelimiter for 2nd field is nullptr. "
+                          "field_location=%d of op_count=%lu",
+                          field_location, i_op_count);
+                break;
+            }
+            o_op.addr = strtoul(i_str, nullptr, 16);
+
+            // Move Past Second Field
+            i_str = pDelimiter+1;
+
+            // Third Field is Command
+            pDelimiter = strchr(i_str, ',' );
+            if (pDelimiter != nullptr)
+            {
+                *pDelimiter = '\0';
+            }
+            else
+            {
+                field_location = CONVERT_STRING_TO_OP_FIELD_3;
+                TRACFCOMP(g_trac_ucd,"convertStringToOp: "
+                          "pDelimiter for 3rd field is nullptr. "
+                          "field_location=%d of op_count=%lu",
+                          field_location, i_op_count);
+                break;
+            }
+            o_op.cmd = strtoul(i_str, nullptr, 16 );
+
+            // Move Past Third Field
+            i_str = pDelimiter+1;
+
+            // Fourth field is Data + PEC byte
+            // - should already have '\0' at it from above
+            o_op.vData.clear();
+            char char_byte[] = "\0\0";
+
+            // Skip the expected "0x" at the start of the data stream
+            i_str += 2;
+
+            while (*i_str != '\0')
+            {
+                char_byte[0] = *(i_str++);  // Get 1st nibble then increment
+                char_byte[1] = *(i_str++);  // Get 2nd nibble then increment
+                o_op.vData.push_back(strtoul(char_byte, nullptr, 16));
+            }
+
+            // Last byte is pec byte
+            o_op.pec_byte = o_op.vData.back();
+            o_op.vData.pop_back();
+
+            // Ignore checking pec byte for now as SMBUS Device Op calculates it
+
+            // Setup data
+            TRACDCOMP(g_trac_ucd,"convertStringToOp: "
+                      "data size=%lu, byte0=0x%.2X",
+                      o_op.vData.size(), o_op.vData[0]);
+        } while(0);
+
+        if (field_location != NO_PARSE_ERROR)
         {
-            assert(false,"convertStringToOp: pDelimiter for 2nd field is nullptr");
-        }
-        o_op.addr = strtoul(i_str, nullptr, 16);
-
-        // Move Past Second Field
-        i_str = pDelimiter+1;
-
-        // Third Field is Command
-        pDelimiter = strchr(i_str, ',' );
-        if (pDelimiter != nullptr)
-        {
-            *pDelimiter = '\0';
-        }
-        else
-        {
-            assert(false,"convertStringToOp: pDelimiter for 3rd field is nullptr");
-        }
-        o_op.cmd = strtoul(i_str, nullptr, 16 );
-
-        // Move Past Third Field
-        i_str = pDelimiter+1;
-
-        // Fourth field is Data + PEC byte
-        // - should already have '\0' at it from above
-        o_op.vData.clear();
-        char char_byte[] = "\0\0\0";
-
-        // Skip the expected "0x" at the start of the data stream
-        i_str += 2;
-
-        while (*i_str != '\0')
-        {
-            char_byte[0] = *(i_str++);  // Get 1st nibble then increment
-            char_byte[1] = *(i_str++);  // Get 2nd nibble then increment
-            o_op.vData.push_back(strtoul(char_byte, nullptr, 16));
+            // Error log already has trace above so just create error log here
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @reasoncode       UCD_RC::UCD_FIELD_PARSE_ERROR
+             * @moduleid         UCD_RC::MOD_CONVERT_STRING_TO_OP
+             * @userdata1[0:31]  HUID of UCD Target
+             * @userdata1[32:63] The Field Location of the parse error
+             * @userdata2        The order of this operation
+             * @devdesc          There was an error while parsing a field in
+             *                   this UCD flash image's command line
+             * @custdesc         Unexpected IPL firmware data format error
+             */
+            err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                UCD_RC::MOD_CONVERT_STRING_TO_OP,
+                UCD_RC::UCD_FIELD_PARSE_ERROR,
+                TWO_UINT32_TO_UINT64(
+                    TARGETING::get_huid(iv_pUcd),
+                    field_location),
+                i_op_count,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         }
 
-        // Last byte is pec byte
-        o_op.pec_byte = o_op.vData.back();
-        o_op.vData.pop_back();
-
-        // Ignore checking pec byte for now as SMBUS Device Op calculates it
-
-        // Setup data
-        TRACDCOMP(g_trac_ucd,"convertStringToOp: data size=%d, byte0=0x%.2X",
-                  o_op.vData.size(), o_op.vData[0]);
-
-        return;
+        return err;
     }
 
     /**
@@ -930,6 +1002,7 @@ public:
         size_t op_count = 1;
         char * tmp_str = reinterpret_cast<char*>(
                               const_cast<void*>(i_pFlashImage));
+        FIELD_LOCATION_PARSE_ERROR field_location = NO_PARSE_ERROR;
 
         while (char_count < i_size)
         {
@@ -944,9 +1017,11 @@ public:
             }
             else
             {
-                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%d: "
-                          "found nullptr: tmp_str=%p, pDelimiter=%p",
+                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: "
+                          "found nullptr processing full line: "
+                          "tmp_str=%p, pDelimiter=%p",
                           op_count, tmp_str, pDelimiter);
+
                 /*@
                  * @errortype
                  * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -969,11 +1044,11 @@ public:
                 break;
             }
 
-            size_t op_str_length = strlen(tmp_str);
+            size_t op_str_length = strnlen(tmp_str, (i_size-char_count));
             char_count += op_str_length+1;
 
-            TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s "
-                      "(len=%d, count=%d, total=%d)",
+            TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s "
+                      "(len=%lu, count=%lu, total=%lu)",
                       op_count, tmp_str, op_str_length, char_count, i_size);
             char * next_op = tmp_str + op_str_length + 1;
 
@@ -985,7 +1060,12 @@ public:
             }
             else
             {
-                assert(false,"updateUcdFlash: pDelimiter for 1st field is nullptr");
+                field_location = UPDATE_UCD_FLASH_FIELD_1;
+                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: "
+                          "pDelimiter for 1st field is nullptr. "
+                          "field_location=%d",
+                          op_count, field_location);
+                break;
             }
             // Save start for if-check and tracing purposes
             char * op_type = tmp_str;
@@ -1000,11 +1080,22 @@ public:
             if (strcmp(op_type,"WriteByte") == 0)
             {
                 // Convert the other fields to address, command, and data
-                convertStringToOp(tmp_str, op);
+                err = convertStringToOp(tmp_str, op_count, op);
+                if (err != nullptr)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
+                        "In WriteByte section, err back from convertStringToOp:"
+                        " plid=0x%.8X",
+                        op_count, op_type, err->plid());
+
+                    // Add full command string to error log
+                    ERRORLOG::ErrlUserDetailsString(op_type).addToLog(err);
+                    break;
+                }
 
                 // Data size == 1 is checked by SMBUS Device Operation
-                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X, "
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s: "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, data=0x%.2X, "
                           "pec=0x%.2X", op_count, op_type, op.addr, op.cmd,
                           op.vData.size(), op.vData[0], op.pec_byte);
 
@@ -1019,26 +1110,37 @@ public:
 
                 if (err)
                 {
-                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
                           "DEVICE_I2C_SMBUS_BYTE Failed: err plid=0x%.8X. "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X, "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, data=0x%.2X, "
                           "pec=0x%.2X", op_count, op_type, err->plid(),
                           op.addr, op.cmd, op.vData.size(), op.vData[0],
                           op.pec_byte);
                     break;
                 }
-                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BYTE size mismatch: returned %d, but expected %d",
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BYTE size mismatch: returned %lu, but expected %lu",
                        size, expSize);
             }
             else if (strcmp(op_type,"WriteWord") == 0)
             {
                 // Convert the other fields to address, command, and data
-                convertStringToOp(tmp_str, op);
+                err = convertStringToOp(tmp_str, op_count, op);
+                if (err != nullptr)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
+                        "In WriteWord section, err back from convertStringToOp:"
+                        " plid=0x%.8X",
+                        op_count, op_type, err->plid());
+
+                    // Add full command string to error log
+                    ERRORLOG::ErrlUserDetailsString(op_type).addToLog(err);
+                    break;
+                }
 
                 // Data size == 2 is checked by SMBUS Device Operation
 
-                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, "
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s: "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, "
                           "data=0x%.2X 0x%.2X, pec=0x%.2X",
                           op_count, op_type, op.addr, op.cmd, op.vData.size(),
                           op.vData[0], op.vData[1], op.pec_byte);
@@ -1054,21 +1156,32 @@ public:
 
                 if (err)
                 {
-                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
                           "DEVICE_I2C_SMBUS_WORD Failed: err plid=0x%.8X. "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data=0x%.2X "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, data=0x%.2X "
                           "0x%.2X, pec=0x%.2X", op_count, op_type, err->plid(),
                           op.addr, op.cmd, op.vData.size(), op.vData[0],
                           op.vData[1], op.pec_byte);
                     break;
                 }
-                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_WORD size mismatch: returned %d, but expected %d",
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_WORD size mismatch: returned %lu, but expected %lu",
                        size, expSize);
             }
             else if (strcmp(op_type,"BlockWrite") == 0)
             {
                 // Convert the other fields to address, command, and data
-                convertStringToOp(tmp_str, op);
+                err = convertStringToOp(tmp_str, op_count, op);
+                if (err != nullptr)
+                {
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
+                        "In BlockWrite section, err back from "
+                        "convertStringToOp: plid=0x%.8X",
+                        op_count, op_type, err->plid());
+
+                    // Add full command string to error log
+                    ERRORLOG::ErrlUserDetailsString(op_type).addToLog(err);
+                    break;
+                }
 
                 // Flash image file for BlockWrite has length as the first data
                 // element, but that element should not get passed into the
@@ -1078,9 +1191,9 @@ public:
                 // byte correctly.
                 op.vData.erase(op.vData.begin());
 
-                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data0=0x%.2X, "
-                          "pec=0x%X", op_count, op_type, op.addr, op.cmd,
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s "
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, data0=0x%.2X,"
+                          " pec=0x%X", op_count, op_type, op.addr, op.cmd,
                           op.vData.size(), op.vData[0], op.pec_byte);
 
                 size = op.vData.size();
@@ -1094,14 +1207,14 @@ public:
 
                 if (err)
                 {
-                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
                           "DEVICE_I2C_SMBUS_BLOCK Failed. err plid=0x%.8X. "
-                          "addr=0x%.2X, cmd=0x%.2X data_size=%d, data0=0x%.2X, "
-                          "pec=0x%X", op_count, op_type, err->plid(), op.addr,
+                          "addr=0x%.2X, cmd=0x%.2X data_size=%lu, data0=0x%.2X,"
+                          " pec=0x%X", op_count, op_type, err->plid(), op.addr,
                           op.cmd, op.vData.size(), op.vData[0], op.pec_byte);
                     break;
                 }
-                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BLOCK size mismatch: returned %d, but expected %d",
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_BLOCK size mismatch: returned %lu, but expected %lu",
                        size, expSize);
             }
             else if (strcmp(op_type,"SendByte") == 0)
@@ -1114,7 +1227,13 @@ public:
                 }
                 else
                 {
-                    assert(false,"updateUcdFlash: SendByte: pDelimiter for 2nd field is nullptr");
+                    field_location = UPDATE_UCD_FLASH_SEND_BYTE_FIELD_2;
+                    TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%lu %s: "
+                              "pDelimiter for 2nd field in SendByte section is "
+                              "nullptr. field_location=%d",
+                              op_count, op_type, field_location);
+                    break;
+
                 }
                 uint64_t addr = strtoul(tmp_str, nullptr, 16);
 
@@ -1126,7 +1245,7 @@ public:
 
                 // There is no additional data, which is why convertStringToOp()
                 // is not being used
-                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
+                TRACUCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s: "
                           "addr=0x%.2X, cmd=0x%.2X",
                           op_count, op_type, addr, cmd);
 
@@ -1142,13 +1261,13 @@ public:
 
                 if (err)
                 {
-                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: %s: "
+                    TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: %s: "
                           "DEVICE_I2C_SMBUS_SEND_OR_RECV Failed. err plid="
                           "0x%.8X. addr=0x%.2X, cmd=0x%.2X",
                           op_count, op_type, err->plid(), op.addr, op.cmd);
                     break;
                 }
-                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_SEND_OR_RECV size mismatch: returned %d, but expected %d",
+                assert(size==expSize, "updateUcdFlash: DEVICE_I2C_SMBUS_SEND_OR_RECV size mismatch: returned %lu, but expected %lu",
                        size, expSize);
             }
             else if (strcmp(op_type,"Pause") == 0)
@@ -1161,7 +1280,12 @@ public:
                 }
                 else
                 {
-                    assert(false,"updateUcdFlash: Pause: pDelimiter for 2nd field is nullptr");
+                    field_location = UPDATE_UCD_FLASH_PAUSE_FIELD_2;
+                    TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%lu %s: "
+                              "pDelimiter for 2nd field in Pause section is "
+                              "nullptr. field_location=%d",
+                              op_count, op_type, field_location);
+                    break;
                 }
 
                 // NOTE: Hostboot's implementation of strtoul only supports
@@ -1179,13 +1303,13 @@ public:
 
                 // Important to trace this pause so users know why there is a
                 // gap in the trace output
-                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%d: %s: "
-                          "Sleep for %d ms", op_count, op_type, sleep_ms);
+                TRACFCOMP(g_trac_ucd,"updateUcdFlash: op=%lu: %s: "
+                          "Sleep for %lu ms", op_count, op_type, sleep_ms);
                 nanosleep(0, sleep_ms * NS_PER_MSEC);
             }
             else
             {
-                TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%d: "
+                TRACFCOMP(g_trac_ucd,ERR_MRK"updateUcdFlash: op=%lu: "
                           "Unrecognized Requested Operation: %s",
                           op_count, op_type);
 
@@ -1221,10 +1345,37 @@ public:
         {
             err->collectTrace(UCD_COMP_NAME);
         }
+        else if (field_location != NO_PARSE_ERROR)
+        {
+            // Error log already has trace above so just create error log here
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @reasoncode       UCD_RC::UCD_FIELD_PARSE_ERROR
+             * @moduleid         UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE
+             * @userdata1[0:31]  HUID of UCD Target
+             * @userdata1[32:63] The Field Location of the parse error
+             * @userdata2        The order of this operation
+             * @devdesc          There was an error while parsing a field in
+             *                   this UCD flash image's command line
+             * @custdesc         Unexpected IPL firmware data format error
+             */
+            err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                UCD_RC::MOD_UPDATE_UCD_FLASH_IMAGE,
+                UCD_RC::UCD_FIELD_PARSE_ERROR,
+                TWO_UINT32_TO_UINT64(
+                    TARGETING::get_huid(iv_pUcd),
+                    field_location),
+                op_count,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            err->collectTrace(UCD_COMP_NAME);
+        }
 
 
         TRACFCOMP(g_trac_ucd,"updateUcdFlash: End of op loop: "
-                  "op_count=%d, char_count=%d, total=%d): %s",
+                  "op_count=%lu, char_count=%lu, total=%lu): %s",
                   op_count, char_count, i_size,
                   err ? "ERROR" : "No Error")
 
@@ -1565,7 +1716,7 @@ errlHndl_t updateAllUcdFlashImages(
         TRACFCOMP(g_trac_ucd,ERR_MRK
             "updateAllUcdFlashImages: Failed to read enough data from UCD "
             "flash image to populate the minor version in the TOC header. "
-            "Image size reported as %d",i_image.size());
+            "Image size reported as %lu",i_image.size());
         break;
     }
 
@@ -1645,8 +1796,8 @@ errlHndl_t updateAllUcdFlashImages(
     if(header.tocEntrySize < sizeof(TocEntry))
     {
         TRACFCOMP(g_trac_ucd,ERR_MRK
-            "updateAllUcdFlashImages: TOC entry size %d smaller than minimum "
-            "of %d",
+            "updateAllUcdFlashImages: TOC entry size %lu smaller than minimum "
+            "of %lu",
             header.tocEntrySize, sizeof(TocEntry));
         /*@
          * @errortype

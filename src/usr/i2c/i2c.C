@@ -1596,7 +1596,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         {
             TRACUCOMP(g_trac_i2c, INFO_MRK
                       "I2C SMBUS Block Write: Command code = 0x%02X, "
-                      "Use PEC = %d. io_buflen = %d",
+                      "Use PEC = %d. io_buflen = %lu",
                       i_args.smbus.commandCode,
                       i_args.smbus.usePec, io_buflen);
 

@@ -37,6 +37,7 @@ namespace UCD_RC
         MOD_UPDATE_UCD_FLASH_IMAGE      = 0x03,
         MOD_VERIFY_UPDATE               = 0x04,
         MOD_PERFORM_DEVICE_OP           = 0x05,
+        MOD_CONVERT_STRING_TO_OP        = 0x06,
     };
 
     enum UcdReasonCode
@@ -53,6 +54,7 @@ namespace UCD_RC
         UCD_ERROR_STORING_TO_FLASH                    = UCD_COMP_ID | 0x0A,
         UCD_TIMEDOUT_STORING_TO_FLASH                 = UCD_COMP_ID | 0x0B,
         UCD_INVALID_DEVICE_OP                         = UCD_COMP_ID | 0x0C,
+        UCD_FIELD_PARSE_ERROR                         = UCD_COMP_ID | 0x0D
     };
 
 }; // namespace UCD
