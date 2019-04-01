@@ -44,6 +44,7 @@
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <lib/freq/axone_freq_traits.H>
 #include <lib/freq/axone_sync.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -52,6 +53,8 @@
 ///
 fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
+    mss::display_git_commit_info("p9a_mss_eff_config");
+
     // Workaround until DIMM level attrs work
     uint8_t l_ranks[mss::exp::MAX_DIMM_PER_PORT] = {};
 

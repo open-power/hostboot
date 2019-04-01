@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 // mss lib
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/voltage/gen_mss_volt.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Calculate and save off rail voltages
@@ -52,6 +53,8 @@
 ///
 fapi2::ReturnCode p9a_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_targets )
 {
+    mss::display_git_commit_info("p9a_mss_volt");
+
     for (const auto& l_port : i_targets)
     {
         FAPI_TRY( (mss::setup_voltage_rail_values<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>(l_port)),

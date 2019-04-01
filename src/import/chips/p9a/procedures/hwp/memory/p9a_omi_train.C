@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/mc/omi.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 
 ///
@@ -56,6 +57,8 @@
 ///
 fapi2::ReturnCode p9a_omi_train( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
 {
+    mss::display_git_commit_info("p9a_omi_train");
+
     FAPI_INF("%s Start p9a_omi_train", mss::c_str(i_target));
 
     const auto l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);

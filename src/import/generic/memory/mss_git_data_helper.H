@@ -22,3 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file mss_git_data_helper.H
+/// @brief Helper file to print out the git data
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_GIT_DATA_HELPER_
+#define _MSS_GIT_DATA_HELPER_
+
+#ifndef __HOSTBOOT_MODULE
+    #include <generic/memory/mss_git_data.H>
+#endif
+
+namespace mss
+{
+
+///
+/// @brief Prints out the git commit data
+/// @pram[in] i_print additional print information to be added to the print statement
+///
+inline void display_git_commit_info(const char* i_print)
+{
+#ifndef __HOSTBOOT_MODULE
+    FAPI_INF("%s Git commit ID: %s", i_print, GIT_COMMIT_ID.c_str());
+#endif
+}
+
+} // ns mss
+
+#endif

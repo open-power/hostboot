@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/mc/omi.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Check the omi status in Axone side
@@ -52,6 +53,8 @@
 ///
 fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
 {
+    mss::display_git_commit_info("p9a_omi_train_check");
+
     FAPI_INF("%s Start p9a_omi_train_check", mss::c_str(i_target));
 
     // Const

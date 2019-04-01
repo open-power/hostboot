@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <chips/common/utils/chipids.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_p9a_attribute_getters.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -602,6 +603,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    mss::display_git_commit_info("exp_omi_init");
+
     FAPI_DBG("Start");
     FAPI_TRY(omiDeviceVerify(i_target));
     FAPI_TRY(omiSetUpstreamTemplates(i_target));

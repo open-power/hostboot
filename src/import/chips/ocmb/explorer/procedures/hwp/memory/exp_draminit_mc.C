@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 
 #include <lib/mc/exp_port.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -50,6 +51,8 @@ extern "C"
 ///
     fapi2::ReturnCode exp_draminit_mc( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
+        mss::display_git_commit_info("exp_draminit_mc");
+
 
         FAPI_INF("%s Start exp_draminit MC", mss::c_str(i_target));
 

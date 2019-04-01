@@ -40,6 +40,8 @@
 #include <lib/exp_draminit_utils.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
+#include <lib/shared/exp_consts.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -50,6 +52,8 @@ extern "C"
     ///
     fapi2::ReturnCode exp_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("exp_draminit");
+
         uint32_t l_crc = 0;
 
         user_input_msdg l_phy_params;

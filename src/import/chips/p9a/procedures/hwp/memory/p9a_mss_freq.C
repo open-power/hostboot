@@ -47,6 +47,7 @@
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -55,6 +56,8 @@
 ///
 fapi2::ReturnCode p9a_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
 {
+    mss::display_git_commit_info("p9a_mss_freq");
+
     // If there are no DIMM, we can just get out.
     if (mss::count_dimm(i_target) == 0)
     {
