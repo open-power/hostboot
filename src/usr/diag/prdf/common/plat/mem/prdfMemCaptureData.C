@@ -220,8 +220,8 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         if ( data.rankDataList.size() > 0 )
         {
             data.header.rankCount = data.rankDataList.size();
-            data.header.isEccSp  = (isDramWidthX4( i_trgt ) &&
-                                    !(TYPE_MCA != getTargetType(i_trgt)));
+            data.header.isEccSp  = ( isDramWidthX4( i_trgt ) &&
+                                     (TYPE_MBA == getTargetType(i_trgt)) );
             UtilMem dramStream;
             dramStream << data;
 
