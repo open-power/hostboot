@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -87,6 +87,14 @@ class PnorRpTest : public CxxTest::TestSuite
                  ( SECUREBOOT::enabled() ) )
             {
                 TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Skipping RINGOVD since Security is enabled");
+                continue;
+            }
+
+            if(( testSections[idx] == PNOR::DIMM_JEDEC_VPD ) &&
+               ( TARGETING::MODEL_AXONE ==
+                 TARGETING::targetService().getProcessorModel() ))
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Skipping non-existent DIMM_JEDEC_VPD section for Axone");
                 continue;
             }
 
