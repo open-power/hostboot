@@ -366,6 +366,10 @@ sub checkSpaceConstraints
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
         my $physicalRegionSize = $sectionHash{$layoutKey}{physicalRegionSize};
 
+        my $pctUtilized = sprintf("%.2f", $filesize / $physicalRegionSize * 100);
+        my $freeBytes = $physicalRegionSize - $filesize;
+        print "$eyeCatch is $pctUtilized% utilized ($freeBytes of $physicalRegionSize bytes free)\n";
+
         if($filesize > $physicalRegionSize)
         {
             # If this is a test run increase HBI size by PAGE_SIZE until all test
