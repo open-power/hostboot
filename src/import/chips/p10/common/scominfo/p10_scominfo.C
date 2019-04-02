@@ -127,11 +127,11 @@ extern "C"
                 //               = 0b00011 for OMI2 and OMI3
                 if ( (i_chipUnitNum % 4 <= 1) ) // OMI DL 0&1
                 {
-                    i_scomAddr.setIoGroupAddr(0b00010);
+                    i_scomAddr.setIoGroupAddr(0x2);
                 }
                 else // OMI DL 2&3
                 {
-                    i_scomAddr.setIoGroupAddr(0b00011);
+                    i_scomAddr.setIoGroupAddr(0x3);
                 }
             }
             else

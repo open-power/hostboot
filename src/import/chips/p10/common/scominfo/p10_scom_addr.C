@@ -369,8 +369,8 @@ extern "C"
                 // must be 0b00000 or 0b00001
                 // Group 0: IOHS[0]
                 // Group 1: IOHS[1]
-                if ( (getIoGroupAddr() == 0b00000) ||
-                     (getIoGroupAddr() == 0b00001) )
+                if ( (getIoGroupAddr() == 0x0) ||
+                     (getIoGroupAddr() == 0x1) )
                 {
                     l_iohsTarget = true;
                 }
@@ -409,7 +409,7 @@ extern "C"
             {
                 l_instance = (getChipletId() - PAU0_CHIPLET_ID) * 2;
 
-                if (getIoGroupAddr() == 0b00001)
+                if (getIoGroupAddr() == 0x1)
                 {
                     l_instance += 1;
                 }
@@ -622,8 +622,8 @@ extern "C"
             {
                 // Group address (bits 22:26 of upper address)
                 // must be 0b00010 or 0b00011
-                if ( (getIoGroupAddr() == 0b00010) ||
-                     (getIoGroupAddr() == 0b00011) )
+                if ( (getIoGroupAddr() == 0x2) ||
+                     (getIoGroupAddr() == 0x3) )
                 {
                     l_omiTarget = true;
                 }
@@ -701,7 +701,7 @@ extern "C"
             }
 
             // Taks group address into account
-            if (getIoGroupAddr() == 0b00011)
+            if (getIoGroupAddr() == 0x3)
             {
                 l_instance += 2;
             }
