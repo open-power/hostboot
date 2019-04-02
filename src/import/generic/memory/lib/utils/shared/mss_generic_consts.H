@@ -52,6 +52,10 @@ enum common_consts
     MEMCMP_EQUAL = 0,         ///< Equal comparison value for memcmp
     BAD_BITS_RANKS = 4,       ///< Bad bit attribute's number of ranks
     BAD_DQ_BYTE_COUNT = 10,      ///< Bad bit attribute's number of byte
+    ATTR_RANK0 = 0, ///< Attribute index for rank0
+    ATTR_RANK1 = 1, ///< Attribute index for rank1
+    ATTR_RANK2 = 2, ///< Attribute index for rank2
+    ATTR_RANK3 = 3, ///< Attribute index for rank3
 };
 
 ///
