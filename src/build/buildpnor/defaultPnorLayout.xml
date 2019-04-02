@@ -257,7 +257,11 @@ Layout Description
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
         <physicalOffset>0x3258000</physicalOffset>
-        <physicalRegionSize>0xC00000</physicalRegionSize>
+        <!-- TODO RTC: 208004
+             Reduced by  MB total to allow HBI + tests to
+             fit in PNOR, need to increase back 1 MB once HBI size
+             is reduced.  Left comment above alone -->
+        <physicalRegionSize>0xB00000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>
