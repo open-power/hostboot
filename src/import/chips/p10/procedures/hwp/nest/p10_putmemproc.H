@@ -22,12 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file p10_putmemproc.H
 /// @brief Invoke ADU putmem chipop.
 ///
 /// *HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
-/// *HWP FW Maintainer: N/A
+/// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
 /// *HWP Consumed by: HB
 ///
 
