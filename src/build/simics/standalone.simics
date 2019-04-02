@@ -8,7 +8,7 @@
 if not defined hb_skip_vpd_preload {$hb_skip_vpd_preload = 0}
 
 
-if ($hb_mode == 0) {
+if ($hb_mode == 0) { # Axone and beyond
     # this number is no longer provided we have to look it up
     $num_dimms = (dec (list-length((get-master-procs)[0].get-dimms)))
 }
@@ -33,17 +33,24 @@ if ($hb_skip_vpd_preload == 0) {
             run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
             # Must match pnor layout used (see eyecatch in layout)
             echo "PNOR layout offset for VPD:"
-            # PNOR eyecatch MVPD
-            echo "    - MVPD at 0x79000"
-            ($hb_pnor).load-file ./sysmvpd.dat.ecc 0x79000
-            if ($hb_mode == 1){
-            # PNOR eyecatch DJVPD
-            echo "    - DJVPD at 0x31000"
-            ($hb_pnor).load-file ./sysspd.dat.ecc 0x31000
+
+            if ($hb_mode == 1) {  # Nimbus/Cumulus
+                # PNOR eyecatch MVPD
+                echo "    - MVPD at 0x79000"
+                ($hb_pnor).load-file ./sysmvpd.dat.ecc 0x79000
+
+                # PNOR eyecatch DJVPD
+                echo "    - DJVPD at 0x31000"
+                ($hb_pnor).load-file ./sysspd.dat.ecc 0x31000
+
+                # PNOR eyecatch CVPD
+                echo "    - CVPD at 0x109000"
+                ($hb_pnor).load-file ./sysmemvpd.dat.ecc 0x109000
+            } else {  # Axone and beyond
+                # PNOR eyecatch MVPD
+                echo "    - MVPD at 0x31000"
+                ($hb_pnor).load-file ./sysmvpd.dat.ecc 0x31000
             }
-            # PNOR eyecatch CVPD
-            echo "    - CVPD at 0x109000"
-            ($hb_pnor).load-file ./sysmemvpd.dat.ecc 0x109000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 }
 
