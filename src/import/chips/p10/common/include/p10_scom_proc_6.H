@@ -804,7 +804,7 @@ static const uint32_t TP_TPBR_AD_ALTD_OPTION_REG_BEFORE_INIT_WAIT_COUNT = 54;
 static const uint32_t TP_TPBR_AD_ALTD_OPTION_REG_BEFORE_INIT_WAIT_COUNT_LEN = 10;
 // proc/reg00025.H
 
-static const uint64_t TP_TPBR_AD_LPC_DATA_REG = 0x03001c42ull;
+static const uint64_t TP_TPBR_AD_LPC_DATA_REG = 0x00090042ull;
 
 static const uint32_t TP_TPBR_AD_LPC_DATA_REG_LPC_DATA = 0;
 static const uint32_t TP_TPBR_AD_LPC_DATA_REG_LPC_DATA_LEN = 64;

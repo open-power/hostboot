@@ -908,7 +908,7 @@ static const uint32_t PE1_PHB2_ETUX08_RSB_REGS_FIR_REG_FIR_INTERNAL_PARITY_ERROR
 static const uint64_t PE1_PHB2_ETUX08_RSB_REGS_PHB5_PMON_COUNTERS = 0x09010999ull;
 // proc/reg00009.H
 
-static const uint64_t TP_TPBR_AD_LPC_CMD_REG = 0x03001c41ull;
+static const uint64_t TP_TPBR_AD_LPC_CMD_REG = 0x00090041ull;
 
 static const uint32_t TP_TPBR_AD_LPC_CMD_REG_RNW = 0;
 static const uint32_t TP_TPBR_AD_LPC_CMD_REG_SIZE = 5;

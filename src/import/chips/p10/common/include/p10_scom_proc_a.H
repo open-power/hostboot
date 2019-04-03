@@ -827,7 +827,7 @@ static const uint32_t TP_LPC_SYNC_FIR_WOF_REG_SYNC_FIR_WOF = 0;
 static const uint32_t TP_LPC_SYNC_FIR_WOF_REG_SYNC_FIR_WOF_LEN = 6;
 // proc/reg00039.H
 
-static const uint64_t TP_TPBR_AD_LPC_STATUS_REG = 0x03001c43ull;
+static const uint64_t TP_TPBR_AD_LPC_STATUS_REG = 0x00090043ull;
 
 static const uint32_t TP_TPBR_AD_LPC_STATUS_REG_DONE_STATUS = 0;
 static const uint32_t TP_TPBR_AD_LPC_STATUS_REG_VALID_STATUS = 10;
