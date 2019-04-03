@@ -310,6 +310,10 @@ void*    call_mss_eff_config( void *io_pArgs )
             const fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT> l_fapi_memport_target
                 (l_memport_target);
 
+            // TODO RTC: 207850 Remove workaround setting EFF_DIMM_SIZE when MSS has code that sets this
+            uint32_t l_defaultMemSize[] = {0x8, 0x0};
+            FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_SIZE, l_fapi_memport_target, l_defaultMemSize);
+
             l_fapi_memport_targets.push_back(l_fapi_memport_target);
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
