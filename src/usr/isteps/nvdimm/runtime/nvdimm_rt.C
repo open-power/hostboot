@@ -410,6 +410,35 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             o_arm_successful = false;
             continue;
         }
+
+        // After arming the trigger, erase the image to prevent the possible
+        // stale image getting the restored on the next boot in case of failed
+        // save.
+        l_err = nvdimmEraseNF(l_nvdimm);
+        if (l_err)
+        {
+            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            o_arm_successful = false;
+
+            // If the erase failed let's disarm the trigger
+            l_err = nvdimmChangeArmState(l_nvdimm, DISARM_TRIGGER);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X], error disarming the nvdimm!",
+                          TARGETING::get_huid(l_nvdimm));
+                l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+                errlCommit(l_err, NVDIMM_COMP_ID);
+            }
+
+            continue;
+        }
     }
 
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",
