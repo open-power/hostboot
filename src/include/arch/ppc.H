@@ -519,6 +519,7 @@ enum
                                         //   1=waiting, 2=done waiting
     MAGIC_SIMICS_SHUTDOWN      =  8006, // Notify we are shutting down
     MAGIC_SIMICS_ISTEP         =  8020, // Log istep, same parms as 7020
+    MAGIC_SIMICS_EXIT_CACHE_CONTAINED = 8021, // Exiting cache contained mode
 };
 
 /**

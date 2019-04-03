@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@
 #endif
 
 #include <isteps/mem_utils.H>
+#include <arch/ppc.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -428,59 +429,67 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS : call_proc_exit_cache_contained on all procs" );
 
-            size_t scom_size = sizeof(uint64_t);
-            TARGETING::Target* l_masterProc = NULL;
-            TARGETING::targetService()
-            .masterProcChipTargetHandle( l_masterProc );
-
             if(Util::isSimicsRunning())
             {
-                //Value to indicate memory is valid
-                uint64_t l_memory_valid = 1;
-
-                //Predicate(s) to get functional dimm for each proc
-                PredicateHwas l_functional;
-                l_functional.functional(true);
-                TargetHandleList l_dimms;
-                PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
-                PredicatePostfixExpr l_checkExprFunctional;
-                l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
-
-                // Loop through all procs to find ones with valid memory
-                for (const auto & l_procChip: l_procList)
+                TARGETING::ATTR_MODEL_type l_procModel = TARGETING::targetService().getProcessorModel();
+                if (l_procModel == TARGETING::MODEL_AXONE)
                 {
-                    // Get the functional DIMMs for this proc
-                    targetService().getAssociated(l_dimms,
-                                          l_procChip,
-                                          TargetService::CHILD_BY_AFFINITY,
-                                          TargetService::ALL,
-                                          &l_checkExprFunctional);
-
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                       "%d functional dimms behind proc: %.8X",
-                       l_dimms.size(), get_huid(l_procChip) );
-
-                    // Check if this proc has memory
-                    if(l_dimms.size())
-                    {
-                        // exit cache contained mode
-                        l_errl = deviceWrite( l_procChip,
-                                &l_memory_valid,  //Memory is valid
-                                scom_size, //Size of Scom
-                                DEVICE_SCOM_ADDRESS(EXIT_CACHE_CONTAINED_SCOM_ADDR));
-                    }
-
-                    if ( l_errl )
-                    {
-                        // Create IStep error log and cross reference to error
-                        // that occurred
-                        l_stepError.addErrorDetails( l_errl );
-
-                        // Commit Error
-                        errlCommit( l_errl, HWPF_COMP_ID );
-                   }
+                    // notify simics exiting cache contained mode
+                    MAGIC_INSTRUCTION(MAGIC_SIMICS_EXIT_CACHE_CONTAINED);
                 }
-            }
+                else
+                {
+                    // used for each processor with memory
+                    size_t scom_size = sizeof(uint64_t);
+
+                    //Value to indicate memory is valid
+                    uint64_t l_memory_valid = 1;
+
+                    //Predicate(s) to get functional dimm for each proc
+                    PredicateHwas l_functional;
+                    l_functional.functional(true);
+                    TargetHandleList l_dimms;
+                    PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+                    PredicatePostfixExpr l_checkExprFunctional;
+                    l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
+
+                    // Loop through all procs to find ones with valid memory
+                    for (const auto & l_procChip: l_procList)
+                    {
+                        // Get the functional DIMMs for this proc
+                        targetService().getAssociated(l_dimms,
+                                              l_procChip,
+                                              TargetService::CHILD_BY_AFFINITY,
+                                              TargetService::ALL,
+                                              &l_checkExprFunctional);
+
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                           "%d functional dimms behind proc: %.8X",
+                           l_dimms.size(), get_huid(l_procChip) );
+
+                        // Check if this proc has memory
+                        if(l_dimms.size())
+                        {
+                            // exit cache contained mode
+                            l_errl = deviceWrite( l_procChip,
+                                            &l_memory_valid,  //Memory is valid
+                                            scom_size,        //Size of Scom
+                                            DEVICE_SCOM_ADDRESS(
+                                              EXIT_CACHE_CONTAINED_SCOM_ADDR) );
+                        }
+
+                        if ( l_errl )
+                        {
+                            // Create IStep error log and cross reference to error
+                            // that occurred
+                            l_stepError.addErrorDetails( l_errl );
+
+                            // Commit Error
+                            errlCommit( l_errl, HWPF_COMP_ID );
+                       }
+                    } // end processor for loop
+                } // end non-Axone model
+            } // end simics running
 
             // Call the function to extend VMM to mainstore
             int rc = mm_extend();
