@@ -1696,7 +1696,7 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
         num = attr[i_pos][i_ds];
     }
 
-    PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT );
+    PRDF_ASSERT( num <= MASTER_RANKS_PER_DIMM_SLCT );
 
     return num;
 
