@@ -1393,6 +1393,7 @@ void add_reserved_mem(devTree * i_dt,
     dtOffset_t rootMemNode = i_dt->addNode(rootNode, "ibm,hostboot");
     i_dt->addPropertyCell32(rootMemNode, "#address-cells", 2);
     i_dt->addPropertyCell32(rootMemNode, "#size-cells", 2);
+    i_dt->addProperty(rootMemNode, "ranges");
     dtOffset_t reservedMemNode = i_dt->addNode(rootMemNode, "reserved-memory");
     i_dt->addPropertyCell32(reservedMemNode, "#address-cells", 2);
     i_dt->addPropertyCell32(reservedMemNode, "#size-cells", 2);
