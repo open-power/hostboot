@@ -39,7 +39,6 @@ namespace mss
 {
 
 ///
-///
 /// @brief Return a DIMM's relative position from a port
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
