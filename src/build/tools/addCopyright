@@ -689,11 +689,16 @@ sub createYearString($)
     # current release year.
     my @years = ();
 
-    # Get size of arrar @CopyRightYears
+    # Get size of array @CopyRightYears
     my $size = @CopyRightYears;
     if ( $size < 2 )   ## If less than 2 then date entry has only a year mentioned
     {
         @years = @CopyRightYears;
+        # add current year if not already in list
+        if ( ($years[0] ne $ReleaseYear) )
+        {
+            push @years, $ReleaseYear ;
+        }
     }
     else
     {
