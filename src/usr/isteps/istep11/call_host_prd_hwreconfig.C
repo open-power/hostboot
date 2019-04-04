@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,12 +37,11 @@ void* call_host_prd_hwreconfig (void *io_pArgs)
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"call_host_prd_hwreconfig");
 
-    errlHndl_t l_err = NULL;
     ISTEP_ERROR::IStepError l_StepError;
     //@TODO-RTC:158411 call p9_enable_reconfig.C
 
-
 #ifdef CONFIG_SECUREBOOT
+    errlHndl_t l_err = NULL;
     // Load the MEMD section here as the first part of step11, it
     //  will stay loaded until the end of step14
     l_err = loadSecureSection(PNOR::MEMD);
