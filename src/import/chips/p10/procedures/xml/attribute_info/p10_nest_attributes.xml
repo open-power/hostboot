@@ -87,6 +87,20 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Processor fabric topology ID based on memory availability. If the
+    master chip has memory then EFF_TOPOLOGY_ID = TOPOLOGY_ID, if not
+    then the first socket with a memory behind it will swap topology
+    IDs with the master chip to form EFF_TOPOLOGY_ID. All else remains
+    the same.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -809,6 +823,43 @@
   </description>
   <valueType>uint64</valueType>
   <array>4</array>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Stores the state of registers affected by p10_sbe_mcs_setup
+    To be restored in p10_revert_sbe_mcs_setup.
+    Set by p10_sbe_mcs_setup.
+  </description>
+  <valueType>uint64</valueType>
+  <array>9</array>
+  <enum>
+    MCFGP0 =    0,
+    MCMODE0 =   1,
+    MCMODE1 =   2,
+    MCMODE2 =   3,
+    MCPERF1 =   4,
+    MCFIRMASK = 5,
+    MCFIRACT0 = 6,
+    MCFIRACT1 = 7,
+    MCTO =      8
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Store unit position of MC written to by p10_sbe_mcs_setup.
+    To be used in p10_revert_sbe_setup.
+  </description>
+  <valueType>uint8</valueType>
   <writeable/>
   <initToZero/>
 </attribute>
