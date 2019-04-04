@@ -117,18 +117,15 @@ include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
 include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 
 
-ifdef CONFIG_AXONE_BRINGUP
-VPATH += ${P9A_MSS_HWP_PATH}
-VPATH += ${EXPLORER_HWP_PATH}
-VPATH += ${EXPLORER_OMI_HWP_PATH}
+VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
+VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
+VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
 
-OBJS+=exp_omi_utils.o
-
-include ${EXPLORER_HWP_PATH}/exp_omi_setup.mk
-include ${EXPLORER_HWP_PATH}/exp_omi_train.mk
-include ${P9A_MSS_HWP_PATH}/p9a_omi_train.mk
-include ${P9A_MSS_HWP_PATH}/p9a_omi_train_check.mk
-endif
+OBJS += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_omi_train.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_omi_train.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_omi_train_check.o,)
 
 
 include ${ROOTPATH}/config.mk

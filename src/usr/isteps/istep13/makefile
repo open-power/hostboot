@@ -126,6 +126,8 @@ include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mba_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_ddrphy_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_row_repair.mk
 
+OBJS += $(if $(CONFIG_AXONE),exp_scominit.o,)
+OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)
 
 include ${ROOTPATH}/config.mk
 
@@ -141,10 +143,5 @@ VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/initfiles
 
-ifdef CONFIG_AXONE_BRINGUP
-include ${EXP_PROCEDURES_PATH}/hwp/memory/exp_scominit.mk
-include ${OCMB_PROCEDURES_PATH}/hwp/initfiles/explorer_scom.mk
-
-VPATH    += ${EXP_PROCEDURES_PATH}/hwp/memory
-VPATH    += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
-endif
+VPATH += $(if $(CONFIG_AXONE),${EXP_PROCEDURES_PATH}/hwp/memory,)
+VPATH += $(if $(CONFIG_AXONE),${OCMB_PROCEDURES_PATH}/hwp/initfiles/,)

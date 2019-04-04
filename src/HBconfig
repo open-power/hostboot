@@ -54,6 +54,10 @@ config SUPPORT_PARTIAL_CACHE
         Support chips that do not have full cache --
         intended for early bringup of hardware
 
+config AXONE
+    default n
+    help
+        Only enabled for Axone
 
 config AXONE_BRING_UP
     default n
