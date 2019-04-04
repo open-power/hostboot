@@ -1418,7 +1418,12 @@ errlHndl_t systemFwIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
 errlHndl_t systemFwIpmiFruInv::buildProductInfoArea(std::vector<uint8_t>
                                                                        &io_data)
 {
-    errlHndl_t l_errl = nullptr, l_errl_version = nullptr;
+    errlHndl_t l_errl = nullptr;
+
+// Setting variable only used in config secureboot
+#ifdef CONFIG_SECUREBOOT
+    errlHndl_t l_errl_version = nullptr;
+#endif
 
     do {
         //Set formatting data that goes at the beginning of the record

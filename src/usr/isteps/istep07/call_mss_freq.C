@@ -79,7 +79,10 @@ void*    call_mss_freq( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = NULL;
+
+    #ifdef CONFIG_SECUREBOOT
     bool l_isMemdLoaded = false;
+    #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 

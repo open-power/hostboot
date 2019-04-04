@@ -528,8 +528,8 @@ errlHndl_t extendBaseImage()
 
 void initBackupTpm()
 {
-    errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_TPMDD
+    errlHndl_t l_errl = nullptr;
     Message* l_msg = Message::factory(MSG_TYPE_INIT_BACKUP_TPM,
                                       0,
                                       nullptr,

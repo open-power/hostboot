@@ -704,8 +704,14 @@ void ErrlEntry::addVersionInfo()
     if (   !INITSERVICE::spBaseServicesEnabled()
         && PNOR::isSectionAvailable(PNOR::VERSION))
     {
+
+// Setting variables only used in config secureboot
+#ifdef CONFIG_SECUREBOOT
         bool l_secureSectionLoaded = false;
-        errlHndl_t l_errl = nullptr, l_errl_loadSecureSection = nullptr;
+        errlHndl_t l_errl_loadSecureSection = nullptr;
+#endif
+
+        errlHndl_t l_errl = nullptr;
 
         do
         {
