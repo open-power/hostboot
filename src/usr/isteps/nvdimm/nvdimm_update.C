@@ -1909,17 +1909,6 @@ bool NvdimmsUpdate::runUpdate(void)
             break;
         }
 
-        /////////////////////////
-        // @todo: remove this check when SMART provides updated 32GB image
-        // The current 32GB image will cause the future updating to fail
-        if (v_NVDIMM_16GB_list.size() == 0)
-        {
-            TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdate() - "
-                "Only 16GB NVDIMM type is supported right now for update");
-            break;
-        }
-        /////////////////////////
-
         if (INITSERVICE::spBaseServicesEnabled())
         {
             // Load the NVDIMM flash binary via the MCL in load-only mode
