@@ -49,6 +49,16 @@
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
+enum p10_fbc_utils_addr_mode
+{
+    EFF_TOPOLOGY_ID,  // effective FBC topology ID attributes
+    HB_BOOT_ID        // address 0 of drawer
+};
+
+//------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
 
@@ -62,6 +72,13 @@ const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
 // max memory interleave = 16TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
+
+// FBC base address determination constants
+const uint8_t FABRIC_ADDR_SMF_BIT = 12;
+const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -90,5 +107,25 @@ fapi2::ReturnCode p10_fbc_utils_get_fbc_state(
 ///
 fapi2::ReturnCode p10_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+///
+///@brief Dynamically determine base address for a given chip
+///
+/// @param[in] i_target                 Reference to processor chip target
+/// @param[in] i_addr_mode              HB_BOOT_ID or EFF_TOPOLOGY_ID (chip 0 of
+///                                     drawer vs eff topology id)
+/// @param[out] o_base_address_nm0      base address of nm0 region of memory map
+/// @param[out] o_base_address_nm1      base address of nm1 region of memory map
+/// @param[out] o_base_address_m        base address of m region of memory map
+/// @param[out] o_base_address_mmio     base address of mmio region of memory map
+/// @return fapi2::ReturnCode           FAPI2_RC_SUCCESS if success, else error
+///
+fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p10_fbc_utils_addr_mode i_addr_mode,
+    uint64_t& o_base_address_nm0,
+    uint64_t& o_base_address_nm1,
+    uint64_t& o_base_address_m,
+    uint64_t& o_base_address_mmio);
 
 #endif // _P10_FBC_UTILS_H_
