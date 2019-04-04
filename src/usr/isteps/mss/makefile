@@ -80,6 +80,8 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/omi/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/i2c/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -183,10 +185,9 @@ MSS_PATH_GENERIC_MEMORY := ${ROOTPATH}/src/import/generic/memory/lib
 MSS_GENERIC_MEMORY_SOURCE := $(shell find $(MSS_PATH_GENERIC_MEMORY) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 
-ifdef CONFIG_AXONE_BRINGUP
 MSS_PATH_AXONE := $(AXONE_PROCEDURES_PATH)/hwp/memory/lib
 MSS_AXONE_SOURCE := $(shell find $(MSS_PATH_AXONE) -name '*.C' -exec basename {} \;)
-MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_AXONE_SOURCE))
+MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_AXONE_SOURCE)),)
 
 MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
 MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
@@ -194,11 +195,8 @@ MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basen
 MSS_EXPLORER_SOURCE := $(filter-out memdiags.C,$(MSS_EXPLORER_SOURCE))
 MSS_EXPLORER_SOURCE := $(filter-out mcbist.C,$(MSS_EXPLORER_SOURCE))
 MSS_EXPLORER_SOURCE := $(filter-out memory_size.C,$(MSS_EXPLORER_SOURCE))
-MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE))
-else
-#must bring this in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
-MSS_MODULE_OBJS += explorer_memory_size.o
-endif
+#must bring explorer_memory_size.o in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
+MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE)),explorer_memory_size.o)
 MODULE = isteps_mss
 OBJS += $(MSS_MODULE_OBJS)
 $(call BUILD_MODULE)

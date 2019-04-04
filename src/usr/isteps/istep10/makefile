@@ -121,13 +121,9 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 # p9_cen_ref_clk_enable : Centaur Ref Clock Enable
 include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
 
-ifdef CONFIG_AXONE_BRINGUP
-VPATH +=  ${OCMB_HWP_PATH}
-# p9a_ocmb_enable
-include ${PERV_HWP_PATH}/p9a_ocmb_enable.mk
-# exp_check_for_ready
-OBJS+=exp_check_for_ready.o
-endif
+VPATH += $(if $(CONFIG_AXONE),${OCMB_HWP_PATH},)
+OBJS += $(if $(CONFIG_AXONE),p9a_ocmb_enable.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_check_for_ready.o,)
 
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10

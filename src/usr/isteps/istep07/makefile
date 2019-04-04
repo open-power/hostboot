@@ -107,13 +107,12 @@ include $(HWP_PATH_CEN)/p9c_mss_bulk_pwr_throttles.mk
 include $(HWP_PATH_CEN)/p9c_mss_eff_mb_interleave.mk
 
 
-ifdef CONFIG_AXONE_BRINGUP
-include $(HWP_PATH_P9A)/p9a_mss_volt.mk
-include $(HWP_PATH_P9A)/p9a_mss_freq.mk
-include $(HWP_PATH_P9A)/p9a_mss_freq_system.mk
-include $(HWP_PATH_P9A)/p9a_mss_eff_config.mk
-include $(HWP_PATH_P9A)/p9a_mss_eff_config_thermal.mk
-endif
+# Axone only objects 
+OBJS += $(if $(CONFIG_AXONE),p9a_mss_volt.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_mss_freq_system.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config.o,)
+OBJS += $(if $(CONFIG_AXONE),p9a_mss_eff_config_thermal.o,)
 
 #host_mss_attr_cleanup : MSS ATTR Cleanup
 include $(HWP_PATH_CEN)/p9c_mss_attr_cleanup.mk
