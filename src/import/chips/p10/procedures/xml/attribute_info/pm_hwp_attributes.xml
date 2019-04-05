@@ -39,6 +39,7 @@
     </description>
     <valueType>uint32</valueType>
     <initToZero/>
+    <writeable/>
     <group>state</group>
   </attribute>
 
@@ -54,6 +55,8 @@
         established.
     </description>
     <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
     <group>boot</group>
   </attribute>
 
@@ -69,6 +72,8 @@
         established
     </description>
     <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
     <group>boot</group>
   </attribute>
 
@@ -84,6 +89,8 @@
         established
     </description>
     <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
     <group>boot</group>
   </attribute>
 
@@ -96,6 +103,7 @@
     </description>
     <valueType>uint8</valueType>
     <initToZero/>
+    <writeable/>
     <group>boot</group>
   </attribute>
 
@@ -108,6 +116,8 @@
     </description>
     <valueType>uint64</valueType>
     <group>fir</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -119,6 +129,8 @@
     </description>
     <valueType>uint64</valueType>
     <group>fir</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -130,6 +142,8 @@
     </description>
     <valueType>uint64</valueType>
     <group>fir</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -150,6 +164,7 @@
           FIRS_RESET_IN_HB = 3
     </enum>
     <initToZero/>
+    <writeable/>
     <group>fir</group>
   </attribute>
 
@@ -162,6 +177,8 @@
     </description>
     <valueType>uint8</valueType>
     <group>status</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -173,6 +190,8 @@
     </description>
     <valueType>uint8</valueType>
     <group>status</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -184,6 +203,8 @@
     </description>
     <valueType>uint8</valueType>
     <group>status</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -195,6 +216,8 @@
     </description>
     <valueType>uint8</valueType>
     <group>status</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
   <!-- ********************************************************************* -->
@@ -215,6 +238,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -237,6 +261,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -259,6 +284,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -281,6 +307,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -303,6 +330,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -322,6 +350,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -341,6 +370,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -360,6 +390,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
 
@@ -380,6 +411,7 @@
           TRUE=1
     </enum>
     <initToZero/>
+    <writeable/>
     <group>state</group>
   </attribute>
 
@@ -397,6 +429,7 @@
           ACTIVE = 0x01
     </enum>
     <initToZero/>
+    <writeable/>
     <group>state</group>
   </attribute>
 
@@ -411,6 +444,7 @@
     </description>
     <valueType>uint8</valueType>
     <initToZero/>
+    <writeable/>
     <group>state</group>
   </attribute>
 
@@ -428,6 +462,7 @@
           ACTIVE = 0x01
     </enum>
     <initToZero/>
+    <writeable/>
     <group>state</group>
   </attribute>
 
@@ -454,6 +489,8 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <group>state</group>
+    <initToZero/>
+    <writeable/>
   </attribute>
 
 </attributes>
