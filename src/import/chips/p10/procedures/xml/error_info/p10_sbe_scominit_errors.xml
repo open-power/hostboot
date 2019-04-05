@@ -62,4 +62,18 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P10_SBE_SCOMINIT_FABRIC_BROADCAST_ATTR_ERR</rc>
+    <description>
+      Procedure: p10_sbe_scominit
+      Invalid attribute value for fabric broadcast mode
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BROADCAST_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
