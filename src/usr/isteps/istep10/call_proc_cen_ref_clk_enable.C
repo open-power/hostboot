@@ -1086,8 +1086,37 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
             else
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS : exp_check_for_ready"
+                          "SUCCESS : exp_check_for_ready "
                           "completed ok");
+
+                size_t size = 0;
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Read IDEC from OCMB 0x%.8X",
+                          TARGETING::get_huid(l_ocmb));
+
+                // This write gets translated into a read of the explorer chip
+                // in the device driver. First, a read of the chip's IDEC
+                // register occurs then ATTR_EC, ATTR_HDAT_EC, and ATTR_CHIP_ID
+                // are set with the values found in that register. So, this
+                // deviceWrite functions more as a setter for an OCMB target's
+                // attributes.
+                l_errl = DeviceFW::deviceWrite(l_ocmb,
+                                               nullptr,
+                                               size,
+                                               DEVICE_IDEC_ADDRESS());
+                if (l_errl)
+                {
+                    // read of ID/EC failed even though we THOUGHT we were
+                    // present.
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "OCMB 0x%.8X - read IDEC failed (eid 0x%X) - bad",
+                              TARGETING::get_huid(l_ocmb), l_errl->eid());
+
+                    // commit the error but keep going
+                    errlCommit(l_errl, HWAS_COMP_ID);
+                    // l_errl is now nullptr
+                }
             }
         }
 #endif
