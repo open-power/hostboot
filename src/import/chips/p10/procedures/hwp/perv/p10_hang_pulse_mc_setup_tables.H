@@ -23,97 +23,105 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/*
+ * We're making all these tables "static const" since they're being used
+ * in one place only each, and we trust the compiler to leave them out
+ * of a module if they're not used.
+ */
 
-uint8_t SETUP_HANG_COUNTERS_PERV[][3] =
+#include <multicast_group_defs.H>
+
+static const hang_pulse_t SETUP_HANG_COUNTERS_PERV[] =
 {
     {0, 16, 0},
     {1, 4, 0},
     {2, 18, 0},
     {3, 1, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_PULSE_FREQ[][3] =
+static const hang_pulse_t SETUP_HANG_PULSE_FREQ[] =
 {
     {0, 1, 0},
-    {1, 31, 0}
+    {1, 31, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_N0[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_N0[] =
 {
     {0, 16, 0},
     {1, 24, 0},
     {2, 34, 0},
     {3, 15, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_N1[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_N1[] =
 {
     {0, 16, 0},
     {1, 23, 0},
     {2, 15, 0},
     {3, 19, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_PCI[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_PCI[] =
 {
     {0, 16, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_MC[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_MC[] =
 {
     {0, 16, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_IOHS[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_IOHS[] =
 {
     {0, 16, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_PAU[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_PAU[] =
 {
     {0, 16, 0},
     {1, 4, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint8_t SETUP_HANG_COUNTERS_EQ[][3] =
+static const hang_pulse_t SETUP_HANG_COUNTERS_EQ[] =
 {
     {0, 16, 0},
     {1, 23, 0},
     {5, 6, 0},
-    {6, 8, 0}
+    {6, 8, 0, 1}
 };
 
-uint64_t ignore_pgood = 0x0;
-uint64_t honor_pgood = 0x1;
-uint64_t honor_core_pgood = 0x2;
-
-uint64_t mc_group_1 = 0x1;
-uint64_t mc_group_2 = 0x2;
-uint64_t mc_group_3 = 0x3;
-uint64_t mc_group_4 = 0x4;
-uint64_t mc_group_5 = 0x5;
-uint64_t mc_group_6 = 0x6;
-
-uint64_t MC_GROUPS[][3] =
+static const mc_setup_t ISTEP3_MC_GROUPS[] =
 {
-    { mc_group_1, 0x3FFFFFFFFFFFFFFF, honor_pgood },
-    { mc_group_2, 0x000F000000000000, honor_pgood },
-    { mc_group_3, 0x000000FF00000000, honor_pgood },
-    { mc_group_4, 0x0000F00000000000, honor_pgood },
-    { mc_group_5, 0x00C0000000000000, honor_pgood },
-    { mc_group_6, 0x00000000FF000000, honor_core_pgood }
+    { fapi2::MCGROUP_GOOD,       MC_GROUP_0, HONOR_PGOOD,          0, 0x7FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_NO_TP, MC_GROUP_1, HONOR_PGOOD_FORCE_EQ, 0, 0x3FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_MC,    MC_GROUP_2, HONOR_PGOOD,          0, 0x000F000000000000 },
+    { fapi2::MCGROUP_GOOD_IOHS,  MC_GROUP_3, HONOR_PGOOD,          0, 0x000000FF00000000 },
+    { fapi2::MCGROUP_GOOD_PAU,   MC_GROUP_4, HONOR_PGOOD,          0, 0x0000F00000000000 },
+    { fapi2::MCGROUP_GOOD_PCI,   MC_GROUP_5, HONOR_PGOOD,          0, 0x00C0000000000000 },
+    { fapi2::MCGROUP_ALL_EQ,     MC_GROUP_6, HONOR_PGOOD,          1, 0x00000000FF000000 },
+};
+
+static const mc_setup_t ISTEP4_MC_GROUPS[] =
+{
+    { fapi2::MCGROUP_GOOD,       MC_GROUP_0, HONOR_PGOOD,      0, 0x7FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_NO_TP, MC_GROUP_1, HONOR_PGOOD,      0, 0x3FFFFFFFFFFFFFFF },
+    { fapi2::MCGROUP_GOOD_MC,    MC_GROUP_2, HONOR_PGOOD,      0, 0x000F000000000000 },
+    { fapi2::MCGROUP_GOOD_IOHS,  MC_GROUP_3, HONOR_PGOOD,      0, 0x000000FF00000000 },
+    { fapi2::MCGROUP_GOOD_PAU,   MC_GROUP_4, HONOR_PGOOD,      0, 0x0000F00000000000 },
+    { fapi2::MCGROUP_GOOD_PCI,   MC_GROUP_5, HONOR_PGOOD,      0, 0x00C0000000000000 },
+    { fapi2::MCGROUP_GOOD_EQ,    MC_GROUP_6, HONOR_CORE_PGOOD, 1, 0x00000000FF000000 },
 };
