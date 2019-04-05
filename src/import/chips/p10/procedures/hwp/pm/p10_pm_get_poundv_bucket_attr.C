@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -91,6 +92,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
     //RTC 207137
     //Hardcode the bucketId until we decide the source of bucketid
     l_bucketId = 1;
+    l_bucketSize = VERSION_1_BUCKET_SIZE;
 
     //Version 1:
     //#V record is laid out as follows:
@@ -152,7 +154,7 @@ fapi2::ReturnCode p10_pm_get_poundv_bucket_attr(
 
     // Use the selected bucket id to populate the output data
     memcpy(o_data,
-           l_fullVpdData + POUNDV_BUCKET_OFFSET + (l_bucketId - 1) * l_bucketSize,
+           l_fullVpdData + POUNDV_BUCKET_OFFSET + ((l_bucketId - 1) * l_bucketSize),
            l_bucketSize);
 
 fapi_try_exit:
