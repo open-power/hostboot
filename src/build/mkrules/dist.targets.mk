@@ -85,6 +85,7 @@ COPY_FILES = \
     src/build/buildpnor/imprintHwKeyHash:openpower \
     src/build/buildpnor/wof-tables-img:openpower \
     src/build/buildpnor/memd_creation.pl:openpower \
+    src/build/buildpnor/pkgOcmbFw.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
     src/usr/targeting/common/genHDATstructures.pl:openpower \
@@ -305,6 +306,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildUcdFlashImages.pl \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/imprintHwKeyHash \
+    src/build/buildpnor/pkgOcmbFw.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
     src/build/buildpnor/pnorLayoutFSP.xml \
     src/build/buildpnor/pnorLayoutAxone.xml \
