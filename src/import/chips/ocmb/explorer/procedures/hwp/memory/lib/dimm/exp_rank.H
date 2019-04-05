@@ -23,17 +23,29 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-
 #ifndef _MSS_EXP_RANK_H_
 #define _MSS_EXP_RANK_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/mss_rank.H>
 
 namespace mss
 {
-
 namespace rank
 {
+
+///
+/// @brief Rank traits for explorer
+///
+template <>
+class rankTraits<mss::mc_type::EXPLORER>
+{
+    public:
+        static constexpr uint8_t MAX_DIMMS_PER_PORT = 2;
+        static constexpr uint8_t MAX_RANKS_PER_DIMM = 4;
+        static constexpr uint8_t RANK_INDEX_STEP = 4;
+};
+
 ///
 /// @brief Return a vector of rank numbers which represent the primary rank pairs for this port or dimm
 /// @tparam T the target type
@@ -51,12 +63,11 @@ inline fapi2::ReturnCode primary_ranks( const fapi2::Target<T>& i_target, std::v
 /// @brief Return the *port relative position* of the DIMM which posesses this rank
 /// @param[in] i_rank the rank number.
 /// @return the relative position of the DIMM which contains this rank.
-///TODO: Need to implement this
 inline size_t get_dimm_from_rank(const uint64_t i_rank)
 {
-    return 0;
+    using TT = rankTraits<mss::mc_type::EXPLORER>;
+    return i_rank / TT::MAX_RANKS_PER_DIMM;
 }
-
 
 } // namespace rank
 } // namespace mss

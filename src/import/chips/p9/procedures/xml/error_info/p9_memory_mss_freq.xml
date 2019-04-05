@@ -303,22 +303,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
-    <description>There seem to be too many primary ranks seen on the dimm</description>
-    <ffdc>RANK_COUNT</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>DIMM_TARGET</target>
-    </gard>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
     <description>Error calculating the index into max_freq array</description>
     <ffdc>INDEX</ffdc>

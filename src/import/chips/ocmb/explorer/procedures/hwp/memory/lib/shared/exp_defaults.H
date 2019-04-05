@@ -25,7 +25,7 @@
 
 ///
 /// @file exp_defaults.H
-/// @brief default types associated with Nimbus system
+/// @brief default types associated with Explorer system
 ///
 // *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
@@ -33,13 +33,16 @@
 // *HWP Level: 2
 // *HWP Consumed by: CI
 
-#ifndef _MSS_NIMBUS_DEFAULTS_H_
-#define _MSS_NIMBUS_DEFAULTS_H_
+#ifndef _MSS_EXPLORER_DEFAULTS_H_
+#define _MSS_EXPLORER_DEFAULTS_H_
 
+#include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
+
+constexpr fapi2::TargetType DEFAULT_MEM_PORT_TARGET = fapi2::TARGET_TYPE_MEM_PORT;
 
 constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::EXPLORER;
 

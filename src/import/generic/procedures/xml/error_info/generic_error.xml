@@ -656,7 +656,7 @@
     </callout>
   </hwpError>
 
-    <hwpError>
+  <hwpError>
     <rc>RC_MSS_POWER_THERMAL_DIMM_INDEX_OUT_OF_BOUND</rc>
     <description>
       The dimm index is out of bound for the port
@@ -668,5 +668,56 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-  
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
+    <description>
+        Too many primary ranks were seen on the dimm according
+        to the call to master_ranks_per_dimm</description>
+    <ffdc>RANK_COUNT</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_PORT</rc>
+    <description>
+        Too many primary ranks were seen on the port according
+        to the call to master_ranks_per_dimm</description>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_RANK_OUT_OF_RANGE</rc>
+    <description>
+        The rank provided to the rank::info constructor exceeded
+        the maximum rank for the MC
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+  </hwpError>
+
 </hwpErrors>
