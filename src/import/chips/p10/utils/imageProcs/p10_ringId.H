@@ -72,16 +72,6 @@ static const ChipletData_t g_chipletData =
     1,     // Number of chiplet instances
     6,  // 6 common rings for pervasive chiplet
     1,  // 1 instance specific rings for pervasive chiplet
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 }; // end of namespace PERV
@@ -107,16 +97,6 @@ static const ChipletData_t g_chipletData =
     1,     // Number of chiplet instances
     6,  // 6 common rings for N0 Chiplet
     1,  // 1 instance specific rings for N0 chiplet
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 };
@@ -142,16 +122,6 @@ static const ChipletData_t g_chipletData =
     1,     // Number of chiplet instances
     6 , // 6 common rings for N1 Chiplet
     1,  // 1 instance specific rings for N1 chiplet
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 };
@@ -177,16 +147,6 @@ static const ChipletData_t g_chipletData =
     1,    // Number of chiplet instances
     6,  // 6 common rings for PCI0 chiplet
     1,  // 1 instance specific rings for PCI0 chiplet
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 };
@@ -212,16 +172,6 @@ static const ChipletData_t g_chipletData =
     1,     // Number of chiplet instances
     6,  // 6 common rings for MC Chiplet
     1,  // 1 instance specific rings for each MC instance
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 }; // end of namespace MC
@@ -247,16 +197,6 @@ static const ChipletData_t g_chipletData =
     1,     // Number of chiplet instances
     6,  // 6 common rings for MC Chiplet
     1,  // 1 instance specific rings for each MC instance
-    2,  // 2 common ring variants: BASE, RL
-    {
-        RV_BASE,
-        RV_RL,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT,
-        UNDEFINED_RING_VARIANT
-    }
 };
 
 }; // end of namespace AXON
@@ -289,16 +229,6 @@ static const ChipletData_t g_chipletData =
     8,    // Number of chiplet instances
     12, // 12 common rings for Quad chiplet.
     2,  // 2 instance specific rings for EQ chiplet
-    7,  // 7 common ring variants: BASE, CC, RL, RL2/3/4/5
-    {
-        RV_BASE,
-        RV_CC,
-        RV_RL,
-        RV_RL2,
-        RV_RL3,
-        RV_RL4,
-        RV_RL5
-    }
 };
 
 }; // end of namespace EQ
