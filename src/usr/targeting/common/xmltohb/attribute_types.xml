@@ -8111,9 +8111,11 @@
         the UCD device rather than the actual value from the device.
     </description>
     <simpleType>
-      <uint16_t/>
+      <uint16_t>
+        <default>1</default>
+      </uint16_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <no_export/>
   </attribute>
