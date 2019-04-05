@@ -728,19 +728,23 @@ errlHndl_t discoverTargets()
                                             MOD_DISCOVER_TARGETS,
                                             RC_PARTIAL_GOOD_INFORMATION);
 
-            if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
-                (l_targetType != TYPE_TPM) &&
-                (l_targetType != TYPE_SP) &&
-                (l_targetType != TYPE_BMC) &&
-                (l_targetType != TYPE_I2C_MUX))
+            if(   (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
+               && (l_targetType != TYPE_TPM)
+               && (l_targetType != TYPE_SP)
+               && (l_targetType != TYPE_BMC)
+               && (l_targetType != TYPE_I2C_MUX)
+               && (l_targetType != TYPE_OCMB_CHIP))
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
 
                 if (errl)
-                {   // read of ID/EC failed even tho we THOUGHT we were present.
-                    HWAS_INF("pTarget %.8X - read IDEC failed (eid 0x%X) - bad",
-                        errl->eid(), pTarget->getAttr<ATTR_HUID>());
+                {
+                    // read of ID/EC failed even tho we THOUGHT we were present.
+                    HWAS_INF("pTarget 0x%.8X - read IDEC failed "
+                             "(eid 0x%X) - bad",
+                             get_huid(pTarget), errl->eid());
+
                     // chip NOT present and NOT functional, so that FSP doesn't
                     // include this for HB to process
                     chipPresent = false;
@@ -758,8 +762,9 @@ errlHndl_t discoverTargets()
 
                     if (errl)
                     {   // read of PG failed even tho we were present..
-                        HWAS_INF("pTarget %.8X - read PG failed (eid 0x%X)- bad",
-                            errl->eid(), pTarget->getAttr<ATTR_HUID>());
+                        HWAS_INF("pTarget 0x%.8X - read PG failed "
+                                 "(eid 0x%X) - bad",
+                                 get_huid(pTarget), errl->eid());
                         chipFunctional = false;
                         errlEid = errl->eid();
 

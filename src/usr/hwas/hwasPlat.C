@@ -50,6 +50,9 @@
 #include <config.h>
 #include <targeting/common/targetservice.H>
 #include <chipids.H>
+#include <vpd/spdenums.H>
+
+#include <map>
 
 #ifdef CONFIG_SUPPORT_EEPROM_CACHING
 #include <i2c/eepromif.H>
@@ -234,6 +237,28 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       TARGETING::TYPE_MEMBUF,
                       cfamIDEC);
 
+/* @brief A helper function used to convert the contents of the IDEC register
+ *        to the CFAM ID format.
+ *
+ * @param[in]  i_idec       The contents of the IDEC register
+ *
+ * @return     uint64_t     The converted result.
+ */
+uint64_t formatOcmbIdecToCfamStandard(const uint64_t i_idec)
+{
+    uint64_t convertedIdec = 0;
+
+    // Need to convert register contents from Mm0L00CC to MLmCC000
+    uint32_t idec = static_cast<uint32_t>(i_idec);
+    uint32_t major = 0xF0000000 & idec;
+    uint32_t minor = 0x0F000000 & idec;
+    uint32_t location = 0x000F0000 & idec;
+    convertedIdec = (major | (location << 8) | (minor >> 4)
+                    | ((idec & 0x000000FF) << 12));
+
+    return convertedIdec;
+}
+
 errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
                     TARGETING::Target* i_target,
                     void* io_buffer,
@@ -241,16 +266,188 @@ errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
                     int64_t i_accessType,
                     va_list i_args)
 {
-    // for now just hardcode the answer to something explicitly invalid
-    uint8_t l_ec = INVALID__ATTR_EC;
-    i_target->setAttr<TARGETING::ATTR_EC>(l_ec);
-    i_target->setAttr<TARGETING::ATTR_HDAT_EC>(l_ec);
+    //@fixme when we know what register to read the IDEC from.
+    const uint16_t OCMB_IDEC_REGISTER = 0x2134;
 
-    // we can assume this is an Explorer chip though
-    uint32_t l_id = POWER_CHIPID::EXPLORER_16;
-    i_target->setAttr<TARGETING::ATTR_CHIP_ID>(l_id);
+    uint64_t idec = 0;
+    size_t op_size = sizeof(idec);
+    errlHndl_t error = nullptr;
 
-    return nullptr;
+    // Read the ID/EC
+    error = DeviceFW::deviceRead(i_target,
+                                 &idec,
+                                 op_size,
+                                 DEVICE_SCOM_ADDRESS(OCMB_IDEC_REGISTER));
+
+    do {
+
+        if (error != nullptr)
+        {
+            HWAS_ERR("ocmbIDEC> OCMB 0x%.8X - failed to read ID/EC",
+                     TARGETING::get_huid(i_target));
+
+            break;
+        }
+
+        assert(op_size == sizeof(idec), "ocmbIDEC> Size returned from OCMB "
+              "IDEC read size %d  not the expected size %d",
+              op_size, sizeof(idec));
+
+        idec = formatOcmbIdecToCfamStandard(idec);
+
+        uint8_t ec = POWER_CHIPID::extract_ddlevel(idec);
+        uint32_t id = POWER_CHIPID::extract_chipid16(idec);
+
+        HWAS_DBG("ocmbIDEC> OCMB 0x%.8X - read ID/EC successful. "
+                 "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
+                 TARGETING::get_huid(i_target),
+                 id,
+                 ec,
+                 idec);
+
+        // Verify the OCMB ID is an expected value
+
+        // Allocate buffer to hold SPD and init to 0
+        size_t spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+        uint8_t* spdBuffer = new uint8_t[spdBufferSize];
+        memset(spdBuffer, 0, spdBufferSize);
+
+        // Read the full SPD.
+        error = deviceRead(i_target,
+                           spdBuffer,
+                           spdBufferSize,
+                           DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD));
+
+        // If unable to retrieve the SPD buffer then can't
+        // extract the IDEC data, so return error.
+        if (error)
+        {
+            HWAS_ERR("ocmbIDEC> Error while trying to read "
+                     "ENTIRE SPD from 0x%.08X ",
+                     TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // Make sure we got back the size we were expecting.
+        assert(spdBufferSize == SPD::OCMB_SPD_EFD_COMBINED_SIZE,
+              "ocmbIDEC> OCMB SPD read size %d "
+              "doesn't match the expected size %d",
+              spdBufferSize,
+              SPD::OCMB_SPD_EFD_COMBINED_SIZE);
+
+       // SPD IDEC info is in the following three bytes
+       const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET = 198;
+       const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET  = 199;
+       const size_t SPD_EC_OFFSET                        = 200;
+
+       // Get the ID from the SPD and verify that it matches what we read from
+       // the IDEC register.
+       uint16_t spdId = 0;
+
+       spdId = TWO_UINT8_TO_UINT16(
+               *(spdBuffer + SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET),
+               *(spdBuffer + SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET));
+
+       uint8_t spdEc = *(spdBuffer + SPD_EC_OFFSET);
+
+        // This map will hold the associated values between what is read from
+        // the OCMB's IDEC register and the SPD since they use different
+        // standards and thus cannot be directly compared.
+        // @TODO RTC 205563 Fix Gemini info when it is known.
+        const uint32_t GEMINI_ID        = 0x20D2;
+        const uint32_t GEMINI_SPD_ID    = 0x80A4;
+        const uint32_t GEMINI_EC        = 0x0000;
+        const uint32_t GEMINI_SPD_EC    = 0x0000;
+        const uint32_t EXPLORER_SPD_ID  = 0x2980;
+        const uint32_t EXPLORER_EC      = 0x0010;
+        const uint32_t EXPLORER_SPD_EC  = 0x0000;
+        const std::map<uint32_t, uint32_t> OCMB_ID_SPD_ASSOCIATION_MAP
+        {
+            {POWER_CHIPID::EXPLORER_16, EXPLORER_SPD_ID},
+            {GEMINI_ID, GEMINI_SPD_ID},
+        };
+
+        const std::map<uint32_t, uint32_t> OCMB_EC_SPD_ASSOCIATION_MAP
+        {
+            {EXPLORER_EC, EXPLORER_SPD_EC},
+            {GEMINI_EC, GEMINI_SPD_EC},
+        };
+
+        auto id_it = OCMB_ID_SPD_ASSOCIATION_MAP.find(id);
+        auto ec_it = OCMB_EC_SPD_ASSOCIATION_MAP.find(ec);
+
+        if ((  id_it == OCMB_ID_SPD_ASSOCIATION_MAP.end())
+            || ec_it == OCMB_EC_SPD_ASSOCIATION_MAP.end())
+        {
+            HWAS_ERR("ocmbIDEC> Unexpected ID/EC value.");
+
+           /*@
+           * @errortype
+           * @severity          ERRL_SEV_UNRECOVERABLE
+           * @moduleid          MOD_OCMB_IDEC
+           * @reasoncode        RC_OCMB_UNEXPECTED_IDEC
+           * @userdata1[00:31]  ID (Chip ID)
+           * @userdata1[32:63]  EC (Revision)
+           * @userdata2         HUID of OCMB target
+           * @devdesc           The IDEC values read from the OCMB did not
+           *                    appear in the IDEC to SPD association map.
+           *                    Please update the map with new values.
+           * @custdesc          Firmware Error
+           */
+           error = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             MOD_OCMB_IDEC,
+                             RC_OCMB_UNEXPECTED_IDEC,
+                             TWO_UINT32_TO_UINT64(id, ec),
+                             TARGETING::get_huid(i_target));
+
+           break;
+
+        }
+
+        if ((id_it->second != spdId) || (ec_it->second != spdEc))
+        {
+           HWAS_ERR("ocmbIDEC> OCMB IDEC and associated SPD IDEC don't match: "
+                    "OCMB ID=0x%.4X, EC=0x%.2X; SPD ID=0x%.4X, EC=0x%.2X; "
+                    "Expected SPD ID=0x%.4X, EC=0x%.2X",
+                    id, ec, spdId, spdEc, id_it->second, ec_it->second);
+
+           uint32_t bothIds = TWO_UINT16_TO_UINT32(id, spdId);
+           uint32_t bothEcs = TWO_UINT16_TO_UINT32(ec, spdEc);
+
+           /*@
+           * @errortype
+           * @severity          ERRL_SEV_UNRECOVERABLE
+           * @moduleid          MOD_OCMB_IDEC
+           * @reasoncode        RC_OCMB_SPD_IDEC_MISMATCH
+           * @userdata1[00:15]  OCMB ID from device read
+           * @userdata1[16:31]  SPD ID from device read
+           * @userdata1[32:47]  OCMB EC from device read
+           * @userdata1[48:63]  SPD EC from device read
+           * @userdata2         HUID of OCMB target
+           * @devdesc           The IDEC info read from the OCMB and SPD
+           *                    did not match the expected values.
+           * @custdesc          Firmware Error
+           */
+           error = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             MOD_OCMB_IDEC,
+                             RC_OCMB_SPD_IDEC_MISMATCH,
+                             TWO_UINT32_TO_UINT64(bothIds, bothEcs),
+                             TARGETING::get_huid(i_target));
+
+           break;
+
+        }
+
+        // set the explorer chip EC attributes.
+        i_target->setAttr<TARGETING::ATTR_EC>(ec);
+        i_target->setAttr<TARGETING::ATTR_HDAT_EC>(ec);
+
+        // set the explorer chip id attribute.
+        i_target->setAttr<TARGETING::ATTR_CHIP_ID>(id);
+
+    } while(0);
+
+    return error;
 }
 
 // Register the presence detect function with the device framework
