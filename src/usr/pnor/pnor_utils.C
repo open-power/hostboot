@@ -450,6 +450,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
         "HDAT",        /**< PNOR::HDAT           : Hdat Data */
         "EECACHE",     /**< PNOR::EECACHE        : Cached data from various EEPROMs */
+        "OCMBFW",      /**< PNOR::OCMBFW         : OCMB image */
 #endif
     };
 
