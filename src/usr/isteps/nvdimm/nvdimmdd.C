@@ -35,6 +35,7 @@
 // Includes
 // ----------------------------------------------
 #include <string.h>
+#include <time.h>
 #include <sys/time.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
@@ -75,6 +76,7 @@ TRAC_INIT( & g_trac_nvdimmr, "NVDIMMR", KILOBYTE );
 // ----------------------------------------------
 #define MAX_BYTE_ADDR 2
 #define NVDIMM_MAX_RETRIES 2
+#define MAX_READ_RETRY_SECS  30
 // ----------------------------------------------
 
 
@@ -462,12 +464,13 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
             ENTER_MRK"nvdimmReadData()");
     do
     {
+        timespec_t l_CurTime, l_PrevTime;
+        clock_gettime(CLOCK_MONOTONIC, &l_PrevTime);
+        int retry = 0;
         /************************************************************/
         /* Attempt read multiple times ONLY on retryable fails      */
         /************************************************************/
-        for (uint8_t retry = 0;
-             retry <= NVDIMM_MAX_RETRIES;
-             retry++)
+        do
         {
             // Only write the byte address if we have data to write
             if( 0 != i_byteAddressSize )
@@ -567,64 +570,35 @@ errlHndl_t nvdimmReadData( TARGETING::Target * i_target,
             else // Handle retryable error
             {
                 // If op will be attempted again: save log and continue
-                if ( retry < NVDIMM_MAX_RETRIES )
+                // Only save original retryable error
+                if ( err_retryable == nullptr )
                 {
-                    // Only save original retryable error
-                    if ( err_retryable == nullptr )
-                    {
-                        // Save original retryable error
-                        err_retryable = l_err;
+                    // Save original retryable error
+                    err_retryable = l_err;
 
-                        TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
-                                   "Retryable Error rc=0x%X, eid=0x%X, tgt=0x%X, "
-                                   "retry/MAX=%d/%d. Save error and retry",
-                                   err_retryable->reasonCode(),
-                                   err_retryable->eid(),
-                                   TARGETING::get_huid(i_target),
-                                   retry, NVDIMM_MAX_RETRIES);
-
-                        err_retryable->collectTrace(NVDIMM_COMP_NAME);
-                    }
-                    else
-                    {
-                        // Add data to original retryable error
-                        TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
-                                   "Another Retryable Error rc=0x%X, eid=0x%X "
-                                   "plid=0x%X, tgt=0x%X, retry/MAX=%d/%d. "
-                                   "Delete error and retry",
-                                   l_err->reasonCode(), l_err->eid(), l_err->plid(),
-                                   TARGETING::get_huid(i_target),
-                                   retry, NVDIMM_MAX_RETRIES);
-
-                        ERRORLOG::ErrlUserDetailsString(
-                                  "Another Retryable ERROR found")
-                                  .addToLog(err_retryable);
-
-                        // Delete this new retryable error
-                        delete l_err;
-                        l_err = nullptr;
-                    }
-
-                    // continue to retry
-                    continue;
-                }
-                else // no more retries: trace and break
-                {
                     TRACFCOMP( g_trac_nvdimm, ERR_MRK"nvdimmReadData(): "
-                               "Error rc=0x%X, eid=%d, tgt=0x%X. No More "
-                               "Retries (retry/MAX=%d/%d). Returning Error",
-                               l_err->reasonCode(), l_err->eid(),
+                               "Retryable Error rc=0x%X, eid=0x%X, tgt=0x%X, "
+                               "retry/MAX=%d/%d. Save error and retry",
+                               err_retryable->reasonCode(),
+                               err_retryable->eid(),
                                TARGETING::get_huid(i_target),
-                               retry, NVDIMM_MAX_RETRIES);
+                               retry);
 
-                    l_err->collectTrace(NVDIMM_COMP_NAME);
-
-                    // break from retry loop
-                    break;
+                    err_retryable->collectTrace(NVDIMM_COMP_NAME);
                 }
-            }
+                else
+                {
+                    // Delete this new retryable error
+                    delete l_err;
+                    l_err = nullptr;
+                }
+            } // retryable error
 
+            // update current time
+            clock_gettime(CLOCK_MONOTONIC, &l_CurTime);
+            retry++;
         } // end of retry loop
+        while( (l_CurTime.tv_sec - l_PrevTime.tv_sec) < MAX_READ_RETRY_SECS );
 
         // Handle saved retryable error, if any
         if (err_retryable)

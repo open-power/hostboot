@@ -815,8 +815,11 @@ errlHndl_t NvdimmInstalledImage::updateImageData(NvdimmLidImage * i_lidImage)
         uint16_t region = 0;
         while (region < fw_img_total_regions)
         {
-            if (region % 10 == 0)
+            if (region % 100 == 0)
             {
+                TRACFCOMP(g_trac_nvdimm_upd,
+                    "updateImage: progress code for sending region %d",
+                    region);
                 INITSERVICE::sendProgressCode();
             }
             TRACUCOMP(g_trac_nvdimm_upd, "updateImage: step 10.a - region 0x%04X",
@@ -1708,22 +1711,15 @@ errlHndl_t NvdimmInstalledImage::resetController()
     }
     else
     {
-        TRACUCOMP(g_trac_nvdimm_upd,"resetController: waiting 5 seconds after controller 0x%.8X reset",
-                TARGETING::get_huid(iv_dimm));
-
-        // sleep 5 seconds to allow for i2c controller to come back online
-        nanosleep(5,0);
-
-        TRACUCOMP(g_trac_nvdimm_upd,"resetController: now check if NV controller is ready again",
-                TARGETING::get_huid(iv_dimm));
-
         // Now wait until NV controller is ready again after reset
+        // nvdimmReady will retry NACK calls
         l_err = nvdimmReady(iv_dimm);
         if (l_err)
         {
             TRACFCOMP(g_trac_nvdimm_upd,ERR_MRK"resetController: NV controller for "
                 "NVDIMM 0x%.8X is not reporting as ready after reset",
                 TARGETING::get_huid(iv_dimm));
+
         }
     }
     return l_err;
@@ -1785,13 +1781,70 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
         }
         else if (updateNeeded)
         {
+            // shared trace variables
+            const TARGETING::Target * l_nvdimm = pInstalledImage->getNvdimmTarget();
+            uint64_t l_nvdimm_huid = TARGETING::get_huid(l_nvdimm);
+
+            uint32_t l_installed_type = INVALID_TYPE;
+            l_err = pInstalledImage->getType(l_installed_type);
+            if (l_err)
+            {
+                // Continue updating other dimms
+                TRACFCOMP(g_trac_nvdimm_upd,
+                    ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                    "Unable to get nvdimm[0x%.8X] installed image type. "
+                    "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
+                    ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+                commitPredictiveNvdimmError(l_err);
+                l_err = nullptr;
+            }
+
+            uint16_t l_oldVersion = INVALID_VERSION;
+            l_err = pInstalledImage->getVersion(l_oldVersion);
+            if (l_err)
+            {
+                // This shouldn't happen as getVersion should return a
+                // cached version
+                TRACFCOMP(g_trac_nvdimm_upd,
+                    ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                    "Failed to find current NVDIMM level of %.8X. "
+                    "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
+                    ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+                commitPredictiveNvdimmError(l_err);
+                l_err = nullptr;
+                o_no_error_found = false;
+                continue;
+            }
+
             // perform update for this DIMM with the current LID image
             TRACFCOMP(g_trac_nvdimm_upd, "NvdimmsUpdate::runUpdateUsingLid() - "
-                "now update nvdimm[0x%.8X]",
-                TARGETING::get_huid(pInstalledImage->getNvdimmTarget()));
+                "now update nvdimm[0x%.8X]", l_nvdimm_huid);
 
             TRACFCOMP(g_trac_nvdimm_upd,"Updating with flash size: 0x%08X",
                 i_lidImage->getFlashImageSize());
+
+            /*
+             *@errortype        INFORMATIONAL
+             *@reasoncode       NVDIMM_START_UPDATE
+             *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
+             *@userdata1        NVDIMM Target Huid
+             *@userdata2[0:15]  Old level (current)
+             *@userdata2[16:31] Update image level (new)
+             *@userdata2[32:63] Installed type (manufacturer and product)
+             *@devdesc          Start of the NVDIMM update of this controller
+             *@custdesc         NVDIMM update started
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                       NVDIMM_RUN_UPDATE_USING_LID,
+                                       NVDIMM_START_UPDATE,
+                                       l_nvdimm_huid,
+                                       TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                       l_oldVersion, i_lidImage->getVersion(),
+                                       l_installed_type),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_err->collectTrace(NVDIMM_UPD, 256);
+            ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+            l_err = nullptr;
 
             l_err = pInstalledImage->updateImage(i_lidImage);
             if (l_err)
@@ -1803,12 +1856,53 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                 TRACFCOMP(g_trac_nvdimm_upd,
                     ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
                     "NVDIMM 0x%.8X NV controller update failed. "
-                    "RC=0x%X, PLID=0x%.8X",
-                    TARGETING::get_huid(pInstalledImage->getNvdimmTarget()),
+                    "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
                     ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
                 commitPredictiveNvdimmError(l_err);
                 l_err = nullptr;
                 o_no_error_found = false;
+            }
+            else
+            {
+                // successfully updated this NVDIMM
+
+                // Note: call for version should just return a saved value
+                uint16_t curVersion = INVALID_VERSION;
+                l_err = pInstalledImage->getVersion(curVersion);
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_nvdimm_upd,
+                        ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                        "Failed to find current NVDIMM level of %.8X after "
+                        "successful update. RC=0x%X, PLID=0x%.8X",
+                        l_nvdimm_huid,
+                        ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+                    commitPredictiveNvdimmError(l_err);
+                    l_err = nullptr;
+                }
+
+                /*
+                 *@errortype        INFORMATIONAL
+                 *@reasoncode       NVDIMM_UPDATE_COMPLETE
+                 *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
+                 *@userdata1        NVDIMM Target Huid
+                 *@userdata2[0:15]  Previous level
+                 *@userdata2[16:31] Current updated level
+                 *@userdata2[32:63] Installed type (manufacturer and product)
+                 *@devdesc          Successful update of NVDIMM code
+                 *@custdesc         NVDIMM was successfully updated
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                       NVDIMM_RUN_UPDATE_USING_LID,
+                                       NVDIMM_UPDATE_COMPLETE,
+                                       l_nvdimm_huid,
+                                       TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                       l_oldVersion, curVersion,
+                                       l_installed_type),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                l_err->collectTrace(NVDIMM_UPD, 512);
+                ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
             }
         } // end of updateNeeded
     }
