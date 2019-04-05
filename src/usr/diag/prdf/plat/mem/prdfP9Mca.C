@@ -775,8 +775,12 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         // BIT 0: Persistency Lost
         if ( bitList.count(0) )
         {
-            // Make the log predictive
-            io_sc.service_data->setServiceCall();
+            // EVENT_N cannot be retriggered on a new PERSISTENCY_LOST_ERROR
+            // if a previous PERSISTENCY_LOST_ERROR still exists. Meaning, we
+            // cannot detect/report multiple errors that happen at different
+            // points in time. As such, mask the EVENT_N bit here (MCACALFIR[8])
+            // and make the log predictive.
+            io_sc.service_data->SetThresholdMaskId(0);
 
             // Send persistency lost message to PHYP
             l_rc = PlatServices::nvdimmNotifyPhypProtChange( dimm,
@@ -796,8 +800,19 @@ int32_t AnalyzeNvdimmHealthStatRegs( ExtensibleChip * i_chip,
         // BIT 2: Persistency Restored
         if ( bitList.count(2) )
         {
-            // hidden log
+            // It would be rare to have an intermittent error that comes and
+            // goes so fast we only see PERSISTENCY_RESTORED and not
+            // PERSISTENCY_LOST_ERROR. Set predictive on threshold of 32
+            // per day (rule code handles the thresholding), else just keep
+            // as a hidden log.
             io_sc.service_data->AddSignatureList( dimm, PRDFSIG_NvdimmPersRes );
+
+            // callout NVDIMM high, cable high, BPM high, no gard
+            io_sc.service_data->SetCallout( dimm, MRU_HIGH, NO_GARD );
+            l_rc = __addBpmCallout( dimm, HWAS::SRCI_PRIORITY_HIGH );
+            if ( SUCCESS != l_rc ) continue;
+            l_rc = __addNvdimmCableCallout( HWAS::SRCI_PRIORITY_HIGH );
+            if ( SUCCESS != l_rc ) continue;
         }
         // BIT 3: Below Warning Threshold -- ignore
         // BIT 4: Hardware Failure -- ignore

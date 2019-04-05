@@ -36,8 +36,8 @@ actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 /** Analyze NVDIMM Health Registers */
 actionclass analyzeNvdimms
 {
-    funccall("AnalyzeNvdimmHealthStatRegs");
     threshold32pday;
+    funccall("AnalyzeNvdimmHealthStatRegs");
 };
 
 /** Mainline NCE/TCE handling */
