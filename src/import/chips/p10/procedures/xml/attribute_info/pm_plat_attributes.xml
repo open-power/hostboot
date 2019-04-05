@@ -318,6 +318,22 @@
     <overrideOnly/>
     <group>dds</group>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAVE_MODE_NODDS_UPLIFT_MV</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute in place to allow override for boot mode voltage
+    Consumer: p9_setup_evid.C
+    </description>
+    <valueType>uint32</valueType>
+    <array>2</array>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>dds</group>
+  </attribute>
+
 
   <!-- ********************************************************************* -->
   <attribute>
@@ -810,8 +826,32 @@
     </enum>
     <default>OFF</default>
     <initToZero/>
+    <writeable/>
     <group>enablement</group>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_DDS_FREQ_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    
+    Producer:Override
+
+    Consumers:p10_pstate_parameter_block ->
+    QME Pstate parameter block ????
+    </description>
+    <valueType>uint8</valueType>
+    <platinit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <initToZero/>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
 
   <!-- ********************************************************************* -->
   <attribute>
@@ -1714,7 +1754,7 @@
 
     Modified in p10_pstate_parameter_block
     </description>
-    <valueType>uint32</valueType>
+    <valueType>int32</valueType>
     <array>2</array>
     <platinit/>
     <initToZero/>
@@ -1959,6 +1999,7 @@
     <overrideOnly/>
     <group>bias</group>
   </attribute>
+  <!-- ********************************************************************* -->=
   <attribute>
     <id>ATTR_WOF_OMI_FORCE_FREQ_MHZ</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
