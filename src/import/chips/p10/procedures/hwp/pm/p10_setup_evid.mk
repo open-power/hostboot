@@ -23,11 +23,13 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_setup_evid
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
-#OBJS+=p10_avsbus_lib.o
-#OBJS+=p10_pstate_parameter_block.o
-#OBJS+=p10_pm_get_poundv_bucket.o
-#OBJS+=p10_pm_get_poundw_bucket.o
-#lib$(PROCEDURE)_DEPLIBS+=p10_pm_utils
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/common/pmlib/include/registers)
+#TBD need to change p10 path
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/common/include/)
+OBJS+=p10_avsbus_lib.o
+OBJS+=p10_pstate_parameter_block.o
+OBJS+=p10_pm_get_poundv_bucket.o
+OBJS+=p10_pm_get_poundw_bucket.o
+lib$(PROCEDURE)_DEPLIBS+=p10_pm_utils
 $(call BUILD_PROCEDURE)

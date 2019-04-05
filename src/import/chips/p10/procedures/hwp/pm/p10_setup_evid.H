@@ -37,7 +37,7 @@
 #define __P10_SETUP_EVID_H__
 
 #include <fapi2.H>
-//#include <p10_pstate_parameter_block.H>
+#include <p10_pstate_parameter_block.H>
 
 enum P10_SETUP_EVID_CONSTANTS
 {
@@ -50,72 +50,67 @@ enum P10_SETUP_EVID_CONSTANTS
     VDD_SETUP = 6,
     VDN_SETUP = 7,
     VCS_SETUP = 8,
-
+    VIO_SETUP = 9,
 };
 
-//VDD Voltage config actions
-typedef enum
-{
-    COMPUTE_VOLTAGE_SETTINGS,
-    APPLY_VOLTAGE_SETTINGS
-} VoltageConfigActions_t;
 
 
 
 extern "C"
 {
 
-/// @typedef VoltageConfigActions_t
-/// enum of the two actions this hwp can perform
-/// it can either compute default voltage settings
-/// otherwise it can apply voltage setting to the system
-/// @typedef p10_setup_evid_FP_t
-/// function pointer typedef definition for HWP call support
+    /// @typedef VoltageConfigActions_t
+    /// enum of the two actions this hwp can perform
+    /// it can either compute default voltage settings
+    /// otherwise it can apply voltage setting to the system
+    /// @typedef p10_setup_evid_FP_t
+    /// function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode (*p10_setup_evid_FP_t) (
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
         const VoltageConfigActions_t);
 
-/// @brief Set safe mode values to DPLL fmult,fmin and fmax
-/// @param [in]  i_target TARGET_TYPE_PROC_CHIP
-/// @param [in]  i_freq_proc_refclock_khz proc clock frequency
-/// @param [in]  i_proc_dpll_divider proc dpll divider value
-//@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    /// @brief Set safe mode values to DPLL fmult,fmin and fmax
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_freq_proc_refclock_khz proc clock frequency
+    /// @param [in]  i_proc_dpll_divider proc dpll divider value
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p10_setup_dpll_values (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                            const uint32_t  i_freq_proc_refclock_khz,
                            const uint32_t i_proc_dpll_divider);
 
 
-/// @brief Read attributes containing part's boot voltages(VDD,VCS and VDN)
-/// and set these voltage using the AVSBUS interface (VDD, VDN and VCS).
-///
-/// @param [in] i_target TARGET_TYPE_PROC_CHIP
-/// @param [in] i_action Describes whether you wish to COMPUTE voltage settings
-///                      during the step or if you would like to APPLY them.
-/// @attr
-/// @attritem  ATTR_VCS_BOOT_VOLTAGE  - 1mV grandularity setting for VCS rail
-/// @attritem  ATTR_VDD_BOOT_VOLTAGE  - 1mV grandularity setting for VDD rail
-/// @attritem  ATTR_VDN_BOOT_VOLTAGE  - 1mV grandularity setting for VDN rail
-/// @attritem  ATTR_VDD_AVSBUS_BUSNUM - AVSBus Number having the VDD VRM
-/// @attritem  ATTR_VDD_AVSBUS_RAIL   - AVSBus Rail number for VDD VRM
-/// @attritem  ATTR_VDN_AVSBUS_BUSNUM - AVSBus Number having the VDN VRM
-/// @attritem  ATTR_VDN_AVSBUS_RAIL   - AVSBus Rail number for VDN VRM
-/// @attritem  ATTR_VCS_AVSBUS_BUSNUM - AVSBus Number having the VCS VRM
-/// @attritem  ATTR_VCS_AVSBUS_RAIL   - AVSBus Rail number for VCS VRM
-///
-///@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    /// @brief Read attributes containing part's boot voltages(VDD,VCS and VDN)
+    /// and set these voltage using the AVSBUS interface (VDD, VDN and VCS).
+    ///
+    /// @param [in] i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in] i_action Describes whether you wish to COMPUTE voltage settings
+    ///                      during the step or if you would like to APPLY them.
+    /// @attr
+    /// @attritem  ATTR_VCS_BOOT_VOLTAGE  - 1mV grandularity setting for VCS rail
+    /// @attritem  ATTR_VDD_BOOT_VOLTAGE  - 1mV grandularity setting for VDD rail
+    /// @attritem  ATTR_VDN_BOOT_VOLTAGE  - 1mV grandularity setting for VDN rail
+    /// @attritem  ATTR_VDD_AVSBUS_BUSNUM - AVSBus Number having the VDD VRM
+    /// @attritem  ATTR_VDD_AVSBUS_RAIL   - AVSBus Rail number for VDD VRM
+    /// @attritem  ATTR_VDN_AVSBUS_BUSNUM - AVSBus Number having the VDN VRM
+    /// @attritem  ATTR_VDN_AVSBUS_RAIL   - AVSBus Rail number for VDN VRM
+    /// @attritem  ATTR_VCS_AVSBUS_BUSNUM - AVSBus Number having the VCS VRM
+    /// @attritem  ATTR_VCS_AVSBUS_RAIL   - AVSBus Rail number for VCS VRM
+    ///
+    ///@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p10_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                    const VoltageConfigActions_t i_action);
 
-/// @brief update VDD,VDN and VCS voltage values
-/// @param [in]  i_target TARGET_TYPE_PROC_CHIP
-/// @param [in]  i_bus_num AVS BUS number
-/// @param [in]  i_rail_select AVS bus rail select
-/// @param [in]  i_voltage_mv voltage value in mv
-/// @param [in]  i_evid_value EVID setup mode
-/// @param [in]  i_ext_vrm_step_size_mv Maximum VRM step size in mv
-//@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    /// @brief update VDD,VDN and VCS voltage values
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_bus_num AVS BUS number
+    /// @param [in]  i_rail_select AVS bus rail select
+    /// @param [in]  i_voltage_mv voltage value in mv
+    /// @param [in]  i_ext_vrm_step_size_mv Maximum VRM step size in mv
+    /// @param [in]  i_present_boot_voltage present voltage read from hw
+    /// @param [in]  i_evid_value EVID setup mode
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p10_setup_evid_voltageWrite(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -123,7 +118,63 @@ extern "C"
         const uint8_t i_rail_select,
         const uint32_t i_voltage_mv,
         const uint32_t i_ext_vrm_step_size_mv,
+        const uint32_t i_present_boot_voltage,
         const P10_SETUP_EVID_CONSTANTS i_evid_value);
+
+    /// @brief Read DPLL freq value from hw
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_freq_proc_refclock_khz proc clock frequency
+    /// @param [in]  i_proc_dpll_divider proc dpll divider value
+    /// @param [out] o_dpll_lesser_value dpll is greater or lesser than safe mode
+    //freq
+    /// @param [out] o_fmult_data dpll freq data
+    /// @param [out] o_safe_model_dpll_value safe mode dpll value
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+
+    fapi2::ReturnCode
+    p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                         const uint32_t  i_freq_proc_refclock_khz,
+                         const uint32_t i_proc_dpll_divider,
+                         bool&  o_dpll_lesser_value,
+                         fapi2::buffer<uint64_t>& o_fmult_data,
+                         uint32_t& o_safe_model_dpll_value);
+
+    /// @brief Update DPLL freq value
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_safe_mode_dpll_value safe mode dpll value
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode
+    p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                           const uint32_t  i_safe_mode_dpll_value);
+
+    /// @brief Read ext voltage from hw
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_bus_num AVS BUS number
+    /// @param [in]  i_rail_select AVS bus rail select
+    /// @param [out] o_voltage_mv ext voltage value
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode
+    p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                               const uint8_t* i_bus_num,
+                               const uint8_t* i_rail_select,
+                               uint32_t* o_voltage_mv);
+
+    /// @brief Update VDD/VCS voltage
+    /// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+    /// @param [in]  i_bus_num AVS BUS number
+    /// @param [in]  i_rail_select AVS bus rail select
+    /// @param [in]  i_voltage_mv  boot mode voltage
+    /// @param [in]  i_ext_vrm_step_size_mv vrm step size value
+    /// @param [in]  i_present_boot_voltage boot voltage rom hw
+    //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode
+    update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                           const uint8_t* i_bus_num,
+                           const uint8_t* i_rail_select,
+                           const uint32_t* i_voltage_mv,
+                           const uint32_t i_ext_vrm_step_size_mv,
+                           const uint32_t* i_present_boot_voltage);
+
 
 } // extern C
 
