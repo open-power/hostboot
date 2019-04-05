@@ -434,7 +434,9 @@ void PageManagerCore::coalesce( void )
             // To determine this, get the index of the block as if the whole
             // page memory space were blocks of this size.  Note: have to
             // take into account the page manager "hole" in the middle of the
-            // space
+            // initial memory allocation.  Also have to ignore the OCC
+            // bootloader page at the start of the third memory range which
+            // accounts for the rest of the cache.
             uint64_t p_idx = 0;
             if(reinterpret_cast<uint64_t>(p) < VmmManager::pageTableOffset())
             {
@@ -442,11 +444,19 @@ void PageManagerCore::coalesce( void )
                          - VmmManager::endPreservedOffset())/
                             ((1 << bucket)*PAGESIZE);
             }
-            else
+            else if(  reinterpret_cast<uint64_t>(p)
+                    < VmmManager::INITIAL_MEM_SIZE)
             {
                 p_idx = (  reinterpret_cast<uint64_t>(p)
                          - (  VmmManager::pageTableOffset()
                             + VmmManager::PTSIZE) )/
+                               ((1 << bucket)*PAGESIZE);
+            }
+            else
+            {
+                p_idx = (  reinterpret_cast<uint64_t>(p)
+                         - (  VmmManager::INITIAL_MEM_SIZE
+                            + PAGESIZE) )/
                                ((1 << bucket)*PAGESIZE);
             }
 
