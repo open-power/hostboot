@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -36,6 +37,38 @@
 #include <fapi2.H>
 #include <pstates_occ.H>
 #include <pstates_pgpe.H>
+#include "p10_pm_get_poundv_bucket.H"
+#include "p10_pm_get_poundw_bucket.H"
+
+
+//VDD Voltage config actions
+typedef enum
+{
+    COMPUTE_VOLTAGE_SETTINGS,
+    APPLY_VOLTAGE_SETTINGS
+} VoltageConfigActions_t;
+typedef enum VPD_TYPE
+{
+    RAW,
+    BIASED,
+} vpd_type;
+typedef enum BOOT_VOLTAGE_TYPE
+{
+    VDD = 0,
+    VCS = 1,
+    VDN = 2,
+    VIO = 3,
+    MAX_VRM = 4,
+} boot_voltage_type;
+
+enum FREQ2PSTATE_ROUNDING
+{
+    ROUND_FAST,
+    ROUND_SLOW
+};
+typedef uint8_t Pstate;
+#define PSTATE_LT_PSTATE_MIN 0x00778a03
+#define PSTATE_GT_PSTATE_MAX 0x00778a04
 
 //Pstate SuperStructure
 typedef struct
@@ -59,6 +92,86 @@ namespace pm_pstate_parameter_block
 {
 
 
+#define BIAS_PCT_UNIT              0.5
+using namespace fapi2;
+// Structure containing all attributes required by Pstate Parameter block
+typedef struct
+{
+    uint32_t attr_freq_core_ceiling_mhz;
+
+
+    uint32_t attr_freq_proc_refclock_khz;
+    uint32_t attr_proc_dpll_divider;
+    uint32_t attr_nest_frequency_mhz;
+
+
+    uint32_t attr_dpll_bias;
+    uint32_t attr_undervolting;
+    uint32_t attr_pm_safe_frequency_mhz;
+    int32_t attr_pm_safe_voltage_mv[2];
+
+    uint32_t attr_freq_core_floor;
+    uint32_t attr_freq_core_floor_mhz;
+    uint32_t attr_boot_freq_mhz;
+    uint32_t attr_nest_freq_mhz;
+
+    uint8_t attr_resclk_disable;
+    uint8_t attr_dpll_vdm_response;
+    uint8_t attr_nest_leakage_percent;
+
+    // Control attributes
+    uint8_t attr_systemp_resclk_disable;
+    uint8_t attr_system_wof_disable;
+    uint8_t attr_system_dds_disable;
+
+    uint8_t attr_dd_wof_not_supported;
+    uint8_t attr_dd_dds_not_supported;
+    uint8_t attr_pstate_mode;
+
+    int8_t   attr_freq_bias; //for all #V points
+    int8_t   attr_voltage_ext_bias[2][8];
+    int8_t   attr_voltage_ext_vdn_bias;
+
+    // AVSBus attributes
+    uint32_t attr_avs_bus_freq;
+    uint8_t  attr_avs_bus_num[4]; //VDD,VCS,VDN,VIO
+    uint8_t  attr_avs_bus_rail_select[4]; //VDD,VCS,VDN,VIO
+    uint32_t attr_boot_voltage_mv[4]; //VDD,VCS,VDN,VIO
+    uint32_t attr_proc_r_distloss_uohm[4];
+    uint32_t attr_proc_r_loadline_uohm[4];
+    uint32_t attr_proc_vrm_voffset_uv[4];
+    uint8_t  attr_boot_voltage_biase_0p5pct;
+    // External Voltage Timing attributes
+    uint32_t attr_ext_vrm_transition_start_ns;
+    uint32_t attr_ext_vrm_transition_rate_inc_uv_per_us;
+    uint32_t attr_ext_vrm_transition_rate_dec_uv_per_us;
+    uint32_t attr_ext_vrm_stabilization_time_us;
+    uint32_t attr_ext_vrm_step_size_mv;
+    uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
+
+
+
+    uint32_t freq_proc_refclock_khz;
+    uint32_t proc_dpll_divider;
+
+    ///Undervolt and Overvolt Attributes
+    uint8_t attr_wov_underv_disable;
+    uint8_t attr_wov_overv_disable;
+    uint8_t attr_wov_underv_force;
+    uint32_t attr_wov_sample_125us;
+    uint32_t attr_wov_max_droop_pct;
+    uint8_t attr_wov_underv_perf_loss_thresh_pct;
+    uint8_t attr_wov_underv_step_incr_pct;
+    uint8_t attr_wov_underv_step_decr_pct;
+    uint8_t attr_wov_underv_max_pct;
+    uint16_t attr_wov_underv_vmin_mv;
+    uint16_t attr_wov_overv_vmax_mv;
+    uint8_t attr_wov_overv_step_incr_pct;
+    uint8_t attr_wov_overv_step_decr_pct;
+    uint8_t attr_wov_overv_max_pct;
+
+} AttributeList;
+
 //PlatPmPPB Object definition
 class PlatPmPPB
 {
@@ -66,20 +179,273 @@ class PlatPmPPB
         //Constructor with Proc target as input
         PlatPmPPB ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_target ) :
             iv_procChip (i_target), iv_pstates_enabled(0), iv_resclk_enabled(0),
-            iv_vdm_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
+            iv_dds_enabled(0), iv_ivrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_nest_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0)
 
         {
+            attr_init();
         }
 
+        ///-----------------------------------------------------------------------
+        /// @brief Initialize pstate attributes
+        /// @return void
+        //-----------------------------------------------------------------------
+        void attr_init();
 
+        /// -----------------------------------------------------------------------
+        /// @brief Initialize VPD data
+        // @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode vpd_init();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute safe mode values
+        /// @param[in]    i_action  voltage config action (Compute/set)
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode compute_boot_safe(
+            const VoltageConfigActions_t i_action);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Read #V data from module vpd
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode get_mvpd_poundV();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Read #W data from module vpd
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode get_mvpd_poundW();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Validate #V data
+        /// @param[in]     i_biased_state present/nonpresent
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode chk_valid_poundv(
+            const bool i_biased_state);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Update pound V optional curve points if values are zero
+        /// @return none
+        /// -----------------------------------------------------------------------
+        void update_vpd_pts_value();
+
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute safe mode values
+        /// @param[in]     i_pstate  pstate value
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode safe_mode_computation(
+            const Pstate i_ps_pstate);
+        /// -----------------------------------------------------------------------
+        /// @brief Convert pstate to voltage
+        /// @param[in]     i_pstate  pstate value that needs to be converted
+        /// @param[in]     i_type   boot voltage type
+        /// @return  boot voltage value.
+        /// -----------------------------------------------------------------------
+        uint32_t ps2v_mv(const Pstate i_pstate,
+                         const boot_voltage_type i_type);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Converts frequency value to pstate number
+        /// @param[in]     i_freq_khz input frequency
+        /// @param[out]     o_pstate pstate output for a given inut frequency
+        /// @return        pstate value
+        /// -----------------------------------------------------------------------
+        int freq2pState (const uint32_t freq_khz,
+                         Pstate* o_pstate,
+                         const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Safe mode frequency and voltage init
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode safe_mode_init( void );
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute VPD points of different regions
+        /// @return none
+        /// -----------------------------------------------------------------------
+        void compute_vpd_pts();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Read IQ vpd data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode get_mvpd_iddq( void );
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of WOF feature
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_wof_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of DDSC feature
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_ddsc_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of WOF Undervolt
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_wov_underv_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of WOF Overvolt
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_wov_overv_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute and apply biased values
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode apply_extint_bias();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Get pstate attribute data
+        /// @param[out]    o_attr  populate attribute list data
+        /// @return        none
+        /// -----------------------------------------------------------------------
+        void get_pstate_attrs(AttributeList& o_attr);
+
+        /// -----------------------------------------------------------------------
+        /// @brief apply biased values for #V data
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode apply_biased_values();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute bias value for pre-defined percentage unit
+        /// @param[in]     i_value Biased value
+        /// @return bias value
+        /// -----------------------------------------------------------------------
+        double calc_bias(const int8_t i_value)
+        {
+            double temp = 1.0 + ((BIAS_PCT_UNIT / 100) * static_cast<double>(i_value));
+            FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; percent = %4.1f biased multiplier = %6.3f",
+                     i_value, (i_value * BIAS_PCT_UNIT), temp);
+            return temp;
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute smallest value for a given input
+        /// @param[in]     x value
+        /// @return smallest value
+        /// -----------------------------------------------------------------------
+        double internal_ceil(double x)
+        {
+            if ((x - static_cast<int>(x)) > 0)
+            {
+                return static_cast<int>(x) + 1;
+            }
+
+            return (static_cast<int>(x));
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute largest value for a given input
+        /// @param[in]     x value
+        /// @return largest value
+        /// -----------------------------------------------------------------------
+        double internal_floor(double x)
+        {
+            if(x >= 0)
+            {
+                return static_cast<int>(x);
+            }
+
+            return static_cast<int>(x - 0.9999999999999999);
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute VDD/VCS/VDN voltage for given system parameters
+        /// @param[in]     i_vpd_mv voltage value in milli volts
+        /// @param[in]     i_vpd_ma Cuurent value in milli amps
+        /// @param[in]     i_loadline_uohm   loadline value
+        /// @param[in]     i_distloss_uohm   dist loss value
+        /// @param[in]     i_distoffset_uohm dist offset value
+        /// @return uplift value
+        /// -----------------------------------------------------------------------
+        uint32_t sysparm_uplift(const uint32_t i_vpd_mv,
+                                const uint32_t i_vpd_ma,
+                                const uint32_t i_loadline_uohm,
+                                const uint32_t i_distloss_uohm,
+                                const uint32_t i_distoffset_uohm)
+        {
+            double l_mv = (static_cast<double>(i_vpd_mv) +  // mV
+                           (
+                               // mA*uOhm/1000 -> uV
+                               (static_cast<double>(i_vpd_ma * (i_loadline_uohm + i_distloss_uohm)) / 1000 +
+                                // uv
+                                static_cast<double>(i_distoffset_uohm))
+                           ) / 1000);  // uV -> mV
+            uint32_t l_result = static_cast<uint32_t>(l_mv);
+            FAPI_DBG("  system_uplift_mv: i_vpd_mv=%d; i_vpd_ma=%d; i_loadline_uohm=%d "
+                     "i_distloss_uohm = %d i_distoffset_uohm = %d l_mv = %5.3f l_result = %d" ,
+                     i_vpd_mv,
+                     i_vpd_ma,
+                     i_loadline_uohm,
+                     i_distloss_uohm,
+                     i_distoffset_uohm,
+                     l_mv,
+                     l_result);
+
+            return  (l_result);
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Adjust bias value for given frequency value
+        /// @param[in]     i_value  frequency value
+        /// @param[in]     i_bias_0p5pct  bias value
+        /// @return computed biase value
+        /// -----------------------------------------------------------------------
+        uint32_t bias_adjust_mhz(const uint32_t i_value,
+                                 const int32_t i_bias_0p5pct)
+        {
+            double l_mult = calc_bias(i_bias_0p5pct);
+            double l_biased_value = static_cast<double>(i_value) * l_mult;
+            FAPI_DBG("  bias_adjust_mhz: i_value=%d; mult=%5.3f; biased value=%3.0f",
+                     i_value,
+                     l_mult,
+                     l_biased_value);
+            return (static_cast<uint32_t>(internal_floor(l_biased_value)));
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Adjust bias value for given vdd/vcs voltage
+        /// @param[in]     i_value vdd/vcs value
+        /// @param[in]     i_bias_0p5pct  bias value
+        /// @return computed biase value
+        /// -----------------------------------------------------------------------
+        uint32_t bias_adjust_mv(const uint32_t i_value,
+                                const int8_t i_bias_0p5pct)
+        {
+            double l_mult = calc_bias(i_bias_0p5pct);
+            double l_biased_value = static_cast<double>(i_value) * l_mult;
+            double l_ceiling = internal_ceil(l_biased_value);
+            uint32_t l_result = static_cast<uint32_t>(l_ceiling);
+            FAPI_DBG("  bias_adjust_mv:  i_value=%d; mult=%5.3f; biased value=%3.0f ceiling = %3.0f result = %d",
+                     i_value,
+                     l_mult,
+                     l_biased_value,
+                     l_ceiling,
+                     l_result);
+            return (l_result);
+        }
     private:
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > iv_procChip;  // processor chip target
+        AttributeList             iv_attrs;
         uint8_t                   iv_pstates_enabled;
         uint8_t                   iv_resclk_enabled;
-        uint8_t                   iv_vdm_enabled;
+        uint8_t                   iv_dds_enabled;
         uint8_t                   iv_ivrm_enabled;
         uint8_t                   iv_wof_enabled;
         uint32_t                  iv_safe_voltage;    // System safe voltage
@@ -91,6 +457,29 @@ class PlatPmPPB
         uint32_t                  iv_nest_freq_mhz;       //Nest frequency
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
+        bool                      iv_optional_pdv_pts_value_zero;
+
+
+        PoundVOpPoint_t           iv_raw_vpd_pts[NUM_PV_POINTS];
+        PoundVOpPoint_t           iv_biased_vpd_pts[NUM_PV_POINTS];
+        PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
+
+        PoundVBias_t              iv_bias;
+
+        voltageBucketData_t       iv_poundV_raw_data;
+        PoundW_t                  iv_poundW_data;
+        IddqTable_t               iv_iddqt;
+
+        PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];
+        PoundVOpPoint_t           iv_attr_mvpd_poundV_biased[NUM_PV_POINTS];
+        PoundVOpPoint_t           iv_attr_mvpd_data[NUM_PV_POINTS];
+        uint8_t                   iv_poundV_bucket_id;
+
+        SysPowerDistParms_t       iv_vdd_sysparam;
+        SysPowerDistParms_t       iv_vcs_sysparam;
+        SysPowerDistParms_t       iv_vdn_sysparam;
+        SysPowerDistParms_t       iv_vio_sysparam;
+        uint8_t                   iv_valid_pdv_points;
 };
 
 }
@@ -104,15 +493,24 @@ typedef fapi2::ReturnCode (*p10_pstate_parameter_block_FP_t) (
 
 extern "C"
 {
+    /// -------------------------------------------------------------------
+    /// @brief  Print an iddq_print structure on a given stream
+    /// @param[in]  i_iddqt pointer to Iddq structure to output
+    /// @return void
+    /// -------------------------------------------------------------------
+    void
+    iddq_print(IddqTable_t* i_iddqt);
 
-/// -------------------------------------------------------------------
-/// @brief Populate Pstate super structure from VPD data
-/// @param[in]    i_target          => Chip Target
-/// @param[inout] *io_pss           => pointer to pstate superstructure
-/// @param[out]   *o_buf            => wof table data
-/// @param[inout] &io_size          => wof table data size
-/// @return   FAPI2::SUCCESS
-/// -------------------------------------------------------------------
+
+
+    /// -------------------------------------------------------------------
+    /// @brief Populate Pstate super structure from VPD data
+    /// @param[in]    i_target          => Chip Target
+    /// @param[inout] *io_pss           => pointer to pstate superstructure
+    /// @param[out]   *o_buf            => wof table data
+    /// @param[inout] &io_size          => wof table data size
+    /// @return   FAPI2::SUCCESS
+    /// -------------------------------------------------------------------
     fapi2::ReturnCode
     p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                 PstateSuperStructure* io_pss, uint8_t* o_buf, uint32_t& io_size);
