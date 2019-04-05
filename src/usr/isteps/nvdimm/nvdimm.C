@@ -442,6 +442,8 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
 
     do
     {
+        nanosleep( 0, OPS_POLL_TIME_MS*NS_PER_MSEC ); //sleep for POLL ms
+
         l_err = nvdimmReadReg( i_nvdimm,
                                timeoutInfoTable[i_ops_id].status_reg_offset,
                                l_data );
@@ -457,7 +459,6 @@ errlHndl_t nvdimmPollStatus ( Target *i_nvdimm,
             break;
         }
 
-        nanosleep( 0, OPS_POLL_TIME_MS*NS_PER_MSEC ); //sleep for POLL ms
         o_poll += OPS_POLL_TIME_MS;
 
     } while (o_poll < l_timeout);
