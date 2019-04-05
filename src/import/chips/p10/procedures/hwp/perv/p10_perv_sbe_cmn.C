@@ -38,7 +38,7 @@
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
 #include <p9_quad_scom_addresses_fld.H>
-#include <p10_hang_pulse_mc_setup_tables.H>
+#include <multicast_group_defs.H>
 #include <target_filters.H>
 
 enum P10_PERV_SBE_CMN_Private_Constants
@@ -545,16 +545,20 @@ fapi_try_exit:
 /// @brief Setup Hangpulse counter values
 ///
 /// @param[in]     i_target_chiplet     Reference to TARGET_TYPE_PERV_CHIPLET target
-/// @param[in]     base_address         base_address on which hangpulse setup is done
-/// @param[in]     pre_divider
+/// @param[in]     i_target_parent_chip true if i_base_address is relative to the parent chip of i_target_chiplet
+/// @param[in]     i_base_address       base_address on which hangpulse setup is done
+/// @param[in]     i_pre_divider        Pre divider value
+/// @param[in]     i_hang_pulse_table   Table of hang pulse parameters to set up; the last element must have .last set
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_perv_sbe_cmn_setup_hangpulse_counters(const
-        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
-        const uint32_t base_address,
-        const uint8_t pre_divider)
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_hangpulse_counters(
+    const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST > & i_target_chiplet,
+    const bool i_target_parent_chip,
+    const uint32_t i_base_address,
+    const uint8_t i_pre_divider,
+    const hang_pulse_t* i_hang_pulse_table)
 {
     fapi2::buffer<uint64_t> l_data64;
-    uint32_t l_chipletID;
+    const hang_pulse_t* l_cur_entry = i_hang_pulse_table;
 
     FAPI_INF("p10_perv_sbe_cmn_setup_hangpulse_counters: Entering ...");
 
@@ -562,162 +566,42 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_hangpulse_counters(const
 
     FAPI_DBG("Setup the pre_divider values");
     l_data64.flush<0>();
-    l_data64.insertFromRight< 0, 8 >(pre_divider);
+    l_data64.insertFromRight< 0, 8 >(i_pre_divider);
 
-    if (base_address == 0x000D0070)
+    if (i_target_parent_chip)
     {
-        FAPI_TRY(fapi2::putScom(l_target_chip , (base_address + 8), l_data64));
+        FAPI_TRY(fapi2::putScom(l_target_chip , (i_base_address + 8), l_data64));
     }
     else
     {
-        FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + 8), l_data64));
+        FAPI_TRY(fapi2::putScom(i_target_chiplet , (i_base_address + 8), l_data64));
     }
 
-    l_chipletID = i_target_chiplet.getChipletNumber();
-
-    switch (l_chipletID)
+    while (true)
     {
-        case 0x1 :
-            if (base_address == 0x000D0070)
-            {
-                for (auto values : SETUP_HANG_PULSE_FREQ )
-                {
-                    l_data64.flush<0>();
-                    l_data64.insert< 0, 6, 2 >(values[1]);
-                    values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                    FAPI_TRY(fapi2::putScom(l_target_chip , (base_address + values[0]), l_data64));
-                }
-            }
-            else
-            {
-                for (auto values : SETUP_HANG_COUNTERS_PERV )
-                {
-                    l_data64.flush<0>();
-                    l_data64.insert< 0, 6, 2 >(values[1]);
-                    values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                    FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-                }
-            }
+        l_data64.flush<0>();
+        l_data64.insertFromRight< 0, 6 >(l_cur_entry->value);
 
+        if (l_cur_entry->stop_on_xstop)
+        {
+            l_data64.setBit<6>();
+        }
+
+        if (i_target_parent_chip)
+        {
+            FAPI_TRY(fapi2::putScom(l_target_chip , (i_base_address + l_cur_entry->id), l_data64));
+        }
+        else
+        {
+            FAPI_TRY(fapi2::putScom(i_target_chiplet , (i_base_address + l_cur_entry->id), l_data64));
+        }
+
+        if (l_cur_entry->last)
+        {
             break;
+        }
 
-        case 0x2 :
-
-            // call SETUP_HANG_COUNTER_N0 table
-            for (auto values : SETUP_HANG_COUNTERS_N0 )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-            }
-
-            break;
-
-        case 0x3 :
-
-            // call SETUP_HANG_COUNTER_N1 table
-            for (auto values : SETUP_HANG_COUNTERS_N1 )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-            }
-
-            break;
-
-        case 0x8 :
-        case 0x9 :
-
-            // Call SETUP_HANG_COUNTER_PCI table
-            for (auto values : SETUP_HANG_COUNTERS_PCI )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-            }
-
-            break;
-
-        case 0xC :
-        case 0xD :
-        case 0xE :
-        case 0xF :
-
-            // Call SETUP_HANG_COUNTER_MC table
-            for (auto values : SETUP_HANG_COUNTERS_MC )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-            }
-
-            break;
-
-        case 0x10 :
-        case 0x11 :
-        case 0x12 :
-        case 0x13 :
-
-            // Call SETUP_HANG_COUNTER_PAU table
-            for (auto values : SETUP_HANG_COUNTERS_PAU )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-            }
-
-            break;
-
-        case 0x18 :
-        case 0x19 :
-        case 0x1A :
-        case 0x1B :
-        case 0x1C :
-        case 0x1D :
-        case 0x1E :
-        case 0x1F :
-
-            // Call SETUP_HANG_COUNTER_IOHS table
-            for (auto values : SETUP_HANG_COUNTERS_IOHS )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-
-            }
-
-            break;
-
-        case 0x20 :
-        case 0x21 :
-        case 0x22 :
-        case 0x23 :
-        case 0x24 :
-        case 0x25 :
-        case 0x26 :
-        case 0x27 :
-
-            // Call SETUP_HANG_COUNTER_EQ table
-            for (auto values : SETUP_HANG_COUNTERS_EQ )
-            {
-                l_data64.flush<0>();
-                l_data64.insert< 0, 6, 2 >(values[1]);
-                values[2] ? l_data64.setBit<6>() : l_data64.clearBit<6>() ;
-                FAPI_TRY(fapi2::putScom(i_target_chiplet , (base_address + values[0]), l_data64));
-
-            }
-
-            break;
-
-        default :
-            FAPI_ERR("Invalid Chiplet_id detected : %#010lX ", l_chipletID);
-
+        l_cur_entry++;
     }
 
     FAPI_INF("p10_perv_sbe_cmn_setup_hangpulse_counters: Exiting ...");
@@ -733,56 +617,71 @@ fapi_try_exit:
 /// @param[in]     Group                uint64_t mc group value
 /// @param[in]     pgood                ignore PGOOD, honor PGOOD, honor CORE PGOOD
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const mc_setup_t* i_setup_table)
 {
 
-    fapi2::buffer<uint64_t> mc_data, ignore_pgood_cplt_status_mask, honor_pgood_cplt_status_mask,
-          honor_core_pgood_cplt_status_mask ;
-    uint64_t cplt_mc_membership = 0xFC00000000000000;
+    fapi2::buffer<uint64_t> present_chiplets, functional_chiplets, eqs_with_good_cores;
+    fapi2::buffer<uint64_t> ignore_pgood_cplt_status_mask, honor_pgood_cplt_status_mask,
+          honor_core_pgood_cplt_status_mask, honor_pgood_force_eq_cplt_status_mask;
+    const uint64_t CPLT_MC_MEMBERSHIP = 0xFC00000000000000;
+    const uint64_t EQ_CHIPLET_MASK    = 0x00000000FF000000;
     int mc_count[64] = {0} ;
     int i;
     uint32_t offset = 0;
+    const mc_setup_t* l_group = i_setup_table;
+    std::vector<fapi2::MulticastGroupMapping> l_group_map;
 
     FAPI_INF("p10_perv_sbe_cmn_setup_multicast_groups: Entering ...");
 
     FAPI_DBG("Clear chiplet MC membership (using broadcast)");
-    FAPI_TRY(fapi2::putScom(i_target_chip , 0x6F0F0002, cplt_mc_membership));
-    FAPI_TRY(fapi2::putScom(i_target_chip , 0x6F0F0003, cplt_mc_membership));
-    FAPI_TRY(fapi2::putScom(i_target_chip , 0x6F0F0004, cplt_mc_membership));
+
+    for (int i = 0; i < 4; i++)
+    {
+        FAPI_TRY(fapi2::putScom(i_target_chip , 0x6F0F0001 + i, CPLT_MC_MEMBERSHIP));
+    }
 
     FAPI_DBG("Clear MC member counts in PCBM");
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_1_SLAVES_REG, 0x0));
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_2_SLAVES_REG, 0x0));
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_3_SLAVES_REG, 0x0));
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_4_SLAVES_REG, 0x0));
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_5_SLAVES_REG, 0x0));
-    FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_6_SLAVES_REG, 0x0));
 
-    FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, ignore_pgood, ignore_pgood_cplt_status_mask));
-    FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, honor_pgood, honor_pgood_cplt_status_mask));
-    FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, honor_core_pgood, honor_core_pgood_cplt_status_mask));
-
-    for (auto group : MC_GROUPS)
+    for (int i = 0; i < 7; i++)
     {
-        fapi2::buffer<uint64_t> mc_group_members = group[1];
-        fapi2::buffer<uint64_t> mc_group_number = group[0];
+        FAPI_TRY(fapi2::putScom(i_target_chip , PERV_PIB_MCAST_GRP_0_SLAVES_REG + i, 0x0));
+    }
 
-        if (group[2] == ignore_pgood) // ignore pgood
+    FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_PRESENT, present_chiplets));
+    FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_FUNCTIONAL, functional_chiplets));
+    FAPI_TRY(p10_perv_sbe_cmn_eqs_with_good_cores(i_target_chip, eqs_with_good_cores));
+
+    ignore_pgood_cplt_status_mask         = present_chiplets;
+    honor_pgood_cplt_status_mask          = functional_chiplets;
+    honor_core_pgood_cplt_status_mask     = (functional_chiplets & ~EQ_CHIPLET_MASK) | eqs_with_good_cores;
+    honor_pgood_force_eq_cplt_status_mask = functional_chiplets | (present_chiplets & EQ_CHIPLET_MASK);
+
+    while (true)
+    {
+        fapi2::buffer<uint64_t> mc_group_members = l_group->members;
+
+        switch (l_group->pgood_type)
         {
-            mc_group_members = (mc_group_members & ignore_pgood_cplt_status_mask);
-        }
-        else if (group[2] == honor_pgood) // honor pgood
-        {
-            mc_group_members = (mc_group_members & honor_pgood_cplt_status_mask);
-        }
-        else if (group[2] == honor_core_pgood) // honor core pgood
-        {
-            mc_group_members = (mc_group_members & honor_core_pgood_cplt_status_mask);
-        }
-        else
-        {
-            FAPI_ERR("Invalid Pgood option");
+            case IGNORE_PGOOD: // ignore pgood
+                mc_group_members &= ignore_pgood_cplt_status_mask;
+                break;
+
+            case HONOR_PGOOD: // honor pgood
+                mc_group_members &= honor_pgood_cplt_status_mask;
+                break;
+
+            case HONOR_CORE_PGOOD: // honor core pgood
+                mc_group_members &= honor_core_pgood_cplt_status_mask;
+                break;
+
+            case HONOR_PGOOD_FORCE_EQ: // honor pgood, but force all EQs on
+                mc_group_members &= honor_pgood_force_eq_cplt_status_mask;
+                break;
+
+            default:
+                FAPI_ERR("Invalid Pgood option");
         }
 
         for ( i = 1; i < 64; i++)
@@ -791,22 +690,43 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(const
 
             if(mc_group_members.getBit(chiplet_id))
             {
-                mc_count[i] = mc_count[i] + 1;
-                FAPI_ASSERT(!(mc_count[i] > 3),
+                fapi2::buffer<uint64_t> mc_data = 0;
+
+                offset = mc_count[chiplet_id];
+                mc_count[chiplet_id]++;
+                FAPI_ASSERT(!(offset > 3),
                             fapi2::MC_GROUP_SETUP_ERR()
                             .set_CHIPLET_ID(chiplet_id),
-                            "Error: Chiplet is being added into more 4 groups");
-
-                offset = mc_count[i];
+                            "Error: Chiplet is being added into more than 4 groups");
 
                 // Setting chiplet multicast group registers
-                uint32_t mc_address = (chiplet_id << 24) + 0xF0000 + offset;
-                mc_data.insert< 3, 3, 61 >(mc_group_number);
+                uint32_t mc_address = (chiplet_id << 24) | (PERV_MULTICAST_GROUP_1 + offset);
+                mc_data.insertFromRight<  3, 3 > (l_group->hw_group);
                 mc_data.insertFromRight< 19, 3 > (0xF);
                 FAPI_TRY(fapi2::putScom(i_target_chip , mc_address, mc_data));
+
             }
         }
+
+        l_group_map.push_back((fapi2::MulticastGroupMapping)
+        {
+            l_group->group, l_group->hw_group
+        });
+
+        if (l_group->last)
+        {
+            break;
+        }
+
+        l_group++;
     }
+
+    /* Always map the broadcast group */
+    l_group_map.push_back((fapi2::MulticastGroupMapping)
+    {
+        fapi2::MCGROUP_ALL, 7
+    });
+    FAPI_TRY(fapi2::setMulticastGroupMap(i_target_chip, l_group_map));
 
     FAPI_INF("p10_perv_sbe_cmn_setup_multicast_groups: Exiting ...");
 
@@ -814,263 +734,65 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Get chiplet status while setting MC groups
+/// @brief Query a bitmask representing present / functional chiplets
 ///
 /// @param[in]     i_target_chip        Reference to TARGET_TYPE_PROC_CHIP target
 /// @param[in]     pgood_option         ignore PGOOD, honor PGOOD, honor CORE PGOOD
 /// @param[out]    o_cplt_status_mask   returns 64 bit mask value with each chiplet functional status
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-        uint64_t pgood_option,
-        fapi2::buffer<uint64_t>& o_cplt_status_mask)
+fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::TargetState i_target_state,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask)
 {
 
     fapi2::Target<fapi2::TARGET_TYPE_PERV> l_chiplet ;
-    fapi2::buffer<uint32_t> l_read_attr_pg;
-    fapi2::buffer<uint64_t> l_data64;
-    l_data64.flush<0>();
+    fapi2::buffer<uint64_t> l_data64 = 0;
 
-    FAPI_INF("p10_perv_sbe_cmn_cplt_status: Entering ...");
-
-    // honor_pgoog or honor_core_pgood
     auto l_cplts = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(
                        static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_EQ | fapi2::TARGET_FILTER_TP |
                                fapi2::TARGET_FILTER_ALL_MC  |  fapi2::TARGET_FILTER_ALL_NEST |
                                fapi2::TARGET_FILTER_ALL_PAU |  fapi2::TARGET_FILTER_ALL_PCI  |
-                               fapi2::TARGET_FILTER_ALL_IOHS), fapi2::TARGET_STATE_FUNCTIONAL);
-
-    if(pgood_option == ignore_pgood)
-    {
-        l_cplts = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(
-                      static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_EQ | fapi2::TARGET_FILTER_TP |
-                              fapi2::TARGET_FILTER_ALL_MC  |  fapi2::TARGET_FILTER_ALL_NEST |
-                              fapi2::TARGET_FILTER_ALL_PAU |  fapi2::TARGET_FILTER_ALL_PCI  |
-                              fapi2::TARGET_FILTER_ALL_IOHS), fapi2::TARGET_STATE_PRESENT);
-    }
+                               fapi2::TARGET_FILTER_ALL_IOHS), i_target_state);
 
     for (auto& targ : l_cplts)
     {
-        uint32_t l_chipletID = targ.getChipletNumber();
-
-        if(l_chipletID == 0x1)
-        {
-            l_data64.setBit<1>();
-        }
-        else if(l_chipletID == 0x2)
-        {
-            l_data64.setBit<2>();
-        }
-        else if(l_chipletID == 0x3)
-        {
-            l_data64.setBit<3>();
-        }
-        else if(l_chipletID == 0x8)
-        {
-            l_data64.setBit<8>();
-        }
-        else if(l_chipletID == 0x9)
-        {
-            l_data64.setBit<9>();
-        }
-        else if(l_chipletID == 0xC)
-        {
-            l_data64.setBit<12>();
-        }
-        else if(l_chipletID == 0xD)
-        {
-            l_data64.setBit<13>();
-        }
-        else if(l_chipletID == 0xE)
-        {
-            l_data64.setBit<14>();
-        }
-        else if(l_chipletID == 0xF)
-        {
-            l_data64.setBit<15>();
-        }
-        else if(l_chipletID == 0x10)
-        {
-            l_data64.setBit<16>();
-        }
-        else if(l_chipletID == 0x11)
-        {
-            l_data64.setBit<17>();
-        }
-        else if(l_chipletID == 0x12)
-        {
-            l_data64.setBit<18>();
-        }
-        else if(l_chipletID == 0x13)
-        {
-            l_data64.setBit<19>();
-        }
-        else if(l_chipletID == 0x18)
-        {
-            l_data64.setBit<24>();
-        }
-        else if(l_chipletID == 0x19)
-        {
-            l_data64.setBit<25>();
-        }
-        else if(l_chipletID == 0x1A)
-        {
-            l_data64.setBit<26>();
-        }
-        else if(l_chipletID == 0x1B)
-        {
-            l_data64.setBit<27>();
-        }
-        else if(l_chipletID == 0x1C)
-        {
-            l_data64.setBit<28>();
-        }
-        else if(l_chipletID == 0x1D)
-        {
-            l_data64.setBit<29>();
-        }
-        else if(l_chipletID == 0x1E)
-        {
-            l_data64.setBit<30>();
-        }
-        else if(l_chipletID == 0x1F)
-        {
-            l_data64.setBit<31>();
-        }
-        else if(l_chipletID == 0x20)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ0, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<32>() : l_data64.clearBit<32>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<32>();
-            }
-        }
-        else if(l_chipletID == 0x21)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ1, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<33>() : l_data64.clearBit<33>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<33>();
-            }
-        }
-        else if(l_chipletID == 0x22)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ2, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<34>() : l_data64.clearBit<34>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<34>();
-            }
-        }
-        else if(l_chipletID == 0x23)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ3, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<35>() : l_data64.clearBit<35>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<35>();
-            }
-        }
-        else if(l_chipletID == 0x24)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ4, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<36>() : l_data64.clearBit<36>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<36>();
-            }
-        }
-        else if(l_chipletID == 0x25)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ5, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<37>() : l_data64.clearBit<37>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<37>();
-            }
-        }
-        else if(l_chipletID == 0x26)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ6, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<38>() : l_data64.clearBit<38>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<38>();
-            }
-        }
-        else if(l_chipletID == 0x27)
-        {
-            if(pgood_option == honor_core_pgood)
-            {
-                l_chiplet = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-                            (fapi2::TARGET_FILTER_EQ7, fapi2::TARGET_STATE_FUNCTIONAL)[0];
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_chiplet, l_read_attr_pg));
-                // Atleast one core should be good in EQ
-                ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
-                  || l_read_attr_pg.getBit<16>() ) ? l_data64.setBit<39>() : l_data64.clearBit<39>();
-            }
-            else // ignore_pgood and honor_pgood
-            {
-                l_data64.setBit<39>();
-            }
-        }
-
-        o_cplt_status_mask = l_data64;
-
+        l_data64.setBit(targ.getChipletNumber());
     }
 
-    FAPI_INF("p10_perv_sbe_cmn_cplt_status: Exiting ...");
+    o_cplt_status_mask = l_data64;
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+/// @brief Query a bitmask representing EQs with at least one good core
+///
+/// @param[in]     i_target_chip        Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[out]    o_cplt_status_mask   returns 64 bit mask value with each chiplet functional status
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask)
+{
+
+    fapi2::Target<fapi2::TARGET_TYPE_PERV> l_chiplet ;
+    fapi2::buffer<uint64_t> l_data64 = 0;
+    fapi2::buffer<uint32_t> l_read_attr_pg;
+
+    auto l_cplts = i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>(
+                       static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_EQ), fapi2::TARGET_STATE_FUNCTIONAL);
+
+    for (auto& targ : l_cplts)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, targ, l_read_attr_pg));
+
+        if ( l_read_attr_pg.getBit<13>() || l_read_attr_pg.getBit<14>() || l_read_attr_pg.getBit<15>()
+             || l_read_attr_pg.getBit<16>() )
+        {
+            l_data64.setBit(targ.getChipletNumber());
+        }
+    }
+
+    o_cplt_status_mask = l_data64;
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -37,7 +37,46 @@
 
 
 #include <fapi2.H>
+#include <multicast_defs.H>
 
+/// @brief Describes a hang pulse configuration
+struct hang_pulse_t
+{
+    uint16_t id            : 4; ///< Hang pulse number to program
+    uint16_t value         : 8; ///< Frequency value for this hang pulse
+    uint16_t stop_on_xstop : 1; ///< Hang pulse should stop when a checkstop comes in
+    uint16_t               : 2;
+    uint16_t last          : 1; ///< Set to 1 for the last entry in an array of this struct
+} __attribute__((packed));
+
+enum mc_hw_group_t : uint8_t
+{
+    MC_GROUP_0 = 0x0,
+    MC_GROUP_1 = 0x1,
+    MC_GROUP_2 = 0x2,
+    MC_GROUP_3 = 0x3,
+    MC_GROUP_4 = 0x4,
+    MC_GROUP_5 = 0x5,
+    MC_GROUP_6 = 0x6,
+};
+
+enum mc_pgood_type : uint8_t
+{
+    IGNORE_PGOOD,
+    HONOR_PGOOD,
+    HONOR_PGOOD_FORCE_EQ,
+    HONOR_CORE_PGOOD,
+};
+
+/// @brief Describes the setup for a single multicast group
+struct mc_setup_t
+{
+    fapi2::MulticastGroup group;       ///< Abstract group ID that will be represented by this
+    mc_hw_group_t         hw_group;    ///< Hardware group value to associate with this group
+    mc_pgood_type         pgood_type;  ///< How to handle partial-goodness of chiplets
+    uint8_t               last;        ///< Set to 1 for the last entry in an array of this struct
+    uint64_t              members;     ///< A vector of chiplets to make members of this group
+};
 
 fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
@@ -58,18 +97,32 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         const fapi2::buffer<uint64_t> i_regions,
         const fapi2::buffer<uint8_t> i_clock_types);
 
-fapi2::ReturnCode p10_perv_sbe_cmn_setup_hangpulse_counters(const
-        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
-        const uint32_t base_address,
-        const uint8_t pre_divider);
+fapi2::ReturnCode p10_perv_sbe_cmn_check_status(
+    const fapi2::buffer<uint64_t> i_regions,
+    const fapi2::buffer<uint64_t> i_clock_status,
+    const bool i_reg,
+    const fapi2::buffer<uint8_t> i_clock_cmd,
+    fapi2::buffer<uint64_t>& o_exp_clock_status);
 
-fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_hangpulse_counters(
+    const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST > & i_target_chiplet,
+    const bool i_target_parent_chip,
+    const uint32_t i_base_address,
+    const uint8_t i_pre_divider,
+    const hang_pulse_t* i_hang_pulse_table);
 
-fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-        uint64_t pgood_option,
-        fapi2::buffer<uint64_t>& o_cplt_status_mask);
+fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const mc_setup_t* i_setup_table);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::TargetState i_target_state,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask);
+
+fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    fapi2::buffer<uint64_t>& o_cplt_status_mask);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_COMPARE > & i_mcast_target);
