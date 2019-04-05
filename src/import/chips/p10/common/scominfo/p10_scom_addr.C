@@ -50,8 +50,8 @@ extern "C"
              (getChipletId() <= EQ7_CHIPLET_ID) )
         {
             // If endpoint is QME (0xE):
-            //  QME per core (bit 20) must be 0
-            //  region select (bits 16:19) must be 0
+            // QME per core (bit 20) must be 0
+            // region select (bits 16:19) must be 0
             if ( (getEndpoint() == QME_ENDPOINT) && (!getQMEPerCore()) &&
                  (getRegionSelect() == EQ_REGION_SEL) )
             {
@@ -316,6 +316,17 @@ extern "C"
                     if ( getRingId() == PSCOM_RING_ID)                    // 0x0
                     {
                         l_pervTarget = true;
+                    }
+                }
+
+                // If chiplet is EQ and falls into the range
+                // of the cores, it's not a PERV target
+                if ( (getChipletId() >= EQ0_CHIPLET_ID) &&
+                     (getChipletId() <= EQ7_CHIPLET_ID) )
+                {
+                    if (getEndpoint() == PSCOM_ENDPOINT)
+                    {
+                        l_pervTarget = false;
                     }
                 }
 
