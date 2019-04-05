@@ -46,14 +46,10 @@
 /// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
 /// uses DD level to extract single ring or block of rings from hw_image
 ///
-/// \param[in]  i_RingVariant A enum to indicate which variant type of
-/// requested for single ring extract. There are three major types. They are
-/// base, Cache contained and Risk level ring
-///
 /// \param[in/out] io_instanceId A variable to indicate chiplet instance ID.
 /// It returns Chiplet instance ID while doing get single ring operation
 ///
-/// \param[in] i_RingVariant  A enum to indicate type of operation performed
+/// \param[in] i_ringRequest  A enum to indicate type of operation performed
 /// by TOR API Option:
 /// GET_SINGLE_RING indicates to extract single ring container.
 /// PUT_SINGLE_RING indicates to extract ring absolute memory addres for
@@ -72,34 +68,12 @@
 ///
 /// \param[in] - i_debug is debug statment params. Supports 0 to 3.
 ///
-/// This API traverse TOR structure of .ringSection from HW image or SBE image
-/// and the following n number of operation based on the call.
-///
-/// GET_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
-/// based on \a i_ringId which gives ring info, \a i_ddLevel which gives dd
-/// spec info, \a i_ringVarint gives ring variant info and \a io_instance which
-/// gives chiplet instance specific while accessing instance specific ring and
-/// returns chiplet number while accessing common ring. On return,
-/// \a io_ringBlockPtr contains RS4 container \a io_ringBlockSize contains size
-/// of data copied into io_ringBlockPtr. \a o_ringName returns ring string name.
-///
-/// PUT_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
-/// based on \a i_ringId which gives ring info, \a i_ddLevel which gives dd
-/// spec info, \a i_ringVarint gives ring variant info and \a io_instance
-/// which gives chiplet instance specific while accessing instance specific
-/// ring and returns chiplet number while accessing common ring. On return,
-/// \a io_ringBlockPtr contains absolute memory address of ring type of
-/// requested ring and \a io_ringBlockSize contains of absolute memory addres
-/// of ringTor slot copied into io_ringBlockPtr \a o_ringName returns ring
-/// string name
-///
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_access_ring( void*           i_ringSection,    // Ring section ptr
                      RingId_t        i_ringId,         // Ring ID
                      uint8_t         i_ddLevel,        // DD level info
-                     RingVariant_t   i_ringVariant,    // BASE,CC,RLn
                      uint8_t&        io_instanceId,    // Chiplet instance ID
                      RingRequest_t   i_ringRequest,    // {GET,PUT}_SINGLE_RING
                      void**          io_ringBlockPtr,  // Addr of ring buffer
@@ -108,8 +82,7 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
                      uint32_t        i_dbgl = 0 );     // Debug option
 
 
-/// Traverse on TOR structure and copies RS4 ring container data for ring
-/// variant
+/// Traverse on TOR structure and copies RS4 ring container data
 ///
 /// \param[in]  i_ringSection A pointer to a Ring section binary image.
 /// It contain details of p9 Ring which is used for scanning operation.
@@ -119,10 +92,6 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
 ///
 /// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
 /// uses DD level to extract single ring or block of rings on hw_image.
-///
-/// \param[in]  i_RingVariant A enum to indicate which variant type of
-/// requested for get single ring operation There are three major types.
-/// They are base, Cache contained and Risk level ring
 ///
 /// \param[in] io_instanceId A variable to indicate chiplet instance ID
 ///
@@ -135,24 +104,19 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
 ///
 /// \param[in] - i_debug is debug statment params. Supports 0 to 3.
 ///
-/// This API contains wrapper on top of tor_access_ring API to support get
-/// single ring container from .ring section and customizes for
-/// get_single_ring parameter.
-///
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
                           uint8_t        i_ddLevel,
                           RingId_t       i_ringId,
-                          RingVariant_t  i_ringVariant,
                           uint8_t        i_instanceId,
                           void**         io_ringBlockPtr,
                           uint32_t&      io_ringBlockSize,
                           uint32_t       i_dbgl = 0 );        // Debug option
 
 /// Traverse on TOR structure and copies absolute memory address of Ringtype
-///  offset addres and TOR offset slot address
+/// offset addres and TOR offset slot address
 ///
 /// \param[in]  i_ringSection A pointer to a Ring section binary image.
 /// It contains details of p9 Ring which is used for scanning operation.
@@ -171,9 +135,6 @@ int tor_get_single_ring ( void*          i_ringSection,
 ///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
-/// \param[in]  i_RingVariant A enum and used as input param to indicate
-/// which variant type of requested for single ring extract
-///
 /// \param[in] i_instanceId A variable to indicate chiplet instance ID
 ///
 /// \param[in] i_rs4_container A void pointer. Contains RS4 compressed ring
@@ -181,13 +142,11 @@ int tor_get_single_ring ( void*          i_ringSection,
 ///
 /// \param[in] - i_debug is debug statment params. Supports 0 to 3.
 ///
-/// This API contains wrapper on tor_access_ring to get \a io_ringBlockPtr
-/// contains absolute memory address of ring type start address of the ring
 /// \a io_ringBlockSize contains absolute memory address of ringTorslot. Then
 /// appends new rs4 ring container at the end of ring section and updates new
-/// ring offset address on ring offset location. the slot must be empty. If there
-/// is non-zero content in the slot, the API will fail catastrophically. Do not
-/// "insert" or "replace" rings at ring section.
+/// ring offset address on ring offset location. The slot must be empty. If there
+/// is non-zero content in the slot, the API will fail. Note that this API does not
+/// "insert" or "replace" rings. It only appends at the end of the ring section.
 ///
 /// \retval 0 Success
 ///
@@ -197,7 +156,6 @@ int tor_append_ring(  void*           i_ringSection,
                       void*           i_ringBuffer,
                       const uint32_t  i_ringBufferSize,
                       RingId_t        i_ringId,
-                      RingVariant_t   i_ringVariant,
                       uint8_t         i_instanceId,
                       void*           i_rs4Container,
                       uint32_t        i_dbgl = 0 );
