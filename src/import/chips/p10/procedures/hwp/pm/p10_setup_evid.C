@@ -31,12 +31,12 @@
 // *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
 // *Team                : PM
 // *Consumed by         : HB
-// *Level               : 1
+// *Level               : 2
 ///
 /// @verbatim
 ///
 /// Procedure Summary:
-///   - Use Attributes to send VDD, VDN and VCS via the AVS bus to VRMs
+///   - Use Attributes to send VDD, VDN, VCS and VIO via the AVS bus to VRMs
 ///
 /// @endverbatim
 
@@ -45,12 +45,13 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p10_setup_evid.H>
-//#include <p10_avsbus_lib.H>
-//#include <p10_avsbus_scom.H>
-//#include <p10_quad_scom_addresses.H>
-//#include <p10_quad_scom_addresses_fld.H>
+#include <p10_pstate_parameter_block.H>
+#include <p10_avsbus_lib.H>
+#include <p10_avsbus_scom.H>
 
-//using namespace pm_pstate_parameter_block;
+using namespace pm_pstate_parameter_block;
+
+#define INVALID_BUS_NUM   0xFF
 
 //-----------------------------------------------------------------------------
 // Procedure
@@ -82,15 +83,19 @@ struct avsbus_attrs_t
 };
 // compute_boot_safe
 
-
+/////////////////////////////////////////////////////////////////
+//////p10_setup_evid
+////////////////////////////////////////////////////////////////
 fapi2::ReturnCode
 p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const VoltageConfigActions_t i_action)
 {
-#if 0
 
     pm_pstate_parameter_block::AttributeList attrs;
-
+    uint32_t l_present_boot_voltage[MAX_VRM];
+    bool  l_dpll_lesser_value = false;
+    fapi2::buffer<uint64_t> l_fmult_data(0);
+//    uint32_t l_safe_model_dpll_value = 0;
     //Instantiate PPB object
     PlatPmPPB l_pmPPB(i_target);
 
@@ -98,78 +103,300 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
 
     //We only wish to apply settings if i_action says to
+    // this will be executed in istep 10
     if(i_action == APPLY_VOLTAGE_SETTINGS)
     {
-        l_pmPPB.get_pstate_attrs(&attrs);
-        // Set the DPLL frequency values to safe mode values
-        FAPI_TRY (p10_setup_dpll_values(i_target,
-                                        attrs.freq_proc_refclock_khz,
-                                        attrs.proc_dpll_divider),
-                  "Error from p10_setup_dpll_values function");
+        l_pmPPB.get_pstate_attrs(attrs);
 
-        if (attrs.vdd_voltage_mv)
+        //TODO nest dpll register is not working on awan model
+        //so for now this code will be commented.
+        //RTC:207137 will be used to enable this code.
+        //HW491247:to track nest dpll issue
+#if 0
+        // Read and compare DPLL and safe mode value
+        FAPI_TRY (p10_read_dpll_value(i_target,
+                                      attrs.freq_proc_refclock_khz,
+                                      attrs.proc_dpll_divider,
+                                      l_dpll_lesser_value,
+                                      l_fmult_data,
+                                      l_safe_model_dpll_value),
+                  "Error from p10_read_dpll_value function");
+#endif
+
+        //if DPLL is greater than safe mode freq then first set the dpll to safe
+        //model freq.
+        if (!l_dpll_lesser_value)
         {
-            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
-                                                 attrs.vdd_bus_num,
-                                                 attrs.vdd_rail_select,
-                                                 attrs.vdd_voltage_mv,
-                                                 attrs.attr_ext_vrm_step_size_mv,
-                                                 VDD_SETUP),
-                     "Error from VDD setup function");
+#if 0
+            // Set the DPLL frequency values to safe mode values
+            FAPI_TRY (p10_update_dpll_value(i_target,
+                                            l_safe_model_dpll_value),
+                      "Error from p10_update_dpll_value function");
+#endif
         }
 
-        if (attrs.vdn_voltage_mv)
+        //Read VDD and VCS present voltage from HW
+        FAPI_TRY(p10_setup_evid_voltageRead(i_target,
+                                            attrs.attr_avs_bus_num,
+                                            attrs.attr_avs_bus_rail_select,
+                                            l_present_boot_voltage),
+                 "Error from voltage read function");
+
+        // Set Boot VDD/VCS Voltage
+        if(attrs.attr_avs_bus_num[VDD] != INVALID_BUS_NUM &&
+           attrs.attr_avs_bus_num[VCS] != INVALID_BUS_NUM)
         {
-            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
-                                                 attrs.vdn_bus_num,
-                                                 attrs.vdn_rail_select,
-                                                 attrs.vdn_voltage_mv,
-                                                 attrs.attr_ext_vrm_step_size_mv,
-                                                 VDN_SETUP),
-                     "error from VDN setup function");
+            FAPI_TRY(update_VDD_VCS_voltage(i_target,
+                                            attrs.attr_avs_bus_num,
+                                            attrs.attr_avs_bus_rail_select,
+                                            attrs.attr_boot_voltage_mv,
+                                            attrs.attr_ext_vrm_step_size_mv,
+                                            l_present_boot_voltage),
+                     "Error from VDD/VCS setup function");
         }
 
-        // Set Boot VCS Voltage
-        if(attrs.vcs_bus_num == 0xFF)
+        // Set DPLL after ext volt update because of dpll is lesser the safe
+        // mode freq.
+        if (l_dpll_lesser_value)
         {
+#if 0
+            // Set the DPLL frequency values to safe mode values
+            FAPI_TRY (p10_update_dpll_value(i_target,
+                                            l_safe_model_dpll_value),
+                      "Error from p10_update_dpll_value function");
+#endif
+        }
 
-            FAPI_INF("VCS rail is not connected to AVSBus. Skipping VCS programming");
+        // Set Boot VDN Voltage
+        if(attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
+        {
+            FAPI_INF("VDN rail is not connected to AVSBus. Skipping VDN programming");
         }
         else
         {
-            if (attrs.vcs_voltage_mv)
+            if (attrs.attr_boot_voltage_mv[VDN])
             {
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
-                                                     attrs.vcs_bus_num,
-                                                     attrs.vcs_rail_select,
-                                                     attrs.vcs_voltage_mv,
+                                                     attrs.attr_avs_bus_num[VDN],
+                                                     attrs.attr_avs_bus_rail_select[VDN],
+                                                     attrs.attr_boot_voltage_mv[VDN],
                                                      attrs.attr_ext_vrm_step_size_mv,
-                                                     VCS_SETUP),
-                         "error from VCS setup function");
+                                                     l_present_boot_voltage[VDN],
+                                                     VDN_SETUP),
+                         "error from VDN setup function");
+            }
+        }
+
+        // Set Boot VIO Voltage
+        if(attrs.attr_avs_bus_num[VIO] == INVALID_BUS_NUM)
+        {
+            FAPI_INF("VIO rail is not connected to AVSBus. Skipping VIO programming");
+        }
+        else
+        {
+            if (attrs.attr_boot_voltage_mv[VIO])
+            {
+                FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                     attrs.attr_avs_bus_num[VIO],
+                                                     attrs.attr_avs_bus_rail_select[VIO],
+                                                     attrs.attr_boot_voltage_mv[VIO],
+                                                     attrs.attr_ext_vrm_step_size_mv,
+                                                     l_present_boot_voltage[VIO],
+                                                     VIO_SETUP),
+                         "error from VIO setup function");
             }
         }
     }
 
 fapi_try_exit:
-#endif
     return fapi2::current_err;
 } // Procedure
 
-#if 0
 
+
+/////////////////////////////////////////////////////////////////
+//////p10_setup_evid_voltageRead
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                           const uint8_t* i_bus_num,
+                           const uint8_t* i_rail_select,
+                           uint32_t* o_voltage_mv)
+
+{
+    uint8_t     l_goodResponse = 0;
+    uint8_t     l_throwAssert = true;
+    uint32_t    l_present_voltage_mv;
+    uint32_t    l_count;
+    char        rail_str[8];
+
+    for (auto i_evid_value = 0; i_evid_value < MAX_VRM; ++i_evid_value)
+    {
+        switch (i_evid_value)
+        {
+            case VCS_SETUP:
+                if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
+                {
+                    FAPI_INF("VCS not connected. skipping");
+                    continue;
+                }
+
+                strcpy(rail_str, "VCS");
+                break;
+
+            case VDD_SETUP:
+                if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
+                {
+                    FAPI_INF("VDD not connected. skipping");
+                    continue;
+                }
+
+                strcpy(rail_str, "VDD");
+                break;
+
+            case VDN_SETUP:
+                if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
+                {
+                    FAPI_INF("VDN not connected. skipping");
+                    continue;
+                }
+
+                strcpy(rail_str, "VDN");
+                break;
+
+            case VIO_SETUP:
+                if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
+                {
+                    FAPI_INF("VIO not connected. skipping");
+                    continue;
+                }
+
+                strcpy(rail_str, "VIO");
+                break;
+
+            default:
+                ;
+        }
+
+        if (i_evid_value != VCS_SETUP)
+        {
+            // Initialize the buses
+            FAPI_TRY(avsInitExtVoltageControl(i_target,
+                                              i_bus_num[i_evid_value], BRIDGE_NUMBER),
+                     "Initializing avsBus VDD/VDN, bridge %d", BRIDGE_NUMBER);
+        }
+
+        // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
+        // initialize the AVS slave
+        FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
+
+        // Read the present voltage
+
+        // This loop is to ensrue AVSBus Master and Slave are in sync
+        l_count = 0;
+
+        do
+        {
+
+            FAPI_TRY(avsVoltageRead(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER,
+                                    i_rail_select[i_evid_value], l_present_voltage_mv),
+                     "AVS Voltage read transaction failed to %d, Bridge %d",
+                     i_bus_num[i_evid_value],
+                     BRIDGE_NUMBER);
+            // Throw an assertion if we don't get a good response.
+            l_throwAssert =  (l_count >= AVSBUS_RETRY_COUNT);
+            FAPI_TRY(avsValidateResponse(i_target,  i_bus_num[i_evid_value], BRIDGE_NUMBER,
+                                         l_throwAssert, l_goodResponse));
+
+            if (!l_goodResponse)
+            {
+                FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
+            }
+
+            l_count++;
+        }
+        while (!l_goodResponse);
+
+        o_voltage_mv[i_evid_value] = l_present_voltage_mv;
+    } //end of for
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/////////////////////////////////////////////////////////////////
+//////update_VDD_VCS_voltage
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                       const uint8_t* i_bus_num,
+                       const uint8_t* i_rail_select,
+                       const uint32_t* i_voltage_mv,
+                       const uint32_t i_ext_vrm_step_size_mv,
+                       const uint32_t* i_present_boot_voltage)
+
+{
+    enum P10_SETUP_EVID_CONSTANTS l_evid_value;
+
+    if (i_present_boot_voltage[VDD] < i_voltage_mv[VDD] &&
+        i_present_boot_voltage[VCS] < i_voltage_mv[VCS])
+    {
+        for (uint8_t i = VDD; i <= VCS;  ++i)
+        {
+            l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+
+            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                 i_bus_num[i],
+                                                 i_rail_select[i],
+                                                 i_voltage_mv[i],
+                                                 i_ext_vrm_step_size_mv,
+                                                 i_present_boot_voltage[i],
+                                                 l_evid_value),
+                     "Error from p10_setup_evid_voltageWrite setup function");
+        }
+    }
+
+
+    if ((i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
+         i_present_boot_voltage[VCS] > i_voltage_mv[VCS]) ||
+        (i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
+         i_present_boot_voltage[VCS] < i_voltage_mv[VCS]))
+    {
+        for (uint8_t i = VCS; i <= VDD;  --i)
+        {
+            l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+
+            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                 i_bus_num[i],
+                                                 i_rail_select[i],
+                                                 i_voltage_mv[i],
+                                                 i_ext_vrm_step_size_mv,
+                                                 i_present_boot_voltage[i],
+                                                 l_evid_value),
+                     "Error from p10_setup_evid_voltageWrite setup function");
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/////////////////////////////////////////////////////////////////
+//////p10_setup_evid_voltageWrite
+////////////////////////////////////////////////////////////////
 fapi2::ReturnCode
 p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                             const uint8_t i_bus_num,
                             const uint8_t i_rail_select,
                             const uint32_t i_voltage_mv,
                             const uint32_t i_ext_vrm_step_size_mv,
-                            const P9_SETUP_EVID_CONSTANTS i_evid_value)
-
+                            const uint32_t i_present_voltage_mv,
+                            const P10_SETUP_EVID_CONSTANTS i_evid_value)
 {
-
     uint8_t     l_goodResponse = 0;
     uint8_t     l_throwAssert = true;
-    uint32_t    l_present_voltage_mv;
+    uint32_t    l_present_voltage_mv = i_present_voltage_mv;
     uint32_t    l_target_mv;
     uint32_t    l_count;
     int32_t     l_delta_mv = 0;
@@ -189,6 +416,10 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
             strcpy(rail_str, "VDN");
             break;
 
+        case VIO_SETUP:
+            strcpy(rail_str, "VIO");
+            break;
+
         default:
             ;
     }
@@ -206,33 +437,6 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
     // initialize the AVS slave
     FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
-
-    // Read the present voltage
-
-    // This loop is to ensrue AVSBus Master and Slave are in sync
-    l_count = 0;
-
-    do
-    {
-
-        FAPI_TRY(avsVoltageRead(i_target, i_bus_num, BRIDGE_NUMBER,
-                                i_rail_select, l_present_voltage_mv),
-                 "AVS Voltage read transaction failed to %d, Bridge %d",
-                 i_bus_num,
-                 BRIDGE_NUMBER);
-        // Throw an assertion if we don't get a good response.
-        l_throwAssert =  (l_count >= AVSBUS_RETRY_COUNT);
-        FAPI_TRY(avsValidateResponse(i_target,  i_bus_num, BRIDGE_NUMBER,
-                                     l_throwAssert, l_goodResponse));
-
-        if (!l_goodResponse)
-        {
-            FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
-        }
-
-        l_count++;
-    }
-    while (!l_goodResponse);
 
     // Compute the delta
     l_delta_mv = (int32_t)l_present_voltage_mv - (int32_t)i_voltage_mv;
@@ -316,105 +520,113 @@ fapi_try_exit:
     return fapi2::current_err;
 } // Procedure
 
+
+/////////////////////////////////////////////////////////////////
+//////p10_read_dpll_value
+////////////////////////////////////////////////////////////////
 fapi2::ReturnCode
-p10_setup_dpll_values (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                       const uint32_t  i_freq_proc_refclock_khz,
-                       const uint32_t i_proc_dpll_divider)
+p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                     const uint32_t  i_freq_proc_refclock_khz,
+                     const uint32_t i_proc_dpll_divider,
+                     bool&  o_dpll_lesser_value,
+                     fapi2::buffer<uint64_t>& o_fmult_data,
+                     uint32_t& o_safe_model_dpll_value)
 
 {
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
-    fapi2::Target<fapi2::TARGET_TYPE_EQ> l_firstEqChiplet;
-    l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
     fapi2::buffer<uint64_t> l_data64;
-    fapi2::buffer<uint64_t> l_fmult;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    uint8_t l_chipNum = 0xFF;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_attr_safe_mode_mv;
+    //TBD  will remove once register defined in scom address file
+    uint32_t NEST_DPLL_FREQ = 0x01060151;
+#define NEST_DPLL_FREQ_FMULT  17
+#define NEST_DPLL_FREQ_FMULT_LEN  11
+#define NEST_DPLL_FREQ_FMAX  1
+#define NEST_DPLL_FREQ_FMAX_LEN  11
+#define NEST_DPLL_FREQ_FMIN  33
+#define NEST_DPLL_FREQ_FMIN_LEN  11
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_safe_mode_freq));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_attr_safe_mode_mv));
 
     do
     {
-
-        if (!l_attr_safe_mode_freq || !l_attr_safe_mode_mv)
+        if (!l_attr_safe_mode_freq )
         {
             break;
         }
 
-        for ( auto l_itr = l_eqChiplets.begin(); l_itr != l_eqChiplets.end(); ++l_itr)
+        o_fmult_data.flush<0>();
+        FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_FREQ, l_data64),
+                 "ERROR: Failed to read NEST_DPLL_FREQ");
+
+        l_data64.extractToRight<NEST_DPLL_FREQ_FMULT,
+                                NEST_DPLL_FREQ_FMULT_LEN>(o_fmult_data);
+
+        // Convert back to the complete frequency value
+        o_fmult_data =  ((o_fmult_data * i_freq_proc_refclock_khz ) / i_proc_dpll_divider ) / 1000;
+
+        // Convert frequency value to a format that needs to be written to the
+        // register
+        o_safe_model_dpll_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
+                                  i_freq_proc_refclock_khz;
+
+        FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d)",
+                 o_fmult_data, o_safe_model_dpll_value, o_safe_model_dpll_value);
+
+        if (o_fmult_data >= o_safe_model_dpll_value)
         {
-            l_fmult.flush<0>();
-            FAPI_TRY(fapi2::getScom(*l_itr, EQ_QPPM_DPLL_FREQ , l_data64),
-                     "ERROR: Failed to read EQ_QPPM_DPLL_FREQ");
-
-            l_data64.extractToRight<EQ_QPPM_DPLL_FREQ_FMULT,
-                                    EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_fmult);
-
-            // Convert back to the complete frequency value
-            l_fmult =  ((l_fmult * i_freq_proc_refclock_khz ) / i_proc_dpll_divider ) / 1000;
-
-            // Convert frequency value to a format that needs to be written to the
-            // register
-            uint32_t l_safe_mode_dpll_value = ((l_attr_safe_mode_freq * 1000) * i_proc_dpll_divider) /
-                                              i_freq_proc_refclock_khz;
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_itr, l_chipNum));
-            FAPI_INF("For EQ number %u, l_fmult 0x%08X l_safe_mode_dpll_value 0x%08X (%d)",
-                     l_chipNum, l_fmult, l_safe_mode_dpll_value, l_safe_mode_dpll_value);
-
-            if (l_fmult > l_safe_mode_dpll_value)
-            {
-                FAPI_INF("DPLL setting: Lowering the dpll frequency");
-            }
-            else if (l_fmult < l_safe_mode_dpll_value)
-            {
-                FAPI_INF("DPLL setting: Raising the dpll frequency");
-            }
-            else
-            {
-                FAPI_INF("DPLL setting: Leaving the dpll frequency as it is");
-            }
-
-            //FMax
-            l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMAX,
-                                     EQ_QPPM_DPLL_FREQ_FMAX_LEN>(l_safe_mode_dpll_value);
-            //FMin
-            l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMIN,
-                                     EQ_QPPM_DPLL_FREQ_FMIN_LEN>(l_safe_mode_dpll_value);
-            //FMult
-            l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMULT,
-                                     EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_safe_mode_dpll_value);
-
-            FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_DPLL_FREQ, l_data64),
-                     "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
-
-
-            //Update VDM VID compare to safe mode value
-            const uint16_t VDM_VOLTAGE_IN_MV = 512;
-            const uint16_t VDM_GRANULARITY = 4;
-
-            //Convert same mode value to a format that needs to be written to
-            //the register
-            uint32_t l_vdm_vid_value = (l_attr_safe_mode_mv - VDM_VOLTAGE_IN_MV) / VDM_GRANULARITY;
-
-            FAPI_INF ("l_vdm_vid_value 0x%x (%d), i_safe_mode_values.safe_mode_mv 0x%x (%d)",
-                      l_vdm_vid_value, l_vdm_vid_value,
-                      l_attr_safe_mode_mv, l_attr_safe_mode_mv);
-
-            FAPI_TRY(fapi2::getScom(*l_itr, EQ_QPPM_VDMCFGR, l_data64),
-                     "ERROR: Failed to read EQ_QPPM_VDMCFGR");
-
-            l_data64.insertFromRight<0, 8>(l_vdm_vid_value);
-
-            FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_VDMCFGR, l_data64),
-                     "ERROR: Failed to write for EQ_QPPM_VDMCFGR");
-        } //end of eq list
+            o_dpll_lesser_value = false;
+            FAPI_INF("DPLL setting: Lowering the dpll frequency");
+        }
+        else
+        {
+            o_dpll_lesser_value = true;
+            FAPI_INF("DPLL setting: Raising the dpll frequency");
+        }
     }
     while (0);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-#endif
+
+/////////////////////////////////////////////////////////////////
+//////p10_update_dpll_value
+////////////////////////////////////////////////////////////////
+fapi2::ReturnCode
+p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                       const uint32_t  i_safe_mode_dpll_value)
+
+{
+    fapi2::buffer<uint64_t> l_data64;
+    //TBD  will remove once register defined in scom address file
+    uint32_t NEST_DPLL_FREQ = 0x01060151;
+#define NEST_DPLL_FREQ_FMULT  17
+#define NEST_DPLL_FREQ_FMULT_LEN  11
+#define NEST_DPLL_FREQ_FMAX  1
+#define NEST_DPLL_FREQ_FMAX_LEN  11
+#define NEST_DPLL_FREQ_FMIN  33
+#define NEST_DPLL_FREQ_FMIN_LEN  11
+
+    do
+    {
+        //FMax
+        l_data64.insertFromRight<NEST_DPLL_FREQ_FMAX,
+                                 NEST_DPLL_FREQ_FMAX_LEN>(i_safe_mode_dpll_value);
+        //FMin
+        l_data64.insertFromRight<NEST_DPLL_FREQ_FMIN,
+                                 NEST_DPLL_FREQ_FMIN_LEN>(i_safe_mode_dpll_value);
+        //FMult
+        l_data64.insertFromRight<NEST_DPLL_FREQ_FMULT,
+                                 NEST_DPLL_FREQ_FMULT_LEN>(i_safe_mode_dpll_value);
+
+        FAPI_TRY(fapi2::putScom(i_target, NEST_DPLL_FREQ, l_data64),
+                 "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
+
+    }
+    while (0);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
