@@ -721,7 +721,7 @@ static const uint32_t PE1_PHB2_ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN
 static const uint64_t PE1_PHB2_ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x09010995ull;
 // proc/reg00036.H
 
-static const uint64_t TP_TPBR_AD_LPC_BASE_REG = 0x03001c40ull;
+static const uint64_t TP_TPBR_AD_LPC_BASE_REG = 0x00090040ull;
 
 static const uint32_t TP_TPBR_AD_LPC_BASE_REG_BASE = 8;
 static const uint32_t TP_TPBR_AD_LPC_BASE_REG_BASE_LEN = 24;

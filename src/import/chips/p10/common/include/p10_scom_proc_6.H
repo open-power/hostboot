@@ -825,7 +825,7 @@ static const uint32_t TP_TPBR_AD_XSCOM_RCVED_STAT_REG_DEST_CHIPID = 17;
 static const uint32_t TP_TPBR_AD_XSCOM_RCVED_STAT_REG_DEST_CHIPID_LEN = 3;
 // proc/reg00025.H
 
-static const uint64_t TP_TPBR_PBA_PBAF_PBAFIR_RWX = 0x03021cc0ull;
+static const uint64_t TP_TPBR_PBA_PBAF_PBAFIR_RWX = 0x03011dc0ull;
 static const uint64_t TP_TPBR_PBA_PBAF_PBAFIR_WOX_AND = 0x03021cc1ull;
 static const uint64_t TP_TPBR_PBA_PBAF_PBAFIR_WOX_OR = 0x03021cc2ull;
 

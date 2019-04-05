@@ -1024,7 +1024,7 @@ static const uint32_t PE1_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN
 static const uint64_t PE1_PHB2_ETUX08_RSB_REGS_WOF_REG = 0x09010990ull;
 // proc/reg00029.H
 
-static const uint64_t TP_LPC_SYNC_FIR_REG_RWX = 0x000201c0ull;
+static const uint64_t TP_LPC_SYNC_FIR_REG_RWX = 0x03012000ull;
 static const uint64_t TP_LPC_SYNC_FIR_REG_WOX_AND = 0x000201c1ull;
 static const uint64_t TP_LPC_SYNC_FIR_REG_WOX_OR = 0x000201c2ull;
 

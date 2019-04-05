@@ -1084,7 +1084,7 @@ static const uint32_t TP_TPBR_AD_PIB_RESET_REG_PIB_RESET_STATE = 1;
 static const uint32_t TP_TPBR_AD_PIB_RESET_REG_PIB_RESET_ABORTED_CMD = 2;
 // proc/reg00043.H
 
-static const uint64_t TP_TPBR_AD_XSCOM_BASE_REG = 0x03001c10ull;
+static const uint64_t TP_TPBR_AD_XSCOM_BASE_REG = 0x00090010ull;
 
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_BASE = 8;
 static const uint32_t TP_TPBR_AD_XSCOM_BASE_REG_BASE_LEN = 22;

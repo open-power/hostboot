@@ -558,7 +558,7 @@ static const uint32_t PB_COM_ES3_EVENT_COMPX_B_PRESP_MASK_ES3_LEN = 14;
 static const uint32_t PB_COM_ES3_EVENT_COMPX_AB_LPC_D_MODE_ES3 = 63;
 // proc/reg00012.H
 
-static const uint64_t PB_COM_ES3_FIR_MASK_REG_RWX = 0x00000383ull;
+static const uint64_t PB_COM_ES3_FIR_MASK_REG_RWX = 0x03011383ull;
 static const uint64_t PB_COM_ES3_FIR_MASK_REG_WOX_AND = 0x00000384ull;
 static const uint64_t PB_COM_ES3_FIR_MASK_REG_WOX_OR = 0x00000385ull;
 

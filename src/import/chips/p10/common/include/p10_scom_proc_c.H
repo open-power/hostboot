@@ -453,19 +453,19 @@ static const uint32_t NX_PBI_RNG_RDELAY_READ_RTY_RATIO = 7;
 static const uint32_t NX_PBI_RNG_RDELAY_READ_RTY_RATIO_LEN = 5;
 // proc/reg00046.H
 
-static const uint64_t PB_COM_ES3_FIR_ACTION0_REG = 0x00000386ull;
+static const uint64_t PB_COM_ES3_FIR_ACTION0_REG = 0x03011386ull;
 
 static const uint32_t PB_COM_ES3_FIR_ACTION0_REG_PB_ES3_FIR_ACTION0 = 0;
 static const uint32_t PB_COM_ES3_FIR_ACTION0_REG_PB_ES3_FIR_ACTION0_LEN = 16;
 // proc/reg00046.H
 
-static const uint64_t PB_COM_ES3_FIR_ACTION1_REG = 0x00000387ull;
+static const uint64_t PB_COM_ES3_FIR_ACTION1_REG = 0x03011387ull;
 
 static const uint32_t PB_COM_ES3_FIR_ACTION1_REG_PB_ES3_FIR_ACTION1 = 0;
 static const uint32_t PB_COM_ES3_FIR_ACTION1_REG_PB_ES3_FIR_ACTION1_LEN = 16;
 // proc/reg00046.H
 
-static const uint64_t PB_COM_ES3_FIR_REG_RWX = 0x00000380ull;
+static const uint64_t PB_COM_ES3_FIR_REG_RWX = 0x03011380ull;
 static const uint64_t PB_COM_ES3_FIR_REG_WOX_AND = 0x00000381ull;
 static const uint64_t PB_COM_ES3_FIR_REG_WOX_OR = 0x00000382ull;
 
@@ -487,7 +487,7 @@ static const uint32_t PB_COM_ES3_FIR_REG_FIR_SPARE_14 = 14;
 static const uint32_t PB_COM_ES3_FIR_REG_FIR_SPARE_15 = 15;
 // proc/reg00046.H
 
-static const uint64_t PB_COM_ES3_MODE = 0x0000038aull;
+static const uint64_t PB_COM_ES3_MODE = 0x0301138aull;
 
 static const uint32_t PB_COM_ES3_MODE_CFG_HOP_MODE_ES3 = 4;
 static const uint32_t PB_COM_ES3_MODE_CFG_PUMP_MODE_ES3 = 5;
@@ -887,7 +887,7 @@ static const uint64_t PE1_PHB2_ETUX08_RSB_REGS_MASK_REG_WOX_OR = 0x0901098dull;
 static const uint64_t PE1_PHB2_ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x09010993ull;
 // proc/reg00047.H
 
-static const uint64_t TP_LPC_SYNC_FIR_ACTION0_REG = 0x000201c6ull;
+static const uint64_t TP_LPC_SYNC_FIR_ACTION0_REG = 0x03012006ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_INVALID_TRANSFER_SIZE_ACTION0 = 0;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_INVALID_COMMAND_ACTION0 = 1;
@@ -901,7 +901,7 @@ static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_RETURNQ_ERR_ACTION0 = 8;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION0_REG_RESERVED_ACTION0 = 9;
 // proc/reg00047.H
 
-static const uint64_t TP_LPC_SYNC_FIR_ACTION1_REG = 0x000201c7ull;
+static const uint64_t TP_LPC_SYNC_FIR_ACTION1_REG = 0x03012007ull;
 
 static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_INVALID_TRANSFER_SIZE_ACTION1 = 0;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_INVALID_COMMAND_ACTION1 = 1;
@@ -915,7 +915,7 @@ static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_RETURNQ_ERR_ACTION1 = 8;
 static const uint32_t TP_LPC_SYNC_FIR_ACTION1_REG_RESERVED_ACTION1 = 9;
 // proc/reg00047.H
 
-static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRACT1 = 0x03021cc7ull;
+static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRACT1 = 0x03011dc7ull;
 
 static const uint32_t TP_TPBR_PBA_PBAF_PBAFIRACT1_PBAFIRACT1_FIR_ACTION1 = 0;
 static const uint32_t TP_TPBR_PBA_PBAF_PBAFIRACT1_PBAFIRACT1_FIR_ACTION1_LEN = 44;

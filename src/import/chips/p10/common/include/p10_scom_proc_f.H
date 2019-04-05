@@ -825,7 +825,7 @@ static const uint32_t PE1_PHB2_ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VAL
 static const uint32_t PE1_PHB2_ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
 // proc/reg00059.H
 
-static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_RW = 0x000201c3ull;
+static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_RW = 0x03012003ull;
 static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_AND = 0x000201c4ull;
 static const uint64_t TP_LPC_SYNC_FIR_MASK_REG_WO_OR = 0x000201c5ull;
 
@@ -848,7 +848,7 @@ static const uint32_t TP_TPBR_AD_PIB_CMD_REG_ADR = 30;
 static const uint32_t TP_TPBR_AD_PIB_CMD_REG_ADR_LEN = 31;
 // proc/reg00059.H
 
-static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRMASK_RW = 0x03021cc3ull;
+static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRMASK_RW = 0x03011dc3ull;
 static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_AND = 0x03021cc4ull;
 static const uint64_t TP_TPBR_PBA_PBAF_PBAFIRMASK_WO_OR = 0x03021cc5ull;
 
