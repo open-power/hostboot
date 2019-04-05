@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -512,8 +512,8 @@ namespace KernelMisc
             return -EFAULT;
         }
 
-        uint64_t* startAddr = NULL;
-        uint64_t* endAddr = NULL;
+        uint8_t* startAddr = nullptr;
+        uint8_t* endAddr = nullptr;
 
         switch(CpuID::getCpuType())
         {
@@ -523,9 +523,9 @@ namespace KernelMisc
             case CORE_POWER9_NIMBUS:
             case CORE_POWER9_CUMULUS:
             case CORE_POWER9_AXONE:
-                startAddr = reinterpret_cast<uint64_t*>
-                                         ( VmmManager::INITIAL_MEM_SIZE ) ;
-                endAddr = reinterpret_cast<uint64_t*>(i_expandSize);
+                startAddr = reinterpret_cast<uint8_t*>
+                                         (VmmManager::INITIAL_MEM_SIZE);
+                endAddr = reinterpret_cast<uint8_t*>(i_expandSize);
                 break;
 
             default:
@@ -533,13 +533,15 @@ namespace KernelMisc
                 break;
         }
 
-        if (startAddr != NULL)
+        if (startAddr != nullptr)
         {
-            populate_cache_lines(startAddr, endAddr);
+            populate_cache_lines(
+                reinterpret_cast<uint64_t*>(startAddr),
+                reinterpret_cast<uint64_t*>(endAddr));
             // Increment the start address by a page size to make a gap
             // in memory that Hostboot will later populate with
             // the OCC Bootloader image.
-            // see src/usr/occ/occ.C::loadnStartAllOccs()
+            // see src/usr/isteps/pm/occCheckstop.C::loadOCCImageDuringIpl()
             startAddr += PAGESIZE;
             size_t pages = (reinterpret_cast<uint64_t>(endAddr) -
                             reinterpret_cast<uint64_t>(startAddr)) / PAGESIZE;
