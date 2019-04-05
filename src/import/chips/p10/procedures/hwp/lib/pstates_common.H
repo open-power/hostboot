@@ -54,14 +54,14 @@
 #define VPD_PV_FMAX        7
 
 #define VPD_PV_STR { \
-        "PowerSave ", \
-        "CF1       ", \
-        "CF2       ", \
-        "CF3       ", \
-        "CF4       ", \
-        "CF5       ", \
+        "PowerSave", \
+        "CF1", \
+        "CF2", \
+        "CF3", \
+        "CF4", \
+        "CF5", \
         "UltraTurbo", \
-        "Fmax      "  \
+        "Fmax"  \
     }
 
 /// VPD #V Operating Points (eg Natural order)
@@ -101,6 +101,7 @@
 #define VPD_PV_TEMP_PWR_PAT_P5C 12
 
 // Different points considered for calculating slopes
+#define VPD_NUM_SLOPES_REGION       7
 #define NUM_VPD_PTS_SET             3
 #define VPD_PT_SET_RAW              0
 #define VPD_PT_SET_BIASED           1
@@ -281,7 +282,6 @@ typedef struct
 
     /// Magic Number
     ///   Set to ASCII  "WFTH___x" where x is the version of the VRT structure
-
     union magic_number_t
     {
         uint32_t value;
