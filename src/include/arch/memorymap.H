@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);  //0x40000000000
 constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE); //0x200000000000
 
+constexpr uint64_t  MMIO_BASE = 0x6000000000000;
 /**
  * @brief Compute MMIO value for a given chip and base value
  */
