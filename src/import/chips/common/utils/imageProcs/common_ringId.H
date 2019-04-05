@@ -46,7 +46,6 @@ typedef uint16_t  RingClass_t;      // Type for RingClass enum vectors used in n
 typedef uint8_t   ChipletType_t;    // Type for Chiplets enum
 typedef uint8_t   ChipId_t;         // Type for ChipId enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
-typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
 typedef uint8_t   RingRequest_t;    // Type for RingRequest enum, e.g. GET_SINGLE_RING
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
 typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
@@ -57,7 +56,6 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
 #define  UNDEFINED_CHIP_ID         (ChipId_t)0xff
 #define  INVALID_RING_TYPE         (RingType_t)0xff
-#define  UNDEFINED_RING_VARIANT    (RingVariant_t)0xff
 
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
 
@@ -164,21 +162,6 @@ enum RingClass
     RCLS_EKB_CMSK_RING     = 0b0000010000000010, // EKB P9 CMSK ring. Flush-scanned
 };
 
-// Ring variants supported.
-// - This enum also reflects the order with which they appear in various images' .rings section.
-// - Do  NOT  make changes to the values or order of this enum.
-enum RingVariant
-{
-    RV_BASE     = 0x00,
-    RV_CC       = 0x01,
-    RV_RL       = 0x02,  // Kernel and user protection
-    RV_RL2      = 0x03,  // Kernel only protection
-    RV_RL3      = 0x04,  // Rugby v4
-    RV_RL4      = 0x05,  // Java performance
-    RV_RL5      = 0x06,  // Spare
-    NUM_RING_VARIANTS = 0x07,
-};
-
 // Ring types supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
@@ -194,9 +177,6 @@ enum RingRequest
     GET_SINGLE_RING     = 0x00,
     PUT_SINGLE_RING     = 0x01
 };
-
-extern const char* ringVariantName[];
-
 
 //
 // Main ring properties structure
@@ -227,8 +207,6 @@ typedef struct
     uint8_t numChipletInstances;      // Num of chiplet instances
     uint8_t numCommonRings;           // Num of common rings
     uint8_t numInstanceRings;         // Num of instance rings (w/different ringId values)
-    uint8_t numCommonRingVariants;    // Num of Common rings variants. Only one for Instance rings
-    RingVariant_t  ringVariantOrder[NUM_RING_VARIANTS]; // Order of ring variants in ring section
 } ChipletData_t;
 
 // This is used to Set (Mark) the left-most bit
@@ -282,7 +260,6 @@ typedef struct
 
 #ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
 int ringid_get_raw_ring_file_path( uint32_t       i_magic,
-                                   RingVariant_t  i_ringVariant,
                                    char*          io_directory );
 #endif
 
@@ -294,8 +271,7 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
                              uint32_t           i_torMagic,
                              uint8_t            i_torVersion,
                              ChipletType_t      i_chipletType, // Ignored if one chiplet in torMagic
-                             ChipletData_t**    o_chipletData,
-                             uint8_t*           o_numVariants);
+                             ChipletData_t**    o_chipletData);
 
 int ringid_get_num_ring_ids( ChipId_t   i_chipId,
                              RingId_t*  o_numRingIds );
