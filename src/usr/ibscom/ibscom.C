@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,6 @@ namespace IBSCOM
 // SCOM Register addresses
 const uint32_t MBS_FIR = 0x02011400;
 const uint32_t MBSIBERR0 = 0x0201141B;
-const uint64_t IBSCOM_BASE = 0x0006000000000000;
 const uint64_t BIT_18_MASK = 0x0000000000002000;
 
 // Register XSCcom access functions to DD framework
@@ -217,7 +216,7 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
             uint8_t l_chipId  =
                 l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>();
 
-            l_IBScomAddr = computeMemoryMapOffset( IBSCOM_BASE,
+            l_IBScomAddr = computeMemoryMapOffset( MMIO_BASE,
                                                    l_groupId,
                                                    l_chipId );
             l_IBScomAddr = l_IBScomAddr + l_IBScomBaseAddrOffset;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,9 +26,11 @@
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
+#include <arch/memorymap.H>
 #include <arch/ppc.H>
 
 #include "mmio.H"
@@ -42,6 +44,8 @@
 // Trace definition
 trace_desc_t* g_trac_mmio = NULL;
 TRAC_INIT(&g_trac_mmio, MMIO_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
+
+#define OMI_PER_MC 8
 
 namespace MMIO
 {
@@ -66,128 +70,118 @@ errlHndl_t mmioSetup()
     errlHndl_t l_err = nullptr;
 
     TRACFCOMP(g_trac_mmio, ENTER_MRK"mmioSetup");
-    // called from istep 12.3
-
+    // called after OMI bars have been written to HW registers
     do
     {
-        // Get the base BAR address for an OCMB and use it to calculate the base
-        // BAR address for OCMB0 on PROC0 (beginning of reserved physical memory
-        // for all OCMBs).
-        // Each pair of OCMBs uses 8GB of interleaved memory,
-        // the second OCMB's memory starts 2GB after the first's.
-        TARGETING::TargetHandleList l_omiTargetList;
-
-        getAllChiplets(l_omiTargetList, TARGETING::TYPE_OMI);
-        if (l_omiTargetList.size() == 0)
-        {
-            TRACFCOMP(g_trac_mmio,
-                      INFO_MRK"mmioSetup: Exiting, non-OMI system");
-            break;
-        }
-
-        auto l_omi = l_omiTargetList[0];
-        auto l_omiParentProc = getParentProc(l_omi);
-        if (l_omiParentProc == nullptr)
-        {
-            TRACFCOMP(g_trac_mmio, ERR_MRK
-                      "mmioSetup: Unable to find the parent processor for an"
-                      " OMI(0x%X).",
-                      l_omi->getAttr<TARGETING::ATTR_HUID>());
-            /*@
-             * @errortype
-             * @moduleid    MMIO::MOD_MMIO_SETUP
-             * @reasoncode  MMIO::RC_PROC_NOT_FOUND
-             * @userdata1   Target huid
-             * @userdata2   None
-             * @devdesc     mmioSetup> Unable to find parent processor for OMI.
-             * @custdesc    Unexpected memory subsystem firmware error.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    MMIO::MOD_MMIO_SETUP,
-                                    MMIO::RC_PROC_NOT_FOUND,
-                                    l_omi->getAttr<TARGETING::ATTR_HUID>(),
-                                    0,
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-            break;
-        }
-
-        // There's a 1:1 relationship between OMIs and OCMBs, so we can directly
-        // relate the OMI position and BAR base addr to its associated OCMB.
-
-        // Get the position of the random OCMB. (OCMBs 0-15 will be on proc0,
-        // 16-31 on proc1, etc)
-        auto l_ocmbPos  = l_omi->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-             l_ocmbPos += l_omiParentProc->getAttr<TARGETING::ATTR_POSITION>() *
-                          fapi2::MAX_OMI_PER_PROC;
-
-        // Get the base BAR address of the OCMB.
-        auto l_ocmbBaseAddr =
-              l_omi->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
-
-        // Calculate the base BAR address of OCMB0 on PROC0 by subtracting 8GB
-        // for every pair of OCMBs beyond the first pair, and subtract an
-        // additional 2GB if the initial OCMB is the second in a pair.
-        l_ocmbBaseAddr -= ((l_ocmbPos / 2) * 8 * GIGABYTE) +
-                          ((l_ocmbPos % 2) * 2 * GIGABYTE);
-
         // map 8 OCMBs at a time, set MMIO_VM_ADDR on each OCMB
         //
-        // loop through all the procs
-        //     call mmio_dev_map() on OCMBs 0-7 and 8-15
-        //     set VM_ADDR on each OCMB
-        //         each pair of OCMBs has their memories interleaved with their
-        //         2GB config sections together and their 2GB mmio sections
-        //         together, we will be setting VM_ADDR to point to the cfg
-        //         section of each ocmb
-        //         Example
-        //             0GB  ocmb0 cfg
-        //             2GB  ocmb1 cfg
-        //             4GB  ocmb0 mmio
-        //             6GB  ocmb1 mmio
-        TARGETING::TargetHandleList l_procTargetList;
+        // loop through all the Memory Channels (MC Targets)
+        //     call allocate of 32 GB virtual memory space with mmio_dev_map() for each MC
+        TARGETING::TargetHandleList l_mcTargetList;
+        getAllChiplets(l_mcTargetList, TARGETING::TYPE_MC);
 
-        getAllChips(l_procTargetList, TARGETING::TYPE_PROC);
-        for (auto & l_procTarget: l_procTargetList)
+        for (auto & l_mcTarget: l_mcTargetList)
         {
-            // map all 16 OCMBs, 8 OCMBs (32GB) at a time
-            uint64_t *l_virtAddr[2] = {nullptr};
-            uint32_t  l_procNum =
-                              l_procTarget->getAttr<TARGETING::ATTR_POSITION>();
-            uint64_t  l_realAddr =
-                              l_ocmbBaseAddr + (l_procNum * 2 * THIRTYTWO_GB);
+            uint32_t  l_mcChipUnit =
+                              l_mcTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-            l_virtAddr[0] = static_cast<uint64_t *>
+            // Get the base BAR address for OpenCapi Memory Interfaces (OMIs) of the this Memory Channel (MC)
+            auto l_omiBaseAddr =
+                  l_mcTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
+
+            // Apply the MMIO base offset so we get the real address
+            uint64_t  l_realAddr = ( l_omiBaseAddr | MMIO_BASE );
+
+            // Map the device with a kernal call, each device, the MC,  is 32 GB
+            uint64_t l_virtAddr = reinterpret_cast<uint64_t>
                          (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
                                        THIRTYTWO_GB));
-            l_realAddr += THIRTYTWO_GB;
-            l_virtAddr[1] = static_cast<uint64_t *>
-                         (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
-                                       THIRTYTWO_GB));
+
+            TRACFCOMP ( g_trac_mmio, "MC%.02x (0x%.08X) MMIO BAR PHYSICAL ADDR = 0x%lx     VIRTUAL ADDR = 0x%lx" ,
+                        l_mcChipUnit ? 0x23 : 0x01, TARGETING::get_huid(l_mcTarget),
+                        l_realAddr, l_virtAddr);
 
             // set VM_ADDR on each OCMB
-            TARGETING::TargetHandleList l_ocmbTargetList;
-            l_ocmbTargetList.clear();
-            getChildAffinityTargets(l_ocmbTargetList, l_procTarget,
-                              TARGETING::CLASS_CHIP, TARGETING::TYPE_OCMB_CHIP);
-            for (auto & l_ocmbTarget: l_ocmbTargetList)
+            TARGETING::TargetHandleList l_omiTargetList;
+            getChildChiplets(l_omiTargetList, l_mcTarget, TARGETING::TYPE_OMI);
+
+            for (auto & l_omiTarget: l_omiTargetList)
             {
-                uint64_t l_ocmbVmAddr = 0;
-                uint32_t l_ocmbNum =
-                              l_ocmbTarget->getAttr<TARGETING::ATTR_POSITION>();
+                // ATTR_CHIP_UNIT is relative to other OMI under this PROC
+                uint32_t l_omiChipUnit =
+                              l_omiTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-                // OCMBs 0-7 in first map, 8-15 in second map
-                l_ocmbVmAddr =
-                          reinterpret_cast<uint64_t>(l_virtAddr[l_ocmbNum / 8]);
+                // Get the OMI position relative to other OMIs under its parent MC chiplet
+                uint32_t l_omiPosRelativeToMc = l_omiChipUnit % OMI_PER_MC;
 
-                // Each pair of OCMBs uses 8GB of interleaved memory,
-                // the second OCMB's memory starts 2GB after the first's
-                l_ocmbVmAddr += ((l_ocmbNum / 2) * 8 * GIGABYTE) +
-                                ((l_ocmbNum % 2) * 2 * GIGABYTE);
+                // Calculate what we think the real address for this OCMB should be. This should
+                // match what the ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET attribute is set to.
 
-                l_ocmbTarget->
-                    setAttr<TARGETING::ATTR_MMIO_VM_ADDR>(l_ocmbVmAddr);
+                // Each Memory Controller Channel (MCC) uses 8 GB of Memory Mapped IO, 4 GB for each of its child OCMBs.
+                // Each OCMB has 2 MMIO distinct spaces that get mapped. The CONFIG space, and the MMIO space. The CONFIG
+                // Space is always before the MMIO space we will treat that as the BAR for the OCMB target. These
+                // paired OCMB spaces get interleaved as follows :
+                //       ocmb  |  BAR ATTRIBUTE     | Type | Base reg           - end addr           | size | sub-ch
+                //       +-----+--------------------+------+-----------------------------------------+------+-------
+                //       ocmb0 | 0x0006030200000000 | cnfg | 0x0006030200000000 - 0x000603027FFFFFFF | 2GB  | 0
+                //       ocmb1 | 0x0006030280000000 | cnfg | 0x0006030280000000 - 0x00060302FFFFFFFF | 2GB  | 1
+                //       ocmb0 | N/A                | mmio | 0x0006030300000000 - 0x000603037FFFFFFF | 2GB  | 0
+                //       ocmb1 | N/A                | mmio | 0x0006030380000000 - 0x00060303FFFFFFFF | 2GB  | 1
+                //       +-----+--------------------+------+-----------------------------------------+------+-------
+
+                // Calculate CNFG space BAR to write to OCMB attribute
+                uint64_t l_currentOmiOffset = (( l_omiPosRelativeToMc / 2) * 8 * GIGABYTE) +
+                                              (( l_omiPosRelativeToMc % 2) * 2 * GIGABYTE);
+
+                // Calculated real address for this OMI is (BAR from MC attribute) + (currentOmiOffset)
+                uint64_t l_calulatedRealAddr = l_omiBaseAddr + l_currentOmiOffset;
+
+                // Grab bar value from attribute to verify it matches our calculations
+                auto l_omiBarAttrVal = l_omiTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
+
+                if(l_omiBarAttrVal != l_calulatedRealAddr)
+                {
+                    TRACFCOMP(g_trac_mmio,
+                              "Discrepancy found between calculated OMI MMIO bar offset and what we found in ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET");
+                    TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lx,  Attribute Value : 0x%lx", l_calulatedRealAddr, l_omiBarAttrVal);
+
+                    /*@
+                    * @errortype   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                    * @moduleid    MMIO::MOD_MMIO_SETUP
+                    * @reasoncode  MMIO::RC_BAR_OFFSET_MISMATCH
+                    * @userdata1   Calculated Bar Offset
+                    * @userdata2   Bar offset from attribute
+                    * @devdesc     mmioSetup> Mismatch between calculated map value
+                    *              and what is in attribute xml
+                    * @custdesc    Unexpected memory subsystem firmware error.
+                    */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            MMIO::MOD_MMIO_SETUP,
+                                            MMIO::RC_BAR_OFFSET_MISMATCH,
+                                            l_calulatedRealAddr,
+                                            l_omiBarAttrVal,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_err->collectTrace( MMIO_COMP_NAME);
+                    ERRORLOG::ErrlUserDetailsTarget(l_omiTarget).addToLog(l_err);
+
+                    break;
+                }
+
+
+                uint64_t l_currentOmiVirtAddr = l_virtAddr + l_currentOmiOffset;
+
+                // set VM_ADDR the associated OCMB
+                TARGETING::TargetHandleList l_ocmbTargetList;
+                getChildAffinityTargets(l_ocmbTargetList, l_omiTarget,
+                                  TARGETING::CLASS_CHIP, TARGETING::TYPE_OCMB_CHIP);
+
+                assert(l_ocmbTargetList.size() == 1 , "OCMB chips list found for a given OMI != 1 as expected");
+
+                TRACFCOMP(g_trac_mmio, "Setting HUID 0x%.08X MMIO vm addr to be 0x%lx , real address is 0x%lx", TARGETING::get_huid(l_ocmbTargetList[0]),
+                        l_currentOmiVirtAddr, l_calulatedRealAddr | MMIO_BASE );
+
+                l_ocmbTargetList[0]->setAttr<TARGETING::ATTR_MMIO_VM_ADDR>(l_currentOmiVirtAddr);
             }
         }
     } while(0);
@@ -216,7 +210,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType   i_opType,
 
     TRACDCOMP(g_trac_mmio, ENTER_MRK"ocmbMmioPerformOp");
     TRACDCOMP(g_trac_mmio, INFO_MRK"op=%d, target=0x%.8X",
-              i_opType, i_target);
+              i_opType, TARGETING::get_huid(i_target));
     TRACDCOMP(g_trac_mmio, INFO_MRK"buffer=%p, length=%d, accessType=%ld",
               io_buffer, io_buflen, i_accessType);
     TRACDCOMP(g_trac_mmio, INFO_MRK"offset=0x%lX, accessLimit=%ld",
@@ -225,6 +219,8 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType   i_opType,
     do
     {
         uint64_t   l_addr = i_target->getAttr<TARGETING::ATTR_MMIO_VM_ADDR>();
+
+        TRACDCOMP(g_trac_mmio, INFO_MRK"MMIO Op l_addr=0x%lX ", l_addr);
 
         if (l_addr == 0)
         {

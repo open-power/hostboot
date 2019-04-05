@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -6513,6 +6513,11 @@
         <id>TYPE</id>
         <default>MC</default>
     </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 16GB -->
+        <default>0x30400000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6574,6 +6579,11 @@
     <attribute>
         <id>TYPE</id>
         <default>MC</default>
+    </attribute>
+    <attribute>
+        <id>OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <!-- 3TB + 48GB -->
+        <default>0x30C00000000</default>
     </attribute>
 </targetInstance>
 
