@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
+#include <errl/errlmanager.H>
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
 #include <console/consoleif.H>
 #endif
@@ -471,6 +472,11 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             }
             break;
         }
+
+#ifdef __HOSTBOOT_MODULE
+        HWAS_INF("deconfigureTargetsFromGardRecordsForIpl: flushing the error log queue");
+        ErrlManager::callFlushErrorLogs();
+#endif
 
         // Get all GARD Records
         GardRecords_t l_gardRecords;
