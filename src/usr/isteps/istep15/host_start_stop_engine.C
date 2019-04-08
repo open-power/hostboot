@@ -57,6 +57,10 @@ void* host_start_stop_engine (void *io_pArgs)
     ISTEP_ERROR::IStepError     l_StepError;
     errlHndl_t l_errl = NULL;
 
+    // Cast to void just to get around unused var warning if #ifdef's dont work
+    // out to actually use the l_errl variable
+    (void)l_errl;
+
     do {
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         uint64_t l_writeData;
