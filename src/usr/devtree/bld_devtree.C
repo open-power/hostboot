@@ -2688,10 +2688,6 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
         bmcNode = i_dt->addNode(rootNode, bmcNodeName);
     }
 
-    /* Add the # address & size cell properties to /bmc node. */
-    i_dt->addPropertyCell32(bmcNode, "#address-cells", 1);
-    i_dt->addPropertyCell32(bmcNode, "#size-cells", 0);
-
     i_dt->addPropertyString(bmcNode, "name", bmcNodeName );
 
     /* create a node to hold the sensors */
