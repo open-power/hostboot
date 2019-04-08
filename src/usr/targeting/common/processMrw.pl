@@ -47,24 +47,7 @@ my $build           = "hb";
 my $system_config   = "";
 my $output_filename = "";
 
-# Map for omi to omic parent
-# OMI   |   OMIC
-# --------------
-# 1     |   2
-# 2     |   1
-# 3     |   1
-# 4     |   0
-# 5     |   0
-# 6     |   0
-# 7     |   1
-# 8     |   2
-# 9     |   2
-# 10    |   1
-# 11    |   1
-# 12    |   0
-# 13    |   0
-# 14    |   0
-# 15    |   1
+# Map the OMI instance to its corresponding OMIC parent
 my %omi_map         = (4  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
                        5  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
                        6  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
@@ -413,7 +396,10 @@ foreach my $target (@targets)
         {
             processUcd($targetObj, $target);
         }
-
+    }
+    elsif ($type eq "OCMB_CHIP")
+    {
+        processOcmbChip($targetObj, $target);
     }
 
     processIpmiSensors($targetObj,$target);
@@ -1170,7 +1156,6 @@ sub processProcessor
     ## update path for mvpd's and sbe's
     my $path  = $targetObj->getAttribute($target, "PHYS_PATH");
     my $model = $targetObj->getAttribute($target, "MODEL");
-
     $targetObj->setAttributeField($target,
         "EEPROM_VPD_PRIMARY_INFO","i2cMasterPath",$path);
     $targetObj->setAttributeField($target,
@@ -1797,7 +1782,31 @@ sub processOmic
 
     $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
 }
+
 #--------------------------------------------------
+## OCMB_CHIP
+##
+##
+sub processOcmbChip
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+
+    use integer;
+    # processMrw parses all of the values in the input xml
+    # Here we delete the values that are not needed
+    $targetObj->deleteAttribute($target, "CLASS");
+    $targetObj->deleteAttribute($target, "DIRECTION");
+    $targetObj->deleteAttribute($target, "FSI_OPTION_FLAGS");
+    $targetObj->deleteAttribute($target, "INSTANCE_PATH");
+    $targetObj->deleteAttribute($target, "MRW_TYPE");
+    $targetObj->deleteAttribute($target, "PRIMARY_CAPABILITIES");
+    $targetObj->deleteAttribute($target, "FRU_ID");
+
+    $targetObj->setEepromAttributesForOcmbChip($targetObj, $target);
+}
+
+#-------------------------------------------------g
 ## MI
 ##
 ##
@@ -3069,7 +3078,6 @@ sub processI2C
             \@i2cSpeed, \@i2cType, \@i2cPurpose, \@i2cLabel);
 }
 
-
 sub setEepromAttributes
 {
     my $targetObj = shift;
@@ -3084,9 +3092,7 @@ sub setEepromAttributes
     #        $conn_target->{BUS_NUM}, "I2C_ADDRESS");
 
     my $addr = $targetObj->getAttribute($conn_target->{DEST},"I2C_ADDRESS");
-
-    my $path = $targetObj->getAttribute($conn_target->{SOURCE_PARENT},
-               "PHYS_PATH");
+    my $path = $targetObj->getAttribute($conn_target->{SOURCE_PARENT}, "PHYS_PATH");
     my $mem  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "MEMORY_SIZE_IN_KB");
     my $count  = 1; # default for VPD SEEPROMs
