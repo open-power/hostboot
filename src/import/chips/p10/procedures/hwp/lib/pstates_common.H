@@ -42,6 +42,7 @@
 #define MAXIMUM_QUADS   8
 #define MAXIMUM_EQ_SETS 4    // A set of 8 cores that are grouped for IDDQ
 
+#define NUM_OP_POINTS      8
 #define NUM_PV_POINTS      8
 #define VPD_PV_PSAV        0
 #define VPD_PV_CF1         1
@@ -85,6 +86,25 @@
 #define VPD_PT_SET {VPD_PT_SET_RAW, VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP}
 #define VPD_PT_SET_STR {"Raw", "Biased", "Biased/SysParam"}
 /// @todo Remove the systparm version?
+
+#define VPD_NUM_SLOPES_REGION       7
+#define REGION_POWERSAVE_CF1        0
+#define REGION_CF1_CF2              1
+#define REGION_CF2_WOF_BASE         2
+#define REGION_WOF_BASE_CF3         3
+#define REGION_CF3_CF4              4
+#define REGION_CF4_UT               5
+#define REGION_UT_FMAX              6
+#define VPD_OP_SLOPES_REGION_ORDER {REGION_POWERSAVE_CF1, REGION_CF1_CF2, REGION_CF2_WOF_BASE, REGION_WOF_BASE_CF3, REGION_CF3_CF4, REGION_CF4_UT, REGION_UT_FMAX,}
+#define VPD_OP_SLOPES_REGION_ORDER_STR {"POWERSAVE_CF1", \
+        "CF1_CF2      ", \
+        "CF2_WOF_BASE ", \
+        "WOF_BASE_CF3 ", \
+        "CF3_CF4      ", \
+        "CF4_UT		  ", \
+        "UT_FMAX	  ", \
+    }
+
 
 #define VID_SLOPE_FP_SHIFT_12       12
 #define THRESH_SLOPE_FP_SHIFT       12
@@ -203,6 +223,21 @@ typedef struct
 
 } SysPowerDistParms_t;
 
+/// AVSBUS Topology
+///
+/// AVS Bus and Rail numbers for VDD, VDN, VCS, and VIO
+///
+typedef struct
+{
+    uint8_t vdd_avsbus_num;
+    uint8_t vdd_avsbus_rail;
+    uint8_t vdn_avsbus_num;
+    uint8_t vdn_avsbus_rail;
+    uint8_t vcs_avsbus_num;
+    uint8_t vcs_avsbus_rail;
+    uint8_t vio_avsbus_num;
+    uint8_t vio_avsbus_rail;
+} AvsBusTopology_t;
 
 //
 // Workload Optimized Frequency (WOF) Structures
