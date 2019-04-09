@@ -29,5 +29,5 @@
 const uint8_t UNLIMITED_RUN = 0xFF;
 const uint8_t VPO_NUM_OF_MBAS_TO_RUN = UNLIMITED_RUN;
 const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
-const uint8_t ISTEP13_MAX_THREADS = 3;
+const uint8_t ISTEP13_MAX_THREADS = 1;
 #endif
