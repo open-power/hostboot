@@ -241,6 +241,11 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBI
 
     FAPI_TRY(mss::ccs::start_stop(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
 
+    // ccs_add_mux_sel back to low. Per Shelton, it is okay to change the mux while ccs is running
+    // when doing single port execute. ccs will remain in control until the end of the program then
+    // mainline takes over
+    FAPI_TRY(mss::change_addr_mux_sel(i_port, mss::LOW));
+
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
@@ -249,9 +254,6 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBI
         return status.getBit<TT::CCS_IN_PROGRESS>() != 1;
     },
     i_program.iv_probes);
-
-    // ccs_add_mux_sel back to low to give control back to mainline
-    FAPI_TRY(mss::change_addr_mux_sel(i_port, mss::LOW));
 
     // Check for done and success. DONE being the only bit set.
     if (status == STAT_QUERY_SUCCESS)

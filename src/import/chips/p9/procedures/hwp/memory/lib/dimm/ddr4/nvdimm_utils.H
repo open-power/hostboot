@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,12 +38,79 @@
 #include <lib/shared/mss_const.H>
 #include <lib/ccs/ccs.H>
 #include <lib/phy/dp16.H>
+#include <lib/mc/port.H>
 
 namespace mss
 {
 
 namespace nvdimm
 {
+///
+/// @brief get refresh overrun fir mask
+/// @param[in] i_target the target associated with this subroutine
+/// @param[out] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+inline fapi2::ReturnCode get_refresh_overrun_mask( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        mss::states& o_state )
+{
+    typedef portTraits<mss::mc_type::NIMBUS> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, TT::CALFIRMASK, l_data),
+              "%s Failed getScom", mss::c_str(i_target) );
+
+    o_state = l_data.getBit<TT::CALFIRMASK_REFRESH_OVERRUN>() ? mss::states::ON : mss::states::OFF;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief change refresh overrun fir mask
+/// @param[in] i_target the target associated with this subroutine
+/// @param[in] i_state the state to change to
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+inline fapi2::ReturnCode change_refresh_overrun_mask( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const mss::states i_state )
+{
+    typedef portTraits<mss::mc_type::NIMBUS> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, TT::CALFIRMASK, l_data),
+              "%s Failed getScom", mss::c_str(i_target) );
+
+    l_data.writeBit<TT::CALFIRMASK_REFRESH_OVERRUN>(i_state);
+
+    FAPI_TRY( mss::putScom(i_target, TT::CALFIRMASK, l_data),
+              "%s Failed putScom", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clear the refresh overrun fir
+/// @param[in] i_target the target associated with this subroutine
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+inline fapi2::ReturnCode clear_refresh_overrun_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef portTraits<mss::mc_type::NIMBUS> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, TT::CALFIRQ, l_data),
+              "%s Failed getScom", mss::c_str(i_target) );
+
+    l_data.clearBit<TT::CALFIRQ_REFRESH_OVERRUN>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::CALFIRQ, l_data),
+              "%s Failed putScom", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Wrapper to read MAINT_ADDR_MODE_EN

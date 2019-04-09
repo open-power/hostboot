@@ -85,6 +85,8 @@ class portTraits<mss::mc_type::NIMBUS>
         static constexpr uint64_t CAL3Q_REG = MCA_MBA_CAL3Q;
         static constexpr uint64_t DSM0Q_REG = MCA_MBA_DSM0Q;
         static constexpr uint64_t FWMS_REG = MCA_FWMS0;
+        static constexpr uint64_t CALFIRQ = MCA_MBACALFIRQ;
+        static constexpr uint64_t CALFIRMASK = MCA_MBACALFIR_MASK;
 
         // Danger Will Robinson <wave robot arms> MCA_DDRPHY_PC_PER_ZCAL_CONFIG_P0 uses PHY rank ordinal numbers
         // which are different between PHYs. So if you're playing with this register, be sure to map rank numbers.
@@ -237,6 +239,9 @@ class portTraits<mss::mc_type::NIMBUS>
             CAL3Q_ALL_PERIODIC_LENGTH = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH,
             CAL3Q_ALL_PERIODIC_LENGTH_LEN = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH_LEN,
             CAL3Q_FREEZE_ON_PARITY_ERROR_DIS = MCA_MBA_CAL3Q_CFG_FREEZE_ON_PARITY_ERROR_DIS,
+
+            CALFIRQ_REFRESH_OVERRUN = MCA_MBACALFIRQ_REFRESH_OVERRUN,
+            CALFIRMASK_REFRESH_OVERRUN = MCA_MBACALFIR_MASK_REFRESH_OVERRUN,
 
             RECR_ENABLE_UE_NOISE_WINDOW = MCA_RECR_MBSECCQ_ENABLE_UE_NOISE_WINDOW,
             RECR_TCE_CORRECTION = MCA_RECR_MBSECCQ_ENABLE_TCE_CORRECTION,
