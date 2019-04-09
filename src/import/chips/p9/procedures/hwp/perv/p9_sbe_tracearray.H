@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,9 +120,17 @@ extern "C" {
         {
             return fapi2::TARGET_TYPE_EX;
         }
-        else
+        else if (i_trace_bus <= _PROC_TB_LAST_CORE_TARGET)
         {
             return fapi2::TARGET_TYPE_CORE;
+        }
+        else if (i_trace_bus <= _PROC_TB_LAST_AXONE_CHIP_TARGET)
+        {
+            return fapi2::TARGET_TYPE_PROC_CHIP;
+        }
+        else
+        {
+            return fapi2::TARGET_TYPE_EX;
         }
     }
 

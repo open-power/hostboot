@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,14 +103,15 @@ enum chip_type_and_ec
 {
     NIMBUS   = 1,
     CUMULUS  = 2,
-    OTHER    = 4,
+    AXONE    = 4,
+    OTHER    = 128,
     ANY_CHIP = 0xFF,
 };
 
 struct ta_def
 {
     /* One entry per mux setting; value of 0 means N/A */
-    p9_tracearray_bus_id bus_ids[TRACE_MUX_POSITIONS];
+    uint8_t bus_ids[TRACE_MUX_POSITIONS];
     const uint8_t ex_odd_scom_offset: 2;
         const uint8_t chiplet: 6;
         const uint8_t base_multiplier;
@@ -133,12 +134,15 @@ struct ta_def
     { { PROC_TB_PB9    },                                              0x00, 0x03, 0x03, ANY_CHIP },
     { { PROC_TB_PB10   },                                              0x00, 0x03, 0x04, ANY_CHIP },
     { { PROC_TB_PB11   },                                              0x00, 0x03, 0x05, ANY_CHIP },
-    { { PROC_TB_MCD0, PROC_TB_MCD1, PROC_TB_VAS },                     0x00, 0x03, 0x06, ANY_CHIP },
-    { { PROC_TB_MCS2, PROC_TB_MCS3, PROC_TB_PB13 },                    0x00, 0x03, 0x07, ANY_CHIP },
+    { { PROC_TB_MCD0, PROC_TB_MCD1, PROC_TB_VAS },                     0x00, 0x03, 0x06, NIMBUS | CUMULUS },
+    { { PROC_TB_MCS2, PROC_TB_MCS3, PROC_TB_PB13 },                    0x00, 0x03, 0x07, NIMBUS | CUMULUS },
+    { { PROC_TB_MCD0, PROC_TB_MCD1, PROC_TB_VAS, PROC_TB_NPU20 },      0x00, 0x03, 0x06, AXONE },
+    { { PROC_TB_MCS2, PROC_TB_MCS3, PROC_TB_PB13, PROC_TB_NPU21 },     0x00, 0x03, 0x07, AXONE },
     { { PROC_TB_PBIO0  },                                              0x00, 0x03, 0x08, ANY_CHIP },
     { { PROC_TB_PBIO1  },                                              0x00, 0x03, 0x09, ANY_CHIP },
     /* N2 */
-    { { PROC_TB_CXA1, PROC_TB_IOPSI },                                 0x00, 0x04, 0x00, ANY_CHIP },
+    { { PROC_TB_CXA1, PROC_TB_IOPSI },                                 0x00, 0x04, 0x00, NIMBUS | CUMULUS },
+    { { NO_TB,        PROC_TB_IOPSI },                                 0x00, 0x04, 0x00, AXONE },
     { { PROC_TB_PCIS0, PROC_TB_PCIS1, PROC_TB_PCIS2 },                 0x00, 0x04, 0x01, ANY_CHIP },
     /* N3 */
     { { PROC_TB_PB0    },                                              0x00, 0x05, 0x00, ANY_CHIP },
@@ -147,10 +151,13 @@ struct ta_def
     { { PROC_TB_PB3    },                                              0x00, 0x05, 0x03, ANY_CHIP },
     { { PROC_TB_PB4    },                                              0x00, 0x05, 0x04, ANY_CHIP },
     { { PROC_TB_PB5    },                                              0x00, 0x05, 0x05, ANY_CHIP },
-    { { PROC_TB_INT, PROC_TB_NPU1, PROC_TB_NMMU1 },                    0x00, 0x05, 0x06, ANY_CHIP },
-    { { PROC_TB_MCS0, PROC_TB_MCS1, PROC_TB_PB12 },                    0x00, 0x05, 0x07, ANY_CHIP },
+    { { PROC_TB_INT, PROC_TB_NPU1, PROC_TB_NMMU1 },                    0x00, 0x05, 0x06, NIMBUS | CUMULUS },
+    { { PROC_TB_MCS0, PROC_TB_MCS1, PROC_TB_PB12 },                    0x00, 0x05, 0x07, NIMBUS | CUMULUS },
+    { { PROC_TB_NPU10, PROC_TB_INT, PROC_TB_NMMU1, PROC_TB_NPU01 },    0x00, 0x05, 0x06, AXONE },
+    { { PROC_TB_MCS0, PROC_TB_MCS1, PROC_TB_PB12, PROC_TB_NPU11 },     0x00, 0x05, 0x07, AXONE },
     { { PROC_TB_BRIDGE },                                              0x00, 0x05, 0x08, ANY_CHIP },
-    { { PROC_TB_NPU0   },                                              0x00, 0x05, 0x0A, ANY_CHIP },
+    { { PROC_TB_NPU0   },                                              0x00, 0x05, 0x0A, NIMBUS | CUMULUS },
+    { { PROC_TB_NPU00  },                                              0x00, 0x05, 0x0A, AXONE },
     { { PROC_TB_NMMU0  },                                              0x00, 0x05, 0x0B, ANY_CHIP },
     /* XBUS */
     { { PROC_TB_PBIOX0, PROC_TB_IOX0 },                                0x00, 0x06, 0x00, ANY_CHIP },
@@ -166,12 +173,13 @@ struct ta_def
     { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x20, NIMBUS },
     { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x21, NIMBUS },
     { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x00, NIMBUS },
-    { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x00, (uint8_t)~NIMBUS },
-    { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x01, (uint8_t)~NIMBUS },
-    { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x02, (uint8_t)~NIMBUS },
+    { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x00, CUMULUS | AXONE },
+    { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x01, CUMULUS | AXONE },
+    { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x02, CUMULUS },
+    { { PROC_TB_OMI0,  PROC_TB_OMI1,  PROC_TB_OMI2 },                  0x00, 0x07, 0x02, AXONE },
     /* EX */
-    { { PROC_TB_L20, NO_TB, NO_TB, PROC_TB_SKIT10 },                   0x01, 0x10, 0x94, ANY_CHIP },
-    { { PROC_TB_L21, NO_TB, NO_TB, PROC_TB_SKIT11 },                   0x01, 0x10, 0x95, ANY_CHIP },
+    { { PROC_TB_L20, NO_TB, PROC_TB_SKIT00, PROC_TB_SKIT10 },          0x01, 0x10, 0x94, ANY_CHIP },
+    { { PROC_TB_L21, NO_TB, PROC_TB_SKIT01, PROC_TB_SKIT11 },          0x01, 0x10, 0x95, ANY_CHIP },
     { { PROC_TB_L30, PROC_TB_NCU0, PROC_TB_CME, PROC_TB_EQPB },        0x02, 0x10, 0x00, ANY_CHIP },
     { { PROC_TB_L31, PROC_TB_NCU1, PROC_TB_IVRM, PROC_TB_SKEWADJ },    0x02, 0x10, 0x01, ANY_CHIP },
     /* CORE */
@@ -349,6 +357,9 @@ static chip_type_and_ec map_chip_type_and_ec(fapi2::ATTR_NAME_Type i_name, fapi2
         case fapi2::ENUM_ATTR_NAME_CUMULUS:
             return CUMULUS;
 
+        case fapi2::ENUM_ATTR_NAME_AXONE:
+            return AXONE;
+
         default:
             return OTHER;
     }
@@ -412,24 +423,11 @@ fapi2::ReturnCode p9_sbe_tracearray(
         }
     }
 
-    /* check that core trace arrays can be logged out, based on EC feature attribute */
-    if (ta_type == fapi2::TARGET_TYPE_CORE)
-    {
-        uint8_t l_core_trace_not_scomable = 0;
-
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> proc_target =
-            i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE,
-                               proc_target, l_core_trace_not_scomable),
-                 "Failed to query chip EC feature "
-                 "ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE");
-
-        FAPI_ASSERT(!l_core_trace_not_scomable ||
-                    !i_args.collect_dump,
-                    fapi2::PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE()
-                    .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
-                    "Core arrays cannot be dumped in this chip EC; please use fastarray instead.");
-    }
+    /* we cannot dump core trace arrays on any chip - permanent erratum. */
+    FAPI_ASSERT(!(i_args.collect_dump && ta_type == fapi2::TARGET_TYPE_CORE),
+                fapi2::PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE()
+                .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                "Core arrays cannot be dumped; please use fastarray instead.");
 
     /* For convenience, we link Cache trace arrays to the virtual EX chiplets.
      * Transform back to EQ chiplet. */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,6 +166,24 @@ enum p9_tracearray_bus_id
     /* Core chiplets - TARGET_TYPE_CORE */
     PROC_TB_CORE0,
     PROC_TB_CORE1,
+
+    _PROC_TB_LAST_CORE_TARGET = PROC_TB_CORE1,
+
+    /* New Axone trace buses */
+    PROC_TB_NPU00,
+    PROC_TB_NPU01,
+    PROC_TB_NPU10,
+    PROC_TB_NPU11,
+    PROC_TB_NPU20,
+    PROC_TB_NPU21,
+    PROC_TB_OMI0,
+    PROC_TB_OMI1,
+    PROC_TB_OMI2,
+
+    _PROC_TB_LAST_AXONE_CHIP_TARGET = PROC_TB_OMI2,
+
+    PROC_TB_SKIT00,
+    PROC_TB_SKIT01,
 };
 
 #endif //_P9_TRACEARRAY_DEFS_H
