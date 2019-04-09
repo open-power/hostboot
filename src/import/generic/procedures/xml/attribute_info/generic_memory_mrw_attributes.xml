@@ -41,7 +41,7 @@
       MT2933 = 2933,
       MT3200 = 3200
     </enum>
-    <default> 1866, 2133, 2400, 2666, 2933, 3200 </default>
+    <default> 1866, 2133, 2400, 2666 </default>
     <mssUnit>MT/s</mssUnit>
   </attribute>
 
