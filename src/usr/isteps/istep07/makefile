@@ -72,6 +72,7 @@ EXTRAINCDIR += ${HWP_PATH_CEN}/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_CEN}/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_EXP}/lib/eff_config/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/include/
 
 VPATH += ${HWP_PATH} ${HWP_PATH_P9}/lib/spd

@@ -39,6 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -100,6 +101,8 @@ OUTPATH = ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 FILE_PREFIX = mss_generic_system
 
 SOURCES += $(IMPORT_PATH)/hwpf/fapi2/xml/attribute_info/system_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_mrw_attributes.xml
+SOURCES += $(IMPORT_PATH)/chips/p9/procedures/xml/attribute_info/freq_attributes.xml
 
 CLEAN_TARGETS += ${OUTPATH}/mss_generic_system_attribute_getters.H
 CLEAN_TARGETS += ${OUTPATH}/.generic_system_accessors.built
@@ -119,7 +122,10 @@ $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 OUTPATH = ${ROOTPATH}/obj/genfiles/generic/memory/lib
 FILE_PREFIX = mss_generic
 
-SOURCES += $(shell find $(IMPORT_PATH)/generic/procedures/xml/attribute_info/ -type f)
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_dq_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_eff_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_si_attributes.xml
 
 CLEAN_TARGETS += ${OUTPATH}/mss_generic_attribute_getters.H
 CLEAN_TARGETS += ${OUTPATH}/mss_generic_attribute_setters.H
