@@ -1237,7 +1237,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             } // end for on targets
 
             // Add EC Level dependencies at the end
-            uint8_t  *l_ecDepSourceRegs = (uint8_t *)(&s_ecDepProcRegisters);
+            uint8_t  *l_ecDepSourceRegs = (uint8_t *)(s_ecDepProcRegisters);
             memcpy( &i_hBuf[idx], l_ecDepSourceRegs,
                                   sizeof(s_ecDepProcRegisters) );
 
