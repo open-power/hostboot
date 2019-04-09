@@ -87,6 +87,15 @@ uint8_t symbol2Dq<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
+uint8_t symbol2Dq<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+{
+    // MEM_PORT case is identical to MCA
+    return symbol2Dq<TARGETING::TYPE_MCA>(i_symbol);
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint8_t symbol2PortSlct<TARGETING::TYPE_MBA>( uint8_t i_symbol )
 {
     uint8_t portSlct = MAX_PORT_PER_MBA;
@@ -106,6 +115,16 @@ template<>
 uint8_t symbol2PortSlct<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     // Port select does not exist on MCA. Always return 0 so that code will
+    // continue to work.
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2PortSlct<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+{
+    // Port select does not exist on MEM_PORT. Always return 0 so that code will
     // continue to work.
     return 0;
 }
@@ -199,6 +218,15 @@ uint8_t nibble2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x4Dram )
 //------------------------------------------------------------------------------
 
 template<>
+uint8_t nibble2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_x4Dram )
+{
+    // MEM_PORT case is identical to MCA
+    return nibble2Symbol<TARGETING::TYPE_MCA>(i_x4Dram);
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint8_t byte2Symbol<TARGETING::TYPE_MBA>( uint8_t i_x8Dram )
 {
     return (MBA_BYTES_PER_RANK > i_x8Dram) ? (i_x8Dram * MBA_SYMBOLS_PER_BYTE)
@@ -230,6 +258,15 @@ uint8_t byte2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x8Dram )
 //------------------------------------------------------------------------------
 
 template<>
+uint8_t byte2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_x8Dram )
+{
+    // MEM_PORT case is identical to MCA
+    return byte2Symbol<TARGETING::TYPE_MCA>(i_x8Dram);
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint8_t symbol2Nibble<TARGETING::TYPE_MBA>( uint8_t i_symbol )
 {
     return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / MBA_SYMBOLS_PER_NIBBLE)
@@ -244,6 +281,15 @@ uint8_t symbol2Nibble<TARGETING::TYPE_MCA>( uint8_t i_symbol )
     return (SYMBOLS_PER_RANK > i_symbol)
             ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/4)
             : MEM_NIBBLES_PER_RANK;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Nibble<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+{
+    // MEM_PORT case is identical to MCA
+    return symbol2Nibble<TARGETING::TYPE_MCA>(i_symbol);
 }
 
 //------------------------------------------------------------------------------
@@ -265,6 +311,16 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
             : MEM_BYTES_PER_RANK;
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t symbol2Byte<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+{
+    // MEM_PORT case is identical to MCA
+    return symbol2Byte<TARGETING::TYPE_MCA>(i_symbol);
+}
+
+//------------------------------------------------------------------------------
 
 /**
  * @brief Find the first symbol of the given DRAM index

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -281,6 +281,7 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 // Avoid linker errors with the template.
 template class MemCeTable<TYPE_MCA>;
 template class MemCeTable<TYPE_MBA>;
+template class MemCeTable<TYPE_MEM_PORT>;
 
 //------------------------------------------------------------------------------
 

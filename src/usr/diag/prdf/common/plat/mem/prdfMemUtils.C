@@ -78,6 +78,12 @@ static const char *mcbCeStatReg[CE_REGS_PER_PORT] =
                            "MCB_MBSSYMEC6", "MCB_MBSSYMEC7", "MCB_MBSSYMEC8"
                        };
 
+static const char *ocmbCeStatReg[CE_REGS_PER_PORT] =
+                       {
+                           "OCMB_MBSSYMEC0", "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2",
+                           "OCMB_MBSSYMEC3", "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5",
+                           "OCMB_MBSSYMEC6", "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8"
+                       };
 //------------------------------------------------------------------------------
 
 // Helper structs for collectCeStats()
@@ -89,6 +95,7 @@ struct DramCount_t
 typedef std::map<uint32_t, DramCount_t> DramCountMap;
 
 //------------------------------------------------------------------------------
+
 template<>
 int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
                         const MemRank & i_rank, MaintSymbols & o_maintStats,
@@ -199,6 +206,134 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
             PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
             o_chipMark  = MemSymbol::fromSymbol( mcaTrgt, i_rank, sym );
+        }
+
+    } while(0);
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed: i_chip=0x%08x i_rank=m%ds%d i_thr=%d",
+                  i_chip->GetId(), i_rank.getMaster(), i_rank.getSlave(),
+                  i_thr );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+template<>
+int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank,
+                                       MaintSymbols & o_maintStats,
+                                       MemSymbol & o_chipMark, uint8_t i_thr )
+{
+    #define PRDF_FUNC "[MemUtils::collectCeStats<TYPE_MEM_PORT>] "
+
+    int32_t o_rc = SUCCESS;
+    o_chipMark = MemSymbol(); // Initially invalid.
+
+    do
+    {
+        PRDF_ASSERT( 0 != i_thr );
+
+        TargetHandle_t memPortTrgt = i_chip->getTrgt();
+        ExtensibleChip * ocmbChip = getConnectedParent(i_chip, TYPE_OCMB_CHIP);
+
+        const bool isX4 = isDramWidthX4(memPortTrgt);
+
+        // Use this map to keep track of the total counts per DRAM.
+        DramCountMap dramCounts;
+
+        const char * reg_str = NULL;
+        SCAN_COMM_REGISTER_CLASS * reg = NULL;
+
+        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
+        {
+            reg_str = ocmbCeStatReg[regIdx];
+            reg     = ocmbChip->getRegister( reg_str );
+
+            o_rc = reg->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
+                break;
+            }
+
+            uint8_t baseSymbol = SYMBOLS_PER_CE_REG * regIdx;
+
+            for ( uint8_t i = 0; i < SYMBOLS_PER_CE_REG; i++ )
+            {
+                uint8_t count = reg->GetBitFieldJustified( (i*8), 8 );
+
+                if ( 0 == count ) continue; // nothing to do
+
+                uint8_t sym  = baseSymbol + i;
+                PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
+
+                uint8_t dram = isX4 ? symbol2Nibble<TYPE_MEM_PORT>( sym )
+                                    : symbol2Byte  <TYPE_MEM_PORT>( sym );
+
+                // Keep track of the total DRAM counts.
+                dramCounts[dram].totalCount += count;
+
+                // Add any symbols that have exceeded threshold to the list.
+                if ( i_thr <= count )
+                {
+                    // Keep track of the total number of symbols per DRAM that
+                    // have exceeded threshold.
+                    dramCounts[dram].symbolCount++;
+
+                    SymbolData symData;
+                    symData.symbol = MemSymbol::fromSymbol( memPortTrgt, i_rank,
+                        sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                    if ( !symData.symbol.isValid() )
+                    {
+                        PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
+                                  sym );
+                        o_rc = FAIL;
+                        break;
+                    }
+                    else
+                    {
+                        // Add the symbol to the list.
+                        symData.count = count;
+                        o_maintStats.push_back( symData );
+                    }
+                }
+            }
+            if ( SUCCESS != o_rc ) break;
+        }
+        if ( SUCCESS != o_rc ) break;
+
+        if ( o_maintStats.empty() ) break; // no need to continue
+
+        // Sort the list of symbols.
+        std::sort( o_maintStats.begin(), o_maintStats.end(), sortSymDataCount );
+
+        // Get the DRAM with the highest count.
+        uint32_t highestDram  = 0;
+        uint32_t highestCount = 0;
+        const uint32_t symbolTH = isX4 ? 1 : 2;
+        for ( DramCountMap::iterator it = dramCounts.begin();
+              it != dramCounts.end(); ++it )
+        {
+            if ( (symbolTH     <= it->second.symbolCount) &&
+                 (highestCount <  it->second.totalCount ) )
+            {
+                highestDram  = it->first;
+                highestCount = it->second.totalCount;
+            }
+        }
+
+        if ( 0 != highestCount )
+        {
+            uint8_t sym = isX4 ? nibble2Symbol<TYPE_MEM_PORT>( highestDram )
+                               : byte2Symbol  <TYPE_MEM_PORT>( highestDram );
+            PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
+
+            o_chipMark  = MemSymbol::fromSymbol( memPortTrgt, i_rank, sym );
         }
 
     } while(0);
@@ -439,6 +574,29 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
     } while(0);
 
     return o_size;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint8_t getDramSize<TYPE_MEM_PORT>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
+{
+    #define PRDF_FUNC "[MemUtils::getDramSize] "
+
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
+
+    TargetHandle_t memPortTrgt = i_chip->getTrgt();
+
+    uint8_t tmp[DIMM_SLCT_PER_PORT];
+
+    if ( !memPortTrgt->tryGetAttr<TARGETING::ATTR_MEM_EFF_DRAM_DENSITY>(tmp) )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_EFF_DRAM_DENSITY" );
+        PRDF_ASSERT( false );
+    }
+
+    return tmp[i_dimmSlct];
 
     #undef PRDF_FUNC
 }

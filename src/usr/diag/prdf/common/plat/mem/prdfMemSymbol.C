@@ -52,7 +52,8 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) ||
-                 TYPE_MCA == getTargetType(i_trgt) );
+                 TYPE_MCA == getTargetType(i_trgt) ||
+                 TYPE_MEM_PORT == getTargetType(i_trgt) );
     // Allowing an invalid symbol. Use isValid() to check validity.
     PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
 }
@@ -75,16 +76,22 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     // Get pins from mask.
     uint8_t pins = NO_SYMBOL_DQS;
-    if ( TYPE_MBA == getTargetType(i_trgt) )
+    TYPE trgtType = getTargetType( i_trgt );
+    if ( TYPE_MBA == trgtType )
     {
         // 2 pins for MBA.
         if ( 0 != (i_mask & 0xaa) ) pins |= EVEN_SYMBOL_DQ;
         if ( 0 != (i_mask & 0x55) ) pins |= ODD_SYMBOL_DQ;
     }
+    else if ( TYPE_MCA == trgtType || TYPE_MEM_PORT == trgtType )
+    {
+        // 1 pin for MCA/MEM_PORT.
+        if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
+    }
     else
     {
-        // 1 pin for MCA.
-        if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
+        PRDF_ERR( "MemSymbol::fromGalois: Invalid target type" );
+        PRDF_ASSERT(false);
     }
 
     return MemSymbol( i_trgt, i_rank, symbol, pins );
@@ -94,33 +101,88 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
 
 uint8_t MemSymbol::getDq() const
 {
-    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    uint8_t dq = DQS_PER_DIMM;
+    TYPE trgtType = getTargetType( iv_trgt );
 
-    return isMba ? symbol2Dq<TYPE_MBA>(iv_symbol)
-                 : symbol2Dq<TYPE_MCA>(iv_symbol);
+    if ( TYPE_MBA == trgtType )
+    {
+        dq = symbol2Dq<TYPE_MBA>( iv_symbol );
+    }
+    else if ( TYPE_MCA == trgtType )
+    {
+        dq = symbol2Dq<TYPE_MCA>( iv_symbol );
+    }
+    else if ( TYPE_MEM_PORT == trgtType )
+    {
+        dq = symbol2Dq<TYPE_MEM_PORT>( iv_symbol );
+    }
+    else
+    {
+        PRDF_ERR( "MemSymbol::getDq: Invalid target type." );
+        PRDF_ASSERT( false );
+    }
+
+    return dq;
 }
 
 //------------------------------------------------------------------------------
 
 uint8_t MemSymbol::getPortSlct() const
 {
-    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    uint8_t portSlct = 0;
+    TYPE trgtType = getTargetType( iv_trgt );
 
-    return isMba ? symbol2PortSlct<TYPE_MBA>(iv_symbol)
-                 : symbol2PortSlct<TYPE_MCA>(iv_symbol);
+    if ( TYPE_MBA == trgtType )
+    {
+        portSlct = symbol2PortSlct<TYPE_MBA>( iv_symbol );
+    }
+    else if ( TYPE_MCA == trgtType )
+    {
+        portSlct = symbol2PortSlct<TYPE_MCA>( iv_symbol );
+    }
+    else if ( TYPE_MEM_PORT == trgtType )
+    {
+        portSlct = symbol2PortSlct<TYPE_MEM_PORT>( iv_symbol );
+    }
+    else
+    {
+        PRDF_ERR( "MemSymbol::getPortSlct: Invalid target type" );
+        PRDF_ASSERT( false );
+    }
+
+    return portSlct;
 }
 
 //------------------------------------------------------------------------------
 
 uint8_t MemSymbol::getDram() const
 {
-    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    uint8_t dram = 0;
+    TYPE trgtType = getTargetType( iv_trgt );
     bool isX4  = isDramWidthX4( iv_trgt );
 
-    return isMba ? isX4 ? symbol2Nibble<TYPE_MBA>( iv_symbol )
-                        : symbol2Byte  <TYPE_MBA>( iv_symbol )
-                 : isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
-                        : symbol2Byte  <TYPE_MCA>( iv_symbol );
+    if ( TYPE_MBA == trgtType )
+    {
+        dram = isX4 ? symbol2Nibble<TYPE_MBA>( iv_symbol )
+                    : symbol2Byte  <TYPE_MBA>( iv_symbol );
+    }
+    else if ( TYPE_MCA == trgtType )
+    {
+        dram = isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
+                    : symbol2Byte  <TYPE_MCA>( iv_symbol );
+    }
+    else if ( TYPE_MEM_PORT == trgtType )
+    {
+        dram = isX4 ? symbol2Nibble<TYPE_MEM_PORT>( iv_symbol )
+                    : symbol2Byte  <TYPE_MEM_PORT>( iv_symbol );
+    }
+    else
+    {
+        PRDF_ERR( "MemSymbol::getDram: Invalid target type" );
+        PRDF_ASSERT( false );
+    }
+
+    return dram;
 }
 
 //------------------------------------------------------------------------------
@@ -168,12 +230,27 @@ uint8_t MemSymbol::getDramRelCenDqs() const
 
 uint8_t MemSymbol::getDramPins() const
 {
-    bool isMba = TYPE_MBA == getTargetType(iv_trgt);
+    TYPE trgtType = getTargetType( iv_trgt );
     bool isX4  = isDramWidthX4( iv_trgt );
 
-    uint32_t dps = isMba ? MBA_DQS_PER_SYMBOL : MEM_DQS_PER_SYMBOL;
-    uint32_t spd = isMba ? isX4 ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE
-                         : isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
+    uint32_t dps = 0;
+    uint32_t spd = 0;
+
+    if ( TYPE_MBA == trgtType )
+    {
+        dps = MBA_DQS_PER_SYMBOL;
+        spd = isX4 ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE;
+    }
+    else if ( TYPE_MCA == trgtType || TYPE_MEM_PORT == trgtType )
+    {
+        dps = MEM_DQS_PER_SYMBOL;
+        spd = isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
+    }
+    else
+    {
+        PRDF_ERR( "MemSymbol::getDramPins: Invalid target type" );
+        PRDF_ASSERT( false );
+    }
 
     return iv_pins << (((spd - 1) - (iv_symbol % spd)) * dps);
 }
@@ -182,14 +259,33 @@ uint8_t MemSymbol::getDramPins() const
 
 uint8_t MemSymbol::getDramSymbol() const
 {
-    bool    isMba = TYPE_MBA == getTargetType(iv_trgt);
+    uint8_t dramSymbol = SYMBOLS_PER_RANK;
+    TYPE trgtType = getTargetType( iv_trgt );
     bool    isX4  = isDramWidthX4( iv_trgt );
     uint8_t dram  = getDram();
 
-    return isMba ? isX4 ? nibble2Symbol<TYPE_MBA>( dram )
-                        : byte2Symbol  <TYPE_MBA>( dram )
-                 : isX4 ? nibble2Symbol<TYPE_MCA>( dram )
-                        : byte2Symbol  <TYPE_MCA>( dram );
+    if ( TYPE_MBA == trgtType )
+    {
+        dramSymbol = isX4 ? nibble2Symbol<TYPE_MBA>( dram )
+                          : byte2Symbol  <TYPE_MBA>( dram );
+    }
+    else if ( TYPE_MCA == trgtType )
+    {
+        dramSymbol = isX4 ? nibble2Symbol<TYPE_MCA>( dram )
+                          : byte2Symbol  <TYPE_MCA>( dram );
+    }
+    else if ( TYPE_MEM_PORT == trgtType )
+    {
+        dramSymbol = isX4 ? nibble2Symbol<TYPE_MEM_PORT>( dram )
+                          : byte2Symbol  <TYPE_MEM_PORT>( dram );
+    }
+    else
+    {
+        PRDF_ERR( "MemSymbol::getDramSymbol: Invalid target type" );
+        PRDF_ASSERT( false );
+    }
+
+    return dramSymbol;
 }
 
 //------------------------------------------------------------------------------
@@ -230,7 +326,7 @@ uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
                                      const MemRank & i_rank,
                                      MemSymbol & o_sym1, MemSymbol & o_sym2 )
 {
-    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MBA>] "
+    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MCA>] "
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
@@ -328,6 +424,72 @@ uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
             break;
         }
         o_sym1.updateSpared(sp0, sp1, ecc);
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemReadSymbol<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          MemSymbol & o_sym1,
+                                          MemSymbol & o_sym2 )
+{
+    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MEM_PORT>] "
+
+    // Check parameters
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    o_sym1 = o_sym2 = MemSymbol(); // both initially invalid
+
+    do
+    {
+        // Get the NCE/TCE galois and mask from hardware.
+        ExtensibleChip * ocmbChip = getConnectedParent(i_chip, TYPE_OCMB_CHIP);
+
+        SCAN_COMM_REGISTER_CLASS * reg = ocmbChip->getRegister("MBSEVR0");
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBSEVR0: "
+                      "ocmbChip=0x%08x", ocmbChip->getHuid() );
+            break;
+        }
+
+        // MBSEVR[0:7]   = mainline NCE galois field
+        // MBSEVR[8:15]  = mainline NCE mask field
+        // MBSEVR[16:23] = mainline TCE galois field
+        // MBSEVR[24:31] = mainline TCE mask field
+        uint8_t nceGalois = reg->GetBitFieldJustified( 0,  8 );
+        uint8_t nceMask   = reg->GetBitFieldJustified( 8,  8 );
+        uint8_t tceGalois = reg->GetBitFieldJustified( 16, 8 );
+        uint8_t tceMask   = reg->GetBitFieldJustified( 24, 8 );
+
+        // Get the NCE/TCE symbol.
+        o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
+                                        nceGalois, nceMask );
+        o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
+                                        tceGalois, tceMask );
+
+        MemSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux<TYPE_MEM_PORT>( i_chip->getTrgt(), i_rank,
+                                              sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+        o_sym1.updateSpared(sp0, sp1, ecc);
+        o_sym2.updateSpared(sp0, sp1, ecc);
 
     } while (0);
 

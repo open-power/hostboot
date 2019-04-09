@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,8 +80,8 @@ class TdRankListEntry
 
   private:
 
-    ExtensibleChip * iv_chip = nullptr;    ///< MCA or MBA chip.
-    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA or MBA.
+    ExtensibleChip * iv_chip = nullptr;    ///< MCA, MBA, or MEM_PORT chip.
+    MemRank          iv_rank = MemRank(0); ///< Any rank on the MCA/MBA/MEM_PORT
 };
 
 /**
@@ -176,6 +176,31 @@ inline TdRankList<TARGETING::TYPE_MCBIST>::TdRankList( ExtensibleChip * i_chip )
         for ( auto & rank : rankList )
         {
             iv_list.push_back( TdRankListEntry(mcaChip, rank) );
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+inline TdRankList<TARGETING::TYPE_OCMB_CHIP>::TdRankList(
+                                                       ExtensibleChip * i_chip )
+{
+    using namespace TARGETING;
+    using namespace PlatServices;
+
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    ExtensibleChipList memPortChipList = getConnected( i_chip, TYPE_MEM_PORT );
+    for ( auto & memPortChip : memPortChipList )
+    {
+        std::vector<MemRank> rankList;
+        getSlaveRanks<TYPE_MEM_PORT>( memPortChip->getTrgt(), rankList );
+        PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
+
+        for ( auto & rank : rankList )
+        {
+            iv_list.push_back( TdRankListEntry(memPortChip, rank) );
         }
     }
 }
