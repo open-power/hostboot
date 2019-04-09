@@ -351,6 +351,10 @@
         <id>EARLY_TESTCASES_ISTEP</id>
         <default>0x0E07</default>
     </attribute>
+    <attribute>
+        <id>MAX_ALLOWED_DIMM_FREQ</id>
+        <default>3200,3200,3200,3200</default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
