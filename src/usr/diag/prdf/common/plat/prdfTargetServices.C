@@ -1527,11 +1527,31 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
             PRDF_ASSERT( false ); // attribute does not exist for target
         }
     }
-    else if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
+    else if ( MODEL_NIMBUS == l_procModel )
     {
-        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED> "
-                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-        PRDF_ASSERT( false ); // attribute does not exist for target
+        if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
+        {
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+    }
+    else if ( MODEL_AXONE == l_procModel )
+    {
+        PRDF_ERR( PRDF_FUNC "Axone attribute not supported yet" );
+        /* TODO RTC 207273 - no targeting support for attr yet
+        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED>(info[0]) )
+        {
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+        */
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
+        PRDF_ASSERT(false);
     }
 
     for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
@@ -1589,8 +1609,7 @@ void getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
                                     std::vector<MemRank> & o_ranks,
                                     uint8_t i_ds )
 {
-    // TODO RTC 207273 - no support for ATTR_EFF_DIMM_RANKS_CONFIGED attr yet
-    //__getMasterRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, 0, i_ds );
+    __getMasterRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, 0, i_ds );
 }
 
 //------------------------------------------------------------------------------
@@ -1653,6 +1672,14 @@ void getSlaveRanks<TYPE_MBA>( TargetHandle_t i_trgt,
     __getSlaveRanks<TYPE_MBA>( i_trgt, o_ranks, i_ds );
 }
 
+template<>
+void getSlaveRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+                                   std::vector<MemRank> & o_ranks,
+                                   uint8_t i_ds )
+{
+    __getSlaveRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, i_ds );
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -1665,7 +1692,7 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
     PRDF_ASSERT( T == getTargetType(i_trgt) );
     PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
-    uint8_t num;
+    uint8_t num = 0;
 
 
     ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
@@ -1682,7 +1709,7 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
 
         num = attr[i_pos][i_ds];
     }
-    else
+    else if ( MODEL_NIMBUS == l_procModel )
     {
         ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
         if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
@@ -1694,6 +1721,24 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
         }
 
         num = attr[i_pos][i_ds];
+    }
+    else if ( MODEL_AXONE == l_procModel )
+    {
+        ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC
+                      "tryGetAttr<ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_ds];
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
+        PRDF_ASSERT(false);
     }
 
     PRDF_ASSERT( num <= MASTER_RANKS_PER_DIMM_SLCT );
@@ -1728,6 +1773,13 @@ uint8_t getNumMasterRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt,
     return __getNumMasterRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
 }
 
+template<>
+uint8_t getNumMasterRanksPerDimm<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+                                                 uint8_t i_ds )
+{
+    return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( i_trgt, 0, i_ds );
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -1740,7 +1792,7 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
     PRDF_ASSERT( T == getTargetType(i_trgt) );
     PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
-    uint8_t num;
+    uint8_t num = 0;
 
     ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
     if ( MODEL_CUMULUS == l_procModel )
@@ -1756,7 +1808,7 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
 
         num = attr[i_pos][i_ds];
     }
-    else
+    else if ( MODEL_NIMBUS == l_procModel )
     {
         ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
         if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
@@ -1767,6 +1819,23 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
         }
 
         num = attr[i_pos][i_ds];
+    }
+    else if ( MODEL_AXONE == l_procModel )
+    {
+        ATTR_MEM_EFF_NUM_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_NUM_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_NUM_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_ds];
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid proc type" );
+        PRDF_ASSERT(false);
     }
 
     PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT*SLAVE_RANKS_PER_MASTER_RANK );
@@ -1797,6 +1866,12 @@ uint8_t getNumRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_ds )
     //       select will be the same for each DIMM select. There is no need to
     //       iterate on both port selects.
     return __getNumRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
+}
+
+template<>
+uint8_t getNumRanksPerDimm<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_ds )
+{
+    return __getNumRanksPerDimm<TYPE_MEM_PORT>( i_trgt, 0, i_ds );
 }
 
 //##############################################################################

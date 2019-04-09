@@ -434,7 +434,7 @@ uint8_t getColNumConfig( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Returns a sorted list of configured master ranks for an MCA or MBA.
- * @param  i_trgt  MCA or MBA target.
+ * @param  i_trgt  MCA, MBA, or MEM_PORT target.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -450,7 +450,7 @@ void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Returns a sorted list of configured slave ranks for an MCA or MBA.
- * @param  i_trgt  MCA or MBA target.
+ * @param  i_trgt  MCA, MBA, or MEM_PORT target.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -466,7 +466,7 @@ void getSlaveRanks( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Obtains the number of master ranks per DIMM select.
- * @param  i_trgt MCA or MBA target.
+ * @param  i_trgt MCA, MBA, or MEM_PORT target.
  * @param  i_ds   DIMM select.
  * @return Total number of master ranks configured per DIMM select.
  */
@@ -477,7 +477,7 @@ uint8_t getNumMasterRanksPerDimm( TARGETING::TargetHandle_t i_trgt,
 /**
  * @brief  Obtains the total number of ranks (including slave ranks) per DIMM
  *         select.
- * @param  i_trgt MCA or MBA target.
+ * @param  i_trgt MCA, MBA, or MEM_PORT target.
  * @param  i_ds   DIMM select.
  * @return Total number of ranks configured per DIMM select.
  */

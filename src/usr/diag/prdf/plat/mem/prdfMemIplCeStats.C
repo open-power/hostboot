@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,19 @@ void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct,
 //------------------------------------------------------------------------------
 
 template<>
+void MemIplCeStats<TYPE_MEM_PORT>::banAnalysis( uint8_t i_dimmSlct,
+                                                uint8_t i_portSlct )
+{
+    PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
+    PRDF_ASSERT( 0 == i_portSlct );
+
+    DimmKey banKey = { i_dimmSlct, i_portSlct };
+    iv_bannedAnalysis[banKey] = true;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 void MemIplCeStats<TYPE_MBA>::banAnalysis( uint8_t i_dimmSlct )
 {
     // Two DIMMs per DIMM select on MBA.
@@ -101,6 +114,14 @@ void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct )
     banAnalysis( i_dimmSlct, 0 );
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+void MemIplCeStats<TYPE_MEM_PORT>::banAnalysis( uint8_t i_dimmSlct )
+{
+    // Only one DIMM per DIMM select on MEM_PORT.
+    banAnalysis( i_dimmSlct, 0 );
+}
 
 //------------------------------------------------------------------------------
 
@@ -460,5 +481,6 @@ void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
 // need these templates to avoid linker errors
 template class MemIplCeStats<TYPE_MCA>;
 template class MemIplCeStats<TYPE_MBA>;
+template class MemIplCeStats<TYPE_MEM_PORT>;
 
 } // end namespace PRDF

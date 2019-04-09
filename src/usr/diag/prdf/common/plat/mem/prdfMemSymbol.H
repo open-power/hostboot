@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a symbol.
-     * @param  i_trgt   MBA or MCA target.
+     * @param  i_trgt   MBA, MCA, or MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @param  i_pins   See enum DqMask.
@@ -95,7 +95,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a Galois field.
-     * @param  i_trgt   MBA or MCA target.
+     * @param  i_trgt   MBA, MCA, or MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_galois The Galois field.
      * @param  i_mask   The bit mask.
@@ -122,7 +122,7 @@ class MemSymbol
     MemRank getRank() const { return iv_rank; };
 
     /** @return The port select for this symbol. Only relevant on MBA. Will
-     *          always return 0 for MCA. */
+     *          always return 0 for MCA and MEM_PORT. */
     uint8_t getPortSlct() const;
 
     /** @return The DRAM index for this symbol. */
@@ -218,7 +218,7 @@ class MemSymbol
 
 /**
  * @brief  Reads the memory NCE/TCE vector trap register from hardware.
- * @param  i_chip   MCA or MBA.
+ * @param  i_chip   MCA, MBA, or MEM_PORT.
  * @param  i_rank   The rank this symbol is on.
  * @param  o_sym1   The first symbol. Should always be valid for both NCE/TCE.
  * @param  o_sym2   The second symbol. Only valid for TCEs.

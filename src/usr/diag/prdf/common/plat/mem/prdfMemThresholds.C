@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,11 +203,15 @@ template
 void getMnfgMemCeTh<TYPE_MCA>( ExtensibleChip * i_chip, const MemRank & i_rank,
                                uint32_t & o_cePerDram, uint32_t & o_cePerRank,
                                uint32_t & o_cePerDimm );
-
 template
 void getMnfgMemCeTh<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
                                uint32_t & o_cePerDram, uint32_t & o_cePerRank,
                                uint32_t & o_cePerDimm );
+
+template
+void getMnfgMemCeTh<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, uint32_t & o_cePerDram, uint32_t & o_cePerRank,
+    uint32_t & o_cePerDimm );
 
 //------------------------------------------------------------------------------
 
@@ -237,6 +241,9 @@ uint32_t getScrubCeThreshold<TYPE_MCA>( ExtensibleChip * i_chip,
 template
 uint32_t getScrubCeThreshold<TYPE_MBA>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank );
+template
+uint32_t getScrubCeThreshold<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                             const MemRank & i_rank );
 
 } // end namespace PRDF
 
