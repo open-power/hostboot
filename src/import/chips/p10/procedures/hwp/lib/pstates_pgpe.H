@@ -154,15 +154,15 @@ typedef struct
         struct
         {
 #ifdef _BIG_ENDIAN
-            unit16_t N_S_drop_3p125pct   : 4;
-            unit16_t N_L_drop_3p125pct   : 4;
-            unit16_t L_S_return_3p125pct : 4;
-            unit16_t S_N_return_3p125pct : 4;
+            uint16_t N_S_drop_3p125pct   : 4;
+            uint16_t N_L_drop_3p125pct   : 4;
+            uint16_t L_S_return_3p125pct : 4;
+            uint16_t S_N_return_3p125pct : 4;
 #else
-            unit16_t S_N_return_3p125pct : 4;
-            unit16_t L_S_return_3p125pct : 4;
-            unit16_t N_L_drop_3p125pct   : 4;
-            unit16_t N_S_drop_3p125pct   : 4;
+            uint16_t S_N_return_3p125pct : 4;
+            uint16_t L_S_return_3p125pct : 4;
+            uint16_t N_L_drop_3p125pct   : 4;
+            uint16_t N_S_drop_3p125pct   : 4;
 #endif // _BIG_ENDIAN                       /// #W Other Settings
         } fields;
     };
@@ -190,6 +190,11 @@ typedef struct
     PoundWOther_t           other;
     uint8_t                 rsvd[256];
 } PoundW_t;
+/// These define the Run-time rails that are controlled by the PGPE during
+/// Pstate operations.
+#define RUNTIME_RAILS       2
+#define RUNTIME_RAIL_VDD    0
+#define RUNTIME_RAIL_VCS    1
 
 /// Voltage Regulation Module (VRM) Control Settings
 typedef struct
@@ -218,12 +223,6 @@ typedef struct
     uint32_t step_size_mv[RUNTIME_RAILS];
 } VRMParms_t;
 
-/// These define the Run-time rails that are controlled by the PGPE during
-/// Pstate operations.
-#define RUNTIME_RAILS       2
-#define RUNTIME_RAIL_VDD    0
-#define RUNTIME_RAIL_VCS    1
-
 /// @todo Need to define the DDS control block
 
 /// Pstate Parameter consumed by PGPE
@@ -239,7 +238,7 @@ typedef struct
         uint64_t        value;
         struct
         {
-            unit64_t    eye_catcher : 56;
+            uint64_t    eye_catcher : 56;
             uint64_t    version     : 8 ;
 
         } fields;
@@ -250,7 +249,8 @@ typedef struct
     uint32_t            reference_frequency_khz;    // Pstate[0] frequency
     uint32_t            frequency_step_khz;
     uint32_t            occ_complex_frequency_mhz;  // Needed for FITs
-    uint32_t            dpll_pstate0_mhz;  // @todo why this and reference_frequency_khz?
+    uint32_t            dpll_pstate0_value;  // @todo why this and reference_frequency_khz?
+    uint32_t            nest_frequency_mhz;  // Needed for FITs
 
     /// VPD operating points are biased but without load-line correction.
     /// Frequencies are in MHz, voltages are specified in units of 1mV, currents
@@ -278,11 +278,14 @@ typedef struct
     ResClkSetup_t       resclk;
 
     /// Precalculated VPD Slopes
-    /// All are in 4.12 decimal form into unit16_t integer value
+    /// All are in 4.12 decimal form into uint16_t integer value
     uint16_t            ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            ps_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+
+    //AvsBusTopology
+    AvsBusTopology_t avs_bus_topology;
 
     // Biased Compare VID operating points
     // CompareVIDPoints_t vid_point_set[NUM_OP_POINTS];
@@ -302,7 +305,8 @@ typedef struct
     // Jump-value slopes
     // int16_t ps_dds_jump_slopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
 
-} GlobalPstateParmBlock_t __attribute__((packed, aligned(1024)));
+//} GlobalPstateParmBlock_t __attribute__((packed, aligned(1024)));
+} GlobalPstateParmBlock_t;
 
 
 #ifdef __cplusplus
