@@ -227,16 +227,16 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
                 // case we just bomb out.)
 #ifdef __HOSTBOOT_MODULE
                 uint64_t l_max_dimm_speed = 0;
-                fapi2::Target<TARGET_TYPE_MEM_PORT> l_fastest_port_target = i_freq_map.begin()->first;
+                fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_fastest_port_target = i_freq_map.begin()->first;
                 std::for_each(i_freq_map.begin(), i_freq_map.end(),
-                              [&l_max_dimm_speed](const std::pair<fapi2::Target<TARGET_TYPE_MEM_PORT>, uint64_t>& m)
+                              [&l_max_dimm_speed, &l_fastest_port_target](const std::pair<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t>& m)
                 {
                     l_max_dimm_speed = std::max(l_max_dimm_speed, m.second);
                     l_fastest_port_target = m.first;
                 });
 
                 std::for_each(i_freq_map.begin(), i_freq_map.end(),
-                              [&l_max_dimm_speed](const std::pair<fapi2::Target<TARGET_TYPE_MEM_PORT>, uint64_t>& m)
+                              [&l_max_dimm_speed](const std::pair<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t>& m)
                 {
                     deconfigure(m.first, m.second, l_max_dimm_speed);
                 });
@@ -265,10 +265,8 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
 
     return fapi2::FAPI2_RC_SUCCESS;
 
-#ifndef __HOSTBOOT_MODULE
 fapi_try_exit:
     return fapi2::current_err;
-#endif
 }
 
 }// mss
