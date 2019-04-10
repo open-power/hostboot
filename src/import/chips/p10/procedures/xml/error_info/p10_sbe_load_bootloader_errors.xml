@@ -1,0 +1,80 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_load_bootloader_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_LOAD_BOOTLOADER_INVALID_TARGET_ADDRESS</rc>
+    <description>
+      Procedure: p10_sbe_load_bootloader
+      Target base address is not cacheline aligned.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>TARGET_BASE_ADDRESS</ffdc>
+    <ffdc>HRMOR_OFFSET</ffdc>
+    <ffdc>BOOTLOADER_OFFSET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_SBE_LOAD_BOOTLOADER_INVALID_PAYLOAD_SIZE</rc>
+    <description>
+      Procedure: p10_sbe_load_bootloader
+      Payload size is invalid.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+  <!-- FIXME @RTC202058 -->
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>PAYLOAD_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_MASTER_CORE_NOT_FOUND</rc>
+    <description>
+      Procedure: p10_sbe_load_bootloader
+      The master core is not found from the EX master target
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+  <!-- FIXME @RTC202058 -->
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>MASTER_CORE_UNIT_POS</ffdc>
+    <ffdc>FUSED_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
