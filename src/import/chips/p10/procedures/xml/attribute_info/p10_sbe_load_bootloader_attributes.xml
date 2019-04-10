@@ -1,0 +1,107 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/attribute_info/p10_sbe_load_bootloader_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<attribute>
+  <id>ATTR_SBE_BOOTLOADER_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines offset to be applied to SBE bootloader installation
+  this will be added with the base address and hostboot HRMOR offset to get the target
+  base address</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_HOSTBOOT_HRMOR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines offset to be applied to SBE bootloader installation
+  this will be added with the bootloader offset and the base address to get the
+  target base addres</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_PNOR_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines size of PNOR that will be put into the exception vector if written</description>
+  <valueType>uint16</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_BOOT_SIDE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines sbe boot side that will be put into the exception vector if written</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_PNOR_BOOT_SIDE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Defines boot side of PNOR that will be put into the exception vector if written</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SECURE_SETTINGS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Byte collecting Security Overrides
+               bits 0:3 - reserved
+               bit 4 - SBE Security Backdoor Enabled
+               bit 5 - Allow Attribute Overrides in Securemode
+               bit 6 - Override Security Setting
+               bit 7 - Secure Access Bit
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_HBBL_EXCEPTION_INSTRUCT</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Instruction for exception vector that will be put into the exception vector if not 0</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_ADDR_KEY_STASH_ADDR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Instruction for HB Boatloader to pick the Add-Key Stash Pair
+    from this memory into the exception vector</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+</attributes>
