@@ -37,9 +37,11 @@
 #define __PMIC_BIAS_H__
 
 #include <fapi2.H>
-#include <lib/pmic/pmic_bias_utils.H>
+#include <lib/utils/pmic_bias_utils.H>
+#include <lib/utils/pmic_consts.H>
 
 typedef fapi2::ReturnCode (*pmic_bias_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        const mss::pmic::id i_id,
         const mss::pmic::setting,
         const float,
         const mss::pmic::unit,
@@ -51,16 +53,19 @@ extern "C"
     /// @brief Bias procedure for PMIC devices
     ///
     /// @param[in] i_ocmb_target explorer target
+    /// @param[in] i_id the PMIC to change (PMIC0,PMIC1)
     /// @param[in] i_setting setting to change (swa_volt, swb_volt, etc.)
     /// @param[in] i_amount amount to change by
     /// @param[in] i_unit percentage or value
     /// @param[in] i_force ignore 10% change limit
     /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
     ///
-    fapi2::ReturnCode exp_pmic_bias(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-                                    const mss::pmic::setting i_setting =  mss::pmic::setting::NO_SETTING,
-                                    const float i_amount = 0,
-                                    const mss::pmic::unit i_unit = mss::pmic::unit::NO_UNIT,
-                                    const bool i_force = false);
+    fapi2::ReturnCode pmic_bias(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                const mss::pmic::id i_id = mss::pmic::id::PMIC0,
+                                const mss::pmic::setting i_setting =  mss::pmic::setting::NO_SETTING,
+                                const float i_amount = 0,
+                                const mss::pmic::unit i_unit = mss::pmic::unit::NO_UNIT,
+                                const bool i_force = false);
 }
+
 #endif

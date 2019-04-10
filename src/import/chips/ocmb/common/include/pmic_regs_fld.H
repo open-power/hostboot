@@ -72,6 +72,8 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t VIN_BULK_INPUT_PWR_GOOD_STATUS = 0x07;
 
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
+    static constexpr uint8_t VOLTAGE_SETTING_START          = 0;
+    static constexpr uint8_t VOLTAGE_SETTING_LENGTH         = 7;
 };
 
 #endif

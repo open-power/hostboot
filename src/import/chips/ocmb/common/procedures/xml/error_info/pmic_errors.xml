@@ -64,7 +64,7 @@
   <hwpError>
     <rc>RC_PMIC_VOLTAGE_OUT_OF_RANGE</rc>
     <description>
-       The voltage from the SPD and offset combination was out of range for the PMIC.
+       The voltage from the SPD and offset combination or bias operation was out of range for the PMIC.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>VOLTAGE_BITMAP</ffdc>
@@ -98,6 +98,24 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_PMIC_VOLTAGE_RANGE_SETTING_OUT_OF_RANGE</rc>
+    <description>
+       The PMIC voltage setting range was too large (Valid: 0,1)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>RANGE_SETTING</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_PMIC_DELAY_OUT_OF_RANGE</rc>
     <description>
        The sequence delay specified by the SPD was out of range for the PMIC (max bitmap: 0b111)
@@ -116,12 +134,101 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_PMIC_BIAS_VOLTAGE_PAST_THRESHOLD</rc>
+    <description>
+       The bias voltage provided exceeded the 10%% change limit. Use -f argument to override.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>PERCENT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_PMIC_DIMM_SPD_4U</rc>
     <description>
        The module_height attribute SPD of this DIMM was read as 4U.
        4U is not supported yet for pmic_enable().
     </description>
     <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_BIAS_VOLTAGE_OUT_OF_RANGE</rc>
+    <description>
+       The target voltage supplied to the BIAS operation was out of range for the PMIC.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VOLTAGE</ffdc>
+    <ffdc>MIN</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>RAIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_NO_PMIC_SPECIFIED</rc>
+    <description>
+       The PMIC ENUM ID provided to the procedure was unknown
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PMIC_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_NO_SETTING_SPECIFIED</rc>
+    <description>
+       The PMIC SETTING ENUM provided to the procedure was unknown
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SETTING_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_NO_UNIT_SPECIFIED</rc>
+    <description>
+       The PMIC UNIT ENUM provided to the procedure was unknown
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>UNIT_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

@@ -289,18 +289,18 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t MAX_DELAY_BITMAP           = 0b00000111;
     static constexpr uint8_t CONVERT_RANGE1_TO_RANGE0   = 40;
 
-    static constexpr float SWABC_VOLT_RANGE0_MIN        = 0.8;
-    static constexpr float SWABC_VOLT_RANGE0_MAX        = 1.435;
-    static constexpr float SWABC_VOLT_RANGE1_MIN        = 0.6;
-    static constexpr float SWABC_VOLT_RANGE1_MAX        = 1.235;
+    // Values below are in millivolts (mV)
+    static constexpr uint32_t SWABC_VOLT_RANGE0_MIN        = 800;
+    static constexpr uint32_t SWABC_VOLT_RANGE0_MAX        = 1435;
+    static constexpr uint32_t SWABC_VOLT_RANGE1_MIN        = 600;
+    static constexpr uint32_t SWABC_VOLT_RANGE1_MAX        = 1235;
 
-    static constexpr float SWD_VOLT_RANGE0_MIN          = 1.5;
-    static constexpr float SWD_VOLT_RANGE0_MAX          = 2.135;
-    static constexpr float SWD_VOLT_RANGE1_MIN          = 2.2;
-    static constexpr float SWD_VOLT_RANGE1_MAX          = 2.835;
+    static constexpr uint32_t SWD_VOLT_RANGE0_MIN          = 1500;
+    static constexpr uint32_t SWD_VOLT_RANGE0_MAX          = 2135;
+    static constexpr uint32_t SWD_VOLT_RANGE1_MIN          = 2200;
+    static constexpr uint32_t SWD_VOLT_RANGE1_MAX          = 2835;
 
-    // the overarching JEDEC spec says 5. Sticking with 5 until we hear otherwise.
-    static constexpr float VOLT_STEP                    = 0.005; // 5 mV
+    static constexpr uint32_t VOLT_STEP                    = 5;
 };
 
 ///

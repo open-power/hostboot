@@ -63,6 +63,14 @@ using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;;
 
 // Arrays to easily index common parameters by rail
+static constexpr uint8_t const VOLT_SETTING_ACTIVE_REGS[] =
+{
+    REGS::R21_SWA_VOLTAGE_SETTING,
+    REGS::R23_SWB_VOLTAGE_SETTING,
+    REGS::R25_SWC_VOLTAGE_SETTING,
+    REGS::R27_SWD_VOLTAGE_SETTING
+};
+
 static constexpr uint8_t const VOLT_SETTING_REGS[] =
 {
     REGS::R21_SWA_VOLTAGE_SETTING,
@@ -79,7 +87,7 @@ static constexpr uint8_t const VOLT_RANGE_FLDS[] =
     FIELDS::SWD_VOLTAGE_RANGE
 };
 
-static constexpr float const VOLT_RANGE_MINS[][CONSTS::NUM_RANGES] =
+static constexpr uint32_t const VOLT_RANGE_MINS[][CONSTS::NUM_RANGES] =
 {
     {CONSTS::SWABC_VOLT_RANGE0_MIN, CONSTS::SWABC_VOLT_RANGE1_MIN},
     {CONSTS::SWABC_VOLT_RANGE0_MIN, CONSTS::SWABC_VOLT_RANGE1_MIN},
@@ -87,7 +95,7 @@ static constexpr float const VOLT_RANGE_MINS[][CONSTS::NUM_RANGES] =
     {CONSTS::SWD_VOLT_RANGE0_MIN,   CONSTS::SWD_VOLT_RANGE1_MIN}
 };
 
-static constexpr float const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
+static constexpr uint32_t const VOLT_RANGE_MAXES[][CONSTS::NUM_RANGES] =
 {
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
     {CONSTS::SWABC_VOLT_RANGE0_MAX, CONSTS::SWABC_VOLT_RANGE1_MAX},
