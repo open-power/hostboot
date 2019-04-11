@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,7 +115,10 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     // ensure threads and pools are shutdown when finished
 
-    doStepCleanup(globals);
+    if(nullptr == err)
+    {
+        err = doStepCleanup(globals);
+    }
 
     // If this step completes without the need for a reconfig due to an RCD
     // parity error, clear all RCD parity error counters.
@@ -140,13 +143,14 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
 }
 
-void doStepCleanup(const Globals & i_globals)
+errlHndl_t doStepCleanup(const Globals & i_globals)
 {
     // stop the state machine
 
-    Singleton<StateMachine>::instance().shutdown();
+    errlHndl_t l_errl = Singleton<StateMachine>::instance().shutdown();
 
     // TODO ... stop the command monitor
+    return l_errl;
 }
 
 errlHndl_t processEvent(MaintCommandEvent & i_event)

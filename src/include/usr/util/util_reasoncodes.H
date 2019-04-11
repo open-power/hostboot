@@ -53,6 +53,7 @@ namespace Util
         UTIL_MOD_GET_OBUS_PLL_BUCKET = 0x14,  // UtilCommonAttr::getObusPllBucket
         UTIL_LIDMGR_CSTOR       = 0x15,       // UtilLidMgr::UtilLidMgr
         UTIL_MCL_PROCESS_SINGLE_COMP = 0x16,  // UtilLidMgr::processSingleComponent
+        UTIL_MOD_TP_SHUTDOWN    = 0x17,       // Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown
     };
 
     enum ReasonCode
@@ -85,6 +86,7 @@ namespace Util
         UTIL_ERC_NO_MATCHING_FREQ        = UTIL_COMP_ID | 0x1B,
         UTIL_LIDMGR_INVAL_LID_REQUEST    = UTIL_COMP_ID | 0x1C,
         UTIL_LIDMGR_INVAL_COMP           = UTIL_COMP_ID | 0x1D,
+        UTIL_RC_CHILD_TASK_FAILED        = UTIL_COMP_ID | 0x1E,
     };
 };
 

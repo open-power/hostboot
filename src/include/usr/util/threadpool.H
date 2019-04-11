@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,7 @@
 #include <stdint.h>
 #include <util/traits/has_lessthan.H>
 #include <util/impl/threadpool.H>
+#include <errl/errlentry.H>
 
 namespace Util
 {
@@ -87,7 +88,10 @@ class ThreadPool : public Util::__Util_ThreadPool_Impl::ThreadPoolImpl
 {
     public:
             /** Basic Constructor.  Initialize ThreadPool. */
-        ThreadPool() : Util::__Util_ThreadPool_Impl::ThreadPoolImpl() { };
+        ThreadPool(bool i_checkChildRc = true) :
+                Util::__Util_ThreadPool_Impl::ThreadPoolImpl(i_checkChildRc)
+        {
+        };
             /** Basic Destructor.  Ensures pool is properly shut down. */
         ~ThreadPool() { shutdown(); };
 
@@ -98,12 +102,20 @@ class ThreadPool : public Util::__Util_ThreadPool_Impl::ThreadPoolImpl
                 __start(reinterpret_cast<start_fn_t>(&run), this);
             };
             /** @brief Completes outstanding work and destroys worker threads.
+             *         Returns an error log when any child task crashes when
+             *         iv_checkChildRc is set.
              *
              *  @note This function will block until all work is completed and
              *        worker threads are destroyed.
+             *
+             * @return nullptr if all child tasks finished (child status
+             *         checking disabled);
+             *         nullptr if all child tasks finished successfully, or a
+             *         pointer to error log otherwise (child status checking
+             *         enabled).
              */
-        void shutdown()
-            { __shutdown(); };
+        errlHndl_t shutdown()
+            { return __shutdown(); };
 
             /** @brief Insert a work item onto the thread-pool's queue.
              *
