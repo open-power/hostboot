@@ -80,6 +80,9 @@
       <id>RESOURCE_IS_CRITICAL</id>
     </attribute>
     <attribute>
+      <id>SAVED_STATE_UINT8</id>
+    </attribute>
+    <attribute>
       <id>TYPE</id>
     </attribute>
   </targetType>
