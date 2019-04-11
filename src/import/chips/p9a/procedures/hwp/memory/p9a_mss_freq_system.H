@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,17 +39,17 @@
 #include <fapi2.H>
 #include <vector>
 
-typedef fapi2::ReturnCode (*p9a_mss_freq_system_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MC>&);
+typedef fapi2::ReturnCode (*p9a_mss_freq_system_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
     ///
     /// @brief Matches OMI freq with DDR freq
-    /// @param[in] i_target controller (e.g. MC)
+    /// @param[in] i_target PROC_CHIP target
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode p9a_mss_freq_system(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target);
+    fapi2::ReturnCode p9a_mss_freq_system(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 }
 
 #endif

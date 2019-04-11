@@ -292,10 +292,12 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::AXONE>( const fapi2::Ta
     fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
 
     const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
+    uint32_t l_omi_freq = 0;
 
     l_vpd_info.iv_is_config_ffdc_enabled = false;
 
-    FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_vpd_info.iv_omi_freq_mhz));
+    FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_omi_freq));
+    l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
     FAPI_INF("Setting VPD info OMI frequency: %d Gbps, for DDR frequency %d MT/s",
              l_vpd_info.iv_omi_freq_mhz, i_proposed_freq);
 

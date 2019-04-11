@@ -231,6 +231,33 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 }
 
 ///
+/// @brief find all the MEM_PORTs connected to a PROC_CHIP
+/// @param[in] i_target a fapi2::Target PROC_CHIP
+/// @return a vector of fapi2::TARGET_TYPE_MEM_PORT
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+              fapi2::TargetState i_state )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_ports;
+
+    for (const auto& l_mc : i_target.getChildren<fapi2::TARGET_TYPE_MC>(i_state))
+    {
+        for (const auto& l_omi : l_mc.getChildren<fapi2::TARGET_TYPE_OMI>(i_state))
+        {
+            for (const auto& l_ocmb : l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state))
+            {
+                auto l_these_ports( l_ocmb.getChildren<fapi2::TARGET_TYPE_MEM_PORT>(i_state) );
+                l_ports.insert(l_ports.end(), l_these_ports.begin(), l_these_ports.end());
+            }
+        }
+    }
+
+    return l_ports;
+}
+
+///
 /// @brief find all the MBA connected to an DMI
 /// @param[in] i_target a fapi2::Target DMI
 /// @return a vector of fapi2::TARGET_TYPE_MBA

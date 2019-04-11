@@ -43,6 +43,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/shared/axone_consts.H>
+#include <lib/freq/axone_freq_traits.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_math.H>
@@ -99,18 +100,19 @@ fapi_try_exit:
 ///
 inline fapi2::ReturnCode convert_ddr_freq_to_omi_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint64_t i_ddr_freq,
-        uint64_t& o_omi_freq)
+        uint32_t& o_omi_freq)
 {
     using TT = mss::frequency_traits<mss::proc_type::AXONE>;
     constexpr uint64_t ROUND_UNITS = 10;
+    uint64_t l_omi_freq = 0;
 
     // Get the OMI to DDR freq ratio
     uint8_t l_ratio[TT::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::attr::get_host_to_ddr_speed_ratio(i_target, l_ratio));
 
     // Multiply by the ratio and round to the nearest 10GBPS
-    FAPI_TRY(mss::divide_and_round((i_ddr_freq * l_ratio[0]), ROUND_UNITS, o_omi_freq));
-    o_omi_freq *= ROUND_UNITS;
+    FAPI_TRY(mss::divide_and_round((i_ddr_freq * l_ratio[0]), ROUND_UNITS, l_omi_freq));
+    o_omi_freq = ROUND_UNITS * l_omi_freq;
     FAPI_DBG("For ratio %d and DDR freq %d, corresponding OMI freq is %d", l_ratio[0], i_ddr_freq, o_omi_freq);
 
 fapi_try_exit:
@@ -125,7 +127,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 inline fapi2::ReturnCode convert_omi_freq_to_ddr_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        const uint64_t i_omi_freq,
+        const uint32_t i_omi_freq,
         uint64_t& o_ddr_freq)
 {
     using TT = mss::frequency_traits<mss::proc_type::AXONE>;
@@ -134,29 +136,9 @@ inline fapi2::ReturnCode convert_omi_freq_to_ddr_freq(const fapi2::Target<fapi2:
     uint8_t l_ratio[TT::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY(mss::attr::get_host_to_ddr_speed_ratio(i_target, l_ratio));
 
-    FAPI_TRY(mss::divide_and_round(i_omi_freq, static_cast<uint64_t>(l_ratio[0]), o_ddr_freq),
+    FAPI_TRY(mss::divide_and_round(static_cast<uint64_t>(i_omi_freq), static_cast<uint64_t>(l_ratio[0]), o_ddr_freq),
              "%s freq system saw a zero Host (OMI) to DDR frequency ratio", mss::c_str(i_target));
     FAPI_DBG( "For ratio %d and OMI freq %d, corresponding DDR freq is %d", l_ratio[0], i_omi_freq, o_ddr_freq);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Checks to see if a passed in value could be a valid OMI frequency
-/// @param[in] i_target the port target
-/// @param[in] i_proposed_freq a frequency value that is to be checked
-/// @param[out] o_valid boolean whether the value is a valid OMI frequency
-/// @return FAPI2_RC_SUCCESS iff successful
-///
-inline fapi2::ReturnCode is_omi_freq_valid (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        const uint64_t i_proposed_freq,
-        uint64_t& o_valid)
-{
-    uint64_t l_proposed_omi_freq = 0;
-    FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_proposed_omi_freq));
-
-    o_valid = std::binary_search(AXONE_OMI_FREQS.begin(), AXONE_OMI_FREQS.end(), l_proposed_omi_freq);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -182,22 +164,20 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<fapi2::TARGET_
 ///
 bool deconfigure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                  const uint64_t i_dimm_speed,
-                 const uint32_t i_omi_freq);
+                 const uint64_t i_omi_freq);
 
 ///
-/// @brief Selects synchronous mode and performs requirements enforced by selected port frequency
+/// @brief Selects OMI frequency based on selected port frequencies
 /// @param[in] i_freq_map dimm speed mapping
 /// @param[in] i_equal_dimm_speed tracks whether map has equal dimm speeds
 /// @param[in] i_omi_freq OMI frequency
-/// @param[out] o_selected_sync_mode final synchronous mode
-/// @param[out] o_selected_omi_freq final freq selected, only valid if final sync mode is in-sync
+/// @param[out] o_selected_omi_freq final freq selected
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t >& i_freq_map,
-                                   const speed_equality i_equal_dimm_speed,
-                                   const uint32_t i_omi_freq,
-                                   uint8_t& o_selected_sync_mode,
-                                   uint64_t& o_selected_omi_freq);
+fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t >& i_freq_map,
+                                  const speed_equality i_equal_dimm_speed,
+                                  const uint32_t i_omi_freq,
+                                  uint32_t& o_selected_omi_freq);
 
 }// mss
 

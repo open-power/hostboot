@@ -64,7 +64,7 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     {
         uint8_t l_dimm_index = 0;
         uint64_t l_freq = 0;
-        uint64_t l_omi_freq = 0;
+        uint32_t l_omi_freq = 0;
         FAPI_TRY( mss::attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(dimm), l_freq, l_omi_freq));
 

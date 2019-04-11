@@ -156,7 +156,7 @@ fapi_try_exit:
 ///
 bool deconfigure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                  const uint64_t i_dimm_speed,
-                 const uint32_t i_max_freq)
+                 const uint64_t i_max_freq)
 {
     bool l_is_hw_deconfigured = (i_dimm_speed != i_max_freq);
 
@@ -174,44 +174,44 @@ bool deconfigure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
 }
 
 ///
-/// @brief Selects synchronous mode and performs requirements enforced by selected port frequency
+/// @brief Selects OMI frequency based on selected port frequencies
 /// @param[in] i_freq_map dimm speed mapping
 /// @param[in] i_equal_dimm_speed tracks whether map has equal dimm speeds
 /// @param[in] i_omi_freq OMI frequency
-/// @param[out] o_selected_sync_mode final synchronous mode
-/// @param[out] o_selected_omi_freq final freq selected, only valid if final sync mode is in-sync
+/// @param[out] o_selected_omi_freq final freq selected
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t >& i_freq_map,
-                                   const speed_equality i_equal_dimm_speed,
-                                   const uint32_t i_omi_freq,
-                                   uint8_t& o_selected_sync_mode,
-                                   uint64_t& o_selected_omi_freq)
+fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t >& i_freq_map,
+                                  const speed_equality i_equal_dimm_speed,
+                                  const uint32_t i_omi_freq,
+                                  uint32_t& o_selected_omi_freq)
 {
-    FAPI_INF("---- In select_sync_mode ----");
+    FAPI_INF("---- In select_omi_freq ----");
 
     switch(i_equal_dimm_speed)
     {
-        // If we have a port which has resolved to equal speeds ...
+        // If we resolved to equal speeds ...
         case speed_equality::EQUAL_DIMM_SPEEDS:
             {
                 // Return back the resulting speed. It doesn't matter which we select from the map as they're all equal
                 // If we end up not in sync in the conditional below, thats ok - this parameter is ignored by the
                 // caller if we're not in sync mode
                 const auto l_ddr_freq = i_freq_map.begin()->second;
-                FAPI_TRY(convert_ddr_freq_to_omi_freq(i_freq_map.begin()->first, l_ddr_freq, o_selected_omi_freq));
+                FAPI_TRY(convert_ddr_freq_to_omi_freq(i_freq_map.begin()->first,
+                                                      l_ddr_freq,
+                                                      o_selected_omi_freq));
 
                 // When we selected ATTR_MSS_FREQ, we made sure that we didn't
                 // select a DIMM freq the OMI couldn't support.
-                o_selected_sync_mode = fapi2::ENUM_ATTR_MC_SYNC_MODE_IN_SYNC;
+
+#ifndef __HOSTBOOT_MODULE
                 // On Cronus if the o_selected_omi_freq != i_omi_freq we've got a mismatch. Note that p9a_mss_freq ensures
                 // we don't select an invalid freq, but doesn't ensure we select the current OMI freq.
-#ifndef __HOSTBOOT_MODULE
                 FAPI_ASSERT(o_selected_omi_freq == i_omi_freq,
                             fapi2::P9A_MSS_FAILED_SYNC_MODE()
                             .set_OMI_FREQ(i_omi_freq)
                             .set_MEM_FREQ(o_selected_omi_freq),
-                            "The DIMM freq (%d) and the OMI freq (%d) don't align",
+                            "The OMI freq selected by DIMM speed (%d) and the currently selected OMI freq (%d) don't align",
                             o_selected_omi_freq, i_omi_freq);
 #endif
                 return fapi2::FAPI2_RC_SUCCESS;
@@ -223,13 +223,14 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
                 // When we selected ATTR_MSS_FREQ, we made sure that we didn't
                 // select a DIMM freq the OMI couldn't support. That means that the fastest of the ports
                 // is the one that rules the roost (the OMI can support it too.) So find that, and set it to
-                // the selected frequency. Then deconfigure the slower port (unless we're in Cronus in which
+                // the selected frequency. Then deconfigure the slower ports (unless we're in Cronus in which
                 // case we just bomb out.)
 #ifdef __HOSTBOOT_MODULE
                 uint64_t l_max_dimm_speed = 0;
                 fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_fastest_port_target = i_freq_map.begin()->first;
                 std::for_each(i_freq_map.begin(), i_freq_map.end(),
-                              [&l_max_dimm_speed, &l_fastest_port_target](const std::pair<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t>& m)
+                              [&l_max_dimm_speed, &l_fastest_port_target]
+                              (const std::pair<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>, uint64_t>& m)
                 {
                     l_max_dimm_speed = std::max(l_max_dimm_speed, m.second);
                     l_fastest_port_target = m.first;
@@ -241,15 +242,16 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
                     deconfigure(m.first, m.second, l_max_dimm_speed);
                 });
 
-                o_selected_sync_mode = fapi2::ENUM_ATTR_MC_SYNC_MODE_IN_SYNC;
-                FAPI_TRY(convert_ddr_freq_to_omi_freq(l_fastest_port_target, l_max_dimm_speed, o_selected_omi_freq));
+                FAPI_TRY(convert_ddr_freq_to_omi_freq(l_fastest_port_target,
+                                                      l_max_dimm_speed,
+                                                      o_selected_omi_freq));
                 return fapi2::FAPI2_RC_SUCCESS;
 #else
                 // Cronus only
                 FAPI_ASSERT(false,
                             fapi2::P9A_MSS_FAILED_SYNC_MODE()
                             .set_OMI_FREQ(i_omi_freq),
-                            "DIMM speeds differ from OMI speed %d", i_omi_freq);
+                            "Some DIMM speeds are incompatible with OMI speed %d", i_omi_freq);
 #endif
                 break;
             }
