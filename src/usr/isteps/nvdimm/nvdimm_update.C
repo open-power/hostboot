@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2031,8 +2031,8 @@ errlHndl_t NvdimmsUpdate::isUpdateNeeded(bool & o_update_needed,
             // Put a check here for non-updateable SMART NVDIMMs.
             // Anything before 0x0030 should bypass the update, as update
             // would fail due to a bug in the backlevel firmware on the
-            // nvdimm card
-            if (le16toh(curVersion) < 0x0030)
+            // nvdimm card (exception: 0x0000 = slot blank so allow update)
+            if ((curVersion != 0x0000) && (le16toh(curVersion) < 0x0030))
             {
                 TRACFCOMP(g_trac_nvdimm_upd,
                     "isUpdateNeeded(): non-updatable SMART NVDIMM 0x%.8X "
