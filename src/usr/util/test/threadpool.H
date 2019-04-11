@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,6 +27,14 @@
 
 #include <cxxtest/TestSuite.H>
 #include <util/threadpool.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <util/util_reasoncodes.H>
+#include <hbotcompid.H>
+
+// Thread pool constructor flags
+#define DISABLE_CHILD_RC_CHECKING false
+#define CHECK_CHILD_RC true
 
 namespace __ThreadPoolTest
 {
@@ -86,6 +96,17 @@ namespace __ThreadPoolTest
             uint64_t* iv_value;
     };
 
+    /** A simple work item that causes the task to crash */
+    struct CrashedTask
+    {
+        CrashedTask() {};
+        void operator()()
+        {
+            uint8_t* l_ptr = nullptr;
+            *l_ptr = 1;
+        }
+    };
+
 };
 
 
@@ -96,7 +117,8 @@ class ThreadPoolTest: public CxxTest::TestSuite
          *  ordered pools. */
         void testSimpleWorkItem()
         {
-            Util::ThreadPool<__ThreadPoolTest::Simple> instance;
+            Util::ThreadPool<__ThreadPoolTest::Simple>
+                    instance(DISABLE_CHILD_RC_CHECKING);
             uint64_t value = 0;
 
             instance.insert(new __ThreadPoolTest::Simple(&value));
@@ -108,7 +130,8 @@ class ThreadPoolTest: public CxxTest::TestSuite
                 TS_FAIL("Value was not changed by Simple worker thread.");
             }
 
-            Util::ThreadPool<__ThreadPoolTest::SimpleOrdered> instance2;
+            Util::ThreadPool<__ThreadPoolTest::SimpleOrdered>
+                    instance2(DISABLE_CHILD_RC_CHECKING);
             value = 0;
 
             instance2.insert(new __ThreadPoolTest::SimpleOrdered(&value));
@@ -127,7 +150,8 @@ class ThreadPoolTest: public CxxTest::TestSuite
          *  threads as directed. */
         void testThreadManager()
         {
-            Util::ThreadPool<__ThreadPoolTest::EnsureThreads> instance;
+            Util::ThreadPool<__ThreadPoolTest::EnsureThreads>
+                    instance(DISABLE_CHILD_RC_CHECKING);
             barrier_t barrier;
 
             for (size_t count = 1; count < 5; count++)
@@ -151,7 +175,8 @@ class ThreadPoolTest: public CxxTest::TestSuite
         /** Test that the order functions work on the thread pool. */
         void testThreadOrder()
         {
-            Util::ThreadPool<__ThreadPoolTest::EnsureOrder> instance;
+            Util::ThreadPool<__ThreadPoolTest::EnsureOrder>
+                    instance(DISABLE_CHILD_RC_CHECKING);
             uint64_t value = 0;
 
             // Ensure that adding work items in order works.
@@ -190,6 +215,102 @@ class ThreadPoolTest: public CxxTest::TestSuite
 
             instance.start();
             instance.shutdown();
+        }
+
+        /** Test a good child task that doesn't return an error. */
+        void testChildRCGoodTask()
+        {
+            TS_INFO(ENTER_MRK"testChildRCGoodTask");
+            Util::ThreadPool<__ThreadPoolTest::Simple>
+                    l_threadPool(CHECK_CHILD_RC);
+            uint64_t l_value = 0;
+
+            do {
+            l_threadPool.insert(new __ThreadPoolTest::Simple(&l_value));
+            l_threadPool.start();
+            errlHndl_t l_errl = l_threadPool.shutdown();
+            if(l_errl)
+            {
+                TS_FAIL("testChildRCGoodTask: an unexpected error log (EID 0x%.8%x) returned from the thread pool", l_errl->eid());
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+                break;
+            }
+
+            if(l_value == 0)
+            {
+                TS_FAIL("testChildRCGoodTask: the test value was not changed by the child task");
+                break;
+            }
+
+            }while(0);
+            TS_INFO(EXIT_MRK"testChildRCGoodTask");
+        }
+
+        /** Test that the crashed task's error log is returned to thread pool
+            correctly */
+        void testChildRCCrashedTask()
+        {
+            TS_INFO(ENTER_MRK"testChildRCCrashedTask");
+            Util::ThreadPool<__ThreadPoolTest::CrashedTask>
+                    l_threadPool(CHECK_CHILD_RC);
+            errlHndl_t l_errl = nullptr;
+
+            do {
+            l_threadPool.insert(new __ThreadPoolTest::CrashedTask());
+            l_threadPool.start();
+            l_errl = l_threadPool.shutdown();
+            if(!l_errl)
+            {
+                TS_FAIL("testChildRCCrashedTask: the thread pool did not return an error log as was expected");
+                break;
+            }
+
+            if(l_errl->moduleId() != Util::UTIL_MOD_TP_SHUTDOWN)
+            {
+                TS_FAIL("testChildRCCrashedTask: unexpected moduleId returned from EID 0x%.8x; expected: 0x%x; actual: 0x%x",
+                        l_errl->eid(),
+                        Util::UTIL_MOD_TP_SHUTDOWN,
+                        l_errl->moduleId());
+                break;
+            }
+
+            if(l_errl->reasonCode() != Util::UTIL_RC_CHILD_TASK_FAILED)
+            {
+                TS_FAIL("testChildRCCrashedTask: unexpected return code from EID 0x%.8x; expected: 0x%x; actual 0x%x",
+                        l_errl->eid(),
+                        Util::UTIL_RC_CHILD_TASK_FAILED,
+                        l_errl->reasonCode());
+                break;
+            }
+            }while(0);
+
+            if(l_errl)
+            {
+                ERRORLOG::errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+            TS_INFO(EXIT_MRK"testChildRCCrashedTask");
+        }
+
+        /* Test that error is not returned by crashed task when explicitly
+           not requested by thread pool */
+        void testChildNoRCCrashedTask()
+        {
+            TS_INFO(ENTER_MRK"testChildNoRCCrashedTask");
+            Util::ThreadPool<__ThreadPoolTest::CrashedTask>
+                        l_threadPool(DISABLE_CHILD_RC_CHECKING);
+            errlHndl_t l_errl = nullptr;
+
+            l_threadPool.insert(new __ThreadPoolTest::CrashedTask());
+            l_threadPool.start();
+            l_errl = l_threadPool.shutdown();
+
+            if(l_errl)
+            {
+                TS_FAIL("testChildNoRCCrashedTask: unexpected error returned from the thread pool (EID 0x%.8x)", l_errl->eid());
+                ERRORLOG::errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+
+            TS_INFO(EXIT_MRK"testChildNoRCCrashedTask");
         }
 };
 

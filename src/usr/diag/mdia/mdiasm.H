@@ -106,8 +106,10 @@ class StateMachine
 
         /**
          * @brief shutdown state machine
+         *
+         * @retval nullptr on success; non-nullptr on error
          */
-        void shutdown();
+        errlHndl_t shutdown();
 
         /**
          * @brief processMaintCommandEvent process maint command event from prd

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,6 +25,9 @@
 #include <util/threadpool.H>
 #include <sys/task.h>
 #include <sys/misc.h>
+#include <util/util_reasoncodes.H>
+#include <errl/errlmanager.H>
+#include <hbotcompid.H>
 
 void Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__init()
 {
@@ -96,9 +101,14 @@ void Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__start(
     mutex_unlock(&iv_mutex);
 }
 
-void Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown()
+errlHndl_t Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown()
 {
     mutex_lock(&iv_mutex);
+
+    int l_childRc = 0;
+    void* l_childRetval = nullptr;
+    errlHndl_t l_origError = nullptr;
+    errlHndl_t l_errl = nullptr;
 
     // Set shutdown status and signal all children to release from their
     // condition variable.
@@ -109,14 +119,52 @@ void Util::__Util_ThreadPool_Impl::ThreadPoolImpl::__shutdown()
     while(!iv_children.empty())
     {
         tid_t child = iv_children.front();
+        tid_t l_returnedTid = 0;
         iv_children.pop_front();
 
         mutex_unlock(&iv_mutex);
-        task_wait_tid(child, NULL, NULL);  // Don't need status.
+        l_returnedTid = task_wait_tid(child, &l_childRc, &l_childRetval);
+        if(iv_checkChildRc &&
+           ((l_returnedTid != child) ||
+            (l_childRc != TASK_STATUS_EXITED_CLEAN)))
+        {
+            /**
+             * @errortype
+             * @moduleid         UTIL_MOD_TP_SHUTDOWN
+             * @reasoncode       UTIL_RC_CHILD_TASK_FAILED
+             * @userdata1        The return code of the child thread
+             * @userdata2[0:31]  The returned task ID of the child thread
+             * @userdata2[32:63] The original task ID of the child thread
+             * @devdesc          The child thread of a thread pool returned an
+             *                   error
+             * @custdesc         A failure occurred during the IPL of the system
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             UTIL_MOD_TP_SHUTDOWN,
+                                             UTIL_RC_CHILD_TASK_FAILED,
+                                             l_childRc,
+                                             TWO_UINT32_TO_UINT64(l_returnedTid,
+                                                                  child),
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+                                            );
+            l_errl->collectTrace(UTIL_COMP_NAME);
+
+            if(!l_origError)
+            {
+                l_origError = l_errl;
+                l_errl = nullptr;
+            }
+            else
+            {
+                l_errl->plid(l_origError->plid());
+                errlCommit(l_errl, UTIL_COMP_ID);
+            }
+        }
         mutex_lock(&iv_mutex);
     }
 
     mutex_unlock(&iv_mutex);
+    return l_origError;
 }
 
 // Default thread count of one per HW thread.

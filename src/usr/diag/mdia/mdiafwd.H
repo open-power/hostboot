@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -211,8 +211,10 @@ errlHndl_t getWorkFlow(
  * @brief doStepCleanup shut down threads and pools on step exit
  *
  * @param[in] i_globals contains objects to be cleaned up
+ *
+ * @return nullptr on success; non-nullptr on error
  */
-void doStepCleanup(const Globals & i_globals);
+errlHndl_t doStepCleanup(const Globals & i_globals);
 
 /**
  * @brief check if hw state has been changed for an mba

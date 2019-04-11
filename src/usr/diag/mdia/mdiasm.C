@@ -1665,9 +1665,11 @@ void StateMachine::reset()
     mutex_unlock(&iv_mutex);
 }
 
-void StateMachine::shutdown()
+errlHndl_t StateMachine::shutdown()
 {
     mutex_lock(&iv_mutex);
+
+    errlHndl_t l_errl = nullptr;
 
     Util::ThreadPool<WorkItem> * tp = iv_tp;
     CommandMonitor * monitor = iv_monitor;
@@ -1684,7 +1686,7 @@ void StateMachine::shutdown()
     if(tp)
     {
         MDIA_FAST("Stopping threadPool...");
-        tp->shutdown();
+        l_errl = tp->shutdown();
         delete tp;
     }
 
@@ -1696,11 +1698,16 @@ void StateMachine::shutdown()
     }
 
     MDIA_FAST("sm: ...shutdown complete");
+    return l_errl;
 }
 
 StateMachine::~StateMachine()
 {
-    shutdown();
+    errlHndl_t l_errl = shutdown();
+    if(l_errl)
+    {
+        errlCommit(l_errl, MDIA_COMP_ID);
+    }
 
     sync_cond_destroy(&iv_cond);
     mutex_destroy(&iv_mutex);

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,6 +40,7 @@
 #include <algorithm>
 #include <sys/sync.h>
 #include <sys/task.h>
+#include <errl/errlentry.H>
 
 namespace Util
 {
@@ -82,7 +85,11 @@ namespace __Util_ThreadPool_Impl
 
                 /** Simple constructor, call __init to avoid the in-charge and
                  *  not-in-charge construction costs. */
-            ThreadPoolImpl() { __init(); };
+            ThreadPoolImpl(bool i_checkChildRc = true) :
+                    iv_checkChildRc(i_checkChildRc)
+            {
+                __init();
+            };
 
         protected:
                 /** Initialize the object. */
@@ -105,7 +112,7 @@ namespace __Util_ThreadPool_Impl
                  */
             void __start(start_fn_t fn, void* instance);
                 /** Stop the thread-pool. */
-            void __shutdown();
+            errlHndl_t __shutdown();
 
                 /** Outstanding work-list. */
             worklist_t iv_worklist;
@@ -119,6 +126,7 @@ namespace __Util_ThreadPool_Impl
             std::list<tid_t> iv_children;
                 /** State of object. */
             bool iv_shutdown;
+            bool iv_checkChildRc;
 
     };
 

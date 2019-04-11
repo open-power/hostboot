@@ -154,7 +154,7 @@ void MembufWorkItem::operator()()
             mutex_unlock(&g_stepErrorMutex);
 
             // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID );
 
             break;
         }
@@ -210,7 +210,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
             l_stepError.addErrorDetails( l_err );
 
             // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID );
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -252,7 +252,14 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
         tp.start();
 
         //wait for all workitems to complete, then clean up all threads.
-        tp.shutdown();
+        l_err = tp.shutdown();
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"call_mss_draminit_trainadv: thread pool returned an error");
+            l_stepError.addErrorDetails(l_err);
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
