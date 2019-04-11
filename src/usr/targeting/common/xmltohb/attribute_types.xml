@@ -6849,6 +6849,21 @@
   </attribute>
 
   <attribute>
+    <description>
+            uint8_t attribute to be used for storing functional state of a target during
+            test cases.
+        </description>
+    <id>SAVED_STATE_UINT8</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>SBE_COMMIT_ID</id>
     <description>
         A hexadecimal value of the commit ID associated

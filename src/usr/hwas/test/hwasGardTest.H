@@ -51,6 +51,22 @@
 #define DISABLE_EX_UNIT_TESTS     1
 //$$#define DISABLE_UNIT_TESTS        0
 
+#define DISABLE_OMI_UNIT_TESTS    0
+
+#if DISABLE_OMI_UNIT_TESTS
+#define ENABLE_OMI_UNIT_TEST_1    0
+#define ENABLE_OMI_UNIT_TEST_2    0
+#define ENABLE_OMI_UNIT_TEST_3    0
+#define ENABLE_OMI_UNIT_TEST_4    0
+#else
+#define ENABLE_OMI_UNIT_TEST_1    1
+#define ENABLE_OMI_UNIT_TEST_2    1
+#define ENABLE_OMI_UNIT_TEST_3    1
+#define ENABLE_OMI_UNIT_TEST_4    1
+#endif
+
+#define TEST_SAVE_RESTORE_SYSTEM_STATE    0
+
 using namespace HWAS;
 using namespace TARGETING;
 
@@ -85,6 +101,114 @@ public:
             }
         }
         HWAS_INF("testParentDeconfigRules: Ended");
+    }
+
+    /*
+     * @brief Checks if the OMI tests should be run for the current model
+     */
+    bool applicableModel()
+    {
+        bool result = false;
+        TargetHandle_t masterProc = nullptr;
+        targetService().masterProcChipTargetHandle(masterProc);
+
+        HWAS_ASSERT(masterProc, "applicableModel: Couldn't get master proc");
+
+        auto model = masterProc->getAttr<ATTR_MODEL>();
+
+        if (model == MODEL_AXONE)
+        {
+            result = true;
+        }
+
+        return result;
+
+    }
+
+    void saveSystemState()
+    {
+        TargetHandle_t pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        TargetHandleList pChildList;
+
+        getChildAffinityTargets(pChildList, pSys, CLASS_NA ,TYPE_NA, false);
+
+        for (auto& child : pChildList)
+        {
+            // Get the original state of the child.
+            HwasState l_originalState = child->getAttr<ATTR_HWAS_STATE>();
+
+            // Store it in a scratch attribute for later.
+            child->setAttr<ATTR_SAVED_STATE_UINT8>(l_originalState.functional);
+        }
+    }
+
+    void restoreSystemState()
+    {
+        TargetHandle_t pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        TargetHandleList pChildList;
+
+        getChildAffinityTargets(pChildList, pSys, CLASS_NA ,TYPE_NA, false);
+
+        for (auto& child : pChildList)
+        {
+            // Get original HwasState from scratch attribute.
+            uint8_t l_savedState = child->getAttr<ATTR_SAVED_STATE_UINT8>();
+
+            // Get current HwasState.
+            HwasState l_state = child->getAttr<ATTR_HWAS_STATE>();
+
+            l_state.functional = l_savedState;
+
+            child->setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+    }
+
+    void testSaveRestoreState()
+    {
+#if TEST_SAVE_RESTORE_SYSTEM_STATE
+        // find an ex unit that we can play with
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+        PredicateHwas predFunctional;
+        predFunctional.poweredOn(true).present(true).functional(true);
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predEx).push(&predFunctional).And();
+        TargetHandleList pExList;
+        targetService().getAssociated( pExList, pSys,
+            TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+        if (pExList.empty())
+        {
+            TS_FAIL("testSaveRestoreState: empty pExList");
+        }
+        TargetHandle_t l_pTarget = *pExList.begin();
+        saveSystemState();
+
+        // Get current HwasState.
+        HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+        HwasState l_originalState = l_state;
+
+        // Change it to something else
+        l_state.functional = !l_state.functional;
+
+        l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
+
+        restoreSystemState();
+
+        HwasState l_restoState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+        if (l_restoState.functional != l_originalState.functional)
+        {
+            TS_FAIL("Original state not restored. original = %d, current = %d",
+                    l_originalState.functional, l_restoState.functional);
+        }
+#endif
     }
 
     /**
@@ -5802,11 +5926,414 @@ public:
         }
     }
 
+    /**
+     *  @brief Find an MC target and deconfigure OMIC targets. This should
+     *         deconfig the MC parent.
+     */
+    void testDeconfigureAssocOMI1()
+    {
+#if ENABLE_OMI_UNIT_TEST_1
+        // Save the state of the system before we make any changes.
+        saveSystemState();
+
+        TS_INFO(INFO_MRK "testDeconfigureAssocOMI1: Started");
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // This test is only relevant to Axone.
+            if (!applicableModel())
+            {
+                TS_INFO(INFO_MRK"testDeconfigureAssocOMI1: Skipped due to N/A"
+                        " model");
+                break;
+            }
+
+            // find an MC
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMC(CLASS_UNIT, TYPE_MC);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExprMC;
+            checkExprMC.push(&predMC).push(&predFunctional).And();
+
+            TargetHandleList pMcList;
+            targetService().getAssociated(pMcList, pSys,
+                TargetService::CHILD, TargetService::ALL,
+                &checkExprMC);
+
+            if (pMcList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI1: empty MC list");
+                break;
+            }
+            TargetHandle_t l_pMc = pMcList[0];
+
+            // find all OMIC targets
+            TargetHandleList l_pOmicList;
+            getChildChiplets(l_pOmicList, l_pMc, TYPE_OMIC);
+
+            if (l_pOmicList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI1: empty OMIC list");
+                break;
+            }
+
+            // deconfigure all but one OMIC
+            for (auto i = (l_pOmicList.size() - 1); i > 0; --i)
+            {
+                TargetHandle_t l_pOmic = l_pOmicList[i];
+
+                // Deconfigure the OMIC.
+                l_pErr = theDeconfigGard().
+                        deconfigureTarget(*l_pOmic, 0xA5);
+                if (l_pErr)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI1: Error from "
+                            "deconfigureTarget");
+                    break;
+                }
+            }
+
+            // Check the HWAS_STATE of the MC
+            HwasState l_state = l_pMc->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssocOMI1: MC not functional after "
+                        "deconfiguring all but one OMIC");
+                break;
+            }
+
+            // deconfigure last functional OMIC
+            TargetHandle_t l_pLastOmic = l_pOmicList[0];
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pLastOmic, 0xA6);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssocOMI1: Error from "
+                        "deconfigureTarget");
+                break;
+            }
+
+            // Check the HWAS_STATE of the MC
+            l_state = l_pMc->getAttr<ATTR_HWAS_STATE>();
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssocOMI1: MC functional after "
+                        "deconfiguring all OMICS");
+                break;
+            }
+
+            TS_INFO(INFO_MRK "testDeconfigureAssocOMI1: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+
+        // Restore the state of the system prior to the test
+        restoreSystemState();
+
+#endif
+    }
+
+
+    /**
+     *  @brief Find an MC target and deconfigure it. This should deconfig the
+     *         child OMIC targets.
+     */
+    void testDeconfigureAssocOMI2()
+    {
+#if ENABLE_OMI_UNIT_TEST_2
+        // Save the state of the system before we make any changes.
+        saveSystemState();
+
+        TS_INFO(INFO_MRK "testDeconfigureAssocOMI2: Started");
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // This test is only relevant to Axone.
+            if (!applicableModel())
+            {
+                TS_INFO(INFO_MRK"testDeconfigureAssocOMI2: Skipped due to N/A"
+                        " model");
+                break;
+            }
+
+            // find an MC
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            TargetHandleList pMcList;
+
+            getChildAffinityTargets(pMcList, pSys, CLASS_NA ,TYPE_MC, true);
+
+            if (pMcList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI2: empty MC list");
+                break;
+            }
+            TargetHandle_t l_pMc = pMcList[0];
+
+            // find all functional OMIC targets
+            TargetHandleList l_pOmicList;
+            getChildChiplets(l_pOmicList, l_pMc, TYPE_OMIC, true);
+
+            if (l_pOmicList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI2: empty OMIC list");
+                break;
+            }
+
+            // Deconfigure the MC target
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pMc, 0xA5);
+
+            bool functionalOmic = false;
+            // Check to see if the OMIC targets were deconfigured.
+            for (auto l_pOmic : l_pOmicList)
+            {
+                HwasState l_state = l_pOmic->getAttr<ATTR_HWAS_STATE>();
+
+                if (l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI1: OMIC functional after "
+                            "deconfiguring parent MC");
+                    functionalOmic = true;
+                    break;
+                }
+            }
+            if (functionalOmic)
+            {
+                break;
+            }
+            TS_INFO(INFO_MRK "testDeconfigureAssocOMI2: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+
+        // Restore the state of the system prior to the test
+        restoreSystemState();
+#endif
+    }
+
+
+    /**
+     *  @brief Find an OMIC target and deconfigure it. This should deconfig the
+     *         child OMI targets.
+     */
+    void testDeconfigureAssocOMI3()
+    {
+#if ENABLE_OMI_UNIT_TEST_3
+        // Save the state of the system before we make any changes.
+        saveSystemState();
+
+        TS_INFO(INFO_MRK "testDeconfigureAssocOMI3: Started");
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // This test is only relevant to Axone.
+            if (!applicableModel())
+            {
+                TS_INFO(INFO_MRK"testDeconfigureAssocOMI3: Skipped due to N/A"
+                        " model");
+                break;
+            }
+
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            // find an OMIC
+            TargetHandleList l_pOmicList;
+            getChildChiplets(l_pOmicList, pSys, TYPE_OMIC, true);
+
+            if (l_pOmicList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI3: empty OMIC list");
+                break;
+            }
+
+            TargetHandle_t l_pOmic = l_pOmicList[0];
+
+            // find all OMI targets
+            TargetHandleList l_pOmiList;
+
+            getChildOmiTargetsByState(l_pOmiList, l_pOmic, CLASS_NA,
+                                    TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
+
+            if (l_pOmiList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI3: empty OMI list");
+                break;
+            }
+
+            // Deconfigure the OMIC target
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pOmic, 0xA5);
+
+            bool foundFunctionalOMI = false;
+            // Check to see if the OMI targets were deconfigured.
+            for (auto l_pOmi : l_pOmiList)
+            {
+                HwasState l_state = l_pOmi->getAttr<ATTR_HWAS_STATE>();
+
+                if (l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI3: OMI functional after "
+                            "deconfiguring parent OMIC");
+                    foundFunctionalOMI = true;
+                    break;
+                }
+            }
+
+            if (!foundFunctionalOMI)
+            {
+                TS_INFO(INFO_MRK "testDeconfigureAssocOMI3: Success");
+            }
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+
+        // Restore the state of the system prior to the test
+        restoreSystemState();
+#endif
+    }
+
+
+    /**
+     *  @brief Find an OMIC target and deconfigure OMI targets. This should
+     *         deconfig the OMIC parent.
+     */
+    void testDeconfigureAssocOMI4()
+    {
+#if ENABLE_OMI_UNIT_TEST_4
+        // Save the state of the system before we make any changes.
+        saveSystemState();
+
+        TS_INFO(INFO_MRK "testDeconfigureAssocOMI4: Started");
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // This test is only relevant to Axone.
+            if (!applicableModel())
+            {
+                TS_INFO(INFO_MRK"testDeconfigureAssocOMI4: Skipped due to N/A"
+                        " model");
+                break;
+            }
+
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            // find an OMIC
+            TargetHandleList l_pOmicList;
+            getChildChiplets(l_pOmicList, pSys, TYPE_OMIC, true);
+
+            if (l_pOmicList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI4: empty OMIC list");
+                break;
+            }
+
+            TargetHandle_t l_pOmic = l_pOmicList[0];
+
+            // find all OMI targets
+            TargetHandleList l_pOmiList;
+            getChildOmiTargetsByState(l_pOmiList, l_pOmic, CLASS_NA,
+                                    TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
+
+            if (l_pOmiList.empty())
+            {
+                TS_FAIL("testDeconfigureAssocOMI4: empty OMI list");
+                break;
+            }
+
+            // deconfigure all but one OMI
+            for (auto i = (l_pOmiList.size() - 1); i > 0; --i)
+            {
+                TargetHandle_t l_pOmi = l_pOmiList[i];
+
+                // Deconfigure the OMI.
+                l_pErr = theDeconfigGard().
+                        deconfigureTarget(*l_pOmi, 0xA5);
+                if (l_pErr)
+                {
+                    TS_FAIL("testDeconfigureAssocOMI4: Error from "
+                            "deconfigureTarget");
+                    break;
+                }
+            }
+
+            // Check the HWAS_STATE of the OMIC
+            HwasState l_state = l_pOmic->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssocOMI4: OMIC not functional after "
+                        "deconfiguring all but one OMI");
+                break;
+            }
+
+            // deconfigure last functional OMI
+            TargetHandle_t l_pLastOmi = l_pOmiList[0];
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pLastOmi, 0xA6);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssocOMI4: Error from "
+                        "deconfigureTarget");
+                break;
+            }
+            // Check the HWAS_STATE of the OMIC
+            l_state = l_pOmic->getAttr<ATTR_HWAS_STATE>();
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssocOMI4: OMIC functional after "
+                        "deconfiguring all OMIs");
+                break;
+            }
+
+            TS_INFO(INFO_MRK "testDeconfigureAssocOMI4: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+
+        // Restore the state of the system prior to the test
+        restoreSystemState();
+
+#endif
+    }
+
+
 };
 
 #undef DISABLE_UNIT_TESTS
 #undef DISABLE_MBA_UNIT_TESTS
 #undef DISABLE_MEM_UNIT_TESTS
 #undef DISABLE_EX_UNIT_TESTS
+#undef DISABLE_OMI_UNIT_TESTS
+
+#undef ENABLE_OMI_UNIT_TEST_1
+#undef ENABLE_OMI_UNIT_TEST_2
+#undef ENABLE_OMI_UNIT_TEST_3
+#undef ENABLE_OMI_UNIT_TEST_4
 
 #endif
