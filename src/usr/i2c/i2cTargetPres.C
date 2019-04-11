@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,11 @@
 #include <vpd/vpd_if.H>
 #include <i2c/i2cif.H>
 #include <i2c/i2creasoncodes.H>
+#include <i2c/eepromif.H>
 #include <initservice/initserviceif.H>
 #include <errl/errlmanager.H>
 #include "i2c_common.H"
+
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -219,62 +221,18 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                     int64_t i_accessType,
                                     va_list i_args)
 {
-    bool l_ocmbPresent = 0;
-    // Error log which will eventually be returned
-    errlHndl_t l_returnedError = nullptr;
-    // Useful if two errors occur, but we still want to return first one
-    // from this function
     errlHndl_t l_invalidateErrl = nullptr;
 
-    l_returnedError = genericI2CTargetPresenceDetect(i_target,
-                                                     io_buflen,
-                                                     l_ocmbPresent);
+    // @TODO RTC 208696: Gemini vs Explorer Presence Detection via SPD
+    // This function will be updated to differentiate between Explorer and
+    // Gemini OCMB chips. For now, presense of an OCMB chip is inferred by
+    // the presense of the eeprom.
+    bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
 
-    if (l_returnedError)
-    {
-        TRACFCOMP( g_trac_i2c, ERR_MRK"ocmbI2CTargetPresenceDetect() "
-                    "Error detecting OCMB target 0x%.08X, io_buffer will not be set.",
-                    " Invalidating SPD cache for target in pnor. ",
-                    TARGETING::get_huid(i_target));
-    }
-    else
-    {
-        // Copy variable describing if target is present or not to i/o buffer param
-        memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));
-        io_buflen = sizeof(l_ocmbPresent);
-    }
+    memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));
+    io_buflen = sizeof(l_ocmbPresent);
 
-    // If OCMB was found to not be present, or an error occurred
-    // while checking presence, invalidate the pnor cache of this
-    // SPD data
-    if(!l_ocmbPresent || l_returnedError)
-    {
-        // Invalidate the SPD in PNOR
-        l_invalidateErrl = VPD::invalidatePnorCache(i_target);
-
-        if (l_invalidateErrl)
-        {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"ocmbI2CTargetPresenceDetect() "
-                       "Error invalidating SPD in PNOR for target 0x%.08X",
-                       TARGETING::get_huid(i_target));
-            // If there was an error found while running genericI2CTargetPresenceDetect
-            // then we want return that error and just link the error we found from
-            // invalidatePnorCache and commit it right away. If this is the first error
-            // we encounter then we will just return the error from invalidatePnorCache
-            if(l_returnedError)
-            {
-                l_invalidateErrl->plid(l_returnedError->plid());
-                errlCommit(l_invalidateErrl, I2C_COMP_ID);
-            }
-            else
-            {
-                l_returnedError = l_invalidateErrl;
-                l_invalidateErrl = nullptr;
-            }
-        }
-    }
-
-    return l_returnedError;
+    return l_invalidateErrl;
 }
 
 /**
