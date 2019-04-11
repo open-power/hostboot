@@ -318,23 +318,23 @@ void*    call_mss_freq( void *io_pArgs )
 #ifdef CONFIG_AXONE
         else if(l_procModel == TARGETING::MODEL_AXONE)
         {
-            TARGETING::TargetHandleList l_mcTargetList;
-            getAllChiplets(l_mcTargetList, TYPE_MC);
-            for (const auto & l_mc_target : l_mcTargetList)
+            TARGETING::TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TYPE_PROC);
+            for (const auto & l_proc_target : l_procTargetList)
             {
                 //  call the HWP with each target ( if parallel, spin off a task )
-                fapi2::Target <fapi2::TARGET_TYPE_MC> l_fapi_mc_target(l_mc_target);
+                fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target(l_proc_target);
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "START : running p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_mc_target));;
+                        "START : running p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_proc_target));;
 
-                FAPI_INVOKE_HWP(l_err, p9a_mss_freq_system, l_fapi_mc_target);
+                FAPI_INVOKE_HWP(l_err, p9a_mss_freq_system, l_proc_target);
                 //  process return code.
                 if ( l_err )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR:  p9a_mss_freq_system HWP while running on mc target 0x%.08X", TARGETING::get_huid(l_mc_target));;
+                    "ERROR:  p9a_mss_freq_system HWP while running on mc target 0x%.08X", TARGETING::get_huid(l_proc_target));;
 
-                    ERRORLOG::ErrlUserDetailsTarget(l_mc_target).addToLog(l_err);
+                    ERRORLOG::ErrlUserDetailsTarget(l_proc_target).addToLog(l_err);
 
                     // Create IStep error log and cross reference to error that occurred
                     l_StepError.addErrorDetails( l_err );
@@ -345,7 +345,7 @@ void*    call_mss_freq( void *io_pArgs )
                 else
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS :  p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_mc_target));;
+                        "SUCCESS :  p9a_mss_freq_system HWP on target 0x%.08X", TARGETING::get_huid(l_proc_target));;
                 }
             }
         }
