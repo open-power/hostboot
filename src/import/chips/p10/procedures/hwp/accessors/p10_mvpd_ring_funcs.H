@@ -74,7 +74,6 @@ extern "C"
      * @param i_record         - Record enumerator
      * @param i_keyword        - Keyword enumerator
      * @param i_chipletId      - Chiplet ID
-     * @param i_evenOddMask    - Even (0) or odd (1) EX. Disregarded for other chiplets.
      * @param i_ringId         - Ring ID
      * @param o_pRingBuf       - The buffer to receive or send the ring
      * @param io_rRingBufsize  - Size of ring / ring buffer
@@ -88,7 +87,6 @@ extern "C"
                              MvpdRecord           i_record,
                              MvpdKeyword          i_keyword,
                              const uint8_t        i_chipletId,
-                             const uint8_t        i_evenOdd,
                              const RingId_t       i_ringId,
                              uint8_t*             o_pRingBuf,
                              uint32_t&            io_rRingBufsize );

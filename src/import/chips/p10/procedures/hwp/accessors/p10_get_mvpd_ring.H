@@ -43,7 +43,6 @@ typedef ReturnCode (*getMvpdRing_FP_t) (
     MvpdRecord,
     MvpdKeyword,
     const uint8_t,
-    const uint64_t,
     const RingId_t,
     uint8_t*,
     uint32_t& );
@@ -64,7 +63,6 @@ extern "C"
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDR
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
      * @param i_chipletId       -   Chiplet ID
-     * @param i_evenOdd         -   Even (0) or odd (1) EX. Disregarded for other chiplets.
      * @param i_ringId          -   Ring ID
      * @param o_pRingBuf        -   pointer to a buffer allocated by the caller
      *                              to receive the ring header and data.
@@ -96,7 +94,6 @@ extern "C"
                             MvpdRecord     i_record,
                             MvpdKeyword    i_keyword,
                             const uint8_t  i_chipletId,
-                            const uint8_t  i_evenOdd,
                             const RingId_t i_ringId,
                             uint8_t*       o_pRingBuf,
                             uint32_t&      io_rRingBufsize );

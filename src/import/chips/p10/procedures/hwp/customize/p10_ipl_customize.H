@@ -40,6 +40,42 @@ enum SYSPHASE
     NOOF_SYSPHASES = 3,
 };
 
+enum MvpdRingStatus
+{
+    RING_NOT_FOUND,
+    RING_FOUND,
+    RING_REDUNDANT,
+    RING_SCAN
+};
+
+enum ChipletIdentifier
+{
+    EQ_CHIPLET,
+    EC_CHIPLET,
+};
+
+const uint32_t EC_POSITION = 0x80000000;
+
+typedef struct
+{
+    //Read as:000X 000X 000X 000X 000X 000X 000X 000X (binary;X=[0,1]) EQ:[0:07]
+    uint32_t EQ;
+
+    //Read as:XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX (binary;X=[0,1]) EC:[0:31]
+    uint32_t EC;
+
+    // Following members used to capture current state of instance vpd ring to
+    // be appended when image run out-of-space.
+    // Refers to chiplet as in EQ/EC
+    uint8_t  chipletUnderProcess;
+
+    // Refer to EQ:[0:7]; EC:[0:31]
+    uint8_t  chipletNumUnderProcess;
+} VpdInsInsertProg_t;
+
+const uint8_t MAX_FILTER_PLL_BUCKETS = 4;
+
+
 typedef fapi2::ReturnCode (*p10_ipl_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     void*     i_hwImage,

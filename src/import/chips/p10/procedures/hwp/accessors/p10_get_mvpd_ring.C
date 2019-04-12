@@ -54,17 +54,15 @@ extern "C"
                                    fapi2::MvpdRecord   i_record,
                                    fapi2::MvpdKeyword  i_keyword,
                                    const uint8_t       i_chipletId,
-                                   const uint8_t       i_evenOdd,
                                    const RingId_t      i_ringId,
                                    uint8_t*            o_pRingBuf,
                                    uint32_t&           io_rRingBufsize )
     {
         fapi2::ReturnCode        l_fapirc;
 
-        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletId=0x%x, evenOdd=0x%x, size=0x%x",
+        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletId=0x%x, size=0x%x",
                  i_ringId,
                  i_chipletId,
-                 i_evenOdd,
                  io_rRingBufsize  );
 
         // common get and set processing
@@ -73,7 +71,6 @@ extern "C"
                                  i_record,
                                  i_keyword,
                                  i_chipletId,
-                                 i_evenOdd,
                                  i_ringId,
                                  o_pRingBuf,
                                  io_rRingBufsize );

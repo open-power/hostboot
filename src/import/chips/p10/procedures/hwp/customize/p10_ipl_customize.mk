@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_ipl_customize
 lib$(PROCEDURE)_DEPLIBS+=p10_ipl_image
-lib$(PROCEDURE)_DEPLIBS+=p9_ring_identification
+lib$(PROCEDURE)_DEPLIBS+=p10_ring_identification
 lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
 lib$(PROCEDURE)_DEPLIBS+=p10_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS+=p10_mvpd_ring_funcs

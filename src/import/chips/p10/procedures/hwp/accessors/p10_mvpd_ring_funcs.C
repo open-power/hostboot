@@ -65,7 +65,6 @@ extern "C"
                                         fapi2::MvpdRecord    i_record,
                                         fapi2::MvpdKeyword   i_keyword,
                                         const uint8_t   i_chipletId,
-                                        const uint8_t   i_evenOdd,
                                         const RingId_t  i_ringId,
                                         uint8_t*        i_pRecordBuf,
                                         uint32_t        i_recordBufLenfapi,
@@ -180,10 +179,6 @@ extern "C"
      *  @param[in]  i_chipletId
      *                   Chiplet ID for the op
      *
-     *  @param[in]  i_evenOdd
-     *                   Indicates whether to choose even (0) or odd (1) EX.
-     *                   Undefined and to be disregarded for non-EX.
-     *
      *  @param[in]  i_ringId
      *                   Ring ID for the op
      *
@@ -203,7 +198,6 @@ extern "C"
                                     fapi2::MvpdRecord    i_record,
                                     fapi2::MvpdKeyword   i_keyword,
                                     const uint8_t        i_chipletId,
-                                    const uint8_t        i_evenOdd,
                                     const RingId_t       i_ringId,
                                     uint8_t*             o_pRingBuf,
                                     uint32_t&            io_rRingBufsize )
@@ -215,11 +209,10 @@ extern "C"
         uint32_t                l_ringLen    = 0;
 
         FAPI_DBG("mvpdRingFunc: Called w/op=0x%x, ringId=0x%x, chipletId=0x%x, "
-                 "evenOdd=0x%x, size=0x%x",
+                 "size=0x%x",
                  i_mvpdRingFuncOp,
                  i_ringId,
                  i_chipletId,
-                 i_evenOdd,
                  io_rRingBufsize  );
 
         // do common get and set input parameter error checks
@@ -297,28 +290,20 @@ extern "C"
                                   i_record,
                                   i_keyword,
                                   i_chipletId,
-                                  i_evenOdd,
                                   i_ringId,
                                   l_recordBuf,
                                   l_recordLen,
                                   l_pRing,
                                   l_ringLen),
                  "mvpdRingFunc: mvpdRingFuncFind failed "
-                 "chipletId=0x%x, evenOdd=0x%x, ringId=0x%x",
+                 "chipletId=0x%x, ringId=0x%x",
                  i_chipletId,
-                 i_evenOdd,
                  i_ringId);
 
         // do the get or set specific operations
         if (i_mvpdRingFuncOp == MVPD_RING_GET ) // do the get operation
         {
             // Ensure ring was found. Must be there for "get"
-            //@TODO: Uncomment the following after PowerOn. Also, need to come
-            //       to agreement whether this should be fatal error or not.
-            //       For now, for PO, it's considered benign and noise and is
-            //       being commented out and we just exit with manually setting
-            //       the RC ring not found but which doesn't activates the FFDC
-            //       capturing.
             if (l_ringLen == 0)
             {
                 fapi2::current_err = RC_MVPD_RING_NOT_FOUND;
@@ -331,9 +316,8 @@ extern "C"
                                      o_pRingBuf,
                                      io_rRingBufsize),
                      "mvpdRingFunc: mvpdRingFuncGet failed "
-                     "chipletId=0x%x, evenOdd=0x%x, ringId=0x%x",
+                     "chipletId=0x%x, ringId=0x%x",
                      i_chipletId,
-                     i_evenOdd,
                      i_ringId);
         }
         else         // set operation
@@ -442,7 +426,6 @@ extern "C"
     fapi2::ReturnCode mvpdRingFuncFindHdr( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                            & i_fapiTarget,
                                            const uint8_t       i_chipletId,
-                                           const uint8_t       i_evenOdd,
                                            const RingId_t      i_ringId,
                                            uint8_t**           io_pBufLeft,
                                            uint32_t*           io_pBufLenLeft,
@@ -494,10 +477,9 @@ extern "C"
             *o_pScanData = l_pScanData;
 
             FAPI_DBG("mvpdRingFuncFindHdr: found RS4 ring for "
-                     "chipletId 0x%x, evenOdd %d and ringId %d "
+                     "chipletId 0x%x and ringId %d "
                      "at address 0x%x and with size %d",
                      i_chipletId,
-                     i_evenOdd,
                      i_ringId,
                      *o_pScanData,
                      be16toh((*o_pScanData)->iv_size));
@@ -525,10 +507,6 @@ extern "C"
      *  @param[in]  i_chipletId
      *                   Chiplet ID for the op
      *
-     *  @param[in]  i_evenOdd
-     *                   Indicates whether choose even (0) or odd (1) EX.
-     *                   Undefined and to be disregarded for non-EX.
-     *
      *  @param[in]  i_ringId
      *                   Ring ID for the op
      *
@@ -554,7 +532,6 @@ extern "C"
                                         fapi2::MvpdRecord   i_record,
                                         fapi2::MvpdKeyword  i_keyword,
                                         const uint8_t       i_chipletId,
-                                        const uint8_t       i_evenOdd,
                                         const RingId_t      i_ringId,
                                         uint8_t*            i_pRecordBuf,
                                         uint32_t            i_recordBufLen,
@@ -567,9 +544,8 @@ extern "C"
         uint32_t            l_prevLen;
         uint32_t            l_recordBufLenLeft = i_recordBufLen;
 
-        FAPI_DBG("mvpdRingFuncFind: Called w/chipletId=0x%x, evenOdd=0x%x, ringId=0x%x ",
+        FAPI_DBG("mvpdRingFuncFind: Called w/chipletId=0x%x, ringId=0x%x ",
                  i_chipletId,
-                 i_evenOdd,
                  i_ringId);
 
         //  Find first RSA data block in ring (fixed offset defined by
@@ -601,7 +577,6 @@ extern "C"
             {
                 FAPI_TRY(mvpdRingFuncFindHdr(i_fapiTarget,
                                              i_chipletId,
-                                             i_evenOdd,
                                              i_ringId,
                                              &i_pRecordBuf,
                                              &l_recordBufLenLeft,
@@ -896,7 +871,6 @@ extern "C"
             FAPI_TRY(mvpdRingFuncFind(i_fapiTarget,
                                       i_record,
                                       i_keyword,
-                                      0x00,
                                       0x00,
                                       0x00,
                                       i_pRecordBuf,

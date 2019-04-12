@@ -44,59 +44,10 @@
 
 #include <p10_ipl_customize.H>
 #include <p10_ipl_image.H>
-#include <p9_ring_identification.H>
+#include <p10_ring_identification.H>
 #include <p10_tor.H>
 #include <p9_scan_compression.H>
 #include <p10_infrastruct_help.H>
-
-enum MvpdRingStatus
-{
-    RING_NOT_FOUND,
-    RING_FOUND,
-    RING_REDUNDANT,
-    RING_SCAN
-};
-
-enum ChipletIdentifier
-{
-    EQ_CHIPLET,
-    EX_CHIPLET,
-    EC_CHIPLET,
-};
-
-enum ChipPosIdentifier
-{
-    EX_EVEN_POS               = 0x00400000,
-    ODD_CORES_IN_EX           = 0x00300000,
-    HIGH_ORDER_ODD_CORE_IN_EX = 0x00100000,
-    LOW_ORDER_ODD_CORE_IN_EX  = 0x00200000,
-    EC_POSITION               = 0x00800000
-};
-
-const uint8_t MAX_FILTER_PLL_BUCKETS = 4;
-
-typedef struct
-{
-    //Read as:0000 0000 000X 000X 000X 000X 000X 000X (binary;X=[0,1]) EQ:[0:05]
-    uint32_t EQ;
-
-    //Read as:0000 0000 0X0X 0X0X 0X0X 0X0X 0X0X 0X0X (binary;X=[0,1]) EX:[0:11]
-    uint32_t EX[4];
-
-    //Read as:0000 0000 XXXX XXXX XXXX XXXX XXXX XXXX (binary;X=[0,1]) EC:[0:23]
-    uint32_t EC;
-
-    // Following members used to capture current state of instance vpd ring to
-    // be appended when image run out-of-space.
-    // Refers to chiplet as in EQ/EX/EC
-    uint8_t  chipletUnderProcess;
-
-    // Refer to 4 EX repr rings:[ex_l3_refr_time,ex_l3_repr,ex_l2_repr,ex_l3_refr_repr]
-    uint8_t  exReprRingNum;
-
-    // Refer to EQ:[0:5]; EX:[0:11]; EC:[0:23]
-    uint8_t  chipletNumUnderProcess;
-} VpdInsInsertProg_t;
 
 using namespace fapi2;
 
@@ -660,9 +611,8 @@ fapi_try_exit:
 //  void*      i_ringBuf3:           Ring work buffer.
 //  uint32_t   i_ringBufSize3:       Size of ring work buffer.
 //  uint8_t    i_chipletId:          Chiplet Id
-//  uint8_t    i_evenOdd:            Even/Odd for EX instances
 //  const RingIdList i_ring:         The ring ID list (#G or #R list)
-//  uint8_t&   io_ringStatusInMvpd:   EQ/EX/EC ring status - found/notfound/redundant in mvpd
+//  uint8_t&   io_ringStatusInMvpd:   EQ/EC ring status - found/notfound/redundant in mvpd
 //  bool       i_bImgOutOfSpace: flag to indicate image space overflow
 //  uint32_t&  io_bootCoreMask:      Desired (in) and actual (out) boot cores.
 //
@@ -686,7 +636,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     void*           i_ringBuf3,
     uint32_t        i_ringBufSize3,
     uint8_t         i_chipletId,
-    uint8_t         i_evenOdd,
     const RingIdList     i_ring,
     uint8_t&        io_ringStatusInMvpd,
     bool&           i_bImgOutOfSpace,
@@ -734,7 +683,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             MVPD_RECORD_CP00,
                             l_mvpdKeyword,
                             i_chipletId,
-                            i_evenOdd,
                             i_ring.ringId,
                             (uint8_t*)i_vpdRing,
                             l_vpdRingSize );
@@ -781,7 +729,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // process it over mvpd-gptr ring.
         if (i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_NEST ||
             i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
-            i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EX ||
             i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EC)
         {
             FAPI_TRY( process_gptr_rings(
@@ -873,10 +820,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         //------------------------------------------
 
         // Calculate the chiplet TOR index
-        uint8_t l_chipletTorId = i_chipletId +
-                                 (( i_chipletId - i_ring.instanceIdMin ) *
-                                  (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS ? 1 : 0)) +
-                                 i_evenOdd;
+        uint8_t l_chipletTorId = i_chipletId - i_ring.instanceIdMin;
 
         l_rc = tor_append_ring(
                    i_ringSection,
@@ -896,8 +840,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      "tor_append_ring() failed in sysPhase=%d w/rc=%d for ringId=0x%x",
                      i_sysPhase, l_rc, i_ring.ringId );
 
-        FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
-                 i_ring.ringId, i_evenOdd, i_chipletId);
+        FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
+                 i_ring.ringId, i_chipletId);
 
         FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
     }
@@ -1085,48 +1029,27 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
         auto l_ringIdListSize         = ALL_VPD_RINGS[vpdType].ringIdListSize;
         uint8_t l_instanceIdMax;
         uint8_t l_chipletId;
-        uint8_t l_evenOdd = 0;
-
-//
-//CMO-20190330: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
-//
 
         for (size_t iRing = 0; iRing < l_ringIdListSize; iRing++)
         {
             if ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EQ_INS &&
-                 l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EX_INS &&
                  l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EC_INS )
             {
-                // We use ring.instanceIdMax column to govern max value of instanceIdMax (i.e., the
-                // max chipletId). But unlike in P8, in P9 we will not search for chipletId=0xff in P9
-                // MVPD. It is no longer used in the MVPD. We merely keep the multicast Id, 0xff, in
-                // the ring list for now, just in case it is needed later on.
-                if (l_ringIdList[iRing].instanceIdMax == 0xff)
-                {
-                    l_instanceIdMax = l_ringIdList[iRing].instanceIdMin;
-                }
-                else
-                {
-                    l_instanceIdMax = l_ringIdList[iRing].instanceIdMax;
-                }
+                l_instanceIdMax = l_ringIdList[iRing].instanceIdMax;
 
                 for (l_chipletId = l_ringIdList[iRing].instanceIdMin;
                      l_chipletId <= l_instanceIdMax; l_chipletId++)
                 {
                     // Fetch common ring
                     // - Fetch all VPD rings for SBE.
-                    // - Fetch only EC VPD rings for CME.
-                    // - Fetch only EX+EQ VPD rings for SGPE.
+                    // - Fetch only EC+EQ VPD rings for QME.
 
                     if ( i_sysPhase == SYSPHASE_HB_SBE   ||
                          ( i_sysPhase == SYSPHASE_RT_QME &&
                            ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EC ||
-                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EC ) )  ||
-                         ( i_sysPhase == SYSPHASE_RT_XGPE &&
-                           ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX ||
+                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EC ||
                              l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EQ ||
-                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
-                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EX ) ) )
+                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EQ ) ) )
                     {
                         l_fapiRc = _fetch_and_insert_vpd_rings (
                                        i_procTarget,
@@ -1143,7 +1066,6 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                        i_ringBuf3,
                                        i_ringBufSize3,
                                        l_chipletId,
-                                       l_evenOdd,
                                        l_ringIdList[iRing],
                                        l_ringStatusInMvpd,
                                        l_bImgOutOfSpace,
@@ -1172,9 +1094,9 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     // 2- Add all instance rings
     // -------------------------
 
-    // Add all instance [QUAD-level] rings in order - EQ->EX->EC.
-    // Looking at the bootCoreMask start adding EQ first followed by EX
-    // and finally followed by EC vpd ring insertion in order.
+    // Add all instance [QUAD-level] rings in order - EQ->EC.
+    // Looking at the bootCoreMask start adding EQ first followed
+    // by EC VPD ring insertion in order.
     // For common rings already completed in above step #1.
     // The step #2 instance part is updated looping over chipletId
     // to fill up one core chipletId "column" at a time (RTC158106).
@@ -1189,27 +1111,18 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
         // Initialize local ring eq, ec to first member of ring list
         RingIdList l_ringEQ = l_ringIdList[0];
         RingIdList l_ringEC = l_ringIdList[0];
-        RingIdList l_ringEX[4];
 
         // Initialize flag for eq/ex/ec instances for entry found in ring list
         bool l_flagEQInstanceFound = false;
-        bool l_flagEXInstanceFound = false;
         bool l_flagECInstanceFound = false;
 
         uint8_t l_chipletId;
-        int     l_id = 0;
 
-//
-//CMO-20190316: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
-//
-
-        // Loop for EQ/EX/EC filling
+        // Loop for EQ/EC filling
         for (auto eq = 0; eq < NUM_OF_QMES; eq++)
         {
-            uint8_t   l_evenOdd = 0;
-
             // For EQ instances
-            if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
+            if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_QME) )
             {
                 // Look for EQ instance in ring list
                 if (l_flagEQInstanceFound == false)
@@ -1229,7 +1142,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 {
                     l_chipletId = l_ringEQ.instanceIdMin + eq;
 
-                    FAPI_DBG("EQ no. %02d; Even(0)/Odd(1):%d; InstanceId:0x%02x; RingName:%s ", eq, l_evenOdd, l_chipletId,
+                    FAPI_DBG("EQ no. %02d; InstanceId:0x%02x; RingName:%s ", eq, l_chipletId,
                              l_ringEQ.ringName);
 
                     if ( ((0x0000000F << ((NUM_OF_QMES - 1)*CORES_PER_QME)) >>
@@ -1254,7 +1167,6 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                        i_ringBuf3,
                                        i_ringBufSize3,
                                        l_chipletId,
-                                       l_evenOdd,
                                        l_ringEQ,
                                        l_ringStatusInMvpd,
                                        l_bImgOutOfSpace,
@@ -1293,118 +1205,10 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 }
             }
 
-            // For EX instances
-            // For EX rings, there's two rings listed in the Mvpd per [EQ] chipletId
-            // listed in ring_identification.C: One for each of the two EX, even and odd.
-            // Each of these two rings have the same [EQ] chipletId encoded in their
-            // iv_chipletId (current RS4 header) or iv_scanAddress (next gen RS4 header).
-            // They are distinguished by their even-odd bits in iv_scanAddress and so
-            // for each EQ chipletId there's two EX rings to be accommodated.
-            for (auto ex = (2 * eq); ex < (2 * (eq + 1)); ex++)
+            for (auto ec = (4 * eq); ec < (4 * (eq + 1)); ec++)
             {
-                if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
-                {
-                    uint32_t   l_coreMask;
-
-                    if (l_flagEXInstanceFound == false)
-                    {
-                        // Look for EX instances in ring list
-                        for (size_t iRing = 0; iRing < l_ringIdListSize; iRing++)
-                        {
-                            if (l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX_INS)
-                            {
-                                l_ringEX[l_id++] = l_ringIdList[iRing];
-                                l_flagEXInstanceFound = true;
-                            }
-                        }
-                    }
-
-                    if (l_flagEXInstanceFound == true)
-                    {
-                        for (auto inst = 0; inst < l_id; inst++)
-                        {
-                            l_chipletId = l_ringEX[inst].instanceIdMin + eq;
-
-                            if (ex % 2)
-                            {
-                                // For higher order ECs in EQ
-                                l_coreMask = 0x00000003;
-                                l_evenOdd = 1;
-                            }
-                            else
-                            {
-                                // For lower order ECs in EQ
-                                l_coreMask = 0x0000000C;
-                                l_evenOdd = 0;
-                            }
-
-                            FAPI_DBG("EX no. %02d; Even(0)/Odd(1):%d; InstanceId:0x%02x; RingName:%s ",
-                                     ex, l_evenOdd, l_chipletId, l_ringEX[inst].ringName);
-
-                            if ( ((l_coreMask << ((NUM_OF_QMES - 1)*CORES_PER_QME)) >>
-                                  ((l_chipletId - l_ringEX[inst].instanceIdMin)
-                                   *CORES_PER_QME)) & io_bootCoreMask )
-                            {
-                                // Update for ring in scan mode
-                                l_ringStatusInMvpd = RING_SCAN;
-
-                                l_fapiRc = _fetch_and_insert_vpd_rings (
-                                               i_procTarget,
-                                               i_ringSection,
-                                               io_ringSectionSize,
-                                               i_maxRingSectionSize,
-                                               l_overlaysSection,
-                                               l_ddLevel,
-                                               i_sysPhase,
-                                               i_vpdRing,
-                                               i_vpdRingSize,
-                                               i_ringBuf2,
-                                               i_ringBufSize2,
-                                               i_ringBuf3,
-                                               i_ringBufSize3,
-                                               l_chipletId,
-                                               l_evenOdd,
-                                               l_ringEX[inst],
-                                               l_ringStatusInMvpd,
-                                               l_bImgOutOfSpace,
-                                               io_bootCoreMask );
-
-                                // Update EX instance var for ring found in mvpd
-                                if (l_ringStatusInMvpd == RING_FOUND)
-                                {
-                                    l_instanceVpdRing.EX[inst] |=
-                                        (0x00C00000 >> (ex * (CORES_PER_QME / 2)));
-                                }
-
-                                if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
-                                {
-                                    // Capture EQ number when image ran out-of-space while appending ring
-                                    l_eqNumWhenOutOfSpace = eq;
-
-                                    // Capture current state of chiplet under process
-                                    l_instanceVpdRing.chipletUnderProcess     = EX_CHIPLET;
-                                    l_instanceVpdRing.exReprRingNum       = inst;
-                                    l_instanceVpdRing.chipletNumUnderProcess = ex;
-                                }
-                                else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
-                                          l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
-                                {
-                                    fapi2::current_err = l_fapiRc;
-                                    FAPI_DBG("_fetch_and_insert_vpd_rings() for EX rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
-                                    goto fapi_try_exit;
-                                }
-
-                                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                            }
-                        }
-                    } // if (l_flagEXInstanceFound == true)
-                } // if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
-
-                // For EC instances
                 if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_QME) )
                 {
-                    l_evenOdd = 0;
-
                     if (l_flagECInstanceFound == false)
                     {
                         // Look for EC instance in ring list
@@ -1421,80 +1225,81 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
                     if (l_flagECInstanceFound == true)
                     {
-                        for (auto ec = (2 * ex); ec < (2 * (ex + 1)); ec++)
+                        l_chipletId = l_ringEC.instanceIdMin + ec;
+                        FAPI_DBG("EC no. %02d; InstanceId:0x%02x; RingName:%s ",
+                                 ec, l_chipletId, l_ringEC.ringName);
+
+                        if ( ((0x00000001 << (NUM_OF_CORES - 1)) >>
+                              (l_chipletId - l_ringEC.instanceIdMin)) & io_bootCoreMask )
                         {
-                            l_chipletId = l_ringEC.instanceIdMin + ec;
-                            FAPI_DBG("EC no. %02d; Even(0)/Odd(1):%d; InstanceId:0x%02x; RingName:%s ", ec, l_evenOdd, l_chipletId,
-                                     l_ringEC.ringName);
+                            // Update for ring in scan mode
+                            l_ringStatusInMvpd = RING_SCAN;
 
-                            if ( ((0x00000001 << (NUM_OF_CORES - 1)) >>
-                                  (l_chipletId - l_ringEC.instanceIdMin)) & io_bootCoreMask )
+                            l_fapiRc = _fetch_and_insert_vpd_rings (
+                                           i_procTarget,
+                                           i_ringSection,
+                                           io_ringSectionSize,
+                                           i_maxRingSectionSize,
+                                           l_overlaysSection,
+                                           l_ddLevel,
+                                           i_sysPhase,
+                                           i_vpdRing,
+                                           i_vpdRingSize,
+                                           i_ringBuf2,
+                                           i_ringBufSize2,
+                                           i_ringBuf3,
+                                           i_ringBufSize3,
+                                           l_chipletId,
+                                           l_ringEC,
+                                           l_ringStatusInMvpd,
+                                           l_bImgOutOfSpace,
+                                           io_bootCoreMask );
+
+                            // Update EC instance var for ring found in mvpd
+                            if (l_ringStatusInMvpd == RING_FOUND)
                             {
-                                // Update for ring in scan mode
-                                l_ringStatusInMvpd = RING_SCAN;
-
-                                l_fapiRc = _fetch_and_insert_vpd_rings (
-                                               i_procTarget,
-                                               i_ringSection,
-                                               io_ringSectionSize,
-                                               i_maxRingSectionSize,
-                                               l_overlaysSection,
-                                               l_ddLevel,
-                                               i_sysPhase,
-                                               i_vpdRing,
-                                               i_vpdRingSize,
-                                               i_ringBuf2,
-                                               i_ringBufSize2,
-                                               i_ringBuf3,
-                                               i_ringBufSize3,
-                                               l_chipletId,
-                                               l_evenOdd,
-                                               l_ringEC,
-                                               l_ringStatusInMvpd,
-                                               l_bImgOutOfSpace,
-                                               io_bootCoreMask );
-
-                                // Update EC instance var for ring found in mvpd
-                                if (l_ringStatusInMvpd == RING_FOUND)
-                                {
-                                    l_instanceVpdRing.EC |=
-                                        (0x00800000 >> ec);
-                                }
-
-                                if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
-                                {
-                                    // Capture EQ number when image ran out-of-space while appending ring
-                                    l_eqNumWhenOutOfSpace = eq;
-
-                                    // Capture current state of chiplet under process
-                                    l_instanceVpdRing.chipletUnderProcess     = EC_CHIPLET;
-                                    l_instanceVpdRing.chipletNumUnderProcess = ec;
-                                }
-                                else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
-                                          l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
-                                {
-                                    fapi2::current_err = l_fapiRc;
-                                    FAPI_DBG("_fetch_and_insert_vpd_rings() for EC rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
-                                    goto fapi_try_exit;
-                                }
-                                else if ( (           l_fapiRc == fapi2::FAPI2_RC_SUCCESS     ||
-                                                      (uint32_t)l_fapiRc == RC_MVPD_RING_REDUNDANT_DATA ||
-                                                      (uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND ) &&
-                                          l_bImgOutOfSpace == false )
-                                {
-                                    FAPI_DBG("(INS) io_ringSectionSize = %d", io_ringSectionSize);
-                                    l_activeCoreMask |= (uint32_t)( 1 << ((NUM_OF_CORES - 1) - ec) );
-                                }
-
-                                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                                l_instanceVpdRing.EC |=
+                                    (0x00800000 >> ec);
                             }
 
-                            l_chipletId++;
+                            if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
+                            {
+                                // Capture EQ number when image ran out-of-space while appending ring
+                                l_eqNumWhenOutOfSpace = eq;
+
+                                // Capture current state of chiplet under process
+                                l_instanceVpdRing.chipletUnderProcess     = EC_CHIPLET;
+                                l_instanceVpdRing.chipletNumUnderProcess = ec;
+                            }
+                            else if ( (uint32_t)l_fapiRc != RC_MVPD_RING_REDUNDANT_DATA &&
+                                      l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
+                            {
+                                fapi2::current_err = l_fapiRc;
+                                FAPI_DBG("_fetch_and_insert_vpd_rings() for EC rings w/rc:0x%.8x", (uint64_t)fapi2::current_err );
+                                goto fapi_try_exit;
+                            }
+                            else if ( (           l_fapiRc == fapi2::FAPI2_RC_SUCCESS     ||
+                                                  (uint32_t)l_fapiRc == RC_MVPD_RING_REDUNDANT_DATA ||
+                                                  (uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND ) &&
+                                      l_bImgOutOfSpace == false )
+                            {
+                                FAPI_DBG("(INS) io_ringSectionSize = %d", io_ringSectionSize);
+                                l_activeCoreMask |= (uint32_t)( 1 << ((NUM_OF_CORES - 1) - ec) );
+                            }
+
+                            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                         }
+
+                        l_chipletId++;
+
                     } // if (l_flagECInstanceFound == true)
+
                 } //if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_QME) )
-            } //for (auto ex = (2*eq); ex = (2*(eq+1)); ex++)
+
+            } //for (ec=4*eq; ec=4*(eq+1); ec++)
+
         }
+
     }
 
 fapi_try_exit:
@@ -1520,23 +1325,15 @@ fapi_try_exit:
         return fapi2::current_err;
     }
 
-    // Display all EQ/EX/EC instance rings found in mvpd for given bootCoreMask
+    // Display all EQ/EC instance rings found in mvpd for given bootCoreMask
     FAPI_DBG("List of instance rings available in mvpd (as per bootCoreMask):");
     FAPI_DBG("Domain | Domain rings in Mvpd");
     FAPI_DBG("-----------------------------");
     FAPI_DBG("EQ     | 0x%08x", l_instanceVpdRing.EQ);
-    FAPI_DBG("EX     | 0x%08x", (l_instanceVpdRing.EX[0] |
-                                 l_instanceVpdRing.EX[1] |
-                                 l_instanceVpdRing.EX[2] |
-                                 l_instanceVpdRing.EX[3]));
     FAPI_DBG("EC     | 0x%08x", l_instanceVpdRing.EC);
     FAPI_DBG("-----------------------------");
 
     l_bootCoreMaskMin = ~(l_instanceVpdRing.EQ |
-                          l_instanceVpdRing.EX[0] |
-                          l_instanceVpdRing.EX[1] |
-                          l_instanceVpdRing.EX[2] |
-                          l_instanceVpdRing.EX[3] |
                           l_instanceVpdRing.EC) &
                         io_bootCoreMask;
     FAPI_DBG("bootCoreMaskMin: 0x%08x", l_bootCoreMaskMin);
@@ -1555,15 +1352,9 @@ fapi_try_exit:
         FAPI_DBG("Seeprom image creation ran out-of-space...");
         FAPI_DBG("EQ number at image overflow                     : %d", l_eqNumWhenOutOfSpace);
         FAPI_DBG("Chiplet name under process at image overflow    : %s",
-                 ((l_instanceVpdRing.chipletUnderProcess == 0) ? "EQ" :
-                  ((l_instanceVpdRing.chipletUnderProcess == 1) ? "EX" : "EC")));
-        FAPI_DBG("EX repr instance number (valid when chiplet=EX) : %d", l_instanceVpdRing.exReprRingNum);
+                 ((l_instanceVpdRing.chipletUnderProcess == 0) ? "EQ" : "EC"));
         FAPI_DBG("Chiplet number under process at image overflow  : %d", l_instanceVpdRing.chipletNumUnderProcess);
         FAPI_DBG("--------------------------------------------------------------");
-
-//
-//CMO-20190316: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
-//
 
         // Make sure EQ chiplet is captured and valid when image ran out-of-space
         if ( l_eqNumWhenOutOfSpace < NUM_OF_QMES )
@@ -1571,78 +1362,8 @@ fapi_try_exit:
             // Process EQ and other chiplets in current quad
             do
             {
-                // Process EQ when image ran out-of-space
-                //if (l_instanceVpdRing.chipletUnderProcess == EQ_CHIPLET)
-                //{
-                //    break;
-                //}
-
-                // Process EX when image ran out-of-space
-                // ======================================
-                // Check for EX: odd(1)/even(0)
-                // Process even EX here as for odd EX no separate processing
-                // needed in current quad when image ran out-of-space
-                // processing odd EX.
-                if ( (l_instanceVpdRing.chipletUnderProcess == EX_CHIPLET) &&
-                     !(l_instanceVpdRing.chipletNumUnderProcess % 2) )
-                {
-                    // Process even EX: If image ran out-of-space when processing
-                    // even EX then continue processing current quad to check
-                    // for cores under odd EX
-                    uint8_t l_exRingNum;
-
-                    for (l_exRingNum = l_instanceVpdRing.exReprRingNum;
-                         l_exRingNum < 4; l_exRingNum++)
-                    {
-                        if (l_instanceVpdRing.EX[l_exRingNum] &
-                            (EX_EVEN_POS >>
-                             ( (l_instanceVpdRing.chipletNumUnderProcess + 1) * 2)) )
-                        {
-                            break;
-                        }
-                    }
-
-                    if (l_exRingNum >= 4)
-                    {
-                        uint32_t l_ecMask = l_instanceVpdRing.EC &
-                                            (ODD_CORES_IN_EX >>
-                                             (l_instanceVpdRing.chipletNumUnderProcess *
-                                              (CORES_PER_QME / 2)));
-
-                        if (l_ecMask == 0)
-                        {
-                            l_activeCoreMask |=
-                                ( (ODD_CORES_IN_EX >>
-                                   (l_instanceVpdRing.chipletNumUnderProcess *
-                                    (CORES_PER_QME / 2))) & io_bootCoreMask );
-                        }
-                        else if (l_ecMask == (uint32_t)(ODD_CORES_IN_EX >>
-                                                        (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QME / 2))) )
-                        {
-                            break;
-                        }
-                        else if (l_ecMask == (uint32_t)(HIGH_ORDER_ODD_CORE_IN_EX >>
-                                                        (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QME / 2))) )
-                        {
-                            l_activeCoreMask |=
-                                ( (LOW_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess * 2)) &
-                                  io_bootCoreMask );
-                        }
-                        else if (l_ecMask == (uint32_t)(LOW_ORDER_ODD_CORE_IN_EX >>
-                                                        (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QME / 2))) )
-                        {
-                            l_activeCoreMask |=
-                                ( (HIGH_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess *
-                                                                 (CORES_PER_QME / 2))) & io_bootCoreMask );
-                        }
-                    }
-                }
-
                 // Process EC when image ran out-of-space
-                else if (l_instanceVpdRing.chipletUnderProcess == EC_CHIPLET)
+                if (l_instanceVpdRing.chipletUnderProcess == EC_CHIPLET)
                 {
                     // Get EC position [1:4] in quad
                     // l_ecPos = 1 : Refer fourth core in quad say EC-3 in EQ-0
@@ -1653,9 +1374,8 @@ fapi_try_exit:
                                       l_instanceVpdRing.chipletNumUnderProcess;
 
                     // We have come to this point (EC chiplet) confirms that the
-                    // EQ instance ring for this quad would have been appended and also
-                    // the EX-odd/even (depending on EC chiplets) instance rings would
-                    // have been appended as well. Now here we should check for the
+                    // EQ instance ring for this quad would have been appended.
+                    // Now here we should check for the
                     // remaining EC chiplets (apart from one during processing
                     // of which image ran out-of-space) in quad for which instance
                     // rings available (or not) to be appended. If not available
@@ -1665,6 +1385,7 @@ fapi_try_exit:
                     switch (l_ecPos)
                     {
                         case 4:
+                        case 3:
                         case 2:
                             if (!(l_instanceVpdRing.EC &
                                   (EC_POSITION >>
@@ -1675,52 +1396,6 @@ fapi_try_exit:
                                                       io_bootCoreMask);
                             }
 
-                        case 3:
-                            uint8_t l_exId;
-
-                            for (l_exId = 0; l_exId < 4; l_exId++)
-                            {
-                                if (l_instanceVpdRing.EX[l_exId] &
-                                    (EX_EVEN_POS >> (l_instanceVpdRing.chipletNumUnderProcess + 1)) )
-                                {
-                                    break;
-                                }
-                            }
-
-                            if (l_exId >= 4)
-                            {
-                                uint32_t l_ecId = l_instanceVpdRing.EC &
-                                                  (ODD_CORES_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess - 1));
-
-                                if (l_ecId == 0)
-                                {
-                                    l_activeCoreMask |=
-                                        ( (ODD_CORES_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess - 1)) &
-                                          io_bootCoreMask );
-                                }
-                                //else if (l_ecId == (uint32_t)(ODD_CORES_IN_EX >>
-                                //                              (l_instanceVpdRing.chipletNumUnderProcess - 1)) )
-                                //{
-                                //    break;
-                                //}
-                                else if (l_ecId == (uint32_t)(HIGH_ORDER_ODD_CORE_IN_EX >>
-                                                              (l_instanceVpdRing.chipletNumUnderProcess - 1)) )
-                                {
-                                    l_activeCoreMask |=
-                                        ( (LOW_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess - 1)) &
-                                          io_bootCoreMask );
-                                }
-                                else if (l_ecId == (uint32_t)(LOW_ORDER_ODD_CORE_IN_EX >>
-                                                              (l_instanceVpdRing.chipletNumUnderProcess - 1)) )
-                                {
-                                    l_activeCoreMask |=
-                                        ( (HIGH_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess - 1)) &
-                                          io_bootCoreMask );
-                                }
-                            }
-
-                            break;
-
                         case 1:
                             break;
 
@@ -1728,9 +1403,11 @@ fapi_try_exit:
                             FAPI_DBG("Incorrect EC mask. It should not come here");
                             break;
                     } // switch (l_ecPos)
+
                 }   // else if (l_instanceVpdRing.chipletUnderProcess == EC_CHIPLET)
+
             }
-            while(false); // Process EQ and other chiplets in current quad
+            while(0);   // Process EQ and other chiplets in current quad
 
             // Get minimum set of EC cores or'ed that should be supported
             // should we hit the ceiling
