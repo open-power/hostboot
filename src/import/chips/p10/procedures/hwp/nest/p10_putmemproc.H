@@ -40,34 +40,6 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
-namespace fapi2
-{
-
-//------------------------------------------------------------------------------
-// Constant Definitions
-//------------------------------------------------------------------------------
-enum sbeMemoryAccessFlags
-{
-    SBE_MEM_ACCESS_FLAGS_TARGET_PROC          = 0x00000001,
-    SBE_MEM_ACCESS_FLAGS_TARGET_PBA           = 0x00000002,
-    SBE_MEM_ACCESS_FLAGS_AUTO_INCR_ON         = 0x00000004,
-    SBE_MEM_ACCESS_FLAGS_ECC_OVERRIDE         = 0x00000008,
-    SBE_MEM_ACCESS_FLAGS_TAG                  = 0x00000010,
-    SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON         = 0x00000020,
-    SBE_MEM_ACCESS_FLAGS_LCO_MODE             = 0x00000040,
-    SBE_MEM_ACCESS_FLAGS_CACHE_INHIBITED_MODE = 0x00000080,
-    SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH    = 0x00000100,
-    SBE_MEM_ACCESS_FLAGS_CACHE_INJECT_MODE    = 0x00000200,
-    SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE          = 0x00000400,
-    SBE_MEM_ACCESS_FLAGS_SWITCH_MODE          = 0x00000800,
-    SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE         = 0x00001000,
-    SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE   = 0x00002000,
-    SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE   = 0x00004000,
-    SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE     = 0x00008000,
-};
-
-} // End namespace
-
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
