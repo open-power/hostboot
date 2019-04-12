@@ -63,12 +63,12 @@ enum RingID
 
     // Nest Chiplet Rings - N1
     n1_fure     = 14, //0x0E
-    n2_gptr     = 15, //0x0F
-    n3_lbst     = 16, //0x10
-    n4_abst     = 17, //0x11
-    n7_repr     = 18, //0x12
-    n5_time     = 19, //0x13
-    n6_bndy     = 20, //0x14
+    n1_gptr     = 15, //0x0F
+    n1_lbst     = 16, //0x10
+    n1_abst     = 17, //0x11
+    n1_repr     = 18, //0x12
+    n1_time     = 19, //0x13
+    n1_bndy     = 20, //0x14
 
     // PCI Chiplet Rings - PCI
     pci_fure    = 21, //0x15
