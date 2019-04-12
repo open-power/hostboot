@@ -83,7 +83,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
     TYPE trgtType = getTargetType( i_trgt );
     PRDF_ASSERT( TYPE_MCBIST == trgtType ||
                  TYPE_MBA == trgtType    ||
-                 TYPE_OCMB_CHIP );
+                 TYPE_OCMB_CHIP == trgtType );
 
     // MDIA must be running.
     PRDF_ASSERT( isInMdiaMode() );
