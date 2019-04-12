@@ -1932,32 +1932,42 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                    "Block count read size mismatch; expected %d but got %d",
                    blockCountSizeExp,blockCountSize);
 
+            // From this point onwards, we don't want a start bit or address to
+            // be sent
+            i_args.with_start     = false;
+            i_args.with_address   = false;
+
             // Now read the specified number of data bytes.
             // If there is no PEC byte, complete the transaction with a stop
             // and inform the engine there is no subsequent read.  If the PEC
-            // byte is supported, withhold the stop inform the engine there is
-            // an additional read transaction coming.  Since this is a
+            // byte is supported, withhold the stop to inform the engine there
+            // is an additional read transaction coming.  Since this is a
             // continuation of the read, withhold the start bit and the address.
-            // nor is an address.
-            i_args.with_start     = false;
-            i_args.with_address   = false;
-            i_args.with_stop      = i_args.smbus.usePec ? false : true;
-            i_args.read_continue  = i_args.smbus.usePec ? true : false;
-
-            size_t dataBytesSize = blockRead.blockCount;
-            const auto dataBytesSizeExp = dataBytesSize;
-            err = i2cRead(i_target,
-                          blockRead.dataBytes,
-                          dataBytesSize,
-                          i_args);
-            if(err)
+            // If the data count was zero, we -have- to
+            // skip the read unless there is no PEC byte (and thus a stop),
+            // because a transaction without a stop/start/address of 0 length
+            // will otherwise trigger a command invalid condition from the I2C
+            // engine.
+            if(blockRead.blockCount || !i_args.smbus.usePec)
             {
-                break;
-            }
+                i_args.with_stop      = i_args.smbus.usePec ? false : true;
+                i_args.read_continue  = i_args.smbus.usePec ? true : false;
 
-            assert(dataBytesSize == dataBytesSizeExp,
-                   "Data bytes read size mismatch; expected %d but got %d",
-                   dataBytesSizeExp,dataBytesSize);
+                size_t dataBytesSize = blockRead.blockCount;
+                const auto dataBytesSizeExp = dataBytesSize;
+                err = i2cRead(i_target,
+                              blockRead.dataBytes,
+                              dataBytesSize,
+                              i_args);
+                if(err)
+                {
+                    break;
+                }
+
+                assert(dataBytesSize == dataBytesSizeExp,
+                       "Data bytes read size mismatch; expected %d but got %d",
+                       dataBytesSizeExp,dataBytesSize);
+            }
 
             if(i_args.smbus.usePec)
             {
