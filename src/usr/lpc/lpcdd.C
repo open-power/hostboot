@@ -200,15 +200,10 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     //  then we have to use our special side copy of the driver
     if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
-        //First check/clear the LPC bus of errors and commit any errors found
-        l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
-        if (!l_err)
-        {
-            l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
-                                                           l_addr,
-                                                           io_buffer,
-                                                           io_buflen );
-        }
+        l_err = Singleton<LpcDD>::instance().writeLPC(l_type,
+                                                      l_addr,
+                                                      io_buffer,
+                                                      io_buflen);
     }
     else
     {
