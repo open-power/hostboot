@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -412,7 +412,14 @@ void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
         else if ( lnkStat->BitStringIsZero() )
         {
             calloutFlg = HWAS::FLAG_LINK_DOWN;
-            i_sc.service_data->SetErrorSig(PRDFSIG_LinkFailed);
+
+            // Indicate in the multi-signature section that the link has failed.
+            // This allows us to know what attention we were handling in the
+            // primary signature.
+            i_sc.service_data->AddSignatureList(i_obusTgt, PRDFSIG_LinkFailed);
+
+            // Make the error log predictive and mask.
+            i_sc.service_data->SetThresholdMaskId(0);
         }
 
         l_mainElog->addBusCallout( i_smpTgt, l_smpPeerTgt, HWAS::O_BUS_TYPE,
@@ -441,7 +448,7 @@ void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
     } // main elog is non-null
 
 
-} // end  obus_smpCallout_link - two SMP targets
+} // end  obus_smpCallout - two SMP targets
 
 
 /** Given an OBUS TARGET and SMP link number -- get the SMP target **/
