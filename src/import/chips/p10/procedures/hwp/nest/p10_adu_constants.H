@@ -108,7 +108,11 @@ extern "C"
         FLAG_LOCK_TRIES       = 0x000F0000,                    // Bit 12:15
 
         // Reserved bits
-        FLAG_NOT_USED_BITS    = 0x0000FFFF,                    // Bit 16:31
+        FLAG_UNUSED_BITS      = 0x0000FFFE,                    // Bit 16:30
+
+        // Invalid bit
+        FLAG_ADU_INVALID_BIT  = 0x00000001,                    // Bit 31
+
     };
 
     // Operation type values

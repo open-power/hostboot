@@ -44,6 +44,21 @@
 <!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
+  <rc>RC_P10_ADU_UTILS_INVALID_FLAG</rc>
+  <description>
+    There was an invalid argument passed in when building flag.
+    It could be either Transaction size or Operation type. Check error trace.
+    Procedure: p10_adu_utils
+  </description>
+  <ffdc>FLAGS</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <sbeError/>
   <rc>RC_P10_ADU_UTILS_INVALID_ARGS</rc>
   <description>
     There is an invalid argument (misaligned address or address out of the

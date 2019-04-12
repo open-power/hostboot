@@ -34,6 +34,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <fapi2.H>
 #include <p10_adu_setup.H>
 #include <p10_adu_utils.H>
 
@@ -62,8 +63,13 @@ fapi2::ReturnCode p10_adu_setup(
     // Read input flags and fix unsupported conditions
     // Note: Auto increment is only supported for dma
     ////////////////////////////////////////////////////////
-
     l_aduFlag.getFlag(i_flags);
+
+    // Verify flag is valid
+    FAPI_ASSERT(l_aduFlag.isFlagValid(),
+                fapi2::P10_ADU_UTILS_INVALID_FLAG()
+                .set_FLAGS(i_flags),
+                "p10_adu_setup: there was an invalid argument passed in when building flag.  Check error trace!");
 
     if (l_aduFlag.getOperationType() != adu_operationFlag::DMA_PARTIAL)
     {

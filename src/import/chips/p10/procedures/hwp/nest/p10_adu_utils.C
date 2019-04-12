@@ -35,6 +35,9 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_adu_utils.H>
+#include <fapi2_mem_access.H>
+
+//@TODO: RTC 207930 - Replace with p10 version
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 
@@ -108,6 +111,8 @@ fapi2::ReturnCode p10_adu_utils_check_args(
     uint32_t l_actualTransSize;
 
     // Get the transaction size
+    l_myAduFlag.getFlag(i_flags);
+
     l_transSize = l_myAduFlag.getTransactionSize();
 
     // Translate the transaction size to the actual size (1, 2, 4, or 8 bytes)
@@ -165,8 +170,16 @@ fapi2::ReturnCode p10_adu_utils_check_fbc_state(
     bool fbc_running = false;
 
     // Get the state of the fabric
+
+//@TODO: RTC 207930 - To run on P9 system.  Replace with p10 version
+#if 0
     FAPI_TRY(p10_fbc_utils_get_fbc_state(i_target, fbc_initialized, fbc_running),
              "Error reading pb_init/pb_stop via p10_fbc_utils_get_fbc_state");
+#endif
+    fbc_initialized = true;
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY(getScom(i_target, PU_SND_MODE_REG, l_data), "Error reading pb_stop from pMisc Mode Register");
+    fbc_running = !(l_data.getBit<PU_SND_MODE_REG_PB_STOP>());
 
     // Make sure the fabric is initialized and running, otherwise set an error
     FAPI_ASSERT(fbc_initialized && fbc_running,
@@ -218,6 +231,10 @@ fapi2::ReturnCode p10_adu_utils_set_quiesce_init(
     altd_option_reg_data.insertFromRight<PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT,
                                          PU_ALTD_OPTION_REG_FBC_BEFORE_INIT_WAIT_COUNT_LEN>
                                          (INIT_SWITCH_WAIT_COUNT);
+
+    // Enable fastpath for PMISC
+    const uint32_t FBC_ALTD_HW397129 = 52; //@TODO: RTC 207930 - Replace with p10 version
+    altd_option_reg_data.setBit<FBC_ALTD_HW397129>();
 
     // Write to ADU special option reg
     FAPI_TRY(putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
@@ -379,6 +396,7 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
                 l_altd_cmd_reg_fbc_ttype = ALTD_CMD_TTYPE_DMA_PR_WR;
 
                 //Set scope to system scope
+                // @TODO: RTC 210038 - Optimization
                 altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
 
                 // Set TSIZE
@@ -412,11 +430,11 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
         // =========================================
         // ====== PB & PMISC common settings =======
         // =========================================
-
         // Set the start op bit
         altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_START_OP>();
         // Set operation scope
-        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_GROUP);
+        // PB_DIS/PB_INIT/PMISC must be set to system scope, performance is not critical.
+        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
         // Set DROP_PRIORITY = HIGH
         altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_DROP_PRIORITY>();
         // Set AXTYPE = Address only

@@ -59,14 +59,15 @@ extern"C"
             // Type of ADU operations
             enum OperationType_t
             {
-                CACHE_INHIBIT = 0, // cache-inhibited 1, 2, 4, or 8 byte read/write
-                DMA_PARTIAL   = 1, // partial cache line direct memory access; always 8 byte read/write
-                PB_DIS_OPER   = 2, // pbop.disable_all
-                PMISC_OPER    = 3, // pmisc switch
-                PB_INIT_OPER  = 4, // pbop.enable_all
-                PRE_SWITCH_CD = 5, // do not issue PB command, pre-set for switch CD operation
-                PRE_SWITCH_AB = 6, // do not issue PB command, pre-set for switch AB operation
-                POST_SWITCH   = 7  // do not issue PB command, clear switch CD/AB flags
+                CACHE_INHIBIT     = 0,               // cache-inhibited 1, 2, 4, or 8 byte read/write
+                DMA_PARTIAL       = 1,               // partial cache line direct memory access; always 8 byte read/write
+                PB_DIS_OPER       = 2,               // pbop.disable_all
+                PMISC_OPER        = 3,               // pmisc switch
+                PB_INIT_OPER      = 4,               // pbop.enable_all
+                PRE_SWITCH_CD     = 5,               // do not issue PB command, pre-set for switch CD operation
+                PRE_SWITCH_AB     = 6,               // do not issue PB command, pre-set for switch AB operation
+                POST_SWITCH       = 7,               // do not issue PB command, clear switch CD/AB flags
+                ILLEGAL_OPER_TYPE = POST_SWITCH + 1, // Illegal operation type, must always be the last entry.
             };
 
             // Transaction size; only checked if not DMA
@@ -89,7 +90,8 @@ extern"C"
                 iv_itag(false),
                 iv_ecc(false),
                 iv_eccItagOverwrite(false),
-                iv_transSize(TSIZE_1)
+                iv_transSize(TSIZE_1),
+                iv_flagInvalid(false)
             {
             }
 
@@ -176,6 +178,13 @@ extern"C"
             inline void setOperationType(const OperationType_t i_type)
             {
                 iv_operType = i_type;
+
+                if (iv_operType >= ILLEGAL_OPER_TYPE)
+                {
+                    FAPI_ERR("Invalid Operation type (%d)", iv_operType);
+                    setFlagInvalid();
+                }
+
                 return;
             }
             /// @brief Set the auto increment option, for dma ops only
@@ -259,10 +268,35 @@ extern"C"
             inline void setTransactionSize(Transaction_size_t i_value)
             {
                 iv_transSize = i_value;
+
+                if ( (iv_transSize != TSIZE_1) &&
+                     (iv_transSize != TSIZE_2) &&
+                     (iv_transSize != TSIZE_4) &&
+                     (iv_transSize != TSIZE_8) )
+                {
+                    FAPI_ERR("Invalid TSIZE (%d)",  iv_transSize);
+                    setFlagInvalid();
+                }
+
                 return;
             }
 
+            /// @brief Return flag valid status
+            /// @return true if flag is valid
+            inline bool isFlagValid()
+            {
+                return (!iv_flagInvalid);
+            }
+
         private:
+
+            /// @brief Set the flag invalid bit
+            /// @return void
+            inline void setFlagInvalid()
+            {
+                iv_flagInvalid = true;
+                return;
+            }
 
             // Class variables
             OperationType_t iv_operType;     // Operation type
@@ -275,6 +309,7 @@ extern"C"
             bool iv_ecc;                     // ECC mode
             bool iv_eccItagOverwrite;        // ECC/ITAG overwrite mode
             Transaction_size_t iv_transSize; // Transaction size
+            bool iv_flagInvalid;             // Invalid flag
     };
 
     ///
@@ -353,7 +388,14 @@ extern"C"
 
             default:
                 FAPI_ERR("Invalid transaction size: iv_transSize %d",  iv_transSize);
+                l_aduFlag |= FLAG_ADU_INVALID_BIT;
                 break;
+        }
+
+        // Set flag validity
+        if (iv_flagInvalid == true)
+        {
+            l_aduFlag |= FLAG_ADU_INVALID_BIT;
         }
 
         // Debug trace
@@ -368,6 +410,7 @@ extern"C"
         FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
         FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
         FAPI_DBG("    iv_transSize 0x%.8X", iv_transSize);
+        FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
 
         return l_aduFlag;
     }
@@ -416,6 +459,9 @@ extern"C"
                 break;
         }
 
+        // Flag validity
+        iv_flagInvalid = (i_flag & FLAG_ADU_INVALID_BIT);
+
         // Debug trace
         FAPI_DBG("adu_operationFlag::getFlag() // Flag value: 0x%.8X", i_flag);
         FAPI_DBG("    iv_operType 0x%.8X", iv_operType);
@@ -428,6 +474,7 @@ extern"C"
         FAPI_DBG("    iv_ecc 0x%.8X", iv_ecc);
         FAPI_DBG("    iv_eccItagOverwrite 0x%.8X", iv_eccItagOverwrite);
         FAPI_DBG("    iv_transSize 0x%.8X", iv_transSize);
+        FAPI_DBG("    iv_flagInvalid 0x%.8X", iv_flagInvalid);
         return;
     }
 

@@ -24,5 +24,6 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_adu_access
 OBJS+=p10_adu_utils.o
+# @TODO: Replace with p10 include dir, RTC 207930
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/include)
 $(call BUILD_PROCEDURE)
