@@ -750,7 +750,7 @@ public:
                 // The MFR Revision represented as ASCII characters excluding
                 // null terminator.
                 uint8_t str[MFR_REVISION_MAX_SIZE];
-            } mfrBuf;
+            } mfrBuf = {0};
 
             size = MFR_REVISION_MAX_SIZE;
             cmd = MFR_REVISION;
