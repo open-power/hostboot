@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -424,7 +424,7 @@ rule rIOOLFIR
 
 group gIOOLFIR
     filter singlebit,
-           cs_root_cause(54,55,56,57,58,59)
+           cs_root_cause(54,55,56,57,58,59,60,61)
 {
     /** IOOLFIR[0]
      *  link0 trained
@@ -699,12 +699,12 @@ group gIOOLFIR
     /** IOOLFIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOOLFIR, bit(54)) ? obusSmpCallout_th32_L0;
+    (rIOOLFIR, bit(54)) ? obusSmpFailure_L0;
 
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOOLFIR, bit(55)) ? obusSmpCallout_th32_L1;
+    (rIOOLFIR, bit(55)) ? obusSmpFailure_L1;
 
     /** IOOLFIR[56]
      *  link0 training failed
@@ -719,22 +719,22 @@ group gIOOLFIR
     /** IOOLFIR[58]
      *  link0 unrecoverable error
      */
-    (rIOOLFIR, bit(58)) ? obusSmpCallout_th32_L0;
+    (rIOOLFIR, bit(58)) ? obusSmpFailure_L0;
 
     /** IOOLFIR[59]
      *  link1 unrecoverable error
      */
-    (rIOOLFIR, bit(59)) ? obusSmpCallout_th32_L1;
+    (rIOOLFIR, bit(59)) ? obusSmpFailure_L1;
 
     /** IOOLFIR[60]
      *  link0 internal error
      */
-    (rIOOLFIR, bit(60)) ? self_th_32perDay;
+    (rIOOLFIR, bit(60)) ? obusSmpFailure_L0;
 
     /** IOOLFIR[61]
      *  link1 internal error
      */
-    (rIOOLFIR, bit(61)) ? self_th_32perDay;
+    (rIOOLFIR, bit(61)) ? obusSmpFailure_L1;
 
     /** IOOLFIR[62]
      *  fir scom err dup
