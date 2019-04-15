@@ -1,0 +1,100 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_smp_link_firs.H $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_smp_link_firs.H
+/// @brief Setup the FIR mask and action registers for a given SMP link
+///
+/// The purpose of this procedure is to setup the necessary FIR mask/action
+/// registers for the requested operational state on a given SMP link. The
+/// FIRs can be setup for either an unused link or for a runtime state. It
+/// can also be used to clear all related FIR registers -- this zeroes all
+/// bits in the FIR itself and leaves the mask/action registers untouched.
+///
+/// *HWP HW Maintainer: Jenny Huynh <jhuynh@us.ibm.com>
+/// *HWP FW Maintainer: Raja Das <rajadas2@in.ibm.com>
+/// *HWP Consumed by: SBE
+///
+
+#ifndef _P10_SMP_LINK_FIRS_H_
+#define _P10_SMP_LINK_FIRS_H_
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+#include <fapi2.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+enum action_t
+{
+    INACTIVE  = 0,
+    RUNTIME   = 1,
+    CLEARFIRS = 2,
+};
+
+enum sublink_t
+{
+    BOTH = 0,
+    EVEN = 1,
+    ODD  = 2,
+    NUM_SUBLINK_OPTS = 3,
+    NONE = 4,
+};
+
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p10_smp_link_firs_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&,
+    sublink_t,
+    action_t);
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+extern "C"
+{
+
+///
+/// @brief Setup the FIR mask and action registers for a given SMP link
+///
+/// @param[in] i_iohs_target   Reference to IOHS target
+/// @param[in] i_sublink       Sub-link to apply settings to (both, even, odd)
+/// @param[in] i_action        Operational state to configure the FIRs for (inactive, runtime, clearfirs)
+///
+/// @return FAPI_RC_SUCCESS if the setup completes successfully, else error code.
+///
+    fapi2::ReturnCode p10_smp_link_firs(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+        sublink_t i_sublink,
+        action_t i_action);
+
+} //extern "C"
+
+#endif //_P10_SMP_LINK_FIRS_H_
