@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -763,13 +763,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Voltage Setting -> PMIC0_SWA_RANGE
+        /// @brief Decodes PMIC0 SWA Voltage Setting -> PMIC0_SWA_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swa_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWA_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWA_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -789,20 +789,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Voltage Offset -> PMIC0_SWA_OFF_RANGE
+        /// @brief Decodes PMIC0 SWA Voltage Offset -> PMIC0_SWA_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swa_pmic0(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swa_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWA_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWA_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Delay Sequence Order -> PMIC0_SWA_ORDER
+        /// @brief Decodes PMIC0 SWA Sequence Delay -> PMIC0_SWA_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swa_pmic0(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWA_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWA Sequence Order -> PMIC0_SWA_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -828,13 +841,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Voltage Setting -> PMIC0_SWB_RANGE
+        /// @brief Decodes PMIC0 SWB Voltage Setting -> PMIC0_SWB_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swb_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWB_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWB_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -854,20 +867,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Voltage Offset -> PMIC0_SWB_OFF_RANGE
+        /// @brief Decodes PMIC0 SWB Voltage Offset -> PMIC0_SWB_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swb_pmic0(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swb_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWB_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWB_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Delay Sequence Order -> PMIC0_SWB_ORDER
+        /// @brief Decodes PMIC0 SWB Sequence Delay -> PMIC0_SWB_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swb_pmic0(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWB_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWB Sequence Order -> PMIC0_SWB_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -893,13 +919,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Voltage Setting -> PMIC0_SWC_RANGE
+        /// @brief Decodes PMIC0 SWC Voltage Setting -> PMIC0_SWC_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swc_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWC_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWC_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -919,20 +945,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Voltage Offset -> PMIC0_SWC_OFF_RANGE
+        /// @brief Decodes PMIC0 SWC Voltage Offset -> PMIC0_SWC_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swc_pmic0(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swc_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWC_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWC_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Delay Sequence Order -> PMIC0_SWC_ORDER
+        /// @brief Decodes PMIC0 SWC Sequence Delay -> PMIC0_SWC_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swc_pmic0(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWC_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWC Sequence Order -> PMIC0_SWC_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -958,13 +997,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Voltage Setting -> PMIC0_SWD_RANGE
+        /// @brief Decodes PMIC0 SWD Voltage Setting -> PMIC0_SWD_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swd_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWD_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWD_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -984,20 +1023,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Voltage Offset -> PMIC0_SWD_OFF_RANGE
+        /// @brief Decodes PMIC0 SWD Voltage Offset -> PMIC0_SWD_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swd_pmic0(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swd_pmic0(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWD_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWD_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Delay Sequence Order -> PMIC0_SWD_ORDER
+        /// @brief Decodes PMIC0 SWD Sequence Delay -> PMIC0_SWD_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swd_pmic0(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC0_SWD_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWD Sequence Order -> PMIC0_SWD_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1036,13 +1088,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Voltage Setting -> PMIC1_SWA_RANGE
+        /// @brief Decodes PMIC1 SWA Voltage Setting -> PMIC1_SWA_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swa_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWA_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWA_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1062,20 +1114,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Voltage Offset -> PMIC1_SWA_OFF_RANGE
+        /// @brief Decodes PMIC1 SWA Voltage Offset -> PMIC1_SWA_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swa_pmic1(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swa_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWA_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWA_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Delay Sequence Order -> PMIC1_SWA_ORDER
+        /// @brief Decodes PMIC1 SWA Sequence Delay -> PMIC1_SWA_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swa_pmic1(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWA_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWA Sequence Order -> PMIC1_SWA_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1101,13 +1166,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Voltage Setting -> PMIC1_SWB_RANGE
+        /// @brief Decodes PMIC1 SWB Voltage Setting -> PMIC1_SWB_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swb_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWB_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWB_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1127,20 +1192,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Voltage Offset -> PMIC1_SWB_OFF_RANGE
+        /// @brief Decodes PMIC1 SWB Voltage Offset -> PMIC1_SWB_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swb_pmic1(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swb_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWB_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWB_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Delay Sequence Order -> PMIC1_SWB_ORDER
+        /// @brief Decodes PMIC1 SWB Sequence Delay -> PMIC1_SWB_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swb_pmic1(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWB_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWB Sequence Order -> PMIC1_SWB_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1166,13 +1244,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Voltage Setting -> PMIC1_SWC_RANGE
+        /// @brief Decodes PMIC1 SWC Voltage Setting -> PMIC1_SWC_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swc_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWC_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWC_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1192,20 +1270,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Voltage Offset -> PMIC1_SWC_OFF_RANGE
+        /// @brief Decodes PMIC1 SWC Voltage Offset -> PMIC1_SWC_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swc_pmic1(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swc_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWC_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWC_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Delay Sequence Order -> PMIC1_SWC_ORDER
+        /// @brief Decodes PMIC1 SWC Sequence Delay -> PMIC1_SWC_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swc_pmic1(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWC_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWC Sequence Order -> PMIC1_SWC_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1231,13 +1322,13 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Voltage Setting -> PMIC1_SWD_RANGE
+        /// @brief Decodes PMIC1 SWD Voltage Setting -> PMIC1_SWD_RANGE_SELECT
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode volt_setpoint_range_swd_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWD_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWD_RANGE_SELECT, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1257,20 +1348,33 @@ class decoder<DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Voltage Offset -> PMIC1_SWD_OFF_RANGE
+        /// @brief Decodes PMIC1 SWD Voltage Offset -> PMIC1_SWD_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swd_pmic1(uint8_t& o_output) const override
+        virtual fapi2::ReturnCode volt_offset_direction_swd_pmic1(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWD_OFF_RANGE, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWD_OFF_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Delay Sequence Order -> PMIC1_SWD_ORDER
+        /// @brief Decodes PMIC1 SWD Sequence Delay -> PMIC1_SWD_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swd_pmic1(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PMIC1_SWD_DELAY, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWD Sequence Order -> PMIC1_SWD_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///

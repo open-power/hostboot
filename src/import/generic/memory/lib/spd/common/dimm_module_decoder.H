@@ -953,7 +953,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Voltage Setting -> PMIC0_SWA_RANGE
+        /// @brief Decodes PMIC0 SWA Voltage Setting -> PMIC0_SWA_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -975,11 +975,22 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWA Voltage Offset -> PMIC0_SWA_OFF_RANGE
+        /// @brief Decodes PMIC0 SWA Voltage Offset -> PMIC0_SWA_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swa_pmic0(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swa_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWA Delay -> PMIC0_SWA_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swa_pmic0(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -1008,7 +1019,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Voltage Setting -> PMIC0_SWB_RANGE
+        /// @brief Decodes PMIC0 SWB Voltage Setting -> PMIC0_SWB_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1030,18 +1041,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Voltage Offset -> PMIC0_SWB_OFF_RANGE
+        /// @brief Decodes PMIC0 SWB Voltage Offset -> PMIC0_SWB_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swb_pmic0(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swb_pmic0(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWB Delay Sequence Order -> PMIC0_SWB_ORDER
+        /// @brief Decodes PMIC0 SWB Delay -> PMIC0_SWB_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swb_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWB Sequence Order -> PMIC0_SWB_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1063,7 +1085,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Voltage Setting -> PMIC0_SWC_RANGE
+        /// @brief Decodes PMIC0 SWC Voltage Setting -> PMIC0_SWC_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1085,18 +1107,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Voltage Offset -> PMIC0_SWC_OFF_RANGE
+        /// @brief Decodes PMIC0 SWC Voltage Offset -> PMIC0_SWC_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swc_pmic0(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swc_pmic0(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWC Delay Sequence Order -> PMIC0_SWC_ORDER
+        /// @brief Decodes PMIC0 SWC Delay -> PMIC0_SWC_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swc_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWC Sequence Order -> PMIC0_SWC_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1118,7 +1151,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Voltage Setting -> PMIC0_SWD_RANGE
+        /// @brief Decodes PMIC0 SWD Voltage Setting -> PMIC0_SWD_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1140,18 +1173,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Voltage Offset -> PMIC0_SWD_OFF_RANGE
+        /// @brief Decodes PMIC0 SWD Voltage Offset -> PMIC0_SWD_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swd_pmic0(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swd_pmic0(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC0 SWD Delay Sequence Order -> PMIC0_SWD_ORDER
+        /// @brief Decodes PMIC0 SWD Delay -> PMIC0_SWD_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swd_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWD Sequence Order -> PMIC0_SWD_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1184,7 +1228,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Voltage Setting -> PMIC1_SWA_RANGE
+        /// @brief Decodes PMIC1 SWA Voltage Setting -> PMIC1_SWA_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1206,18 +1250,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Voltage Offset -> PMIC1_SWA_OFF_RANGE
+        /// @brief Decodes PMIC1 SWA Voltage Offset -> PMIC1_SWA_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swa_pmic1(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swa_pmic1(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWA Delay Sequence Order -> PMIC1_SWA_ORDER
+        /// @brief Decodes PMIC1 SWA Delay -> PMIC1_SWA_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swa_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWA Sequence Order -> PMIC1_SWA_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1239,7 +1294,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Voltage Setting -> PMIC1_SWB_RANGE
+        /// @brief Decodes PMIC1 SWB Voltage Setting -> PMIC1_SWB_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1261,18 +1316,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Voltage Offset -> PMIC1_SWB_OFF_RANGE
+        /// @brief Decodes PMIC1 SWB Voltage Offset -> PMIC1_SWB_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swb_pmic1(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swb_pmic1(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWB Delay Sequence Order -> PMIC1_SWB_ORDER
+        /// @brief Decodes PMIC1 SWB Delay -> PMIC1_SWB_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swb_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWB Sequence Order -> PMIC1_SWB_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1294,7 +1360,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Voltage Setting -> PMIC1_SWC_RANGE
+        /// @brief Decodes PMIC1 SWC Voltage Setting -> PMIC1_SWC_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1316,18 +1382,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Voltage Offset -> PMIC1_SWC_OFF_RANGE
+        /// @brief Decodes PMIC1 SWC Voltage Offset -> PMIC1_SWC_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swc_pmic1(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swc_pmic1(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWC Delay Sequence Order -> PMIC1_SWC_ORDER
+        /// @brief Decodes PMIC1 SWC Delay -> PMIC1_SWC_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swc_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWC Sequence Order -> PMIC1_SWC_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1349,7 +1426,7 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Voltage Setting -> PMIC1_SWD_RANGE
+        /// @brief Decodes PMIC1 SWD Voltage Setting -> PMIC1_SWD_RANGE_SETTING
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
@@ -1371,18 +1448,29 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Voltage Offset -> PMIC1_SWD_OFF_RANGE
+        /// @brief Decodes PMIC1 SWD Voltage Offset -> PMIC1_SWD_OFF_DIRECTION
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode volt_offset_range_swd_pmic1(uint8_t& o_output) const
+        virtual fapi2::ReturnCode volt_offset_direction_swd_pmic1(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
-        /// @brief Decodes PMIC1 SWD Delay Sequence Order -> PMIC1_SWD_ORDER
+        /// @brief Decodes PMIC1 SWD Delay -> PMIC1_SWD_DELAY
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode volt_delay_swd_pmic1(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWD Sequence Order -> PMIC1_SWD_ORDER
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///

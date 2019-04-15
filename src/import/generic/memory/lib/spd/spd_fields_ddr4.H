@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1003,76 +1003,84 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC0_SWA_VOLT_SET_BYTE = 234,
             PMIC0_SWA_VOLT_SET_START = 0,
             PMIC0_SWA_VOLT_SET_LEN = 7,
-            PMIC0_SWA_RANGE_START = 7,
-            PMIC0_SWA_RANGE_LEN = 1,
+            PMIC0_SWA_RANGE_SELECT_START = 7,
+            PMIC0_SWA_RANGE_SELECT_LEN = 1,
 
             // Byte 235: PMIC0 SWA Voltage Offset
             PMIC0_SWA_VOLT_OFF_BYTE = 235,
             PMIC0_SWA_VOLT_OFF_START = 0,
             PMIC0_SWA_VOLT_OFF_LEN = 7,
-            PMIC0_SWA_OFF_RANGE_START = 7,
-            PMIC0_SWA_OFF_RANGE_LEN = 1,
+            PMIC0_SWA_OFF_DIRECTION_START = 7,
+            PMIC0_SWA_OFF_DIRECTION_LEN = 1,
 
             // Byte 236: PMIC0 SWA Delay Sequence Order
             PMIC0_SWA_DELAY_BYTE = 236,
-            PMIC0_SWA_ORDER_START = 0,
+            PMIC0_SWA_DELAY_START = 0,
+            PMIC0_SWA_DELAY_LEN = 4,
+            PMIC0_SWA_ORDER_START = 4,
             PMIC0_SWA_ORDER_LEN = 4,
 
             // Byte 237: PMIC0 SWB Voltage Setting
             PMIC0_SWB_VOLT_SET_BYTE = 237,
             PMIC0_SWB_VOLT_SET_START = 0,
             PMIC0_SWB_VOLT_SET_LEN = 7,
-            PMIC0_SWB_RANGE_START = 7,
-            PMIC0_SWB_RANGE_LEN = 1,
+            PMIC0_SWB_RANGE_SELECT_START = 7,
+            PMIC0_SWB_RANGE_SELECT_LEN = 1,
 
             // Byte 238: PMIC0 SWB Voltage Offset
             PMIC0_SWB_VOLT_OFF_BYTE = 238,
             PMIC0_SWB_VOLT_OFF_START = 0,
             PMIC0_SWB_VOLT_OFF_LEN = 7,
-            PMIC0_SWB_OFF_RANGE_START = 7,
-            PMIC0_SWB_OFF_RANGE_LEN = 1,
+            PMIC0_SWB_OFF_DIRECTION_START = 7,
+            PMIC0_SWB_OFF_DIRECTION_LEN = 1,
 
             // Byte 239: PMIC0 SWB Delay Sequence Order
             PMIC0_SWB_DELAY_BYTE = 239,
-            PMIC0_SWB_ORDER_START = 0,
+            PMIC0_SWB_DELAY_START = 0,
+            PMIC0_SWB_DELAY_LEN = 4,
+            PMIC0_SWB_ORDER_START = 4,
             PMIC0_SWB_ORDER_LEN = 4,
 
             // Byte 240: PMIC0 SWC Voltage Setting
             PMIC0_SWC_VOLT_SET_BYTE = 240,
             PMIC0_SWC_VOLT_SET_START = 0,
             PMIC0_SWC_VOLT_SET_LEN = 7,
-            PMIC0_SWC_RANGE_START = 7,
-            PMIC0_SWC_RANGE_LEN = 1,
+            PMIC0_SWC_RANGE_SELECT_START = 7,
+            PMIC0_SWC_RANGE_SELECT_LEN = 1,
 
             // Byte 241: PMIC0 SWC Voltage Offset
             PMIC0_SWC_VOLT_OFF_BYTE = 241,
             PMIC0_SWC_VOLT_OFF_START = 0,
             PMIC0_SWC_VOLT_OFF_LEN = 7,
-            PMIC0_SWC_OFF_RANGE_START = 7,
-            PMIC0_SWC_OFF_RANGE_LEN = 1,
+            PMIC0_SWC_OFF_DIRECTION_START = 7,
+            PMIC0_SWC_OFF_DIRECTION_LEN = 1,
 
             // Byte 242: PMIC0 SWC Delay Sequence Order
             PMIC0_SWC_DELAY_BYTE = 242,
-            PMIC0_SWC_ORDER_START = 0,
+            PMIC0_SWC_DELAY_START = 0,
+            PMIC0_SWC_DELAY_LEN = 4,
+            PMIC0_SWC_ORDER_START = 4,
             PMIC0_SWC_ORDER_LEN = 4,
 
             // Byte 243: PMIC0 SWD Voltage Setting
             PMIC0_SWD_VOLT_SET_BYTE = 243,
             PMIC0_SWD_VOLT_SET_START = 0,
             PMIC0_SWD_VOLT_SET_LEN = 7,
-            PMIC0_SWD_RANGE_START = 7,
-            PMIC0_SWD_RANGE_LEN = 1,
+            PMIC0_SWD_RANGE_SELECT_START = 7,
+            PMIC0_SWD_RANGE_SELECT_LEN = 1,
 
             // Byte 244: PMIC0 SWD Voltage Offset
             PMIC0_SWD_VOLT_OFF_BYTE = 244,
             PMIC0_SWD_VOLT_OFF_START = 0,
             PMIC0_SWD_VOLT_OFF_LEN = 7,
-            PMIC0_SWD_OFF_RANGE_START = 7,
-            PMIC0_SWD_OFF_RANGE_LEN = 1,
+            PMIC0_SWD_OFF_DIRECTION_START = 7,
+            PMIC0_SWD_OFF_DIRECTION_LEN = 1,
 
             // Byte 245: PMIC0 SWD Delay Sequence Order
             PMIC0_SWD_DELAY_BYTE = 245,
-            PMIC0_SWD_ORDER_START = 0,
+            PMIC0_SWD_DELAY_START = 0,
+            PMIC0_SWD_DELAY_LEN = 4,
+            PMIC0_SWD_ORDER_START = 4,
             PMIC0_SWD_ORDER_LEN = 4,
 
             // Byte 246: PMIC0 Phase Combination
@@ -1084,76 +1092,84 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC1_SWA_VOLT_SET_BYTE = 247,
             PMIC1_SWA_VOLT_SET_START = 0,
             PMIC1_SWA_VOLT_SET_LEN = 7,
-            PMIC1_SWA_RANGE_START = 7,
-            PMIC1_SWA_RANGE_LEN = 1,
+            PMIC1_SWA_RANGE_SELECT_START = 7,
+            PMIC1_SWA_RANGE_SELECT_LEN = 1,
 
             // Byte 248: PMIC1 SWA Voltage Offset
             PMIC1_SWA_VOLT_OFF_BYTE = 248,
             PMIC1_SWA_VOLT_OFF_START = 0,
             PMIC1_SWA_VOLT_OFF_LEN = 7,
-            PMIC1_SWA_OFF_RANGE_START = 7,
-            PMIC1_SWA_OFF_RANGE_LEN = 1,
+            PMIC1_SWA_OFF_DIRECTION_START = 7,
+            PMIC1_SWA_OFF_DIRECTION_LEN = 1,
 
             // Byte 249: PMIC1 SWA Delay Sequence Order
             PMIC1_SWA_DELAY_BYTE = 249,
-            PMIC1_SWA_ORDER_START = 0,
+            PMIC1_SWA_DELAY_START = 0,
+            PMIC1_SWA_DELAY_LEN = 4,
+            PMIC1_SWA_ORDER_START = 4,
             PMIC1_SWA_ORDER_LEN = 4,
 
             // Byte 250: PMIC1 SWB Voltage Setting
             PMIC1_SWB_VOLT_SET_BYTE = 250,
             PMIC1_SWB_VOLT_SET_START = 0,
             PMIC1_SWB_VOLT_SET_LEN = 7,
-            PMIC1_SWB_RANGE_START = 7,
-            PMIC1_SWB_RANGE_LEN = 1,
+            PMIC1_SWB_RANGE_SELECT_START = 7,
+            PMIC1_SWB_RANGE_SELECT_LEN = 1,
 
             // Byte 251: PMIC1 SWB Voltage Offset
             PMIC1_SWB_VOLT_OFF_BYTE = 251,
             PMIC1_SWB_VOLT_OFF_START = 0,
             PMIC1_SWB_VOLT_OFF_LEN = 7,
-            PMIC1_SWB_OFF_RANGE_START = 7,
-            PMIC1_SWB_OFF_RANGE_LEN = 1,
+            PMIC1_SWB_OFF_DIRECTION_START = 7,
+            PMIC1_SWB_OFF_DIRECTION_LEN = 1,
 
             // Byte 252: PMIC1 SWB Delay Sequence Order
             PMIC1_SWB_DELAY_BYTE = 252,
-            PMIC1_SWB_ORDER_START = 0,
+            PMIC1_SWB_DELAY_START = 0,
+            PMIC1_SWB_DELAY_LEN = 4,
+            PMIC1_SWB_ORDER_START = 4,
             PMIC1_SWB_ORDER_LEN = 4,
 
             // Byte 253: PMIC1 SWC Voltage Setting
             PMIC1_SWC_VOLT_SET_BYTE = 253,
             PMIC1_SWC_VOLT_SET_START = 0,
             PMIC1_SWC_VOLT_SET_LEN = 7,
-            PMIC1_SWC_RANGE_START = 7,
-            PMIC1_SWC_RANGE_LEN = 1,
+            PMIC1_SWC_RANGE_SELECT_START = 7,
+            PMIC1_SWC_RANGE_SELECT_LEN = 1,
 
             // Byte 254: PMIC1 SWC Voltage Offset
             PMIC1_SWC_VOLT_OFF_BYTE = 254,
             PMIC1_SWC_VOLT_OFF_START = 0,
             PMIC1_SWC_VOLT_OFF_LEN = 7,
-            PMIC1_SWC_OFF_RANGE_START = 7,
-            PMIC1_SWC_OFF_RANGE_LEN = 1,
+            PMIC1_SWC_OFF_DIRECTION_START = 7,
+            PMIC1_SWC_OFF_DIRECTION_LEN = 1,
 
             // Byte 255: PMIC1 SWC Delay Sequence Order
             PMIC1_SWC_DELAY_BYTE = 255,
-            PMIC1_SWC_ORDER_START = 0,
+            PMIC1_SWC_DELAY_START = 0,
+            PMIC1_SWC_DELAY_LEN = 4,
+            PMIC1_SWC_ORDER_START = 4,
             PMIC1_SWC_ORDER_LEN = 4,
 
             // Byte 256: PMIC1 SWD Voltage Setting
             PMIC1_SWD_VOLT_SET_BYTE = 256,
             PMIC1_SWD_VOLT_SET_START = 0,
             PMIC1_SWD_VOLT_SET_LEN = 7,
-            PMIC1_SWD_RANGE_START = 7,
-            PMIC1_SWD_RANGE_LEN = 1,
+            PMIC1_SWD_RANGE_SELECT_START = 7,
+            PMIC1_SWD_RANGE_SELECT_LEN = 1,
 
             // Byte 257: PMIC1 SWD Voltage Offset
             PMIC1_SWD_VOLT_OFF_BYTE = 257,
             PMIC1_SWD_VOLT_OFF_START = 0,
             PMIC1_SWD_VOLT_OFF_LEN = 7,
-            PMIC1_SWD_OFF_RANGE_START = 7,
-            PMIC1_SWD_OFF_RANGE_LEN = 1,
+            PMIC1_SWD_OFF_DIRECTION_START = 7,
+            PMIC1_SWD_OFF_DIRECTION_LEN = 1,
 
             // Byte 258: PMIC1 SWD Delay Sequence Order
             PMIC1_SWD_DELAY_BYTE = 258,
-            PMIC1_SWD_ORDER_START = 0,
+            PMIC1_SWD_DELAY_START = 0,
+            PMIC1_SWD_DELAY_LEN = 4,
+            PMIC1_SWD_ORDER_START = 4,
             PMIC1_SWD_ORDER_LEN = 4,
 
             // Byte 259: PMIC1 Phase Combination
@@ -1292,46 +1308,50 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 234: PMIC0 SWA Voltage Setting
         static constexpr field_t PMIC0_SWA_VOLT_SET{PMIC0_SWA_VOLT_SET_BYTE, PMIC0_SWA_VOLT_SET_START, PMIC0_SWA_VOLT_SET_LEN};
-        static constexpr field_t PMIC0_SWA_RANGE{PMIC0_SWA_VOLT_SET_BYTE, PMIC0_SWA_RANGE_START, PMIC0_SWA_RANGE_LEN};
+        static constexpr field_t PMIC0_SWA_RANGE_SELECT{PMIC0_SWA_VOLT_SET_BYTE, PMIC0_SWA_RANGE_SELECT_START, PMIC0_SWA_RANGE_SELECT_LEN};
 
         // Byte 235: PMIC0 SWA Voltage Offset
         static constexpr field_t PMIC0_SWA_VOLT_OFF{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_VOLT_OFF_START, PMIC0_SWA_VOLT_OFF_LEN};
-        static constexpr field_t PMIC0_SWA_OFF_RANGE{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_OFF_RANGE_START, PMIC0_SWA_OFF_RANGE_LEN};
+        static constexpr field_t PMIC0_SWA_OFF_DIRECTION{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_OFF_DIRECTION_START, PMIC0_SWA_OFF_DIRECTION_LEN};
 
         // Byte 236: PMIC0 SWA Delay Sequence Order
+        static constexpr field_t PMIC0_SWA_DELAY{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_DELAY_START, PMIC0_SWA_DELAY_LEN};
         static constexpr field_t PMIC0_SWA_ORDER{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_ORDER_START, PMIC0_SWA_ORDER_LEN};
 
         // Byte 237: PMIC0 SWB Voltage Setting
         static constexpr field_t PMIC0_SWB_VOLT_SET{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_VOLT_SET_START, PMIC0_SWB_VOLT_SET_LEN};
-        static constexpr field_t PMIC0_SWB_RANGE{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_RANGE_START, PMIC0_SWB_RANGE_LEN};
+        static constexpr field_t PMIC0_SWB_RANGE_SELECT{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_RANGE_SELECT_START, PMIC0_SWB_RANGE_SELECT_LEN};
 
         // Byte 238: PMIC0 SWB Voltage Offset
         static constexpr field_t PMIC0_SWB_VOLT_OFF{PMIC0_SWB_VOLT_OFF_BYTE, PMIC0_SWB_VOLT_OFF_START, PMIC0_SWB_VOLT_OFF_LEN};
-        static constexpr field_t PMIC0_SWB_OFF_RANGE{PMIC0_SWB_VOLT_OFF_BYTE, PMIC0_SWB_OFF_RANGE_START, PMIC0_SWB_OFF_RANGE_LEN};
+        static constexpr field_t PMIC0_SWB_OFF_DIRECTION{PMIC0_SWB_VOLT_OFF_BYTE, PMIC0_SWB_OFF_DIRECTION_START, PMIC0_SWB_OFF_DIRECTION_LEN};
 
         // Byte 239: PMIC0 SWB Delay Sequence Order
+        static constexpr field_t PMIC0_SWB_DELAY{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_DELAY_START, PMIC0_SWB_DELAY_LEN};
         static constexpr field_t PMIC0_SWB_ORDER{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_ORDER_START, PMIC0_SWB_ORDER_LEN};
 
         // Byte 240: PMIC0 SWC Voltage Setting
         static constexpr field_t PMIC0_SWC_VOLT_SET{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_VOLT_SET_START, PMIC0_SWC_VOLT_SET_LEN};
-        static constexpr field_t PMIC0_SWC_RANGE{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_RANGE_START, PMIC0_SWC_RANGE_LEN};
+        static constexpr field_t PMIC0_SWC_RANGE_SELECT{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_RANGE_SELECT_START, PMIC0_SWC_RANGE_SELECT_LEN};
 
         // Byte 241: PMIC0 SWC Voltage Offset
         static constexpr field_t PMIC0_SWC_VOLT_OFF{PMIC0_SWC_VOLT_OFF_BYTE, PMIC0_SWC_VOLT_OFF_START, PMIC0_SWC_VOLT_OFF_LEN};
-        static constexpr field_t PMIC0_SWC_OFF_RANGE{PMIC0_SWC_VOLT_OFF_BYTE, PMIC0_SWC_OFF_RANGE_START, PMIC0_SWC_OFF_RANGE_LEN};
+        static constexpr field_t PMIC0_SWC_OFF_DIRECTION{PMIC0_SWC_VOLT_OFF_BYTE, PMIC0_SWC_OFF_DIRECTION_START, PMIC0_SWC_OFF_DIRECTION_LEN};
 
         // Byte 242: PMIC0 SWC Delay Sequence Order
+        static constexpr field_t PMIC0_SWC_DELAY{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_DELAY_START, PMIC0_SWC_DELAY_LEN};
         static constexpr field_t PMIC0_SWC_ORDER{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_ORDER_START, PMIC0_SWC_ORDER_LEN};
 
         // Byte 243: PMIC0 SWD Voltage Setting
         static constexpr field_t PMIC0_SWD_VOLT_SET{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_VOLT_SET_START, PMIC0_SWD_VOLT_SET_LEN};
-        static constexpr field_t PMIC0_SWD_RANGE{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_RANGE_START, PMIC0_SWD_RANGE_LEN};
+        static constexpr field_t PMIC0_SWD_RANGE_SELECT{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_RANGE_SELECT_START, PMIC0_SWD_RANGE_SELECT_LEN};
 
         // Byte 244: PMIC0 SWD Voltage Offset
         static constexpr field_t PMIC0_SWD_VOLT_OFF{PMIC0_SWD_VOLT_OFF_BYTE, PMIC0_SWD_VOLT_OFF_START, PMIC0_SWD_VOLT_OFF_LEN};
-        static constexpr field_t PMIC0_SWD_OFF_RANGE{PMIC0_SWD_VOLT_OFF_BYTE, PMIC0_SWD_OFF_RANGE_START, PMIC0_SWD_OFF_RANGE_LEN};
+        static constexpr field_t PMIC0_SWD_OFF_DIRECTION{PMIC0_SWD_VOLT_OFF_BYTE, PMIC0_SWD_OFF_DIRECTION_START, PMIC0_SWD_OFF_DIRECTION_LEN};
 
         // Byte 245: PMIC0 SWD Delay Sequence Order
+        static constexpr field_t PMIC0_SWD_DELAY{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_DELAY_START, PMIC0_SWD_DELAY_LEN};
         static constexpr field_t PMIC0_SWD_ORDER{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_ORDER_START, PMIC0_SWD_ORDER_LEN};
 
         // Byte 246: PMIC0 Phase Combination
@@ -1339,46 +1359,50 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 247: PMIC1 SWA Voltage Setting
         static constexpr field_t PMIC1_SWA_VOLT_SET{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_VOLT_SET_START, PMIC1_SWA_VOLT_SET_LEN};
-        static constexpr field_t PMIC1_SWA_RANGE{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_RANGE_START, PMIC1_SWA_RANGE_LEN};
+        static constexpr field_t PMIC1_SWA_RANGE_SELECT{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_RANGE_SELECT_START, PMIC1_SWA_RANGE_SELECT_LEN};
 
         // Byte 248: PMIC1 SWA Voltage Offset
         static constexpr field_t PMIC1_SWA_VOLT_OFF{PMIC1_SWA_VOLT_OFF_BYTE, PMIC1_SWA_VOLT_OFF_START, PMIC1_SWA_VOLT_OFF_LEN};
-        static constexpr field_t PMIC1_SWA_OFF_RANGE{PMIC1_SWA_VOLT_OFF_BYTE, PMIC1_SWA_OFF_RANGE_START, PMIC1_SWA_OFF_RANGE_LEN};
+        static constexpr field_t PMIC1_SWA_OFF_DIRECTION{PMIC1_SWA_VOLT_OFF_BYTE, PMIC1_SWA_OFF_DIRECTION_START, PMIC1_SWA_OFF_DIRECTION_LEN};
 
         // Byte 249: PMIC1 SWA Delay Sequence Order
+        static constexpr field_t PMIC1_SWA_DELAY{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_DELAY_START, PMIC1_SWA_DELAY_LEN};
         static constexpr field_t PMIC1_SWA_ORDER{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_ORDER_START, PMIC1_SWA_ORDER_LEN};
 
         // Byte 250: PMIC1 SWB Voltage Setting
         static constexpr field_t PMIC1_SWB_VOLT_SET{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_VOLT_SET_START, PMIC1_SWB_VOLT_SET_LEN};
-        static constexpr field_t PMIC1_SWB_RANGE{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_RANGE_START, PMIC1_SWB_RANGE_LEN};
+        static constexpr field_t PMIC1_SWB_RANGE_SELECT{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_RANGE_SELECT_START, PMIC1_SWB_RANGE_SELECT_LEN};
 
         // Byte 251: PMIC1 SWB Voltage Offset
         static constexpr field_t PMIC1_SWB_VOLT_OFF{PMIC1_SWB_VOLT_OFF_BYTE, PMIC1_SWB_VOLT_OFF_START, PMIC1_SWB_VOLT_OFF_LEN};
-        static constexpr field_t PMIC1_SWB_OFF_RANGE{PMIC1_SWB_VOLT_OFF_BYTE, PMIC1_SWB_OFF_RANGE_START, PMIC1_SWB_OFF_RANGE_LEN};
+        static constexpr field_t PMIC1_SWB_OFF_DIRECTION{PMIC1_SWB_VOLT_OFF_BYTE, PMIC1_SWB_OFF_DIRECTION_START, PMIC1_SWB_OFF_DIRECTION_LEN};
 
         // Byte 252: PMIC1 SWB Delay Sequence Order
+        static constexpr field_t PMIC1_SWB_DELAY{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_DELAY_START, PMIC1_SWB_DELAY_LEN};
         static constexpr field_t PMIC1_SWB_ORDER{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_ORDER_START, PMIC1_SWB_ORDER_LEN};
 
         // Byte 253: PMIC1 SWC Voltage Setting
         static constexpr field_t PMIC1_SWC_VOLT_SET{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_VOLT_SET_START, PMIC1_SWC_VOLT_SET_LEN};
-        static constexpr field_t PMIC1_SWC_RANGE{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_RANGE_START, PMIC1_SWC_RANGE_LEN};
+        static constexpr field_t PMIC1_SWC_RANGE_SELECT{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_RANGE_SELECT_START, PMIC1_SWC_RANGE_SELECT_LEN};
 
         // Byte 254: PMIC1 SWC Voltage Offset
         static constexpr field_t PMIC1_SWC_VOLT_OFF{PMIC1_SWC_VOLT_OFF_BYTE, PMIC1_SWC_VOLT_OFF_START, PMIC1_SWC_VOLT_OFF_LEN};
-        static constexpr field_t PMIC1_SWC_OFF_RANGE{PMIC1_SWC_VOLT_OFF_BYTE, PMIC1_SWC_OFF_RANGE_START, PMIC1_SWC_OFF_RANGE_LEN};
+        static constexpr field_t PMIC1_SWC_OFF_DIRECTION{PMIC1_SWC_VOLT_OFF_BYTE, PMIC1_SWC_OFF_DIRECTION_START, PMIC1_SWC_OFF_DIRECTION_LEN};
 
         // Byte 255: PMIC1 SWC Delay Sequence Order
+        static constexpr field_t PMIC1_SWC_DELAY{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_DELAY_START, PMIC1_SWC_DELAY_LEN};
         static constexpr field_t PMIC1_SWC_ORDER{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_ORDER_START, PMIC1_SWC_ORDER_LEN};
 
         // Byte 256: PMIC1 SWD Voltage Setting
         static constexpr field_t PMIC1_SWD_VOLT_SET{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_VOLT_SET_START, PMIC1_SWD_VOLT_SET_LEN};
-        static constexpr field_t PMIC1_SWD_RANGE{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_RANGE_START, PMIC1_SWD_RANGE_LEN};
+        static constexpr field_t PMIC1_SWD_RANGE_SELECT{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_RANGE_SELECT_START, PMIC1_SWD_RANGE_SELECT_LEN};
 
         // Byte 257: PMIC1 SWD Voltage Offset
         static constexpr field_t PMIC1_SWD_VOLT_OFF{PMIC1_SWD_VOLT_OFF_BYTE, PMIC1_SWD_VOLT_OFF_START, PMIC1_SWD_VOLT_OFF_LEN};
-        static constexpr field_t PMIC1_SWD_OFF_RANGE{PMIC1_SWD_VOLT_OFF_BYTE, PMIC1_SWD_OFF_RANGE_START, PMIC1_SWD_OFF_RANGE_LEN};
+        static constexpr field_t PMIC1_SWD_OFF_DIRECTION{PMIC1_SWD_VOLT_OFF_BYTE, PMIC1_SWD_OFF_DIRECTION_START, PMIC1_SWD_OFF_DIRECTION_LEN};
 
         // Byte 258: PMIC1 SWD Delay Sequence Order
+        static constexpr field_t PMIC1_SWD_DELAY{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_DELAY_START, PMIC1_SWD_DELAY_LEN};
         static constexpr field_t PMIC1_SWD_ORDER{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_ORDER_START, PMIC1_SWD_ORDER_LEN};
 
         // Byte 259: PMIC1 Phase Combination

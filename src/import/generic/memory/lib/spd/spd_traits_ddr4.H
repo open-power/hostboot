@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4621,11 +4621,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWA_RANGE field specialization
+/// @note PMIC0_SWA_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_RANGE_SELECT, R >
 {
     public:
 
@@ -4659,16 +4659,35 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWA_OFF_RANGE field specialization
+/// @note PMIC0_SWA_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWA Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Voltage Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWA_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWA_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Delay";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -4716,11 +4735,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWB_RANGE field specialization
+/// @note PMIC0_SWB_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_RANGE_SELECT, R >
 {
     public:
 
@@ -4754,20 +4773,40 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWB_OFF_RANGE field specialization
+/// @note PMIC0_SWB_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWB Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Voltage Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
 };
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWB_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWB_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Delay";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
 
 ///
 /// @class readerTraits
@@ -4811,11 +4850,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWC_RANGE field specialization
+/// @note PMIC0_SWC_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_RANGE_SELECT, R >
 {
     public:
 
@@ -4849,20 +4888,40 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWC_OFF_RANGE field specialization
+/// @note PMIC0_SWC_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWC Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Voltage Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
 };
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWC_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWC_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Delay";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
 
 ///
 /// @class readerTraits
@@ -4906,11 +4965,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWD_RANGE field specialization
+/// @note PMIC0_SWD_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_RANGE_SELECT, R >
 {
     public:
 
@@ -4944,20 +5003,40 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC0_SWD_OFF_RANGE field specialization
+/// @note PMIC0_SWD_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC0 SWD Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Voltage Offset Direction";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
 };
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWD_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Delay";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
 
 ///
 /// @class readerTraits
@@ -5020,11 +5099,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWA_RANGE field specialization
+/// @note PMIC1_SWA_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_RANGE_SELECT, R >
 {
     public:
 
@@ -5058,16 +5137,35 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWA_OFF_RANGE field specialization
+/// @note PMIC1_SWA_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWA Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Voltage Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWA_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWA_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Delay";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -5115,11 +5213,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWB_RANGE field specialization
+/// @note PMIC1_SWB_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_RANGE_SELECT, R >
 {
     public:
 
@@ -5153,16 +5251,35 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWB_OFF_RANGE field specialization
+/// @note PMIC1_SWB_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWB Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Voltage Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWB_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWB_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Delay";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -5210,11 +5327,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWC_RANGE field specialization
+/// @note PMIC1_SWC_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_RANGE_SELECT, R >
 {
     public:
 
@@ -5248,16 +5365,35 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWC_OFF_RANGE field specialization
+/// @note PMIC1_SWC_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWC Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Voltage Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWC_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWC_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Delay";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -5305,11 +5441,11 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_VOLT_SET, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWD_RANGE field specialization
+/// @note PMIC1_SWD_RANGE_SELECT field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_RANGE_SELECT, R >
 {
     public:
 
@@ -5343,16 +5479,35 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_VOLT_OFF, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note PMIC1_SWD_OFF_RANGE field specialization
+/// @note PMIC1_SWD_OFF_DIRECTION field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_OFF_RANGE, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_OFF_DIRECTION, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x01;
-        static constexpr const char* FIELD_STR = "PMIC1 SWD Voltage Offset Range";
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Voltage Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWD_DELAY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_DELAY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x07;
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Delay";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
