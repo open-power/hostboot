@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,7 +27,7 @@
 <!-- ********************************************************************* -->
 <attribute>
   <id>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
-  <targetType>TARGET_TYPE_OMI</targetType>
+  <targetType>TARGET_TYPE_OMI, TARGET_TYPE_MC</targetType>
   <description>
        OMI inband BAR address offset.
 
@@ -45,6 +45,9 @@
        For example, both MMIO and config bar sizes are 2GB.  The 2GB
        bit becomes the selector for the subchannel.  The 4GB bit becomes
        the offset applied for MMIO operations.
+
+       Value is also set on MC to match the BAR offset of the child OMI with
+       lowest chip unit.
 
 
        Each OCMB is assigned one base address attribute.
