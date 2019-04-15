@@ -42,7 +42,7 @@
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/rank.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <p9_mc_scom_addresses_fld.H>
@@ -87,21 +87,21 @@ fapi2::ReturnCode check_shadow_register_corruption( const fapi2::Target<fapi2::T
 /// @param[in] i_inst instruction to check for an MRS command
 /// @return true iff the command contains an MRS command
 ///
-bool is_command_mrs(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst);
+bool is_command_mrs(const ccs::instruction_t& i_inst);
 
 ///
 /// @brief Returns true if a vector of commands contains an MRS command
 /// @param[in] i_inst instruction to check for an MRS command
 /// @return true iff the command contains an MRS command
 ///
-bool contains_command_mrs(const std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& i_inst);
+bool contains_command_mrs(const std::vector<ccs::instruction_t>& i_inst);
 
 ///
 /// @brief Converts the CCS instructions to the shadow register configuration
 /// @param[in] i_inst CCS instruction to convert
 /// @return the register value for the shadow register
 ///
-inline fapi2::buffer<uint64_t> convert_to_shadow_reg(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst)
+inline fapi2::buffer<uint64_t> convert_to_shadow_reg(const ccs::instruction_t& i_inst)
 {
     fapi2::buffer<uint64_t> l_arr0(i_inst.arr0);
     mss::reverse(l_arr0);
@@ -137,7 +137,7 @@ class shadow_regs_traits<0>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             constexpr uint8_t LR_2666_MARGIN_ADJUST = 2;
@@ -188,7 +188,7 @@ class shadow_regs_traits<1>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs01(i_target, io_inst, i_rank);
@@ -214,7 +214,7 @@ class shadow_regs_traits<2>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs02(i_target, io_inst, i_rank);
@@ -240,7 +240,7 @@ class shadow_regs_traits<3>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs03(i_target, io_inst, i_rank);
@@ -266,7 +266,7 @@ class shadow_regs_traits<4>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs04(i_target, io_inst, i_rank);
@@ -292,7 +292,7 @@ class shadow_regs_traits<5>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs05(i_target, io_inst, i_rank);
@@ -318,7 +318,7 @@ class shadow_regs_traits<6>
         /// @return FAPI2_RC_SUCCESS iff OK
         ///
         static inline fapi2::ReturnCode mrs_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                                ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                                                ccs::instruction_t& io_inst,
                                                 const uint64_t i_rank)
         {
             return mss::ddr4::mrs06(i_target, io_inst, i_rank);
@@ -342,7 +342,7 @@ fapi2::ReturnCode fix_shadow_register_corruption_mr( const fapi2::Target<fapi2::
 {
     static_assert( MR <= MAX_MR, "MR instance out of range");
 
-    ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> l_inst;
+    ccs::instruction_t l_inst;
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     // Converts this to DIMM rank. just. in. case.

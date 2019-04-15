@@ -39,7 +39,8 @@
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/workarounds/quad_encode_workarounds.H>
@@ -105,7 +106,7 @@ const std::vector< uint64_t> shadow_regs_traits<6>::REGS =
 /// @param[in] i_inst instruction to check for an MRS command
 /// @return true iff the command contains an MRS command
 ///
-bool is_command_mrs(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst)
+bool is_command_mrs(const ccs::instruction_t& i_inst)
 {
     // An MRS command is
     // 1) at least one chip select active
@@ -132,7 +133,7 @@ bool is_command_mrs(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst)
 /// @param[in] i_inst instruction to check for an MRS command
 /// @return true iff the command contains an MRS command
 ///
-bool contains_command_mrs(const std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& i_inst)
+bool contains_command_mrs(const std::vector<ccs::instruction_t>& i_inst)
 {
     bool l_contains_mrs = false;
 
