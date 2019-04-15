@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -148,27 +148,27 @@ group gMCFIR
     /** MCFIR[0]
      *  MC internal recoverable error
      */
-    (rMCFIR, bit(0)) ? defaultMaskedError;
+    (rMCFIR, bit(0)) ? self_th_1;
 
     /** MCFIR[1]
      *  MC internal non recoverable error
      */
-    (rMCFIR, bit(1)) ? defaultMaskedError;
+    (rMCFIR, bit(1)) ? self_th_1;
 
     /** MCFIR[2]
      *  Powerbus protocol error
      */
-    (rMCFIR, bit(2)) ? defaultMaskedError;
+    (rMCFIR, bit(2)) ? level2_th_1;
 
     /** MCFIR[3]
      *  Inband bar hit with incorrect ttype
      */
-    (rMCFIR, bit(3)) ? defaultMaskedError;
+    (rMCFIR, bit(3)) ? level2_M_self_L_th_1;
 
     /** MCFIR[4]
      *  Multiple bar
      */
-    (rMCFIR, bit(4)) ? defaultMaskedError;
+    (rMCFIR, bit(4)) ? self_th_1;
 
     /** MCFIR[5]
      *  PB write ECC syndrome NE0
@@ -183,7 +183,7 @@ group gMCFIR
     /** MCFIR[8]
      *  Command list timeout
      */
-    (rMCFIR, bit(8)) ? defaultMaskedError;
+    (rMCFIR, bit(8)) ? threshold_and_mask_self;
 
     /** MCFIR[9:10]
      *  reserved
@@ -218,7 +218,7 @@ group gMCFIR
     /** MCFIR[17]
      *  WAT debug config reg error
      */
-    (rMCFIR, bit(17)) ? defaultMaskedError;
+    (rMCFIR, bit(17)) ? threshold_and_mask_self;
 
     /** MCFIR[18:21]
      *  reserved

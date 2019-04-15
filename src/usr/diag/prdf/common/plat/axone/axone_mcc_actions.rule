@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,10 +23,80 @@
 #
 # IBM_PROLOG_END_TAG
 
+actionclass omi_0_and_explorer_0_th_1_UERE
+{
+    SueSource;
+    callout(connected(TYPE_OMI,       0), MRU_MEDA);
+    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MEDA);
+    threshold1;
+};
+
+actionclass omi_0_and_explorer_0_th_32_perDay
+{
+    callout(connected(TYPE_OMI,       0), MRU_MEDA);
+    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MEDA);
+    threshold32pday;
+};
+
+actionclass explorer_0_th_1_UERE
+{
+    SueSource;
+    callout(connected(TYPE_OCMB_CHIP, 0), MRU_MED);
+    threshold1;
+};
+
+actionclass omi_1_and_explorer_1_th_1_UERE
+{
+    SueSource;
+    callout(connected(TYPE_OMI,       1), MRU_MEDA);
+    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MEDA);
+    threshold1;
+};
+
+actionclass omi_1_and_explorer_1_th_32_perDay
+{
+    callout(connected(TYPE_OMI,       1), MRU_MEDA);
+    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MEDA);
+    threshold32pday;
+};
+
+actionclass explorer_1_th_1_UERE
+{
+    SueSource;
+    callout(connected(TYPE_OCMB_CHIP, 1), MRU_MED);
+    threshold1;
+};
+
 ################################################################################
 # Analyze groups
 ################################################################################
 
 actionclass analyzeDSTLFIR { analyze(gDSTLFIR); };
 actionclass analyzeUSTLFIR { analyze(gUSTLFIR); };
+
+################################################################################
+# Analyze connected
+################################################################################
+
+actionclass analyzeConnectedExplorer_0
+{
+    analyze(connected(TYPE_OCMB_CHIP, 0));
+};
+
+actionclass analyzeConnectedExplorer_1
+{
+    analyze(connected(TYPE_OCMB_CHIP, 1));
+};
+
+actionclass analyzeConnectedExplorer_0_UERE
+{
+    SueSource;
+    analyzeConnectedExplorer_0;
+};
+
+actionclass analyzeConnectedExplorer_1_UERE
+{
+    SueSource;
+    analyzeConnectedExplorer_1;
+};
 
