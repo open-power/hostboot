@@ -731,11 +731,11 @@ uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
-                                         AddrRangeType i_rangeType,
-                                         bool & o_stoppedOnLastAddr,
-                                         bool i_rowRepair )
+template<TARGETING::TYPE T>
+uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
+                               AddrRangeType i_rangeType,
+                               bool & o_stoppedOnLastAddr,
+                               bool i_rowRepair )
 {
     #define PRDF_FUNC "[didCmdStopOnLastAddr] "
 
@@ -747,7 +747,7 @@ uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
     {
         // Get the current address.
         MemAddr curAddr;
-        o_rc = getMemMaintAddr<TYPE_MBA>( i_chip, curAddr );
+        o_rc = getMemMaintAddr<T>( i_chip, curAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -757,7 +757,7 @@ uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
 
         // Get the end address of the current rank.
         MemAddr junk, endAddr;
-        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, curAddr.getRank(), junk,
+        o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), junk,
                                           endAddr, i_rangeType );
         if ( SUCCESS != o_rc )
         {
@@ -782,7 +782,16 @@ uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-
+template
+uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                         AddrRangeType i_rangeType,
+                                         bool & o_stoppedOnLastAddr,
+                                         bool i_rowRepair );
+template
+uint32_t didCmdStopOnLastAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                               AddrRangeType i_rangeType,
+                                               bool & o_stoppedOnLastAddr,
+                                               bool i_rowRepair );
 //------------------------------------------------------------------------------
 
 } // end namespace PRDF

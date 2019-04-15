@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,18 +37,12 @@ namespace PRDF
 
 using namespace PlatServices;
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
+                                STEP_CODE_DATA_STRUCT & io_sc,
+                                bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::checkEcc] "
+    #define PRDF_FUNC "[DsdEvent<T>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -71,7 +65,7 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
             // At this point we don't actually have an address for the UE. The
             // best we can do is get the address in which the command stopped.
             MemAddr addr;
-            o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
+            o_rc = getMemMaintAddr<T>( iv_chip, addr );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -79,8 +73,8 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
-            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
-                                                  UE_TABLE::SCRUB_UE, io_sc );
+            o_rc = MemEcc::handleMemUe<T>( iv_chip, addr,
+                                           UE_TABLE::SCRUB_UE, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
@@ -101,12 +95,12 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
-                                          STEP_CODE_DATA_STRUCT & io_sc,
-                                          bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
+                                   STEP_CODE_DATA_STRUCT & io_sc,
+                                   bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::verifySpare] "
+    #define PRDF_FUNC "[DsdEvent<T>::verifySpare] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -128,8 +122,15 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
             // Set the bad spare in the VPD. At this point, the chip mark
             // should have already been set in the VPD because it was recently
             // verified.
+            TargetHandle_t bitmapTrgt = iv_chip->getTrgt();
+            if ( TYPE_OCMB_CHIP == T )
+            {
+                ExtensibleChip * bitmapChip = getConnectedChild( iv_chip,
+                    TYPE_MEM_PORT, iv_mark.getSymbol().getPortSlct() );
+                bitmapTrgt = bitmapChip->getTrgt();
+            }
             MemDqBitmap bitmap;
-            o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            o_rc = getBadDqBitmap( bitmapTrgt, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
@@ -149,7 +150,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
                 }
             }
 
-            o_rc = setBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            o_rc = setBadDqBitmap( bitmapTrgt, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
@@ -166,7 +167,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
                                               PRDFSIG_DsdDramSpared );
 
             // Remove the chip mark.
-            o_rc = MarkStore::clearChipMark<TYPE_MBA>( iv_chip, iv_rank );
+            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
@@ -190,7 +191,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
 template<>
 uint32_t DsdEvent<TYPE_MBA>::startCmd()
 {
-    #define PRDF_FUNC "[DsdEvent::startCmd] "
+    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::startCmd] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -231,7 +232,50 @@ uint32_t DsdEvent<TYPE_MBA>::startCmd()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
+{
+    #define PRDF_FUNC "[DsdEvent<TYPE_OCMB_CHIP>::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    mss::mcbist::stop_conditions<> stopCond;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_1:
+            // Start the steer cleanup procedure on this master rank.
+            o_rc = startTdSteerCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                        MASTER_RANK, stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) failed",
+                          iv_chip->getHuid(), getKey() );
+            }
+            break;
+
+        case TD_PHASE_2:
+            // Start the superfast read procedure on this master rank.
+            o_rc = startTdSfRead<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
+                                                  stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
+                          iv_chip->getHuid(), getKey() );
+            }
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 {
     uint32_t signature = 0;
 
@@ -259,6 +303,10 @@ uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 }
 
 //------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class DsdEvent<TYPE_MBA>;
+template class DsdEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF
 

@@ -1020,7 +1020,7 @@ int32_t mssSetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
 }
 
 template<>
-int32_t mssSetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
+int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
     const MemRank & i_rank, const MemSymbol & i_symbol, bool i_x4EccSpare )
 {
     int32_t o_rc = SUCCESS;

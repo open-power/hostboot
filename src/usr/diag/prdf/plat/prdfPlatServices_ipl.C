@@ -949,6 +949,151 @@ uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
 {
     return SUCCESS; // Not needed for MCBIST commands.
 }
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTdSteerCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, AddrRangeType i_rangeType,
+    mss::mcbist::stop_conditions<> i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdSteerCleanup<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Default speed is to run as fast as possible.
+    //mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
+
+    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
+    // for the reasons why.
+    i_stopCond.set_pause_on_aue(mss::ON);
+
+    do
+    {
+        // Get the address range of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr, eaddr,
+                                                i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        /* TODO RTC 207273 - sparing support
+        // Get the MBA fapi target.
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+        // Start the steer cleanup command.
+        mss_TimeBaseSteerCleanup cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
+                                       i_stopCond, false };
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+        */
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTdSfRead<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
+                                      const MemRank & i_rank,
+                                      AddrRangeType i_rangeType,
+                                      mss::mcbist::stop_conditions<> i_stopCond)
+{
+    #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
+    // for the reasons why.
+    i_stopCond.set_pause_on_aue(mss::ON);
+
+    do
+    {
+        // Get the address range of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr, eaddr,
+                                                i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        /* TODO RTC 207273 - HWP support
+        // Get the MBA fapi target.
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+        // Create the new command. Store a pointer to the command in the MBA
+        // data bundle so that we can call the cleanup function after the
+        // command has completed.
+        MbaDataBundle * db = getMbaDataBundle( i_chip );
+        PRDF_ASSERT( nullptr == db->iv_sfCmd ); // Code bug.
+        db->iv_sfCmd = new mss_SuperFastRead { fapiTrgt, saddr, eaddr,
+                                               i_stopCond, false };
+
+        // Start the super fast read command.
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+        */
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //------------------------------------------------------------------------------
 
 } // end namespace PlatServices

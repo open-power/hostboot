@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ class DsdEvent : public TdEntry
 
     /**
      * @brief Constructor
-     * @param i_chip MCA or MBA.
+     * @param i_chip MCA, MBA, or OCMB.
      * @param i_rank Rank reporting chip mark.
      */
     DsdEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,

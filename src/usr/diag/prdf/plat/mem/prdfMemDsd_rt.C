@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,16 +36,10 @@ namespace PRDF
 
 using namespace PlatServices;
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
+                                STEP_CODE_DATA_STRUCT & io_sc,
+                                bool & o_done )
 {
     #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::checkEcc] "
 
@@ -64,7 +58,7 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
             // At this point we don't actually have an address for the UE. The
             // best we can do is get the address in which the command stopped.
             MemAddr addr;
-            o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
+            o_rc = getMemMaintAddr<T>( iv_chip, addr );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -72,8 +66,8 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
-            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
-                                                  UE_TABLE::SCRUB_UE, io_sc );
+            o_rc = MemEcc::handleMemUe<T>( iv_chip, addr,
+                                           UE_TABLE::SCRUB_UE, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
@@ -83,7 +77,7 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
 
             // Because of the UE, any further TPS requests will likely have no
             // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<TYPE_MBA>( iv_chip, addr.getRank() );
+            MemDbUtils::banTps<T>( iv_chip, addr.getRank() );
 
             // Leave the mark in place and abort this procedure.
             o_done = true; break;
@@ -114,12 +108,12 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
-                                          STEP_CODE_DATA_STRUCT & io_sc,
-                                          bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
+                                   STEP_CODE_DATA_STRUCT & io_sc,
+                                   bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::verifySpare] "
+    #define PRDF_FUNC "[DsdEvent<T>::verifySpare] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -134,7 +128,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
         // error (i.e. a UE).
 
         bool lastAddr = false;
-        o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, MASTER_RANK, lastAddr );
+        o_rc = didCmdStopOnLastAddr<T>( iv_chip, MASTER_RANK, lastAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
@@ -155,7 +149,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_DsdDramSpared );
             // Remove the chip mark.
-            o_rc = MarkStore::clearChipMark<TYPE_MBA>( iv_chip, iv_rank );
+            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
@@ -179,7 +173,7 @@ uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
 template<>
 uint32_t DsdEvent<TYPE_MBA>::startCmd()
 {
-    #define PRDF_FUNC "[DsdEvent::startCmd] "
+    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::startCmd] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -224,7 +218,34 @@ uint32_t DsdEvent<TYPE_MBA>::startCmd()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
+{
+    #define PRDF_FUNC "[DsdEvent<TYPE_OCMB_CHIP>::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    mss::mcbist::stop_conditions<> stopCond;
+
+    stopCond.set_pause_on_ue(mss::ON);
+
+    // Start the time based scrub procedure on this master rank.
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
+                                         stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint32_t DsdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 {
     uint32_t signature = 0;
 
@@ -257,6 +278,10 @@ uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 }
 
 //------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class DsdEvent<TYPE_MBA>;
+template class DsdEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF
 
