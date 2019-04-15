@@ -61,6 +61,7 @@ enum p10_fbc_utils_addr_mode
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+
 #ifndef __PPE_QME
 // address range definitions
 const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
@@ -72,6 +73,9 @@ const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
 // fbc racetrack stations
 const uint8_t FABRIC_NUM_STATIONS = 16;
+
+// fbc max number of iohs links
+const uint8_t FABRIC_NUM_IOHS_LINKS = 8;
 
 // max memory interleave = 16TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
