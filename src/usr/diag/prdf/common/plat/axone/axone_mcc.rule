@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -180,22 +180,22 @@ rule rDSTLFIR
 
 group gDSTLFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,4,12,13,16,17,22,23)
 {
     /** DSTLFIR[0]
      *  AFU initiated Checkstop on Subchannel A
      */
-    (rDSTLFIR, bit(0)) ? defaultMaskedError;
+    (rDSTLFIR, bit(0)) ? analyzeConnectedExplorer_0_UERE;
 
     /** DSTLFIR[1]
      *  AFU initiated Recoverable Attn on Subchannel A
      */
-    (rDSTLFIR, bit(1)) ? defaultMaskedError;
+    (rDSTLFIR, bit(1)) ? analyzeConnectedExplorer_0;
 
     /** DSTLFIR[2]
      *  AFU initiated Special Attn on Subchannel A
      */
-    (rDSTLFIR, bit(2)) ? defaultMaskedError;
+    (rDSTLFIR, bit(2)) ? analyzeConnectedExplorer_0;
 
     /** DSTLFIR[3]
      *  AFU initiated Application Interrupt Attn on Subchannel A
@@ -205,17 +205,17 @@ group gDSTLFIR
     /** DSTLFIR[4]
      *  AFU initiated Checkstop on Subchannel B
      */
-    (rDSTLFIR, bit(4)) ? defaultMaskedError;
+    (rDSTLFIR, bit(4)) ? analyzeConnectedExplorer_1_UERE;
 
     /** DSTLFIR[5]
      *  AFU initiated Recoverable Attn on Subchannel B
      */
-    (rDSTLFIR, bit(5)) ? defaultMaskedError;
+    (rDSTLFIR, bit(5)) ? analyzeConnectedExplorer_1;
 
     /** DSTLFIR[6]
      *  AFU initiated Special Attn on Subchannel B
      */
-    (rDSTLFIR, bit(6)) ? defaultMaskedError;
+    (rDSTLFIR, bit(6)) ? analyzeConnectedExplorer_1;
 
     /** DSTLFIR[7]
      *  AFU initiated Application Interrupt Attn on Subchannel B
@@ -225,52 +225,52 @@ group gDSTLFIR
     /** DSTLFIR[8]
      *  Async crossing parity error
      */
-    (rDSTLFIR, bit(8)) ? defaultMaskedError;
+    (rDSTLFIR, bit(8)) ? self_th_1;
 
     /** DSTLFIR[9]
      *  Async crossing sequence error
      */
-    (rDSTLFIR, bit(9)) ? defaultMaskedError;
+    (rDSTLFIR, bit(9)) ? self_th_1;
 
     /** DSTLFIR[10]
      *  Config reg recoverable parity error
      */
-    (rDSTLFIR, bit(10)) ? defaultMaskedError;
+    (rDSTLFIR, bit(10)) ? self_th_1;
 
     /** DSTLFIR[11]
      *  Config reg fatal parity error
      */
-    (rDSTLFIR, bit(11)) ? defaultMaskedError;
+    (rDSTLFIR, bit(11)) ? self_th_1;
 
     /** DSTLFIR[12]
      *  Subchannel A counter error
      */
-    (rDSTLFIR, bit(12)) ? defaultMaskedError;
+    (rDSTLFIR, bit(12)) ? omi_0_and_explorer_0_th_1_UERE;
 
     /** DSTLFIR[13]
      *  Subchannel B counter error
      */
-    (rDSTLFIR, bit(13)) ? defaultMaskedError;
+    (rDSTLFIR, bit(13)) ? omi_1_and_explorer_1_th_1_UERE;
 
     /** DSTLFIR[14]
      *  Subchannel A timeout error
      */
-    (rDSTLFIR, bit(14)) ? defaultMaskedError;
+    (rDSTLFIR, bit(14)) ? omi_0_and_explorer_0_th_32_perDay;
 
     /** DSTLFIR[15]
      *  Subchannel B timeout error
      */
-    (rDSTLFIR, bit(15)) ? defaultMaskedError;
+    (rDSTLFIR, bit(15)) ? omi_1_and_explorer_1_th_32_perDay;
 
     /** DSTLFIR[16]
      *  Subchannel A buffer overuse error
      */
-    (rDSTLFIR, bit(16)) ? defaultMaskedError;
+    (rDSTLFIR, bit(16)) ? explorer_0_th_1_UERE;
 
     /** DSTLFIR[17]
      *  Subchannel B buffer overuse error
      */
-    (rDSTLFIR, bit(17)) ? defaultMaskedError;
+    (rDSTLFIR, bit(17)) ? explorer_1_th_1_UERE;
 
     /** DSTLFIR[18]
      *  Subchannel A DL link down
@@ -293,14 +293,29 @@ group gDSTLFIR
     (rDSTLFIR, bit(21)) ? defaultMaskedError;
 
     /** DSTLFIR[22]
-     *  Internal SCOM error
+     *  DSTLFIR channel timeout on subch A
      */
-    (rDSTLFIR, bit(22)) ? defaultMaskedError;
+    (rDSTLFIR, bit(22)) ? omi_0_and_explorer_0_th_1_UERE;
 
     /** DSTLFIR[23]
-     *  Internal SCOM error clone
+     *  DSTLFIR channel timeout on subch B
      */
-    (rDSTLFIR, bit(23)) ? defaultMaskedError;
+    (rDSTLFIR, bit(23)) ? omi_1_and_explorer_1_th_1_UERE;
+
+    /** DSTLFIR[24:25]
+     *  spare
+     */
+    (rDSTLFIR, bit(24|25)) ? defaultMaskedError;
+
+    /** DSTLFIR[26]
+     *  Internal SCOM Error
+     */
+    (rDSTLFIR, bit(26)) ? defaultMaskedError;
+
+    /** DSTLFIR[27]
+     *  Internal SCOM Error Clone
+     */
+    (rDSTLFIR, bit(27)) ? defaultMaskedError;
 
 };
 
