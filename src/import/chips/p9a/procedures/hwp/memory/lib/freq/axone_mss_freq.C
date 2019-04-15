@@ -129,6 +129,18 @@ fapi2::ReturnCode get_master_rank_per_dimm<mss::proc_type::AXONE>(
 fapi_try_exit:
     return fapi2::current_err;
 }
+///
+/// @brief Gets the DIMM type for a specific DIMM - specialization for the NIMBUS processor type
+/// @param[in] i_target DIMM target
+/// @param[out] o_dimm_type DIMM type on the DIMM target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_dimm_type<mss::proc_type::AXONE>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_dimm_type)
+{
+    return mss::attr::get_dimm_type(i_target, o_dimm_type);
+}
 
 ///
 /// @brief Gets the attribute for the maximum - specialization for Axone
