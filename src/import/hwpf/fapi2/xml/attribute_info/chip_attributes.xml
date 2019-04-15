@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -42,7 +42,8 @@
       NIMBUS = 0x5,
       CUMULUS = 0x6,
       AXONE = 0x7,
-      EXPLORER = 0x8
+      EXPLORER = 0x8,
+      GEMINI = 0x9
     </enum>
     <platInit/>
     <privileged/>
