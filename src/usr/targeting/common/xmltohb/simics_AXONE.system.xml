@@ -538,7 +538,7 @@
         <default>400,400,0,0,0,0,0,0,0,0,0,0,0,
                  400,400,400,400,0,0,0,0,0,0,0,0,0,
                  400,400,0,0,0,0,0,0,0,0,0,0,0,
-                 400,400,0,0,0,0,0,0,0,0,0,0,0</default>
+                 400,400,400,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -9174,16 +9174,32 @@
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xD2</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>2</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9223,16 +9239,32 @@
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xD4</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>3</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9272,16 +9304,32 @@
         <id>FAPI_POS</id>
         <default>11</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xD6</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>4</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9321,16 +9369,32 @@
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xD2</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>5</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9370,16 +9434,32 @@
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xD4</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>6</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9419,16 +9499,32 @@
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xD6</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>7</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -9468,16 +9564,32 @@
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
-    <!-- Note that EEPROM_VPD_PRIMARY_INFO attrs for OCMB 9-15 and DIMM 9-15
-         are invalid. The port value is invalid, info is just here to fully test
-         the EEPROM caching code (DIMM X should match OCMB X) -->
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xD8</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
+        </default>
+    </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
-            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>8</value></field>
+            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
     </attribute>
 </targetInstance>
