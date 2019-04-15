@@ -1822,10 +1822,10 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
     }
     else if ( MODEL_AXONE == l_procModel )
     {
-        ATTR_MEM_EFF_NUM_RANKS_PER_DIMM_type attr;
-        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_NUM_RANKS_PER_DIMM>(attr) )
+        ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM>(attr) )
         {
-            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_NUM_RANKS_PER_DIMM> "
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM> "
                       "failed: i_trgt=0x%08x", getHuid(i_trgt) );
             PRDF_ASSERT( false ); // attribute does not exist for target
         }
