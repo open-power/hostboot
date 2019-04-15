@@ -47,88 +47,6 @@ namespace mss
 {
 
 ///
-/// @class DataSetterTraits2D
-/// @brief Traits for setting eff_config data
-/// @tparam P proc_type
-/// @tparam X size of 1st array index
-/// @tparam Y size of 2nd array index
-///
-template < proc_type, size_t X, size_t Y >
-struct DataSetterTraits2D;
-
-///
-/// @class DataSetterTraits - Nimbus, [PORT][DIMM] array specialization
-/// @brief Traits for setting eff_config data
-///
-template < >
-struct DataSetterTraits2D < proc_type::NIMBUS,
-           mcTypeTraits<mc_type::NIMBUS>::PORTS_PER_MCS,
-           mcTypeTraits<mc_type::NIMBUS>::DIMMS_PER_PORT
-           >
-{
-    static constexpr fapi2::TargetType TARGET = fapi2::TARGET_TYPE_MCA;
-};
-
-///
-/// @brief Helper function to update a 2D array output
-/// @tparam P proc_type
-/// @tparam X size of 1st array index
-/// @tparam Y size of 2nd array index
-/// @tparam T Input/output data type
-/// @tparam TT defaulted to DataSetterTraits2D<P, X, Y>
-/// @param[in] i_target the DIMM target
-/// @param[in] i_setting array to set
-/// @param[in] i_ffdc_code FFDC function code
-/// @param[out] o_data attribute data structure to set
-/// @warning This is Nimbus specific until MCA alias to MEM_PORT
-///
-template < proc_type P,
-           size_t X,
-           size_t Y,
-           typename T,
-           typename TT = DataSetterTraits2D<P, X, Y>
-           >
-fapi2::ReturnCode update_data(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                              const T i_setting,
-                              const generic_ffdc_codes i_ffdc_code,
-                              T (&o_data)[X][Y])
-{
-    // Currenlty only valid for a DIMM target, for Nimbus, traits enforces this at compile time
-    // Use case is currently for pre_eff_config which is supported in both Axone and Nimbus
-    const auto l_port_index = mss::index( find_target<TT::TARGET>(i_target) );
-    const auto l_dimm_index = mss::index(i_target);
-
-    FAPI_ASSERT( l_port_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_port_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(i_target),
-                 "Port index (%d) was larger than max (%d) on %s",
-                 l_port_index,
-                 X,
-                 mss::spd::c_str(i_target) );
-
-    FAPI_ASSERT( l_dimm_index < Y,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(Y)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(i_target),
-                 "DIMM index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 Y,
-                 mss::spd::c_str(i_target) );
-
-    o_data[l_port_index][l_dimm_index] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Mapping boilerplate check
 /// @tparam T FAPI2 target type
 /// @tparam IT map key type
@@ -162,41 +80,13 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Sets attr data fields
-/// @tparam P proc_type
-/// @tparam TT data engine class traits (e.g. preDataInitTraits, etc.)
-/// @tparam T FAPI2 target type
-/// @tparam IT Input data type
-/// @param[in] i_target the FAPI target
-/// @param[in] i_setting value we want to set attr with
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-template< proc_type P,
-          typename TT,
-          fapi2::TargetType T,
-          typename IT >
-inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
-                                   const IT i_setting)
-{
-    const auto l_attr_target = mss::find_target<TT::TARGET_TYPE>(i_target);
-    typename TT::attr_type l_attr_list = {};
-    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list) );
-
-    FAPI_TRY( update_data<P>(i_target, i_setting, TT::FFDC_CODE, l_attr_list) );
-    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 // Controller agnostic functions
 
 namespace gen
 {
 
 ///
-/// @brief Get the target associated with the SPD facade
+/// @brief Helper to get the target associated with the SPD facade
 /// @param[in] i_data the SPD data
 /// return a fapi2 DIMM target
 ///
@@ -206,13 +96,39 @@ static inline fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target(const spd::facad
 }
 
 ///
-/// @brief Get the target associated with the EFD decoder
+/// @brief Helper to get the target associated with the EFD decoder
 /// @param[in] i_data the EFD data
 /// return a fapi2 DIMM target
 ///
 static inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_target(const std::shared_ptr<efd::base_decoder>& i_data)
 {
     return i_data->get_ocmb_target();
+}
+
+///
+/// @brief Helper function to get the target associated with generic attribute setting
+/// @param[in] i_target
+/// return a fapi2 MEM_PORT target
+///
+static inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_target)
+{
+    return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+}
+
+///
+/// @brief Helper function to get the target associated with generic attribute setting
+/// @param[in] i_target
+/// return a fapi2 MEM_PORT target
+///
+inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    // Explorer has only one MEM_PORT per OCMB, so we are looking for the 0th pos relative to the OCMB
+    // Will need to update to take into account a mem_channel index in VPDinfo if we ever support this.
+    // Per FW, for the DDIMM case we can't support unique settings per channel because the SPD
+    // doesn't know about anything outside of the DDIMM itself.
+    return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)[0];
 }
 
 ///
@@ -294,9 +210,8 @@ inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
                                       const FFDC i_ffdc_code,
                                       T (&o_data)[X])
 {
-    // TK remove hard-code to DIMM0, use REL_POS attr
     const auto l_dimm = i_spd_data.get_dimm_target();
-    const size_t l_dimm_index = 0;
+    const size_t l_dimm_index = mss::index(l_dimm);
 
     FAPI_ASSERT( l_dimm_index < X,
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
@@ -310,6 +225,49 @@ inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
                  mss::spd::c_str(l_dimm) );
 
     FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(l_dimm));
+    o_data[l_dimm_index] = i_setting;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to update the structure that holds attr data
+/// @tparam T the FAPI2 TargetType
+/// @tparam IT Input/Output data type
+/// @tparam FFDC the FFDC type
+/// @tparam X size of 1st array index
+/// @param[in] i_target the FAPI2 target
+/// @param[in] i_setting array to set
+/// @param[in] i_ffdc_code FFDC function code
+/// @param[out] o_data attribute data structure to set
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template < fapi2::TargetType T,
+           typename IT,
+           typename FFDC,
+           size_t X >
+inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
+                                      const IT i_setting,
+                                      const FFDC i_ffdc_code,
+                                      IT (&o_data)[X])
+{
+    const size_t l_dimm_index = mss::index(i_target);
+
+    FAPI_ASSERT( l_dimm_index < X,
+                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                 .set_INDEX(l_dimm_index)
+                 .set_LIST_SIZE(X)
+                 .set_FUNCTION(i_ffdc_code)
+                 .set_TARGET(i_target),
+                 "Dimm index (%d) was larger than max (%d) on %s",
+                 l_dimm_index,
+                 X,
+                 mss::spd::c_str(i_target) );
+
+    FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(i_target));
     o_data[l_dimm_index] = i_setting;
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -396,32 +354,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
-///
-static inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target)
-{
-    return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-}
-
-///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
-///
-inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target)
-{
-    // Explorer has only one MEM_PORT per OCMB, so we are looking for the 0th pos relative to the OCMB
-    // Will need to update to take into account a mem_channel index in VPDinfo if we ever support this.
-    // Per FW, for the DDIMM case we can't support unique settings per channel because the SPD
-    // doesn't know about anything outside of the DDIMM itself.
-    return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)[0];
-}
-
-///
 /// @brief Sets attr data fields
 /// @tparam TT data engine class traits (e.g. preDataInitTraits, etc.)
 /// @tparam DT the data type
@@ -472,17 +404,17 @@ struct attr_engine
 {
     ///
     /// @brief Sets attributes fields F in ET
-    /// @tparam T the fapi2 target type
-    /// @param[in] i_target the fapi2 target
-    /// @return FAPI2_RC_SUCCESS iff oka
+    /// @tparam IT the input type
+    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
+    /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    template < fapi2::TargetType T >
-    static fapi2::ReturnCode single_set(const fapi2::Target<T>& i_target)
+    template < typename IT >
+    static fapi2::ReturnCode single_set(const IT& i_input)
     {
         typename TT::attr_integral_type l_value = 0;
-        FAPI_TRY( TT::get_value_to_set(i_target, l_value) );
+        FAPI_TRY( TT::get_value_to_set(i_input, l_value) );
 
-        FAPI_TRY( set_field<TT>(i_target, l_value) );
+        FAPI_TRY( set_field<TT>(i_input, l_value) );
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -490,57 +422,19 @@ struct attr_engine
 
     ///
     /// @brief Sets attributes fields F in ET
-    /// @tparam DT the data type
-    /// @param[in] i_data the data (efd_decoder, spd_facade, etc.)
+    /// @tparam IT the input type
+    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    template < typename DT >
-    static fapi2::ReturnCode single_set(const DT& i_data)
+    template < typename IT >
+    static fapi2::ReturnCode set(const IT& i_input)
     {
-        typename TT::attr_integral_type l_value = 0;
-        FAPI_TRY( TT::get_value_to_set(i_data, l_value) );
-
-        FAPI_TRY( set_field<TT>(i_data, l_value) );
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam DT the data type
-    /// @param[in] i_data the data (efd_decoder, spd_facade, etc.)
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < typename DT >
-    static fapi2::ReturnCode set(const DT& i_data)
-    {
-        FAPI_TRY( (attr_engine<ET, F>::single_set(i_data)) );
+        FAPI_TRY( (attr_engine<ET, F>::single_set(i_input)) );
 
         // Compiler isn't smart enough to deduce F - 1u (decrementing the enum values by 1)
         // Cast needed to help the compiler deduce this value is an ET type
         // This does the recursive call to unroll a compile-time looping of a enum list of attrs to set
-        FAPI_TRY( (attr_engine < ET, static_cast<ET>(F - 1u) >::set(i_data)) );
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam T the fapi2 target type
-    /// @param[in] i_target the fapi2 target
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < fapi2::TargetType T >
-    static fapi2::ReturnCode set(const fapi2::Target<T>& i_target)
-    {
-        FAPI_TRY( (attr_engine<ET, F>::single_set(i_target)) );
-
-        // Compiler isn't smart enough to deduce F - 1u (decrementing the enum values by 1)
-        // Cast needed to help the compiler deduce this value is an ET type
-        // This does the recursive call to unroll a compile-time looping of a enum list of attrs to set
-        FAPI_TRY( (attr_engine < ET, static_cast<ET>(F - 1u) >::set(i_target)) );
+        FAPI_TRY( (attr_engine < ET, static_cast<ET>(F - 1u) >::set(i_input)) );
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -562,24 +456,12 @@ struct attr_engine< ET,
 {
     ///
     /// @brief Sets attributes fields F in ET
-    /// @tparam T the fapi2 target type
-    /// @param[in] i_target the fapi2 target
+    /// @tparam IT the input type
+    /// @param[in] i_input input (efd_decoder, spd_facade, fapi2 target)
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    template < fapi2::TargetType T >
-    static fapi2::ReturnCode set(const fapi2::Target<T>& i_target)
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    ///
-    /// @brief Sets attributes fields F in ET
-    /// @tparam DT the data type
-    /// @param[in] i_data the data (efd_decoder, spd_facade, etc.)
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    template < typename DT >
-    static fapi2::ReturnCode set(const DT& i_data)
+    template < typename IT >
+    static fapi2::ReturnCode set(const IT& i_input)
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }

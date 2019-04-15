@@ -46,66 +46,6 @@ namespace mss
 {
 
 ///
-/// @brief Helper function to get dimm_type from SPD
-/// @param[in] i_spd_data SPD data
-/// @param[in] i_setting value we want to set attr with
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-static fapi2::ReturnCode get_dimm_type(const spd::facade& i_spd_data,
-                                       uint8_t& o_setting)
-{
-    // =========================================================
-    // DDR4 SPD Document Release 4
-    // Byte 3 (0x003): Key Byte / Module Type
-    // =========================================================
-    static const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
-    {
-        //{key byte, dimm type}
-        {1, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM},
-        {2, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM},
-        {10, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
-        // All others reserved or not supported
-    };
-
-    const auto l_dimm = i_spd_data.get_dimm_target();
-    uint8_t l_base_module_type = 0;
-    FAPI_TRY(i_spd_data.base_module(l_base_module_type));
-    FAPI_TRY(lookup_table_check(l_dimm, BASE_MODULE_TYPE_MAP, SET_ATTR_DIMM_TYPE, l_base_module_type, o_setting));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Helper function to get dram_gen from SPD
-/// @param[in] i_spd_data SPD data
-/// @param[in] i_setting value we want to set attr with
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-static fapi2::ReturnCode get_dram_gen(const spd::facade& i_spd_data,
-                                      uint8_t& o_setting)
-{
-    // =========================================================
-    // DDR4 SPD Document Release 4
-    // Byte 2 (0x002): Key Byte / DRAM Device Type
-    // =========================================================
-    static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_GEN_MAP =
-    {
-        //{key value, dram gen}
-        {0x0C, fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4}
-        // Other key bytes reserved or not supported
-    };
-
-    const auto l_dimm = i_spd_data.get_dimm_target();
-    uint8_t l_device_type = 0;
-    FAPI_TRY(i_spd_data.device_type(l_device_type));
-    FAPI_TRY(lookup_table_check(l_dimm, DRAM_GEN_MAP, SET_ATTR_DRAM_GEN, l_device_type, o_setting));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
 /// @note pre_data_init_fields, DIMM_TYPE specialization
@@ -145,13 +85,36 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_TYPE>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return get_dimm_type(i_spd_data, o_setting);
+        // =========================================================
+        // DDR4 SPD Document Release 4
+        // Byte 3 (0x003): Key Byte / Module Type
+        // =========================================================
+        static const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
+        {
+            //{key byte, dimm type}
+            {1, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM},
+            {2, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM},
+            {10, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
+            // All others reserved or not supported
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_base_module_type = 0;
+        FAPI_TRY( i_spd_data.base_module(l_base_module_type),
+                  "%s failed to get base module from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY( lookup_table_check(l_dimm, BASE_MODULE_TYPE_MAP, FFDC_CODE, l_base_module_type, o_setting),
+                  "%s failed DIMM_TYPE lookup check", spd::c_str(l_dimm) );
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -195,13 +158,34 @@ struct attrEngineTraits<pre_data_init_fields, DRAM_GEN>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return get_dram_gen(i_spd_data, o_setting);
+        // =========================================================
+        // DDR4 SPD Document Release 4
+        // Byte 2 (0x002): Key Byte / DRAM Device Type
+        // =========================================================
+        static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_GEN_MAP =
+        {
+            //{key value, dram gen}
+            {0x0C, fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4}
+            // Other key bytes reserved or not supported
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_device_type = 0;
+        FAPI_TRY( i_spd_data.device_type(l_device_type),
+                  "%s failed to get device type from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY( lookup_table_check(l_dimm, DRAM_GEN_MAP, FFDC_CODE, l_device_type, o_setting),
+                  "%s failed DRAM_GEN lookup check", spd::c_str(l_dimm) );
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -245,7 +229,7 @@ struct attrEngineTraits<pre_data_init_fields, HOST_TO_DDR_SPEED_RATIO>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
@@ -323,7 +307,7 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
@@ -341,9 +325,14 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID>
             // All others reserved or not supported
         };
 
-        uint8_t l_spd_hybrid_type = 0;
-        FAPI_TRY(i_spd_data.hybrid(l_spd_hybrid_type));
-        FAPI_TRY(lookup_table_check(i_spd_data.get_dimm_target(), HYBRID_MAP, SET_ATTR_HYBRID, l_spd_hybrid_type, o_setting));
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_spd_hybrid_type = 0;
+        FAPI_TRY(i_spd_data.hybrid(l_spd_hybrid_type),
+                 "%s failed to get hybrid from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY(lookup_table_check(l_dimm, HYBRID_MAP, FFDC_CODE, l_spd_hybrid_type, o_setting),
+                 "%s failed HYBRID lookup check", spd::c_str(l_dimm) );
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -390,7 +379,7 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID_MEDIA>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
@@ -408,49 +397,19 @@ struct attrEngineTraits<pre_data_init_fields, HYBRID_MEDIA>
             {1, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM},
             // All others reserved or not supported
         };
+        const auto l_dimm = i_spd_data.get_dimm_target();
+        attr_integral_type l_spd_hybrid_media = 0;
 
-        uint8_t l_spd_hybrid_media = 0;
-        FAPI_TRY(i_spd_data.hybrid_media(l_spd_hybrid_media));
-        FAPI_TRY(lookup_table_check(i_spd_data.get_dimm_target(), HYBRID_MEMORY_TYPE_MAP, SET_ATTR_HYBRID_MEDIA,
-                                    l_spd_hybrid_media, o_setting));
+        FAPI_TRY( i_spd_data.hybrid_media(l_spd_hybrid_media),
+                  "%s failed to get hybrid media from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY( lookup_table_check(l_dimm, HYBRID_MEMORY_TYPE_MAP, FFDC_CODE, l_spd_hybrid_media, o_setting),
+                  "%s failed HYBRID_MEMORY_TYPE lookup check", spd::c_str(l_dimm) );
 
     fapi_try_exit:
         return fapi2::current_err;
     }
 };
-
-///
-/// @brief Gets master ranks from SPD
-/// @param[out] o_output num package ranks per DIMM
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-static fapi2::ReturnCode get_master_ranks(const spd::facade& i_spd_data,
-        const generic_ffdc_codes i_ffdc,
-        uint8_t& o_output)
-{
-    // =========================================================
-    // DDR4 SPD Document Release 4
-    // Byte 12 (0x00C): Module Organization
-    // =========================================================
-    static const std::vector< std::pair<uint8_t, uint8_t> > NUM_PACKAGE_RANKS_MAP =
-    {
-        // {key byte, num of package ranks per DIMM (package ranks)}
-        {0, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_1R},
-        {1, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_2R},
-        {3, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R},
-    };
-
-    const auto l_dimm = i_spd_data.get_dimm_target();
-    uint8_t l_master_ranks_spd = 0;
-    FAPI_TRY(i_spd_data.num_package_ranks_per_dimm(l_master_ranks_spd),
-             "%s failed to get number of package ranks from SPD", spd::c_str(l_dimm));
-
-    FAPI_TRY(lookup_table_check(l_dimm, NUM_PACKAGE_RANKS_MAP, i_ffdc, l_master_ranks_spd,
-                                o_output), "%s failed MASTER_RANKS lookup check", spd::c_str(l_dimm));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Traits for pre_data_engine
@@ -467,7 +426,7 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the attribute associated target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
@@ -479,7 +438,7 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the attribute associated target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
@@ -492,13 +451,32 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        FAPI_TRY( get_master_ranks(i_spd_data, SET_ATTR_MASTER_RANKS, o_setting) );
+        // =========================================================
+        // DDR4 SPD Document Release 4
+        // Byte 12 (0x00C): Module Organization
+        // =========================================================
+        static const std::vector< std::pair<uint8_t, uint8_t> > NUM_PACKAGE_RANKS_MAP =
+        {
+            // {key byte, num of package ranks per DIMM (package ranks)}
+            {0, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_1R},
+            {1, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_2R},
+            {3, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R},
+        };
+
+        const auto l_dimm = i_spd_data.get_dimm_target();
+
+        attr_integral_type l_master_ranks_spd = 0;
+        FAPI_TRY( i_spd_data.num_package_ranks_per_dimm(l_master_ranks_spd),
+                  "%s failed to get number of package ranks from SPD", spd::c_str(l_dimm) );
+
+        FAPI_TRY( lookup_table_check(l_dimm, NUM_PACKAGE_RANKS_MAP, FFDC_CODE, l_master_ranks_spd, o_setting),
+                  "%s failed MASTER_RANKS lookup check", spd::c_str(l_dimm) );
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -508,36 +486,37 @@ struct attrEngineTraits<pre_data_init_fields, MRANKS>
 ///
 /// @brief Traits for pre_data_engine
 /// @class attrEngineTraits
-/// @note pre_data_init_fields, DIMM_RANKS_CNFG specialization
+/// @note DIMM_RANKS_CNFG specialization
 ///
 template<>
 struct attrEngineTraits<pre_data_init_fields, DIMM_RANKS_CNFG>
 {
+
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_TargetType;
+    static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_RANKS_CNFG;
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the fapi2 target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& o_setting)
+    static inline fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& o_setting)
     {
         return mss::attr::get_dimm_ranks_configed(i_target, o_setting);
     }
 
     ///
     /// @brief attribute setter
-    /// @param[in] i_target the attr target
+    /// @param[in] i_target the fapi2 target
     /// @param[in] i_setting array to set
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                      attr_type& i_setting)
+    static inline fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+            attr_type& i_setting)
     {
         return mss::attr::set_dimm_ranks_configed(i_target, i_setting);
     }
@@ -545,9 +524,9 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_RANKS_CNFG>
     ///
     /// @brief Computes setting for attribute
     /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
-    ///
+
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
@@ -555,8 +534,9 @@ struct attrEngineTraits<pre_data_init_fields, DIMM_RANKS_CNFG>
         // a 4R DIMM would be 0b11110000 (0xF0). This is used by PRD.
         fapi2::buffer<uint8_t> l_ranks_configed;
 
+        // Make sure the number of master ranks is setup
         uint8_t l_master_ranks = 0;
-        FAPI_TRY( get_master_ranks(i_spd_data, SET_ATTR_RANKS_CONFIGED, l_master_ranks) );
+        FAPI_TRY( (attrEngineTraits<pre_data_init_fields, MRANKS>::get_value_to_set(i_spd_data, l_master_ranks)) );
 
         FAPI_TRY( l_ranks_configed.setBit(0, l_master_ranks),
                   "%s. Failed to setBit", spd::c_str(i_spd_data.get_dimm_target()) );

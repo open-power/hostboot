@@ -48,10 +48,14 @@
 namespace mss
 {
 
+////////////////////////////////////////////////////////
+// Explorer specific traits for setTimingTraits
+////////////////////////////////////////////////////////
+
 ///
 /// @brief Forward declartion of traits for setTimingTraits
 /// @class setTimingTraits
-/// @note attr_eff_engine_fields, SPD_TAA_MIN
+/// @note exp::attr_eff_engine_fields, SPD_TAA_MIN
 ///
 template< >
 struct setTimingTraits< exp::attr_eff_engine_fields, exp::SPD_TAA_MIN >
@@ -61,6 +65,11 @@ struct setTimingTraits< exp::attr_eff_engine_fields, exp::SPD_TAA_MIN >
     static constexpr spd_facade_fptr get_timing_in_mtb = &spd::facade::min_taa;
     static constexpr spd_facade_fptr get_timing_in_ftb = &spd::facade::fine_offset_min_taa;
 };
+
+////////////////////////////////////////////////////////
+// Traits for explorer specific attr_eff_engine_fields
+////////////////////////////////////////////////////////
+
 
 ///
 /// @brief Traits for attr_engine
@@ -93,7 +102,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::BYTE_ENABLES>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_byte_enables(i_target, o_setting);
+        return mss::attr::get_byte_enables(i_target, o_setting);
     }
 
     ///
@@ -105,7 +114,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::BYTE_ENABLES>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_byte_enables(i_target, i_setting);
+        return mss::attr::set_byte_enables(i_target, i_setting);
     }
 
     ///
@@ -143,7 +152,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::NIBBLE_ENABLES>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_nibble_enables(i_target, o_setting);
+        return mss::attr::get_nibble_enables(i_target, o_setting);
     }
 
     ///
@@ -155,7 +164,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::NIBBLE_ENABLES>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_nibble_enables(i_target, i_setting);
+        return mss::attr::set_nibble_enables(i_target, i_setting);
     }
 
     ///
@@ -193,7 +202,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_TAA_MIN>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_exp_spd_taa_min(i_target, o_setting);
+        return mss::attr::get_exp_spd_taa_min(i_target, o_setting);
     }
 
     ///
@@ -205,7 +214,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_TAA_MIN>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_exp_spd_taa_min(i_target, i_setting);
+        return mss::attr::set_exp_spd_taa_min(i_target, i_setting);
     }
 
     ///
@@ -243,7 +252,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::FOUR_RANK_MODE>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_four_rank_mode(i_target, o_setting);
+        return mss::attr::get_four_rank_mode(i_target, o_setting);
     }
 
     ///
@@ -255,7 +264,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::FOUR_RANK_MODE>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_four_rank_mode(i_target, i_setting);
+        return mss::attr::set_four_rank_mode(i_target, i_setting);
     }
 
     ///
@@ -268,7 +277,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::FOUR_RANK_MODE>
             attr_integral_type& o_setting)
     {
         constexpr auto FOUR_RANK_MODE_BIT = 7; // From SPEC
-        uint8_t l_spd_four_rank_mode = 0;
+        attr_integral_type l_spd_four_rank_mode = 0;
         FAPI_TRY(i_spd_data.compatabilty_modes(l_spd_four_rank_mode));
 
         o_setting = fapi2::buffer<uint8_t>(l_spd_four_rank_mode).getBit<FOUR_RANK_MODE_BIT>();
@@ -300,7 +309,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::DDP_COMPATIBILITY>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_ddp_compatibility(i_target, o_setting);
+        return mss::attr::get_ddp_compatibility(i_target, o_setting);
     }
 
     ///
@@ -312,7 +321,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::DDP_COMPATIBILITY>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_ddp_compatibility(i_target, i_setting);
+        return mss::attr::set_ddp_compatibility(i_target, i_setting);
     }
 
     ///
@@ -325,7 +334,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::DDP_COMPATIBILITY>
             attr_integral_type& o_setting)
     {
         constexpr auto DDP_COMPATIBILITY_BIT = 6; // From SPEC
-        uint8_t l_spd_ddp_compatibility = 0;
+        attr_integral_type l_spd_ddp_compatibility = 0;
         FAPI_TRY(i_spd_data.compatabilty_modes(l_spd_ddp_compatibility));
 
         o_setting = fapi2::buffer<uint8_t>(l_spd_ddp_compatibility).getBit<DDP_COMPATIBILITY_BIT>();
@@ -357,7 +366,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::TSV_8H_SUPPORT>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_tsv_8h_support(i_target, o_setting);
+        return mss::attr::get_tsv_8h_support(i_target, o_setting);
     }
 
     ///
@@ -369,7 +378,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::TSV_8H_SUPPORT>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_tsv_8h_support(i_target, i_setting);
+        return mss::attr::set_tsv_8h_support(i_target, i_setting);
     }
 
     ///
@@ -407,7 +416,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::PSTATES>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_pstates(i_target, o_setting);
+        return mss::attr::get_pstates(i_target, o_setting);
     }
 
     ///
@@ -419,7 +428,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::PSTATES>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_pstates(i_target, i_setting);
+        return mss::attr::set_pstates(i_target, i_setting);
     }
 
     ///
@@ -457,7 +466,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::MRAM_SUPPORT>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_mram_support(i_target, o_setting);
+        return mss::attr::get_mram_support(i_target, o_setting);
     }
 
     ///
@@ -469,7 +478,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::MRAM_SUPPORT>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_mram_support(i_target, i_setting);
+        return mss::attr::set_mram_support(i_target, i_setting);
     }
 
     ///
@@ -482,7 +491,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::MRAM_SUPPORT>
             attr_integral_type& o_setting)
     {
         constexpr auto MRAM_SUPPORT_BIT = 4; // From SPEC
-        uint8_t l_spd_ddp_compatibility = 0;
+        attr_integral_type l_spd_ddp_compatibility = 0;
         FAPI_TRY(i_spd_data.compatabilty_modes(l_spd_ddp_compatibility));
 
         o_setting = fapi2::buffer<uint8_t>(l_spd_ddp_compatibility).getBit<MRAM_SUPPORT_BIT>();
@@ -514,7 +523,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::HEIGHT_3DS>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_exp_3ds_height(i_target, o_setting);
+        return mss::attr::get_exp_3ds_height(i_target, o_setting);
     }
 
     ///
@@ -526,7 +535,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::HEIGHT_3DS>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_exp_3ds_height(i_target, i_setting);
+        return mss::attr::set_exp_3ds_height(i_target, i_setting);
     }
 
     ///
@@ -565,7 +574,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_CL_SUPPORTED>
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return attr::get_exp_spd_cl_supported(i_target, o_setting);
+        return mss::attr::get_exp_spd_cl_supported(i_target, o_setting);
     }
 
     ///
@@ -577,7 +586,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_CL_SUPPORTED>
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return attr::set_exp_spd_cl_supported(i_target, i_setting);
+        return mss::attr::set_exp_spd_cl_supported(i_target, i_setting);
     }
 
     ///
@@ -591,6 +600,7 @@ struct attrEngineTraits<exp::attr_eff_engine_fields, exp::SPD_CL_SUPPORTED>
     {
         uint64_t l_val = 0;
         FAPI_TRY(i_spd_data.supported_cas_latencies(l_val));
+
         o_setting = static_cast<attr_integral_type>(l_val);
 
     fapi_try_exit:
@@ -637,8 +647,8 @@ struct attrEngineTraits<generic_metadata_fields, DIMM_TYPE_METADATA>
 
     ///
     /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[in] i_target the DIMM target
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -721,8 +731,8 @@ struct attrEngineTraits<generic_metadata_fields, DRAM_GEN_METADATA>
 
     ///
     /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[in] i_target the DIMM target
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -771,8 +781,8 @@ struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
 
     ///
     /// @brief Computes setting for attribute
-    /// @param[in] i_spd_data SPD data
-    /// @param[in] i_setting value we want to set attr with
+    /// @param[in] i_target the DIMM target
+    /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -783,10 +793,15 @@ struct attrEngineTraits<generic_metadata_fields, DIMM_POS_METADATA>
     }
 };
 
+////////////////////////////////////////////////////////
+// Explorer specific traits for attrEnumTraits
+////////////////////////////////////////////////////////
+
+
 ///
 /// @brief Value traits for attr_eff_engine_fields
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields
+/// @note exp::attr_eff_engine_fields are exp DDIMM SPD fields
 ///
 template < >
 struct attrEnumTraits<exp::attr_eff_engine_fields>
@@ -797,7 +812,7 @@ struct attrEnumTraits<exp::attr_eff_engine_fields>
 ///
 /// @brief Value traits for attr_eff_engine_fields
 /// @class attrEngineTraits
-/// @note attr_eff_engine_fields
+/// @note generic_metadata_fields used for dimm pos setting
 ///
 template < >
 struct attrEnumTraits<generic_metadata_fields>

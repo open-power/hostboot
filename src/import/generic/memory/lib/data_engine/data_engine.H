@@ -190,6 +190,16 @@ struct attrEnumTraits<pre_data_init_fields>
 };
 
 ///
+/// @brief Value traits for attrEnumTraits
+/// @class attrEnumTraits - attr_eff_engine_fields specialization
+///
+template < >
+struct attrEnumTraits<attr_engine_derived_fields>
+{
+    static constexpr size_t DISPATCHER = ATTR_DERIVED_DISPATCHER;
+};
+
+///
 /// @brief attribute signal integrity engine
 /// @class attr_si_engine
 /// @tparam ET field enumeration type

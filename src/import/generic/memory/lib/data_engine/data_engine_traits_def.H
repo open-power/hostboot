@@ -43,7 +43,32 @@ namespace mss
 {
 
 ///
+/// @brief enum list of preliminary data fields needed before eff_config
+///
+enum pre_data_init_fields
+{
+    // Template recursive base case
+    ATTR_PRE_DATA_ENGINE_CASE = 0,
+
+    // Attrs to set
+    DIMM_TYPE = 1,
+    DRAM_GEN = 2,
+    HYBRID = 3,
+    HYBRID_MEDIA = 4,
+    MRANKS = 5,
+    HOST_TO_DDR_SPEED_RATIO = 6,
+    DIMM_RANKS_CNFG = 7,
+
+    // Dispatcher set to last enum value
+    ATTR_PRE_DATA_ENG_DISPATCHER = DIMM_RANKS_CNFG,
+};
+
+///
 /// @brief enum list of preliminary data fields
+/// @note Separating these fields into their own special case
+/// since this is needed for reuse in incompatible code bases
+/// (e.g. Nimbus vs Axone)
+/// @warning these depend on pre_data_init_fields fields being set
 ///
 enum generic_metadata_fields
 {
@@ -60,27 +85,6 @@ enum generic_metadata_fields
 };
 
 ///
-/// @brief enum list of preliminary data fields
-///
-enum pre_data_init_fields
-{
-    // Template recursive base case
-    ATTR_PRE_DATA_ENGINE_CASE = 0,
-
-    // Attrs to set
-    DIMM_TYPE = 1,
-    DRAM_GEN = 2,
-    HYBRID = 3,
-    HYBRID_MEDIA = 4,
-    MRANKS = 5,
-    DIMM_RANKS_CNFG = 6,
-    HOST_TO_DDR_SPEED_RATIO = 7,
-
-    // Dispatcher set to last enum value
-    ATTR_PRE_DATA_ENG_DISPATCHER = HOST_TO_DDR_SPEED_RATIO,
-};
-
-///
 /// @brief enum list of SPD based attr fields to set
 ///
 enum attr_eff_engine_fields
@@ -90,13 +94,17 @@ enum attr_eff_engine_fields
 
     // Attrs to set
     DRAM_WIDTH = 1,
+    PRIM_BUS_WIDTH = 2,
+    DRAM_DENSITY = 3,
+    PRIMARY_DIE_COUNT = 4,
+    PRIM_STACK_TYPE = 5,
 
     // Dispatcher set to last enum value
-    ATTR_EFF_DISPATCHER = DRAM_WIDTH,
+    ATTR_EFF_DISPATCHER = PRIM_STACK_TYPE,
 };
 
 ///
-/// @brief enum list of SI attr fields to set
+/// @brief enum list of SI attr fields to set from EFD
 ///
 enum attr_si_engine_fields
 {
@@ -127,6 +135,29 @@ enum attr_si_engine_fields
 
     // Dispatcher set to last enum value
     ATTR_SI_DISPATCHER = SI_GEARDOWN_MODE,
+};
+
+///
+/// @brief enum list of derived attributes
+/// @note these are attributes that are derived from other
+/// attributes or other APIs.
+///
+enum attr_engine_derived_fields
+{
+    // Attributes are set recursively from the bottom up.
+    // When adding attrs that depend on other attrs
+    // being set first, they should be placed earlier in the enum list
+    // so that base level attrs are set first.
+
+    // Template recursive base case
+    ATTR_DERIVED_BASE_CASE = 0,
+
+    // Attrs to set
+    MEM_DIMM_SIZE = 1,
+    LOGICAL_RANKS = 2,
+
+    // Dispatcher set to last enum value
+    ATTR_DERIVED_DISPATCHER = LOGICAL_RANKS,
 };
 
 ///

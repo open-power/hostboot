@@ -46,6 +46,117 @@
 
 namespace mss
 {
+// TK - Remove generalizations since this is dubbed Nimbus specific implementation
+
+///
+/// @class DataSetterTraits2D
+/// @brief Traits for setting eff_config data
+/// @tparam P proc_type
+/// @tparam X size of 1st array index
+/// @tparam Y size of 2nd array index
+///
+template < proc_type P, size_t X, size_t Y >
+struct DataSetterTraits2D;
+
+///
+/// @class DataSetterTraits - Nimbus, [PORT][DIMM] array specialization
+/// @brief Traits for setting eff_config data
+///
+template < >
+struct DataSetterTraits2D < proc_type::NIMBUS,
+           mcTypeTraits<mc_type::NIMBUS>::PORTS_PER_MCS,
+           mcTypeTraits<mc_type::NIMBUS>::DIMMS_PER_PORT
+           >
+{
+    static constexpr fapi2::TargetType TARGET = fapi2::TARGET_TYPE_MCA;
+};
+
+///
+/// @brief Helper function to update a 2D array output
+/// @tparam P proc_type
+/// @tparam X size of 1st array index
+/// @tparam Y size of 2nd array index
+/// @tparam T Input/output data type
+/// @tparam TT defaulted to DataSetterTraits2D<P, X, Y>
+/// @param[in] i_target the DIMM target
+/// @param[in] i_setting array to set
+/// @param[in] i_ffdc_code FFDC function code
+/// @param[out] o_data attribute data structure to set
+/// @warning This is Nimbus specific until MCA alias to MEM_PORT
+///
+template < proc_type P,
+           size_t X,
+           size_t Y,
+           typename T,
+           typename TT = DataSetterTraits2D<P, X, Y>
+           >
+fapi2::ReturnCode update_data(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const T i_setting,
+                              const generic_ffdc_codes i_ffdc_code,
+                              T (&o_data)[X][Y])
+{
+    // Currenlty only valid for a DIMM target, for Nimbus, traits enforces this at compile time
+    // Use case is currently for pre_eff_config which is supported in both Axone and Nimbus
+    const auto l_port_index = mss::index( find_target<TT::TARGET>(i_target) );
+    const auto l_dimm_index = mss::index(i_target);
+
+    FAPI_ASSERT( l_port_index < X,
+                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                 .set_INDEX(l_port_index)
+                 .set_LIST_SIZE(X)
+                 .set_FUNCTION(i_ffdc_code)
+                 .set_TARGET(i_target),
+                 "Port index (%d) was larger than max (%d) on %s",
+                 l_port_index,
+                 X,
+                 mss::spd::c_str(i_target) );
+
+    FAPI_ASSERT( l_dimm_index < Y,
+                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                 .set_INDEX(l_dimm_index)
+                 .set_LIST_SIZE(Y)
+                 .set_FUNCTION(i_ffdc_code)
+                 .set_TARGET(i_target),
+                 "DIMM index (%d) was larger than max (%d) on %s",
+                 l_dimm_index,
+                 Y,
+                 mss::spd::c_str(i_target) );
+
+    o_data[l_port_index][l_dimm_index] = i_setting;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets attr data fields
+/// @tparam P proc_type
+/// @tparam TT data engine class traits (e.g. preDataInitTraits, etc.)
+/// @tparam T FAPI2 target type
+/// @tparam IT Input data type
+/// @param[in] i_target the FAPI target
+/// @param[in] i_setting value we want to set attr with
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< proc_type P,
+          typename TT,
+          fapi2::TargetType T,
+          typename IT >
+inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
+                                   const IT i_setting)
+{
+    const auto l_attr_target = mss::find_target<TT::TARGET_TYPE>(i_target);
+    typename TT::attr_type l_attr_list = {};
+    FAPI_TRY( TT::get_attr(l_attr_target, l_attr_list) );
+
+    FAPI_TRY( update_data<P>(i_target, i_setting, TT::FFDC_CODE, l_attr_list) );
+    FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Sets preliminary data fields
@@ -277,11 +388,13 @@ inline fapi2::ReturnCode set_pre_init_attrs<mss::proc_type::NIMBUS>( const fapi2
     FAPI_TRY(l_data_engine.set_hybrid_media(), "Failed to set Hybrid Media %s", mss::spd::c_str(i_target) );
 
     // Number of master ranks needed for VPD decoding
-    // and dimm_ranks_configured is a PRD attr...
     FAPI_TRY(l_data_engine.set_master_ranks(), "Failed to set Master ranks %s", mss::spd::c_str(i_target) );
+
+    // and dimm_ranks_configured is a PRD attr...
     FAPI_TRY(l_data_engine.set_dimm_ranks_configured(), "Failed to set DIMM ranks configured %s",
              mss::spd::c_str(i_target) );
 
+    // Adding metadata c-str fields derived from attrs set above
     FAPI_TRY( mss::attr_derived_engine<mss::generic_metadata_fields>::set(i_target) );
 
 fapi_try_exit:

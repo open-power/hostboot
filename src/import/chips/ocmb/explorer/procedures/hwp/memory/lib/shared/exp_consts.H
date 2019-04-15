@@ -47,7 +47,10 @@ namespace exp
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
 
 ///
-/// @brief enum list of explorer eff attributes to set
+/// @brief enum list of explorer SPD derived attributes to set
+/// @note these attrs are strictly derived from SPD
+/// @warning wrapped in exp namesapce to be distinguished from
+/// the generic attr_eff_engine_fields
 ///
 enum attr_eff_engine_fields
 {

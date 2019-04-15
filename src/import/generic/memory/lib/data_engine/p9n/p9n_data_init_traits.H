@@ -255,39 +255,35 @@ class preDataInitTraits<mss::proc_type::NIMBUS, MRANKS>
 /// @note NIMBUS, DIMM_RANKS_CNFG specialization
 ///
 template<>
-class preDataInitTraits<mss::proc_type::NIMBUS, DIMM_RANKS_CNFG>
+struct preDataInitTraits<mss::proc_type::NIMBUS, DIMM_RANKS_CNFG>
 {
-    public:
-        using attr_type = fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
-        static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_RANKS_CNFG;
+    using attr_type = fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED_Type;
+    static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_RANKS_CNFG;
 
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, o_setting) );
+    ///
+    /// @brief attribute getter
+    /// @param[in] i_target the MCS target
+    /// @param[out] o_setting array to populate
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& o_setting)
+    {
+        return FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, o_setting);
+    }
 
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& i_setting)
-        {
-            return FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, i_setting);
-        }
+    ///
+    /// @brief attribute setter
+    /// @param[in] i_target the MCS target
+    /// @param[in] i_setting array to set
+    /// @return FAPI2_RC_SUCCESS iff okay
+    ///
+    static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
+                                      attr_type& i_setting)
+    {
+        return FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, i_setting);
+    }
 };
 
 ///

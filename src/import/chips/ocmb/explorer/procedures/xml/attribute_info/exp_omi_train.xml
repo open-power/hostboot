@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,7 +47,8 @@
             MANUFACTURING_MODE = 1
         </enum>
         <initToZero/>
-        <writeable/>
+        <platInit/>
+        <overrideOnly/>
         <mssAccessorName>ocmb_exp_boot_config_fw_mode</mssAccessorName>
     </attribute>
 
@@ -63,7 +64,8 @@
             PERFORM_LOOPBACK_TESTING = 1
         </enum>
         <initToZero/>
-        <writeable/>
+        <platInit/>
+        <overrideOnly/>
         <mssAccessorName>ocmb_exp_boot_config_opencapi_loopback_test</mssAccessorName>
     </attribute>
 
@@ -80,7 +82,8 @@
             JTAG = 2
         </enum>
         <initToZero/>
-        <writeable/>
+        <platInit/>
+        <overrideOnly/>
         <mssAccessorName>ocmb_exp_boot_config_transport_layer</mssAccessorName>
     </attribute>
 
@@ -96,8 +99,9 @@
            BOOT_RIGHT_AFTER_CONFIG = 0,
            WAIT_FOR_HOST_CMD = 1
         </enum>
+        <platInit/>
         <initToZero/>
-        <writeable/>
+        <overrideOnly/>
         <mssAccessorName>ocmb_exp_boot_config_dl_layer_boot_mode</mssAccessorName>
     </attribute>
 
@@ -113,7 +117,8 @@
             STEP_BY_STEP_BOOT = 1
         </enum>
         <initToZero/>
-        <writeable/>
+        <platInit/>
+        <overrideOnly/>
         <mssAccessorName>ocmb_exp_boot_config_boot_mode</mssAccessorName>
     </attribute>
 
@@ -130,7 +135,6 @@
         </enum>
         <default>1</default>
         <platInit/>
-        <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_lane_mode</mssAccessorName>
     </attribute>
 
@@ -148,7 +152,6 @@
         </enum>
         <default>3</default>
         <platInit/>
-        <writeable/>
         <mssAccessorName>ocmb_exp_boot_config_serdes_frequency</mssAccessorName>
     </attribute>
 

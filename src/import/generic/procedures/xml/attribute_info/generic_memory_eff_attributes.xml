@@ -212,11 +212,36 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_EFF_PRIM_DIE_COUNT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Primary SDRAM Die Count.
+      Decodes Byte 6 (bits 6~4).
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      D1 = 1,
+      D2 = 2,
+      D3 = 3,
+      D4 = 4,
+      D5 = 5,
+      D6 = 6,
+      D7 = 7,
+      D8 = 8
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>prim_die_count</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_EFF_PRIM_STACK_TYPE</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       ARRAY[DIMM]
-      Primary SDRAM Package Type.
+      Primary SDRAM Package Type (bits 1~0).
       Decodes Byte 6.
       This byte defines the primary set of SDRAMs.
       Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
@@ -227,6 +252,24 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>prim_stack_type</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_PRIM_BUS_WIDTH</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Primary bus with (bits 1~0).
+      Decodes Byte 13.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      8_BITS = 8, 16_BITS = 16, 32_BITS = 32, 64_BITS = 64
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>prim_bus_width</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -522,7 +565,7 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_MEM_EFF_NUM_RANKS_PER_DIMM</id>
+    <id>ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       ARRAY[DIMM]
@@ -542,7 +585,7 @@
     </enum>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>num_ranks_per_dimm</mssAccessorName>
+    <mssAccessorName>logical_ranks_per_dimm</mssAccessorName>
   </attribute>
 
   <attribute>

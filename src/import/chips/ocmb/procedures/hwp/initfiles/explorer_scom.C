@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,10 +172,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                        l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
         uint64_t l_def_NUM_MRANKS_0 = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
                                        l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
-        fapi2::ATTR_MEM_EFF_NUM_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_NUM_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM));
-        uint64_t l_def_NUM_SRANKS_1 = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] / l_def_NUM_MRANKS_1);
-        uint64_t l_def_NUM_SRANKS_0 = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] / l_def_NUM_MRANKS_0);
+        fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM));
+        uint64_t l_def_NUM_SRANKS_1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] / l_def_NUM_MRANKS_1);
+        uint64_t l_def_NUM_SRANKS_0 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] / l_def_NUM_MRANKS_0);
         uint64_t l_def_disable_fast_act = ((((l_def_NUM_SRANKS_0 > literal_1) || (l_def_NUM_SRANKS_1 > literal_1))
                                             && ((l_def_NUM_MRANKS_0 == literal_4) || (l_def_NUM_MRANKS_1 == literal_4))) || l_def_half_dimm_mode);
         fapi2::ATTR_MSS_MRW_DRAM_2N_MODE_Type l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE;
@@ -186,16 +186,18 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, TGT0, l_TGT0_ATTR_MEM_MRW_IS_PLANAR));
         uint64_t l_def_SLOT0_DENOMINATOR = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
                                             l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
-        uint64_t l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] / l_def_SLOT0_DENOMINATOR);
+        uint64_t l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] /
+                l_def_SLOT0_DENOMINATOR);
         uint64_t l_def_SLOT1_DENOMINATOR = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1] == literal_0x0) |
                                             l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_1]);
-        uint64_t l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] / l_def_SLOT1_DENOMINATOR);
+        uint64_t l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] /
+                l_def_SLOT1_DENOMINATOR);
         fapi2::ATTR_MEM_SI_ODT_RD_Type l_TGT1_ATTR_MEM_SI_ODT_RD;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_RD, TGT1, l_TGT1_ATTR_MEM_SI_ODT_RD));
         fapi2::ATTR_MEM_SI_ODT_WR_Type l_TGT1_ATTR_MEM_SI_ODT_WR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_ODT_WR, TGT1, l_TGT1_ATTR_MEM_SI_ODT_WR));
-        uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] +
-                                    l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1]);
+        uint64_t l_def_NUM_RANKS = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] +
+                                    l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1]);
         uint64_t l_def_NUM_RANKS_DENOMINATOR = ((l_def_NUM_RANKS == literal_0x0) | l_def_NUM_RANKS);
         fapi2::ATTR_MEM_EFF_DRAM_TREFI_Type l_TGT1_ATTR_MEM_EFF_DRAM_TREFI;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TREFI, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TREFI));
@@ -219,8 +221,8 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         uint64_t l_def_row_bit16_val_1 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_17);
         uint64_t l_def_row_bit17_val_0 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_0] >= literal_18);
         uint64_t l_def_row_bit17_val_1 = (l_TGT1_ATTR_MEM_EFF_DRAM_ROW_BITS[literal_1] >= literal_18);
-        uint64_t l_def_slot_val_0 = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] > literal_0);
-        uint64_t l_def_slot_val_1 = (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] > literal_0);
+        uint64_t l_def_slot_val_0 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] > literal_0);
+        uint64_t l_def_slot_val_1 = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] > literal_0);
         uint64_t l_def_m0_val_0 = (l_def_NUM_MRANKS_0 > literal_2);
         uint64_t l_def_m1_val_0 = (l_def_NUM_MRANKS_0 >= literal_2);
         uint64_t l_def_m0_val_1 = (l_def_NUM_MRANKS_1 > literal_2);
@@ -780,65 +782,65 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801186full, l_scom_buffer ));
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01011 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01100 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01100 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01101 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01101 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01101 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0b01101 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0b01110 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0b01110 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0b01111 );
             }
@@ -1298,92 +1300,92 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                 l_scom_buffer.insert<38, 5, 59, uint64_t>(literal_0b10011 );
             }
 
-            if (((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] < literal_2)
-                 && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] < literal_2)))
+            if (((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] < literal_2)
+                 && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] < literal_2)))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b00110 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_1)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01100 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_2)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01101 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_3)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01110 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_4)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01111 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_5)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10000 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_6)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10001 );
             }
             else if (((l_def_half_dimm_mode == literal_1) && ((l_def_num_of_bitvals_0 == literal_7)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10010 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_1)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01101 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_2)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01110 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_3)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b01111 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_4)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10000 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_5)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10001 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_6)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10010 );
             }
             else if (((l_def_half_dimm_mode == literal_0) && ((l_def_num_of_bitvals_0 == literal_7)
-                      && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] >= literal_2)
-                          || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] >= literal_2)))))
+                      && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] >= literal_2)
+                          || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] >= literal_2)))))
             {
                 l_scom_buffer.insert<33, 5, 59, uint64_t>(literal_0b10011 );
             }
@@ -1429,76 +1431,76 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             {
                 l_scom_buffer.insert<35, 5, 59, uint64_t>(literal_0b00101 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<35, 5, 59, uint64_t>(literal_0b00110 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<35, 5, 59, uint64_t>(literal_0b00111 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0b00110 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0b00111 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0b00111 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0b01000 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_0b00111 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_0b01000 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_0b01000 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_0b01001 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01000 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01001 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01001 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<59, 5, 59, uint64_t>(literal_0b01010 );
             }
@@ -1646,44 +1648,44 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_0b00101 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_0b01001 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_0b01010 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_0b01010 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_0b01011 );
             }
 
-            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                    || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            if (((l_def_half_dimm_mode == literal_1) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                    || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0b01010 );
             }
-            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_1) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0b01011 );
             }
-            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] == literal_1)
-                      || (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] == literal_1))))
+            else if (((l_def_half_dimm_mode == literal_0) && ((l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] == literal_1)
+                      || (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] == literal_1))))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0b01011 );
             }
-            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_0] != literal_1))
-                      && (l_TGT1_ATTR_MEM_EFF_NUM_RANKS_PER_DIMM[literal_1] != literal_1)))
+            else if ((((l_def_half_dimm_mode == literal_0) && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] != literal_1))
+                      && (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_1] != literal_1)))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0b01100 );
             }
