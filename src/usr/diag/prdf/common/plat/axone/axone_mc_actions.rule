@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,7 @@
 ###############################################################################
 
 actionclass analyzeMC_LFIR   { analyze(gMC_LFIR);   };
-actionclass analyzeMCBISTFIR { analyze(gMCBISTFIR); };
+actionclass analyzeMCMISCFIR { analyze(gMCMISCFIR); };
 
 ###############################################################################
 # Analyze connected

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -212,7 +212,7 @@ group gPHBNFIR
     /** PHBNFIR[0]
      *  BAR Parity Error
      */
-    (rPHBNFIR, bit(0)) ? self_th_1;
+    (rPHBNFIR, bit(0)) ? parent_proc_th_1;
 
     /** PHBNFIR[1]
      *  Parity Errors on Registers besides BAR
@@ -252,12 +252,12 @@ group gPHBNFIR
     /** PHBNFIR[8]
      *  Register Array Parity Error
      */
-    (rPHBNFIR, bit(8)) ? self_th_1;
+    (rPHBNFIR, bit(8)) ? parent_proc_th_1;
 
     /** PHBNFIR[9]
      *  Power Bus Interface Parity Error
      */
-    (rPHBNFIR, bit(9)) ? self_th_1;
+    (rPHBNFIR, bit(9)) ? parent_proc_th_1;
 
     /** PHBNFIR[10]
      *  Power Bus Data Hang
@@ -297,7 +297,7 @@ group gPHBNFIR
     /** PHBNFIR[17]
      *  Hardware Error
      */
-    (rPHBNFIR, bit(17)) ? self_th_1;
+    (rPHBNFIR, bit(17)) ? parent_proc_th_1;
 
     /** PHBNFIR[18]
      *  Unsolicited Power Bus Data

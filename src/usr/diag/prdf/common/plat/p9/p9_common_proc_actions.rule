@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -670,7 +670,6 @@ actionclass analyzePBIOOFIR    { analyze(gPBIOOFIR   ); };
 actionclass analyzePBAFIR      { analyze(gPBAFIR     ); };
 actionclass analyzePSIHBFIR    { analyze(gPSIHBFIR   ); };
 actionclass analyzePBAMFIR     { analyze(gPBAMFIR    ); };
-actionclass analyzeENHCAFIR    { analyze(gENHCAFIR   ); };
 actionclass analyzeXB_LFIR     { analyze(gXB_LFIR    ); };
 actionclass analyzeXBPPEFIR    { analyze(gXBPPEFIR   ); };
 

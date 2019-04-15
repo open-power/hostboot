@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -947,42 +947,6 @@ chip axone_proc
         scomaddr    0x05012907;
         capture     group default;
         capture     req nonzero("PSIHBFIR");
-    };
-
-    ############################################################################
-    # P9 chip ENHCAFIR
-    ############################################################################
-
-    register ENHCAFIR
-    {
-        name        "P9 chip ENHCAFIR";
-        scomaddr    0x05012940;
-        reset       (&, 0x05012941);
-        mask        (|, 0x05012945);
-        capture     group default;
-    };
-
-    register ENHCAFIR_MASK
-    {
-        name        "P9 chip ENHCAFIR MASK";
-        scomaddr    0x05012943;
-        capture     group default;
-    };
-
-    register ENHCAFIR_ACT0
-    {
-        name        "P9 chip ENHCAFIR ACT0";
-        scomaddr    0x05012946;
-        capture     group default;
-        capture     req nonzero("ENHCAFIR");
-    };
-
-    register ENHCAFIR_ACT1
-    {
-        name        "P9 chip ENHCAFIR ACT1";
-        scomaddr    0x05012947;
-        capture     group default;
-        capture     req nonzero("ENHCAFIR");
     };
 
     ############################################################################
@@ -2758,7 +2722,7 @@ group gNXCQFIR
     /** NXCQFIR[19]
      *  Uncorrectable error on ERAT arrays
      */
-    (rNXCQFIR, bit(19)) ? nx_th_32perDay;
+    (rNXCQFIR, bit(19)) ? nx_th_1;
 
     /** NXCQFIR[20]
      *  SUE on ERAT arrays
@@ -4077,14 +4041,14 @@ group gN3_CHIPLET_FIR
     (rN3_CHIPLET_FIR, bit(14)) ? analyzePBPPEFIR;
 
     /** N3_CHIPLET_FIR[15]
-     *  Attention from PBIOEFIR
-     */
-    (rN3_CHIPLET_FIR, bit(15)) ? analyzePBIOEFIR;
-
-    /** N3_CHIPLET_FIR[16]
      *  Attention from PBIOOFIR
      */
-    (rN3_CHIPLET_FIR, bit(16)) ? analyzePBIOOFIR;
+    (rN3_CHIPLET_FIR, bit(15)) ? analyzePBIOOFIR;
+
+    /** N3_CHIPLET_FIR[16]
+     *  Attention from NPU0FIR 1
+     */
+    (rN3_CHIPLET_FIR, bit(16)) ? analyzeConnectedNPU1;
 
     /** N3_CHIPLET_FIR[17]
      *  Attention from INTCQFIR
@@ -4106,15 +4070,10 @@ group gN3_CHIPLET_FIR
      */
     (rN3_CHIPLET_FIR, bit(20)) ? analyzePBAMFIR;
 
-    /** N3_CHIPLET_FIR[21]
-     *  Attention from NPU0FIR 1
-     */
-    (rN3_CHIPLET_FIR, bit(21)) ? analyzeConnectedNPU1;
-
     /** N3_CHIPLET_FIR[22]
-     *  Attention from ENHCAFIR
+     *  Attention from PBIOEFIR
      */
-    (rN3_CHIPLET_FIR, bit(22)) ? analyzeENHCAFIR;
+    (rN3_CHIPLET_FIR, bit(22)) ? analyzePBIOEFIR;
 
     /** N3_CHIPLET_FIR[23]
      *  Attention from NPU2FIR 0
@@ -5141,144 +5100,6 @@ group gPSIHBFIR
      *  fir parity Error
      */
     (rPSIHBFIR, bit(28)) ? defaultMaskedError;
-
-};
-
-################################################################################
-# P9 chip ENHCAFIR
-################################################################################
-
-rule rENHCAFIR
-{
-  CHECK_STOP:
-    ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 & ~ENHCAFIR_ACT1;
-  RECOVERABLE:
-    ENHCAFIR & ~ENHCAFIR_MASK & ~ENHCAFIR_ACT0 &  ENHCAFIR_ACT1;
-};
-
-group gENHCAFIR
-    filter singlebit,
-           cs_root_cause
-{
-    /** ENHCAFIR[0]
-     *  PB0 data UE
-     */
-    (rENHCAFIR, bit(0)) ? defaultMaskedError;
-
-    /** ENHCAFIR[1]
-     *  PB0 data SUE
-     */
-    (rENHCAFIR, bit(1)) ? defaultMaskedError;
-
-    /** ENHCAFIR[2]
-     *  PB0 data ue
-     */
-    (rENHCAFIR, bit(2)) ? defaultMaskedError;
-
-    /** ENHCAFIR[3]
-     *  spare
-     */
-    (rENHCAFIR, bit(3)) ? defaultMaskedError;
-
-    /** ENHCAFIR[4]
-     *  Castout Drop Counter Full
-     */
-    (rENHCAFIR, bit(4)) ? defaultMaskedError;
-
-    /** ENHCAFIR[5]
-     *  Data Hang Detect
-     */
-    (rENHCAFIR, bit(5)) ? defaultMaskedError;
-
-    /** ENHCAFIR[6]
-     *  Unexpected data or cresp
-     */
-    (rENHCAFIR, bit(6)) ? defaultMaskedError;
-
-    /** ENHCAFIR[7]
-     *  Internal Error
-     */
-    (rENHCAFIR, bit(7)) ? defaultMaskedError;
-
-    /** ENHCAFIR[8]
-     *  ADU checkstop error from power bus data
-     */
-    (rENHCAFIR, bit(8)) ? defaultMaskedError;
-
-    /** ENHCAFIR[9]
-     *  ADU checkstop error from alter display
-     */
-    (rENHCAFIR, bit(9)) ? defaultMaskedError;
-
-    /** ENHCAFIR[10]
-     *  ADU checkstop error from xsco m
-     */
-    (rENHCAFIR, bit(10)) ? defaultMaskedError;
-
-    /** ENHCAFIR[11]
-     *  ADU checkstop from power bus cmd
-     */
-    (rENHCAFIR, bit(11)) ? defaultMaskedError;
-
-    /** ENHCAFIR[12]
-     *  ADU checkstop error from power bus send
-     */
-    (rENHCAFIR, bit(12)) ? defaultMaskedError;
-
-    /** ENHCAFIR[13]
-     *  ADU checkstop from power bus receive
-     */
-    (rENHCAFIR, bit(13)) ? defaultMaskedError;
-
-    /** ENHCAFIR[14]
-     *  ADU recoverable error from pb data
-     */
-    (rENHCAFIR, bit(14)) ? defaultMaskedError;
-
-    /** ENHCAFIR[15]
-     *  ADU recoverable error from alter display
-     */
-    (rENHCAFIR, bit(15)) ? defaultMaskedError;
-
-    /** ENHCAFIR[16]
-     *  ADU recoverable error from xscom
-     */
-    (rENHCAFIR, bit(16)) ? defaultMaskedError;
-
-    /** ENHCAFIR[17]
-     *  ADU recoverable from power bus cmd
-     */
-    (rENHCAFIR, bit(17)) ? defaultMaskedError;
-
-    /** ENHCAFIR[18]
-     *  ADU recoverable error from pb send
-     */
-    (rENHCAFIR, bit(18)) ? defaultMaskedError;
-
-    /** ENHCAFIR[19]
-     *  ADU recoverable error from pb receive
-     */
-    (rENHCAFIR, bit(19)) ? defaultMaskedError;
-
-    /** ENHCAFIR[20]
-     *  NHTM scom error
-     */
-    (rENHCAFIR, bit(20)) ? defaultMaskedError;
-
-    /** ENHCAFIR[21]
-     *  spare
-     */
-    (rENHCAFIR, bit(21)) ? defaultMaskedError;
-
-    /** ENHCAFIR[22]
-     *  scom error
-     */
-    (rENHCAFIR, bit(22)) ? defaultMaskedError;
-
-    /** ENHCAFIR[23]
-     *  scom error
-     */
-    (rENHCAFIR, bit(23)) ? defaultMaskedError;
 
 };
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -141,39 +141,39 @@ chip axone_mc
     };
 
     ############################################################################
-    # P9 MC target MCBISTFIR
+    # P9 MC target MCMISCFIR
     ############################################################################
 
-    register MCBISTFIR
+    register MCMISCFIR
     {
-        name        "P9 MC target MCBISTFIR";
+        name        "P9 MC target MCMISCFIR";
         scomaddr    0x07012300;
         reset       (&, 0x07012301);
         mask        (|, 0x07012305);
         capture     group default;
     };
 
-    register MCBISTFIR_MASK
+    register MCMISCFIR_MASK
     {
-        name        "P9 MC target MCBISTFIR MASK";
+        name        "P9 MC target MCMISCFIR MASK";
         scomaddr    0x07012303;
         capture     group default;
     };
 
-    register MCBISTFIR_ACT0
+    register MCMISCFIR_ACT0
     {
-        name        "P9 MC target MCBISTFIR ACT0";
+        name        "P9 MC target MCMISCFIR ACT0";
         scomaddr    0x07012306;
         capture     group default;
-        capture     req nonzero("MCBISTFIR");
+        capture     req nonzero("MCMISCFIR");
     };
 
-    register MCBISTFIR_ACT1
+    register MCMISCFIR_ACT1
     {
-        name        "P9 MC target MCBISTFIR ACT1";
+        name        "P9 MC target MCMISCFIR ACT1";
         scomaddr    0x07012307;
         capture     group default;
-        capture     req nonzero("MCBISTFIR");
+        capture     req nonzero("MCMISCFIR");
     };
 
 # Include registers not defined by the xml
@@ -253,9 +253,9 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
     (rMC_CHIPLET_FIR, bit(11)) ? analyzeConnectedMCC3;
 
     /** MC_CHIPLET_FIR[12]
-     *  Attention from MCBISTFIR
+     *  Attention from MCMISCFIR
      */
-    (rMC_CHIPLET_FIR, bit(12)) ? analyzeMCBISTFIR;
+    (rMC_CHIPLET_FIR, bit(12)) ? analyzeMCMISCFIR;
 
     /** MC_CHIPLET_FIR[13]
      *  Attention from IOOMIFIR 0
@@ -358,9 +358,9 @@ group gMC_CHIPLET_UCS_FIR attntype UNIT_CS
     (rMC_CHIPLET_UCS_FIR, bit(8)) ? analyzeConnectedMCC3;
 
     /** MC_CHIPLET_UCS_FIR[9]
-     *  Attention from MCBISTFIR
+     *  Attention from MCMISCFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMCBISTFIR;
+    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMCMISCFIR;
 
     /** MC_CHIPLET_UCS_FIR[10]
      *  Attention from IOOMIFIR 0
@@ -448,9 +448,9 @@ group gMC_CHIPLET_HA_FIR attntype HOST_ATTN
     (rMC_CHIPLET_HA_FIR, bit(8)) ? analyzeConnectedMCC3;
 
     /** MC_CHIPLET_HA_FIR[9]
-     *  Attention from MCBISTFIR
+     *  Attention from MCMISCFIR
      */
-    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMCBISTFIR;
+    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMCMISCFIR;
 
 };
 
@@ -563,94 +563,94 @@ group gMC_LFIR
 };
 
 ################################################################################
-# P9 MC target MCBISTFIR
+# P9 MC target MCMISCFIR
 ################################################################################
 
-rule rMCBISTFIR
+rule rMCMISCFIR
 {
   CHECK_STOP:
-    MCBISTFIR & ~MCBISTFIR_MASK & ~MCBISTFIR_ACT0 & ~MCBISTFIR_ACT1;
+    MCMISCFIR & ~MCMISCFIR_MASK & ~MCMISCFIR_ACT0 & ~MCMISCFIR_ACT1;
   RECOVERABLE:
-    MCBISTFIR & ~MCBISTFIR_MASK & ~MCBISTFIR_ACT0 &  MCBISTFIR_ACT1;
+    MCMISCFIR & ~MCMISCFIR_MASK & ~MCMISCFIR_ACT0 &  MCMISCFIR_ACT1;
   HOST_ATTN:
-    MCBISTFIR & ~MCBISTFIR_MASK &  MCBISTFIR_ACT0 & ~MCBISTFIR_ACT1;
+    MCMISCFIR & ~MCMISCFIR_MASK &  MCMISCFIR_ACT0 & ~MCMISCFIR_ACT1;
   UNIT_CS:
-    MCBISTFIR & ~MCBISTFIR_MASK &  MCBISTFIR_ACT0 &  MCBISTFIR_ACT1;
+    MCMISCFIR & ~MCMISCFIR_MASK &  MCMISCFIR_ACT0 &  MCMISCFIR_ACT1;
 };
 
-group gMCBISTFIR
+group gMCMISCFIR
     filter singlebit,
            cs_root_cause
 {
-    /** MCBISTFIR[0]
+    /** MCMISCFIR[0]
      *  WAT debug bus attn
      */
-    (rMCBISTFIR, bit(0)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(0)) ? defaultMaskedError;
 
-    /** MCBISTFIR[1]
+    /** MCMISCFIR[1]
      *  WAT debug register parity error
      */
-    (rMCBISTFIR, bit(1)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(1)) ? defaultMaskedError;
 
-    /** MCBISTFIR[2]
+    /** MCMISCFIR[2]
      *  SCOM recoverable register parity error
      */
-    (rMCBISTFIR, bit(2)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(2)) ? defaultMaskedError;
 
-    /** MCBISTFIR[3]
+    /** MCMISCFIR[3]
      *  Spare
      */
-    (rMCBISTFIR, bit(3)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(3)) ? defaultMaskedError;
 
-    /** MCBISTFIR[4]
+    /** MCMISCFIR[4]
      *  Chan 0A application interrupt
      */
-    (rMCBISTFIR, bit(4)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(4)) ? defaultMaskedError;
 
-    /** MCBISTFIR[5]
+    /** MCMISCFIR[5]
      *  Chan 0B application interrupt
      */
-    (rMCBISTFIR, bit(5)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(5)) ? defaultMaskedError;
 
-    /** MCBISTFIR[6]
+    /** MCMISCFIR[6]
      *  Chan 1A application interrupt
      */
-    (rMCBISTFIR, bit(6)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(6)) ? defaultMaskedError;
 
-    /** MCBISTFIR[7]
+    /** MCMISCFIR[7]
      *  Chan 1B application interrupt
      */
-    (rMCBISTFIR, bit(7)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(7)) ? defaultMaskedError;
 
-    /** MCBISTFIR[8]
+    /** MCMISCFIR[8]
      *  Chan 2A application interrupt
      */
-    (rMCBISTFIR, bit(8)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(8)) ? defaultMaskedError;
 
-    /** MCBISTFIR[9]
+    /** MCMISCFIR[9]
      *  Chan 2B application interrupt
      */
-    (rMCBISTFIR, bit(9)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(9)) ? defaultMaskedError;
 
-    /** MCBISTFIR[10]
+    /** MCMISCFIR[10]
      *  Chan 3A application interrupt
      */
-    (rMCBISTFIR, bit(10)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(10)) ? defaultMaskedError;
 
-    /** MCBISTFIR[11]
+    /** MCMISCFIR[11]
      *  Chan 3B application interrupt
      */
-    (rMCBISTFIR, bit(11)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(11)) ? defaultMaskedError;
 
-    /** MCBISTFIR[12]
+    /** MCMISCFIR[12]
      *  Internal SCOM error
      */
-    (rMCBISTFIR, bit(12)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(12)) ? defaultMaskedError;
 
-    /** MCBISTFIR[13]
+    /** MCMISCFIR[13]
      *  Internal SCOM error clone
      */
-    (rMCBISTFIR, bit(13)) ? defaultMaskedError;
+    (rMCMISCFIR, bit(13)) ? defaultMaskedError;
 
 };
 
