@@ -440,18 +440,6 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t stopBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
-
-    ExtensibleChip* ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-    return stopBgScrub<TYPE_OCMB_CHIP>( ocmbChip );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_OCMB_CHIP>] "
@@ -496,18 +484,6 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t resumeBgScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
-
-    ExtensibleChip* ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-    return resumeBgScrub<TYPE_OCMB_CHIP>( ocmbChip );
 }
 
 //##############################################################################

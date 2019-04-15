@@ -387,11 +387,11 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                         const MemRank & i_rank,
-                                         mss::mcbist::address & o_startAddr,
-                                         mss::mcbist::address & o_endAddr,
-                                         AddrRangeType i_rangeType )
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          mss::mcbist::address & o_startAddr,
+                                          mss::mcbist::address & o_endAddr,
+                                          AddrRangeType i_rangeType )
 {
     #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MEM_PORT>] "
 
@@ -520,15 +520,15 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                         const MemRank & i_rank,
-                                         MemAddr & o_startAddr,
-                                         MemAddr & o_endAddr,
-                                         AddrRangeType i_rangeType )
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          MemAddr & o_startAddr,
+                                          MemAddr & o_endAddr,
+                                          AddrRangeType i_rangeType )
 {
     mss::mcbist::address saddr, eaddr;
-    uint32_t o_rc = getMemAddrRange<TYPE_MEM_PORT>( i_chip, i_rank, saddr,
-                                                    eaddr, i_rangeType );
+    uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
+                                                     eaddr, i_rangeType );
     if ( SUCCESS == o_rc )
     {
         o_startAddr = __convertMssMcbistAddr( saddr );
@@ -630,16 +630,16 @@ uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     uint8_t i_dimmSlct );
 
 template
-uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                         mss::mcbist::address & o_startAddr,
-                                         mss::mcbist::address & o_endAddr,
-                                         uint8_t i_dimmSlct );
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          mss::mcbist::address & o_startAddr,
+                                          mss::mcbist::address & o_endAddr,
+                                          uint8_t i_dimmSlct );
 
 template
-uint32_t getMemAddrRange<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                         MemAddr & o_startAddr,
-                                         MemAddr & o_endAddr,
-                                         uint8_t i_dimmSlct );
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          MemAddr & o_startAddr,
+                                          MemAddr & o_endAddr,
+                                          uint8_t i_dimmSlct );
 
 //------------------------------------------------------------------------------
 
@@ -1426,15 +1426,15 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_memPort,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t startTdScrub<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
                                       const MemRank & i_rank,
                                       AddrRangeType i_rangeType,
-                                      mss::mcbist::stop_conditions<> i_stopCond )
+                                      mss::mcbist::stop_conditions<> i_stopCond)
 {
-    #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_OCMB_CHIP>] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
