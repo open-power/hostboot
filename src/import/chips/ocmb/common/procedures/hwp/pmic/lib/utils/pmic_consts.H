@@ -43,6 +43,58 @@ namespace mss
 namespace pmic
 {
 
+///
+/// @brief Module height from SPD (1U-4U)
+/// @note these values are taken directly from the SPD.
+///
+enum module_height
+{
+    HEIGHT_1U = 0b000,
+    HEIGHT_2U = 0b001,
+    HEIGHT_4U = 0b100,
+};
+
+///
+/// @brief IDs for PMIC0 or PMIC1
+///
+enum id
+{
+    PMIC0 = 0,
+    PMIC1 = 1,
+    PMIC2 = 2,
+    PMIC3 = 3,
+    UNKNOWN_ID = 4, // default constant for wrapper procedure
+};
+
+///
+/// @brief Constants for pmic product types
+///
+enum product
+{
+    JEDEC_COMPLIANT, // Only JEDEC exists
+};
+
+///
+/// @brief constants for pmic vendor
+///
+enum vendor
+{
+    UNKNOWN_VENDOR,
+    TI = 0x9780,
+    IDT = 0xB380,
+};
+
+///
+/// @brief Constants for pmic rail
+///
+enum rail
+{
+    SWA = 0,
+    SWB = 1,
+    SWC = 2,
+    SWD = 3,
+};
+
 enum attr_eff_engine_fields
 {
     // Template recursive base case
@@ -186,6 +238,106 @@ enum ffdc_codes
     SET_DRAM_MODULE_HEIGHT                  = 0x1086,
 };
 
+///
+/// @brief constants for PMIC procedures
+///
+/// @tparam P product ID (jedec, etc.)
+///
+template<mss::pmic::product P>
+struct consts;
+
+///
+/// @brief constants for JEDEC_COMPLIANT PMICS
+///
+template<>
+struct consts<mss::pmic::product::JEDEC_COMPLIANT>
+{
+    static constexpr uint8_t RANGE_0                    = 0;
+    static constexpr uint8_t RANGE_1                    = 1;
+    static constexpr uint8_t NUM_UNIQUE_PMICS           = 2; // PMIC0/2, PMIC1/3
+    static constexpr uint8_t NUMBER_OF_RAILS            = 4;
+
+    static constexpr uint8_t VENDOR_PASSWORD_LOW        = 0x73;
+    static constexpr uint8_t VENDOR_PASSWORD_HIGH       = 0x94;
+    static constexpr uint8_t UNLOCK_VENDOR_REGION       = 0x40;
+    static constexpr uint8_t LOCK_VENDOR_REGION         = 0x00;
+
+    static constexpr uint8_t PROGRAMMABLE_MODE          = 0x01;
+    static constexpr uint8_t SECURE_MODE                = 0x00;
+
+    static constexpr uint8_t SINGLE_PHASE               = 0x0;
+    static constexpr uint8_t DUAL_PHASE                 = 0x1;
+
+    static constexpr uint8_t PWR_GOOD                   = 0x0;
+    static constexpr uint8_t PWR_NOT_GOOD               = 0x1;
+
+    // Sequencing
+    static constexpr uint8_t DELAY_LIMIT                = 0b1000;
+
+    // Despite the SPD max of 1000, the PMIC can only really support this value
+    static constexpr uint8_t ORDER_LIMIT                = 0b0101;
+
+    // Offset voltage from spd (+/-)
+    static constexpr uint8_t OFFSET_PLUS                = 0;
+    static constexpr uint8_t OFFSET_MINUS               = 1;
+
+    // Shift left 1 to match buffer position
+    static constexpr uint8_t SHIFT_VOLTAGE_FOR_REG      = 1;
+
+    static constexpr uint8_t NUM_RANGES                 = 2; // RANGE0 and RANGE1
+    static constexpr uint8_t MAX_VOLT_BITMAP            = 0b01111111;
+    static constexpr uint8_t MAX_DELAY_BITMAP           = 0b00000111;
+    static constexpr uint8_t CONVERT_RANGE1_TO_RANGE0   = 40;
+
+    static constexpr float SWABC_VOLT_RANGE0_MIN        = 0.8;
+    static constexpr float SWABC_VOLT_RANGE0_MAX        = 1.435;
+    static constexpr float SWABC_VOLT_RANGE1_MIN        = 0.6;
+    static constexpr float SWABC_VOLT_RANGE1_MAX        = 1.235;
+
+    static constexpr float SWD_VOLT_RANGE0_MIN          = 1.5;
+    static constexpr float SWD_VOLT_RANGE0_MAX          = 2.135;
+    static constexpr float SWD_VOLT_RANGE1_MIN          = 2.2;
+    static constexpr float SWD_VOLT_RANGE1_MAX          = 2.835;
+
+    // the overarching JEDEC spec says 5. Sticking with 5 until we hear otherwise.
+    static constexpr float VOLT_STEP                    = 0.005; // 5 mV
+};
+
+///
+/// @brief PMIC traits that change depending on DIMM module height
+///
+/// @tparam H module_height enum
+///
+template<mss::pmic::module_height H>
+struct pmic_traits;
+
+///
+/// @brief pmic traits for 1U dimms
+///
+template <>
+struct pmic_traits<mss::pmic::module_height::HEIGHT_1U>
+{
+    static constexpr uint8_t PMICS_PER_DIMM = 2;
+};
+
+///
+/// @brief pmic traits for 2U dimms
+///
+template <>
+struct pmic_traits<mss::pmic::module_height::HEIGHT_2U>
+{
+    static constexpr uint8_t PMICS_PER_DIMM = 2;
+};
+
+///
+/// @brief pmic traits for 4U dimms
+///
+template <>
+struct pmic_traits<mss::pmic::module_height::HEIGHT_4U>
+{
+    static constexpr uint8_t PMICS_PER_DIMM = 4;
+};
+
 namespace i2c
 {
 
@@ -197,7 +349,7 @@ enum sizes
     DATA_LENGTH = 1,
 };
 
-}// i2c
+} // i2c
 } // pmic
 } // mss
 

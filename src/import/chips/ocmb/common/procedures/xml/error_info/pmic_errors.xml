@@ -44,4 +44,92 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_PMIC_CHIP_NOT_RECOGNIZED</rc>
+    <description>
+       The PMIC identifier register contents did not match any known chip.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VENDOR_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_VOLTAGE_OUT_OF_RANGE</rc>
+    <description>
+       The voltage from the SPD and offset combination was out of range for the PMIC.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VOLTAGE_BITMAP</ffdc>
+    <ffdc>RAIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_ORDER_OUT_OF_RANGE</rc>
+    <description>
+       The sequence order specified by the SPD was out of range for the PMIC (max 4)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>ORDER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_DELAY_OUT_OF_RANGE</rc>
+    <description>
+       The sequence delay specified by the SPD was out of range for the PMIC (max bitmap: 0b111)
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RAIL</ffdc>
+    <ffdc>DELAY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_DIMM_SPD_4U</rc>
+    <description>
+       The module_height attribute SPD of this DIMM was read as 4U.
+       4U is not supported yet for pmic_enable().
+    </description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

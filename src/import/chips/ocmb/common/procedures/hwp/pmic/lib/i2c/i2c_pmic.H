@@ -148,7 +148,6 @@ inline fapi2::ReturnCode reg_read_reverse_buffer(const fapi2::Target<fapi2::TARG
 {
     FAPI_TRY(mss::pmic::i2c::reg_read(i_target, i_addr, o_data_buffer));
     o_data_buffer.reverse();
-
 fapi_try_exit:
     return fapi2::current_err;
 }
