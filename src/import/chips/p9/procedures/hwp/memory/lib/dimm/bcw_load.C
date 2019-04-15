@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,10 +34,15 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-
 #include <mss.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/shared/mss_const.H>
+
 #include <lib/dimm/bcw_load.H>
 #include <lib/dimm/bcw_load_ddr4.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -58,7 +63,7 @@ template<>
 fapi2::ReturnCode bcw_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
     // instructions in the CCS instruction vector
@@ -91,7 +96,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -121,7 +126,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_DBG("perform bcw_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
     FAPI_TRY( bcw_load_ddr4(i_target, io_inst), "Failed bcw load for lrdimm %s", mss::c_str(i_target));
@@ -138,7 +143,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_INF("Skipping BCW loading for %s since this is valid only for LRDIMMs", mss::c_str(i_target));
     return fapi2::FAPI2_RC_SUCCESS;
@@ -152,7 +157,7 @@ fapi2::ReturnCode perform_bcw_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;

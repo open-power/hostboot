@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ template< >
 fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
                               const uint64_t i_rank,
-                              std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst )
+                              std::vector< ccs::instruction_t >& io_inst )
 {
     FAPI_TRY( mrs_engine(i_target, i_data, i_rank, i_data.iv_delay, io_inst) );
 
@@ -138,7 +138,7 @@ namespace ddr4
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                            std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                            std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_INF("ddr4::mrs_load %s", mss::c_str(i_target));
 
@@ -234,7 +234,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode rtt_nom_override(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                    const uint64_t i_rank,
-                                   std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                   std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_rtt_nom_override_disable = 0;
     uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
@@ -274,7 +274,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode rtt_wr_disable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                  const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                 std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};
 
@@ -302,7 +302,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode rtt_nom_restore(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                   const uint64_t i_rank,
-                                  std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                  std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_rtt_nom_override_disable = 0;
     uint8_t l_rtt_nom_value[MAX_RANK_PER_DIMM] = {0};
@@ -335,7 +335,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode rtt_wr_restore(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                  const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                 std::vector< ccs::instruction_t >& io_inst)
 {
     // Get original RTT_WR value
     uint8_t l_rtt_wr_value[MAX_RANK_PER_DIMM] = {0};

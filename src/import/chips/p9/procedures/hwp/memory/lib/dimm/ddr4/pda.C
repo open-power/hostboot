@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,13 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <lib/shared/mss_const.H>
+#include <lib/mc/port.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
@@ -48,6 +51,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/pda.H>
 #include <lib/workarounds/ccs_workarounds.H>
+
 
 namespace mss
 {
@@ -209,7 +213,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode add_enable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const uint64_t i_rank,
-                              std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst )
+                              std::vector< ccs::instruction_t >& io_inst )
 {
     mss::ddr4::mrs03_data l_mrs03( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS03 data from attributes", mss::c_str(i_target));
@@ -232,7 +236,7 @@ fapi_try_exit:
 fapi2::ReturnCode enter( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                          const uint64_t i_rank )
 {
-    ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -261,7 +265,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode add_disable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                const uint64_t i_rank,
-                               std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst )
+                               std::vector< ccs::instruction_t >& io_inst )
 {
     mss::ddr4::mrs03_data l_mrs03( i_target, fapi2::current_err );
     FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS03 data from attributes", mss::c_str(i_target));
@@ -284,7 +288,7 @@ fapi_try_exit:
 fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const uint64_t i_rank )
 {
-    ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -344,7 +348,7 @@ fapi2::ReturnCode execute_wr_vref_latch( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Issue MRS commands
     {
-        ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+        ccs::program l_program;
 
         FAPI_TRY(mss::ddr4::add_latch_wr_vref_commands( i_target,
                  i_mrs,

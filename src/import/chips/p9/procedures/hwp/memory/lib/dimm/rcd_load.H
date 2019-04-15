@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,11 @@
 #include <fapi2.H>
 
 #include <p9_mc_scom_addresses.H>
-
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/shared/mss_kind.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -112,7 +114,7 @@ struct perform_rcd_load_overload< KIND_LRDIMM_DDR4 >
 template< mss::kind_t K = FORCE_DISPATCH >
 typename std::enable_if< perform_rcd_load_overload<DEFAULT_KIND>::available, fapi2::ReturnCode>::type
 perform_rcd_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+                  std::vector< ccs::instruction_t >& i_inst);
 
 //
 // We know we registered overloads for perform_rcd_load, so we need the entry point to
@@ -121,11 +123,11 @@ perform_rcd_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 //
 template<>
 fapi2::ReturnCode perform_rcd_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+        std::vector< ccs::instruction_t >& i_inst);
 
 template<>
 fapi2::ReturnCode perform_rcd_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+        std::vector< ccs::instruction_t >& i_inst);
 
 ///
 /// @brief Start the rcd_load_dispatch boilerplate -- specialization for recursion dispatcher
@@ -137,7 +139,7 @@ fapi2::ReturnCode perform_rcd_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TAR
 template< kind_t K, bool B = perform_rcd_load_overload<K>::available >
 inline fapi2::ReturnCode perform_rcd_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     // We dispatch to another kind if:
     // We don't have an overload defined (B == false)
@@ -162,7 +164,7 @@ inline fapi2::ReturnCode perform_rcd_load_dispatch( const kind_t& i_kind,
 template<>
 inline fapi2::ReturnCode perform_rcd_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     return perform_rcd_load<DEFAULT_KIND>(i_target, i_inst);
 }

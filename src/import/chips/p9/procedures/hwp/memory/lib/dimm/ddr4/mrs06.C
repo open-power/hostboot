@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs06(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Check to make sure our ctor worked ok
@@ -101,7 +101,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs06_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
 
@@ -159,7 +159,7 @@ fapi_try_exit:
 /// @param[out] o_vrefdq_train_value_buffer the vrefdq training value
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_vrefdq_train_range,
                                       uint8_t& o_vrefdq_train_enable,
@@ -188,7 +188,7 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs06_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank)
 {
     fapi2::buffer<uint8_t> l_tccd_l_buffer;
@@ -202,10 +202,10 @@ fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
 
 fapi2::ReturnCode (*mrs06_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs06_data& i_data,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs06;
 
-fapi2::ReturnCode (*mrs06_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode (*mrs06_data::decode)(const ccs::instruction_t& i_inst,
                                         const uint64_t i_rank) = &mrs06_decode;
 
 } // ns ddr4

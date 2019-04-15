@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,13 +38,17 @@
 
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/mc/port.H>
+#include <lib/shared/mss_const.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/phy/write_cntrl.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+
 
 #include <map>
 
@@ -170,7 +174,7 @@ fapi2::ReturnCode blast_dram_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 ///
 fapi2::ReturnCode add_enable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const uint64_t i_rank,
-                              std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst );
+                              std::vector< ccs::instruction_t >& io_inst );
 
 ///
 /// @brief Enters into and configures PDA mode
@@ -190,7 +194,7 @@ fapi2::ReturnCode enter( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode add_disable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                const uint64_t i_rank,
-                               std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst );
+                               std::vector< ccs::instruction_t >& io_inst );
 
 ///
 /// @brief Exits out of and disables PDA mode

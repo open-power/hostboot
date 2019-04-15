@@ -548,24 +548,23 @@ class ecc::fwms::address
         fapi2::buffer<uint64_t> iv_value;
 };
 
-using field = std::pair<uint64_t, uint64_t>;
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::DIMM;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::DIMM;
 
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::MRANK;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::MRANK;
 
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::SRANK;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::SRANK;
 
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::BANK_GROUP;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::BANK_GROUP;
 
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::BANK;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::BANK;
 
 template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr field ecc::fwms::address<MC, T, TT>::LAST_VALID;
+constexpr mss::mcbist::address::field ecc::fwms::address<MC, T, TT>::LAST_VALID;
 
 } // close namespace mss
 

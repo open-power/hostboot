@@ -38,6 +38,7 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <lib/shared/mss_const.H>
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
@@ -45,12 +46,14 @@
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/workarounds/ccs_workarounds.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mc/port.H>
 #include <lib/rosetta_map/rosetta_map.H>
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/eff_config/timing.H>
 #include <generic/memory/lib/utils/pos.H>
+
 
 #ifdef LRDIMM_CAPABLE
     #include <lib/phy/mss_lrdimm_training_helper.H>
@@ -190,7 +193,7 @@ fapi2::ReturnCode mpr_pattern_wr_rank(const fapi2::Target<fapi2::TARGET_TYPE_MCA
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Gets the DIMM target
@@ -250,16 +253,17 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode execute_nttm_mode_read(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
-    using TT = ccsTraits<fapi2::TARGET_TYPE_MCBIST>;
+
+    using TT = ccsTraits<mss::mc_type::NIMBUS>;
 
     // A hardware bug requires us to increase our delay significanlty for NTTM mode reads
     constexpr uint64_t SAFE_NTTM_READ_DELAY = 0x40;
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     // Note: CKE are enabled by default in the NTTM mode read command, so we should be good to go
     // set the NTTM read mode
-    auto l_nttm_read = mss::ccs::nttm_read_command<fapi2::TARGET_TYPE_MCBIST>();
+    auto l_nttm_read = mss::ccs::nttm_read_command();
     l_nttm_read.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(SAFE_NTTM_READ_DELAY);
     l_program.iv_instructions.push_back(l_nttm_read);
 
@@ -439,7 +443,7 @@ fapi2::ReturnCode mrep::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
                                   const uint8_t i_rank,
                                   const uint8_t i_delay ) const
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -453,7 +457,7 @@ fapi2::ReturnCode mrep::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,10 @@
 #define _MSS_DDR_PHY_H_
 
 #include <fapi2.H>
-#include <lib/ccs/ccs.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 namespace mss
 {
@@ -295,16 +298,15 @@ fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE
 ///
 /// @brief Setup terminations for WR_LEVEL cal for a given RP
 /// @tparam T the target type of the MCA/MBA
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target the target associated with this cal setup
 /// @param[in] i_rp selected rank pair
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<CT> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Setup terminations for WR_LEVEL cal for a given RP
@@ -313,24 +315,23 @@ fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<T>& i_target,
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template<>
+template< >
 fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Restore terminations after WR_LEVEL cal for a given RP
 /// @tparam T the target type of the MCA/MBA
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target the target associated with this cal setup
 /// @param[in] i_rp selected rank pair
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<CT> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Restore terminations after WR_LEVEL cal for a given RP
@@ -339,10 +340,10 @@ fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<T>& i_targe
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template<>
+template< >
 fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Perform the DLL calibration

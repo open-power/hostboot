@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,8 +39,10 @@
 #define MSS_LRDIMM_TRAINING_H
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/shared/mss_const.H>
 #include <lib/phy/mss_training.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
@@ -51,6 +53,7 @@
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/rosetta_map/rosetta_map.H>
 #include <lib/phy/ddr_phy.H>
+
 
 // Disables LRDIMM support for HB
 #ifndef __HOSTBOOT_MODULE
@@ -86,18 +89,16 @@ fapi2::ReturnCode mpr_pattern_wr_all_ranks(const fapi2::Target<fapi2::TARGET_TYP
 
 ///
 /// @brief Adds all write commands for the passed in pattern
-/// @tparam fapi2::TargetType T target type for the CCS instruction
 /// @param[in] i_target DIMM target on which to operate
 /// @param[in] i_rank the DIMM rank to set the MPR on
 /// @param[in] i_pattern the pattern to write into the MPRS
 /// @param[in,out] io_insts CCS instructions
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
 ///
-template<fapi2::TargetType T>
 inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_rank,
         const uint64_t i_pattern,
-        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+        std::vector<mss::ccs::instruction_t>& io_insts)
 {
 
     constexpr uint64_t NUM_MPR_PATTERNS = 4;
@@ -122,10 +123,10 @@ inline fapi2::ReturnCode add_mpr_pattern_writes(const fapi2::Target<fapi2::TARGE
         FAPI_TRY(l_swizzled_pattern.extract(l_pattern, l_ba * PATTERN_LEN, PATTERN_LEN, ADDR_START), "%s ba%u",
                  mss::c_str(i_target), l_ba);
         {
-            auto l_wr = mss::ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>( i_rank,
-                        l_ba,
-                        MPR_WR_BG,
-                        l_pattern);
+            auto l_wr = mss::ccs::wr_command( i_rank,
+                                              l_ba,
+                                              MPR_WR_BG,
+                                              l_pattern);
             // Swaps the bank addresses so they're a true to the BA we tried to pass in above
             swap<BA0, BA1>(l_wr.arr0);
 
@@ -142,14 +143,12 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to disable address inversion
-/// @tparam fapi2::TargetType T target type for the CCS instruction
 /// @param[in] i_target DIMM target on which to operate
 /// @param[in,out] io_insts CCS instructions
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
 ///
-template<fapi2::TargetType T>
 inline fapi2::ReturnCode disable_address_inversion(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+        std::vector<mss::ccs::instruction_t>& io_insts)
 {
     // Declares the default control word that handles address inversion
     // Data of 0 as we're going to override it below
@@ -177,14 +176,12 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to restore default address inversion
-/// @tparam fapi2::TargetType T target type for the CCS instruction
 /// @param[in] i_target DIMM target on which to operate
 /// @param[in,out] io_insts CCS instructions
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
 ///
-template<fapi2::TargetType T>
 inline fapi2::ReturnCode restore_address_inversion(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector<mss::ccs::instruction_t<T>>& io_insts)
+        std::vector<mss::ccs::instruction_t>& io_insts)
 {
     // Declares the default control word that handles address inversion
     // Data of 0 as we're going to override it below
@@ -590,7 +587,7 @@ inline fapi2::ReturnCode set_buffer_training(const fapi2::Target<fapi2::TARGET_T
         const mss::ddr4::training i_mode )
 {
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -615,7 +612,7 @@ inline fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
                                   const uint8_t i_mode,
                                   const uint64_t i_rank)
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -647,7 +644,7 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
     constexpr uint64_t SAFETY_CYCLES = 2;
     constexpr uint64_t ODT_CYCLE_LEN = 5 + SAFETY_CYCLES * 2;
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
     uint8_t l_cl = 0;
@@ -661,16 +658,16 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     FAPI_TRY(mss::eff_odt_rd(i_target, &l_rd_odt[0]));
 
-    FAPI_TRY( ddr4::mpr_read<fapi2::TARGET_TYPE_MCBIST>(i_target, i_mpr_loc, i_rank, l_program.iv_instructions));
+    FAPI_TRY( ddr4::mpr_read(i_target, i_mpr_loc, i_rank, l_program.iv_instructions));
 
     l_program.iv_instructions[0].arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(l_delay);
 
     // Holds the RD ODT's for 5 cycles
     {
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
                                  (l_rd_odt[l_dimm_rank]));
-        auto l_odt = mss::ccs::odt_command<fapi2::TARGET_TYPE_MCBIST>(l_ccs_value, ODT_CYCLE_LEN);
+        auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN);
         l_program.iv_instructions.push_back(l_odt);
     }
 

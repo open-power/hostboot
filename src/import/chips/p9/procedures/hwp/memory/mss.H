@@ -49,6 +49,7 @@
 
 #include <lib/shared/mss_const.H>
 #include <lib/shared/mss_kind.H>
+#include <lib/ccs/ccs_nimbus.H>
 
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -62,7 +63,6 @@
 #include <lib/utils/checker.H>
 #include <generic/memory/lib/utils/dump_regs.H>
 
-#include <lib/ccs/ccs.H>
 #include <lib/mcbist/mcbist.H>
 
 #include <lib/dimm/rcd_load.H>

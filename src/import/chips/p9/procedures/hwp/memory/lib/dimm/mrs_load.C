@@ -62,7 +62,7 @@ fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
 
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
     // instructions in the CCS instruction vector
@@ -121,7 +121,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -151,7 +151,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_DBG("perform mrs_load for %s [expecting rdimm (ddr4)]", mss::c_str(i_target));
     FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
@@ -168,7 +168,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_DBG("perform mrs_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
     FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
@@ -186,7 +186,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;

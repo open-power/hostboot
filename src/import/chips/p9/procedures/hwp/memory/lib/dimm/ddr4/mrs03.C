@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,7 +106,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Check to make sure our ctor worked ok
@@ -130,7 +130,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs03_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     //Some consts for the swizzle action
@@ -186,7 +186,7 @@ fapi_try_exit:
 /// @param[out] o_read_fromat the mpr read format setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_mpr_mode,
                                       uint8_t& o_geardown,
@@ -228,7 +228,7 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs03_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank)
 {
     uint8_t l_mpr_mode = 0;
@@ -246,10 +246,10 @@ fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
 
 fapi2::ReturnCode (*mrs03_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs03_data& i_data,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs03;
 
-fapi2::ReturnCode (*mrs03_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode (*mrs03_data::decode)(const ccs::instruction_t& i_inst,
                                         const uint64_t i_rank) = &mrs03_decode;
 
 } // ns ddr4

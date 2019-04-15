@@ -34,13 +34,15 @@
 // *HWP Consumed by: FSP:HB Memory Lab
 
 #include <lib/shared/nimbus_defaults.H>
+#include <lib/shared/mss_const.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/rank.H>
 #include <p9_mc_scom_addresses.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/eff_config/timing.H>
-#include <lib/ccs/ccs.H>
+#include <generic/memory/lib/ccs/ccs.H>
+#include <lib/mc/port.H>
 
 namespace mss
 {
@@ -105,7 +107,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const uint64_t i_rank,
-                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
+                        ccs::program& io_program )
 {
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
     // Issues A-side MRS
@@ -150,9 +152,9 @@ fapi_try_exit:
 ///       ccs program execution will be handled by OCC
 ///
 fapi2::ReturnCode preload_ccs_for_epow( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program)
+                                        ccs::program& i_program)
 {
-    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+    typedef ccsTraits<mss::mc_type::NIMBUS> TT;
 
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
@@ -229,10 +231,10 @@ namespace nvdimm
 ///       CCS can properly drive the bus during the nvdimm post-restore sequence.
 ///
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                                     mss::ccs::program& i_program,
                                      const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port)
 {
-    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+    typedef ccsTraits<mss::mc_type::NIMBUS> TT;
 
     fapi2::buffer<uint64_t> status;
 
@@ -256,7 +258,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBI
     i_program.iv_probes);
 
     // Check for done and success. DONE being the only bit set.
-    if (status == STAT_QUERY_SUCCESS)
+    if (status == TT::STAT_QUERY_SUCCESS)
     {
         FAPI_INF("%s CCS Executed Successfully.", mss::c_str(i_port) );
         goto fapi_try_exit;
@@ -280,17 +282,17 @@ fapi_try_exit:
 /// @note This is a copy of execute() with minor tweaks to the namespace and single port only
 ///
 fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                           mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                           mss::ccs::program& i_program,
                            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port)
 {
-    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+    typedef ccsTraits<mss::mc_type::NIMBUS> TT;
 
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
     constexpr uint64_t CCS_ARR0_ZERO = MCBIST_CCS_INST_ARR0_00;
     constexpr uint64_t CCS_ARR1_ZERO = MCBIST_CCS_INST_ARR1_00;
 
-    mss::ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> l_des = ccs::des_command<fapi2::TARGET_TYPE_MCBIST>();
+    mss::ccs::instruction_t l_des = ccs::des_command();
 
     FAPI_INF("loading ccs instructions (%d) for %s", i_program.iv_instructions.size(), mss::c_str(i_target));
 
@@ -413,7 +415,7 @@ void update_mrs(mss::ddr4::mrs01_data& io_mrs, const mss::states i_state)
 fapi2::ReturnCode add_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                           const uint64_t i_rank,
                           const mss::states& i_state,
-                          std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst)
+                          std::vector<ccs::instruction_t>& io_inst)
 {
     // First, get the DIMM target
     // Note: the target is setup below based upon the rank
@@ -555,7 +557,7 @@ fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TAR
         const mss::states& i_state)
 {
     // Declares variables
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST, fapi2::TARGET_TYPE_MCA> l_program;
+    ccs::program l_program;
     std::vector<uint64_t> l_ranks;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 

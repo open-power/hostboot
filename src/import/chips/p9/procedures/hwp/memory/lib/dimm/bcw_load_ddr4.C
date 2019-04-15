@@ -36,17 +36,20 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/shared/mss_const.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/eff_config/timing.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/bcw_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <generic/memory/lib/spd/spd_utils.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -67,7 +70,7 @@ namespace mss
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                 std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                 std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_INF("bcw_load_ddr4 %s", mss::c_str(i_target) );
 
@@ -140,7 +143,7 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         };
 
         // DES first - make sure those CKE go high and stay there
-        io_inst.push_back(mss::ccs::des_command<TARGET_TYPE_MCBIST>());
+        io_inst.push_back(mss::ccs::des_command());
 
         // Issues the CW's
         FAPI_TRY( control_word_engine(i_target, l_bcw_info, l_sim, io_inst),

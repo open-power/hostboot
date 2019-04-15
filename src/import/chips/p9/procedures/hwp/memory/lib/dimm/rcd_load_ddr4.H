@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,6 @@ namespace mss
 ///
 fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const bool i_sim,
-                                 std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+                                 std::vector< ccs::instruction_t >& io_inst);
 }
 #endif

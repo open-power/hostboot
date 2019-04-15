@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,12 +36,16 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <vector>
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 
 #include <lib/dimm/ddr4/zqcal.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
-#include <lib/ccs/ccs.H>
+#include <lib/mc/port.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/eff_config/timing.H>
 #include <lib/workarounds/ccs_workarounds.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -61,15 +65,15 @@ namespace mss
 template<>
 fapi2::ReturnCode setup_dram_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                     const uint64_t i_rank,
-                                    std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+                                    std::vector< ccs::instruction_t >& io_inst)
 {
-    ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst;
+    ccs::instruction_t l_inst;
 
     uint64_t tDLLK = 0;
     FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
     // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-    l_inst = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_rank);
+    l_inst = ccs::zqcl_command(i_rank);
 
     // Doubling tZQ to better margin per lab request
     {
@@ -98,7 +102,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode setup_data_buffer_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // For LRDIMMs, program BCW to send ZQCal Long command to all data buffers
     // in broadcast mode
@@ -128,7 +132,7 @@ template<>
 fapi2::ReturnCode setup_and_execute_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
 {
-    mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
 
     for ( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {

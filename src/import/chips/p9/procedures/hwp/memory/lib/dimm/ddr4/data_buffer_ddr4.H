@@ -44,6 +44,9 @@
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/eff_config/timing.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 namespace mss
 {
@@ -135,7 +138,7 @@ enum command : size_t
 ///
 inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
         const uint64_t i_func_space,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_ASSERT(i_func_space <= MAX_FUNC_SPACE,
                 fapi2::MSS_LRDIMM_FUNC_SPACE_OUT_OF_RANGE()
@@ -246,13 +249,13 @@ fapi_try_exit:
 template< mss::control_word T >
 static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
         const cw_data& i_data,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     uint8_t l_sim = 0;
     mss::is_simulation(l_sim);
 
     // DES first - make sure those CKE go high and stay there
-    io_inst.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    io_inst.push_back(mss::ccs::des_command());
 
     FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",
@@ -274,17 +277,15 @@ fapi_try_exit:
 
 ///
 /// @brief Sets data buffer training mode control word
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_mode buffer training mode
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets buffer control word (BC0C) setting
 ///
-template< fapi2::TargetType T >
 inline fapi2::ReturnCode set_buffer_training( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const training i_mode,
-        std::vector< ccs::instruction_t<T> >& io_inst )
+        std::vector< ccs::instruction_t >& io_inst )
 {
     // This doesn't need to be reused so it is left local to this function scope
     static const std::vector< std::pair<training, uint64_t> > BUFF_TRAINING =
@@ -365,17 +366,15 @@ fapi_try_exit:
 
 ///
 /// @brief Sets rank presence control word
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_num_package_ranks num of package ranks for LRDIMM
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets buffer control word (BC07) setting
 ///
-template< fapi2::TargetType T>
 inline fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_num_package_ranks,
-        std::vector< ccs::instruction_t<T> >& io_inst )
+        std::vector< ccs::instruction_t >& io_inst )
 {
     // Helper function handles error checking
     uint64_t l_encoding = 0;
@@ -394,7 +393,6 @@ fapi_try_exit:
 ///
 /// @brief Sets Upper/Lower nibble DRAM interface receive enable training control word
 /// @tparam T the nibble of in training (upper/lower)
-/// @tparam OT TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_rank DIMM0 rank [0:3] or DIMM1 rank [4:7]
 /// @param[in] i_trained_timing the delay MDQS receive enable timing
@@ -402,11 +400,11 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets buffer control word ( F[3:0]BC2x ) setting
 ///
-template< mss::nibble N, fapi2::TargetType OT>
+template< mss::nibble N >
 fapi2::ReturnCode set_mrep_timing_control( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint64_t i_rank,
         const uint64_t i_trained_timing,
-        std::vector< ccs::instruction_t<OT> >& io_inst )
+        std::vector< ccs::instruction_t >& io_inst )
 {
     constexpr size_t MAX_DELAY = 63;
 
@@ -433,17 +431,15 @@ fapi_try_exit:
 
 ///
 /// @brief Sets command space control word
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_command command name
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets buffer control word (BC06) setting
 ///
-template< fapi2::TargetType T>
 inline fapi2::ReturnCode set_command_space( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const command i_command,
-        std::vector< ccs::instruction_t<T> >& io_inst )
+        std::vector< ccs::instruction_t >& io_inst )
 {
     constexpr uint64_t MAX_VALID_CMD = 4;
 
@@ -466,17 +462,15 @@ fapi_try_exit:
 
 ///
 /// @brief Sets per buffer addressibility (PBA) mode
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target the DIMM target
 /// @param[in] i_state mss::ON or mss::OFF
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Sets DA0 setting for buffer control word (F0BC1x)
 ///
-template< fapi2::TargetType T>
 inline fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                        const mss::states i_state,
-                                       std::vector< ccs::instruction_t<T> >& io_inst )
+                                       std::vector< ccs::instruction_t >& io_inst )
 {
     // PBA position is really bit 0, but we're right justified on our bit ordering here, so it's bit7
     constexpr uint64_t PBA_POSITION = 7;

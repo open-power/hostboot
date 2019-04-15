@@ -163,7 +163,7 @@
   </registerFfdc>
 
   <hwpError>
-    <rc>RC_MSS_CCS_READ_MISCOMPARE</rc>
+    <rc>RC_MSS_NIMBUS_CCS_READ_MISCOMPARE</rc>
     <description>
         CCS reports a read miscompare.
     </description>
@@ -186,7 +186,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_CCS_UE_SUE</rc>
+    <rc>RC_MSS_NIMBUS_CCS_UE_SUE</rc>
     <description>
         CCS reports a UE or SUE in the CCS program array
         Chould be an indicator of corruption in the CCS program
@@ -210,7 +210,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_CCS_CAL_TIMEOUT</rc>
+    <rc>RC_MSS_NIMBUS_CCS_CAL_TIMEOUT</rc>
     <description>
         CCS reports never getting a response back from the PHY on a calibration command
     </description>
@@ -233,7 +233,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_CCS_HUNG</rc>
+    <rc>RC_MSS_NIMBUS_CCS_HUNG</rc>
     <description>
         Software reported that the machine is not seeing the CCS finish in the alloted time
     </description>

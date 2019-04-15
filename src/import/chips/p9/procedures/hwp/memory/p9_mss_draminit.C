@@ -60,9 +60,8 @@ extern "C"
     {
         fapi2::buffer<uint64_t> l_data;
 
-        mss::ccs::instruction_t<TARGET_TYPE_MCBIST> l_des = mss::ccs::des_command<TARGET_TYPE_MCBIST>();
-
-        mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
+        mss::ccs::instruction_t l_des = mss::ccs::des_command();
+        mss::ccs::program l_program;
 
         // Up, down P down, up N. Somewhat magic numbers - came from Centaur and proven to be the
         // same on Nimbus. Why these are what they are might be lost to time ...

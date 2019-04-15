@@ -36,11 +36,15 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <vector>
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/dimm/rank.H>
 #include <lib/workarounds/ccs_workarounds.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -62,7 +66,7 @@ namespace ddr4
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs06_data& i_mrs06,
         const uint64_t i_rank,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // JEDEC has a 3 step latching process for WR VREF
     // 1) enter into VREFDQ training mode, with the desired range value is XXXXXX
@@ -111,7 +115,7 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
     const auto l_mcbist = find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     // Warning: l_dimm is not a valid Target and will crash Cronus if used before it gets filled in by mss::rank::get_dimm_target_from_rank
     fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST, fapi2::TARGET_TYPE_MCA> l_program;
+    ccs::program l_program;
     std::vector<uint64_t> l_ranks;
 
     // Gets the ranks on which to latch the VREF's
@@ -173,7 +177,7 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
         const uint64_t i_rank,
         const uint8_t i_train_range,
         const uint8_t i_train_value,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // Check to make sure our ctor worked ok
     mrs06_data l_mrs06( i_target, fapi2::current_err );

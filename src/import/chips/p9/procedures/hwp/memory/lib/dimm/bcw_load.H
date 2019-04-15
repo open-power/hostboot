@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,13 @@
 #include <fapi2.H>
 
 #include <p9_mc_scom_addresses.H>
+#include <lib/shared/mss_const.H>
 
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/shared/mss_kind.H>
+
 
 namespace mss
 {
@@ -113,7 +117,7 @@ struct perform_bcw_load_overload< KIND_LRDIMM_DDR4 >
 template< mss::kind_t K = FORCE_DISPATCH >
 typename std::enable_if< perform_bcw_load_overload<DEFAULT_KIND>::available, fapi2::ReturnCode>::type
 perform_bcw_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+                  std::vector< ccs::instruction_t >& io_inst);
 
 //
 // We know we registered overloads for perform_bcw_load, so we need the entry point to
@@ -129,7 +133,7 @@ perform_bcw_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Perform the bcw_load operations (DEFAULT_KIND specialization)
@@ -139,7 +143,7 @@ fapi2::ReturnCode perform_bcw_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::T
 ///
 template<>
 fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 //
 // Boilerplate dispatcher
@@ -157,7 +161,7 @@ fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TAR
 template< kind_t K, bool B = perform_bcw_load_overload<K>::available >
 inline fapi2::ReturnCode perform_bcw_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // We dispatch to another kind if:
     // We don't have an overload defined (B == false)
@@ -182,7 +186,7 @@ inline fapi2::ReturnCode perform_bcw_load_dispatch( const kind_t& i_kind,
 template<>
 inline fapi2::ReturnCode perform_bcw_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     return perform_bcw_load<DEFAULT_KIND>(i_target, io_inst);
 }

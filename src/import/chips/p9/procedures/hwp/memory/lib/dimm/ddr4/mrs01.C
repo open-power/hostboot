@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,12 @@
 #include <fapi2.H>
 
 #include <mss.H>
+#include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -86,7 +91,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs01(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Check to make sure our ctor worked ok
@@ -108,7 +113,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs01_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Little table to map Output Driver Imepdance Control. 34Ohm is index 0,
@@ -188,7 +193,7 @@ fapi_try_exit:
 /// @param[out] o_rtt_nom the rtt_nom setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_dll_enable,
                                       uint8_t& o_wrl_enable,
@@ -226,7 +231,7 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 /// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs01_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank)
 {
     uint8_t l_dll_enable = 0;
@@ -243,10 +248,10 @@ fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
 
 fapi2::ReturnCode (*mrs01_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs01_data& i_data,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs01;
 
-fapi2::ReturnCode (*mrs01_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode (*mrs01_data::decode)(const ccs::instruction_t& i_inst,
                                         const uint64_t i_rank) = &mrs01_decode;
 
 } // ns ddr4

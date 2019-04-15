@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,12 @@
 #include <fapi2.H>
 
 #include <mss.H>
+#include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -91,7 +96,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs00(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Check to make sure our ctor worked ok
@@ -113,7 +118,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs00_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Map from Write Recovery attribute value to bits in the MRS.
@@ -202,7 +207,7 @@ fapi_try_exit:
 /// @param[out] o_cas_latency the cas latency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_burst_length,
                                       uint8_t& o_read_burst_type,
@@ -248,7 +253,7 @@ fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 /// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs00_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank)
 {
     uint8_t l_burst_length = 0;
@@ -264,10 +269,10 @@ fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
 
 fapi2::ReturnCode (*mrs00_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs00_data& i_data,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs00;
 
-fapi2::ReturnCode (*mrs00_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode (*mrs00_data::decode)(const ccs::instruction_t& i_inst,
                                         const uint64_t i_rank) = &mrs00_decode;
 
 } // ns ddr4

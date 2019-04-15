@@ -48,6 +48,7 @@
 #include <lib/phy/adr.H>
 #include <lib/phy/seq.H>
 #include <lib/fir/check.H>
+#include <lib/ccs/ccs_nimbus.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
@@ -1038,9 +1039,9 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<TARGET_TYPE_MCA>
         const uint64_t i_total_cycles)
 {
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
-    auto l_cal_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(i_rp);
+    auto l_cal_inst = mss::ccs::initial_cal_command(i_rp);
 
-    mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
+    ccs::program l_program;
 
     FAPI_DBG("%s executing training CCS instruction: 0x%016llx, 0x%016llx for cal config 0x%16x",
              mss::c_str(i_target),
@@ -1337,7 +1338,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // Danger: Make sure this DIMM target doesn't get used/accessed until it is populated
     // by get_dimm_target_from_rank below!
@@ -1396,7 +1397,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     // Danger: Make sure this DIMM target doesn't get used/accessed until it is populated
     // by get_dimm_target_from_rank below!

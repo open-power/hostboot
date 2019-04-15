@@ -36,9 +36,9 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/mss_const.H>
-#include <lib/ccs/ccs.H>
 #include <lib/phy/dp16.H>
 #include <lib/mc/port.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -188,7 +188,7 @@ fapi2::ReturnCode self_refresh_exit( const fapi2::Target<T>& i_target );
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Load the rcd control words
@@ -199,7 +199,7 @@ fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<fapi2::TARGET_TYPE
 ///       with NVDIMMs
 ///
 fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+                                   std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Restore the rcd after restoring the nvdimm data

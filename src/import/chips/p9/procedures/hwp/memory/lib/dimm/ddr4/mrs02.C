@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs02(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     // Check to make sure our ctor worked ok
@@ -105,7 +105,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs02_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank)
 {
     constexpr uint64_t CWL_LENGTH = 3;
@@ -170,7 +170,7 @@ fapi_try_exit:
 /// @param[out] o_rtt_wr the rtt_wr setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_write_crc,
                                       fapi2::buffer<uint8_t>& o_lpasr,
@@ -199,7 +199,7 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 /// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs02_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank)
 {
     uint8_t l_write_crc = 0;
@@ -212,10 +212,10 @@ fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
 
 fapi2::ReturnCode (*mrs02_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs02_data& i_data,
-        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        ccs::instruction_t& io_inst,
         const uint64_t i_rank) = &mrs02;
 
-fapi2::ReturnCode (*mrs02_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode (*mrs02_data::decode)(const ccs::instruction_t& i_inst,
                                         const uint64_t i_rank) = &mrs02_decode;
 
 } // ns ddr4

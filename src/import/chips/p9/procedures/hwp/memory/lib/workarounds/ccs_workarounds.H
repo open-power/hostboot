@@ -38,11 +38,14 @@
 
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/shared/mss_const.H>
 
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+
 
 namespace mss
 {
@@ -66,7 +69,7 @@ namespace workarounds
 ///
 fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const uint64_t i_rank,
-                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program );
+                        ccs::program& io_program );
 
 ///
 /// @brief Re-enables PDA mode on a given rank in the shadow registers
@@ -83,7 +86,7 @@ fapi2::ReturnCode enable_pda_shadow_reg( const fapi2::Target<fapi2::TARGET_TYPE_
 /// @param[in,out] io_inst - the CCS instruction
 ///
 inline void hold_cke_low_helper( fapi2::buffer<uint8_t>& io_cke,
-                                 ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+                                 ccs::instruction_t& io_inst )
 {
     fapi2::buffer<uint8_t> l_cur_cke;
     io_inst.arr0.extractToRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(l_cur_cke);
@@ -95,7 +98,7 @@ inline void hold_cke_low_helper( fapi2::buffer<uint8_t>& io_cke,
 /// @brief Holds the lower order rank cke low in higher order rank instruction
 /// @param[in,out] io_program - CCS program with instructions on multi-rank DIMM
 ///
-inline void hold_cke_low( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
+inline void hold_cke_low( ccs::program& io_program )
 {
     fapi2::buffer<uint8_t> l_cke(CKE_HIGH);
 
@@ -111,7 +114,7 @@ inline void hold_cke_low( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
 /// @param[in,out] io_inst - the CCS instruction
 ///
 inline void hold_cke_high_helper( fapi2::buffer<uint8_t>& io_cke,
-                                  ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+                                  ccs::instruction_t& io_inst )
 {
     fapi2::buffer<uint8_t> l_cur_cke;
     io_inst.arr0.extractToRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(l_cur_cke);
@@ -123,7 +126,7 @@ inline void hold_cke_high_helper( fapi2::buffer<uint8_t>& io_cke,
 /// @brief Holds the lower order rank cke high in higher order rank instruction
 /// @param[in,out] io_inst - CCS program with instructions on multi-rank DIMM
 ///
-inline void hold_cke_high( std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst )
+inline void hold_cke_high( std::vector<ccs::instruction_t>& io_inst )
 {
     fapi2::buffer<uint8_t> l_cke(CKE_LOW);
 
@@ -137,7 +140,7 @@ inline void hold_cke_high( std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCB
 /// @brief Holds the lower order rank cke high in higher order rank instruction
 /// @param[in,out] io_program - CCS program with instructions on multi-rank DIMM
 ///
-inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
+inline void hold_cke_high( ccs::program& io_program )
 {
     fapi2::buffer<uint8_t> l_cke(CKE_LOW);
 
@@ -155,7 +158,7 @@ inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
 /// @note This is written specifically to support EPOW on NVDIMM
 ///
 fapi2::ReturnCode preload_ccs_for_epow( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                        ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program);
+                                        ccs::program& i_program);
 
 namespace nvdimm
 {
@@ -169,7 +172,7 @@ namespace nvdimm
 /// @note This is a copy of execute() with minor tweaks to the namespace and single port only
 ///
 fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                           mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                           mss::ccs::program& i_program,
                            const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port);
 
 ///
@@ -183,7 +186,7 @@ fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_tar
 ///       CCS can properly drive the bus during the nvdimm post-restore sequence.
 ///
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST>& i_program,
+                                     mss::ccs::program& i_program,
                                      fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_port);
 }
 
@@ -208,7 +211,7 @@ void update_mrs(mss::ddr4::mrs01_data& io_mrs, const mss::states i_state);
 fapi2::ReturnCode add_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                           const uint64_t i_rank,
                           const mss::states& i_state,
-                          std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst);
+                          std::vector<ccs::instruction_t>& io_inst);
 
 ///
 /// @brief Gets a vector of ranks that are not going to be calibrated in the given rank pair

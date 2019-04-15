@@ -22,3 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file ccs_traits.H
+/// @brief Run and manage the CCS engine
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_CCS_TRAITS_H_
+#define _MSS_CCS_TRAITS_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+///
+/// @class ccsTraits
+/// @brief CCS Engine traits and addresses
+/// @tparam MC The memory controller type of the traits
+///
+template< mss::mc_type MC >
+class ccsTraits;
+
+#endif

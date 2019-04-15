@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,10 @@
 #include <fapi2.H>
 
 #include <p9_mc_scom_addresses.H>
-
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -276,7 +277,6 @@ struct cw_data
 /// @brief Control word engine that sets the CCS instruction
 /// @tparam T the buffer control word type (4 bit or 8 bit)
 /// @tparam TT traits type defaults to cwTraits<T>
-/// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data control word data to send
 /// @param[in] i_sim true if in simulation mode
@@ -284,12 +284,12 @@ struct cw_data
 /// @param[out] o_instruction CCS instruction we created
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
+template< control_word T, typename TT = cwTraits<T> >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
                                       const bool i_sim,
                                       const bool i_turn_on_cke,
-                                      ccs::instruction_t<OT>& o_instruction)
+                                      ccs::instruction_t& o_instruction)
 {
     // You're probably asking "Why always turn off CKE's? What is this madness?"
     // Well, due to a vendor sensitivity, we need to have the CKE's off until we run RC09 at the very end
@@ -298,7 +298,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Therefore, we want to setup all RCW commands to have CKE's off across both DIMM's
     // We then manually turn on the CKE's associated with a specific DIMM
     constexpr bool CKE_OFF = false;
-    ccs::instruction_t<OT> l_inst = ccs::rcd_command<OT>(i_target, i_sim, CKE_OFF);
+    ccs::instruction_t l_inst = ccs::rcd_command(i_target, i_sim, CKE_OFF);
 
     // Turn on the CKE's for the ranks we're not touching, if it's needed
     // Note: we only have the whole CKE field, not the per DIMM one by default
@@ -359,7 +359,6 @@ fapi_try_exit:
 /// @brief Control word engine that sets the CCS instruction
 /// @tparam T the buffer control word type (4 bit or 8 bit)
 /// @tparam TT traits type defaults to cwTraits<T>
-/// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data control word data to send
 /// @param[in] i_sim true if in simulation mode
@@ -367,14 +366,14 @@ fapi_try_exit:
 /// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
+template< control_word T, typename TT = cwTraits<T> >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
                                       const bool i_sim,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      std::vector< ccs::instruction_t >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
-    ccs::instruction_t<OT> l_inst;
+    ccs::instruction_t l_inst;
     FAPI_TRY(control_word_engine<T>(i_target, i_data, i_sim, i_turn_on_cke, l_inst));
     io_inst.push_back(l_inst);
 
@@ -386,7 +385,6 @@ fapi_try_exit:
 /// @brief Control word engine that sets the CCS instruction
 /// @tparam T the buffer control word type (4 bit or 8 bit)
 /// @tparam TT traits type defaults to cwTraits<T>
-/// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data_list a vector of control word data to send
 /// @param[in] i_sim true if in simulation mode
@@ -394,11 +392,11 @@ fapi_try_exit:
 /// @param[in] i_turn_on_cke flag that states whether we want CKE on for all RCWs in the vector (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
+template< control_word T, typename TT = cwTraits<T> >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const std::vector<cw_data>& i_data_list,
                                       const bool i_sim,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      std::vector< ccs::instruction_t >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
     FAPI_ASSERT( !i_data_list.empty(),
@@ -495,7 +493,6 @@ struct cw_info
 
 ///
 /// @brief Control word engine that sets the CCS instruction
-/// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_info control word data and information about how to send it
 /// @param[in] i_sim true if in simulation mode
@@ -503,12 +500,11 @@ struct cw_info
 /// @param[out] o_instruction CCS instruction we created
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType OT >
-fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const cw_info& i_info,
-                                      const bool i_sim,
-                                      const bool i_turn_on_cke,
-                                      ccs::instruction_t<OT>& o_instruction)
+inline fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const cw_info& i_info,
+        const bool i_sim,
+        const bool i_turn_on_cke,
+        ccs::instruction_t& o_instruction)
 {
     // BCW 4-bit
     if(i_info.iv_is_bcw && i_info.iv_data_len == CW4_DATA_LEN)
@@ -548,7 +544,6 @@ fapi_try_exit:
 
 ///
 /// @brief Control word engine that sets the CCS instruction
-/// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_info_list a vector of control word data to send
 /// @param[in] i_sim true if in simulation mode
@@ -556,12 +551,11 @@ fapi_try_exit:
 /// @param[in] i_turn_on_cke flag that states whether we want CKE on for all RCWs in the vector (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType OT >
-fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const std::vector<cw_info>& i_info_list,
-                                      const bool i_sim,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst,
-                                      const bool i_turn_on_cke = true)
+inline fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::vector<cw_info>& i_info_list,
+        const bool i_sim,
+        std::vector< ccs::instruction_t >& io_inst,
+        const bool i_turn_on_cke = true)
 {
     FAPI_ASSERT( !i_info_list.empty(),
                  fapi2::MSS_EMPTY_VECTOR().
@@ -571,7 +565,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
     for (const auto& l_info : i_info_list)
     {
-        ccs::instruction_t<OT> l_inst;
+        ccs::instruction_t l_inst;
         FAPI_TRY( control_word_engine(i_target, l_info, i_sim, i_turn_on_cke, l_inst) );
         io_inst.push_back(l_inst);
     }

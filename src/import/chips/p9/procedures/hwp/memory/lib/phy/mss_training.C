@@ -198,7 +198,7 @@ fapi2::ReturnCode wr_lvl::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE
         const uint64_t i_rp,
         const uint8_t i_abort_on_error ) const
 {
-    std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> > l_rtt_inst;
+    std::vector< ccs::instruction_t > l_rtt_inst;
 
     FAPI_DBG("%s Running Pre-WR_LEVEL workaround steps on RP%d", mss::c_str(i_target), i_rp);
     // Setup WR_LEVEL specific terminations
@@ -208,7 +208,7 @@ fapi2::ReturnCode wr_lvl::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE
     if (!l_rtt_inst.empty())
     {
         const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-        mss::ccs::program<fapi2::TARGET_TYPE_MCBIST, fapi2::TARGET_TYPE_MCA> l_program;
+        ccs::program l_program;
         l_program.iv_instructions.insert(l_program.iv_instructions.end(), l_rtt_inst.begin(), l_rtt_inst.end() );
         FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
         l_program.iv_instructions.clear();
@@ -261,7 +261,7 @@ fapi2::ReturnCode wr_lvl::post_workaround( const fapi2::Target<fapi2::TARGET_TYP
         const uint64_t i_rp,
         const uint8_t i_abort_on_error ) const
 {
-    std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> > l_rtt_inst;
+    std::vector< ccs::instruction_t > l_rtt_inst;
 
     FAPI_DBG("%s Running Post-WR_LEVEL workaround steps on RP%d", mss::c_str(i_target), i_rp);
 
@@ -270,7 +270,7 @@ fapi2::ReturnCode wr_lvl::post_workaround( const fapi2::Target<fapi2::TARGET_TYP
     if (!l_rtt_inst.empty())
     {
         const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
-        mss::ccs::program<fapi2::TARGET_TYPE_MCBIST, fapi2::TARGET_TYPE_MCA> l_program;
+        ccs::program l_program;
         l_program.iv_instructions.insert(l_program.iv_instructions.end(),
                                          l_rtt_inst.begin(),
                                          l_rtt_inst.end() );

@@ -33,14 +33,15 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <vector>
 
 #include <lib/shared/mss_const.H>
+#include <lib/shared/nimbus_defaults.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 #include <lib/mc/mc.H>
-#include <lib/ccs/ccs.H>
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
 #include <generic/memory/lib/utils/poll.H>
@@ -329,7 +330,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+        std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_INF("rc09_disable_powerdown %s", mss::c_str(i_target));
 
@@ -349,7 +350,7 @@ fapi2::ReturnCode rc09_disable_powerdown( const fapi2::Target<TARGET_TYPE_DIMM>&
 
     // DES to ensure we exit powerdown properly
     FAPI_DBG("deselect for %s", mss::c_str(i_target));
-    io_inst.push_back( ccs::des_command<TARGET_TYPE_MCBIST>() );
+    io_inst.push_back( ccs::des_command() );
 
     static const cw_data l_rc09_4bit_data( FS0, 9, l_rc09_cw, mss::tmrd() );
 
@@ -374,7 +375,7 @@ fapi_try_exit:
 ///       with NVDIMMs
 ///
 fapi2::ReturnCode rcd_load_nvdimm( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                   std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
+                                   std::vector< ccs::instruction_t >& io_inst)
 {
     FAPI_INF("rcd_load_nvdimm %s", mss::c_str(i_target));
 
@@ -457,7 +458,7 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
     std::vector<uint64_t> l_ranks;
 
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
     // instructions in the CCS instruction vector
@@ -483,7 +484,7 @@ fapi2::ReturnCode rcd_restore( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
     // Now, drive CKE back to low via STR entry instead of pde (we have data in the drams!)
     FAPI_TRY( self_refresh_entry( i_target ) );
 
-    l_program = ccs::program<TARGET_TYPE_MCBIST>(); //Reset the program
+    l_program = ccs::program(); //Reset the program
 
     // Now, fill the program with instructions to program the RCD
     for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
@@ -514,7 +515,7 @@ fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
     std::vector<uint64_t> l_ranks;
     uint8_t l_trp[MAX_DIMM_PER_PORT];
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     // Get tRP
     FAPI_TRY(mss::eff_dram_trp(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_trp));
@@ -527,9 +528,9 @@ fapi2::ReturnCode post_restore_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_MCA
         for ( const auto r : l_ranks)
         {
             FAPI_DBG("precharge_all_command for %s", mss::c_str(d));
-            l_program.iv_instructions.push_back( ccs::precharge_all_command<TARGET_TYPE_MCBIST>(r, l_trp[0]) );
+            l_program.iv_instructions.push_back( ccs::precharge_all_command(r, l_trp[0]) );
             FAPI_DBG("zqcal_command for %s", mss::c_str(d));
-            l_program.iv_instructions.push_back( ccs::zqcl_command<TARGET_TYPE_MCBIST>(r, mss::tzqinit()) );
+            l_program.iv_instructions.push_back( ccs::zqcl_command(r, mss::tzqinit()) );
         }
     }// dimms
 
@@ -644,15 +645,15 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
-    typedef ccsTraits<fapi2::TARGET_TYPE_MCBIST> TT;
+    typedef ccsTraits<mss::mc_type::NIMBUS> TT;
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
     const auto& l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
     constexpr uint64_t CS_N_ACTIVE = 0b00;
     uint8_t l_trp = 0;
     uint16_t l_trfc = 0;
     std::vector<uint64_t> l_ranks;
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
-    ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst;
+    ccs::program l_program;
+    ccs::instruction_t l_inst;
 
     // Get tRP and tRFC
     FAPI_TRY(mss::eff_dram_trp(i_target, l_trp));
@@ -663,14 +664,14 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Start the program with DES and wait for tRFC
     // All CKE = high, all CSn = high, Reset_n = high, wait tRFC
-    l_inst = ccs::des_command<TARGET_TYPE_MCBIST>(l_trfc);
+    l_inst = ccs::des_command(l_trfc);
     l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
     FAPI_INF("des_command() arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
     l_program.iv_instructions.push_back(l_inst);
 
     // Precharge all command
     // All CKE = high, all CSn = low, Reset_n = high, wait tRP
-    l_inst = ccs::precharge_all_command<TARGET_TYPE_MCBIST>(0, l_trp);
+    l_inst = ccs::precharge_all_command(0, l_trp);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
     l_inst.arr0.setBit<TT::ARR0_DDR_RESETN>();
@@ -679,7 +680,7 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Self-refresh entry command
     // All CKE = low, all CSn = low, Reset_n = high, wait tCKSRE
-    l_inst = ccs::self_refresh_entry_command<TARGET_TYPE_MCBIST>(0, mss::tcksre(l_dimms[0]));
+    l_inst = ccs::self_refresh_entry_command(0, mss::tcksre(l_dimms[0]));
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(CS_N_ACTIVE);
     l_inst.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(mss::CKE_LOW);
@@ -689,7 +690,7 @@ fapi2::ReturnCode preload_epow_sequence( const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Push in an empty instruction for RESETn
     // All CKE = low, all CSn = high (default), Reset_n = low
-    l_inst = ccs::instruction_t<TARGET_TYPE_MCBIST>();
+    l_inst = ccs::instruction_t();
     FAPI_INF("Assert RESETn arr0 = 0x%016lx , arr1 = 0x%016lx", l_inst.arr0, l_inst.arr1);
     l_program.iv_instructions.push_back(l_inst);
 

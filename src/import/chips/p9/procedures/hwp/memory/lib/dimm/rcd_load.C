@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
 
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
-    ccs::program<TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     uint8_t l_sim = 0;
     // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
@@ -76,7 +76,7 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA
         // So we use the power down entry command to achieve this
         if(!l_sim)
         {
-            l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
+            l_program.iv_instructions.push_back( ccs::pde_command() );
         }
 
         FAPI_DBG("rcd load for %s", mss::c_str(d));
@@ -119,7 +119,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_rcd_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -149,7 +149,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_rcd_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     uint8_t l_sim = 0;
     FAPI_TRY( mss::is_simulation(l_sim) );
@@ -170,7 +170,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_rcd_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     uint8_t l_sim = 0;
     FAPI_TRY( mss::is_simulation(l_sim) );
@@ -191,7 +191,7 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode perform_rcd_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t >& i_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;

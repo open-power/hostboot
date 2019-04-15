@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/shared/nimbus_defaults.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/ccs/ccs_nimbus.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,28 +24,35 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file nimbus_defaults.H
-/// @brief default types associated with Nimbus system
+/// @file ccs_nimbus.C
+/// @brief Run and manage the CCS engine
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: HB:FSP
+// *HWP Consumed by: FSP:HB
 
-#ifndef _MSS_NIMBUS_DEFAULTS_H_
-#define _MSS_NIMBUS_DEFAULTS_H_
+#ifndef _MSS_CCS_NIMBUS_H_
+#define _MSS_CCS_NIMBUS_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
+namespace ccs
+{
 
-constexpr mss::mc_type DEFAULT_MC_TYPE = mss::mc_type::NIMBUS;
-constexpr fapi2::TargetType DEFAULT_MC_TARGET = fapi2::TARGET_TYPE_MCBIST;
-constexpr fapi2::TargetType DEFAULT_MEM_PORT_TARGET = fapi2::TARGET_TYPE_MCA;
+///
+/// @brief Create, initialize an instruction which indicates an initial cal
+/// @param[in] i_rp the rank-pair (rank) to cal
+/// @return the initial cal instruction
+///
+instruction_t initial_cal_command(const uint64_t i_rp);
 
-} // ns mss
+} // namespace ccs
+} // namespace mss
 
 #endif

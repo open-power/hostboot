@@ -38,10 +38,14 @@
 
 #include <vector>
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/eff_config/timing.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 namespace mss
 {
@@ -65,7 +69,7 @@ enum wr_vref_override : uint8_t
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs06_data& i_mrs06,
         const uint64_t i_rank,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Add latching commands for WR VREF to the instruction array
@@ -121,7 +125,7 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
         const uint64_t i_rank,
         const uint8_t i_train_range,
         const uint8_t i_train_value,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 } // close namespace DDR4
 } // close namespace mss

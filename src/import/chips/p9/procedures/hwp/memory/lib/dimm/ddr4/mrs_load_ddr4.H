@@ -41,6 +41,9 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/eff_config/timing.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -99,13 +102,11 @@ enum rtt_nom_settings
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction - implementation
-/// @tparam T typename of the ccs::instruction_t
 /// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note written this way so this is easier to test
 ///
-template<fapi2::TargetType T>
-void address_mirror_impl(ccs::instruction_t<T>& io_inst)
+inline void address_mirror_impl(ccs::instruction_t& io_inst)
 {
     // Nothing fancy here, just mirror the bits we're told to mirror in Table 14 — Address Mirroring and Inversion
     mss::template swap<A3, A4>(io_inst.arr0);
@@ -118,17 +119,15 @@ void address_mirror_impl(ccs::instruction_t<T>& io_inst)
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction
-/// @tparam T typename of the ccs::instruction_t
 /// @param[in] i_target target to use to get mirroring attribute
 /// @param[in] i_rank the rank in question
 /// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note assumes the input is from an even number rank
 ///
-template<fapi2::TargetType T>
-fapi2::ReturnCode address_mirror(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 const uint64_t i_rank,
-                                 ccs::instruction_t<T>& io_inst)
+inline fapi2::ReturnCode address_mirror(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint64_t i_rank,
+                                        ccs::instruction_t& io_inst)
 {
     // We only mirror if the mirroring attribute is set.
     uint8_t l_mirror = 0;
@@ -147,19 +146,17 @@ fapi_try_exit:
 
 ///
 /// @brief Invert (side to side) the ADR bits of a CCS instruction
-/// @tparam T the target type of the ccs instruction
 /// @param[in] i_target the DIMM target of the ccs command
 /// @param[in] i_inst const reference to a CCS instruction.
 /// @param[in] l_is_a17 Boolean for whether A17 bit is enabled or not
 /// @return ccs instruction with the ADR bits inverted (side-to-side)
 ///
-template<fapi2::TargetType T>
-ccs::instruction_t<T> address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const ccs::instruction_t<T>& i_inst,
-                                     const bool i_is_a17 = false)
+inline ccs::instruction_t address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const ccs::instruction_t& i_inst,
+        const bool i_is_a17 = false)
 {
     // Copy the input as the output doesn't all change.
-    ccs::instruction_t<T> i_out(i_inst);
+    ccs::instruction_t i_out(i_inst);
 
     // Nothing fancy here, just negate the bits we're told to negate in Table 14 — Address Mirroring and Inversion
     mss::template negate<A3>(i_out.arr0);
@@ -189,7 +186,6 @@ ccs::instruction_t<T> address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
 ///
 /// @brief Helper function to make a CCS instruction for an MRS
-/// @tparam T TargetType of the CCS instruction
 /// @tparam D the mrs data structure to send out
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_data the completed MRS data to send
@@ -197,11 +193,11 @@ ccs::instruction_t<T> address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, typename D >
+template< typename D >
 static inline fapi2::ReturnCode make_ccs_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const D& i_data,
         const uint64_t i_rank,
-        ccs::instruction_t<T>& io_inst )
+        ccs::instruction_t& io_inst )
 {
     FAPI_TRY( D::make_ccs_instruction(i_target, i_data, io_inst, i_rank),
               "Failed making a CCS instruction for templated MRS data. MR%d rank %d on %s",
@@ -219,11 +215,10 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< >
-inline fapi2::ReturnCode make_ccs_helper(
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-    const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
-    const uint64_t i_rank,
-    ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+inline fapi2::ReturnCode make_ccs_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
+        const uint64_t i_rank,
+        ccs::instruction_t& io_inst )
 {
     FAPI_TRY( i_data.iv_func(i_target, io_inst, i_rank),
               "Failed making a CCS instruction for mrs_data<TARGET_TYPE_MCBIST> specialization. MR%d rank %d on %s",
@@ -235,17 +230,16 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to decode MRS and trace CCS instructions
-/// @tparam T TargetType of the CCS instruction
 /// @tparam D the mrs data structure to send out
 /// @param[in] i_data the completed MRS data to send
 /// @param[in] i_rank the rank to send to
 /// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, typename D >
+template< typename D >
 static inline fapi2::ReturnCode decode_helper(const D& i_data,
         const uint64_t i_rank,
-        const ccs::instruction_t<T>& i_inst )
+        const ccs::instruction_t& i_inst )
 {
     // Dump out the 'decoded' MRS and trace the CCS instructions.
     FAPI_TRY( D::decode(i_inst, i_rank),
@@ -278,7 +272,7 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<T>& i_target,
 template< >
 inline fapi2::ReturnCode decode_helper(const mrs_data<fapi2::TARGET_TYPE_MCBIST>& i_data,
                                        const uint64_t i_rank,
-                                       const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst )
+                                       const ccs::instruction_t& i_inst )
 {
     // Dump out the 'decoded' MRS and trace the CCS instructions.
     FAPI_TRY( i_data.iv_dumper(i_inst, i_rank),
@@ -292,7 +286,6 @@ fapi_try_exit:
 
 ///
 /// @brief Sets up MRS CCS instructions
-/// @tparam T TargetType of the CCS instruction
 /// @tparam D the mrs data structure to send out
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_data the completed MRS data to send
@@ -301,15 +294,15 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, typename D >
+template< typename D >
 fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const D& i_data,
                               const uint64_t i_rank,
                               const uint64_t i_delay_in_cycles,
-                              std::vector< ccs::instruction_t<T> >& io_inst )
+                              std::vector< ccs::instruction_t >& io_inst )
 {
-    ccs::instruction_t<T> l_inst_a_side = ccs::mrs_command<T>(i_rank, i_data.iv_mrs);
-    ccs::instruction_t<T> l_inst_b_side;
+    ccs::instruction_t l_inst_a_side = ccs::mrs_command(i_rank, i_data.iv_mrs);
+    ccs::instruction_t l_inst_b_side;
     bool l_is_a17 = false;
 
     // Thou shalt send 2 MRS, one for the a-side and the other inverted for the b-side.
@@ -355,7 +348,6 @@ fapi_try_exit:
 
 ///
 /// @brief Sets up MRS CCS instructions
-/// @tparam T TargetType of the CCS instruction
 /// @tparam D the mrs data structure to send out
 /// @param[in] i_target a fapi2::Target DIMM
 /// @param[in] i_data the completed MRS data to send
@@ -363,11 +355,11 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, typename D >
+template< typename D >
 fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const D& i_data,
                               const uint64_t i_rank,
-                              std::vector< ccs::instruction_t<T> >& io_inst );
+                              std::vector< ccs::instruction_t >& io_inst );
 
 namespace ddr4
 {
@@ -395,7 +387,7 @@ class mrs06_data;
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -406,7 +398,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -417,7 +409,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs03
@@ -427,7 +419,7 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs04
@@ -437,7 +429,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs05
@@ -447,7 +439,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs06
@@ -457,7 +449,7 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 /// }@
@@ -478,7 +470,7 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs00_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -491,7 +483,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs01_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -504,7 +496,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs02_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -517,7 +509,7 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs03_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -530,7 +522,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs04_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -543,7 +535,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs05_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 ///
@@ -556,7 +548,7 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                         const mrs06_data& i_data,
-                        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+                        ccs::instruction_t& io_inst,
                         const uint64_t i_rank);
 
 /// }@
@@ -579,7 +571,7 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @param[out] o_cas_latency the cas latency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_burst_length,
                                       uint8_t& o_read_burst_type,
@@ -595,7 +587,7 @@ fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs00_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -611,7 +603,7 @@ fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_rtt_nom the rtt_nom setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_dll_enable,
                                       uint8_t& o_wrl_enable,
@@ -628,7 +620,7 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs01_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -641,7 +633,7 @@ fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_rtt_wr the rtt_wr setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_write_crc,
                                       fapi2::buffer<uint8_t>& o_lpasr,
@@ -655,7 +647,7 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs02_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -672,7 +664,7 @@ fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_read_fromat the mpr read format setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_mpr_mode,
                                       uint8_t& o_geardown,
@@ -690,7 +682,7 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs03_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -709,7 +701,7 @@ fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_cs_cmd_latency_buffer the cs to cmd/addr latency mode setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_max_pd_mode,
                                       uint8_t& o_temp_refresh_range,
@@ -730,7 +722,7 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs04_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -748,7 +740,7 @@ fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_rtt_park_buffer the rtt_park setting
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_crc_error_clear,
                                       uint8_t& o_ca_parity_error_status,
@@ -767,7 +759,7 @@ fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs05_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -780,7 +772,7 @@ fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @param[out] o_vrefdq_train_value_buffer the vrefdq training value
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t& i_inst,
                                       const uint64_t i_rank,
                                       uint8_t& o_vrefdq_train_range,
                                       uint8_t& o_vrefdq_train_enable,
@@ -794,7 +786,7 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYP
 /// @param[in] i_rank the rank in question
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+fapi2::ReturnCode mrs06_decode(const ccs::instruction_t& i_inst,
                                const uint64_t i_rank);
 
 ///
@@ -818,10 +810,10 @@ struct mrs00_data
     // dynaimc polymorphism and I avoid that where possible.
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs00_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -909,10 +901,10 @@ struct mrs01_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs01_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1011,10 +1003,10 @@ struct mrs02_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs02_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1091,10 +1083,10 @@ struct mrs03_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs03_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1196,10 +1188,10 @@ struct mrs04_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs04_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1322,10 +1314,10 @@ struct mrs05_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs05_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1436,10 +1428,10 @@ struct mrs06_data
     // Helper function needed by the lab tooling to find our instruction maker and our dumper
     static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             const mrs06_data& i_data,
-            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            ccs::instruction_t& io_inst,
             const uint64_t i_rank);
 
-    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t& i_inst,
                                        const uint64_t i_rank);
 
     ///
@@ -1516,7 +1508,7 @@ struct mrs06_data
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                            std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+                            std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Sets WR LVL mode
@@ -1720,18 +1712,16 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set WR LVL Mode
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for WR LVL mode
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                         const mss::states i_mode,
-                         const uint64_t i_rank,
-                         std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode wr_lvl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                const mss::states i_mode,
+                                const uint64_t i_rank,
+                                std::vector< ccs::instruction_t >& io_inst )
 {
     // Spec states we need to use tmod for our delay, so we do
     const uint64_t l_delay = mss::tmod(i_target);
@@ -1754,18 +1744,16 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set MPR Mode
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for MPR mode
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                           const uint8_t i_mode,
-                           const uint64_t i_rank,
-                           std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint8_t i_mode,
+                                  const uint64_t i_rank,
+                                  std::vector< ccs::instruction_t >& io_inst )
 {
     // From DDR4 spec section 4.10.3 MPR Reads:
     // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
@@ -1789,7 +1777,6 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set MPR Mode
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode setting for MPR mode
 /// @param[in] i_rd_format MPR read format
@@ -1797,12 +1784,11 @@ fapi_try_exit:
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                           const uint8_t i_mode,
-                           const uint8_t i_rd_format,
-                           const uint64_t i_rank,
-                           std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode mpr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint8_t i_mode,
+                                  const uint8_t i_rd_format,
+                                  const uint64_t i_rank,
+                                  std::vector< ccs::instruction_t >& io_inst )
 {
     // From DDR4 spec section 4.10.3 MPR Reads:
     // tMRD and tMOD must be satisfied after enabling/disabling MPR mode
@@ -1830,18 +1816,16 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set RTT_NOM value
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_value values to set to RTT_NOM
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                               const uint8_t i_value[MAX_RANK_PER_DIMM],
-                               const uint64_t i_rank,
-                               std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode rtt_nom_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const uint8_t i_value[MAX_RANK_PER_DIMM],
+                                      const uint64_t i_rank,
+                                      std::vector< ccs::instruction_t >& io_inst )
 {
     // tMRD (clock cycles) must be satisfied after an MRS command
     constexpr uint64_t l_delay = mss::tmrd();
@@ -1864,18 +1848,16 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set RTT_WR value
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_value values to set to RTT_WR
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                              const uint8_t i_value[MAX_RANK_PER_DIMM],
-                              const uint64_t i_rank,
-                              std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode rtt_wr_load(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t i_value[MAX_RANK_PER_DIMM],
+                                     const uint64_t i_rank,
+                                     std::vector< ccs::instruction_t >& io_inst )
 {
     // tMRD (clock cycles) must be satisfied after an MRS command
     constexpr uint64_t l_delay = mss::tmrd();
@@ -1898,23 +1880,21 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction for an MPR read
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_mode MPR location
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                            const uint64_t i_mpr_loc,
-                            const uint64_t i_rank,
-                            std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const uint64_t i_mpr_loc,
+                                   const uint64_t i_rank,
+                                   std::vector< ccs::instruction_t >& io_inst )
 {
     // Right now we only have support for RD and RDA
     // Unclear if we want the API select the type of read command right now
     // Note the auto precharge is ignored with MPR mode on so we just do a read cmd
-    ccs::instruction_t<T> l_inst = ccs::rd_command<T> (i_rank, i_mpr_loc);
+    ccs::instruction_t l_inst = ccs::rd_command (i_rank, i_mpr_loc);
 
     // In MPR Mode:
     // Reads (back-to-back) from Page 0 may use tCCD_S or tCCD_L timing between read commands
@@ -1948,18 +1928,16 @@ fapi_try_exit:
 
 ///
 /// @brief Makes CCS instruction to set precharge all command
-/// @tparam T TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rank DIMM rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t<T> >& io_inst )
+inline fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint64_t i_rank,
+                                        std::vector< ccs::instruction_t >& io_inst )
 {
-    ccs::instruction_t<T> l_inst = ccs::precharge_all_command<T> (i_rank);
+    ccs::instruction_t l_inst = ccs::precharge_all_command (i_rank);
 
     // From the DDR4 Spec tRP is the precharge command period
     uint8_t l_delay = 0;
@@ -1995,58 +1973,54 @@ fapi2::ReturnCode rtt_wr_to_rtt_nom_helper(const fapi2::Target<T>& i_target,
 ///
 /// @brief Executes CCS instructions to set RTT_WR value into RTT_NOM
 /// @tparam T TargetType of the DIMM
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode rtt_nom_override(const fapi2::Target<T>& i_target,
                                    const uint64_t i_rank,
-                                   std::vector< ccs::instruction_t<CT> >& io_inst);
+                                   std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Executes CCS instructions to disable RTT_WR
 /// @tparam T TargetType of the DIMM
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode rtt_wr_disable(const fapi2::Target<T>& i_target,
                                  const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t<CT> >& io_inst);
+                                 std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Executes CCS instructions to restore original value to RTT_NOM
 /// @tparam T TargetType of the DIMM
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode rtt_nom_restore(const fapi2::Target<T>& i_target,
                                   const uint64_t i_rank,
-                                  std::vector< ccs::instruction_t<CT> >& io_inst);
+                                  std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Executes CCS instructions to restore original value to RTT_WR
 /// @tparam T TargetType of the DIMM
-/// @tparam CT TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_rank selected rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< fapi2::TargetType T, fapi2::TargetType CT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode rtt_wr_restore(const fapi2::Target<T>& i_target,
                                  const uint64_t i_rank,
-                                 std::vector< ccs::instruction_t<CT> >& io_inst);
+                                 std::vector< ccs::instruction_t >& io_inst);
 
 } // ddr4
 } // mss

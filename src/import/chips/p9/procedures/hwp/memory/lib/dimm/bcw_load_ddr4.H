@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,9 @@
 
 #include <fapi2.H>
 #include <vector>
-#include <lib/ccs/ccs.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 
 namespace mss
 {
@@ -51,6 +53,6 @@ namespace mss
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
+                                 std::vector< ccs::instruction_t >& io_inst);
 }
 #endif

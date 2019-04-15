@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,11 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <lib/ccs/ccs.H>
+#include <lib/mc/port.H>
+#include <lib/shared/mss_const.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
+
 
 namespace mss
 {
@@ -46,28 +50,26 @@ namespace mss
 ///
 /// @brief Setup DRAM ZQCL
 /// @tparam T the target type associated with this cal
-/// @tparam TT the target type of the CCS instruction
 /// @param[in] i_target the target associated with this cal
 /// @param[in] i_rank the current rank
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template< fapi2::TargetType T, fapi2::TargetType TT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode setup_dram_zqcal( const fapi2::Target<T>& i_target,
                                     const uint64_t i_rank,
-                                    std::vector< ccs::instruction_t<TT> >& io_inst);
+                                    std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Setup LRDIMM data buffer ZQCL
 /// @tparam T the target type associated with this cal
-/// @tparam TT the target type of the CCS instruction
 /// @param[in] i_target the target associated with this cal
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template< fapi2::TargetType T, fapi2::TargetType TT >
+template< fapi2::TargetType T >
 fapi2::ReturnCode setup_data_buffer_zqcal( const fapi2::Target<T>& i_target,
-        std::vector< ccs::instruction_t<TT> >& io_inst);
+        std::vector< ccs::instruction_t >& io_inst);
 
 ///
 /// @brief Setup and execute DRAM ZQCL

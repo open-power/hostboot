@@ -35,10 +35,11 @@
 
 #include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
-
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/phy/phy_cntrl.H>
 #include <lib/dimm/ddr4/pba.H>
@@ -113,7 +114,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode enter( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 {
-    ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -145,7 +146,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 {
-    ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    ccs::program l_program;
 
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -200,10 +201,10 @@ fapi2::ReturnCode execute_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 
     // Issue PBA commands
     {
-        ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+        ccs::program l_program;
 
         // Inserts the DES command to ensure we keep our CKE high
-        l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+        l_program.iv_instructions.push_back(mss::ccs::des_command());
 
         // Makes a copy of the vector, so we can do the function space swaps correctly
         auto l_bcws = i_bcws;

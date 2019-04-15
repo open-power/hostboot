@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace workarounds
 ///
 fapi2::ReturnCode rcw_reset_dram( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                   const bool i_sim,
-                                  std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
+                                  std::vector< ccs::instruction_t >& io_inst)
 {
     // Note: we're always going to run this guy
     FAPI_INF("%s running the DRAM RCW DRAM reset workaround", mss::c_str(i_target));
