@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -214,7 +214,7 @@ rule rNPU0FIR
 
 group gNPU0FIR
     filter singlebit,
-           cs_root_cause(1,2,3,4,5,6,7,9,10,16,18,29,31,42,44)
+           cs_root_cause(1,2,3,4,5,6,7,9,10,16,18,19,25,29,31,40,42,44,45)
 {
     /** NPU0FIR[0]
      *  NTL array CE
@@ -354,7 +354,7 @@ group gNPU0FIR
     /** NPU0FIR[27]
      *  Invalid access to secure memory attempted
      */
-    (rNPU0FIR, bit(27)) ? defaultMaskedError;
+    (rNPU0FIR, bit(27)) ? self_th_1;
 
     /** NPU0FIR[28]
      *  spare
@@ -489,12 +489,12 @@ rule rNPU1FIR
 
 group gNPU1FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,2,4,6,8,10,13,14,15,20,22,25,27,29,31,32,33,34,35,37,39,40,41,42,47,49,51,53,55,57)
 {
     /** NPU1FIR[0]
      *  NDL Brick0 stall
      */
-    (rNPU1FIR, bit(0)) ? defaultMaskedError;
+    (rNPU1FIR, bit(0)) ? self_th_1;
 
     /** NPU1FIR[1]
      *  NDL Brick0 nostall
@@ -504,7 +504,7 @@ group gNPU1FIR
     /** NPU1FIR[2]
      *  NDL Brick1 stall
      */
-    (rNPU1FIR, bit(2)) ? defaultMaskedError;
+    (rNPU1FIR, bit(2)) ? self_th_1;
 
     /** NPU1FIR[3]
      *  NDL Brick1 nostall
@@ -514,7 +514,7 @@ group gNPU1FIR
     /** NPU1FIR[4]
      *  NDL Brick2 stall
      */
-    (rNPU1FIR, bit(4)) ? defaultMaskedError;
+    (rNPU1FIR, bit(4)) ? self_th_1;
 
     /** NPU1FIR[5]
      *  NDL Brick2 nostall
@@ -524,7 +524,7 @@ group gNPU1FIR
     /** NPU1FIR[6]
      *  NDL Brick3 stall
      */
-    (rNPU1FIR, bit(6)) ? defaultMaskedError;
+    (rNPU1FIR, bit(6)) ? self_th_1;
 
     /** NPU1FIR[7]
      *  NDL Brick3 nostall
@@ -534,7 +534,7 @@ group gNPU1FIR
     /** NPU1FIR[8]
      *  NDL Brick4 stall
      */
-    (rNPU1FIR, bit(8)) ? defaultMaskedError;
+    (rNPU1FIR, bit(8)) ? self_th_1;
 
     /** NPU1FIR[9]
      *  NDL Brick4 nostall
@@ -544,7 +544,7 @@ group gNPU1FIR
     /** NPU1FIR[10]
      *  NDL Brick5 stall
      */
-    (rNPU1FIR, bit(10)) ? defaultMaskedError;
+    (rNPU1FIR, bit(10)) ? self_th_1;
 
     /** NPU1FIR[11]
      *  NDL Brick5 nostall
@@ -554,22 +554,22 @@ group gNPU1FIR
     /** NPU1FIR[12]
      *  MISC Register ring error (ie noack)
      */
-    (rNPU1FIR, bit(12)) ? defaultMaskedError;
+    (rNPU1FIR, bit(12)) ? self_th_32perDay;
 
     /** NPU1FIR[13]
-     *  MISC Parity error from ibr addr regi
+     *  MISC Parity error on MISC Cntrl reg
      */
-    (rNPU1FIR, bit(13)) ? defaultMaskedError;
+    (rNPU1FIR, bit(13)) ? self_th_1;
 
     /** NPU1FIR[14]
      *  MISC Parity error on SCOM D/A addr reg
      */
-    (rNPU1FIR, bit(14)) ? defaultMaskedError;
+    (rNPU1FIR, bit(14)) ? self_th_1;
 
     /** NPU1FIR[15]
      *  MISC Parity error on MISC Cntrl reg
      */
-    (rNPU1FIR, bit(15)) ? defaultMaskedError;
+    (rNPU1FIR, bit(15)) ? self_th_1;
 
     /** NPU1FIR[16]
      *  Reserved
@@ -594,7 +594,7 @@ group gNPU1FIR
     /** NPU1FIR[20]
      *  ATS Effective Address hit multiple TCE
      */
-    (rNPU1FIR, bit(20)) ? defaultMaskedError;
+    (rNPU1FIR, bit(20)) ? self_th_1;
 
     /** NPU1FIR[21]
      *  ATS TCE Page access error
@@ -604,72 +604,72 @@ group gNPU1FIR
     /** NPU1FIR[22]
      *  ATS Timeout on TCE tree walk
      */
-    (rNPU1FIR, bit(22)) ? defaultMaskedError;
+    (rNPU1FIR, bit(22)) ? self_th_1;
 
     /** NPU1FIR[23]
      *  ATS Parity error on TCE cache dir array
      */
-    (rNPU1FIR, bit(23)) ? defaultMaskedError;
+    (rNPU1FIR, bit(23)) ? self_th_32perDay;
 
     /** NPU1FIR[24]
      *  ATS Parity error on TCE cache data array
      */
-    (rNPU1FIR, bit(24)) ? defaultMaskedError;
+    (rNPU1FIR, bit(24)) ? self_th_32perDay;
 
     /** NPU1FIR[25]
      *  ATS ECC UE on Effective Address array
      */
-    (rNPU1FIR, bit(25)) ? defaultMaskedError;
+    (rNPU1FIR, bit(25)) ? self_th_1;
 
     /** NPU1FIR[26]
      *  ATS ECC CE on Effective Address array
      */
-    (rNPU1FIR, bit(26)) ? defaultMaskedError;
+    (rNPU1FIR, bit(26)) ? self_th_32perDay;
 
     /** NPU1FIR[27]
      *  ATS ECC UE on TDRmem array
      */
-    (rNPU1FIR, bit(27)) ? defaultMaskedError;
+    (rNPU1FIR, bit(27)) ? self_th_1;
 
     /** NPU1FIR[28]
      *  ATS ECC CE on TDRmem array
      */
-    (rNPU1FIR, bit(28)) ? defaultMaskedError;
+    (rNPU1FIR, bit(28)) ? self_th_32perDay;
 
     /** NPU1FIR[29]
      *  ATS ECC UE on CQ CTL DMA Read
      */
-    (rNPU1FIR, bit(29)) ? defaultMaskedError;
+    (rNPU1FIR, bit(29)) ? self_th_1;
 
     /** NPU1FIR[30]
      *  ATS ECC CE on CQ CTL DMA Read
      */
-    (rNPU1FIR, bit(30)) ? defaultMaskedError;
+    (rNPU1FIR, bit(30)) ? self_th_32perDay;
 
     /** NPU1FIR[31]
      *  ATS Parity error on TVT entry
      */
-    (rNPU1FIR, bit(31)) ? defaultMaskedError;
+    (rNPU1FIR, bit(31)) ? self_th_1;
 
     /** NPU1FIR[32]
      *  ATS Parity err on IODA Address Reg
      */
-    (rNPU1FIR, bit(32)) ? defaultMaskedError;
+    (rNPU1FIR, bit(32)) ? self_th_1;
 
     /** NPU1FIR[33]
      *  ATS Parity error on ATS Control Register
      */
-    (rNPU1FIR, bit(33)) ? defaultMaskedError;
+    (rNPU1FIR, bit(33)) ? self_th_1;
 
     /** NPU1FIR[34]
-     *  ATS Parity error on ATS Timeout Control Register
+     *  ATS Parity error on ATS reg
      */
-    (rNPU1FIR, bit(34)) ? defaultMaskedError;
+    (rNPU1FIR, bit(34)) ? self_th_1;
 
     /** NPU1FIR[35]
      *  ATS Invalid IODA Table Select entry
      */
-    (rNPU1FIR, bit(35)) ? defaultMaskedError;
+    (rNPU1FIR, bit(35)) ? self_th_1;
 
     /** NPU1FIR[36]
      *  Reserved
@@ -679,7 +679,7 @@ group gNPU1FIR
     /** NPU1FIR[37]
      *  Kill xlate epoch timeout
      */
-    (rNPU1FIR, bit(37)) ? defaultMaskedError;
+    (rNPU1FIR, bit(37)) ? self_th_1;
 
     /** NPU1FIR[38]
      *  PEE secure SMF not secure
@@ -689,17 +689,32 @@ group gNPU1FIR
     /** NPU1FIR[39]
      *  XSL in suspend mode when OTL sends cmd
      */
-    (rNPU1FIR, bit(39)) ? defaultMaskedError;
+    (rNPU1FIR, bit(39)) ? self_th_1;
 
-    /** NPU1FIR[40:46]
+    /** NPU1FIR[40]
+     *  Unsupported page size
+     */
+    (rNPU1FIR, bit(40)) ? self_th_1;
+
+    /** NPU1FIR[41]
+     *  Unexpected XLATE release
+     */
+    (rNPU1FIR, bit(41)) ? self_th_1;
+
+    /** NPU1FIR[42]
+     *  Kill XLATE done fail
+     */
+    (rNPU1FIR, bit(42)) ? self_th_1;
+
+    /** NPU1FIR[43:46]
      *  Reserved
      */
-    (rNPU1FIR, bit(40|41|42|43|44|45|46)) ? defaultMaskedError;
+    (rNPU1FIR, bit(43|44|45|46)) ? defaultMaskedError;
 
     /** NPU1FIR[47]
      *  NDL Brick6 stall
      */
-    (rNPU1FIR, bit(47)) ? defaultMaskedError;
+    (rNPU1FIR, bit(47)) ? self_th_1;
 
     /** NPU1FIR[48]
      *  NDL Brick6 nostall
@@ -709,7 +724,7 @@ group gNPU1FIR
     /** NPU1FIR[49]
      *  NDL Brick7 stall
      */
-    (rNPU1FIR, bit(49)) ? defaultMaskedError;
+    (rNPU1FIR, bit(49)) ? self_th_1;
 
     /** NPU1FIR[50]
      *  NDL Brick7 nostall
@@ -719,7 +734,7 @@ group gNPU1FIR
     /** NPU1FIR[51]
      *  NDL Brick8 stall
      */
-    (rNPU1FIR, bit(51)) ? defaultMaskedError;
+    (rNPU1FIR, bit(51)) ? self_th_1;
 
     /** NPU1FIR[52]
      *  NDL Brick8 nostall
@@ -729,7 +744,7 @@ group gNPU1FIR
     /** NPU1FIR[53]
      *  NDL Brick9 stall
      */
-    (rNPU1FIR, bit(53)) ? defaultMaskedError;
+    (rNPU1FIR, bit(53)) ? self_th_1;
 
     /** NPU1FIR[54]
      *  NDL Brick9 nostall
@@ -739,7 +754,7 @@ group gNPU1FIR
     /** NPU1FIR[55]
      *  NDL Brick10 stall
      */
-    (rNPU1FIR, bit(55)) ? defaultMaskedError;
+    (rNPU1FIR, bit(55)) ? self_th_1;
 
     /** NPU1FIR[56]
      *  NDL Brick10 nostall
@@ -749,7 +764,7 @@ group gNPU1FIR
     /** NPU1FIR[57]
      *  NDL Brick11 stall
      */
-    (rNPU1FIR, bit(57)) ? defaultMaskedError;
+    (rNPU1FIR, bit(57)) ? self_th_1;
 
     /** NPU1FIR[58]
      *  NDL Brick11 nostall
@@ -762,22 +777,22 @@ group gNPU1FIR
     (rNPU1FIR, bit(59)) ? defaultMaskedError;
 
     /** NPU1FIR[60]
-     *  MISC SCOM ring 0 sat 0 signaled internal FSM err
+     *  Misc SCOM ring 0 sat 0 signalled internal FSM error
      */
     (rNPU1FIR, bit(60)) ? defaultMaskedError;
 
     /** NPU1FIR[61]
-     *  MISC SCOM ring 0 sat 1 signaled internal FSM err
+     *  Misc SCOM ring 0 sat 1 signalled internal FSM error
      */
     (rNPU1FIR, bit(61)) ? defaultMaskedError;
 
     /** NPU1FIR[62]
-     *  Scom Error
+     *  scom error
      */
     (rNPU1FIR, bit(62)) ? defaultMaskedError;
 
     /** NPU1FIR[63]
-     *  Scom Error
+     *  scom error
      */
     (rNPU1FIR, bit(63)) ? defaultMaskedError;
 
@@ -799,7 +814,7 @@ rule rNPU2FIR
 
 group gNPU2FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21,22,23,24,25,26,27,28,29,30,31,36,37,38,39,40,41,42,43,45,47,48,50,51,52)
 {
     /** NPU2FIR[0]
      *  OTL Brick2 translation fault
@@ -824,145 +839,145 @@ group gNPU2FIR
     /** NPU2FIR[4]
      *  OTL TL credit ctr overflow
      */
-    (rNPU2FIR, bit(4)) ? defaultMaskedError;
+    (rNPU2FIR, bit(4)) ? self_th_1;
 
     /** NPU2FIR[5]
      *  OTL RX acTag invalid
      */
-    (rNPU2FIR, bit(5)) ? defaultMaskedError;
+    (rNPU2FIR, bit(5)) ? self_th_1;
 
     /** NPU2FIR[6]
      *  OTL RX acTag points to an invalid entry.
      */
-    (rNPU2FIR, bit(6)) ? defaultMaskedError;
+    (rNPU2FIR, bit(6)) ? self_th_1;
 
     /** NPU2FIR[7]
      *  OTL RX reserved opcode used.
      */
-    (rNPU2FIR, bit(7)) ? defaultMaskedError;
+    (rNPU2FIR, bit(7)) ? self_th_1;
 
     /** NPU2FIR[8]
      *  OTL RX rtn_tl_credit cmd outside slot0.
      */
-    (rNPU2FIR, bit(8)) ? defaultMaskedError;
+    (rNPU2FIR, bit(8)) ? self_th_1;
 
     /** NPU2FIR[9]
      *  OTL RX bad opcode and template combo
      */
-    (rNPU2FIR, bit(9)) ? defaultMaskedError;
+    (rNPU2FIR, bit(9)) ? self_th_1;
 
     /** NPU2FIR[10]
      *  OTL RX unsupported template format.
      */
-    (rNPU2FIR, bit(10)) ? defaultMaskedError;
+    (rNPU2FIR, bit(10)) ? self_th_1;
 
     /** NPU2FIR[11]
      *  OTL RX bad template x00 format.
      */
-    (rNPU2FIR, bit(11)) ? defaultMaskedError;
+    (rNPU2FIR, bit(11)) ? self_th_1;
 
     /** NPU2FIR[12]
      *  OTL RX control flit overrun.
      */
-    (rNPU2FIR, bit(12)) ? defaultMaskedError;
+    (rNPU2FIR, bit(12)) ? self_th_1;
 
     /** NPU2FIR[13]
      *  OTL RX unexpected data flit.
      */
-    (rNPU2FIR, bit(13)) ? defaultMaskedError;
+    (rNPU2FIR, bit(13)) ? self_th_1;
 
     /** NPU2FIR[14]
      *  OTL RX DL link down.
      */
-    (rNPU2FIR, bit(14)) ? defaultMaskedError;
+    (rNPU2FIR, bit(14)) ? self_th_1;
 
     /** NPU2FIR[15]
      *  OTL RX bad data received on command.
      */
-    (rNPU2FIR, bit(15)) ? defaultMaskedError;
+    (rNPU2FIR, bit(15)) ? self_th_1;
 
     /** NPU2FIR[16]
      *  OTL RX bad data received on response.
      */
-    (rNPU2FIR, bit(16)) ? defaultMaskedError;
+    (rNPU2FIR, bit(16)) ? self_th_1;
 
     /** NPU2FIR[17]
      *  OTL RX AP response not allowed
      */
-    (rNPU2FIR, bit(17)) ? defaultMaskedError;
+    (rNPU2FIR, bit(17)) ? self_th_1;
 
     /** NPU2FIR[18]
      *  OR of all OTL parity errors.
      */
-    (rNPU2FIR, bit(18)) ? defaultMaskedError;
+    (rNPU2FIR, bit(18)) ? self_th_1;
 
     /** NPU2FIR[19]
      *  OR of all OTL ECC CE errors.
      */
-    (rNPU2FIR, bit(19)) ? defaultMaskedError;
+    (rNPU2FIR, bit(19)) ? self_th_32perDay;
 
     /** NPU2FIR[20]
      *  OR of all OTL ECC UE errors.
      */
-    (rNPU2FIR, bit(20)) ? defaultMaskedError;
+    (rNPU2FIR, bit(20)) ? self_th_1;
 
     /** NPU2FIR[21]
      *  RXO OP Errors.
      */
-    (rNPU2FIR, bit(21)) ? defaultMaskedError;
+    (rNPU2FIR, bit(21)) ? self_th_1;
 
     /** NPU2FIR[22]
      *  RXO Internal Errors.
      */
-    (rNPU2FIR, bit(22)) ? defaultMaskedError;
+    (rNPU2FIR, bit(22)) ? self_th_1;
 
     /** NPU2FIR[23]
      *  OTL RXI fifo overrun.
      */
-    (rNPU2FIR, bit(23)) ? defaultMaskedError;
+    (rNPU2FIR, bit(23)) ? self_th_1;
 
     /** NPU2FIR[24]
      *  OTL RXI ctrl flit data run len invalid.
      */
-    (rNPU2FIR, bit(24)) ? defaultMaskedError;
+    (rNPU2FIR, bit(24)) ? self_th_1;
 
     /** NPU2FIR[25]
      *  OTL RXI opcode specifies dL=0b00.
      */
-    (rNPU2FIR, bit(25)) ? defaultMaskedError;
+    (rNPU2FIR, bit(25)) ? self_th_1;
 
     /** NPU2FIR[26]
      *  OTL RXI bad data received vc2
      */
-    (rNPU2FIR, bit(26)) ? defaultMaskedError;
+    (rNPU2FIR, bit(26)) ? self_th_1;
 
     /** NPU2FIR[27]
      *  OTL RXI dcp2 fifo overrun
      */
-    (rNPU2FIR, bit(27)) ? defaultMaskedError;
+    (rNPU2FIR, bit(27)) ? self_th_1;
 
     /** NPU2FIR[28]
      *  OTL RXI vc1 fifo overrun
      */
-    (rNPU2FIR, bit(28)) ? defaultMaskedError;
+    (rNPU2FIR, bit(28)) ? self_th_1;
 
     /** NPU2FIR[29]
      *  OTL RXI vc2 fifo overrun
      */
-    (rNPU2FIR, bit(29)) ? defaultMaskedError;
+    (rNPU2FIR, bit(29)) ? self_th_1;
 
     /** NPU2FIR[30]
-     *  Reserved
+     *  OTL RXI Data link not supported
      */
-    (rNPU2FIR, bit(30)) ? defaultMaskedError;
+    (rNPU2FIR, bit(30)) ? self_th_1;
 
     /** NPU2FIR[31]
      *  OTL TXI opcode error
      */
-    (rNPU2FIR, bit(31)) ? defaultMaskedError;
+    (rNPU2FIR, bit(31)) ? self_th_1;
 
     /** NPU2FIR[32]
-     *  Malformed packet error type 4
+     *  OTL RXI reserved field not equal to 0
      */
     (rNPU2FIR, bit(32)) ? defaultMaskedError;
 
@@ -974,42 +989,42 @@ group gNPU2FIR
     /** NPU2FIR[36]
      *  MMIO invalidate while one in progress.
      */
-    (rNPU2FIR, bit(36)) ? defaultMaskedError;
+    (rNPU2FIR, bit(36)) ? self_th_1;
 
     /** NPU2FIR[37]
      *  Unexpected ITAG on itag completion pt 0
      */
-    (rNPU2FIR, bit(37)) ? defaultMaskedError;
+    (rNPU2FIR, bit(37)) ? self_th_1;
 
     /** NPU2FIR[38]
      *  Unexpected ITAG on itag completion pt 1
      */
-    (rNPU2FIR, bit(38)) ? defaultMaskedError;
+    (rNPU2FIR, bit(38)) ? self_th_1;
 
     /** NPU2FIR[39]
      *  Unexpected Read PEE completion.
      */
-    (rNPU2FIR, bit(39)) ? defaultMaskedError;
+    (rNPU2FIR, bit(39)) ? self_th_1;
 
     /** NPU2FIR[40]
      *  Unexpected Checkout response.
      */
-    (rNPU2FIR, bit(40)) ? defaultMaskedError;
+    (rNPU2FIR, bit(40)) ? self_th_1;
 
     /** NPU2FIR[41]
      *  Translation request but SPAP is invalid.
      */
-    (rNPU2FIR, bit(41)) ? defaultMaskedError;
+    (rNPU2FIR, bit(41)) ? self_th_1;
 
     /** NPU2FIR[42]
      *  Read a PEE which was not valid.
      */
-    (rNPU2FIR, bit(42)) ? defaultMaskedError;
+    (rNPU2FIR, bit(42)) ? self_th_1;
 
     /** NPU2FIR[43]
      *  Bloom filter protection error.
      */
-    (rNPU2FIR, bit(43)) ? defaultMaskedError;
+    (rNPU2FIR, bit(43)) ? self_th_1;
 
     /** NPU2FIR[44]
      *  Translation request to non-valid TA
@@ -1017,44 +1032,44 @@ group gNPU2FIR
     (rNPU2FIR, bit(44)) ? defaultMaskedError;
 
     /** NPU2FIR[45]
-     *  TA Translation request to an invalid TA
+     *  TA translation request to an invalid TA
      */
-    (rNPU2FIR, bit(45)) ? defaultMaskedError;
+    (rNPU2FIR, bit(45)) ? self_th_1;
 
     /** NPU2FIR[46]
      *  correctable array error (SBE).
      */
-    (rNPU2FIR, bit(46)) ? defaultMaskedError;
+    (rNPU2FIR, bit(46)) ? self_th_32perDay;
 
     /** NPU2FIR[47]
      *  array error (UE or parity).
      */
-    (rNPU2FIR, bit(47)) ? defaultMaskedError;
+    (rNPU2FIR, bit(47)) ? self_th_1;
 
     /** NPU2FIR[48]
      *  S/TLBI buffer overflow.
      */
-    (rNPU2FIR, bit(48)) ? defaultMaskedError;
+    (rNPU2FIR, bit(48)) ? self_th_1;
 
     /** NPU2FIR[49]
      *  SBE CE on Pb cout rsp or PEE read data.
      */
-    (rNPU2FIR, bit(49)) ? defaultMaskedError;
+    (rNPU2FIR, bit(49)) ? self_th_32perDay;
 
     /** NPU2FIR[50]
      *  UE on Pb cut rsp or PEE read data.
      */
-    (rNPU2FIR, bit(50)) ? defaultMaskedError;
+    (rNPU2FIR, bit(50)) ? self_th_1;
 
     /** NPU2FIR[51]
      *  SUE on Pb chkout rsp or Pb PEE rd data.
      */
-    (rNPU2FIR, bit(51)) ? defaultMaskedError;
+    (rNPU2FIR, bit(51)) ? self_th_1;
 
     /** NPU2FIR[52]
-     *  PA mem_hit when bar mode is nonzero
+     *  PA mem hit when bar mode is nonzero
      */
-    (rNPU2FIR, bit(52)) ? defaultMaskedError;
+    (rNPU2FIR, bit(52)) ? self_th_1;
 
     /** NPU2FIR[53]
      *  XSL Reserved, macro bit 17.
