@@ -38,6 +38,7 @@
     <enum>
       NONE = 0x0,
       EXPLORER = 0x8,
+      GEMINI = 0x9,
       P10 = 0xA
     </enum>
     <platInit/>
