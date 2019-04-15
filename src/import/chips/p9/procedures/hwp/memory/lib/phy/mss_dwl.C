@@ -38,6 +38,7 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <lib/shared/mss_const.H>
 
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_dwl.H>
@@ -47,12 +48,13 @@
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/workarounds/ccs_workarounds.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mc/port.H>
 #include <lib/rosetta_map/rosetta_map.H>
-#include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/ddr4/pba.H>
 #include <lib/phy/mss_lrdimm_training_helper.H>
+
 
 namespace mss
 {
@@ -73,7 +75,7 @@ fapi2::ReturnCode dwl::dram_wr_lvl( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
                                     const uint64_t i_rank,
                                     const mss::states i_mode) const
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -137,7 +139,7 @@ fapi_try_exit:
 fapi2::ReturnCode dwl::set_rank(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                 const uint64_t i_rank) const
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -150,7 +152,7 @@ fapi2::ReturnCode dwl::set_rank(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
@@ -188,7 +190,7 @@ fapi2::ReturnCode dwl::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 {
     constexpr uint8_t NIBBLE0_BCW_NUMBER = 0x0A;
     constexpr uint8_t NIBBLE1_BCW_NUMBER = 0x0B;
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -203,7 +205,7 @@ fapi2::ReturnCode dwl::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));

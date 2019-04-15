@@ -38,6 +38,7 @@
 #include <lib/shared/nimbus_defaults.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <lib/shared/mss_const.H>
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
@@ -45,12 +46,14 @@
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
 #include <lib/workarounds/ccs_workarounds.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/mc/port.H>
 #include <lib/rosetta_map/rosetta_map.H>
 #include <lib/eff_config/timing.H>
 #include <lib/phy/mss_mwd_coarse.H>
 #include <lib/phy/mss_lrdimm_training_helper.H>
+
 
 namespace mss
 {
@@ -115,7 +118,7 @@ fapi2::ReturnCode mwd_coarse::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_D
     {
         {l_func_space, l_bcw_number, l_bcw_data, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
     };
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -123,7 +126,7 @@ fapi2::ReturnCode mwd_coarse::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_D
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
@@ -490,8 +493,8 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
         const uint64_t i_rank) const
 {
     constexpr uint64_t ODT_CYCLE_LEN = 5;
-    using TT = ccsTraits<fapi2::TARGET_TYPE_MCBIST>;
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    using TT = ccsTraits<mss::mc_type::NIMBUS>;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -510,7 +513,7 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Creates the activate and updates the timing for the activate command
     {
         // Creates the instruciton
-        auto l_activate = ccs::act_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
+        auto l_activate = ccs::act_command(i_rank);
 
         // Gets the command to command timing we need activate to write
         // This is a RAS command to a CAS command, so RAS to CAS delay -> tRCD
@@ -525,10 +528,10 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Smash some ODT's high originally
     {
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
                                  (l_wr_odt[l_dimm_rank]));
         // Inserts ODT values
-        auto l_odt = mss::ccs::odt_command<fapi2::TARGET_TYPE_MCBIST>(l_ccs_value, ODT_CYCLE_LEN + 2);
+        auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN + 2);
         // Adds the instructions to the CCS program
         l_program.iv_instructions.push_back(l_odt);
     }
@@ -536,10 +539,10 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Creates the write command and updates
     {
         // Creates the instruciton
-        auto l_wr = ccs::wr_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
+        auto l_wr = ccs::wr_command(i_rank);
 
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
                                  (l_wr_odt[l_dimm_rank]));
 
         // Ensures that we do not have any default idles or repeats
@@ -556,14 +559,14 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
     // Hold the ODT's high for the whole write cycle
     {
         // ODT value buffer
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
                                  (l_wr_odt[l_dimm_rank]));
 
         // Inserts ODT values
         // Timing is ODT_CYCLE_LEN + 1
         // We could have up to +2 cycles needing to be added to our WR data
         // We have already held the ODT for one cycle due to the writes, so we use +1 instead
-        auto l_odt = mss::ccs::odt_command<fapi2::TARGET_TYPE_MCBIST>(l_ccs_value, ODT_CYCLE_LEN + 1);
+        auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN + 1);
 
         // Gets the command to command timing we need for WR to RD
         // Taken from the JEDEC spec
@@ -583,7 +586,7 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
 
     // Read auto-precharge, so we don't need to send our own precharge command
     {
-        auto l_rd = ccs::rda_command<fapi2::TARGET_TYPE_MCBIST>(i_rank);
+        auto l_rd = ccs::rda_command(i_rank);
 
         // Wait until we should start our RD ODT's
         uint8_t l_cl = 0;
@@ -596,9 +599,9 @@ fapi2::ReturnCode mwd_coarse::conduct_write_read( const fapi2::Target<fapi2::TAR
 
     // Holds the RD ODT's for 5 cycles
     {
-        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs<fapi2::TARGET_TYPE_MCBIST>(fapi2::buffer<uint8_t>
+        const auto l_ccs_value = mss::ccs::convert_odt_attr_to_ccs(fapi2::buffer<uint8_t>
                                  (l_rd_odt[l_dimm_rank]));
-        auto l_odt = mss::ccs::odt_command<fapi2::TARGET_TYPE_MCBIST>(l_ccs_value, ODT_CYCLE_LEN);
+        auto l_odt = mss::ccs::odt_command(l_ccs_value, ODT_CYCLE_LEN);
         l_program.iv_instructions.push_back(l_odt);
     }
 

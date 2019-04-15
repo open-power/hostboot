@@ -67,7 +67,7 @@ fapi2::ReturnCode set_training_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     constexpr uint64_t TRAINING_LEVEL_POS = 7;
     constexpr uint64_t TRAINING_LEVEL_LEN = 1;
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -86,7 +86,7 @@ fapi2::ReturnCode set_training_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
@@ -123,7 +123,7 @@ fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_
     constexpr uint64_t PREAMBLE_MODE_POS = 3;
     constexpr uint64_t PREAMBLE_MODE_LEN = 1;
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -142,7 +142,7 @@ fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));
@@ -176,7 +176,7 @@ fapi_try_exit:
 fapi2::ReturnCode set_dram_rd_preamble_mode_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_mode,
         const uint64_t i_rank,
-        std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst)
+        std::vector<ccs::instruction_t>& io_inst)
 {
     // Enter rank into read preamble training mode
     fapi2::ReturnCode l_rc;
@@ -204,7 +204,7 @@ fapi2::ReturnCode set_dram_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_TY
         const uint64_t i_rank)
 {
 
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -226,7 +226,7 @@ fapi_try_exit:
 fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                      const uint8_t i_rank)
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -240,7 +240,7 @@ fapi2::ReturnCode set_rank_presence( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // DES first - make sure those CKE go high and stay there
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Issues the CW's
     FAPI_TRY( control_word_engine(i_target, l_bcw_info, l_sim, l_program.iv_instructions),
@@ -310,7 +310,7 @@ std::vector<cw_info> set_expected_mpr_pattern(const fapi2::buffer<uint8_t>& i_pa
 fapi2::ReturnCode set_expected_mpr_pattern(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const fapi2::buffer<uint8_t>& i_pattern )
 {
-    mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
+    mss::ccs::program l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
@@ -321,7 +321,7 @@ fapi2::ReturnCode set_expected_mpr_pattern(const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY(mss::is_simulation(l_sim));
 
     // Ensure our CKE's are powered on
-    l_program.iv_instructions.push_back(mss::ccs::des_command<fapi2::TARGET_TYPE_MCBIST>());
+    l_program.iv_instructions.push_back(mss::ccs::des_command());
 
     // Inserts the function space selects
     FAPI_TRY(mss::ddr4::insert_function_space_select(l_bcws));

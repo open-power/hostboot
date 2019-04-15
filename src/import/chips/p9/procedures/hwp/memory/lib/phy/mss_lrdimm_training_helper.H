@@ -39,7 +39,8 @@
 #define MSS_LRDIMM_TRAINING_HELPER_H
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <lib/ccs/ccs.H>
+#include <lib/ccs/ccs_traits_nimbus.H>
+#include <generic/memory/lib/ccs/ccs.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/dimm/ddr4/data_buffer_ddr4.H>
@@ -735,7 +736,7 @@ fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_
 fapi2::ReturnCode set_dram_rd_preamble_mode_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_mode,
         const uint64_t i_rank,
-        std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst);
+        std::vector<ccs::instruction_t>& io_inst);
 
 ///
 /// @brief Enter read preamble training mode
