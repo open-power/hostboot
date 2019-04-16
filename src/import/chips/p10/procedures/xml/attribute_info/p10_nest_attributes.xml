@@ -595,7 +595,7 @@
     Set by p10_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -611,7 +611,7 @@
     Set by p10_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -792,7 +792,24 @@
     Used by p10_setup_bars.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_HTM_QUEUES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    The number of HTM queues to be reserved for each port in order
+    to improve HTM trace performance.
+    This number is calculated in memory grouping process when the
+    HTM trace spaces are determined.
+    Set by p10_mss_eff_grouping.
+    Used by p10_htm_setup.
+  </description>
+  <valueType>uint8</valueType>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -808,7 +825,7 @@
     Used by p10_setup_bars.
   </description>
   <valueType>uint64</valueType>
-  <array>4</array>
+  <array>8</array>
   <writeable/>
   <initToZero/>
 </attribute>
