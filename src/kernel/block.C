@@ -386,8 +386,10 @@ void Block::castOutPages(uint64_t i_type)
     if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) && // Skip base area
        (iv_baseAddr != VMM_ADDR_EXTEND_BLOCK)) // Skip extended memory.
     {
+        // NOTE: All LRU constraints must be < 7, since getLRU() only reports
+        // 3 bits worth of size (despite the uint8_t return type).
         size_t rw_constraint = 5;
-        size_t ro_constraint = 10;
+        size_t ro_constraint = 6;
 
         if(i_type == VmmManager::CRITICAL)
         {
