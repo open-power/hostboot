@@ -37,7 +37,6 @@ lib$(PROCEDURE)_DEPLIBS += p10_stop_api
 lib$(PROCEDURE)_DEPLIBS += p10_ipl_image
 lib$(PROCEDURE)_DEPLIBS += p10_scan_ring_util
 lib$(PROCEDURE)_DEPLIBS += p10_ipl_customize
-lib$(PROCEDURE)_DEPLIBS += p10_ring_identification
 lib$(PROCEDURE)_DEPLIBS += p10_get_mvpd_ring
 lib$(PROCEDURE)_DEPLIBS += p10_mvpd_ring_funcs
 $(call BUILD_PROCEDURE)

@@ -42,7 +42,7 @@ typedef ReturnCode (*getMvpdRing_FP_t) (
     const Target<TARGET_TYPE_PROC_CHIP>&,
     MvpdRecord,
     MvpdKeyword,
-    const uint8_t,
+    const uint32_t,
     const RingId_t,
     uint8_t*,
     uint32_t& );
@@ -62,7 +62,10 @@ extern "C"
      * Supported Rings are:
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDR
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
-     * @param i_chipletId       -   Chiplet ID
+     * @param i_chipletSel      -   Chiplet Select (chiplet ID + quad region select)
+     *                              Note that the quad region select MUST only be
+     *                              non-zero for the EQ chiplet core instance rings.
+     *                              For all other rings is MUST be zero.
      * @param i_ringId          -   Ring ID
      * @param o_pRingBuf        -   pointer to a buffer allocated by the caller
      *                              to receive the ring header and data.
@@ -93,7 +96,7 @@ extern "C"
                             i_fapiTarget,
                             MvpdRecord     i_record,
                             MvpdKeyword    i_keyword,
-                            const uint8_t  i_chipletId,
+                            const uint32_t i_chipletSel,
                             const RingId_t i_ringId,
                             uint8_t*       o_pRingBuf,
                             uint32_t&      io_rRingBufsize );

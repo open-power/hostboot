@@ -31,6 +31,12 @@
 #define NUM_OF_CORES     (uint8_t)32
 #define NUM_OF_QMES      (uint8_t)8
 #define CORES_PER_QME    (NUM_OF_CORES/NUM_OF_QMES)
+
+#define EQ_QUADRANT_MASK      (uint32_t)0x00003C00
+#define EQ_QUADRANT0_SEL      (uint32_t)0x00002000
+#define QUAD0_CORES_MASK (uint32_t)0xF0000000
+#define CORE0_MASK       (uint32_t)0x80000000
+
 #define MVPD_DD_KWD_VER1 (uint8_t)0x01
 
 enum SYSPHASE
@@ -54,8 +60,6 @@ enum ChipletIdentifier
     EC_CHIPLET,
 };
 
-const uint32_t EC_POSITION = 0x80000000;
-
 typedef struct
 {
     //Read as:000X 000X 000X 000X 000X 000X 000X 000X (binary;X=[0,1]) EQ:[0:07]
@@ -70,7 +74,7 @@ typedef struct
     uint8_t  chipletUnderProcess;
 
     // Refer to EQ:[0:7]; EC:[0:31]
-    uint8_t  chipletNumUnderProcess;
+    uint8_t  instanceNumUnderProcess;
 } VpdInsInsertProg_t;
 
 const uint8_t MAX_FILTER_PLL_BUCKETS = 4;
@@ -102,21 +106,21 @@ extern "C"
 /// @param[in/out] io_image              => Pointer to SBE image
 ///                                         HB_SBE:
 ///                                             In:  SBE [ringless] DD specific image
-///                                             Out: Customized SBE image
+///                                             Out: Customized SBE image w/rings
 ///                                         RT_QME:
 ///                                             In:  Undefined
 ///                                             Out: Undefined
 /// @param[in/out] io_imageSize          => Size of SBE image
 ///                                         HB_SBE:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
-///                                             Out: Final size
+///                                             Out: Final size of customized SBE image
 ///                                         RT_QME:
 ///                                             In:  Undefined
 ///                                             Out: Undefined
 /// @param[in/out] io_ringSectionBuf     => Pointer to an in-memory ring section
 ///                                         buffer
 ///                                         HB_SBE:
-///                                             Used as temporary image work buffer
+///                                             Used as temporary image and ring section work buffer
 ///                                             In:  Caller supplied buffer
 ///                                             Out: Undefined
 ///                                         RT_QME:
@@ -125,27 +129,24 @@ extern "C"
 /// @param[in/out] io_ringSectionBufSize => In: Size of ring section buffer
 ///                                         HB_SBE:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
-///                                             Out: Final size
+///                                             Out: Final size of SBE .rings section
 ///                                         RT_QME:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
-///                                             Out: Final size
+///                                             Out: Final size of QME .rings section
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_QME}
-/// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
-///                                         for VPD rings
-/// @param[in] i_ringBufSize1            => Max size of ring buffer
+/// @param[in] i_ringBuf1                => Caller supplied ring work buffer 1
+/// @param[in] i_ringBufSize1            => Max size of buffer 1
 ///                                         (Should equal MAX_RING_BUF_SIZE)
-/// @param[in] i_ringBuf2                => Caller supplied in-memory buffer
-///                                         for dynamic and overlays rings
-/// @param[in] i_ringBufSize2            => Max size of ring buffer
+/// @param[in] i_ringBuf2                => Caller supplied ring work buffer 2
+/// @param[in] i_ringBufSize2            => Max size of buffer 2
 ///                                         (Should equal MAX_RING_BUF_SIZE)
-/// @param[in] i_ringBuf3                => Caller supplied in-memory buffer
-///                                         to hold scratchpad rings
-/// @param[in] i_ringBufSize3            => Max size of ring buffer
+/// @param[in] i_ringBuf3                => Caller supplied ring work buffer 3
+/// @param[in] i_ringBufSize3            => Max size of buffer 3
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in/out] io_bootCoreMask       => In: Mask of the desired boot cores
 ///                                         Out: Actual boot cores filled
 ///                                         (Only used in HB_SBE sysPhase)
-///                                         (Bits(0:31) = EC00:EC31)
+///                                         (Bits(0:31) = Core(0:31))
 ///
 /// @return FAPI_RC_SUCCESS if the customization was successful
 ///

@@ -106,22 +106,18 @@ int get_ring_from_ring_section( void*           i_ringSection,  // Ring section 
                                   chipletType,
                                   &chipletIndex );
 
+    // TOR_INVALID_CHIPLET_TYPE:  This is not necessarily a fatal or unacceptable error. For
+    // example, xip_tool and ipl_customize's dynamic customization for QME will hit
+    // this one.  So we can't trace out here in confidence without being "annoying". It's
+    // up to the calling TOR APIs to investigate the rc.
     if (rc)
     {
-        if ( rc == TOR_INVALID_CHIPLET_TYPE )
-        {
-            // This is not necessarily a fatal or unacceptable error. For example,
-            // xip_tool and ipl_customize's dynamic customization for QME will hit
-            // this one a lot.  So we can't trace out here in confidence.  For
-            // now, we're just returning TOR_INVALID_CHIPLET_TYPE and leaving it
-            // up to the caller to investigate the rc.
-            return rc;
-        }
-        else
+        if (rc != TOR_INVALID_CHIPLET_TYPE)
         {
             MY_ERR("ringid_get_chipletIndex() failed w/rc=0x%08x\n", rc);
-            return rc;
         }
+
+        return rc;
     }
 
     //
@@ -205,8 +201,12 @@ int get_ring_from_ring_section( void*           i_ringSection,  // Ring section 
 
                             if (io_ringBufSize < rs4Size)
                             {
-                                MY_ERR("io_ringBufSize(=%u) is less than rs4Size(=%u).\n",
-                                       io_ringBufSize, rs4Size);
+                                if (i_dbgl > 0)
+                                {
+                                    MY_DBG("io_ringBufSize(=%u) is less than rs4Size(=%u).\n",
+                                           io_ringBufSize, rs4Size);
+                                }
+
                                 io_ringBufSize = rs4Size;
                                 return TOR_BUFFER_TOO_SMALL;
                             }
@@ -392,13 +392,26 @@ int tor_access_ring( void*           i_ringSection,  // Ring section ptr
                                       io_ringBufSize,
                                       i_dbgl );
 
-    if ( rc &&
-         rc != TOR_RING_IS_EMPTY &&         // generally acceptable
-         rc != TOR_RING_HAS_NO_TOR_SLOT &&  // ipl_image_tool will cause this a lot
-         rc != TOR_INVALID_CHIPLET_TYPE )   // ipl_image_tool will cause this a lot
+    // Explanation to the "list" of RCs that we exclude from tracing out:
+    // TOR_RING_IS_EMPTY:  Normal scenario (will occur frequently)
+    // TOR_RING_HAS_NO_TOR_SLOT:  Will be caused a lot by ipl_image_tool, but is an error if
+    //                     called by any other user.
+    // TOR_INVALID_CHIPLET_TYPE:  Also somewhat normal scenario since the caller should,
+    //                     in princple, be able to mindlessly request a ringId without
+    //                     having to figure out first if that ringId belongs to a chiplet
+    //                     that is valid for the context. But really this is a gray area.
+    //                     For now, we omit to trace out as we will hit this rc condition
+    //                     in both ipl_image_tool and ipl_customize (RT_QME phase).
+    if (rc)
     {
-        MY_ERR("ERROR: tor_access_ring(): get_ring_from_ring_section() failed w/rc="
-               "0x%08x\n", rc);
+        if ( rc != TOR_RING_IS_EMPTY &&
+             rc != TOR_RING_HAS_NO_TOR_SLOT &&
+             rc != TOR_INVALID_CHIPLET_TYPE )
+        {
+            MY_ERR("ERROR : tor_access_ring() : get_ring_from_ring_section() failed w/rc="
+                   "0x%08x\n", rc);
+        }
+
         return rc;
     }
 
@@ -421,11 +434,6 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
 
     int    rc = TOR_SUCCESS;
 
-    if (i_dbgl > 1)
-    {
-        MY_DBG("Entering tor_get_single_ring()...\n");
-    }
-
     rc = tor_access_ring( i_ringSection,
                           i_ringId,
                           i_ddLevel,
@@ -443,12 +451,14 @@ int tor_get_single_ring ( void*         i_ringSection,  // Ring section ptr
     //                     that is valid for the context. But really this is a gray area.
     //                     For now, we omit to trace out as we will hit this rc condition
     //                     in both ipl_image_tool and ipl_customize (RT_QME phase).
-    if ( rc &&
-         rc != TOR_RING_IS_EMPTY &&
-         rc != TOR_INVALID_CHIPLET_TYPE )
+    if (rc)
     {
-        MY_ERR("ERROR: tor_get_single_ring(): tor_access_ring() failed w/rc="
-               "0x%08x\n", rc);
+        if ( rc != TOR_RING_IS_EMPTY &&
+             rc != TOR_INVALID_CHIPLET_TYPE )
+        {
+            MY_ERR("ERROR : tor_get_single_ring() : tor_access_ring() failed w/rc=0x%08x\n", rc);
+        }
+
         return rc;
     }
 
@@ -484,18 +494,23 @@ int tor_append_ring( void*           i_ringSection,      // Ring section ptr
                           // chiplet section's common or instance section
                           torOffsetSlot,        // On return, contains offset (wrt ringSection) of
                           // TOR offset slot
-                          i_dbgl);
+                          i_dbgl );
 
+    // Explanation to the "list" of RCs that we exclude from tracing out:
+    // TOR_INVALID_CHIPLET_TYPE:  Not really a normal scenario though it's not unreasonable that
+    //                     the caller should be able to mindlessly request a ringId without
+    //                     having to figure out first if that ringId belongs to a chiplet
+    //                     that is valid for the context. But really this is a gray area.
+    //                     For now, we omit to trace out as we will hit this rc condition
+    //                     in ipl_customize (RT_QME phase).
     if (rc)
     {
-        MY_ERR("ERROR: tor_append_ring(): tor_access_ring() failed w/rc="
-               "0x%08x\n", rc);
-        return rc;
-    }
+        if (rc != TOR_INVALID_CHIPLET_TYPE)
+        {
+            MY_ERR("ERROR : tor_append_ring() : tor_access_ring() failed w/rc=0x%08x\n", rc);
+        }
 
-    if (i_dbgl > 1)
-    {
-        MY_INF(" TOR offset slot for ring address %d \n", torOffsetSlot );
+        return rc;
     }
 
     // Explanation to the following:

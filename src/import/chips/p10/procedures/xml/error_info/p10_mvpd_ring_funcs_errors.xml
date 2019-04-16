@@ -30,9 +30,21 @@
     <description>Corrupted MVPD data buffer</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>CHIPLET_SEL</ffdc>
     <ffdc>RECORD_VAL</ffdc>
     <ffdc>KEYWORD_VAL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INVALID_RS4_MAGIC</rc>
+    <description>The RS4 magic word is invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>HEADER_MAGIC</ffdc>
+    <ffdc>REF_MAGIC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -48,7 +60,7 @@
     <ffdc>HEADER_RING_ID</ffdc>
     <ffdc>REF_RING_ID</ffdc>
     <ffdc>HEADER_SCAN_ADDR</ffdc>
-    <ffdc>REF_CHIPLET_ID</ffdc>
+    <ffdc>REF_CHIPLET_SEL</ffdc>
     <ffdc>HEADER_RING_SIZE</ffdc>
     <ffdc>REF_RING_SIZE</ffdc>
     <ffdc>SIZEOF_COMPRESSED_SCAN_DATA</ffdc>
@@ -64,7 +76,7 @@
     <description>NULL pointer passed to mvpdRingFunc(SET) is not allowed</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>CHIPLET_SEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -111,7 +123,7 @@
     <description>Data does not fit into output ring buffer</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>CHIPLET_SEL</ffdc>
     <ffdc>BUFFER_SIZE</ffdc>
     <ffdc>RING_SIZE</ffdc>
     <ffdc>OCCURRENCE</ffdc>

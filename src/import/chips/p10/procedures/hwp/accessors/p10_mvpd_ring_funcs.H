@@ -73,7 +73,10 @@ extern "C"
      * @param i_mvpdRingFuncOp - indicate get or set via enum mvpdRingFuncOp
      * @param i_record         - Record enumerator
      * @param i_keyword        - Keyword enumerator
-     * @param i_chipletId      - Chiplet ID
+     * @param i_chipletSel     - Chiplet Select mask (chiplet ID + quad region select)
+     *                           Note that the quad region select MUST only be
+     *                           non-zero for the EQ chiplet core instance rings.
+     *                           For all other rings is MUST be zero.
      * @param i_ringId         - Ring ID
      * @param o_pRingBuf       - The buffer to receive or send the ring
      * @param io_rRingBufsize  - Size of ring / ring buffer
@@ -86,7 +89,7 @@ extern "C"
                              mvpdRingFuncOp       i_mvpdRingFuncOp,
                              MvpdRecord           i_record,
                              MvpdKeyword          i_keyword,
-                             const uint8_t        i_chipletId,
+                             const uint32_t       i_chipletSel,
                              const RingId_t       i_ringId,
                              uint8_t*             o_pRingBuf,
                              uint32_t&            io_rRingBufsize );

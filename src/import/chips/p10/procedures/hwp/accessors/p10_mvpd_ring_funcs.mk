@@ -27,4 +27,5 @@
 PROCEDURE=p10_mvpd_ring_funcs
 lib$(PROCEDURE)_DEPLIBS+=p10_ringId
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/utils/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/customize)
 $(call BUILD_PROCEDURE)

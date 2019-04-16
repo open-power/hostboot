@@ -30,6 +30,7 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>CHIP_UNIT_POS</ffdc>
     <ffdc>PG_INDEX</ffdc>
+    <ffdc>IMG_PG_ENTRIES</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -37,9 +38,10 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_INVALID_INPUT_BUFFER_PARM</rc>
+    <rc>RC_XIPC_INVALID_INPUT_BUFFER_PTR_PARM</rc>
     <description>Caller bug: Caller supplied one or more invalid input buffer pointers</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SYSPHASE</ffdc>
     <ffdc>HW_IMAGE</ffdc>
     <ffdc>IMAGE_BUF</ffdc>
     <ffdc>RING_SECTION_BUF</ffdc>
@@ -56,6 +58,7 @@
     <rc>RC_XIPC_INVALID_INPUT_BUFFER_SIZE_PARM</rc>
     <description>Caller bug: Caller supplied one or more invalid input buffer sizes</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SYSPHASE</ffdc>
     <ffdc>INPUT_IMAGE_SIZE</ffdc>
     <ffdc>IMAGE_BUF_SIZE</ffdc>
     <ffdc>RING_SECTION_BUF_SIZE</ffdc>
@@ -94,10 +97,12 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_INVALID_VPD_KEYWORD</rc>
-    <description>Code bug: Unsupported value of vpdKeyword</description>
+    <rc>RC_XIPC_INVALID_MVPD_RINGCLASS</rc>
+    <description>Code bug: Unsupported value of ringClass</description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>VPD_KEYWORD</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>RING_CLASS</ffdc>
+    <ffdc>KWD_MASK</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -109,8 +114,8 @@
     <description>VPD ring's chipletId doesn't match requested chipletId</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
-    <ffdc>MVPD_CHIPLET_ID</ffdc>
+    <ffdc>CHIPLET_SEL</ffdc>
+    <ffdc>MVPD_CHIPLET_SEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -187,6 +192,34 @@
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RINGID_RINGPROPS_ERROR</rc>
+    <description>ringid_get_ringProps() failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RINGID_CHIPLETPROPS_ERROR</rc>
+    <description>ringid_get_chipletProps() failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>TOR_MAGIC</ffdc>
+    <ffdc>TOR_VER</ffdc>
+    <ffdc>CHIPLET_TYPE</ffdc>
+    <ffdc>RING_ID</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -311,6 +344,7 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_SECTION_SIZE</ffdc>
     <ffdc>MAX_RING_SECTION_SIZE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -581,6 +615,17 @@
     <ffdc>BIT</ffdc>
     <ffdc>DATA_DYNACC</ffdc>
     <ffdc>DATA_DYN</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_CODE_BUG</rc>
+    <description>Code bug: Fix code!</description>
+    <ffdc>CHIP_TARGET</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
