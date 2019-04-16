@@ -79,11 +79,9 @@ void* host_start_stop_engine (void *io_pArgs)
         }
 #endif
 
-// Skip initializing the PM complex in axone simics for now
-#ifndef CONFIG_AXONE_BRING_UP
         //Use targeting code to get a list of all processors
         TARGETING::TargetHandleList l_procChips;
-        getAllChips( l_procChips, TARGETING::TYPE_PROC   );
+        getAllChips( l_procChips, TARGETING::TYPE_PROC );
 
         for (const auto & l_procChip: l_procChips)
         {
@@ -91,6 +89,10 @@ void* host_start_stop_engine (void *io_pArgs)
             //l_procChip into the fapi2::Target constructor
             fapi2::Target<TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget(
                                                               (l_procChip));
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Calling p9_pm_stop_gpe_init for 0x%.8X target",
+                TARGETING::get_huid(l_procChip) );
 
             //call p9_pm_stop_gpe_init.C HWP
             FAPI_INVOKE_HWP(l_errl,
@@ -105,7 +107,6 @@ void* host_start_stop_engine (void *io_pArgs)
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_start_stop_engine:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
             }
         }
-#endif
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         // Starting SGPE in istep15.4 causes OIMR0 register to be improperly
