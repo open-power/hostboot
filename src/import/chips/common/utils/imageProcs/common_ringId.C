@@ -311,10 +311,7 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
     switch (i_chipId)
     {
         case CID_P10:
-            if ( (P10_RID::RING_PROPERTIES[i_ringId].ringClass & RCLS_MVPD_PDG_RING) ==
-                 RCLS_MVPD_PDG_RING ||
-                 (P10_RID::RING_PROPERTIES[i_ringId].ringClass & RCLS_MVPD_PDR_RING) ==
-                 RCLS_MVPD_PDR_RING )
+            if ( P10_RID::RING_PROPERTIES[i_ringId].ringClass & RCLS_MVPD_MASK )
             {
                 return true;
             }
@@ -332,7 +329,7 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
 }
 
 
-#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE) && !defined(WIN32)
 
 // Mapping from the shared [initCompiler] chipId to the chipType name
 std::map <ChipId_t, std::string> chipIdToTypeMap
@@ -384,7 +381,7 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
         {
             if ( ringProps[iRingId].scanScomAddr == i_scanScomAddr )
             {
-                if ( ringProps[iRingId].ringClass & RCLS_ROOT_RING )
+                if ( ringProps[iRingId].ringClass & RMRK_ROOT )
                 {
                     if (bFound)
                     {
@@ -414,12 +411,19 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
         }
     }
 
-    if (!rc && !bFound)
+    if ( !rc && !bFound )
     {
-        MY_DBG("ringidGetRootRingId(): Did not find match for scanScomAddr=0x%08x for chipId=%d."
-               " (Note, l_ringId=0x%x better be equal to UNDEFINED_RING_ID=0x%x)\n",
-               i_scanScomAddr, i_chipId, l_ringId, UNDEFINED_RING_ID);
+        // This is not a bug, but do tell caller that scanScomAddr wasn't found.
         rc = TOR_SCOM_ADDR_NOT_FOUND;
+
+        if (l_ringId != UNDEFINED_RING_ID)
+        {
+            MY_ERR("ringidGetRootRingId(): Did not find match for scanScomAddr=0x%08x for"
+                   " chipId=%d.  However, l_ringId=0x%x cannot be different from"
+                   " UNDEFINED_RING_ID=0x%x.  Fix code!\n",
+                   i_scanScomAddr, i_chipId, l_ringId, UNDEFINED_RING_ID);
+            rc = INFRASTRUCT_RC_CODE_BUG;
+        }
     }
 
     o_ringId = l_ringId;
@@ -570,10 +574,10 @@ int ringidGetRingId2( ChipId_t       i_chipId,
                     // Allow ring index overlap between a root and a non-root ring
                     // and let the non-root (i.e., the bucket ring) "win"
                     if ( !bOverlap &&
-                         ( (ringProps[iRingId].ringClass & RCLS_ROOT_RING) !=
-                           (ringProps[l_ringId].ringClass & RCLS_ROOT_RING) ) )
+                         ( (ringProps[iRingId].ringClass & RMRK_ROOT) !=
+                           (ringProps[l_ringId].ringClass & RMRK_ROOT) ) )
                     {
-                        if ( (ringProps[iRingId].ringClass & RCLS_ROOT_RING) != RCLS_ROOT_RING )
+                        if ( !(ringProps[iRingId].ringClass & RMRK_ROOT) )
                         {
                             l_ringId = iRingId;
                         }

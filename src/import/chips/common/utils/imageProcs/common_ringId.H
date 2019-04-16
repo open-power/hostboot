@@ -66,6 +66,7 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 
 #define  UNDEFINED_BOOLEAN      (MyBool_t)0xff
 
+#define  CHIPLET_ID_MASK       (uint32_t)0xFF000000
 #define  MIN_INSTANCE_ID       (uint8_t)0x01
 #define  MAX_INSTANCE_ID       (uint8_t)0x3F
 
@@ -149,28 +150,69 @@ enum ChipId
 
 #define P10_MVPD_CHIP_NAME 0xda
 
-// Ring classes
-// - Specified whether root ring:            ROOT (only applied in RING_PROPERTIES list)
-// - Specifies origination repo:             EKB or MVPD
-// - Specifies chip ID:                      P9
-// - Specifies MVPD subclass:                #G or #R
-// - Specifies flush status assumption:      Flushed or non-flushed (prev scanned)
-// - Specifies various special ring classes: FSM, OVLY, STUMPED, CMSK
 //
-enum RingClass
+// Ring markers and pre-defined classes (both used in RING_PROPERTIES to classify rings)
+//
+// Assumptions:
+// - Main assumption is that ALL rings are assumed to be scanned onto previously flushed
+//   HW scan chains. The exception to this rule is a couple of rings that will be
+//   scanned onto previously scanned HW scan chains, such as the ana_bndy and filter rings.
+//   So to simplify the marking work in the RING_PROPERTIES list, there's only a need for a
+//   NONFLUSH ring marker, and if not set, which will be by far the most cases, implies an
+//   FLUSH ring.
+//
+// ROOT:      Ring name exists verbatim in ENGD. Denoted a ROOT ring as opposed to a derived
+//            ring that has a suffix added to its ringName by ifCompiler, eg _bucket or _flt.
+// NONFLUSH:  Ring created with the assumption the scan chain has been previously scanned.
+// EKB_RINGS: Ring content [possibly partly] from initfiles. Destined for .rings ringSection.
+// GPTR_OVLY: Ring content [possibly partly] from initfiles. Destined for .overlays ringSection.
+// CMSK:      CMSK setup ring.
+// STUMPED:   The shortened (stumped) actual ring to utilize CMSK scanning.
+// MVPD_PDG:  #G Gptr/Time MVPD ring.
+// MVPD_PDP:  #P Pll       MVPD ring.
+// MVPD_PDR:  #R Repr      MVPD ring.
+// MVPD_NEST: Ring is in a NEST chiplet. (Needed for bootCoreMask in ipl_customize)
+// MVPD_EQ:   Ring is in the EQ chiplet. (Needed for bootCoreMask in ipl_customize)
+// MVPD_CORE: Ring is in the core chiplet. (Needed for bootCoreMask in ipl_customize)
+//
+enum RingMarker
 {
-    RCLS_ROOT_RING         = 0b0000000000000001, // ENGD root ring marker bit
-    RCLS_FLUSH_RING        = 0b0000000000000010, // Flush-scan marker bit
-    RCLS_NONFLUSH_RING     = 0b0000000000000100, // Nonflush-scan marker bit
-    RCLS_EKB_FLUSH_RING    = 0b0000000000001010, // EKB P9 ring. Flush-scanned
-    RCLS_EKB_NONFLUSH_RING = 0b0000000000001100, // EKB P9 ring. Nonflush-scanned
-    RCLS_MVPD_PDG_RING     = 0b0000000000010010, // MVPD #G P9 ring. Flush-scanned
-    RCLS_MVPD_PDR_RING     = 0b0000000000100010, // MVPD #R P9 ring. Flush-scanned
-    RCLS_EKB_FSM_RING      = 0b0000000010000110, // EKB P9 ring for eq_ana_bndy. Mixed-scanned
-    RCLS_EKB_OVLY_RING     = 0b0000000100010010, // EKB P9 ovly for MVPD GPTR ring. Flush-scanned
-    RCLS_EKB_STUMPED_RING  = 0b0000001000000010, // EKB P9 CMSK stump ring. Flush-scanned
-    RCLS_EKB_CMSK_RING     = 0b0000010000000010, // EKB P9 CMSK ring. Flush-scanned
+    RMRK_ROOT        = (RingClass_t)0b0000000000000001, // ENGD root ring marker bit
+    RMRK_EKB_RINGS   = (RingClass_t)0b0000000000000010, // EKB .rings and .dynamic marker bit
+    RMRK_GPTR_OVLY   = (RingClass_t)0b0000000000000100, // Gptr overlay ring marker bit
+    RMRK_TIME        = (RingClass_t)0b0000000000001000, // Time ring marker bit
+    RMRK_CMSK        = (RingClass_t)0b0000000000010000, // CMSK marker bit (setup ring)
+    RMRK_STUMPED     = (RingClass_t)0b0000000000100000, // CMSK stump marker bit (short actual ring)
+    RMRK_MVPD_PDG    = (RingClass_t)0b0000000001000000, // MVPD #G gptr/time ring marker bit
+    RMRK_MVPD_PDP    = (RingClass_t)0b0000000010000000, // MVPD #P pll ring marker bit
+    RMRK_MVPD_PDR    = (RingClass_t)0b0000000100000000, // MVPD #G repr ring marker bit
+    RMRK_MVPD_NEST   = (RingClass_t)0b0000001000000000, // NEST (non-EQ) ring marker bit
+    RMRK_MVPD_EQ     = (RingClass_t)0b0000010000000000, // EQ (non-core) ring marker bit
+    RMRK_MVPD_CORE   = (RingClass_t)0b0000100000000000, // Core ring marker bit
+    RMRK_SCAN_BY_QME = (RingClass_t)0b0001000000000000, // QME scannable ring marker bit
 };
+
+//
+// Predefined ring classes
+// - The following ring classes are combining the above RingMarker bits to condense the
+//   programming of the ringClass field in the RING_PROPERTIES list in p10_ringId.H.
+//
+// EKB class to represent COMMON rings
+#define RCLS_EKB_RINGS          (RMRK_EKB_RINGS)
+// EKB and MVPD class to represent COMMON rings
+#define RCLS_EKB_MVPD_PDG_OVLY  (RMRK_MVPD_PDG | RMRK_GPTR_OVLY)
+#define RCLS_EKB_MVPD_PDP       (RMRK_MVPD_PDP)
+// MVPD class to represent COMMON rings
+#define RCLS_MVPD_PDG_TIME      (RMRK_MVPD_PDG | RMRK_TIME)
+// MVPD class to represent INSTANCE rings
+#define RCLS_MVPD_PDR_NEST      (RMRK_MVPD_PDR | RMRK_MVPD_NEST)
+#define RCLS_MVPD_PDR_EQ        (RMRK_MVPD_PDR | RMRK_MVPD_EQ)
+#define RCLS_MVPD_PDR_CORE      (RMRK_MVPD_PDR | RMRK_MVPD_CORE)
+// CMSK rings
+#define RCLS_EKB_STUMPED        (RMRK_EKB_RINGS | RMRK_STUMPED)
+#define RCLS_EKB_CMSK           (RMRK_EKB_RINGS | RMRK_CMSK)
+// MVPD keyword mask
+#define RCLS_MVPD_MASK          (RMRK_MVPD_PDG | RMRK_MVPD_PDP | RMRK_MVPD_PDR)
 
 // Ring types supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
@@ -290,7 +332,7 @@ int ringid_get_scanScomAddr( ChipId_t   i_chipId,
                              RingId_t   i_ringId,
                              uint32_t*  o_scanScomAddr );
 
-// This fumction returns the ringClass associated with the ringId.
+// This function returns the ringClass associated with the ringId.
 int ringid_get_ringClass( ChipId_t      i_chipId,
                           RingId_t      i_ringId,
                           RingClass_t*  o_ringClass );
@@ -309,7 +351,7 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
 
-#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE) && !defined(WIN32)
 
 #include <map>
 #include <string>
