@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,182 +34,6 @@
 <!-- -->
 
 <hwpErrors>
-  <hwpError>
-    <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
-    <description>
-      There was no match or value found in decoding the power thermal attributes
-    </description>
-    <ffdc>GENERATED_KEY</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <ffdc>DIMM_TARGET</ffdc>
-    <ffdc>SIZE</ffdc>
-    <ffdc>DRAM_GEN</ffdc>
-    <ffdc>DIMM_TYPE</ffdc>
-    <ffdc>DRAM_WIDTH</ffdc>
-    <ffdc>DRAM_DENSITY</ffdc>
-    <ffdc>STACK_TYPE</ffdc>
-    <ffdc>MFGID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_POWER_THERMAL_ENCODE_ERROR</rc>
-    <description>
-      There was no match or value found in encoding the power thermal attributes
-    </description>
-    <ffdc>DIMM_TARGET</ffdc>
-    <ffdc>ATTR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_POWER_THERMAL_DECODE_ERROR</rc>
-    <description>
-      There was no match or value found in decoding the power thermal attributes
-    </description>
-    <ffdc>DIMM_TARGET</ffdc>
-    <ffdc>ATTR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_POWER_INTERCEPT_NOT_SET</rc>
-    <description>
-      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
-    </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_POWER_SLOPE_NOT_SET</rc>
-    <description>
-      The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
-    </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
-    <description>
-      There are 2 DIMMS on the port but both have 0 databus utilization
-    </description>
-    <ffdc>PORT_DATABUS_UTIL</ffdc>
-    <ffdc>DIMM_COUNT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
-    <description>
-      Denominator equals 0
-    </description>
-    <ffdc>PORT_DATABUS_UTIL</ffdc>
-    <ffdc>UTIL_CONVERSION</ffdc>
-    <ffdc>IDLE_UTIL</ffdc>
-    <ffdc>RESULT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
- <hwpError>
-    <rc>RC_MSS_NO_PORT_POWER_LIMIT</rc>
-    <description>
-        Got 0 when calculating port power limit.
-        Either no dimms or attribute MEM_WATT_TARGET wasn't set
-    </description>
-    <ffdc>COUNT_DIMMS</ffdc>
-    <ffdc>PORT_POWER_LIMIT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
-
- <hwpError>
-    <rc>RC_MSS_NO_PORT_POWER</rc>
-    <description>
-        Got 0 when calculating port power limits using the DIMMs databus utilization
-    </description>
-    <ffdc>COUNT_DIMMS</ffdc>
-    <ffdc>MAX_UTILIZATION_DIMM_0</ffdc>
-    <ffdc>MAX_UTILIZATION_DIMM_1</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
-
- <hwpError>
-    <rc>RC_MSS_M_DRAM_CLOCKS_EQUALS_ZERO</rc>
-    <description>
-        ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero
-    </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
-
- <hwpError>
-    <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
-    <description>
-      The calculated port power from equalizing throttles exceeds the maximum allowed power
-    </description>
-    <ffdc>CALCULATED_PORT_POWER</ffdc>
-    <ffdc>MAX_POWER_ALLOWED</ffdc>
-    <ffdc>PORT_POS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <childTargets>
-          <parent>MCA_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-       <childTargets>
-          <parent>MCA_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-    </deconfigure>
- </hwpError>
-
- <hwpError>
-    <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
-    <description>
-      The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
-    </description>
-    <ffdc>SLOT_UTIL</ffdc>
-    <ffdc>PORT_UTIL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
-
  <hwpError>
     <rc>RC_MSS_SPLIT_UTIL_CALC_ERROR</rc>
     <description>
@@ -225,17 +49,6 @@
     </callout>
   </hwpError>
 
- <hwpError>
-     <rc>RC_MSS_OUTPUT_OVERFLOW_CALC_UTIL</rc>
-    <description>
-        Type of output variable is not large enough for the calculations
-    </description>
-    <ffdc>RESULT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
 
  <hwpError>
     <rc>RC_MSS_DIMM_COUNT_EXCEEDS_VMEM_REGULATOR_LIMIT</rc>

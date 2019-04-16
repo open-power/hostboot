@@ -606,4 +606,136 @@
     <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
   </attribute>
 
+ <attribute>
+    <id>ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Thermal Memory Power Limit
+        Used to calculate throttles to be at or under the power limit
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffffc07940000</default>
+    <array>25</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_PWR_SLOPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Slope for DIMM
+        Used to get the OCMB+DRAM power curve for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW/utilization:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW</mssUnits>
+    <default>0xfffffc00044C0000</default>
+    <array>50</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_pwr_slope</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_PWR_INTERCEPT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept for DIMM
+        Used to get the OCMB+DRAM power curve for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-47) in cW/utilization:
+        OCMB+DRAM thermal power limit per DIMM = 32-47
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>cW/utilization</mssUnits>
+    <default>0xfffffc00044C0000</default>
+    <array>50</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_pwr_intercept</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept and limit for DIMM
+        Used to get the PMIC power curve and limit for each DIMM
+        Per DIMM basis
+        KEY (0-21): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        Bits 22-32: Not used
+        VALUE (bits 32-39): Current limit (dA)
+        VALUE (bits 40-51): Current slope (cA/utilization)
+        VALUE (bits 52-63): Current intercept (cA)
+    </description>
+    <valueType>uint64</valueType>
+    <mssUnits>dA, cA/utilization, cA</mssUnits>
+    <default>0xfffffc0000000000</default>
+    <array>25</array>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_current_curve_with_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook value for safe mode dram data bus utilization in centi percent (c%).
+        Set to below optimum value/ rate.
+        On a per port basis
+        Also used for emergency mode throttle
+        Used to thermally protect the system in all supported environmental conditions when OCC is not functional
+        Consumer: thermal_init, initfile
+        Default to 2500 c%%
+    </description>
+    <valueType>uint32</valueType>
+    <default>0x000009C4</default>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
+  </attribute>
+
 </attributes>

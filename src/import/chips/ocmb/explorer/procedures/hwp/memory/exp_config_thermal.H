@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_config_thermal.H
+/// @brief The explorer thermal/power config
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: Memory
+#ifndef EXP_CONFIG_THERMAL_H_
+#define EXP_CONFIG_THERMAL_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_mss_eff_config_thermal_FP_t) (const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Config the thermal/power throttle setting
+    /// @param[in] i_target vector of OCMB chip
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&
+            i_targets);
+}
+
+#endif

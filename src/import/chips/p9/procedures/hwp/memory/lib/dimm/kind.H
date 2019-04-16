@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,6 +237,8 @@ class kind
         uint8_t iv_hybrid;
         uint8_t iv_hybrid_memory_type;
         uint16_t iv_rcd_mfgid;
+        // This is just a workaround. There is another task that will port kind library to generic folder
+        uint8_t iv_module_height;
 
         ///
         /// @brief equal_config

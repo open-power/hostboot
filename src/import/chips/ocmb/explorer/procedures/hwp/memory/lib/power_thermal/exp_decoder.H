@@ -22,3 +22,61 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_decoder.H
+/// @brief Decoder for ATTR_MSS_MRW_PWR_CURVE_SLOPE and _INTERCEPT and THERMAL_POWER_LIMIT
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_POWER_EXP_DECODER__
+#define _MSS_POWER_EXP_DECODER__
+
+#include <fapi2.H>
+
+#include <lib/shared/exp_consts.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/power_thermal/exp_throttle.H>
+#include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
+
+
+namespace mss
+{
+
+namespace power_thermal
+{
+
+
+///
+/// @brief find the power curve attributes for each dimm on an MCS target
+/// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding and values for MSS_MRW_POWER_SLOPE
+/// @param[in] i_intercept vector of generated hashes for encoding and values for MSS_MRW_POWER_INTERCEPT
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding and values for MSS_MRW_THERMAL_MEMORY_POWER_LIMIT
+/// @param[out] o_vddr_slope the VDDR power curve slope for each dimm
+/// @param[out] o_vddr_int the VDDR power curve intercept for each dimm
+/// @param[out] o_total_slope the VDDR+VPP power curve slope for each dimm
+/// @param[out] o_total_int the VDDR+VPP power curve intercept for each dimm
+/// @param[out] o_thermal_power the thermal power limit for the dimm
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note used to set power curve attributes in calling function
+/// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
+///
+fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
+                                   const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                   const std::vector< uint64_t >& i_slope,
+                                   const std::vector< uint64_t >& i_intercept,
+                                   const std::vector< uint64_t >& i_thermal_power_limit,
+                                   const std::vector< uint64_t >& i_current_curve_with_limit,
+                                   uint16_t o_slope [throttle_traits<>::DIMMS_PER_PORT],
+                                   uint16_t o_intercept [throttle_traits<>::DIMMS_PER_PORT],
+                                   uint32_t o_limit [throttle_traits<>::DIMMS_PER_PORT]);
+
+
+} // power_thermal
+} // mss
+#endif

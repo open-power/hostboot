@@ -621,6 +621,22 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_EFF_DRAM_MODULE_HEIGHT</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      DRAM Modlue Height
+      Decodes SPD Byte 193
+    </description>
+    <enum>1U = 0, 2U = 1, 4U = 2 </enum>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>dram_module_height</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_EFF_RCD_MFG_ID</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>

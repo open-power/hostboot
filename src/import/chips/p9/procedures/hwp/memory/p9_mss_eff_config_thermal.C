@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <fapi2.H>
 #include <vector>
 #include <p9_mss_eff_config_thermal.H>
@@ -52,12 +53,14 @@ extern "C"
     /// @note sets ATTR_MSS_MEM_WATT_TARGET, ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT and _PER_SLOT, and ATTR_MSS_PORT_MAXPOWER
     fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets )
     {
+        using TT = mss::power_thermal::throttle_traits<mss::mc_type::NIMBUS>;
+
         FAPI_INF("Start effective config thermal");
         fapi2::ReturnCode l_rc;
 
-        std::vector< uint64_t > l_slope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_intercept (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_thermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR, 0);
+        std::vector< uint64_t > l_slope (TT::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_intercept (TT::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_thermal_power_limit (TT::SIZE_OF_THERMAL_ATTR, 0);
 
         uint16_t l_vddr_slope     [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint16_t l_vddr_int       [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
@@ -75,19 +78,21 @@ extern "C"
         // Return error if safemode throttle utilization is less than MIN_UTIL
         // This section needs to be in braces otherwise the compile will fail
         {
+            using TT = mss::power_thermal::throttle_traits<>;
+            const uint64_t l_min_util = TT::MIN_UTIL;
             uint16_t l_throttle_per_port = 0;
             uint32_t l_throttle_denominator = 0;
             FAPI_TRY(mss::mrw_mem_m_dram_clocks(l_throttle_denominator), "Error in p9_mss_eff_config_thermal" );
             FAPI_TRY(mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port),
                      "Error in p9_mss_eff_config_thermal" );
-            FAPI_ASSERT( (l_throttle_per_port  >= (mss::power_thermal::MIN_UTIL * l_throttle_denominator /
+            FAPI_ASSERT( (l_throttle_per_port  >= (TT::MIN_UTIL * l_throttle_denominator /
                                                    mss::power_thermal::DRAM_BUS_UTILS / mss::power_thermal::UTIL_CONVERSION)),
                          fapi2::MSS_MRW_SAFEMODE_THROTTLE_NOT_SUPPORTED()
                          .set_MRW_SAFEMODE_N_VALUE(l_throttle_per_port)
                          .set_MRW_DRAM_CLOCK_THROTTLE_M(l_throttle_denominator)
-                         .set_MIN_UTIL_VALUE(mss::power_thermal::MIN_UTIL),
+                         .set_MIN_UTIL_VALUE(l_min_util),
                          "MRW safemode attribute (N=%d, M=%d) has less util than the min util allowed (%d centi percent)",
-                         l_throttle_per_port, l_throttle_denominator, mss::power_thermal::MIN_UTIL);
+                         l_throttle_per_port, l_throttle_denominator, l_min_util);
         }
 
         //Restore runtime_throttles from safemode setting

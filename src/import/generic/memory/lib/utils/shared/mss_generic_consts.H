@@ -104,6 +104,9 @@ enum conversions
     NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
     BITS_PER_BYTE = 8,
+
+    // Used by exp_decoder.C for dA to cA
+    DECI_TO_CENTI = 10,
 };
 
 enum generic_sizes
@@ -200,6 +203,11 @@ enum generic_ffdc_codes
     SET_PRIM_BUS_WIDTH = 0x1069,
     SET_PRIM_DIE_COUNT = 0x1070,
     SET_DRAM_DENSITY = 0x1071,
+
+    // Power thermal functions
+    POWER_LIMIT = 0x1072,
+    SLOPE = 1073,
+    INTERCEPT = 1074,
 };
 
 ///

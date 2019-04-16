@@ -108,6 +108,24 @@ fapi_try_exit:
 }
 
 
+///
+/// @brief Determines if the double has decimal digits and adds 1 and rounds if true
+/// @param[in] i_val the double to be rounded up if trialing digits
+/// @return the input value rounded up to the next whole digit
+/// @note Called in p9_mss_bulk_pwr_throttles
+///
+inline uint32_t round_up(const double i_val)
+{
+    //convert to uint to truncate decimals and convert back to double for comparison
+    uint32_t temp = uint32_t (i_val);
+
+    //if not equal, lost something from truncating, so add 1
+    temp += (temp == i_val) ? 0 : 1;
+
+    //Truncate final value
+    return temp;
+}
+
 }// mss
 
 #endif

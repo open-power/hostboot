@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 #include <p9_mss_utils_to_throttle.H>
 
 // fapi2
@@ -133,28 +134,30 @@ extern "C"
                     l_input_databus_util[l_port_num] = l_calc_util_safemode;
                 }
 
+                using TT = mss::power_thermal::throttle_traits<>;
+                const uint64_t l_min_util = TT::MIN_UTIL;
                 //Make sure MIN_UTIL <= input_utilization <= max_utilization
-                const uint32_t l_databus_util = ( l_input_databus_util[l_port_num] >= mss::power_thermal::MIN_UTIL) ?
+                const uint32_t l_databus_util = ( l_input_databus_util[l_port_num] >= l_min_util) ?
                                                 std::min(l_input_databus_util[l_port_num], l_max_databus_util)
-                                                : mss::power_thermal::MIN_UTIL;
+                                                : l_min_util;
 
                 // Error if utilization is less than MIN_UTIL
                 // Don't exit, let HWP finish and return error at end
-                if (l_input_databus_util[l_port_num] < mss::power_thermal::MIN_UTIL)
+                if (l_input_databus_util[l_port_num] < l_min_util)
                 {
                     FAPI_ASSERT_NOEXIT( false,
                                         fapi2::MSS_MIN_UTILIZATION_ERROR()
                                         .set_INPUT_UTIL_VALUE(l_input_databus_util[l_port_num])
-                                        .set_MIN_UTIL_VALUE(mss::power_thermal::MIN_UTIL),
+                                        .set_MIN_UTIL_VALUE(l_min_util),
                                         "%s Input utilization (%d) less than minimum utilization allowed (%d)",
-                                        mss::c_str(l_mca), l_input_databus_util[l_port_num], mss::power_thermal::MIN_UTIL);
+                                        mss::c_str(l_mca), l_input_databus_util[l_port_num], l_min_util);
                     l_util_error = true;
                 }
 
                 //Make a throttle object in order to calculate the port power
                 fapi2::ReturnCode l_rc;
 
-                mss::power_thermal::throttle l_throttle (l_mca, l_rc);
+                mss::power_thermal::throttle<> l_throttle (l_mca, l_rc);
                 FAPI_TRY(l_rc, "Error calculating mss::power_thermal::throttle constructor in p9_mss_utils_to_throttles");
 
                 FAPI_INF( "%s MRW dram clock window: %d, databus utilization: %d",

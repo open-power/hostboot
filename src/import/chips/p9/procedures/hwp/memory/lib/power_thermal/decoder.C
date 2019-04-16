@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/nimbus_defaults.H>
 // fapi2
 #include <fapi2.H>
 #include <vector>
@@ -44,100 +45,21 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
 #include <lib/dimm/kind.H>
 #include <lib/shared/mss_const.H>
-
-using fapi2::TARGET_TYPE_MCA;
-using fapi2::TARGET_TYPE_MCS;
-using fapi2::TARGET_TYPE_DIMM;
-using fapi2::TARGET_TYPE_MCBIST;
 
 namespace mss
 {
 namespace power_thermal
 {
 
-///
-/// @brief generates the 32 bit encoding for the power curve attributes
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-/// @note populates iv_gen_keys
-///
-fapi2::ReturnCode decoder::generate_encoding()
+const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::NIMBUS>::DIMM_TYPE_MAP =
 {
-    //DIMM_SIZE
-    FAPI_TRY(( encode<DIMM_SIZE_START, DIMM_SIZE_LEN>
-               (iv_kind.iv_target, iv_kind.iv_size, DIMM_SIZE_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DIMM_SIZE", iv_kind.iv_size, c_str(iv_kind.iv_target) );
-
-    //DRAM_GEN
-    FAPI_TRY(( encode<DRAM_GEN_START, DRAM_GEN_LEN>
-               (iv_kind.iv_target, iv_kind.iv_dram_generation, DRAM_GEN_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DRAM_GEN", iv_kind.iv_dram_generation, c_str(iv_kind.iv_target) );
-
-    //DIMM_TYPE
-    FAPI_TRY(( encode<DIMM_TYPE_START, DIMM_TYPE_LEN>
-               (iv_kind.iv_target, iv_kind.iv_dimm_type, DIMM_TYPE_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DIMM_TYPE", iv_kind.iv_dimm_type, c_str(iv_kind.iv_target) );
-
-    //DRAM WIDTH
-    FAPI_TRY(( encode<DRAM_WIDTH_START, DRAM_WIDTH_LEN>
-               (iv_kind.iv_target, iv_kind.iv_dram_width, DRAM_WIDTH_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DRAM_WIDTH", iv_kind.iv_dram_width, c_str(iv_kind.iv_target) );
-
-    //DRAM DENSITY
-    FAPI_TRY(( encode<DRAM_DENSITY_START, DRAM_DENSITY_LEN>
-               (iv_kind.iv_target, iv_kind.iv_dram_density, DRAM_DENSITY_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DRAM_DENSITY", iv_kind.iv_dram_density, c_str(iv_kind.iv_target) );
-
-    //DRAM STACK TYPE
-    FAPI_TRY(( encode<DRAM_STACK_TYPE_START, DRAM_STACK_TYPE_LEN>
-               (iv_kind.iv_target, iv_kind.iv_stack_type, DRAM_STACK_TYPE_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DRAM_STACK_TYPE", iv_kind.iv_stack_type, c_str(iv_kind.iv_target) );
-
-    //DRAM MFG ID
-    FAPI_TRY(( encode<DRAM_MFGID_START, DRAM_MFGID_LEN>
-               (iv_kind.iv_target, iv_kind.iv_mfgid, DRAM_MFGID_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DRAM_MFG_ID", iv_kind.iv_mfgid, c_str(iv_kind.iv_target) );
-
-    //NUM DROPS PER PORT
-    FAPI_TRY(( encode<DIMMS_PER_PORT_START, DIMMS_PER_PORT_LEN>
-               (iv_kind.iv_target, iv_dimms_per_port, DIMMS_PORT_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DIMMS_PER_PORT", iv_dimms_per_port, c_str(iv_kind.iv_target) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-///
-///@brief a compare functor for the decoder::find_attr functions below
-///@note AND's the input hash with the generated hash from the DIMM to see if they match
-///@note Using an AND instead of == because not all DIMM configs have power slopes, so defaults are needed
-///
-struct is_match
-{
-    ///
-    ///@brief functor constructor
-    ///@param[in] i_gen_key the class object's constructed hash for the installed dimm, to be compared with the attr array
-    ///
-    is_match(const uint32_t i_gen_key) : iv_gen_key(i_gen_key) {}
-    const fapi2::buffer<uint32_t> iv_gen_key;
-
-    ///
-    ///@brief Boolean compare used for find_if function
-    ///
-    bool operator()(const uint64_t i_hash)
-    {
-        // l_this_hash is the first half of the i_hash's bits
-        uint32_t l_this_hash = i_hash >> 32;
-        return ((l_this_hash & iv_gen_key) == iv_gen_key);
-    }
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM, 0b00},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM, 0b01},
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM, 0b10},
+    {ANY_TYPE, 0b11}
 };
 
 ///
@@ -146,16 +68,21 @@ struct is_match
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_vddr_slope, iv_total_slop
 ///
-fapi2::ReturnCode decoder::find_slope (const std::vector<uint64_t>& i_slope)
+template<>
+fapi2::ReturnCode decoder<mss::mc_type::NIMBUS>::find_slope (
+    const std::vector< const std::vector<uint64_t>* >& i_slope)
 {
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
+    // For nimbus only one attribute is used to get slope (i_slope[0])
     // Find iterator to matching key (if it exists)
-    const auto l_value_iterator  =  std::find_if(i_slope.begin(),
-                                    i_slope.end(),
-                                    is_match(iv_gen_key));
+    const auto l_value_iterator  =  std::find_if((*i_slope[0]).begin(),
+                                    (*i_slope[0]).end(),
+                                    is_match<>(iv_gen_key));
 
     //Should have matched with the default ATTR value at least
     //The last value should always be the default value
-    FAPI_ASSERT(l_value_iterator != i_slope.end(),
+    FAPI_ASSERT(l_value_iterator != (*i_slope[0]).end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_FUNCTION(SLOPE)
@@ -184,8 +111,8 @@ fapi2::ReturnCode decoder::find_slope (const std::vector<uint64_t>& i_slope)
 
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
-        l_temp.extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_slope);
-        l_temp.extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_slope);
+        l_temp.extractToRight<TT::VDDR_START, TT::VDDR_LENGTH>( iv_vddr_slope);
+        l_temp.extractToRight<TT::TOTAL_START, TT::TOTAL_LENGTH>(iv_total_slope);
     }
 fapi_try_exit:
     return fapi2::current_err;
@@ -197,15 +124,19 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_vddr_intercept, iv_total_intercept
 ///
-fapi2::ReturnCode decoder::find_intercept (const std::vector<uint64_t>& i_intercept)
+template<>
+fapi2::ReturnCode decoder<mss::mc_type::NIMBUS>::find_intercept (
+    const std::vector< const std::vector<uint64_t>* >& i_intercept)
 {
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
     // Find iterator to matching key (if it exists)
-    const auto l_value_iterator  =  std::find_if(i_intercept.begin(),
-                                    i_intercept.end(),
-                                    is_match(iv_gen_key));
+    const auto l_value_iterator  =  std::find_if((*i_intercept[0]).begin(),
+                                    (*i_intercept[0]).end(),
+                                    is_match<>(iv_gen_key));
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
-    FAPI_ASSERT(l_value_iterator != i_intercept.end(),
+    FAPI_ASSERT(l_value_iterator != (*i_intercept[0]).end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_FUNCTION(INTERCEPT)
@@ -234,31 +165,36 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<uint64_t>& i_interc
 
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
-        l_temp.extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_intercept);
-        l_temp.extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_intercept);
+        l_temp.extractToRight<TT::VDDR_START, TT::VDDR_LENGTH>( iv_vddr_intercept);
+        l_temp.extractToRight<TT::TOTAL_START, TT::TOTAL_LENGTH>(iv_total_intercept);
     }
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 ///
 /// @brief Finds a value from ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT and stores in iv variable
 /// @param[in] i_thermal_limits is a vector of the generated values from ATTR_MSS_MRW_THERMAL_POWER_LIMIT
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-/// @note populates thermal_power_limit
+/// @note populates thermal_power_limit.
 ///
-fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<uint64_t>& i_thermal_limits)
+template<>
+fapi2::ReturnCode decoder<mss::mc_type::NIMBUS>::find_thermal_power_limit (
+    const std::vector< const std::vector<uint64_t>* >& i_thermal_limits)
 {
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
     // Find iterator to matching key (if it exists)
-    const auto l_value_iterator  =  std::find_if(i_thermal_limits.begin(),
-                                    i_thermal_limits.end(),
-                                    is_match(iv_gen_key));
+    const auto l_value_iterator  =  std::find_if((*i_thermal_limits[0]).begin(),
+                                    (*i_thermal_limits[0]).end(),
+                                    is_match<>(iv_gen_key));
 
     fapi2::buffer<uint64_t> l_temp;
 
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
-    FAPI_ASSERT(l_value_iterator != i_thermal_limits.end(),
+    FAPI_ASSERT(l_value_iterator != (*i_thermal_limits[0]).end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_FUNCTION(POWER_LIMIT)
@@ -287,11 +223,13 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<uint64_t>
 
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
-        l_temp.extractToRight<THERMAL_POWER_START, THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
+        l_temp.extractToRight<TT::THERMAL_POWER_START, TT::THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
     }
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
 ///
 /// @brief find the power curve attributes for each dimm on an MCS target
 /// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
@@ -317,13 +255,15 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
                                    uint16_t o_total_int [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint32_t o_thermal_power [PORTS_PER_MCS][MAX_DIMM_PER_PORT])
 {
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_mcs))
     {
-        const auto l_mca_pos = mss::index (find_target<TARGET_TYPE_MCA>(l_dimm));
+        const auto l_mca_pos = mss::index (find_target<fapi2::TARGET_TYPE_MCA>(l_dimm));
         const auto l_dimm_pos = mss::index (l_dimm);
 
         mss::dimm::kind l_kind (l_dimm);
-        mss::power_thermal::decoder l_decoder(l_kind);
+        mss::power_thermal::decoder<> l_decoder(l_kind);
         FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
 
         // The first entry into these arrays must be valid
@@ -331,12 +271,13 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
         if (i_slope.empty() || i_slope[0] == 0)
         {
             FAPI_INF("%s ATTR_MSS_MRW_PWR_SLOPE not found!!", mss::c_str(i_mcs));
-            o_vddr_slope [l_mca_pos][l_dimm_pos] = default_power::VDDR_SLOPE;
-            o_total_slope [l_mca_pos][l_dimm_pos] = default_power::TOTAL_SLOPE;
+            o_vddr_slope [l_mca_pos][l_dimm_pos] = TT::VDDR_SLOPE;
+            o_total_slope [l_mca_pos][l_dimm_pos] = TT::TOTAL_SLOPE;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_slope(i_slope), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
+            const std::vector< const std::vector<uint64_t>* > l_slope {&i_slope};
+            FAPI_TRY( l_decoder.find_slope(l_slope), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_vddr_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_slope;
             o_total_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_slope;
         }
@@ -344,12 +285,13 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
         if (i_intercept.empty() || i_intercept[0] == 0)
         {
             FAPI_INF("%s ATTR_MSS_MRW_PWR_INTERCEPT not found!!", mss::c_str(i_mcs));
-            o_total_int [l_mca_pos][l_dimm_pos] = default_power::TOTAL_INT;
-            o_vddr_int [l_mca_pos][l_dimm_pos] = default_power::VDDR_INT;
+            o_total_int [l_mca_pos][l_dimm_pos] = TT::TOTAL_INT;
+            o_vddr_int [l_mca_pos][l_dimm_pos] = TT::VDDR_INT;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_intercept(i_intercept), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
+            std::vector< const std::vector<uint64_t>* > l_intercept {&i_intercept};
+            FAPI_TRY( l_decoder.find_intercept(l_intercept), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_vddr_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_intercept;
             o_total_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_intercept;
         }
@@ -357,11 +299,12 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
         if (i_thermal_power_limit.empty() || i_thermal_power_limit[0] == 0)
         {
             FAPI_INF("%s ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT not found!!", mss::c_str(i_mcs));
-            o_thermal_power [l_mca_pos][l_dimm_pos] = default_power::THERMAL_LIMIT;
+            o_thermal_power [l_mca_pos][l_dimm_pos] = TT::THERMAL_LIMIT;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_thermal_power_limit(i_thermal_power_limit),
+            std::vector< const std::vector<uint64_t>* > l_thermal_power_limit {&i_thermal_power_limit};
+            FAPI_TRY( l_decoder.find_thermal_power_limit(l_thermal_power_limit),
                       "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_thermal_power [l_mca_pos][l_dimm_pos] = l_decoder.iv_thermal_power_limit;
         }

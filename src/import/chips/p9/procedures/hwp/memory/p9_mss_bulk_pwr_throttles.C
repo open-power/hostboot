@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
+
+#include <lib/shared/nimbus_defaults.H>
 #include <vector>
 
 #include <fapi2.H>
@@ -88,7 +90,7 @@ extern "C"
 
                 const uint8_t l_pos = mss::index(l_mca);
 
-                mss::power_thermal::throttle l_pwr_struct(l_mca, l_rc);
+                mss::power_thermal::throttle<> l_pwr_struct(l_mca, l_rc);
                 FAPI_TRY(l_rc, "Error constructing mss:power_thermal::throttle object for target %s",
                          mss::c_str(l_mca));
 

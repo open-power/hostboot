@@ -156,11 +156,6 @@ enum ffdc_function_codes
     // Used in rank.H
     MAP_RP_PRIMARY_TO_INIT_CAL = 60,
 
-    // Power thermal functions
-    SLOPE = 70,
-    INTERCEPT = 71,
-    POWER_LIMIT = 72,
-
     // PDA function codes
     PDA_WR_VREF_LATCH_CONTAINER = 80,
     PDA_WR_VREF_LATCH_VECTOR = 81,
