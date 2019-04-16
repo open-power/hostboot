@@ -1,0 +1,239 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_mss_eff_grouping_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+<hwpError>
+    <rc>RC_MSS_EFF_CONFIG_MIRROR_DISABLED</rc>
+    <description>
+        Mirroring is disabled but Mirror placement policy is flipped.
+        Firmware error.
+        - ATTR_MRW_HW_MIRRORING_ENABLE is not false
+        - ATTR_MEM_MIRROR_PLACEMENT_POLICY is FLIPPED
+    </description>
+    <ffdc>MRW_HW_MIRRORING_ENABLE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_GROUP_ALLOWED</rc>
+    <description>
+        ATTR_MSS_INTERLEAVE_ENABLE doesn't have any grouping type allowed.
+        Firmware error.
+    </description>
+    <ffdc>MSS_INTERLEAVE_ENABLE_VALUE</ffdc>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP</rc>
+    <description>
+        p10_mss_eff_grouping is unable to group at least one
+        MCA/DMI port on this chip, based on the specified
+        memory interleaving and mirroring rules.
+        This is a memory plugging error.
+        Refer to memory plugging rules.
+    </description>
+    <ffdc>MAX_REGION_SIZE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM</rc>
+    <description>
+        p10_mss_eff_grouping is unable to group this DIMM
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MC_PORT</ffdc>
+    <ffdc>MC_PORT_SIZE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR</rc>
+    <description>
+        There is not enough memory available for the requested HTM and OCC
+        Sandbox bar sizes.
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE</rc>
+    <description>
+        HTM and OCC Sandbox bars are not possible.
+    </description>
+    <ffdc>ADJUSTED_SIZE</ffdc>
+    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED_OR_SUPPORTED</rc>
+    <description>
+        Secure memory is not enabled or supported.
+    </description>
+    <ffdc>SMF_SUPPORTED</ffdc>
+    <ffdc>SMF_CONFIG</ffdc>
+    <ffdc>SMF_ENABLED</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_256MB_MINIMUM_ERROR</rc>
+    <description>
+        Secure memory must be a minimum size of 256MB by design.
+    </description>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_256MB_OFFSET_ERROR</rc>
+    <description>
+        Secure memory must be allocated in offsets of 256MB by design.
+    </description>
+    <ffdc>SMF_BASE_ADDR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_SMF_BAR</rc>
+    <description>
+        There is not enough memory available for the requested SMF bar sizes.
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_BAR_NOT_POSSIBLE</rc>
+    <description>
+        SMF bars are not possible.
+    </description>
+    <ffdc>ADJUSTED_SIZE</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NM_REGION_MAP_ERROR</rc>
+    <description>
+        p10_mss_eff_grouping did not find an available region
+        to map non-mirrored group
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>MEM_BASE_ADDRS</ffdc>
+    <ffdc>CURR_GROUP_IDX</ffdc>
+    <ffdc>CURR_GROUP_SIZE</ffdc>
+    <ffdc>CURR_REGION_IDX</ffdc>
+    <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
+    <ffdc>MAX_REGION_IDX</ffdc>
+    <ffdc>MAX_REGION_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_M_REGION_MAP_ERROR</rc>
+    <description>
+        p10_mss_eff_grouping did not find an available region
+        to map mirrored group
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>MIRROR_BASE_ADDRS</ffdc>
+    <ffdc>CURR_GROUP_IDX</ffdc>
+    <ffdc>CURR_GROUP_SIZE</ffdc>
+    <ffdc>CURR_REGION_IDX</ffdc>
+    <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
+    <ffdc>MAX_REGION_IDX</ffdc>
+    <ffdc>MAX_REGION_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+</hwpErrors>
