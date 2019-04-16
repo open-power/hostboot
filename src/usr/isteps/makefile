@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ SUBDIRS+=nest.d
 SUBDIRS+=io.d
 SUBDIRS+=nvdimm.d
 SUBDIRS+=ucd.d
+SUBDIRS+=expupd.d
 
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/

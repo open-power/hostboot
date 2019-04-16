@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -216,6 +216,7 @@ EXTENDED_MODULES += node_comm
 EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += expaccess
+EXTENDED_MODULES += expupd
 EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
 EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmiext)
 EXTENDED_MODULES += isteps_mss
@@ -225,6 +226,7 @@ EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += xz
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 endif
+
 #***************************************
 # Working test modules
 #***************************************
@@ -272,6 +274,7 @@ TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpaccess
 TESTCASE_MODULES += testrtloader
+TESTCASE_MODULES += testexpupd
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)

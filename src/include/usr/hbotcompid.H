@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -492,6 +492,14 @@ const compId_t SPI_COMP_ID = 0x4200;
 const char SPI_COMP_NAME[] = "spi";
 //@}
 
+/** @name EXPUPD
+ *  Explorer update component
+ */
+//@{
+const compId_t EXPUPD_COMP_ID = 0x4200;
+const char EXPUPD_COMP_NAME[] = "expupd";
+//@}
+
 //
 /** @name FAPIWRAP
  *  Wrapper around fapi2 HWP for hb platform to use
@@ -499,7 +507,6 @@ const char SPI_COMP_NAME[] = "spi";
 //@{
 const compId_t FAPIWRAP_COMP_ID = 0x4400;
 const char FAPIWRAP_COMP_NAME[] = "fapiwrap";
-
 //@}
 
 //
