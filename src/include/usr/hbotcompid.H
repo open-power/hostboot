@@ -484,6 +484,18 @@ const compId_t UCD_COMP_ID = 0x4100;
 const char UCD_COMP_NAME[] = "ucd";
 
 //@}
+
+//
+/** @name EXPUPD
+ *  Explorer update component
+ */
+//@{
+const compId_t EXPUPD_COMP_ID = 0x4200;
+const char EXPUPD_COMP_NAME[] = "expupd";
+
+//@}
+
+//
 //
 /** @name HDAT
  *  HDAT component

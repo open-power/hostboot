@@ -52,6 +52,7 @@ SUBDIRS+=nest.d
 SUBDIRS+=io.d
 SUBDIRS+=nvdimm.d
 SUBDIRS+=ucd.d
+SUBDIRS+=expupd.d
 
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/

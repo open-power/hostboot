@@ -215,6 +215,7 @@ EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += mmio
 EXTENDED_MODULES += smf
 EXTENDED_MODULES += expaccess
+EXTENDED_MODULES += expupd
 
 #***************************************
 # Working test modules
@@ -260,6 +261,7 @@ TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 #TODO RTC: 206800 Investigate why SMF tests fail in Axone
 TESTCASE_MODULES += $(if $(CONFIG_AXONE_BRING_UP),,testsmf)
 TESTCASE_MODULES += testexpaccess
+TESTCASE_MODULES += testexpupd
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
