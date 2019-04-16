@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,6 @@
 #include <dimmConsts.H>
 
 typedef fapi2::ReturnCode (*p9c_mss_eff_config_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MBA> i_target_mba);
-
 ///
 /// @brief struct mss_eff_config_data
 /// @brief holds the the variables used in many function calls

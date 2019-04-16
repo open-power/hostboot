@@ -40,6 +40,7 @@ enum consts : size_t
 {
     MAX_PORTS_PER_MBA = 2,         ///< Maximum number of ports on an MBA
     MAX_DIMM_PER_PORT = 2,         ///< Maximum number of DIMMs attached to an MBA PORT
+    MAX_DIMM_PER_MBA = MAX_DIMM_PER_PORT * MAX_PORTS_PER_MBA, ///< Maximum number of DIMMs attached to an MBA
     MAX_MBA_PER_CEN = 2,           ///< Maximum number of MBAs on a membuf
     MAX_PORTS_PER_CEN = 4,         ///< Maximum number of ports on a centaur
     MAX_RANKS_PER_DIMM = 4,        ///< Maximum number of ranks on a DIMM

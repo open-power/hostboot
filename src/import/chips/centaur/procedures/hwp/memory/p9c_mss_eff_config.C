@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <p9c_mss_eff_config_rank_group.H>
 #include <p9c_mss_eff_config_shmoo.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <p9c_cen_plug_rules.H>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -2724,6 +2725,9 @@ extern "C"
         FAPI_TRY(mss_eff_config_rank_group(i_target_mba));
 
         FAPI_TRY(mss_eff_config_shmoo(i_target_mba));
+
+        // Checks that both MBA's are configured the same
+        FAPI_TRY(mss::cen::mss_eff_config_verify_centaur_plug_rules(i_target_mba));
 
         FAPI_INF("mss_eff_config on %s COMPLETE\n", mss::c_str(i_target_mba));
 
