@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -296,13 +297,13 @@
   <description>
     The base addresses where the CHTM traces start. They are
     calculated based on the CHTM trace sizes requested by users.
-    There are 24 different CHTM regions, thus 24 different sizes.
+    There are 32 different CHTM regions, thus 32 different sizes.
     Each region is to store HTM trace for a core.
     Set by p10_mss_eff_grouping.
     Used by p10_setup_bars.
   </description>
   <valueType>uint64</valueType>
-  <array>24</array>
+  <array>32</array>
   <writeable/>
 </attribute>
 <!-- ********************************************************************* -->
