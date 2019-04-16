@@ -180,18 +180,27 @@ enum RingID
     ec_cl2_time              = 123, //0x7B
     ec_cl2_cmsk              = 124, //0x7C
     ec_cl2_inex              = 125, //0x7D
-    ec_mma_fure              = 126, //0x7E
-    ec_mma_gptr              = 127, //0x7F
-    ec_mma_repr              = 128, //0x80
-    ec_mma_time              = 129, //0x81
-    ec_mma_cmsk              = 130, //0x82
-    ec_mma_inex              = 131, //0x83
-    ec_l3_fure               = 132, //0x84
-    ec_l3_gptr               = 133, //0x85
-    ec_l3_repr               = 134, //0x86
-    ec_l3_time               = 135, //0x87
-    ec_l3_cmsk               = 136, //0x88
-    ec_l3_inex               = 137, //0x89
+    ec1_cl2_repr             = 126, //0x7E
+    ec2_cl2_repr             = 127, //0x7F
+    ec3_cl2_repr             = 128, //0x80
+    ec_mma_fure              = 129, //0x81
+    ec_mma_gptr              = 130, //0x82
+    ec_mma_repr              = 131, //0x83
+    ec_mma_time              = 132, //0x84
+    ec_mma_cmsk              = 133, //0x85
+    ec_mma_inex              = 134, //0x86
+    ec1_mma_repr             = 135, //0x87
+    ec2_mma_repr             = 136, //0x88
+    ec3_mma_repr             = 137, //0x89
+    ec_l3_fure               = 138, //0x8A
+    ec_l3_gptr               = 139, //0x8B
+    ec_l3_repr               = 140, //0x8C
+    ec_l3_time               = 141, //0x8D
+    ec_l3_cmsk               = 142, //0x8E
+    ec_l3_inex               = 143, //0x8F
+    ec1_l3_repr              = 144, //0x90
+    ec2_l3_repr              = 145, //0x91
+    ec3_l3_repr              = 146, //0x92
 
     NUM_RING_IDS
 }; // enum RingID
