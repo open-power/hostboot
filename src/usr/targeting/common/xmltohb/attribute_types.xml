@@ -5149,6 +5149,39 @@
     <no_export/>
   </attribute>
 
+  <enumerationType>
+    <default>INVALID</default>
+    <description>Enumeration indicating the type of the OCMB Chip</description>
+    <enumerator>
+      <name>INVALID</name>
+      <value>0x00</value>
+    </enumerator>
+    <enumerator>
+      <name>GEMINI</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>EXPLORER</name>
+      <value>0x02</value>
+    </enumerator>
+    <id>OCMB_CHIP_TYPE</id>
+  </enumerationType>
+
+  <attribute>
+    <description>Designation of OCMB Chip Type</description>
+    <id>OCMB_CHIP_TYPE</id>
+    <hasStringConversion/>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <enumeration>
+        <id>OCMB_CHIP_TYPE</id>
+      </enumeration>
+    </simpleType>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
   <attribute>
     <description>
         Physical entity path an OMI's associated OMIC parent target
