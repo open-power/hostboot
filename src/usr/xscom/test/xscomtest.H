@@ -404,7 +404,7 @@ public:
         uint32_t l_num;
 
         do {
-#ifdef CONFIG_EARLY_TESTCASES
+#if defined(CONFIG_EARLY_TESTCASES) || defined(CONFIG_AXONE_BRING_UP)
             TS_TRACE("testXscom4: Skipping test, multicast groups not setup yet");
             break;
 #endif
