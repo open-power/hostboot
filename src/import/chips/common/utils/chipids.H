@@ -83,7 +83,8 @@ constexpr uint32_t NIMBUS       = 0x020D1049;
 constexpr uint32_t CUMULUS      = 0x020D4049;
 constexpr uint32_t AXONE        = 0x020D9049;
 constexpr uint32_t CENTAUR      = 0x06039049;
-constexpr uint32_t EXPLORER     = 0x060D2049;
+constexpr uint32_t EXPLORER     = 0x060D2000;
+constexpr uint32_t GEMINI       = 0x060DC000;
 
 // Shorter 16-bit value (drops Major nibble and 049)
 constexpr uint32_t NIMBUS_16       = 0x20D1;
@@ -91,6 +92,7 @@ constexpr uint32_t CUMULUS_16      = 0x20D4;
 constexpr uint32_t AXONE_16        = 0x20D9;
 constexpr uint32_t CENTAUR_16      = 0x6039;
 constexpr uint32_t EXPLORER_16     = 0x60D2;
+constexpr uint32_t GEMINI_16       = 0x60DC;
 
 }; //namespace
 
@@ -103,9 +105,20 @@ namespace POWER_OCID
 constexpr uint16_t EXPLORER     = 0x0636;
 
 
-// Vendir IDs
+// Vendor IDs
 constexpr uint16_t VENDOR_IBM   = 0x1014;
 
 }; //namespace
+
+
+// DMB (Differential Memory Buffer) IDs
+namespace DDIMM_DMB_ID
+{
+
+// DDR4 DDIMM - Bytes [198][199]
+constexpr uint16_t EXPLORER    = 0x8029;
+constexpr uint16_t GEMINI      = 0x80A4;
+
+};
 
 #endif /* _CHIPIDS_H */
