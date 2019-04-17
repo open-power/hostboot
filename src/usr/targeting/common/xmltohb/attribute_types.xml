@@ -5111,6 +5111,72 @@
   </attribute>
 
   <attribute>
+    <id>NVDIMM_ENCRYPTION_ENABLE</id>
+    <description>
+        0 - Encryption is not enabled on all NVDIMMS in the system
+        1 - Encryption is enabled on all NVDIMMS in the system
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>NVDIMM_ENCRYPTION_KEYS_ANCHOR</id>
+    <description>
+        NVDIMM Encryption keys
+          Bytes  0..31  Random String (RS)
+          Bytes 32..63  Erase Key     (EK)
+          Bytes 64..95  Access Key    (AK)
+        Set by HWSV, stored in anchor card
+        Should match NVDIMM_ENCRYPTION_KEYS_FW
+    </description>
+    <simpleType>
+      <array>96</array>
+      <uint8_t>
+        <default>
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>NVDIMM_ENCRYPTION_KEYS_FW</id>
+    <description>
+        NVDIMM Encryption keys
+          Bytes  0..31  Random String (RS)
+          Bytes 32..63  Erase Key     (EK)
+          Bytes 64..95  Access Key    (AK)
+        Set by Hostboot, stored in FSP flash
+        Should match NVDIMM_ENCRYPTION_KEYS_ANCHOR
+    </description>
+    <simpleType>
+      <array>96</array>
+      <uint8_t>
+        <default>
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        </default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>NV_OPS_TIMEOUT_MSEC</id>
     <description>
         NVDIMM timeout value for 6 main operations

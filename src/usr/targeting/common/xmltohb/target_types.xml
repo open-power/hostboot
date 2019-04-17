@@ -2037,6 +2037,15 @@
       <id>NUMERIC_POD_TYPE_TEST</id>
     </attribute>
     <attribute>
+      <id>NVDIMM_ENCRYPTION_ENABLE</id>
+    </attribute>
+    <attribute>
+      <id>NVDIMM_ENCRYPTION_KEYS_ANCHOR</id>
+    </attribute>
+    <attribute>
+      <id>NVDIMM_ENCRYPTION_KEYS_FW</id>
+    </attribute>
+    <attribute>
       <id>O_EREPAIR_THRESHOLD_FIELD</id>
     </attribute>
     <attribute>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,15 @@ bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
 
 #endif
 
+
+/**
+ * @brief Entry function to NVDIMM generate keys
+ *        Generate encryption keys if required and set the FW key attribute
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ */
+void nvdimm_gen_keys(TARGETING::TargetHandleList &i_nvdimmList);
 
 /**
  * @brief This function erases image on the nvdimm target

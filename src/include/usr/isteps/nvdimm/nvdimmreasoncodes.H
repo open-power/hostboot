@@ -85,6 +85,8 @@ enum nvdimmModuleId
     VALIDATE_FW_IMAGE                       = 0x23,
     WAIT_FW_OPS_BLOCK_RECEIVED              = 0x24,
     NVDIMM_IS_UPDATE_NEEDED                 = 0x25,
+    NVDIMM_RUN_UPDATE_USING_LID             = 0x26,
+    NVDIMM_GEN_KEYS                         = 0x27,
 };
 
 /**
@@ -135,6 +137,9 @@ enum nvdimmReasonCode
     NVDIMM_BLOCK_NOT_RECEIVED               = NVDIMM_COMP_ID | 0x25,   // Block data not received
     NVDIMM_FW_OPS_NOT_SUCCESSFUL            = NVDIMM_COMP_ID | 0x26,   // Unsuccessful Firmware Operation
     NVDIMM_UPDATE_NOT_SUPPORTED             = NVDIMM_COMP_ID | 0x27,   // NV controller cannot be updated
+    NVDIMM_START_UPDATE                     = NVDIMM_COMP_ID | 0x28,   // start update
+    NVDIMM_UPDATE_COMPLETE                  = NVDIMM_COMP_ID | 0x29,   // update completed
+    NVDIMM_TPM_NOT_FOUND                    = NVDIMM_COMP_ID | 0x30,   // TPM not found
 };
 
 enum UserDetailsTypes

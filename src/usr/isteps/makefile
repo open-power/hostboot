@@ -50,7 +50,7 @@ SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
 SUBDIRS+=io.d
-SUBDIRS+=nvdimm.d
+SUBDIRS+=$(if $(CONFIG_NVDIMM),nvdimm.d)
 SUBDIRS+=ucd.d
 SUBDIRS+=expupd.d
 
