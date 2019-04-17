@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ void RsvdTraceBuffer::init(uint32_t   i_bufferSize,
                            uintptr_t  i_addressToBuffer,
                            uintptr_t* i_addressToHead)
 {
-    // If buffer is not already initilaized and incoming data is legit
+    // If buffer is not already initialized and incoming data is legit
     if ( (false == isBufferValid())   &&
          (i_bufferSize > 0 )          &&
          (i_addressToBuffer > 0)      &&
@@ -83,9 +83,11 @@ Entry* RsvdTraceBuffer::insertEntry(uint32_t i_dataSize)
         // (Alignment is needed so that Entry's members can be atomically
         //  updated).
         uint32_t l_entrySize = getAlignedSizeOfEntry(i_dataSize);
-        if (makeSpaceForEntry(l_entrySize, l_availableAddress) && l_availableAddress)
+        if (makeSpaceForEntry(l_entrySize, l_availableAddress) &&
+            l_availableAddress)
         {
-            // Set entry if space was created and an avilable address is returned
+            // Set entry if space was created and an available address
+            // is returned
             l_entry = reinterpret_cast<Entry*>(l_availableAddress);
 
             setListTail(l_entry);
@@ -104,7 +106,8 @@ uint32_t RsvdTraceBuffer::makeSpaceForEntry(uint32_t i_spaceNeeded,
     o_availableAddress = nullptr;
     uint32_t l_spaceAvailable = 0;
 
-    // Only look for space if requested space is less or equal to buffer size
+    // Only look for space if requested space is less than
+    // or equal to buffer size
     if (i_spaceNeeded <= getBufferSize())
     {
         l_spaceAvailable = getAvailableSpace(i_spaceNeeded, o_availableAddress);
@@ -112,7 +115,7 @@ uint32_t RsvdTraceBuffer::makeSpaceForEntry(uint32_t i_spaceNeeded,
         // Keep requesting for space until we get the space that is asked for
         while (l_spaceAvailable < i_spaceNeeded)
         {
-            // If we can't remove any entries, then we exhausted all efforts
+            // If we can't remove any entries, then we exhausted all efforts.
             // Should not happen, because the space requested should be less
             // than or equal to buffer size
             if (!removeOldestEntry())
@@ -215,7 +218,7 @@ bool RsvdTraceBuffer::removeOldestEntry()
     if (!isListEmpty())
     {
         // Get a handle to the head
-        Entry* l_head = getListHead();
+        Entry* l_head(getListHead());
 
         // Is there only one entry?
         if (l_head->next == l_head)
@@ -252,12 +255,17 @@ uint32_t RsvdTraceBuffer::getTrace(void* o_data, uint32_t i_dataSize) const
     // Before continuing, make sure the buffer is valid
     if (isBufferValid())
     {
+        // If caller passed in a nullptr for the data or zero for the data size,
+        // then that signals the user only wants to ascertain the size
+        // requirement to hold all the data associated with the entries.
         if ((nullptr == o_data) || (0 == i_dataSize))
         {
+            // Caller wants to ascertain size requirements for data
             l_sizeOfBufferExtracted = getAggregateSizeOfEntries();
         }
         else
         {
+            // Caller wants to collect data - enough data to fill data size
             l_sizeOfBufferExtracted = getTraceEntries(o_data, i_dataSize);
         }
     }
@@ -273,7 +281,7 @@ uint32_t RsvdTraceBuffer::getAggregateSizeOfEntries() const
     uint32_t l_aggregatedSize(0);
 
     // Get a handle to the head
-    Entry* l_head = getListHead();
+    Entry* l_head(getListHead());
 
     // Make sure the list is not null
     if (l_head)
@@ -283,8 +291,8 @@ uint32_t RsvdTraceBuffer::getAggregateSizeOfEntries() const
         {
             // Need to add to the size, the size of an uint32_t.  The uint32_t
             // will hold the size of the data that is to be returned along
-            // with the returned data.  This is why it is added.
-            l_aggregatedSize += l_entry->size + sizeof(uint32_t);
+            // with the returned data.
+            l_aggregatedSize += ALIGN_8(l_entry->size) + sizeof(uint32_t);
             l_entry = l_entry->next;
         } while (l_entry != l_head);
     }
@@ -304,11 +312,11 @@ uint32_t RsvdTraceBuffer::getTraceEntries(void* o_data, uint32_t i_dataSize) con
     if ((nullptr != o_data) &&
         (i_dataSize >= sizeof(trace_buf_head_t)) )
     {
+        // Clear the outgoing data before populating it
+        memset(o_data, 0, i_dataSize);
+
         // Get a useful "trace buffer head" handle to the data buffer passed in
         trace_buf_head_t* l_header =reinterpret_cast<trace_buf_head_t*>(o_data);
-
-        // Now that we have an easy handle to the data, let's clear it for now
-        memset(l_header, '\0', sizeof(trace_buf_head_t));
 
         // Now populate the trace buffer header with some useful info
         l_header->ver = TRACE_BUF_VERSION;
@@ -318,35 +326,42 @@ uint32_t RsvdTraceBuffer::getTraceEntries(void* o_data, uint32_t i_dataSize) con
         l_header->endian_flg = 'B'; // Big Endian.
 
         // Get a handle to the head
-        Entry* l_head = getListHead();
+        Entry* l_head(getListHead());
 
         // Extract the trace info from this class' internal buffer
         // If the list is not empty and have data then extract the trace info
         if (l_head)
         {
-            // Keep a tally of the size of the data that can be copied over
-            uint32_t l_totalSize(l_head->size);
+            // Keep a tally of the size of the data that can be copied over.
+            // Also account for the trace_buf_head_t that is at the beginning
+            // of buffer o_data.
+            uint32_t l_totalSize(sizeof(trace_buf_head_t));
             // Keep a tally of the number of entries that can be extracted
             uint32_t l_entriesToExtract(0);
             // The entry size as data type uint32_t; for code up keep
             uint32_t l_entrySize(0);
             // Get a handle on the last entry on the list
-            Entry* l_entry = l_head->prev;
+            Entry* l_entry(l_head->prev);
 
-            // Calculate the number of entries that can be stuffed into data buffer
-            // starting with newest entry (tail) to oldest entry (head)
+            // Calculate the number of entries that can be stuffed into the data
+            // buffer - starting with newest entry (tail) to oldest entry (head)
             do
             {
-                // Calculate the size: add the size of the data, that will be
-                // copied over, plus the size of the type of the entry size,
-                // that will hold the size of the data being copied over.
-                if ((l_totalSize + l_entry->size + sizeof(l_entrySize)) <= i_dataSize)
+                // Calculate the size: add the size of the data (that will be
+                // copied over) plus the size of the type of the entry size
+                // (that will hold the size of the data being copied over).
+                if ((l_totalSize + ALIGN_8(l_entry->size) + sizeof(l_entrySize))
+                                                                  <= i_dataSize)
                 {
-                    l_totalSize += l_entry->size + sizeof(l_entrySize);
+                    l_totalSize += ALIGN_8(l_entry->size) + sizeof(l_entrySize);
                     ++l_entriesToExtract;
                 }
                 else // Can't retrieve this entry; it breaks the size limitation
                 {
+                    // Although we are done here, we still need to point to
+                    // the previous item.  The continuation of this algorithm
+                    // depends on it (expects to be one behind the needed data)
+                    l_entry = l_entry->prev;
                     break;
                 }
 
@@ -368,17 +383,18 @@ uint32_t RsvdTraceBuffer::getTraceEntries(void* o_data, uint32_t i_dataSize) con
 
                 // Copy entry data.
                 memcpy(&l_data[l_header->size], l_entry->data, l_entry->size);
-                l_header->size += l_entry->size;
+                l_header->size += ALIGN_8(l_entry->size);
 
                 // Copy entry size.
                 l_entrySize = l_entry->size + sizeof(l_entrySize);
                 memcpy(&l_data[l_header->size], &l_entrySize, sizeof(l_entrySize));
                 l_header->size += sizeof(l_entrySize);
 
+                // increment/decrements our counters
                 ++l_header->te_count;
                 --l_entriesToExtract;
             }  // end while (l_entriesToExtract)
-        }  // end if (!isListEmpty())
+        }  // end if (l_head)
 
         // Update the size of the entries retrieved and the
         // next free memory location in header trace buffer

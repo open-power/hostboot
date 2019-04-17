@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ namespace TRACE
              *
              *  @param[in] i_addressToBuffer - Where the buffer begins
              *
-             *  @param[in] i_addressToHead - A pointer to a ponter to the first
+             *  @param[in] i_addressToHead - A pointer to a pointer to the first
              *                               Entry, cannot be a nullptr
              */
             void init(uint32_t   i_bufferSize,
@@ -176,7 +176,7 @@ namespace TRACE
              *         ---------------------------------------------------------
              *         | < - 10 bytes -> | Head | .....| Tail | <- 20 bytes -> |
              *         ---------------------------------------------------------
-             *            scenario 1: Contigous space desired: 15 bytes
+             *            scenario 1: Contiguous space desired: 15 bytes
              *                        Return the 20 bytes after the Tail
              *            scenario 2: Contiguous space desired: 10 bytes
              *                        Return the 20 bytes after the Tail
@@ -223,9 +223,9 @@ namespace TRACE
              *         ---------------------------------------------------------
              *         |  .... | Tail | < - 30 bytes -> | Head |  ....
              *         ---------------------------------------------------------
-             *            Case 1: Contigous space desired: 25 bytes
+             *            Case 1: Contiguous space desired: 25 bytes
              *                    Return the 30 bytes between Tail and Head.
-             *            Case 2: Contigous space desired: 40 bytes
+             *            Case 2: Contiguous space desired: 40 bytes
              *                    Return the 30 bytes between Tail and Head.
              *
              *  @param[in]  i_spaceNeeded - @see insertEntry::i_dataSize above
@@ -380,7 +380,6 @@ namespace TRACE
              *
              *  @param[in] i_tail - a pointer to an Entry data type;
              *                      OK to be a nullptr
-             *
              */
             void setListTail(Entry* i_newEntry)
                 {
