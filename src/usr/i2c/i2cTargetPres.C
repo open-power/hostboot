@@ -33,7 +33,6 @@
 #include <errl/errlmanager.H>
 #include "i2c_common.H"
 
-
 extern trace_desc_t* g_trac_i2c;
 
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
@@ -223,10 +222,6 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_invalidateErrl = nullptr;
 
-    // @TODO RTC 208696: Gemini vs Explorer Presence Detection via SPD
-    // This function will be updated to differentiate between Explorer and
-    // Gemini OCMB chips. For now, presense of an OCMB chip is inferred by
-    // the presense of the eeprom.
     bool l_ocmbPresent = EEPROM::eepromPresence(i_target);
 
     memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));
