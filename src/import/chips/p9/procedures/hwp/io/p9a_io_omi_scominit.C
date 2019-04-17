@@ -97,7 +97,8 @@ fapi2::ReturnCode p9a_io_omi_scominit(const fapi2::Target<fapi2::TARGET_TYPE_OMI
         FAPI_EXEC_HWP(rc, p9a_omi_io_scom, l_omi_target, l_system_target, l_proc_target);
     }
 
-    // configure FIR
+    // configure FIR if p9a_omi_io_scom passed
+    if ( fapi2::current_err == fapi2::FAPI2_RC_SUCCESS )
     {
         FAPI_TRY(fapi2::putScom(i_target,
                                 P9A_OMIC_FIR_ACTION0_REG,
@@ -114,7 +115,8 @@ fapi2::ReturnCode p9a_io_omi_scominit(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     }
 
     // mark HWP exit
-    FAPI_INF("p9a_io_omi_scominit: ...Exiting");
+    FAPI_INF("p9a_io_omi_scominit: ...Exiting, rc = 0x%X",
+             (uint32_t)fapi2::current_err);
 
 fapi_try_exit:
     return fapi2::current_err;
