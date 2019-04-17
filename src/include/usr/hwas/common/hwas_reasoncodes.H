@@ -43,6 +43,9 @@ namespace HWAS
         MOD_UPDATE_PROC_COMPAT_RISK_LEVEL = 0x0C,
         MOD_CHECK_PG_FOR_DESC             = 0x0D,
         MOD_OCMB_IDEC                     = 0x0E,
+        MOD_OCMB_IDEC_PHASE_1             = 0x0F,
+        MOD_OCMB_IDEC_PHASE_2             = 0x10,
+        MOD_OCMB_TRANSLATE_SPD_IDEC       = 0x11,
     };
 
     enum HwasReasonCode
@@ -81,8 +84,11 @@ namespace HWAS
         RC_FORCED_NATIVE_INVALID_MIXED_EC       = HWAS_COMP_ID | 0x1C,
         RC_FORCED_NATIVE_OF_INCOMPATIBLE_RISK   = HWAS_COMP_ID | 0x1D,
         RC_PARTIAL_GOOD_MISSING_TARGET          = HWAS_COMP_ID | 0x1E,
-        RC_OCMB_SPD_IDEC_MISMATCH               = HWAS_COMP_ID | 0x1F,
+        RC_OCMB_SPD_REVISION_MISMATCH           = HWAS_COMP_ID | 0x1F,
         RC_OCMB_UNEXPECTED_IDEC                 = HWAS_COMP_ID | 0x20,
+        RC_OCMB_UNKNOWN_CHIP_TYPE               = HWAS_COMP_ID | 0x21,
+        RC_OCMB_INTERFACE_TYPE_MISMATCH         = HWAS_COMP_ID | 0x22,
+        RC_OCMB_CHIP_ID_MISMATCH                = HWAS_COMP_ID | 0x23,
     };
 
     enum HwasPlatUserDetailsTypes

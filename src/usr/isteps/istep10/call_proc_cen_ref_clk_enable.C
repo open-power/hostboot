@@ -1101,10 +1101,14 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                 // are set with the values found in that register. So, this
                 // deviceWrite functions more as a setter for an OCMB target's
                 // attributes.
+                // Pass 2 as a va_arg to signal the ocmbIDEC function to execute
+                // phase 2 of it's read process.
+                const uint64_t Phase2 = 2;
                 l_errl = DeviceFW::deviceWrite(l_ocmb,
-                                               nullptr,
-                                               size,
-                                               DEVICE_IDEC_ADDRESS());
+                                   nullptr,
+                                   size,
+                                   DEVICE_IDEC_ADDRESS(),
+                                   Phase2);
                 if (l_errl)
                 {
                     // read of ID/EC failed even though we THOUGHT we were

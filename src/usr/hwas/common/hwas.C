@@ -732,8 +732,7 @@ errlHndl_t discoverTargets()
                && (l_targetType != TYPE_TPM)
                && (l_targetType != TYPE_SP)
                && (l_targetType != TYPE_BMC)
-               && (l_targetType != TYPE_I2C_MUX)
-               && (l_targetType != TYPE_OCMB_CHIP))
+               && (l_targetType != TYPE_I2C_MUX))
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);

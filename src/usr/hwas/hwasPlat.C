@@ -88,13 +88,19 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
     // Call over to the target-specific layer since every chip can have
     //  unique registers
     size_t sz = 0;
-    errlHndl_t l_errl =
-      DeviceFW::deviceWrite(i_target,
-                            nullptr,
-                            sz,
-                            DEVICE_IDEC_ADDRESS());
+    errlHndl_t errl = nullptr;
 
-    return l_errl;
+    // Pass a 1 as va_arg to signal phase 1 of ocmbIDEC to execute.
+    // Other IDEC functions will ignore this argument.
+    const uint64_t Phase1 = 1;
+    errl = DeviceFW::deviceWrite(i_target,
+                                 nullptr,
+                                 sz,
+                                 DEVICE_IDEC_ADDRESS(),
+                                 Phase1);
+
+
+    return errl;
 }
 
 /**
@@ -259,6 +265,70 @@ uint64_t formatOcmbIdecToCfamStandard(const uint64_t i_idec)
     return convertedIdec;
 }
 
+/**
+ * @brief During early IPL the OCMB isn't able to be read from so this function,
+ *        executed during discover targets, will read from the SPD and set the
+ *        CHIP_ID, EC, and HDAT_EC attributes with what is found there.
+ *
+ * @param[in] i_target        Presence detect target
+ *
+ * @return  errlHndl_t        An error log if reading from the SPD failed.
+ *                            Otherwise, other errors are predictive and
+ *                            committed. So nullptr will be returned in those
+ *                            cases and on success.
+ */
+errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target);
+
+/**
+ * @brief Once the OCMB is able to be read from the second phase will execute
+ *        and cross-check the data given from the SPD is consistent with what
+ *        was read from the chip itself. If the data is not consistent then the
+ *        CHIP_ID, EC, and HDAT_EC attributes will be updated with what was
+ *        found from the OCMB read since that data would be correct.
+ *
+ * @param[in] i_target        Presence detect target
+ *
+ * @return  errlHndl_t        An error log if reading from the OCMB ID/EC
+ *                            register failed. Otherwise, other errors are
+ *                            predictive and committed. So nullptr will be
+ *                            returned in those cases and on success.
+ */
+errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target);
+
+/**
+ * @brief Read the chipid and EC/DD-level for OCMB chips and set the attributes.
+ *        In this function there are two phases that are executed at different
+ *        times during IPL. The OCMB is held in reset and unable to be read from
+ *        during early IPL. So the first phase, executed during discover
+ *        targets, will read from the SPD and set the attributes with what is
+ *        found there. Once the OCMB is able to be read from the second phase
+ *        will execute and cross-check the data given from the SPD is consistent
+ *        with what was read from the chip itself. If the data is not consistent
+ *        then the attributes will be updated with what was found from the OCMB
+ *        read since that data would be correct.
+ *
+ * @param[in]     i_opType      Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ *
+ * @param[in]     i_target      Presence detect target
+ *
+ * @param[in/out] io_buffer     Unused by this function
+ *
+ * @param[in/out] io_buflen     Unused by this function
+ *
+ * @param[in]     i_accessType  DeviceFW::AccessType enum (userif.H)
+ *
+ * @param[in]     i_args        This is an argument list for DD framework.
+ *                              In this function, there is one argument to
+ *                              signal which phase to execute.
+ *
+ * @return  errlHndl_t          If there is an issue while reading from the SPD
+ *                              or the OCMB chip, or an unexpected memory
+ *                              interface type then this function will return an
+ *                              error. Otherwise, all other errors are
+ *                              predictive and committed. So nullptr will be
+ *                              returned in that case or on success.
+ */
 errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
                     TARGETING::Target* i_target,
                     void* io_buffer,
@@ -266,51 +336,177 @@ errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
                     int64_t i_accessType,
                     va_list i_args)
 {
-    //@fixme when we know what register to read the IDEC from.
-    const uint16_t OCMB_IDEC_REGISTER = 0x2134;
-
-    uint64_t idec = 0;
-    size_t op_size = sizeof(idec);
     errlHndl_t error = nullptr;
 
-    // Read the ID/EC
-    error = DeviceFW::deviceRead(i_target,
-                                 &idec,
-                                 op_size,
-                                 DEVICE_SCOM_ADDRESS(OCMB_IDEC_REGISTER));
+    // Determine which phase of this function to run.
+    uint64_t phase = va_arg(i_args, uint64_t);
+
+    // Execute the correct phase based on the va_arg given.
+    if (phase == 1)
+    {
+        error = ocmbIdecPhase1(i_target);
+    }
+    else
+    {
+        error = ocmbIdecPhase2(i_target);
+    }
+
+
+    return error;
+}
+
+/**
+ * @brief This is a small helper function that the ocmb IDEC functions use to
+ *        add all the proper callouts and commit errorlogs.
+ *
+ * @param[in] i_target        Presence detect target
+ *
+ * @param[in] io_error        The error log to be committed
+ *
+ */
+void ocmbErrlCommit(const TARGETING::TargetHandle_t& i_target,
+                          errlHndl_t&                io_error)
+{
+    io_error->addHwCallout(i_target,
+                          SRCI_PRIORITY_HIGH,
+                          NO_DECONFIG,
+                          GARD_NULL);
+
+    io_error->addPartCallout(i_target,
+                            VPD_PART_TYPE,
+                            SRCI_PRIORITY_MED,
+                            NO_DECONFIG,
+                            GARD_NULL);
+
+    io_error->addProcedureCallout(EPUB_PRC_HB_CODE,
+                                 SRCI_PRIORITY_LOW);
+
+    ERRORLOG::errlCommit(io_error, HWAS_COMP_ID);
+
+}
+
+/**
+ * @brief This is a small helper function that is used to translate from SPD
+ *        to OCMB IDEC register values.
+ *
+ * @param[in]  i_value            The value to translate
+ *
+ * @param[in]  i_isID             The type of value passed in. Used to search
+ *                                the corresponding map and for FFDC.
+ *
+ * @param[in]  i_spdFFDCBytes     Byte 1: SPD Module Revision
+ *                                Byte 2: DRAM Interface Type Presented or
+ *                                        Emulated
+ *                                Byte 3: Memory Module Interface Type
+ *                                Byte 4: Unused
+ *
+ * @param[out] o_translatedValue  The value resulting from the map.find()
+ *
+ * @param[in]  i_id               The SPD ID used to construct the association
+ *                                map. Defaulted to 0xFFFF. This MUST be set
+ *                                when i_isID == false.
+ *
+ * @return     errlHndl_t         nullptr on success. Otherwise an error log
+ *                                indicating that the translation failed.
+ *
+ */
+errlHndl_t ocmbTranslateSpdToIdec(const uint16_t  i_value,
+                                  const bool      i_isID,
+                                  const uint32_t  i_spdFFDCBytes,
+                                        uint16_t& o_translatedValue,
+                                  const uint16_t  i_id = 0xFFFF)
+{
+
+    assert((i_isID || (i_id != 0xFFFF)), "i_id must be set to a valid OCMB SPD Chip ID value when attempting to translate an SPD EC value.");
+
+    errlHndl_t error = nullptr;
+
+    const uint16_t OCMB_ID = i_isID ? i_value : i_id;
+
+    const uint32_t GEMINI_EC        = 0x0000;
+    const uint32_t GEMINI_SPD_EC    = 0x0000;
+    const uint32_t EXPLORER_EC      = 0x0010;
+    const uint32_t EXPLORER_SPD_EC  = 0x0000;
+    // This map will hold the associated values between what is read from
+    // the OCMB's IDEC register and the SPD since they use different
+    // standards and thus cannot be directly compared.
+    std::map<uint32_t, uint32_t> OCMB_ASSOCIATION_MAP;
+
+    if (i_isID)
+    {
+        if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
+        {
+            OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::EXPLORER] =
+                POWER_CHIPID::EXPLORER_16;
+        }
+        else if (DDIMM_DMB_ID::GEMINI == OCMB_ID)
+        {
+            OCMB_ASSOCIATION_MAP[DDIMM_DMB_ID::GEMINI] =
+                POWER_CHIPID::GEMINI_16;
+        }
+    }
+    else
+    {
+        if (DDIMM_DMB_ID::EXPLORER == OCMB_ID)
+        {
+            OCMB_ASSOCIATION_MAP[EXPLORER_SPD_EC] = EXPLORER_EC;
+        }
+        else if (DDIMM_DMB_ID::GEMINI == OCMB_ID)
+        {
+            OCMB_ASSOCIATION_MAP[GEMINI_SPD_EC] = GEMINI_EC;
+        }
+    }
+
+    auto map_it = OCMB_ASSOCIATION_MAP.find(i_value);
+
+    if (map_it == OCMB_ASSOCIATION_MAP.end())
+    {
+        HWAS_ERR("ocmbTranslateSpdToIdec> Unable to translate "
+                 "given %s 0x%.4X to a known OCMB IDEC register equivalent",
+                 i_isID ? "Chip ID" : "Revision",
+                 i_value);
+
+        /*@
+        * @errortype
+        * @severity          ERRL_SEV_PREDICTIVE
+        * @moduleid          MOD_OCMB_TRANSLATE_SPD_IDEC
+        * @reasoncode        RC_OCMB_UNEXPECTED_IDEC
+        * @userdata1[0:7]    SPD Module Revision
+        * @userdata1[8:15]   DRAM Interface Type Presented or Emulated
+        * @userdata1[16:23]  Memory Module Interface Type
+        * @userdata1[24:31]  Unused
+        * @userdata1[32:47]  The value given to the translate function
+        * @userdata1[48:63]  0x1 = value is Chip ID, 0x0 = value is Revision
+        * @devdesc           The IDEC values read from the OCMB did not
+        *                    appear in the OCMB IDEC to SPD association map.
+        *                    Please update the map with new values.
+        * @custdesc          Firmware Error
+        */
+        error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                          MOD_OCMB_TRANSLATE_SPD_IDEC,
+                          RC_OCMB_UNEXPECTED_IDEC,
+                          TWO_UINT32_TO_UINT64(i_spdFFDCBytes,
+                              TWO_UINT16_TO_UINT32(i_value, i_isID)));
+
+    }
+    else
+    {
+        o_translatedValue = map_it->second;
+    }
+
+    return error;
+}
+
+errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
+{
+    errlHndl_t error = nullptr;
+
+    // Allocate buffer to hold SPD and init to 0
+    size_t spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+    uint8_t* spdBuffer = new uint8_t[spdBufferSize];
+    memset(spdBuffer, 0, spdBufferSize);
 
     do {
-
-        if (error != nullptr)
-        {
-            HWAS_ERR("ocmbIDEC> OCMB 0x%.8X - failed to read ID/EC",
-                     TARGETING::get_huid(i_target));
-
-            break;
-        }
-
-        assert(op_size == sizeof(idec), "ocmbIDEC> Size returned from OCMB "
-              "IDEC read size %d  not the expected size %d",
-              op_size, sizeof(idec));
-
-        idec = formatOcmbIdecToCfamStandard(idec);
-
-        uint8_t ec = POWER_CHIPID::extract_ddlevel(idec);
-        uint32_t id = POWER_CHIPID::extract_chipid16(idec);
-
-        HWAS_DBG("ocmbIDEC> OCMB 0x%.8X - read ID/EC successful. "
-                 "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
-                 TARGETING::get_huid(i_target),
-                 id,
-                 ec,
-                 idec);
-
-        // Verify the OCMB ID is an expected value
-
-        // Allocate buffer to hold SPD and init to 0
-        size_t spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
-        uint8_t* spdBuffer = new uint8_t[spdBufferSize];
-        memset(spdBuffer, 0, spdBufferSize);
 
         // Read the full SPD.
         error = deviceRead(i_target,
@@ -320,7 +516,7 @@ errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
 
         // If unable to retrieve the SPD buffer then can't
         // extract the IDEC data, so return error.
-        if (error)
+        if (error != nullptr)
         {
             HWAS_ERR("ocmbIDEC> Error while trying to read "
                      "ENTIRE SPD from 0x%.08X ",
@@ -330,112 +526,155 @@ errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
 
         // Make sure we got back the size we were expecting.
         assert(spdBufferSize == SPD::OCMB_SPD_EFD_COMBINED_SIZE,
-              "ocmbIDEC> OCMB SPD read size %d "
-              "doesn't match the expected size %d",
-              spdBufferSize,
-              SPD::OCMB_SPD_EFD_COMBINED_SIZE);
+               "ocmbIDEC> OCMB SPD read size %d "
+               "doesn't match the expected size %d",
+               spdBufferSize,
+               SPD::OCMB_SPD_EFD_COMBINED_SIZE);
 
-       // SPD IDEC info is in the following three bytes
-       const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET = 198;
-       const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET  = 199;
-       const size_t SPD_EC_OFFSET                        = 200;
+        // These bytes are used for FFDC and verification purposes.
+        const size_t SPD_REVISION_OFFSET                  = 1;
+        const size_t DRAM_INTERFACE_TYPE_OFFSET           = 2;
+        const size_t MEMORY_MODULE_INTERFACE_TYPE_OFFSET  = 3;
 
-       // Get the ID from the SPD and verify that it matches what we read from
-       // the IDEC register.
-       uint16_t spdId = 0;
+        // This is the value that signifies the SPD we read is for a DDIMM.
+        const uint32_t DDIMM_MEMORY_INTERFACE_TYPE        = 0x0A;
 
-       spdId = TWO_UINT8_TO_UINT16(
-               *(spdBuffer + SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET),
-               *(spdBuffer + SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET));
+        const uint8_t spdModuleRevision =
+            *(spdBuffer + SPD_REVISION_OFFSET);
 
-       uint8_t spdEc = *(spdBuffer + SPD_EC_OFFSET);
+        const uint8_t spdDRAMInterfaceType =
+            *(spdBuffer + DRAM_INTERFACE_TYPE_OFFSET);
 
-        // This map will hold the associated values between what is read from
-        // the OCMB's IDEC register and the SPD since they use different
-        // standards and thus cannot be directly compared.
-        // @TODO RTC 205563 Fix Gemini info when it is known.
-        const uint32_t GEMINI_ID        = 0x20D2;
-        const uint32_t GEMINI_SPD_ID    = 0x80A4;
-        const uint32_t GEMINI_EC        = 0x0000;
-        const uint32_t GEMINI_SPD_EC    = 0x0000;
-        const uint32_t EXPLORER_SPD_ID  = 0x2980;
-        const uint32_t EXPLORER_EC      = 0x0010;
-        const uint32_t EXPLORER_SPD_EC  = 0x0000;
-        const std::map<uint32_t, uint32_t> OCMB_ID_SPD_ASSOCIATION_MAP
+        const uint8_t spdMemoryInterfaceType =
+            *(spdBuffer + MEMORY_MODULE_INTERFACE_TYPE_OFFSET);
+
+        // Byte 1 SPD Module Revision
+        // Byte 2 DRAM Interface Type Presented or Emulated
+        // Byte 3 Memory Module Interface Type
+        const uint32_t SPD_FFDC_BYTES = TWO_UINT16_TO_UINT32(
+           TWO_UINT8_TO_UINT16(spdModuleRevision, spdDRAMInterfaceType),
+           TWO_UINT8_TO_UINT16(spdMemoryInterfaceType, 0));
+
+        // Since the byte offsets used to get the IDEC info out of the SPD are
+        // specific to the DDIMM interface type we must first verify that we
+        // read from an SPD of that type.
+        if (DDIMM_MEMORY_INTERFACE_TYPE != spdMemoryInterfaceType)
         {
-            {POWER_CHIPID::EXPLORER_16, EXPLORER_SPD_ID},
-            {GEMINI_ID, GEMINI_SPD_ID},
-        };
+            HWAS_ERR("ocmbIDEC> OCMB 0x%.8X memory module interface type "
+                     "didn't match the expected type. "
+                     "Expected 0x%.2X, Actual 0x%.2X",
+                     TARGETING::get_huid(i_target),
+                     DDIMM_MEMORY_INTERFACE_TYPE,
+                     spdMemoryInterfaceType);
 
-        const std::map<uint32_t, uint32_t> OCMB_EC_SPD_ASSOCIATION_MAP
-        {
-            {EXPLORER_EC, EXPLORER_SPD_EC},
-            {GEMINI_EC, GEMINI_SPD_EC},
-        };
+            /*@
+            * @errortype
+            * @severity          ERRL_SEV_UNRECOVERABLE
+            * @moduleid          MOD_OCMB_IDEC
+            * @reasoncode        RC_OCMB_INTERFACE_TYPE_MISMATCH
+            * @userdata1[0:7]    SPD Module Revision
+            * @userdata1[8:15]   DRAM Interface Type Presented or Emulated
+            * @userdata1[16:23]  Memory Module Interface Type
+            * @userdata1[24:31]  Unused
+            * @userdata1[32:63]  Expected memory interface type
+            * @userdata2         HUID of OCMB target
+            * @devdesc           The memory interface type read from the SPD did
+            *                    not match the DDIMM value. Setting the
+            *                    appropriate IDEC values for this target cannot
+            *                    continue.
+            * @custdesc          Invalid or unsupported memory card installed.
+            */
+            error = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              MOD_OCMB_IDEC,
+                              RC_OCMB_INTERFACE_TYPE_MISMATCH,
+                              TWO_UINT32_TO_UINT64(SPD_FFDC_BYTES,
+                                DDIMM_MEMORY_INTERFACE_TYPE),
+                              TARGETING::get_huid(i_target));
 
-        auto id_it = OCMB_ID_SPD_ASSOCIATION_MAP.find(id);
-        auto ec_it = OCMB_EC_SPD_ASSOCIATION_MAP.find(ec);
+            error->addProcedureCallout(EPUB_PRC_HB_CODE,
+                                       SRCI_PRIORITY_LOW);
 
-        if ((  id_it == OCMB_ID_SPD_ASSOCIATION_MAP.end())
-            || ec_it == OCMB_EC_SPD_ASSOCIATION_MAP.end())
-        {
-            HWAS_ERR("ocmbIDEC> Unexpected ID/EC value.");
+            error->addHwCallout(i_target,
+                                SRCI_PRIORITY_HIGH,
+                                NO_DECONFIG,
+                                GARD_NULL);
 
-           /*@
-           * @errortype
-           * @severity          ERRL_SEV_UNRECOVERABLE
-           * @moduleid          MOD_OCMB_IDEC
-           * @reasoncode        RC_OCMB_UNEXPECTED_IDEC
-           * @userdata1[00:31]  ID (Chip ID)
-           * @userdata1[32:63]  EC (Revision)
-           * @userdata2         HUID of OCMB target
-           * @devdesc           The IDEC values read from the OCMB did not
-           *                    appear in the IDEC to SPD association map.
-           *                    Please update the map with new values.
-           * @custdesc          Firmware Error
-           */
-           error = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             MOD_OCMB_IDEC,
-                             RC_OCMB_UNEXPECTED_IDEC,
-                             TWO_UINT32_TO_UINT64(id, ec),
-                             TARGETING::get_huid(i_target));
 
-           break;
-
+            break;
         }
 
-        if ((id_it->second != spdId) || (ec_it->second != spdEc))
+        // SPD IDEC info is in the following three bytes
+        const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET = 198;
+        const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET  = 199;
+        const size_t SPD_EC_OFFSET                        = 200;
+
+        // Get the ID from the SPD and verify that it matches what we read from
+        // the IDEC register.
+        uint16_t spdId = TWO_UINT8_TO_UINT16(
+                         *(spdBuffer + SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET),
+                         *(spdBuffer + SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET));
+
+        uint8_t spdEc = *(spdBuffer + SPD_EC_OFFSET);
+
+        if (DDIMM_DMB_ID::EXPLORER == spdId)
         {
-           HWAS_ERR("ocmbIDEC> OCMB IDEC and associated SPD IDEC don't match: "
-                    "OCMB ID=0x%.4X, EC=0x%.2X; SPD ID=0x%.4X, EC=0x%.2X; "
-                    "Expected SPD ID=0x%.4X, EC=0x%.2X",
-                    id, ec, spdId, spdEc, id_it->second, ec_it->second);
+            HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is EXPLORER",
+                     TARGETING::get_huid(i_target));
+        }
+        else if (DDIMM_DMB_ID::GEMINI == spdId)
+        {
+            HWAS_INF("ocmbIdecPhase1> OCMB 0x%.8X chip type is GEMINI",
+                     TARGETING::get_huid(i_target));
+        }
+        else
+        {
+            HWAS_ERR("ocmbIdecPhase1> Unknown OCMB chip type discovered in SPD "
+                     "ID=0x%.4X OCMB HUID 0x%.8X",
+                     spdId,
+                     TARGETING::get_huid(i_target));
 
-           uint32_t bothIds = TWO_UINT16_TO_UINT32(id, spdId);
-           uint32_t bothEcs = TWO_UINT16_TO_UINT32(ec, spdEc);
+            /*@
+            * @errortype
+            * @severity          ERRL_SEV_PREDICTIVE
+            * @moduleid          MOD_OCMB_IDEC_PHASE_1
+            * @reasoncode        RC_OCMB_UNKNOWN_CHIP_TYPE
+            * @userdata1[0:7]    SPD Module Revision
+            * @userdata1[8:15]   DRAM Interface Type Presented or Emulated
+            * @userdata1[16:23]  Memory Module Interface Type
+            * @userdata1[24:31]  Unused
+            * @userdata1[32:63]  SPD Chip Id
+            * @userdata2         HUID of OCMB target
+            * @devdesc           The ID read from the SPD didn't match any known
+            *                    OCMB chip types.
+            * @custdesc          Unsupported memory installed.
+            */
+            error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                              MOD_OCMB_IDEC_PHASE_1,
+                              RC_OCMB_UNKNOWN_CHIP_TYPE,
+                              TWO_UINT32_TO_UINT64(SPD_FFDC_BYTES, spdId),
+                              TARGETING::get_huid(i_target));
 
-           /*@
-           * @errortype
-           * @severity          ERRL_SEV_UNRECOVERABLE
-           * @moduleid          MOD_OCMB_IDEC
-           * @reasoncode        RC_OCMB_SPD_IDEC_MISMATCH
-           * @userdata1[00:15]  OCMB ID from device read
-           * @userdata1[16:31]  SPD ID from device read
-           * @userdata1[32:47]  OCMB EC from device read
-           * @userdata1[48:63]  SPD EC from device read
-           * @userdata2         HUID of OCMB target
-           * @devdesc           The IDEC info read from the OCMB and SPD
-           *                    did not match the expected values.
-           * @custdesc          Firmware Error
-           */
-           error = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             MOD_OCMB_IDEC,
-                             RC_OCMB_SPD_IDEC_MISMATCH,
-                             TWO_UINT32_TO_UINT64(bothIds, bothEcs),
-                             TARGETING::get_huid(i_target));
+            // Add callouts and commit
+            ocmbErrlCommit(i_target, error);
 
-           break;
+            break;
+        }
 
+        uint16_t id = 0;
+        uint16_t  ec = 0;
+        bool isId = true;
+
+
+        error = ocmbTranslateSpdToIdec(spdId, isId, SPD_FFDC_BYTES, id);
+        if (error)
+        {
+            ocmbErrlCommit(i_target, error);
+        }
+
+        error = ocmbTranslateSpdToIdec(spdEc, !isId, SPD_FFDC_BYTES, ec, spdId);
+        if (error)
+        {
+            ocmbErrlCommit(i_target, error);
         }
 
         // set the explorer chip EC attributes.
@@ -447,7 +686,145 @@ errlHndl_t ocmbIDEC(DeviceFW::OperationType i_opType,
 
     } while(0);
 
+    delete[] spdBuffer;
     return error;
+
+}
+
+errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
+{
+    //@TODO RTC-209353: Read IDEC for Gemini.
+    const uint16_t OCMB_IDEC_REGISTER = 0x2134;
+
+    errlHndl_t error = nullptr;
+    uint64_t idec = 0;
+    size_t op_size = sizeof(idec);
+
+    do {
+        // Read the ID/EC
+        // @TODO RTC-209353: Make this work for both Gemini and Explorer cards
+        //                   when more information is known about which
+        //                   registers to read from.
+        error = DeviceFW::deviceRead(i_target,
+                                     &idec,
+                                     op_size,
+                                     DEVICE_SCOM_ADDRESS(OCMB_IDEC_REGISTER));
+
+        if (error != nullptr)
+        {
+            HWAS_ERR("ocmbIdecPhase2> OCMB 0x%.8X - failed to read ID/EC",
+                     TARGETING::get_huid(i_target));
+
+            break;
+        }
+
+        idec = formatOcmbIdecToCfamStandard(idec);
+
+        uint8_t ec = POWER_CHIPID::extract_ddlevel(idec);
+        uint32_t id = POWER_CHIPID::extract_chipid16(idec);
+
+        HWAS_INF("ocmbIdecPhase2> OCMB 0x%.8X - read ID/EC successful. "
+                 "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
+                 TARGETING::get_huid(i_target),
+                 id,
+                 ec,
+                 idec);
+
+        // Get the id that was translated from the SPD read during phase 1.
+        const uint16_t translatedId =
+            i_target->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+        if (id != translatedId)
+        {
+            HWAS_ERR("ocmbIdecPhase2> OCMB Chip Id and associated SPD Chip Id "
+                     "don't match: OCMB ID=0x%.4X; Translated SPD ID=0x%.4X;",
+                     id,
+                     translatedId);
+
+            HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%.4X translated from "
+                     "SPD read will be overwritten with OCMB IDEC register "
+                     "ID=0x%.4X",
+                     translatedId,
+                     id);
+            /*@
+            * @errortype
+            * @severity          ERRL_SEV_PREDICTIVE
+            * @moduleid          MOD_OCMB_IDEC
+            * @reasoncode        RC_OCMB_CHIP_ID_MISMATCH
+            * @userdata1[00:31]  OCMB IDEC Register ID
+            * @userdata1[32:63]  Translated SPD ID
+            * @userdata2[32:63]  HUID of OCMB target
+            * @devdesc           The IDEC info read from the OCMB and SPD
+            *                    did not match the expected values.
+            * @custdesc          Firmware Error
+            */
+            error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                              MOD_OCMB_IDEC,
+                              RC_OCMB_CHIP_ID_MISMATCH,
+                              TWO_UINT32_TO_UINT64(id, translatedId),
+                              TARGETING::get_huid(i_target));
+
+            // Add callouts and commit
+            ocmbErrlCommit(i_target, error);
+
+            // Since there was an error then the ID values don't agree between
+            // the OCMB read and the SPD read. Since the OCMB has the correct
+            // answer, set the attributes to the values read from that instead
+            // of the SPD.
+            i_target->setAttr<TARGETING::ATTR_CHIP_ID>(id);
+        }
+
+        const uint8_t translatedEc = i_target->getAttr<TARGETING::ATTR_EC>();
+
+        if (ec != translatedEc)
+        {
+            HWAS_ERR("ocmbIdecPhase2> OCMB Revision and associated SPD "
+                     "Revision don't match: OCMB EC=0x%.2X; "
+                     "Translated SPD EC=0x%.2X; ",
+                     ec, translatedEc);
+
+            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC 0x%.2X "
+                     "translated from SPD read will be overwritten with OCMB "
+                     "IDEC register ID=0x%.2X",
+                     translatedEc,
+                     ec);
+
+            /*@
+            * @errortype
+            * @severity          ERRL_SEV_PREDICTIVE
+            * @moduleid          MOD_OCMB_IDEC
+            * @reasoncode        RC_OCMB_SPD_REVISION_MISMATCH
+            * @userdata1[00:31]  OCMB IDEC register EC
+            * @userdata1[32:63]  Translated SPD EC
+            * @userdata2[00:31]  OCMB Chip ID Attribute
+            * @userdata2[32:63]  HUID of OCMB target
+            * @devdesc           The EC (Revision) info read from the OCMB and
+            *                    SPD did not match the expected values.
+            * @custdesc          Firmware Error
+            */
+            error = hwasError(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                              MOD_OCMB_IDEC,
+                              RC_OCMB_SPD_REVISION_MISMATCH,
+                              TWO_UINT32_TO_UINT64(ec, translatedEc),
+                              TWO_UINT32_TO_UINT64(
+                                  i_target->getAttr<TARGETING::ATTR_CHIP_ID>(),
+                                  TARGETING::get_huid(i_target)));
+
+            // Add callouts and commit
+            ocmbErrlCommit(i_target, error);
+
+            // Since there was an error then the EC values don't agree between
+            // the OCMB read and the SPD read. Since the OCMB has the correct
+            // answer, set the attributes to the values read from that instead
+            // of the SPD.
+            i_target->setAttr<TARGETING::ATTR_EC>(ec);
+            i_target->setAttr<TARGETING::ATTR_HDAT_EC>(ec);
+        }
+
+    } while(0);
+
+    return error;
+
 }
 
 // Register the presence detect function with the device framework
