@@ -55,6 +55,31 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_OCMB_ENTERPRISE_POLICY</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Indicates whether the OCMB is allowed to run in enterprise
+            mode, commodity mode, or either.
+
+            ALLOW_ENTERPRISE = Most permissive, uses whatever is installed in
+               the way it is intended to be used.
+            REQUIRE_ENTERPRISE = Throws an error for any commodity dimms that
+               are installed.
+            FORCE_NONENTERPRISE = Throws an error for any enterprise dimms that
+               are installed.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ALLOW_ENTERPRISE = 0,
+            FORCE_ENTERPRISE = 1,
+            FORCE_COMMODITY  = 2
+        </enum>
+        <platInit/>
+        <default>ALLOW_ENTERPRISE</default>
+        <mssAccessorName>ocmb_enterprise_policy</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
