@@ -40,6 +40,10 @@
 #include <pnor/pnorif.H>
 #include <vpd/vpd_if.H>
 #include <errl/errludtarget.H>
+#include <config.h>
+#ifdef CONFIG_CONSOLE
+#include <console/consoleif.H>
+#endif
 
 extern trace_desc_t* g_trac_eeprom;
 
