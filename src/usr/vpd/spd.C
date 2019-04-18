@@ -2368,17 +2368,37 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
     o_match = false;
     do
     {
-        // Read the Basic Memory Type
-        uint8_t memType(MEM_TYPE_INVALID);
-        err = getMemType( memType,
+        // Read the Basic Memory Type from the Seeprom
+        uint8_t memTypeSeeprom(MEM_TYPE_INVALID);
+        err = getMemType( memTypeSeeprom,
                           i_target,
-                          VPD::AUTOSELECT );
+                          VPD::SEEPROM );
         if( err )
         {
             break;
         }
 
-        if( false == isValidDimmType(memType) )
+        if( false == isValidDimmType(memTypeSeeprom) )
+        {
+            break;
+        }
+
+        // Read the Basic Memory Type from PNOR
+        uint8_t memTypePnor(MEM_TYPE_INVALID);
+        err = getMemType( memTypePnor,
+                          i_target,
+                          VPD::PNOR );
+        if( err )
+        {
+            break;
+        }
+
+        if( false == isValidDimmType(memTypePnor) )
+        {
+            break;
+        }
+
+        if (memTypeSeeprom != memTypePnor)
         {
             break;
         }
@@ -2386,7 +2406,7 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
          // Get the keyword size
         const KeywordData* entry = NULL;
         err = getKeywordEntry( i_keyword,
-                               memType,
+                               memTypePnor,
                                i_target,
                                entry );
         if( err )
@@ -2403,7 +2423,7 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
                            dataPnor,
                            sizePnor,
                            i_target,
-                           memType,
+                           memTypePnor,
                            VPD::PNOR );
         if( err )
         {
@@ -2420,7 +2440,7 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
                            dataSeeprom,
                            sizeSeeprom,
                            i_target,
-                           memType,
+                           memTypePnor,
                            VPD::SEEPROM );
         if( err )
         {
