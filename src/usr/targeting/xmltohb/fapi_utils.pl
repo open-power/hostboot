@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -282,7 +282,8 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_OMIC          => "unit-omic-power9",
     TARGET_TYPE_MCC           => "unit-mcc-power9",
     TARGET_TYPE_OCMB_CHIP     => "chip-ocmb",
-    TARGET_TYPE_MEM_PORT      => "unit-mem_port"
+    TARGET_TYPE_MEM_PORT      => "unit-mem_port",
+    TARGET_TYPE_PMIC          => "pmic",
     };
 
     # Loop through all of the targets that this attribute
@@ -293,7 +294,7 @@ sub createTargetExtensionFromFapi(\%,\%)
         my $foundmatch = 0;
         $type =~ s/\s//g;
         my $targtype = $fapi2targ->{$type};
-        #print "type = $type -> $targtype\n";
+        # print "type = $type -> $targtype\n";
         my $attrid = $fapiattr->{id};
         $attrid =~ s/ATTR_//;
 
