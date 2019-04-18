@@ -1,0 +1,268 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/common/include/p10_scom_mc_a.H $         */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#include "proc_scomt.H"
+
+#ifndef __p10_scom_mc_a_H_
+#define __p10_scom_mc_a_H_
+
+
+namespace scomt
+{
+namespace mc
+{
+
+
+static const uint64_t CC_PROTECT_MODE_REG = 0x0c0303feull;
+
+static const uint32_t CC_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
+static const uint32_t CC_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
+// mc/reg00058.H
+
+static const uint64_t CLOCK_STAT_SL = 0x0c0303c8ull;
+
+static const uint32_t CLOCK_STAT_SL_PERV_SL = 4;
+static const uint32_t CLOCK_STAT_SL_UNIT1_SL = 5;
+static const uint32_t CLOCK_STAT_SL_UNIT2_SL = 6;
+static const uint32_t CLOCK_STAT_SL_UNIT3_SL = 7;
+static const uint32_t CLOCK_STAT_SL_UNIT4_SL = 8;
+static const uint32_t CLOCK_STAT_SL_UNIT5_SL = 9;
+static const uint32_t CLOCK_STAT_SL_UNIT6_SL = 10;
+static const uint32_t CLOCK_STAT_SL_UNIT7_SL = 11;
+static const uint32_t CLOCK_STAT_SL_UNIT8_SL = 12;
+static const uint32_t CLOCK_STAT_SL_UNIT9_SL = 13;
+static const uint32_t CLOCK_STAT_SL_UNIT10_SL = 14;
+static const uint32_t CLOCK_STAT_SL_UNIT11_SL = 15;
+static const uint32_t CLOCK_STAT_SL_UNIT12_SL = 16;
+static const uint32_t CLOCK_STAT_SL_UNIT13_SL = 17;
+static const uint32_t CLOCK_STAT_SL_UNIT14_SL = 18;
+// mc/reg00058.H
+
+static const uint64_t CPLT_CTRL3_RW = 0x0c0003c3ull;
+static const uint64_t CPLT_CTRL3_WO_CLEAR = 0x0c0003e3ull;
+static const uint64_t CPLT_CTRL3_WO_OR = 0x0c0003d3ull;
+
+static const uint32_t CPLT_CTRL3_0_PSCOM_EN = 4;
+static const uint32_t CPLT_CTRL3_1_PSCOM_EN = 5;
+static const uint32_t CPLT_CTRL3_2_PSCOM_EN = 6;
+static const uint32_t CPLT_CTRL3_3_PSCOM_EN = 7;
+static const uint32_t CPLT_CTRL3_4_PSCOM_EN = 8;
+static const uint32_t CPLT_CTRL3_5_PSCOM_EN = 9;
+static const uint32_t CPLT_CTRL3_6_PSCOM_EN = 10;
+static const uint32_t CPLT_CTRL3_7_PSCOM_EN = 11;
+static const uint32_t CPLT_CTRL3_8_PSCOM_EN = 12;
+static const uint32_t CPLT_CTRL3_9_PSCOM_EN = 13;
+static const uint32_t CPLT_CTRL3_10_PSCOM_EN = 14;
+static const uint32_t CPLT_CTRL3_11_PSCOM_EN = 15;
+static const uint32_t CPLT_CTRL3_12_PSCOM_EN = 16;
+static const uint32_t CPLT_CTRL3_13_PSCOM_EN = 17;
+static const uint32_t CPLT_CTRL3_14_PSCOM_EN = 18;
+// mc/reg00058.H
+
+static const uint64_t EPS_DBG_INST1_COND_REG_1 = 0x0c0107c1ull;
+
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND1_SEL_A = 0;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND1_SEL_A_LEN = 8;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND1_SEL_B = 8;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND1_SEL_B_LEN = 8;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND2_SEL_A = 16;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND2_SEL_A_LEN = 8;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND2_SEL_B = 24;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND2_SEL_B_LEN = 8;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C1_INAROW_MODE = 32;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_AND_TRIGGER_MODE1 = 33;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_NOT_TRIGGER_MODE1 = 34;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_EDGE_TRIGGER_MODE1 = 35;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C2_INAROW_MODE = 39;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_AND_TRIGGER_MODE2 = 40;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_NOT_TRIGGER_MODE2 = 41;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_EDGE_TRIGGER_MODE2 = 42;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_COND3_ENABLE_RESET = 46;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_EXACT_TO_MODE = 47;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C2TIMER_ON_C1 = 48;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C3_ON_C0 = 49;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_SLOW_TO_MODE = 50;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_EXACT_RESET_C3_ON_TO = 51;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C1_COUNT_LT = 52;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C1_COUNT_LT_LEN = 4;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT = 56;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT_LEN = 4;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT = 60;
+static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT_LEN = 3;
+// mc/reg00058.H
+
+static const uint64_t EPS_DBG_INST2_COND_REG_1 = 0x0c0107c4ull;
+
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND1_SEL_A = 0;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND1_SEL_A_LEN = 8;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND1_SEL_B = 8;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND1_SEL_B_LEN = 8;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND2_SEL_A = 16;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND2_SEL_A_LEN = 8;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND2_SEL_B = 24;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND2_SEL_B_LEN = 8;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C1_INAROW_MODE = 32;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_AND_TRIGGER_MODE1 = 33;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_NOT_TRIGGER_MODE1 = 34;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_EDGE_TRIGGER_MODE1 = 35;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C2_INAROW_MODE = 39;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_AND_TRIGGER_MODE2 = 40;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_NOT_TRIGGER_MODE2 = 41;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_EDGE_TRIGGER_MODE2 = 42;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_COND3_ENABLE_RESET = 46;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_EXACT_TO_MODE = 47;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C2TIMER_ON_C1 = 48;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_ON_C0 = 49;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_SLOW_TO_MODE = 50;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_EXACT_RESET_C3_ON_TO = 51;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C1_COUNT_LT = 52;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C1_COUNT_LT_LEN = 4;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT = 56;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT_LEN = 4;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT = 60;
+static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT_LEN = 3;
+// mc/reg00058.H
+
+static const uint64_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x0c0103c7ull;
+
+static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK = 0;
+static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 32;
+// mc/reg00058.H
+
+static const uint64_t MBA_SCOMFIR_MCWATCNTL = 0x0c010fd9ull;
+
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_ENABLE_WAT = 0;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_SET_WAT_EXTERNAL_ARM = 1;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_SET_WAT_EXTERNAL_RESET = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_SET_WAT_EXTERNAL_TRIGGER = 3;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RCTRL_WAT_SELECT = 4;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RCTRL_WAT_SELECT_LEN = 4;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_EVENT_SELECT = 8;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_EVENT_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_EXTERNAL_SELECT = 10;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_EXTERNAL_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_LOCAL_EVENT_SELECT = 12;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_LOCAL_EVENT_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_EXTERNAL_EVENT_TO_INTERNAL = 14;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_15 = 15;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_0_SELECT = 16;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_0_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_18 = 18;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_1_SELECT = 19;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_1_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_21 = 21;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_2_SELECT = 22;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_2_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_24 = 24;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_3_SELECT = 25;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_GLOBAL_EVENT_3_SELECT_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_27 = 27;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_PBI_DEBUG_CAPTURE = 28;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RCTRL_DEBUG_SELECT = 29;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RCTRL_DEBUG_SELECT_LEN = 4;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_DEBUG_SELECT = 33;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_DEBUG_SELECT_LEN = 7;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_EVENT_BUS_SELECT = 40;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_EVENT_BUS_SELECT_LEN = 5;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_SELECT = 45;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_SELECT_LEN = 4;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_ON_EARLY_HANG = 49;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_WAT_ON_EARLY_HANG_LEN = 9;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_58_59 = 58;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_58_59_LEN = 2;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_ENABLE = 60;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_DBG_COUNT_RESET = 61;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_AND_22BIT_WAT_OUTPUTS = 62;
+static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_63 = 63;
+// mc/reg00058.H
+
+static const uint64_t MBA_SCOMFIR_MCWATDATA9 = 0x0c010fe3ull;
+
+static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT = 0;
+static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT_LEN = 46;
+static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL = 47;
+static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL_LEN = 17;
+// mc/reg00058.H
+
+static const uint64_t SCOMFIR_MCFIR_RWX = 0x0c010fc0ull;
+static const uint64_t SCOMFIR_MCFIR_WOX_AND = 0x0c010fc1ull;
+static const uint64_t SCOMFIR_MCFIR_WOX_OR = 0x0c010fc2ull;
+
+static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR = 0;
+static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR = 1;
+static const uint32_t SCOMFIR_MCFIR_POWERBUS_PROTOCOL_ERROR = 2;
+static const uint32_t SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE = 3;
+static const uint32_t SCOMFIR_MCFIR_MULTIPLE_BAR_HIT = 4;
+static const uint32_t SCOMFIR_MCFIR_PB_WRITE_ECC_SYNDROME_NE0 = 5;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_6 = 6;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_7 = 7;
+static const uint32_t SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT = 8;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_9 = 9;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_10 = 10;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT0 = 11;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT1 = 12;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT2 = 13;
+static const uint32_t SCOMFIR_MCFIR_MCS_WAT3 = 14;
+static const uint32_t SCOMFIR_MCFIR_POP_RCMD_NOHIT = 15;
+static const uint32_t SCOMFIR_MCFIR_POP_RCMD_BADHIT = 16;
+static const uint32_t SCOMFIR_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR = 17;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_18 = 18;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_19 = 19;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_20 = 20;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_21 = 21;
+static const uint32_t SCOMFIR_MCFIR_INVALID_SMF_ACCESS = 22;
+static const uint32_t SCOMFIR_MCFIR_RESERVED_23 = 23;
+// mc/reg00058.H
+
+static const uint64_t SCOMFIR_MCMODE1 = 0x0c010fd2ull;
+
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY = 0;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY_LEN = 10;
+static const uint32_t SCOMFIR_MCMODE1_RESERVED_10 = 10;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CRC_ECC_BYPASS = 11;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CRC_ECC_BYPASS_LEN = 6;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_FP_CRC_ECC_BYPASS = 17;
+static const uint32_t SCOMFIR_MCMODE1_ENABLE_CRC_ECC_BYPASS_NODAL_ONLY = 18;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_SOURCE_SCOPE = 19;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_SOURCE_SCOPE_LEN = 9;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CENTAUR_CMD_PREFETCH = 28;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CENTAUR_CMD_PREFETCH_LEN = 4;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_ALL_SPEC_OPS = 32;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_OP = 33;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_SPEC_OP_LEN = 19;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CI = 52;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_CI_LEN = 2;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_COMMAND_BYPASS = 54;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_COMMAND_BYPASS_LEN = 6;
+static const uint32_t SCOMFIR_MCMODE1_RESERVED_60 = 60;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_FP_COMMAND_BYPASS = 61;
+static const uint32_t SCOMFIR_MCMODE1_DISABLE_BYPASS_IN_READ_DATAFLOW = 62;
+static const uint32_t SCOMFIR_MCMODE1_RESERVED_63 = 63;
+// mc/reg00058.H
+
+}
+}
+#include "mc/reg00058.H"
+#endif

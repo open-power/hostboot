@@ -25,41 +25,24 @@
 
 #include "proc_scomt.H"
 
-#ifndef __phb_H_
-#define __phb_H_
+#ifndef __p10_scom_phb_H_
+#define __p10_scom_phb_H_
 
+#include "p10_scom_phb_0.H"
+#include "p10_scom_phb_1.H"
+#include "p10_scom_phb_2.H"
+#include "p10_scom_phb_3.H"
+#include "p10_scom_phb_4.H"
+#include "p10_scom_phb_5.H"
+#include "p10_scom_phb_6.H"
+#include "p10_scom_phb_7.H"
+#include "p10_scom_phb_8.H"
+#include "p10_scom_phb_9.H"
+#include "p10_scom_phb_a.H"
+#include "p10_scom_phb_b.H"
+#include "p10_scom_phb_c.H"
+#include "p10_scom_phb_d.H"
+#include "p10_scom_phb_e.H"
+#include "p10_scom_phb_f.H"
 
-namespace scomt
-{
-namespace phb
-{
-
-
-//ERRCODE: // Some of the name targets not found in address targets.
-// No targets could be determined from the address.
-
-static const uint64_t ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x08010d81ull;
-// phb/reg00000.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-// No targets could be determined from the address.
-
-static const uint64_t ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x08010d83ull;
-// phb/reg00000.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-// No targets could be determined from the address.
-
-static const uint64_t ETUX16_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x08000d01ull;
-// phb/reg00000.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-// No targets could be determined from the address.
-
-static const uint64_t ETUX16_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x08000d03ull;
-// phb/reg00000.H
-
-}
-}
-#include "phb/reg00000.H"
 #endif

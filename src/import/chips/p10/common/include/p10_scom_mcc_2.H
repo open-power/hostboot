@@ -1,0 +1,222 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/common/include/p10_scom_mcc_2.H $        */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#include "proc_scomt.H"
+
+#ifndef __p10_scom_mcc_2_H_
+#define __p10_scom_mcc_2_H_
+
+
+namespace scomt
+{
+namespace mcc
+{
+
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f7cull;
+
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A = 0;
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t DSTL_DSLTWAT = 0x0c010d11ull;
+
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_ACT_PMU = 0;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_ACT_PMU_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_ACT_PMU = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_ACT_PMU_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_DLY_CREDIT_RETURN_EN = 4;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_DLY_CREDIT_RETURN_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_DLY_CREDIT_RETURN_EN = 6;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_DLY_CREDIT_RETURN_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_NULL_FLIT_STALL_EN = 8;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_NULL_FLIT_STALL_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_NULL_FLIT_STALL_EN = 10;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_NULL_FLIT_STALL_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXVC0_EN = 12;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXVC0_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXVC0_EN = 14;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXVC0_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXVC3_EN = 16;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXVC3_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXVC3_EN = 18;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXVC3_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXDCP0_EN = 20;
+static const uint32_t DSTL_DSLTWAT_CHANA_WAT_HOLD_TLXDCP0_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN = 22;
+static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN_LEN = 2;
+static const uint32_t DSTL_DSLTWAT_RESERVED_24_62 = 24;
+static const uint32_t DSTL_DSLTWAT_RESERVED_24_62_LEN = 39;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t ERR_INJ_LFSR = 0x0c01101bull;
+
+static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR = 0;
+static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR_LEN = 61;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t LINK0_TX_LANE_CONTROL = 0x0c011010ull;
+
+static const uint32_t LINK0_TX_LANE_CONTROL_00_CONTROL = 0;
+static const uint32_t LINK0_TX_LANE_CONTROL_00_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_01_CONTROL = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_01_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_02_CONTROL = 8;
+static const uint32_t LINK0_TX_LANE_CONTROL_02_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_03_CONTROL = 12;
+static const uint32_t LINK0_TX_LANE_CONTROL_03_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_04_CONTROL = 16;
+static const uint32_t LINK0_TX_LANE_CONTROL_04_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_05_CONTROL = 20;
+static const uint32_t LINK0_TX_LANE_CONTROL_05_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_06_CONTROL = 24;
+static const uint32_t LINK0_TX_LANE_CONTROL_06_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_07_CONTROL = 28;
+static const uint32_t LINK0_TX_LANE_CONTROL_07_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL = 32;
+static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN = 4;
+static const uint32_t LINK0_TX_LANE_CONTROL__FAILED = 48;
+static const uint32_t LINK0_TX_LANE_CONTROL__FAILED_LEN = 9;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t LINK1_QUALITY = 0x0c011027ull;
+
+static const uint32_t LINK1_QUALITY_TX_BW = 1;
+static const uint32_t LINK1_QUALITY_TX_BW_LEN = 11;
+static const uint32_t LINK1_QUALITY_RX_BW = 13;
+static const uint32_t LINK1_QUALITY_RX_BW_LEN = 11;
+static const uint32_t LINK1_QUALITY_ERROR_RATE = 25;
+static const uint32_t LINK1_QUALITY_ERROR_RATE_LEN = 23;
+static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1 = 49;
+static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1_LEN = 7;
+static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2 = 57;
+static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t PERF_COUNT_LSB_0 = 0x0c011020ull;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t REGS_PRX0_DLR_APCR = 0x0c011038ull;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t USTL_USTLFIR_RWX = 0x0c010e00ull;
+static const uint64_t USTL_USTLFIR_WOX_AND = 0x0c010e01ull;
+static const uint64_t USTL_USTLFIR_WOX_OR = 0x0c010e02ull;
+
+static const uint32_t USTL_USTLFIR_CHANA_UNEXP_DATA_ERR = 0;
+static const uint32_t USTL_USTLFIR_CHANB_UNEXP_DATA_ERR = 1;
+static const uint32_t USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR = 2;
+static const uint32_t USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR = 3;
+static const uint32_t USTL_USTLFIR_CHANA_HALF_SPEED_MODE = 4;
+static const uint32_t USTL_USTLFIR_CHANB_HALF_SPEED_MODE = 5;
+static const uint32_t USTL_USTLFIR_WDF_BUFFER_CE = 6;
+static const uint32_t USTL_USTLFIR_WDF_BUFFER_UE = 7;
+static const uint32_t USTL_USTLFIR_WDF_BUFFER_SUE = 8;
+static const uint32_t USTL_USTLFIR_WDF_BUFFER_OVERRUN = 9;
+static const uint32_t USTL_USTLFIR_WDF_TAG_PARITY_ERROR = 10;
+static const uint32_t USTL_USTLFIR_WDF_SCOM_SEQ_ERROR = 11;
+static const uint32_t USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR = 12;
+static const uint32_t USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR = 13;
+static const uint32_t USTL_USTLFIR_RESERVED_14 = 14;
+static const uint32_t USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0 = 15;
+static const uint32_t USTL_USTLFIR_WDF_CMT_PARITY_ERROR = 16;
+static const uint32_t USTL_USTLFIR_READ_SPARE_1 = 17;
+static const uint32_t USTL_USTLFIR_READ_SPARE_2 = 18;
+static const uint32_t USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR = 19;
+static const uint32_t USTL_USTLFIR_WRT_BUFFER_CE = 20;
+static const uint32_t USTL_USTLFIR_WRT_BUFFER_UE = 21;
+static const uint32_t USTL_USTLFIR_WRT_BUFFER_SUE = 22;
+static const uint32_t USTL_USTLFIR_WRT_SCOM_SEQ_ERROR = 23;
+static const uint32_t USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR = 24;
+static const uint32_t USTL_USTLFIR_WRT_DATA_SYNDROME_NE0 = 25;
+static const uint32_t USTL_USTLFIR_WRT_BUFF_ERR = 26;
+static const uint32_t USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP = 27;
+static const uint32_t USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP = 28;
+static const uint32_t USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER = 29;
+static const uint32_t USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER = 30;
+static const uint32_t USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP = 31;
+static const uint32_t USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP = 32;
+static const uint32_t USTL_USTLFIR_CHANA_LOL_DROP_RECOVER = 33;
+static const uint32_t USTL_USTLFIR_CHANB_LOL_DROP_RECOVER = 34;
+static const uint32_t USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR = 35;
+static const uint32_t USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR = 36;
+static const uint32_t USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR = 37;
+static const uint32_t USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR = 38;
+static const uint32_t USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL = 39;
+static const uint32_t USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL = 40;
+static const uint32_t USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS = 41;
+static const uint32_t USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS = 42;
+static const uint32_t USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO = 43;
+static const uint32_t USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO = 44;
+static const uint32_t USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE = 45;
+static const uint32_t USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE = 46;
+static const uint32_t USTL_USTLFIR_CHANA_BAD_DATA = 47;
+static const uint32_t USTL_USTLFIR_CHANB_BAD_DATA = 48;
+static const uint32_t USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR = 49;
+static const uint32_t USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR = 50;
+static const uint32_t USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR = 51;
+static const uint32_t USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR = 52;
+static const uint32_t USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR = 53;
+static const uint32_t USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR = 54;
+static const uint32_t USTL_USTLFIR_CHANA_INVALID_CMD_ERROR = 55;
+static const uint32_t USTL_USTLFIR_CHANB_INVALID_CMD_ERROR = 56;
+static const uint32_t USTL_USTLFIR_FATAL_REG_PARITY_ERROR = 57;
+static const uint32_t USTL_USTLFIR_RECOV_REG_PARITY_ERROR = 58;
+static const uint32_t USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO = 59;
+static const uint32_t USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO = 60;
+static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
+// mcc/reg00066.H
+
+//ERRCODE: // Some of the name targets not found in address targets.
+
+static const uint64_t WDF_WBMGR_TAG_INFO = 0x0c010f63ull;
+
+static const uint32_t WDF_WBMGR_TAG_INFO_SLICE0_BUFFER_OVERRUN = 0;
+static const uint32_t WDF_WBMGR_TAG_INFO_SLICE1_BUFFER_OVERRUN = 1;
+static const uint32_t WDF_WBMGR_TAG_INFO_SLICE2_BUFFER_OVERRUN = 2;
+static const uint32_t WDF_WBMGR_TAG_INFO_SLICE3_BUFFER_OVERRUN = 3;
+static const uint32_t WDF_WBMGR_TAG_INFO_TAG_OVERRUN = 4;
+// mcc/reg00066.H
+
+}
+}
+#include "mcc/reg00066.H"
+#endif
