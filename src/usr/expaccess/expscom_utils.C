@@ -55,20 +55,21 @@ errlHndl_t validateInputs(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = nullptr;
     uint32_t l_commonPlid = 0;  // If there are multiple issues found link logs with first
 
-    TARGETING::ATTR_MODEL_type l_targetModel =
-                    i_target->getAttr<TARGETING::ATTR_MODEL>();
+    // Verify that the target is of type OCMB_CHIP
+    TARGETING::ATTR_TYPE_type l_targetType =
+                    i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    // Only target we can perform ocmb scoms on are explorer OCMB chip targets
-    if( l_targetModel != TARGETING::MODEL_EXPLORER )
+    // Only target we can perform ocmb scoms on are OCMB chip targets
+    if( l_targetType != TARGETING::TYPE_OCMB_CHIP )
     {
-        TRACFCOMP( g_trac_expscom, ERR_MRK "validateInputs> Invalid target type : l_targetModel=%d", l_targetModel );
+        TRACFCOMP( g_trac_expscom, ERR_MRK "validateInputs> Invalid target type : l_targetType=0x%X", l_targetType );
         /*@
           * @errortype
           * @moduleid     EXPSCOM::MOD_OCMB_UTILS
           * @reasoncode   EXPSCOM::RC_INVALID_MODEL_TYPE
           * @userdata1    SCOM Address
           * @userdata2    Model Type
-          * @devdesc      validateInputs> Invalid target type (!= OCMB_CHP)
+          * @devdesc      validateInputs> Invalid target type (!= OCMB_CHIP)
           * @custdesc     A problem occurred during the IPL of the system:
           *               Invalid target type for a SCOM operation.
           */
@@ -76,7 +77,7 @@ errlHndl_t validateInputs(DeviceFW::OperationType i_opType,
                                         EXPSCOM::MOD_OCMB_UTILS,
                                         EXPSCOM::RC_INVALID_MODEL_TYPE,
                                         i_scomAddr,
-                                        l_targetModel,
+                                        l_targetType,
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         l_err->collectTrace(EXPSCOM_COMP_NAME);
