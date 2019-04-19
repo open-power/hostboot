@@ -41,7 +41,6 @@ enum SectionId
             // Value of HB_EXT_CODE must be 1 for debug framework.
 #ifndef BOOTLOADER
     HB_EXT_CODE,    /**< Hostboot Extended Image */
-    GLOBAL_DATA,    /**< Global Data */
 #endif
     HB_BASE_CODE,   /**< Hostboot Base Image */
 #ifndef BOOTLOADER

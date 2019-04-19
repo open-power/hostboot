@@ -415,7 +415,6 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "part",        /**< PNOR::TOC            : Table of Contents */
 #ifndef BOOTLOADER
         "HBI",         /**< PNOR::HB_EXT_CODE    : Hostboot Extended Image */
-        "GLOBAL",      /**< PNOR::GLOBAL_DATA    : Global Data */
 #endif
         "HBB",         /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
 #ifndef BOOTLOADER

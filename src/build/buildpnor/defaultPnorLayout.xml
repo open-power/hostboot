@@ -219,17 +219,9 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Global Data (36K)</description>
-        <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x3126000</physicalOffset>
-        <physicalRegionSize>0x9000</physicalRegionSize>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x312F000</physicalOffset>
+        <physicalOffset>0x3126000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -237,7 +229,7 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x3134000</physicalOffset>
+        <physicalOffset>0x312B000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -245,7 +237,7 @@ Layout Description
     <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x3138000</physicalOffset>
+        <physicalOffset>0x312F000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -256,7 +248,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x3258000</physicalOffset>
+        <physicalOffset>0x324F000</physicalOffset>
         <!-- TODO RTC: 208004
              Reduced by  MB total to allow HBI + tests to
              fit in PNOR, need to increase back 1 MB once HBI size
@@ -269,7 +261,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x3E58000</physicalOffset>
+        <physicalOffset>0x3D4F000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -277,7 +269,7 @@ Layout Description
     <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x3E5B000</physicalOffset>
+        <physicalOffset>0x3D52000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -286,7 +278,7 @@ Layout Description
     <section>
         <description>Secureboot Test Load (12K)</description>
         <eyeCatch>TESTLOAD</eyeCatch>
-        <physicalOffset>0x3E7B000</physicalOffset>
+        <physicalOffset>0x3D72000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -295,7 +287,7 @@ Layout Description
     <section>
         <description>Centaur Hw Ref Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x3E7E000</physicalOffset>
+        <physicalOffset>0x3D75000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -304,7 +296,7 @@ Layout Description
     <section>
         <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalOffset>0x3E81000</physicalOffset>
+        <physicalOffset>0x3D78000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -313,7 +305,7 @@ Layout Description
     <section>
         <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalOffset>0x3EA5000</physicalOffset>
+        <physicalOffset>0x3D9C000</physicalOffset>
         <physicalRegionSize>0x4B000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -323,7 +315,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3EF0000</physicalOffset>
+        <physicalOffset>0x3DE7000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>

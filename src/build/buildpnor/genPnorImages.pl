@@ -483,6 +483,14 @@ sub manipulateImages
             instructionStartStackPointer => 0);
 
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
+
+        # Skip if binary file isn't included in the PNOR layout file
+        if ($layoutKey eq -1)
+        {
+            print "Warning: skipping $key since it is NOT in the PNOR layout file\n";
+            next;
+        }
+
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
         my %tempImages = (
             HDR_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.bin",
