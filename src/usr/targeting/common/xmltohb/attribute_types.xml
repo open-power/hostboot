@@ -3922,6 +3922,10 @@
       <value>144</value>
     </enumerator>
     <enumerator>
+      <name>POWER10</name>
+      <value>145</value>
+    </enumerator>
+    <enumerator>
       <name>CECTPM</name>
     </enumerator>
     <enumerator>
@@ -8179,8 +8183,24 @@
       <value>78</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>NMMU</name>
       <value>79</value>
+    </enumerator>
+    <enumerator>
+      <name>PAU</name>
+      <value>80</value>
+    </enumerator>
+    <enumerator>
+      <name>IOHS</name>
+      <value>81</value>
+    </enumerator>
+    <enumerator>
+      <name>PAUC</name>
+      <value>82</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>83</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

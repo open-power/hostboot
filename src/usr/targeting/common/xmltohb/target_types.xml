@@ -649,6 +649,10 @@
       <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
+      <id>MODEL</id>
+      <default>POWER10</default>
+    </attribute>
+    <attribute>
       <id>NVDIMM_ARMED</id>
     </attribute>
     <attribute>
@@ -762,6 +766,11 @@
       <default>NIMBUS</default>
       <id>MODEL</id>
     </attribute>
+  </targetType>
+
+  <targetType>
+    <id>chip-processor-power10</id>
+    <parent>chip-processor</parent>
   </targetType>
 
   <targetType>
@@ -1120,6 +1129,23 @@
   <targetType>
     <id>chip-vreg-generic</id>
     <parent>pmic</parent>
+  </targetType>
+
+  <targetType>
+    <id>enc-node-power10</id>
+    <parent>base</parent>
+    <attribute>
+      <default>ENC</default>
+      <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <default>POWER10</default>
+      <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <default>NODE</default>
+      <id>TYPE</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -1709,6 +1735,35 @@
   </targetType>
 
   <targetType>
+    <id>sys-sys-power10</id>
+    <parent>base</parent>
+    <attribute>
+      <default>affinity:sys-0</default>
+      <id>AFFINITY_PATH</id>
+    </attribute>
+    <attribute>
+      <default>SYS</default>
+      <id>CLASS</id>
+    </attribute>
+    <attribute>
+      <default>0x00010000</default>
+      <id>HUID</id>
+    </attribute>
+    <attribute>
+      <default>POWER10</default>
+      <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <default>physical:sys-0</default>
+      <id>PHYS_PATH</id>
+    </attribute>
+    <attribute>
+      <default>SYS</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>sys-sys-power9</id>
     <parent>base</parent>
     <attribute>
@@ -2262,6 +2317,10 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <id>MODEL</id>
+      <default>POWER10</default>
+    </attribute>
+    <attribute>
       <id>MRU_ID</id>
     </attribute>
     <attribute>
@@ -2339,6 +2398,18 @@
     </attribute>
     <attribute>
       <default>CAPP</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-core-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>CORE</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
@@ -2442,6 +2513,18 @@
     </attribute>
   </targetType>
 
+  <targetType>
+    <id>unit-eq-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>EQ</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
   <!-- EQ chiplet: Use same EQ target for Nimbus and Cumulus
      6 EQs on Nimbus
      Quad: 2 ex's and one ep -->
@@ -2523,6 +2606,18 @@
     </attribute>
     <attribute>
       <default>EX</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-iohs-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>IOHS</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
@@ -2628,6 +2723,18 @@
     <attribute>
       <id>MODEL</id>
       <default>CUMULUS</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-mc-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>MC</default>
     </attribute>
   </targetType>
 
@@ -2831,6 +2938,18 @@
     <attribute>
       <default>AXONE</default>
       <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-mcc-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>MCC</default>
+      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3057,6 +3176,18 @@
     </attribute>
   </targetType>
 
+  <targetType>
+    <id>unit-mi-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>MI</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
   <!-- MI
      Nimbus : None
      Cumulus: 4 total per chip (2 per MC)
@@ -3098,6 +3229,18 @@
     </attribute>
     <attribute>
       <default>MI</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-nmmu-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>NMMU</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
@@ -3485,6 +3628,21 @@
     </attribute>
   </targetType>
 
+  <targetType>
+    <id>unit-omi-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>OMIC_PARENT</id>
+    </attribute>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>OMI</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
   <!-- OMI (Special has two parents)
      Nimbus : None
      Cumulus: None
@@ -3544,6 +3702,18 @@
     </attribute>
   </targetType>
 
+  <targetType>
+    <id>unit-omic-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>OMIC</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
   <!-- OMIC
      Nimbus : None
      Cumulus: None
@@ -3585,6 +3755,42 @@
     </attribute>
     <attribute>
       <default>OMIC</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-pau-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>PAU</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-pauc-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>PAUC</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-pec-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>PEC</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
@@ -3717,6 +3923,15 @@
     </attribute>
   </targetType>
 
+  <targetType>
+    <id>unit-perv-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>PERV</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
   <!-- PERV
      Nimbus : 43 (1 per chiplet)
      Cumulus: 1 per chiplet -->
@@ -3778,6 +3993,18 @@
     <attribute>
       <default>NIMBUS</default>
       <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-phb-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
+    </attribute>
+    <attribute>
+      <default>PHB</default>
+      <id>TYPE</id>
     </attribute>
   </targetType>
 

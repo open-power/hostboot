@@ -491,6 +491,14 @@ const char* EntityPath::pathElementTypeAsString(
 //            return "Engine";
         case TYPE_PMIC:
             return "PMIC";
+        case TYPE_NMMU:
+            return "NMMU";
+        case TYPE_PAU:
+            return "PAU";
+        case TYPE_IOHS:
+            return "IOHS";
+        case TYPE_PAUC:
+            return "PAUC";
         default:
             return "Unknown path type";
     }
