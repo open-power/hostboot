@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -67,6 +67,20 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_INBAND_RSP_NO_DOORBELL</rc>
+    <description>
+       Doorbell is low when expecting a response
+    </description>
+    <ffdc>DATA</ffdc>
+    <ffdc>NUM_LOOPS</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
 

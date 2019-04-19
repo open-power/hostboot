@@ -87,6 +87,8 @@
 #include <exp_data_structs.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fixes.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
@@ -350,8 +352,12 @@ fapi2::ReturnCode getOCCfg(
     const uint64_t i_cfgAddr,
     fapi2::buffer<uint32_t>& o_data) ;
 
-
-
+///
+/// @brief Polls for response ready door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 /// @brief Reads a response from the response buffer
 ///
@@ -363,7 +369,8 @@ fapi2::ReturnCode getOCCfg(
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode getRSP(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    host_fw_response_struct& o_rsp, std::vector<uint8_t>& o_data) ;
+    host_fw_response_struct& o_rsp,
+    std::vector<uint8_t>& o_data) ;
 
 
 

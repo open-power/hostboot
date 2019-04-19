@@ -22,3 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
+#ifndef __EXPLR_SCOM_ADDRESSES_FIXES_H
+#define __EXPLR_SCOM_ADDRESSES_FIXES_H
+
+static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1 = 0x2058ull;
+
+#endif
