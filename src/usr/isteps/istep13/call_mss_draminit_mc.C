@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,13 @@
 //From Import Directory (EKB Repository)
 #include  <config.h>
 #include  <fapi2.H>
+#ifdef CONFIG_AXONE
+#include  <exp_draminit_mc.H>
+#else
 #include  <p9_mss_draminit_mc.H>
 #include  <p9c_mss_draminit_mc.H>
+#endif
+
 
 
 using namespace ERRORLOG;
@@ -65,6 +70,8 @@ void* call_mss_draminit_mc (void *io_pArgs)
     TARGETING::targetService().getTopLevelTarget( sys );
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
+
+#ifndef CONFIG_AXONE
 
     // Get all MCBIST
     TARGETING::TargetHandleList l_mcbistTargetList;
@@ -152,6 +159,53 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
         }
     }
+
+#else
+
+        // Get all OCMB targets
+        TARGETING::TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+        for (const auto & l_ocmb_target : l_ocmbTargetList)
+        {
+            // Dump current run on target
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running exp_draminit_mc HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
+
+            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                (l_ocmb_target);
+
+            //  call the HWP with each fapi2::Target
+            FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X : exp_draminit_mc HWP returns error",
+                        l_err->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_ocmb_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_stepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, HWPF_COMP_ID );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS running exp_draminit_mc HWP on "
+                           "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
+            }
+
+        }
+
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
