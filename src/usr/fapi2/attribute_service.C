@@ -49,6 +49,7 @@
 #include <target.H>
 #include <target_types.H>
 #include <hwpf_fapi2_reasoncodes.H>
+#include <chipids.H>
 
 #include <devicefw/driverif.H>
 #include <plat_attr_override_sync.H>
@@ -366,9 +367,52 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
         {
             o_name = ENUM_ATTR_NAME_AXONE;
         }
-        else if (l_model == TARGETING::MODEL_EXPLORER)
+        else if (l_model == TARGETING::MODEL_OCMB)
         {
-            o_name = ENUM_ATTR_NAME_EXPLORER;
+            // For MODEL_OCMB the ATTR_CHIP_ID determines if it is a
+            // Gemini or an Explorer chip
+            uint32_t l_chipID =
+                l_pHbTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+            if (l_chipID == POWER_CHIPID::EXPLORER_16)
+            {
+                o_name = ENUM_ATTR_NAME_EXPLORER;
+            }
+            else if (l_chipID == POWER_CHIPID::GEMINI_16)
+            {
+                o_name = ENUM_ATTR_NAME_GEMINI;
+            }
+            else
+            {
+                FAPI_ERR("platGetTargetName. Unknown CHIP_ID 0x%x for MODEL_OCMB 0x%x", l_chipID, l_model);
+
+                /*@
+                * @errortype
+                * @moduleid          fapi2::MOD_FAPI2_GET_TARGETING_TARGET
+                * @reasoncode        RC_UNKNOWN_OCMB_CHIP_TYPE
+                * @userdata1[0:31]    FAPI2 Type
+                * @userdata1[32:63]   HB Target HUID
+                * @userdata2[0:31]    HB Type
+                * @userdata2[32:63]   HB Target CHIP_ID
+                * @devdesc           HB OCMB_CHIP target found with unknown
+                *                    model based on ATTR_CHIP_ID
+                * @custdesc          Firmware Error
+                */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            MOD_FAPI2_GET_TARGETING_TARGET,
+                                            RC_UNKNOWN_OCMB_CHIP_TYPE,
+                                            TWO_UINT32_TO_UINT64(
+                                            i_pFapiTarget.getType(),
+                                            TARGETING::get_huid(l_pHbTarget)
+                                            ),
+                                            TWO_UINT32_TO_UINT64(
+                                            l_pHbTarget->
+                                            getAttr<TARGETING::ATTR_TYPE>(),
+                                            l_chipID));
+
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
         }
         else
         {

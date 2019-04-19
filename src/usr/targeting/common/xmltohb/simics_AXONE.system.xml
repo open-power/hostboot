@@ -8612,7 +8612,7 @@
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
@@ -8679,7 +8679,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb1</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
@@ -8746,7 +8746,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb2</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
@@ -8813,7 +8813,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb3</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
@@ -8880,7 +8880,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb4</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0/ocmb_chip-0</default>
@@ -8947,7 +8947,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb5</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-1/ocmb_chip-0</default>
@@ -9014,7 +9014,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb6</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0/ocmb_chip-0</default>
@@ -9081,7 +9081,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb7</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-1/ocmb_chip-0</default>
@@ -9148,7 +9148,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb8</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
@@ -9214,7 +9214,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb9</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
@@ -9280,7 +9280,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb10</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
@@ -9346,7 +9346,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb11</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
@@ -9412,7 +9412,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb12</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-0/ocmb_chip-0</default>
@@ -9478,7 +9478,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb13</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-1/ocmb_chip-0</default>
@@ -9544,7 +9544,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb14</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-0/ocmb_chip-0</default>
@@ -9610,7 +9610,7 @@
 
 <targetInstance>
     <id>sys0node0ocmb15</id>
-    <type>chip-ocmb-explorer</type>
+    <type>chip-ocmb</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-1/ocmb_chip-0</default>

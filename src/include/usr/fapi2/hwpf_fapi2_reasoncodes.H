@@ -129,6 +129,7 @@ namespace fapi2
         RC_SET_ATTR_NOT_VALID          = FAPI2_COMP_ID | 0x3F,
         RC_FAILED_TO_GET_RING_LIST     = FAPI2_COMP_ID | 0x40,
         RC_ATTR_OVERRIDE_DISALLOWED    = FAPI2_COMP_ID | 0x41,
+        RC_UNKNOWN_OCMB_CHIP_TYPE      = FAPI2_COMP_ID | 0x42,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
