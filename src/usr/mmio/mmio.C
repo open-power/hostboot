@@ -85,7 +85,7 @@ errlHndl_t mmioSetup()
             uint32_t  l_mcChipUnit =
                               l_mcTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-            // Get the base BAR address for OpenCapi Memory Interfaces (OMIs) of the this Memory Channel (MC)
+            // Get the base BAR address for OpenCapi Memory Interfaces (OMIs) of this Memory Controller (MC)
             auto l_omiBaseAddr =
                   l_mcTarget->getAttr<TARGETING::ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET>();
 
@@ -97,7 +97,7 @@ errlHndl_t mmioSetup()
                          (mmio_dev_map(reinterpret_cast<void *>(l_realAddr),
                                        THIRTYTWO_GB));
 
-            TRACFCOMP ( g_trac_mmio, "MC%.02x (0x%.08X) MMIO BAR PHYSICAL ADDR = 0x%lx     VIRTUAL ADDR = 0x%lx" ,
+            TRACFCOMP ( g_trac_mmio, "MC%.02X (0x%.08X) MMIO BAR PHYSICAL ADDR = 0x%lX     VIRTUAL ADDR = 0x%lX" ,
                         l_mcChipUnit ? 0x23 : 0x01, TARGETING::get_huid(l_mcTarget),
                         l_realAddr, l_virtAddr);
 
@@ -143,7 +143,7 @@ errlHndl_t mmioSetup()
                 {
                     TRACFCOMP(g_trac_mmio,
                               "Discrepancy found between calculated OMI MMIO bar offset and what we found in ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET");
-                    TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lx,  Attribute Value : 0x%lx", l_calulatedRealAddr, l_omiBarAttrVal);
+                    TRACFCOMP(g_trac_mmio, "Calculated Offset: 0x%lX,  Attribute Value : 0x%lX", l_calulatedRealAddr, l_omiBarAttrVal);
 
                     /*@
                     * @errortype   ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -178,7 +178,7 @@ errlHndl_t mmioSetup()
 
                 assert(l_ocmbTargetList.size() == 1 , "OCMB chips list found for a given OMI != 1 as expected");
 
-                TRACFCOMP(g_trac_mmio, "Setting HUID 0x%.08X MMIO vm addr to be 0x%lx , real address is 0x%lx", TARGETING::get_huid(l_ocmbTargetList[0]),
+                TRACFCOMP(g_trac_mmio, "Setting HUID 0x%.08X MMIO vm addr to be 0x%lX , real address is 0x%lX", TARGETING::get_huid(l_ocmbTargetList[0]),
                         l_currentOmiVirtAddr, l_calulatedRealAddr | MMIO_BASE );
 
                 l_ocmbTargetList[0]->setAttr<TARGETING::ATTR_MMIO_VM_ADDR>(l_currentOmiVirtAddr);
