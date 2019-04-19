@@ -39,6 +39,7 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <mss_explorer_attribute_setters.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -50,6 +51,8 @@ extern "C"
     ///
     fapi2::ReturnCode exp_getecid(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("exp_getecid");
+
         // Using FUSE enterprise_dis bit, determine whether enterprise is disabled, otherwise
         // we will enable it. Override to disable it is done in omi_setup. Half_dimm_mode we
         // will also disable by default, as it is not a feature of P systems

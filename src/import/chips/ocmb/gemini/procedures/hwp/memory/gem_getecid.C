@@ -26,6 +26,7 @@
 #include <fapi2.H>
 #include <gem_getecid.H>
 #include <mss_explorer_attribute_setters.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -37,6 +38,8 @@ extern "C"
     ///
     fapi2::ReturnCode gem_getecid(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("gem_getecid");
+
         // Address defined here as gemini SCOM address library does not exist
         static constexpr uint64_t GEMINI_ECID_REGISTER = 0x0801240E;
         fapi2::buffer<uint64_t> l_data_buffer;

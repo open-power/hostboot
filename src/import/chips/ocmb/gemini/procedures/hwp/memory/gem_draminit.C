@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 #include <lib/gem_draminit_utils.H>
+#include <generic/memory/mss_git_data_helper.H>
 
 extern "C"
 {
@@ -45,6 +46,8 @@ extern "C"
     ///
     fapi2::ReturnCode gem_draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+        mss::display_git_commit_info("gem_draminit");
+
         FAPI_TRY(mss::gem::gem_draminit_check_memory_size(i_target));
         FAPI_TRY(mss::gem::gem_draminit_poll_check_calibration(i_target));
 
