@@ -290,6 +290,14 @@ enum cmd_and_response_id
 };
 
 ///
+/// @brief Command flag definitions
+enum cmd_flags
+{
+    NO_FLAGS = 0,
+    ADDITIONAL_DATA = 1,
+};
+
+///
 /// @brief Response argument parameters
 ///
 enum response_arg
