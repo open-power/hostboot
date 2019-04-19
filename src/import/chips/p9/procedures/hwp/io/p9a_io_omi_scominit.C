@@ -52,6 +52,7 @@
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
 #include <p9a_omi_io_scom.H>
+#include <p9a_omic_io_scom.H>
 #include <p9a_io_omi_scominit.H>
 #include <p9_obus_scom_addresses.H>
 #include <p9a_mc_scom_addresses.H>
@@ -78,6 +79,8 @@ fapi2::ReturnCode p9a_io_omi_scominit(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     // get a proc target
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
+    auto l_omi_lst = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+
     // assert IO reset to power-up bus endpoint logic
     FAPI_TRY(io::rmw(OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, SET_RESET));
 
@@ -87,7 +90,12 @@ fapi2::ReturnCode p9a_io_omi_scominit(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     FAPI_TRY(io::rmw(OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, CLEAR_RESET));
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
-    FAPI_EXEC_HWP(rc, p9a_omi_io_scom, i_target, l_system_target, l_proc_target);
+    FAPI_EXEC_HWP(rc, p9a_omic_io_scom, i_target, l_system_target, l_proc_target);
+
+    for (auto l_omi_target : l_omi_lst)
+    {
+        FAPI_EXEC_HWP(rc, p9a_omi_io_scom, l_omi_target, l_system_target, l_proc_target);
+    }
 
     // configure FIR
     {
