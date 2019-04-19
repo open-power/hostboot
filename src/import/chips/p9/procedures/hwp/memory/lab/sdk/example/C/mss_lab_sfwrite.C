@@ -33,7 +33,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: Memory
 
-#include <mss_lab_tools.H>
+#include <generic/memory/lab/mss_lab_tools.H>
+#include <lib/shared/nimbus_defaults.H>
 
 #include <lib/shared/nimbus_defaults.H>
 #include <generic/memory/lib/utils/poll.H>
