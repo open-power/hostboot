@@ -233,7 +233,7 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>VFRT data for WOF (12MB)</description>
+        <description>VFRT data for WOF (6MB)</description>
         <!-- We need 266KB per module sort, going to support
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
