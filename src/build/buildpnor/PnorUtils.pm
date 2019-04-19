@@ -172,7 +172,7 @@ sub loadPnorLayout
 
             if($physicalRegionSize  + $physicalOffset > $imageSize)
             {
-                die "ERROR: $this_func: Image size ($imageSize) smaller than $eyeCatch's offset + $eyeCatch's size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
+                die "ERROR: $this_func: Image size ($imageSize) smaller than ".$eyeCatch."'s offset + ".$eyeCatch."'s size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
             }
 
             if (exists $$i_pnorLayoutRef{sections}{$physicalOffset})
