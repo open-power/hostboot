@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,10 @@ namespace HBPM
         // FIR Master
         NOT_FIR_MASTER = 0x00000000,
         IS_FIR_MASTER  = 0x00000001,
+
+        // SMF Mode
+        SMF_MODE_DISABLED = 0x00000000,
+        SMF_MODE_ENABLED  = 0x00000001,
 
         // Mask off bit zero
         PHYSICAL_ADDR_MASK = 0x7FFFFFFFFFFFFFFF,

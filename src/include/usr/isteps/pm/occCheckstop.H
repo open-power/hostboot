@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,10 @@ namespace HBOCC
         // FIR Master
         NOT_FIR_MASTER = 0x00000000,
         IS_FIR_MASTER  = 0x00000001,
+
+        // SMF Mode
+        SMF_MODE_DISABLED = 0x00000000,
+        SMF_MODE_ENABLED  = 0x00000001,
 
         // SRAM Addresses for OCC Main App and GPE0 app
         OCC_405_SRAM_ADDRESS  = 0xFFF40000,

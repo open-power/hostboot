@@ -82,6 +82,7 @@
 #include    <p9_stop_api.H>
 #include    <scom/scomif.H>
 #include    <p9_quad_scom_addresses.H>
+#include <secureboot/smf_utils.H>
 
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
@@ -241,6 +242,15 @@ namespace HBPM
 #else
         l_config_data->firMaster = 0;
 #endif
+
+        if (SECUREBOOT::SMF::isSmfEnabled())
+        {
+            l_config_data->smfMode = SMF_MODE_ENABLED;
+        }
+        else
+        {
+            l_config_data->smfMode = SMF_MODE_DISABLED;
+        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadHostDataToHomer: RC=0x%X, PLID=0x%lX",

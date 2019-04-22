@@ -229,6 +229,7 @@ my $resident_modules = {
     "libexpaccess.so"           => '1',
     "libnvdimm.so"              => '1',
     "libmmio.so"                => '1',
+    "libsmf.so"                 => '1',
 };
 
 # A list of the dependent libraries in each istep.

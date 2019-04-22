@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@
 #include <pnorif.H>
 #include <pnor_const.H>
 #include <utillidmgr.H>
+#include <secureboot/smf_utils.H>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -476,6 +477,16 @@ namespace HBOCC
         l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
                                           sizeof(config_data->firdataConfig),
                                           i_curHw);
+
+        if (SECUREBOOT::SMF::isSmfEnabled())
+        {
+            config_data->smfMode = SMF_MODE_ENABLED;
+        }
+        else
+        {
+            config_data->smfMode = SMF_MODE_DISABLED;
+        }
+
         if (l_errl)
         {
             TRACFCOMP( g_fapiImpTd,
