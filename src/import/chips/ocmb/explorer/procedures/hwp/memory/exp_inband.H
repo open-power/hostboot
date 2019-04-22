@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -393,6 +393,21 @@ fapi2::ReturnCode getSensorCache(
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data);
+
+/// @brief Ensure data is an even multiple of 8 (BUFFER_TRANSACTION_SIZE).
+///        If (sizeof(buffer) % BUFFER_TRANSACTION_SIZE != 0) ; then pad
+///        buffer with zeros until statement is true.
+///
+/// @param[in,out] io_data   Communication data , either CMD or RSP buffer
+///
+/// @return void
+inline void padCommData(std::vector<uint8_t>& io_data)
+{
+    while ((io_data.size() % BUFFER_TRANSACTION_SIZE) != 0)
+    {
+        io_data.push_back(0);
+    }
+}
 
 ///
 /// @brief Forces native data into the correct endianness necessary for Explorer

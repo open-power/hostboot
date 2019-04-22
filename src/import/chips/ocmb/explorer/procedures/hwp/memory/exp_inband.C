@@ -198,6 +198,7 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
 
     o_crc = crc32_gen(o_data);
 
+    padCommData(o_data);
     FAPI_TRY(correctMMIOEndianForStruct(o_data));
 
 fapi_try_exit:
@@ -248,6 +249,7 @@ fapi2::ReturnCode host_fw_command_struct_to_little_endian(const host_fw_command_
     l_cmd_header_crc = crc32_gen(o_data);
     FAPI_DBG("Command header crc: %xl", l_cmd_header_crc);
     FAPI_TRY(forceCrctEndian(l_cmd_header_crc, o_data));
+    padCommData(o_data);
     FAPI_TRY(correctMMIOEndianForStruct(o_data));
 
 fapi_try_exit:
@@ -604,11 +606,6 @@ fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data)
         goto fapi_try_exit;
     }
 
-    while ((io_data.size() % BUFFER_TRANSACTION_SIZE) != 0)
-    {
-        io_data.push_back(0);
-    }
-
     l_loops = io_data.size() / BUFFER_TRANSACTION_SIZE;
 
     for (size_t l_idx = 0; l_idx < l_loops; l_idx++)
@@ -625,8 +622,6 @@ fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
 }
-
-
 
 ///
 /// @brief Forces native data into the correct endianness necessary for Explorer
