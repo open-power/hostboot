@@ -47,6 +47,9 @@
 #include <targeting/common/util.H>
 #include <targeting/common/pointer.H>
 #include <vector>
+#ifdef __HOSTBOOT_MODULE
+#include <array>
+#endif
 
 // This component
 #include <targeting/common/attributes.H>
@@ -181,6 +184,34 @@ class Target
         template<const ATTRIBUTE_ID A>
         bool tryGetAttrNotSynced(
             typename AttributeTraits<A>::Type& o_attrValue) const;
+
+        /**
+         *  @brief Try to get the target's specified std::array attribute value
+         *
+         *  A special tryGetAttr function for getting the attribute values
+         *  of the attributes which support std::array.
+         *  It returns false (with invalid o_attrValue) if the specified
+         *  attribute does not exist for the associated target, true (with a
+         *  valid o_attrValue) otherwise.
+         *
+         *  @param[out] o_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post See "return"
+         *
+         *  @return bool indicating whether the specified attribute was returned
+         *      or not
+         *
+         *  @retval true Attribute returned in o_attrValue
+         *  @retval false Attribute not found; o_attValue not valid
+         */
+#ifdef __HOSTBOOT_MODULE
+        template<const ATTRIBUTE_ID A>
+        bool tryGetAttr(
+            typename AttributeTraits<A>::TypeStdArr& o_attrValue) const;
+#endif
+
         /**
          *  @brief Get the target's specified attribute value
          *
@@ -250,6 +281,26 @@ class Target
         const char* getAttrAsString() const;
 
         /**
+         *  @brief For targets whose attribute value type is an array, return
+         *      the array in std::array form.
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's specified attribute value returned as a std::array,
+         *      or assert called if specified attribute doesn't exist for the
+         *      associated target or type is not an array
+         *
+         *  @return std::array
+         *
+         *  @retval Content and dimension varies, see xml file where the
+         *      attribute's type is set
+         */
+#ifdef __HOSTBOOT_MODULE
+        template<const ATTRIBUTE_ID A>
+        typename AttributeTraits<A>::TypeStdArr getAttrAsStdArr() const;
+#endif
+
+        /**
          *  @brief Tries to set the target's specified attribute value
          *
          *  Attempts to set the target's specified attribute value.  It
@@ -296,6 +347,34 @@ class Target
         template<const ATTRIBUTE_ID A>
         bool trySetAttrNotSynced(
             typename AttributeTraits<A>::Type const& i_attrValue);
+
+        /**
+         *
+         *  @brief Tries to set the target's specified std::array attribute value
+         *
+         *  A special trySetAttr function for setting the attribute values
+         *  of the attributes which support std::array.
+         *  It returns false if the specified attribute does not exist for the
+         *  associated target, true otherwise.
+         *
+         *  @param[in] i_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's attribute value updated (if it exists), and caller
+         *      notified whether the update occurred or not.
+         *
+         *  @return bool indicating whether the specified attribute was updated
+         *      or not
+         *
+         *  @retval true Attribute updated
+         *  @retval false Attribute not updated
+         */
+#ifdef __HOSTBOOT_MODULE
+        template<const ATTRIBUTE_ID A>
+        bool trySetAttr(
+            typename AttributeTraits<A>::TypeStdArr const& i_attrValue);
+#endif
 
         /**
          *  @brief Returns pointer to a mutex attribute associated with the
@@ -359,6 +438,23 @@ class Target
          */
         template<const ATTRIBUTE_ID A>
         void setAttr(typename AttributeTraits<A>::Type const& i_attrValue);
+
+        /**
+         *  @brief For targets whose attribute value type is an array, set value
+         *      from a std::array of any dimension
+         *
+         *  @param[in] i_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's attribute value updated if it exists and if it
+         *  suppports TypeStdArr type, otherwise routine asserts
+         */
+#ifdef __HOSTBOOT_MODULE
+        template<const ATTRIBUTE_ID A>
+        void setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
+            i_attrValue);
+#endif
 
         /**
          *  @brief Perform FFDC for the target instance
@@ -729,8 +825,10 @@ class Target
         enum TargAssertReason
         {
             SET_ATTR,
+            SET_ATTR_FROM_STD_ARR,
             GET_ATTR,
             GET_ATTR_AS_STRING,
+            GET_ATTR_AS_STD_ARRAY,
             GET_HB_MUTEX_ATTR,
             GET_ATTR_TANK_TARGET_POS_DATA,
             GET_ATTR_TANK_TARGET_POS_DATA_ATTR,
@@ -865,6 +963,19 @@ bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
     return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
 }
 
+#ifdef __HOSTBOOT_MODULE
+template<const ATTRIBUTE_ID A>
+bool Target::tryGetAttr(
+    typename AttributeTraits<A>::TypeStdArr& o_attrValue) const
+{
+    if(AttributeTraits<A>::readable == AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::fspAccessible == AttributeTraits<A>::fspAccessible)
+       { }
+    return _tryGetAttr(A, sizeof(o_attrValue), &o_attrValue);
+}
+#endif
+
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 {
@@ -885,6 +996,17 @@ bool Target::trySetAttrNotSynced(
     if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
+
+#ifdef __HOSTBOOT_MODULE
+template<const ATTRIBUTE_ID A>
+bool Target::trySetAttr(typename AttributeTraits<A>::TypeStdArr
+    const& i_attrValue)
+{
+    if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
+    return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
+}
+#endif
 
 template<const ATTRIBUTE_ID A>
 typename AttributeTraits<A>::Type Target::getAttr() const
@@ -933,6 +1055,19 @@ void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
     }
 }
 
+#ifdef __HOSTBOOT_MODULE
+template<const ATTRIBUTE_ID A>
+void Target::setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
+    i_attrValue)
+{
+    bool l_wrote = trySetAttr<A>(i_attrValue);
+    if (unlikely(!l_wrote))
+    {
+        targAssert(SET_ATTR_FROM_STD_ARR, A);
+    }
+}
+#endif
+
 template<const ATTRIBUTE_ID A>
 mutex_t* Target::getHbMutexAttr() const
 {
@@ -977,6 +1112,23 @@ const char* Target::getAttrAsString() const
     }
     return attrToString<A>(l_attrValue);
 }
+
+#ifdef __HOSTBOOT_MODULE
+template<const ATTRIBUTE_ID A>
+typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
+{
+    typename AttributeTraits<A>::TypeStdArr l_stdArr;
+
+    bool l_read = tryGetAttr<A>(l_stdArr);
+
+    if (unlikely(!l_read))
+    {
+        targAssert(GET_ATTR_AS_STD_ARRAY, A);
+    }
+
+    return l_stdArr;
+}
+#endif
 
 // Function to set various frequency related attributes
 /**

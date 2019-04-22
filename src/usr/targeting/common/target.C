@@ -745,6 +745,12 @@ void Target::targAssert(TargAssertReason i_reason,
             "TARGETING::Target::setAttr<0x%7x>: trySetAttr returned false",
             i_ffdc);
         break;
+    case SET_ATTR_FROM_STD_ARR:
+        TARG_ASSERT(false,
+            "TARGETING::Target::setAttrFromStdArr<0x%7x>: setAttrFromStdArr "
+            "returned false",
+            i_ffdc);
+        break;
     case GET_ATTR:
         TARG_ASSERT(false,
             "TARGETING::Target::getAttr<0x%7x>: tryGetAttr returned false",
@@ -753,6 +759,12 @@ void Target::targAssert(TargAssertReason i_reason,
     case GET_ATTR_AS_STRING:
         TARG_ASSERT(false,
             "TARGETING::Target::getAttrAsString<0x%7x>: tryGetAttr returned false",
+            i_ffdc);
+        break;
+    case GET_ATTR_AS_STD_ARRAY:
+        TARG_ASSERT(false,
+            "TARGETING::Target::getAttrAsStdArray<0x%7x>: getAttrAsStdArray returned"
+            " false",
             i_ffdc);
         break;
     case GET_HB_MUTEX_ATTR:

@@ -147,6 +147,76 @@ void* funcTestRecursiveMutexEntry(void* i_pData)
     return nullptr;
 }
 
+/**
+ *  @brief Function to test get and set of std::array values for attributes that
+ *  support it. Any N-th dimensional array can be tested.
+ *
+ *  @param[in] i_target Pointer to target object
+ *  @param[in] i_setVal TA_typeStdArr type value to set
+ */
+template <const TARGETING::ATTRIBUTE_ID TA, typename TA_typeStdArr,
+    typename TA_type>
+void testStdArrayND(TARGETING::Target *i_target, TA_typeStdArr i_setVal)
+{
+
+    // Storing original value
+    TA_type l_origVal;
+
+    if(!i_target->tryGetAttr<TA>(l_origVal))
+    {
+        TS_FAIL("Failed to get original value of attribute.");
+        return;
+    }
+
+    // Setting value using std::array as input
+    i_target->setAttrFromStdArr<TA>(i_setVal);
+
+    // Get c-style array
+    TA_type l_cArrOutVal;
+    if(!i_target->tryGetAttr<TA>(l_cArrOutVal))
+    {
+        TS_FAIL("Could not get c-style array value of attribute.");
+        return;
+    }
+
+    // Copying l_cArrOutVal to a std::array var so that it can be
+    // compared with l_outVal below
+    TA_typeStdArr l_cArrOutValStdArr;
+    memcpy(&l_cArrOutValStdArr, &l_cArrOutVal, sizeof(l_cArrOutVal));
+
+    // std::array output
+    auto l_outVal = i_target->getAttrAsStdArr<TA>();
+
+    // Comparing set value with std::array value, and std::array value with
+    // c-array value
+    if (l_outVal == i_setVal)
+    {
+        TS_INFO("Success, get value equals set value.");
+        if (l_cArrOutValStdArr == l_outVal)
+        {
+            TS_INFO("Success, get c-style array value equals get std::array"
+                " value.");
+        }
+        else
+        {
+            TS_FAIL("Failure, get c-style array value does not equal get"
+                " std::array value.");
+        }
+    }
+    else
+    {
+        TS_FAIL("Failure, get value does not equal set value.");
+    }
+
+    // Restoring original value
+    if(!i_target->trySetAttr<TA>(l_origVal))
+    {
+        TS_FAIL("Failed to restore original attribute value.");
+    }
+
+}
+
+
 class TargetingTestSuite : public CxxTest::TestSuite
 {
   public:
@@ -487,6 +557,59 @@ class TargetingTestSuite : public CxxTest::TestSuite
         }
 
         TS_TRACE(EXIT_MRK "testSignedAttribute");
+    }
+
+    /**
+     *  @brief Testing attribute's ability to get/set using std::array
+     */
+    void testStdArray()
+    {
+
+        // Testing 1D array
+
+        TS_INFO(ENTER_MRK "testStdArray: Testing 1D array");
+
+        constexpr auto TA = TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS;
+            // TA: targeting attribute
+        typedef TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS_typeStdArr
+            TA_typeStdArr;
+        typedef TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS_type TA_type;
+
+        TARGETING::Target* l_pTarget = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_pTarget);
+        assert(l_pTarget != nullptr, "testStdArray, unable to establish top"
+            " level target service");
+
+        TA_typeStdArr l_setVal = {9, 6, 3, 1, 5, 1, 7, 3};
+
+        testStdArrayND<TA, TA_typeStdArr, TA_type>(l_pTarget, l_setVal);
+
+        // Testing 2D array
+        TS_INFO(ENTER_MRK "testStdArray: Testing 2D array");
+
+        constexpr auto TA2 = TARGETING::ATTR_EEPROM_PAGE_ARRAY;
+        typedef TARGETING::ATTR_EEPROM_PAGE_ARRAY_typeStdArr TA2_typeStdArr;
+        typedef TARGETING::ATTR_EEPROM_PAGE_ARRAY_type TA2_type;
+
+        TARGETING::TargetHandleList l_procList;
+        TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC);
+
+        if (l_procList.size() == 0 )
+        {
+            TS_FAIL("Failed to get proc targets.");
+        }
+        else
+        {
+            // Setting value using std::array as input
+            TA2_typeStdArr l_setVal2 {{ {9, 6, 3, 1}, {8, 4, 2, 44},
+                                        {18, 14, 22, 2}, {77, 8, 6, 54} }};
+
+            testStdArrayND<TA2, TA2_typeStdArr, TA2_type>(l_procList.front(),
+                l_setVal2);
+        }
+
+        TS_INFO(EXIT_MRK "testStdArray");
+
     }
 
     void testPciPhbTarget()
