@@ -1018,32 +1018,30 @@ sub validateAttributes {
     my($attributes) = @_;
 
     my %elements = ( );
-    $elements{"id"}          = { required => 1, isscalar => 1};
-    $elements{"description"} = { required => 1, isscalar => 1};
-    $elements{"persistency"} = { required => 1, isscalar => 1};
-    $elements{"fspOnly"}     = { required => 0, isscalar => 0};
-    $elements{"hbOnly"}      = { required => 0, isscalar => 0};
-    $elements{"readable"}    = { required => 0, isscalar => 0};
-    $elements{"simpleType"}  = { required => 0, isscalar => 0};
-    $elements{"complexType"} = { required => 0, isscalar => 0};
-    $elements{"nativeType"}  = { required => 0, isscalar => 0};
-    $elements{"writeable"}   = { required => 0, isscalar => 0};
-    $elements{"hasStringConversion"}
-                             = { required => 0, isscalar => 0};
-    $elements{"hwpfToHbAttrMap"}
-                             = { required => 0, isscalar => 0};
-    $elements{"display-name"} = { required => 0, isscalar => 1};
-    $elements{"virtual"}     = { required => 0, isscalar => 0};
-    $elements{"tempAttribute"} = { required => 0, isscalar => 0};
-    $elements{"serverwizReadonly"} = { required => 0, isscalar => 0};
-    $elements{"serverwizShow"} = { required => 0, isscalar => 1};
-    $elements{"global"} = { required => 0, isscalar => 0};
-    $elements{"range"} = { required => 0, isscalar => 0};
-    $elements{"ignoreEkb"} = { required => 0, isscalar => 0};
-    $elements{"mrwRequired"} = { required => 0, isscalar => 0};
+    $elements{"id"}                     = { required => 1, isscalar => 1};
+    $elements{"description"}            = { required => 1, isscalar => 1};
+    $elements{"persistency"}            = { required => 1, isscalar => 1};
+    $elements{"fspOnly"}                = { required => 0, isscalar => 0};
+    $elements{"hbOnly"}                 = { required => 0, isscalar => 0};
+    $elements{"readable"}               = { required => 0, isscalar => 0};
+    $elements{"simpleType"}             = { required => 0, isscalar => 0};
+    $elements{"complexType"}            = { required => 0, isscalar => 0};
+    $elements{"nativeType"}             = { required => 0, isscalar => 0};
+    $elements{"writeable"}              = { required => 0, isscalar => 0};
+    $elements{"hasStringConversion"}    = { required => 0, isscalar => 0};
+    $elements{"hwpfToHbAttrMap"}        = { required => 0, isscalar => 0};
+    $elements{"display-name"}           = { required => 0, isscalar => 1};
+    $elements{"virtual"}                = { required => 0, isscalar => 0};
+    $elements{"tempAttribute"}          = { required => 0, isscalar => 0};
+    $elements{"serverwizReadonly"}      = { required => 0, isscalar => 0};
+    $elements{"serverwizShow"}          = { required => 0, isscalar => 1};
+    $elements{"global"}                 = { required => 0, isscalar => 0};
+    $elements{"range"}                  = { required => 0, isscalar => 0};
+    $elements{"ignoreEkb"}              = { required => 0, isscalar => 0};
+    $elements{"mrwRequired"}            = { required => 0, isscalar => 0};
 
     # do NOT export attribute & its associated enum to serverwiz
-    $elements{"no_export"}   = { required => 0, isscalar => 0};
+    $elements{"no_export"}              = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -2438,6 +2436,9 @@ print $outFile <<VERBATIM;
 // STD
 #include <stdint.h>
 #include <stdlib.h>
+#ifdef __HOSTBOOT_MODULE
+#include <array>
+#endif
 VERBATIM
 
 foreach my $attribute (@{$attributes->{attribute}})
@@ -2541,12 +2542,11 @@ sub writeTraitFileTraits {
             $traits .= " fspAccessible,";
         }
 
-        chop($traits);
-
         # Build value type
 
         my $type = "";
         my $dimensions = "";
+        my $stdArrAddOn = ""; # Only used if attr holds array type
         if(exists $attribute->{simpleType})
         {
             my $simpleType = $attribute->{simpleType};
@@ -2569,11 +2569,26 @@ sub writeTraitFileTraits {
                     if(   (exists $simpleType->{array})
                         && ($simpleTypeProperties->{$typeName}{supportsArray}) )
                     {
-                        my @bounds = split(/,/,$simpleType->{array});
-                        foreach my $bound (@bounds)
+
+                        my @revBounds = reverse split(/,/,$simpleType->{array});
+
+                        for my $idx (0 .. $#revBounds)
                         {
-                            $dimensions .= "[$bound]";
+                            $dimensions = "[@revBounds[$idx]]$dimensions";
+
+                            # Creating std::array, even if multi-dimensional
+                            if ($idx == 0)
+                            {
+                                $stdArrAddOn = "std::array<$type, "
+                                    ."@revBounds[$idx]>";
+                            }
+                            else
+                            {
+                                $stdArrAddOn = "std::array<$stdArrAddOn, "
+                                    ."@revBounds[$idx]>";
+                            }
                         }
+
                     }
 
                     if(exists $simpleType->{string})
@@ -2611,6 +2626,8 @@ sub writeTraitFileTraits {
                 . "$attribute->{id}.");
         }
 
+        chop($traits);
+
         # if it already exists skip it
         if( !exists($attrValHash{$attribute->{id}}))
         {
@@ -2625,6 +2642,13 @@ sub writeTraitFileTraits {
             print $outFile "    public:\n";
             print $outFile "        enum {",$traits," };\n";
             print $outFile "        typedef ", $type, " Type$dimensions;\n";
+            if ($stdArrAddOn ne "")
+            {
+                # Append typedef for std::array if attr holds array value
+                print $outFile "#ifdef __HOSTBOOT_MODULE\n";
+                print $outFile "        typedef $stdArrAddOn TypeStdArr;\n";
+                print $outFile "#endif\n";
+            }
             print $outFile "};\n\n";
 
             $typedefs .= "// Type aliases and/or sizes for ATTR_"
@@ -2636,6 +2660,14 @@ sub writeTraitFileTraits {
             # Append a more friendly type alias for attribute
             $typedefs .= "typedef " . $type .
                 " ATTR_" . "$attribute->{id}" . "_type" . $dimensions . ";\n";
+
+            if ($stdArrAddOn ne "")
+            {
+                $typedefs .= "#ifdef __HOSTBOOT_MODULE\n";
+                $typedefs .= "typedef $stdArrAddOn "
+                    ."ATTR_$attribute->{id}_typeStdArr;\n";
+                $typedefs .= "#endif\n";
+            }
 
             # If a string, append max # of characters for the string
             if(   (exists $attribute->{simpleType})
