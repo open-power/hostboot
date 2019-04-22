@@ -52,6 +52,11 @@ namespace HBPM
         // FIR collection configuration data needed by FIR Master
         //  OCC in the event of a checkstop
         uint8_t firdataConfig[3072];
+
+        // For informing OCC if SMF mode is enabled:
+        //  0x00000000 = Default (SMF disabled)
+        //  0x00000001 = SMF mode is enabled
+        uint32_t smfMode;
     };
 
     /**
