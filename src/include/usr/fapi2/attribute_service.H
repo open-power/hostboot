@@ -49,6 +49,7 @@
 #include <devicefw/driverif.H>
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
+#include <config.h>
 
 //******************************************************************************
 // Interface
@@ -115,7 +116,7 @@ ReturnCode getTargetingAttr(const Target<TARGET_TYPE_ALL,
 /// @param[in] o_pAttr       Pointer to attribute where value is copied to
 /// @return                  boolean describing if it was successful
 ///
-bool setTargetingAttrHelper(TARGETING::Target * l_pTargTarget,
+bool setTargetingAttrHelper(TARGETING::Target * i_pTargTarget,
                             const TARGETING::ATTRIBUTE_ID i_targAttrId,
                             const uint32_t i_attrSize,
                             void * o_pAttr);
@@ -189,6 +190,19 @@ ReturnCode platGetFunctional(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
 ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
                                  uint32_t & o_pos);
 
+
+///
+/// @brief This function is called by the FAPI_ATTR_SET macro when accessing
+/// an attribute that should never be set.  This is used to handle config-
+/// dependent cases where the attribute may need to be writable in general
+/// but not in some specific cases.
+///
+/// @param[in] i_pTargTarget  Pointer to TARGETING Target
+/// @param[in] i_fapiAttrId  FAPI attribute id
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+ReturnCode platErrorOnSet( TARGETING::Target * i_pTargTarget,
+                           const fapi2::AttributeId i_fapiAttrId );
 
 ///
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
@@ -1666,11 +1680,23 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //----------------------------------------------------------------------------
 // MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
 //----------------------------------------------------------------------------
+
+// For Axone ATTR_FREQ_MCA_MHZ is a regular writable attribute
+// For Nimbus/Cumulus ATTR_FREQ_MCA_MHZ is readonly and based on NEST
+#ifndef CONFIG_AXONE
+
+#undef ATTR_FREQ_MCA_MHZ_GETMACRO
 #define ATTR_FREQ_MCA_MHZ_GETMACRO(ID, TARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::\
     platGetFreqMcaMhz(TARGET, VAL)
+#undef ATTR_FREQ_MCA_MHZ_SETMACRO
+#define ATTR_FREQ_MCA_MHZ_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platErrorOnSet(TARGET, VAL)
 
+#endif
 
 #endif // ATTRIBUTESERVICE_H_

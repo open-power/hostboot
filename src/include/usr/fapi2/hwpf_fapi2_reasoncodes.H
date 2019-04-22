@@ -68,6 +68,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_PROC_TEST                = 0x19,
         MOD_FAPI2_MONITOR_FOR_FSP_MSGS              = 0x1A,
         MOD_FAPI2_PLAT_GET_VPD_OCMB                 = 0x1B,
+        MOD_FAPI2_PLAT_ERROR_ON_SET                 = 0x1C,
     };
 
     /**

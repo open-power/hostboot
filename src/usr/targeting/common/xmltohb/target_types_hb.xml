@@ -273,6 +273,10 @@
     <attribute>
       <id>FORCE_PRE_PAYLOAD_DRTM</id>
     </attribute>
+    <!-- Need to add this explicitly to handle the Axone case -->
+    <attribute>
+      <id>FREQ_MCA_MHZ</id>
+    </attribute>
     <attribute>
       <id>HB_EXISTING_IMAGE</id>
     </attribute>
@@ -311,7 +315,7 @@
     </attribute>
     <attribute>
       <id>OVERRIDES_ATTEMPTED_FLAG</id>
-    </attribute>  
+    </attribute>
     <attribute>
       <id>PDA_CAPTURED_THREAD_REG_ARRAY_ADDR</id>
     </attribute>

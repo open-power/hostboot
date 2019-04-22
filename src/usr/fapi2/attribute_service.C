@@ -37,6 +37,7 @@
 // supported HWPF attributes lists attributes handled by Hostboot
 
 #include <stdint.h>
+#include <config.h>
 #include <return_code.H>
 #include <attribute_ids.H>
 #include <attributeenums.H>
@@ -178,11 +179,11 @@ errlHndl_t getTargetingTarget(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     return l_errl;
 }
 
-bool getTargetingAttrHelper(TARGETING::Target * l_pTargTarget,
+bool getTargetingAttrHelper(TARGETING::Target * i_pTargTarget,
                             const TARGETING::ATTRIBUTE_ID i_targAttrId,
                             const uint32_t i_attrSize, void * o_pAttr)
 {
-    return l_pTargTarget->_tryGetAttr(i_targAttrId, i_attrSize, o_pAttr);
+    return i_pTargTarget->_tryGetAttr(i_targAttrId, i_attrSize, o_pAttr);
 }
 
 ///
@@ -462,6 +463,40 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
         o_pos = l_pos;
     }
 
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platErrorOnSet function
+//******************************************************************************
+ReturnCode platErrorOnSet( TARGETING::Target * i_pTargTarget,
+                           const fapi2::AttributeId i_fapiAttrId )
+{
+    // Just create an error to return back
+    FAPI_ERR("platErrorOnSet: Set not valid for Attribute %X on Target %.8X",
+             i_fapiAttrId, TARGETING::get_huid(i_pTargTarget) );
+    /*@
+     * @errortype
+     * @moduleid     fapi2::MOD_FAPI2_PLAT_ERROR_ON_SET
+     * @reasoncode   fapi2::RC_SET_ATTR_NOT_VALID
+     * @userdata1    Target HUID
+     * @userdata2    FAPI Attribute Id
+     * @devdesc      platErrorOnSet> Set operation not valid
+     * @custdesc     Firmware error
+     */
+    errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     fapi2::MOD_FAPI2_PLAT_ERROR_ON_SET,
+                                     fapi2::RC_SET_ATTR_NOT_VALID,
+                                     TARGETING::get_huid(i_pTargTarget),
+                                     i_fapiAttrId,
+                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+    l_errl->collectTrace(FAPI_TRACE_NAME);
+    l_errl->collectTrace(FAPI_IMP_TRACE_NAME);
+
+    // attach our log to the fapi RC and return it
+    ReturnCode l_rc;
+    l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     return l_rc;
 }
 
@@ -2652,11 +2687,12 @@ ReturnCode platGetMBvpdSlopeInterceptData(
     return rc;
 }
 
+#ifndef CONFIG_AXONE
 //******************************************************************************
 // fapi::platAttrSvc::platGetFreqMcaMhz function
 //******************************************************************************
 ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                             uint32_t & o_val)
+                             ATTR_FREQ_MCA_MHZ_Type & o_val)
 {
     // The POR config for Cumulus is to run the MC/DMI clocks directly
     // off of the NEST PLL in 'sync' mode.  To support 'sync' mode FW
@@ -2678,6 +2714,7 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     }
     return l_rc;
 }
+#endif
 
 
 } // End platAttrSvc namespace
