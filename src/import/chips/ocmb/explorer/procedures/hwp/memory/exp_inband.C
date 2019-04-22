@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -443,6 +443,8 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                  "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
                  mss::c_str(i_target), i_data.size(), sizeof(host_fw_response_struct));
 
+//TODO CQ: SW461052 Correct MMIO CRC responses
+#ifndef CONFIG_AXONE_BRING_UP
     FAPI_ASSERT(l_crc == o_response.response_header_crc,
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
@@ -450,6 +452,7 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                 .set_OCMB_TARGET(i_target),
                 "%s Response CRC failed to validate computed: 0x%08x got: 0x%08x",
                 mss::c_str(i_target), l_crc, o_response.response_header_crc);
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
