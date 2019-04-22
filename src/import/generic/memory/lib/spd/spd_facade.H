@@ -1059,6 +1059,20 @@ class facade final
         fapi_try_exit:
             return fapi2::current_err;
         }
+
+        ///
+        /// @brief Decodes module base height
+        /// @param[out] o_value SPD encoded value
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode module_base_height(uint8_t& o_value) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->module_base_height(o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
         ///
         /// @brief Decodes module nominal height max
         /// @param[out] o_value SPD encoded value
