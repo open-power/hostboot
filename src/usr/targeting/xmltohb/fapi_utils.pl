@@ -264,7 +264,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_ABUS          => "unit-abus-power9",
     TARGET_TYPE_L4            => "unit-l4-power9",
     TARGET_TYPE_CORE          => "unit-core-power9",
-    TARGET_TYPE_EQ            => "unit-eq-power9",
+    TARGET_TYPE_EQ            => "unit-eq",
     TARGET_TYPE_MCA           => "unit-mca-power9",
     TARGET_TYPE_MCBIST        => "unit-mcbist-power9",
     TARGET_TYPE_MI            => "unit-mi-power9",
@@ -274,7 +274,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_OBUS_BRICK    => "unit-obus-brick-power9",
     TARGET_TYPE_SBE           => "unit-sbe-power9",
     TARGET_TYPE_PPE           => "unit-ppe-power9",
-    TARGET_TYPE_PERV          => "unit-perv-power9",
+    TARGET_TYPE_PERV          => "unit-perv",
     TARGET_TYPE_PEC           => "unit-pec-power9",
     TARGET_TYPE_PHB           => "unit-phb-power9",
     TARGET_TYPE_MC            => "unit-mc-power9",
@@ -284,6 +284,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_OCMB_CHIP     => "chip-ocmb",
     TARGET_TYPE_MEM_PORT      => "unit-mem_port",
     TARGET_TYPE_PMIC          => "pmic",
+    TARGET_TYPE_NMMU          => "unit-nmmu-power10",
     };
 
     # Loop through all of the targets that this attribute

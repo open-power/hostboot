@@ -6251,13 +6251,9 @@ sub generateTargetingImage {
             $targetSystemInstance = $targetInstance;
             next;
         }
-        elsif(($targetInstance->{type} eq "enc-node-power8") && ($targetNodeCnt == 0))
-        {
-            $targetNodeCnt = 1;
-            $targetNodeInstance = $targetInstance;
-            next;
-        }
-        elsif(($targetInstance->{type} eq "enc-node-power9") && ($targetNodeCnt == 0))
+        elsif((($targetInstance->{type} eq "enc-node-power8")   ||
+               ($targetInstance->{type} eq "enc-node-power9")   ||
+               ($targetInstance->{type} eq "enc-node-power10")) && ($targetNodeCnt == 0))
         {
             $targetNodeCnt = 1;
             $targetNodeInstance = $targetInstance;

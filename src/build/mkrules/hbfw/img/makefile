@@ -366,7 +366,7 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 NIMBUS_HBD_IMG = simics_NIMBUS_targeting.bin
 CUMULUS_HBD_IMG = simics_CUMULUS_targeting.bin
 CUMULUS_CDIMM_HBD_IMG = simics_CUMULUS_CDIMM_targeting.bin
-P10_HBD_IMG = simics_AXONE_targeting.bin
+P10_HBD_IMG = simics_P10_targeting.bin
 
 NIMBUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9n.hw_ref_image.bin}
 CUMULUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9c.hw_ref_image.bin}
@@ -443,7 +443,6 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
         GEN_CUMULUS_BIN_FILES = CUMULUS:SBE=${${CUMULUS_SBE_IMG}:P},HCODE=${${CUMULUS_HCODE_IMG}:P},OCC=${${CUMULUS_OCC_IMG}:P},HBD=${${CUMULUS_HBD_IMG}:P},CENHWIMG=${${CUMULUS_CENHWIMG_IMG}:P}
         GEN_CUMULUS_CDIMM_BIN_FILES = CUMULUS_CDIMM:SBE=${${CUMULUS_SBE_IMG}:P},HCODE=${${CUMULUS_HCODE_IMG}:P},OCC=${${CUMULUS_OCC_IMG}:P},HBD=${${CUMULUS_CDIMM_HBD_IMG}:P},CENHWIMG=${${CUMULUS_CENHWIMG_IMG}:P}
         GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P},CENHWIMG=${P10_CENHWIMG_IMG}
-
     .endif
     GEN_ZZ_BIN_FILES = ZZ:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P},HBD=${${ZZ_HBD_IMG}:P}
     GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P},MEMD=${${ZEPPELIN_MEMD_IMG}:P},HBD=${${ZEPPELIN_HBD_IMG}:P}
@@ -460,13 +459,16 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
                              --systemBinFiles ${GEN_ZEPPELIN_BIN_FILES} \
                              --systemBinFiles ${GEN_FLEETWOOD_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ2U_BIN_FILES} \
+                             --systemBinFiles ${GEN_ZZGEN4_BIN_FILES} \
+                             --systemBinFiles ${GEN_ZZ2UGEN4_BIN_FILES} \
+                             --systemBinFiles ${GEN_P10_BIN_FILES} \
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = NIMBUS:HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_VPO_HBD_IMG}:P},CENHWIMG=EMPTY
     GEN_CUMULUS_BIN_FILES = CUMULUS:HCODE=${${CUMULUS_HCODE_IMG}:P},CENHWIMG=${${CUMULUS_CENHWIMG_IMG}:P}
     GEN_CUMULUS_CDIMM_BIN_FILES = CUMULUS:HCODE=${${CUMULUS_HCODE_IMG}:P},CENHWIMG=${${CUMULUS_CENHWIMG_IMG}:P}
-    GEN_P10_BIN_FILES = P10:HCODE=${${P10_HCODE_IMG}:P},HBD=${${P10_VPO_HBD_IMG}:P},CENHWIMG=EMPTY
+    GEN_P10_BIN_FILES = P10:HCODE=${${P10_HCODE_IMG}:P},HBD=${${P10_HBD_IMG}:P},CENHWIMG=EMPTY
     SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${PNOR_LAYOUT} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} \
                              --systemBinFiles ${GEN_CUMULUS_BIN_FILES} \

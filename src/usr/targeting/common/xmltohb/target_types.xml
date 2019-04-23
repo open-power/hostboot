@@ -2514,14 +2514,19 @@
   </targetType>
 
   <targetType>
-    <id>unit-eq-power10</id>
+    <id>unit-eq</id>
     <parent>unit</parent>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
     <attribute>
       <default>EQ</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-eq-power10</id>
+    <parent>unit-eq</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
 
@@ -2530,7 +2535,7 @@
      Quad: 2 ex's and one ep -->
   <targetType>
     <id>unit-eq-power9</id>
-    <parent>unit</parent>
+    <parent>unit-eq</parent>
     <attribute>
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
@@ -2562,10 +2567,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>EQ</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3897,6 +3898,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-perv</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>PERV</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-perv-axone</id>
     <parent>unit-perv-power9</parent>
     <attribute>
@@ -3925,11 +3935,7 @@
 
   <targetType>
     <id>unit-perv-power10</id>
-    <parent>unit</parent>
-    <attribute>
-      <default>PERV</default>
-      <id>TYPE</id>
-    </attribute>
+    <parent>unit-perv</parent>
   </targetType>
 
   <!-- PERV
@@ -3937,7 +3943,7 @@
      Cumulus: 1 per chiplet -->
   <targetType>
     <id>unit-perv-power9</id>
-    <parent>unit</parent>
+    <parent>unit-perv</parent>
     <attribute>
       <default>0</default>
       <id>DECONFIG_GARDABLE</id>
@@ -3962,10 +3968,6 @@
     <attribute>
       <default>5</default>
       <id>PG</id>
-    </attribute>
-    <attribute>
-      <default>PERV</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
