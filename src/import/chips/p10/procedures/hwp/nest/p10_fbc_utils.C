@@ -72,7 +72,7 @@ fapi2::ReturnCode p10_fbc_utils_get_fbc_state(
              "Error reading pb_init from Powerbus ES3 Mode Config Register");
 
     // fabric is initialized if PB_INITIALIZED bit is one/set
-    o_is_initialized = l_fbc_mode_data && 0x8000000000000000;
+    o_is_initialized = l_fbc_mode_data & 0x8000000000000000;
 
     // read ADU PMisc Mode Register state
     FAPI_TRY(fapi2::getScom(i_target, PU_SND_MODE_REG, l_pmisc_mode_data),
