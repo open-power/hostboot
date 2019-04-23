@@ -6683,7 +6683,7 @@ sub generateTargetingImage {
                     # list, num associations x 8 byte pointers to association lists
 
                     # length(double + quad + quad + # associations x quad)
-                    $index *= (20 + 8 * (scalar @associationTypes));
+                    $index *= (20 + 6 * (scalar @associationTypes));
                     $attrhash{$attributeId}->{default} = $index + $firstTgtPtr;
                 }
 
