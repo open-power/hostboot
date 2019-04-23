@@ -709,7 +709,7 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
                 displayHwpf( user_data->iv_pData, user_data->iv_Size,
                              user_data->iv_header.iv_sst);
             }
-            else
+            else if(user_data->iv_header.iv_compId == ERRL_COMP_ID)
             {
                 switch ( user_data->iv_header.iv_sst )
                 {
