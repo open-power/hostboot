@@ -36,110 +36,198 @@
 #ifndef __P10_HCD_COMMON_H__
 #define __P10_HCD_COMMON_H__
 
-// TODO RTC 207122 remove when scomdef address header is merged
-#define  G_CPLT_CTRL0                 0x20000000
-#define  G_CPLT_CTRL0_OR              0x20000010
-#define  G_CPLT_CTRL0_CLR             0x20000020
-#define  G_CPLT_CTRL1                 0x20000001
-#define  G_CPLT_CTRL1_OR              0x20000011
-#define  G_CPLT_CTRL1_CLR             0x20000021
-#define  G_CPLT_CTRL2                 0x20000002
-#define  G_CPLT_CTRL2_OR              0x20000012
-#define  G_CPLT_CTRL2_CLR             0x20000022
-#define  G_CPLT_CTRL3                 0x20000003
-#define  G_CPLT_CTRL3_OR              0x20000013
-#define  G_CPLT_CTRL3_CLR             0x20000023
-#define  G_CPLT_CTRL4                 0x20000004
-#define  G_CPLT_CTRL4_OR              0x20000014
-#define  G_CPLT_CTRL4_CLR             0x20000024
-#define  G_CPLT_STAT0                 0x20000100
-#define  G_SCAN_REGION_TYPE           0x20030005
-#define  G_CLK_REGION_TYPE            0x20030006
-#define  G_CLOCK_STAT_SL              0x20030008
-#define  G_CLOCK_STAT_NSL             0x20030009
-#define  G_CLOCK_STAT_ARY             0x2003000A
-#define  G_QME_CPMS_CGCSR             0x200E0E00
-#define  G_QME_CPMS_CGCSR_CLR         0x200E0E02
-#define  G_QME_CPMS_CGCSR_OR          0x200E0E03
+#include <stdint.h>
+
+//when include scom headers
+#ifndef __PPE_QME
+
+    #define CPMS_CUCR_RW                 0xC000E3C0
+    #define CPMS_CUCR_WO_CLEAR           0xC000E3E0
+    #define CPMS_CUCR_WO_OR              0xC000E3F0
+
+    #define CPMS_RVCSR_RW                CPMS_RVCSR_SCOM
+    #define CPMS_RVCSR_WO_CLEAR          CPMS_RVCSR_SCOM1
+    #define CPMS_RVCSR_WO_OR             CPMS_RVCSR_SCOM2
+
+    #define CPMS_CGCSR_RW                CPMS_CGCSR_SCOM
+    #define CPMS_CGCSR_WO_CLEAR          CPMS_CGCSR_SCOM1
+    #define CPMS_CGCSR_WO_OR             CPMS_CGCSR_SCOM2
+
+    #define CPMS_CL2_PFETCNTL_RW         CPMS_CL2_PFETCNTL_SCOM
+    #define CPMS_CL2_PFETCNTL_WO_CLEAR   CPMS_CL2_PFETCNTL_SCOM1
+    #define CPMS_CL2_PFETCNTL_WO_OR      CPMS_CL2_PFETCNTL_SCOM2
+
+    #define CPMS_L3_PFETCNTL_RW          CPMS_CL2_PFETCNTL_SCOM
+    #define CPMS_L3_PFETCNTL_WO_CLEAR    CPMS_CL2_PFETCNTL_SCOM1
+    #define CPMS_L3_PFETCNTL_WO_OR       CPMS_CL2_PFETCNTL_SCOM2
+
+    #define QME_SCSR_RW                  QME_SCSR_SCOM
+    #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
+    #define QME_SCSR_WO_OR               QME_SCSR_SCOM2
+
+    #define QME_TFCSR_RW                 QME_TFCSR_SCOM
+    #define QME_TFCSR_WO_CLEAR           QME_TFCSR_SCOM1
+    #define QME_TFCSR_WO_OR              QME_TFCSR_SCOM2
+
+#endif
+
+//-------------------------
+// Test Switches
+//-------------------------
+
+#define P10_HCD_SCAN0_FUNC_REPEAT    1
+#define P10_HCD_SCAN0_GPTR_REPEAT    1
 
 //-------------------------
 // Macros
 //-------------------------
 
-// Create a multi-bit mask of \a n bits starting at bit \a b
+/// \defgroup be64_bits Bit manipulation for 64-bit Big-Endian values
+///
+/// \note These macros only work in the assembler context because we build our
+/// assemblers to do 64-bit arithmetic, which is required for PORE assembly.
+///
+/// @{
+
+/// Create a multi-bit mask of \a n bits starting at bit \a b
 #define BITS64(b, n) ((0xffffffffffffffffull << (64 - (n))) >> (b))
 #define BITS32(b, n) ((0xffffffff            << (32 - (n))) >> (b))
 #define BITS16(b, n) (((0xffff               << (16 - (n))) & 0xffff) >> (b))
 #define BITS8(b, n)  (((0xff                 << (8  - (n))) & 0xff) >> (b))
 
-// Create a single bit mask at bit \a b
+/// Create a single bit mask at bit \a b
 #define BIT64(b) BITS64((b), 1)
 #define BIT32(b) BITS32((b), 1)
 #define BIT16(b) BITS16((b), 1)
 #define BIT8(b)  BITS8((b), 1)
 
-// Create a amount of shift to bit location \a b
-#define SHIFT64(b) (63-b)
-#define SHIFT32(b) (31-b)
-#define SHIFT16(b) (15-b)
-#define SHIFT8(b)  (7-b)
+/// Create a amount of shift to bit location \a b
+#define SHIFT64(b) (63-(b))
+#define SHIFT32(b) (31-(b))
+#define SHIFT16(b) (15-(b))
+#define SHIFT8(b)  (7-(b))
 
 /// Macro used for second word operation
 #define BIT64SH(bit64)          BIT32((bit64-32))
 #define BITS64SH(bit64, size)   BITS32((bit64-32), size)
 #define SHIFT64SH(bit64)        SHIFT32((bit64-32))
 
+/// Second Half Local Register Access
+/// use in32/out32 for first half
+#define in32_sh(addr)           in32(addr+4)
+#define out32_sh(addr, data)    out32(addr+4, data)
+
 /// Macros used for insertFromRight
 #define MASK32(start,size,val)  (val << (32-(start+size)))
 #define MASK64(start,size,val)  (val << (64-(start+size)))
 
-// The BUF_* macros apply operations to a newly constructed buffer
-#define BUF_SET(bit)   fapi2::buffer<uint64_t>().setBit<bit>()
-#define BUF_UNSET(bit) fapi2::buffer<uint64_t>().flush<1>().clearBit<bit>()
-#define BUF_INSERT(start,size,val) \
-    fapi2::buffer<uint64_t>().insertFromRight<start,size>(val)
-#define BUF_REPLACE(start,size,val) \
-    fapi2::buffer<uint64_t>().flush<1>().insertFromRight<start,size>(val)
+// local/scom addr switcher
+// Through several experiments with plat_target,
+// it was very costly to overlay core select
+// and on top of that, scom and local
+// core_select bit locations are differnt.
+// one on first half word, another on second,
+// the instruction is working on 16bit boundary
+// on immediates, therefore the cost depends
+// very much on whether the overlay happened
+// on the first half or second half
+// because first half anyway needs to overlay
+// the multicast info or chiplet_id
 
-// The following DATA_* and MASK_* macros assume you have
-// "fapi2::buffer<uint64_t> l_data64" declared
+// IMPORTANT NOTE:
+// only use the following macro on any register
+// that has both local and scom address
+#ifdef __PPE_QME
+    typedef uint32_t buffer_t;
+    #define MMIO_LOWADDR(addr)                 (addr+4)
+    #define MMIO_LOWBIT(bit)                   (bit-32)
 
-// The DATA_* macros apply operations to a buffer contains existing data
-#define DATA_BIT(buf,op,bit)              buf.op##Bit<bit>()
-#define DATA_SET(bit)                     DATA_BIT(l_data64,set,bit)
-#define DATA_UNSET(bit)                   DATA_BIT(l_data64,clear,bit)
-#define DATA_GET(bit)                     DATA_BIT(l_data64,get,bit)
+    #define HCD_PUTMMIO_C(target, addr, data)  putMmioCore(target, addr, data)
+    #define HCD_GETMMIO_C(target, addr, data)  getMmioCore(target, addr, data)
+    #define HCD_PUTMMIO_Q(target, addr, data)  putMmioQuad(target, addr, data)
+    #define HCD_GETMMIO_Q(target, addr, data)  getMmioQuad(target, addr, data)
 
-#define DATA_FIELD(buf,op,start,size,val) buf.op##Right<start,size>(val)
-#define DATA_INSERT(start,size,val)       DATA_FIELD(l_data64,insertFrom,start,size,val)
-#define DATA_H32W(val)                    DATA_INSERT(0, 32, val)
-#define DATA_L32W(val)                    DATA_INSERT(32,32, val)
+    #define HCD_PUTSCOM_C(target, addr, data)  putScomCore(target, addr, data)
+    #define HCD_GETSCOM_C(target, addr, data)  getScomCore(target, addr, data)
+    #define HCD_PUTSCOM_Q(target, addr, data)  putScomQuad(target, addr, data)
+    #define HCD_GETSCOM_Q(target, addr, data)  getScomQuad(target, addr, data)
+#else
+    typedef uint64_t buffer_t;
+    #define MMIO_LOWADDR(addr)                 (addr)
+    #define MMIO_LOWBIT(bit)                   (bit)
 
-#define DATA_EXTRACT(start,size,val)      DATA_FIELD(l_data64,extractTo,start,size,val)
-#define DATA_H32R(val)                    DATA_EXTRACT(0, 32, val)
-#define DATA_L32R(val)                    DATA_EXTRACT(32,32, val)
+    #define HCD_PUTMMIO_C(target, addr, data)  putScom(target, addr, data)
+    #define HCD_GETMMIO_C(target, addr, data)  getScom(target, addr, data)
+    #define HCD_PUTMMIO_Q(target, addr, data)  putScom(target, addr, data)
+    #define HCD_GETMMIO_Q(target, addr, data)  getScom(target, addr, data)
 
-// The MASK_* macros apply operations to a buffer to create a new data mask
+    #define HCD_PUTSCOM_C(target, addr, data)  putScom(target, addr, data)
+    #define HCD_GETSCOM_C(target, addr, data)  getScom(target, addr, data)
+    #define HCD_PUTSCOM_Q(target, addr, data)  putScom(target, addr, data)
+    #define HCD_GETSCOM_Q(target, addr, data)  getScom(target, addr, data)
+#endif
+
+// The following MMIO_* and SCOM_* macros assume you have
+// BUF_MMIO defined as variable name of your mmio buffer
+// BUF_SCOM defined as variable name of your scom buffer
+#define BUF_MMIO l_mmioData
+#define BUF_SCOM l_scomData
+
+// The following macros apply operations to a buffer contains existing data
+#define BUF_BIT(buf,op,bit)               buf.op##Bit<bit>()
+#define MMIO_GET(bit)                     BUF_BIT(BUF_MMIO,get,bit)
+#define MMIO_SET(bit)                     BUF_BIT(BUF_MMIO,set,bit)
+#define MMIO_UNSET(bit)                   BUF_BIT(BUF_MMIO,clear,bit)
+
+#define SCOM_GET(bit)                     BUF_BIT(BUF_SCOM,get,bit)
+#define SCOM_SET(bit)                     BUF_BIT(BUF_SCOM,set,bit)
+#define SCOM_UNSET(bit)                   BUF_BIT(BUF_SCOM,clear,bit)
+
+#define BUF_FIELD(buf,op,start,size,val)  buf.op##Right<start,size>(val)
+#define MMIO_INSERT(start,size,val)       BUF_FIELD(BUF_MMIO,insertFrom,start,size,val)
+#define MMIO_EXTRACT(start,size,val)      BUF_FIELD(BUF_MMIO,extractTo,start,size,val)
+#define SCOM_INSERT(start,size,val)       BUF_FIELD(BUF_SCOM,insertFrom,start,size,val)
+#define SCOM_EXTRACT(start,size,val)      BUF_FIELD(BUF_SCOM,extractTo,start,size,val)
+
+#define MMIO_PUT32H(val)                  MMIO_INSERT(0, 32, val)
+#define MMIO_PUT32L(val)                  MMIO_INSERT(MMIO_LOWBIT(32), 32, val)
+#define MMIO_GET32H(val)                  MMIO_EXTRACT(0, 32, val)
+#define MMIO_GET32L(val)                  MMIO_EXTRACT(MMIO_LOWBIT(32),32, val)
+
+#define SCOM_PUT32H(val)                  SCOM_INSERT(0, 32, val)
+#define SCOM_PUT32L(val)                  SCOM_INSERT(32,32, val)
+#define SCOM_GET32H(val)                  SCOM_EXTRACT(0, 32, val)
+#define SCOM_GET32L(val)                  SCOM_EXTRACT(32,32, val)
+
+// The following macros apply operations to a buffer to create a new data mask
 // data previously stored in the buffer will be overwritten.
-#define MASK_FLUSH(buf,mask)             buf.flush<mask>()
-#define MASK_ZERO                        MASK_FLUSH(l_data64,0)
-#define MASK_ALL                         MASK_FLUSH(l_data64,1)
+#define BUF_FLUSH(buf,mask)               buf.flush<mask>()
+#define MMIO_ZERO                         BUF_FLUSH(BUF_MMIO,0)
+#define MMIO_ALL1                         BUF_FLUSH(BUF_MMIO,1)
+#define SCOM_ZERO                         BUF_FLUSH(BUF_SCOM,0)
+#define SCOM_ALL1                         BUF_FLUSH(BUF_SCOM,1)
 
-#define MASK_BIT(buf,mask,op,bit)        buf.flush<mask>().op##Bit<bit>()
-#define MASK_SET(bit)                    MASK_BIT(l_data64,0,set,bit)
-#define MASK_UNSET(bit)                  MASK_BIT(l_data64,1,clear,bit)
+#define BUF_BITMASK(buf,mask,op,bit)      buf.flush<mask>().op##Bit<bit>()
+#define MMIO_1BIT(bit)                    BUF_BITMASK(BUF_MMIO,0,set,bit)
+#define MMIO_1ZERO(bit)                   BUF_BITMASK(BUF_MMIO,1,clear,bit)
+#define SCOM_1BIT(bit)                    BUF_BITMASK(BUF_SCOM,0,set,bit)
+#define SCOM_1ZERO(bit)                   BUF_BITMASK(BUF_SCOM,1,clear,bit)
 
-#define MASK_FIELD(buf,mask,start,size,val) \
+#define BUF_LOAD(buf,mask,start,size,val) \
     buf.flush<mask>().insertFromRight<start,size>(val)
-#define MASK_OR(start,size,val)          MASK_FIELD(l_data64,0,start,size,val)
-#define MASK_AND(start,size,val)         MASK_FIELD(l_data64,1,start,size,val)
-#define MASK_CLR(start,size,val)         MASK_FIELD(l_data64,0,start,size,val)
+#define MMIO_ZEROS(start,size,val)        BUF_LOAD(BUF_MMIO,1,start,size,val)
+#define MMIO_BITS(start,size,val)         BUF_LOAD(BUF_MMIO,0,start,size,val)
+#define MMIO_LOAD32H(val)                 MMIO_BITS(0, 32,val)
+#define MMIO_LOAD32L(val)                 MMIO_BITS(MMIO_LOWBIT(32), 32,val)
 
-#define MASK_FIELD2(buf,mask,start1,size1,val1,start2,size2,val2) \
+#define SCOM_ZEROS(start,size,val)        BUF_LOAD(BUF_SCOM,1,start,size,val)
+#define SCOM_BITS(start,size,val)         BUF_LOAD(BUF_SCOM,0,start,size,val)
+#define SCOM_LOAD32H(val)                 SCOM_BITS(0, 32,val)
+#define SCOM_LOAD32L(val)                 SCOM_BITS(32,32,val)
+
+#define BUF_LOAD2(buf,mask,start1,size1,val1,start2,size2,val2) \
     buf.flush<mask>().insertFromRight<start1,size1>(val1).insertFromRight<start2,size2>(val2)
-#define MASK_H32(val)                    MASK_OR(0, 32,val)
-#define MASK_L32(val)                    MASK_OR(32,32,val)
-#define MASK_HL(hword, lword)            MASK_FIELD2(l_data64,0,0,32,hword,32,32,lword)
+#define SCOM_LOAD64(hword, lword)         BUF_LOAD2(BUF_SCOM,0,0,32,hword,32,32,lword)
 
 //-------------------------
 // Constants
@@ -244,44 +332,44 @@ enum P10_HCD_PFET_CTRL_CONSTANTS
 // Clock Control Constants
 enum P10_HCD_CLK_CTRL_CONSTANTS
 {
-    HCD_CLK_STOP                                 = BIT32(0),
-    HCD_CLK_START                                = BIT32(1),
-    HCD_CLK_SLAVE                                = BIT32(2),
-    HCD_CLK_MASTER                               = BIT32(3),
-    HCD_CLK_REGION_PERV                          = BIT32(4),
-    HCD_CLK_REGION_ECL2                          = BITS32(5, 4),
-    HCD_CLK_REGION_L3                            = BITS32(9, 4),
-    HCD_CLK_REGION_MMA                           = BITS32(16, 4),
-    HCD_CLK_THOLD_ALL                            = BITS64SH(48, 3),
-    HCD_CLK_THOLD_SL                             = BIT64SH(48),
-    HCD_CLK_THOLD_NSL                            = BIT64SH(49),
-    HCD_CLK_THOLD_ARY                            = BIT64SH(50)
+    HCD_CLK_STOP                                = BIT32(0),
+    HCD_CLK_START                               = BIT32(1),
+    HCD_CLK_SLAVE                               = BIT32(2),
+    HCD_CLK_MASTER                              = BIT32(3),
+    HCD_CLK_REGION_PERV                         = BIT32(4),
+    HCD_CLK_REGION_ECL2                         = BITS32(5, 4),
+    HCD_CLK_REGION_L3                           = BITS32(9, 4),
+    HCD_CLK_REGION_MMA                          = BITS32(16, 4),
+    HCD_CLK_THOLD_ALL                           = BITS64SH(48, 3),
+    HCD_CLK_THOLD_SL                            = BIT64SH(48),
+    HCD_CLK_THOLD_NSL                           = BIT64SH(49),
+    HCD_CLK_THOLD_ARY                           = BIT64SH(50)
 };
 
 // Scan Type Constants
 enum P10_HCD_SCAN_TYPE_CONSTANTS
 {
-    SCAN_TYPE_FUNC                          = BIT64(48),
-    SCAN_TYPE_CFG                           = BIT64(49),
-    SCAN_TYPE_CCFG_GPTR                     = BIT64(50),
-    SCAN_TYPE_REGF                          = BIT64(51),
-    SCAN_TYPE_LBIST                         = BIT64(52),
-    SCAN_TYPE_ABIST                         = BIT64(53),
-    SCAN_TYPE_REPR                          = BIT64(54),
-    SCAN_TYPE_TIME                          = BIT64(55),
-    SCAN_TYPE_BNDY                          = BIT64(56),
-    SCAN_TYPE_FARR                          = BIT64(57),
-    SCAN_TYPE_CMSK                          = BIT64(58),
-    SCAN_TYPE_INEX                          = BIT64(59)
+    HCD_SCAN_TYPE_FUNC                          = BIT64(48),
+    HCD_SCAN_TYPE_CFG                           = BIT64(49),
+    HCD_SCAN_TYPE_CCFG_GPTR                     = BIT64(50),
+    HCD_SCAN_TYPE_REGF                          = BIT64(51),
+    HCD_SCAN_TYPE_LBIST                         = BIT64(52),
+    HCD_SCAN_TYPE_ABIST                         = BIT64(53),
+    HCD_SCAN_TYPE_REPR                          = BIT64(54),
+    HCD_SCAN_TYPE_TIME                          = BIT64(55),
+    HCD_SCAN_TYPE_BNDY                          = BIT64(56),
+    HCD_SCAN_TYPE_FARR                          = BIT64(57),
+    HCD_SCAN_TYPE_CMSK                          = BIT64(58),
+    HCD_SCAN_TYPE_INEX                          = BIT64(59)
 };
 
 // Scan Flush Constants
 enum P10_HCD_SCAN0_CONSTANTS
 {
-    SCAN0_REGION_ALL                         = 0x7FF,
-    SCAN0_REGION_ALL_BUT_PLL                 = 0x7FE,
-    SCAN0_TYPE_GPTR_REPR_TIME                = 0x230,
-    SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME        = 0xDCF
+    HCD_SCAN0_REGION_ALL                        = 0x7FF,
+    HCD_SCAN0_REGION_ALL_BUT_PLL                = 0x7FE,
+    HCD_SCAN0_TYPE_GPTR_REPR_TIME               = 0x230,
+    HCD_SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME       = 0xDCF
 };
 
 // XSR defines
@@ -311,13 +399,11 @@ enum XCR_DEFS
     HARD_RESET         = 6,
     FORCE_HALT         = 7
 };
+
 enum SLAVE_CONFIG_DEFS
 {
     CFG_PM_DISABLE     = 6,
     CFG_PM_MUX_DISABLE = 7
 };
-
-#define P10_HCD_SCAN_FUNC_REPEAT 1
-#define P10_HCD_SCAN_GPTR_REPEAT 1
 
 #endif  // __P10_HCD_COMMON_H__
