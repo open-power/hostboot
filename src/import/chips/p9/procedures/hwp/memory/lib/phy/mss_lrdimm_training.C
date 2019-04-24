@@ -445,8 +445,8 @@ fapi2::ReturnCode mrep::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 
     std::vector<cw_info> l_bcws =
     {
-        {i_rank, NIBBLE0_BCW_NUMBER, i_delay, mss::tmrc(), mss::CW8_DATA_LEN, cw_info::BCW},
-        {i_rank, NIBBLE1_BCW_NUMBER, i_delay, mss::tmrc(), mss::CW8_DATA_LEN, cw_info::BCW},
+        {i_rank, NIBBLE0_BCW_NUMBER, i_delay, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
+        {i_rank, NIBBLE1_BCW_NUMBER, i_delay, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
     };
 
     uint8_t l_sim = 0;

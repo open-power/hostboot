@@ -96,6 +96,9 @@ enum db02_def : size_t
     HOST_VREF_CW = 0x5, // Func space 5
     DRAM_VREF_CW = 0x6, // Func space 5
     BUFF_TRAIN_CONFIG_CW = 0x4, // Func space 6
+
+    // Safe delays for BCW's
+    BCW_SAFE_DELAY = 2000,
 };
 
 namespace ddr4
@@ -302,7 +305,7 @@ inline fapi2::ReturnCode set_buffer_training( const fapi2::Target<fapi2::TARGET_
     uint64_t l_encoding = 0;
     fapi2::Assert(find_value_from_key(BUFF_TRAINING, i_mode, l_encoding));
 
-    cw_data l_data(FUNC_SPACE_0, BUFF_TRAIN_MODE_CW, l_encoding, mss::tmrc());
+    cw_data l_data(FUNC_SPACE_0, BUFF_TRAIN_MODE_CW, l_encoding, mss::tmrd_l2());
     FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
@@ -453,9 +456,8 @@ inline fapi2::ReturnCode set_command_space( const fapi2::Target<fapi2::TARGET_TY
     }
 
     // From the DDR4DB02 Spec: BC06 - Command Space Control Word
-    // After issuing a data buffer command via writes to BC06 waiting for tMRC(16 tCK)
-    // is required before the next DRAM command or BCW write can be issued.
-    cw_data l_data(FUNC_SPACE_0, CMD_SPACE_CW, i_command, mss::tmrc());
+    // Waiting safe delay here as we've seen issues in the lab where the required tMRD_l2 isn't sufficient
+    cw_data l_data(FUNC_SPACE_0, CMD_SPACE_CW, i_command, BCW_SAFE_DELAY);
     FAPI_TRY( settings_boilerplate<BCW_4BIT>(i_target, l_data, io_inst) );
 
 fapi_try_exit:
@@ -495,7 +497,7 @@ inline fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DI
     FAPI_TRY(mss::eff_dimm_ddr4_f0bc1x(i_target, l_nominal_bc_value));
 
     {
-        cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, l_nominal_bc_value, mss::tmrc());
+        cw_data l_data(FUNC_SPACE_0, BUFF_CONFIG_CW, l_nominal_bc_value, mss::tmrd_l2());
         l_data.iv_data.writeBit<PBA_POSITION>(i_state);
         FAPI_INF("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
         FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
