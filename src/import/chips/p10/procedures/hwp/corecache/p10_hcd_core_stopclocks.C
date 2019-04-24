@@ -47,6 +47,16 @@
 #include "p10_hcd_corecache_clock_control.H"
 #include "p10_hcd_common.H"
 
+#ifdef __PPE_QME
+    #include "p10_hcd_addresses.H"
+#else
+    #include "p10_scom_eq.H"
+    #include "p10_scom_c.H"
+    using namespace scomt::eq;
+    using namespace scomt::c;
+#endif
+
+
 //------------------------------------------------------------------------------
 // Constant Definitions
 //------------------------------------------------------------------------------
@@ -64,31 +74,27 @@ enum P10_HCD_CORE_STOPCLOCKS_CONSTANTS
 
 fapi2::ReturnCode
 p10_hcd_core_stopclocks(
-    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_target,
-    uint32_t i_regions)
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_target)
 {
-
-    fapi2::buffer<uint64_t> l_data64  = 0;
-    uint32_t                l_timeout = 0;
-
-// @todo RTC 207921
-//     fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
-//         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
-    fapi2::Target < fapi2::TARGET_TYPE_EQ > eq_target =
-        i_target.getParent < fapi2::TARGET_TYPE_EQ > ();
+    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
+        i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
+    uint32_t                l_regions  = i_target.getCoreSelect();
+    uint32_t                l_timeout  = 0;
+    fapi2::buffer<uint64_t> l_scomData = 0;
+    fapi2::buffer<buffer_t> l_mmioData = 0;
 
     FAPI_INF(">>p10_hcd_core_stopclocks");
 
     FAPI_DBG("Disable ECL2 Regional PSCOMs via CPLT_CTRL3[5-8:ECL2_REGIONS]");
-    FAPI_TRY( putScom( eq_target, G_CPLT_CTRL3_CLR, MASK_H32(i_regions) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL3_WO_CLEAR, SCOM_LOAD32H(l_regions) ) );
 
     FAPI_DBG("Enable ECL2 Regional Fences via CPLT_CTRL1[5-8:ECL2_FENCES]");
-    FAPI_TRY( putScom( eq_target, G_CPLT_CTRL1_OR, MASK_H32(i_regions) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL1_WO_OR,  SCOM_LOAD32H(l_regions) ) );
 
-    FAPI_TRY( p10_hcd_corecache_clock_control(eq_target, i_regions, HCD_CLK_STOP ) );
+    FAPI_TRY( p10_hcd_corecache_clock_control(eq_target, l_regions, HCD_CLK_STOP ) );
 
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
-    FAPI_TRY( putScom( i_target, G_QME_CPMS_CGCSR_CLR, MASK_SET(1) ) );
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(1) ) );
 
     FAPI_DBG("Check ECL2 Skewadjust Removed via CPMS_CGCSR[33:CL2_CLK_SYNC_DONE]");
     l_timeout = HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
@@ -96,10 +102,10 @@ p10_hcd_core_stopclocks(
 
     do
     {
-        FAPI_TRY( getScom( i_target, G_QME_CPMS_CGCSR, l_data64 ) );
+        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR_RW), l_mmioData ) );
 
         // use multicastOR to check 0
-        if( DATA_GET(33) == 0 )
+        if( MMIO_GET(MMIO_LOWBIT(33)) == 0 )
         {
             break;
         }
@@ -112,7 +118,7 @@ p10_hcd_core_stopclocks(
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::ECL2_CLK_SYNC_DROP_TIMEOUT()
                 .set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CGCSR(l_data64)
+                .set_CPMS_CGCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
                 "ECL2 Clock Sync Drop Timeout");
 

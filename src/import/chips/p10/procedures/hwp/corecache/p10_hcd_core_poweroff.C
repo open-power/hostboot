@@ -56,8 +56,7 @@
 
 fapi2::ReturnCode
 p10_hcd_core_poweroff(
-    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target,
-    uint32_t i_regions)
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
     FAPI_INF(">>p10_hcd_core_poweroff");
 

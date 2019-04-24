@@ -41,8 +41,7 @@
 typedef fapi2::ReturnCode (*p10_hcd_cache_poweroff_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_CORE |
     fapi2::TARGET_TYPE_MULTICAST,
-    fapi2::MULTICAST_AND > &,
-    uint32_t);
+    fapi2::MULTICAST_AND > &);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -60,8 +59,7 @@ extern "C"
     fapi2::ReturnCode p10_hcd_cache_poweroff(
         const fapi2::Target < fapi2::TARGET_TYPE_CORE |
         fapi2::TARGET_TYPE_MULTICAST,
-        fapi2::MULTICAST_AND > & i_target,
-        uint32_t i_regions);
+        fapi2::MULTICAST_AND > & i_target);
 
 } // extern "C"
 

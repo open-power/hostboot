@@ -25,4 +25,6 @@
 PROCEDURE=p10_hcd_corecache_clock_control
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
+# TODO:  remove when clock stat works.
+lib$(PROCEDURE)_COMMONFLAGS += -DEQ_CLOCK_STAT_DISABLE
 $(call BUILD_PROCEDURE)

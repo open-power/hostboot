@@ -40,7 +40,14 @@
 //------------------------------------------------------------------------------
 
 #include "p10_hcd_corecache_clock_control.H"
-#include <p10_hcd_common.H>
+#include "p10_hcd_common.H"
+
+#ifdef __PPE_QME
+    #include "p10_hcd_addresses.H"
+#else
+    #include "p10_scom_eq.H"
+    using namespace scomt::eq;
+#endif
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -73,42 +80,41 @@ p10_hcd_corecache_clock_control(
 
 {
 
-    fapi2::buffer<uint64_t> l_data64                = 0;
-#ifdef __PPE_QME
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
+    fapi2::buffer<uint64_t> l_scomData              = 0;
     uint32_t                l_timeout               = 0;
+#ifndef EQ_CLOCK_STAT_DISABLE
+    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
     uint32_t                l_clk_stat              = 0;
     uint32_t                l_clk_stat_expected     = 0;
 #endif
-    FAPI_INF(">>p10_hcd_corecache_clock_control[%s] on regions[0x%08X]",
-             (i_command & HCD_CLK_STOP) ? "STOP" : "START", i_regions);
+
+    FAPI_INF(">>p10_hcd_corecache_clock_control[%x](b0:stop/b1:start) on regions[0x%08X]", i_command, i_regions);
 
     FAPI_DBG("Exit Flush (set flushmode inhibit) via CPLT_CTRL4[REGIONS]");
-    FAPI_TRY( putScom( i_target, G_CPLT_CTRL4_OR, MASK_H32(i_regions) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL4_WO_OR, SCOM_LOAD32H(i_regions) ) );
 
     FAPI_DBG("Enable Alignment via CPLT_CTRL0[3:CTRL_CC_FORCE_ALIGN]");
-    FAPI_TRY( putScom( i_target, G_CPLT_CTRL0_OR, MASK_SET(3) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL0_WO_OR, SCOM_1BIT(3) ) );
 
     FAPI_DBG("Disable Alignment via CPLT_CTRL0[3:CTRL_CC_FORCE_ALIGN]");
-    FAPI_TRY( putScom( i_target, G_CPLT_CTRL0_CLR, MASK_SET(3) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL0_WO_CLEAR, SCOM_1BIT(3) ) );
 
     FAPI_DBG("Clear SCAN_REGION_TYPE Register");
-    FAPI_TRY( putScom( i_target, G_SCAN_REGION_TYPE, 0 ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, SCAN_REGION_TYPE, 0 ) );
 
     FAPI_DBG("Start/Stop ECL2 Clocks via CLK_REGION_TYPE");
-    FAPI_TRY( putScom( i_target, G_CLK_REGION_TYPE, MASK_HL( (i_command | i_regions), HCD_CLK_THOLD_ALL ) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CLK_REGION, SCOM_LOAD64( (i_command | i_regions), HCD_CLK_THOLD_ALL ) ) );
 
-#ifdef __PPE_QME
     FAPI_DBG("Poll OPCG done bit to check for completeness via CPLT_STAT0[8:CC_CTRL_OPCG_DONE_DC]");
     l_timeout = HCD_CORECACHE_CLK_CTRL_POLL_TIMEOUT_HW_NS /
                 HCD_CORECACHE_CLK_CTRL_POLL_DELAY_HW_NS;
 
     do
     {
-        FAPI_TRY( getScom( i_target, G_CPLT_STAT0, l_data64 ) );
+        FAPI_TRY( HCD_GETSCOM_Q( i_target, CPLT_STAT0, l_scomData ) );
 
         //use multicastAND to check 1
-        if( DATA_GET(8) == 1 )
+        if( SCOM_GET(8) == 1 )
         {
             break;
         }
@@ -121,12 +127,13 @@ p10_hcd_corecache_clock_control(
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::CORECACHE_CLK_CTRL_TIMEOUT()
                 .set_CLK_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_CLK_CTRL_POLL_TIMEOUT_HW_NS)
-                .set_CPLT_STAT0(l_data64)
+                .set_CPLT_STAT0(l_scomData)
                 .set_CLK_COMMAND(i_command)
                 .set_CLK_REGIONS(i_regions)
                 .set_QUAD_TARGET(i_target),
                 "Core/Cache Clock Control Timeout");
 
+#ifndef EQ_CLOCK_STAT_DISABLE
     // IF clocks are stopped, check for stat bits ON, use MC_AND target
     // Otherwise, check for bits OFF, use MC_OR target
 
@@ -147,15 +154,15 @@ p10_hcd_corecache_clock_control(
     if( i_command & HCD_CLK_STOP )
     {
         l_clk_stat_expected = i_regions;
-        FAPI_TRY( getScom( i_target , G_CLOCK_STAT_SL, l_data64 ) );
+        FAPI_TRY( getScom( i_target , CLOCK_STAT_SL, l_scomData ) );
     }
     else
     {
         // stat expected 0s in this case
-        FAPI_TRY( getScom( l_mc_or , G_CLOCK_STAT_SL, l_data64 ) );
+        FAPI_TRY( getScom( l_mc_or , CLOCK_STAT_SL, l_scomData ) );
     }
 
-    DATA_H32R(l_clk_stat);
+    SCOM_GET32H(l_clk_stat);
     FAPI_ASSERT( ( ( l_clk_stat & i_regions ) == l_clk_stat_expected ),
                  fapi2::CORECACHE_CLK_CTRL_SL_FAILED()
                  .set_CLK_STAT_SL(l_clk_stat)
@@ -168,14 +175,14 @@ p10_hcd_corecache_clock_control(
 
     if( i_command & HCD_CLK_STOP )
     {
-        FAPI_TRY( getScom( i_target , G_CLOCK_STAT_NSL, l_data64 ) );
+        FAPI_TRY( getScom( i_target , CLOCK_STAT_NSL, l_scomData ) );
     }
     else
     {
-        FAPI_TRY( getScom( l_mc_or , G_CLOCK_STAT_NSL, l_data64 ) );
+        FAPI_TRY( getScom( l_mc_or , CLOCK_STAT_NSL, l_scomData ) );
     }
 
-    DATA_H32R(l_clk_stat);
+    SCOM_GET32H(l_clk_stat);
     FAPI_ASSERT( ( ( l_clk_stat & i_regions ) == l_clk_stat_expected ),
                  fapi2::CORECACHE_CLK_CTRL_NSL_FAILED()
                  .set_CLK_STAT_NSL(l_clk_stat)
@@ -188,14 +195,14 @@ p10_hcd_corecache_clock_control(
 
     if( i_command & HCD_CLK_STOP )
     {
-        FAPI_TRY( getScom( i_target , G_CLOCK_STAT_NSL, l_data64 ) );
+        FAPI_TRY( HCD_GETSCOM_Q( i_target, CLOCK_STAT_ARY, l_scomData ) );
     }
     else
     {
-        FAPI_TRY( getScom( l_mc_or , G_CLOCK_STAT_NSL, l_data64 ) );
+        FAPI_TRY( HCD_GETSCOM_Q( l_mc_or,  CLOCK_STAT_ARY, l_scomData ) );
     }
 
-    DATA_H32R(l_clk_stat);
+    SCOM_GET32H(l_clk_stat);
     FAPI_ASSERT( ( ( l_clk_stat & i_regions ) == l_clk_stat_expected ),
                  fapi2::CORECACHE_CLK_CTRL_ARY_FAILED()
                  .set_CLK_STAT_ARY(l_clk_stat)
@@ -205,7 +212,7 @@ p10_hcd_corecache_clock_control(
 #endif
 
     FAPI_DBG("Enter Flush (clear flushmode inhibit) via CPLT_CTRL4[REGIONS]");
-    FAPI_TRY( putScom( i_target, G_CPLT_CTRL4_CLR, MASK_H32(i_regions) ) );
+    FAPI_TRY( HCD_PUTSCOM_Q( i_target, CPLT_CTRL4_WO_CLEAR, SCOM_LOAD32H(i_regions) ) );
 
 fapi_try_exit:
 

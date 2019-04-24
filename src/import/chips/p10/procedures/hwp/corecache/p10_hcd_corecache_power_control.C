@@ -43,6 +43,13 @@
 #include "p10_hcd_corecache_power_control.H"
 #include "p10_hcd_common.H"
 
+#ifdef __PPE_QME
+    #include "p10_hcd_addresses.H"
+#else
+    #include "p10_scom_eq.H"
+    #include "p10_scom_c.H"
+#endif
+
 //------------------------------------------------------------------------------
 // Constant Definitions
 //------------------------------------------------------------------------------
@@ -78,22 +85,17 @@ const uint32_t HCD_CPMS_PFETCNTL[2] =
     0x200E0E20  //L3
 };
 
-// TODO: HW487147 - CLEAR and OR addresses switched
-// Needed be switched back once the hardware is fixed.
-const uint32_t HCD_CPMS_PFETCNTL_OR[2] =
-//const uint32_t HCD_CPMS_PFETCNTL_CLR[2] =
+const uint32_t HCD_CPMS_PFETCNTL_CLR[2] =
 {
     0x200E0E2A, //ECL2
     0x200E0E22  //L3
 };
 
-const uint32_t HCD_CPMS_PFETCNTL_CLR[2] =
-//const uint32_t HCD_CPMS_PFETCNTL_OR[2] =
+const uint32_t HCD_CPMS_PFETCNTL_OR[2] =
 {
     0x200E0E2B, //ECL2
     0x200E0E23  //L3
 };
-// End HW487147
 
 const uint32_t HCD_CPMS_PFETSTAT[2] =
 {
@@ -111,7 +113,7 @@ p10_hcd_corecache_power_control(
     uint32_t i_command)
 {
     fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
-    fapi2::buffer<uint64_t> l_data64          = 0;
+    fapi2::buffer<buffer_t> l_mmioData        = 0;
 #ifndef PFET_SENSE_POLL_DISABLE
     uint32_t                l_timeout         = 0;
     uint32_t                l_pfet_senses     = 0;
@@ -121,7 +123,7 @@ p10_hcd_corecache_power_control(
     uint32_t                l_isON            = (i_command & HCD_PFET_ON_MASK);
     uint32_t                l_isVCS           = l_isON;
 
-    FAPI_INF(">>p10_hcd_corecache_power_control[%x]", i_command);
+    FAPI_INF(">>p10_hcd_corecache_power_control[%x](b1x:L3,bx1:ON)", i_command);
 
     do
     {
@@ -137,9 +139,9 @@ p10_hcd_corecache_power_control(
         l_isVCS = l_isVCS ^ 1;
 
         FAPI_DBG("Make sure that we are not forcing PFET while the state isnt idle");
-        FAPI_TRY( getScom(l_mc_or, HCD_CPMS_PFETCNTL[l_isL3], l_data64 ) ); // use Multicast_OR to check 0s
+        FAPI_TRY( HCD_GETMMIO_C(l_mc_or, HCD_CPMS_PFETCNTL[l_isL3], l_mmioData ) ); // use Multicast_OR to check 0s
 
-        DATA_EXTRACT(0, 4, l_pfet_seq_states);
+        MMIO_EXTRACT(0, 4, l_pfet_seq_states);
         FAPI_ASSERT((l_pfet_seq_states == 0),
                     fapi2::CORECACHE_PFET_SEQ_STATE_ERROR()
                     .set_PFET_SEQ_STATES(l_pfet_seq_states)
@@ -149,11 +151,12 @@ p10_hcd_corecache_power_control(
                     .set_CORE_TARGET(i_target),
                     "PFET_SEQ_STATE not 0");
 
-        FAPI_DBG("Clear %s PFET stage select and value override bits via PFETCNTL[4,5/6,7/8]", l_isL3 ? "L3" : "ECL2" );
-        FAPI_TRY( putScom( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MASK_H32( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
+        FAPI_DBG("Clear L3/CL2[%x] PFET stage select and value override bits via PFETCNTL[4,5/6,7/8]", l_isL3);
+        FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MMIO_LOAD32H( HCD_PFET_OVERRIDES[l_isVCS] ) ) );
 
-        FAPI_DBG("Turn %s %s %s", l_isL3 ? "L3" : "ECL2", l_isVCS ? "VCS" : "VDD", l_isON ? "ON" : "OFF");
-        FAPI_TRY( putScom( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3], MASK_H32( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
+        FAPI_DBG("Turn L3/CL2[%x] VCS/VDD[%x] ON/OFF[%x]", l_isL3, l_isVCS, l_isON);
+        FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3],
+                                 MMIO_LOAD32H( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
 
 #ifndef PFET_SENSE_POLL_DISABLE
         FAPI_DBG("Poll for PFET senses to be proper in PFETSTAT[]");
@@ -162,9 +165,9 @@ p10_hcd_corecache_power_control(
 
         do
         {
-            FAPI_TRY( getScom( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_data64 ) );
+            FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
 
-            DATA_H32R(l_pfet_senses);
+            MMIO_GET32H(l_pfet_senses);
 
             //use multicastAND to check 1
             if( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] )
@@ -173,7 +176,7 @@ p10_hcd_corecache_power_control(
             }
 
             // Debug read
-            FAPI_TRY( getScom( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_data64 ) );
+            FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_mmioData ) );
 
             fapi2::delay(HCD_CORECACHE_POW_CTRL_POLL_DELAY_HW_NS,
                          HCD_CORECACHE_POW_CTRL_POLL_DELAY_SIM_CYCLE);
@@ -192,12 +195,13 @@ p10_hcd_corecache_power_control(
 #endif
 
         FAPI_DBG("Reset PFET Sequencer State via PFETCNTL[0,1/2,3]");
-        FAPI_TRY( putScom( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MASK_H32( HCD_PFET_SEQ_STATES[1][l_isVCS] ) ) );
+        FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MMIO_LOAD32H( HCD_PFET_SEQ_STATES[1][l_isVCS] ) ) );
 
+        // Debug read
         FAPI_DBG("Check PFET Sequencer State via PFETCNTL[0,1/2,3]");
-        FAPI_TRY( getScom( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_data64 ) );
+        FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_mmioData ) );
 
-        DATA_EXTRACT(0, 4, l_pfet_seq_states);
+        MMIO_EXTRACT(0, 4, l_pfet_seq_states);
         FAPI_DBG("Current PFET Sequencer State is %x, clear value is %x", l_pfet_seq_states, HCD_PFET_SEQ_STATES[1][l_isVCS]);
 
     }
