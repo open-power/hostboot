@@ -141,8 +141,8 @@ fapi2::ReturnCode mrd_fine::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Note: the function space corresponds to the rank we passed in
     std::vector<cw_info> l_bcws =
     {
-        {i_rank, NIBBLE0_BCW_NUMBER, l_delay_register, mss::tmrc(), mss::CW8_DATA_LEN, cw_info::BCW},
-        {i_rank, NIBBLE1_BCW_NUMBER, l_delay_register, mss::tmrc(), mss::CW8_DATA_LEN, cw_info::BCW},
+        {i_rank, NIBBLE0_BCW_NUMBER, l_delay_register, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
+        {i_rank, NIBBLE1_BCW_NUMBER, l_delay_register, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
     };
 
     uint8_t l_sim = 0;

@@ -132,7 +132,7 @@ fapi2::ReturnCode mrd_coarse::set_delay(const fapi2::Target<fapi2::TARGET_TYPE_D
 
     std::vector<cw_info> l_bcws =
     {
-        {l_func_space, l_bcw_number, l_bcw_data, mss::tmrc(), mss::CW8_DATA_LEN, cw_info::BCW},
+        {l_func_space, l_bcw_number, l_bcw_data, mss::tmrd_l2(), mss::CW8_DATA_LEN, cw_info::BCW},
     };
     mss::ccs::program<fapi2::TARGET_TYPE_MCBIST> l_program;
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);

@@ -136,7 +136,7 @@ fapi2::ReturnCode set_buffer_rd_preamble_mode(const fapi2::Target<fapi2::TARGET_
 
     // Modifies the BCW value accordingly
     l_bcw_value.insertFromRight<PREAMBLE_MODE_POS, PREAMBLE_MODE_LEN>(i_mode);
-    l_bcws.push_back(cw_info(FUNC_SPACE_0, BUFF_CONFIG_CW, l_bcw_value, mss::tmrc(), mss::CW8_DATA_LEN,
+    l_bcws.push_back(cw_info(FUNC_SPACE_0, BUFF_CONFIG_CW, l_bcw_value, mss::tmrd_l2(), mss::CW8_DATA_LEN,
                              cw_info::BCW));
 
     FAPI_TRY(mss::is_simulation(l_sim));
