@@ -2612,6 +2612,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-fc-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>FC</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-iohs-power10</id>
     <parent>unit</parent>
     <attribute>

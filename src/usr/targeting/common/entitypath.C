@@ -345,6 +345,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "Membuf";
         case TYPE_PROC:
             return "Proc";
+        case TYPE_FC:
+            return "FC";
         case TYPE_EX:
             return "EX";
         case TYPE_CORE:

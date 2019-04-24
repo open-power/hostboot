@@ -577,6 +577,713 @@
 </targetInstance>
 
 <!-- ===================================================================== -->
+<!-- FC (Fused Core) Units -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0proc0eq0fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c0</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c1</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c2</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520002</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c3</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520003</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c4</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520004</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c5</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520005</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c6</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520006</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c7</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520007</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c8</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520008</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c9</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x00520009</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c10</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000a</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c11</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000b</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq6fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-6/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c12</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000c</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-6/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq6fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c13</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000d</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq7fc0</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-7/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c14</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000e</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-7/fc-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq7fc1</id>
+    <type>unit-fc-power10</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.fc:k0:n0:s0:p00:c15</default>
+    </attribute>
+<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
+<!--
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+-->
+    <attribute>
+        <id>HUID</id>
+        <default>0x0052000f</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- ===================================================================== -->
 <!-- PERVASIVE Units (PERV Units) -->
 <!-- ===================================================================== -->
 <targetInstance>

@@ -285,6 +285,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_MEM_PORT      => "unit-mem_port",
     TARGET_TYPE_PMIC          => "pmic",
     TARGET_TYPE_NMMU          => "unit-nmmu-power10",
+    TARGET_TYPE_FC            => "unit-fc-power10",
     };
 
     # Loop through all of the targets that this attribute
