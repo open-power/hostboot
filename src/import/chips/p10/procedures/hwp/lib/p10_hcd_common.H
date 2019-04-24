@@ -38,27 +38,28 @@
 
 #include <stdint.h>
 
-//when include scom headers
+#define CPMS_CUCR                    0xC000E3C0
+#define CPMS_CUCR_WO_CLEAR           0xC000E3E0
+#define CPMS_CUCR_WO_OR              0xC000E3F0
+
 #ifndef __PPE_QME
 
-    #define CPMS_CUCR_RW                 0xC000E3C0
-    #define CPMS_CUCR_WO_CLEAR           0xC000E3E0
-    #define CPMS_CUCR_WO_OR              0xC000E3F0
-
-    #define CPMS_PFETDLY_RW              CPMS_PFETDLY
-
-    #define CPMS_CGCSR_RW                CPMS_CGCSR
-
-    #define CPMS_RVCSR_RW                CPMS_RVCSR
-
-    #define QME_SCSR_RW                  QME_SCSR_SCOM
     #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
     #define QME_SCSR_WO_OR               QME_SCSR_SCOM2
 
-    #define QME_TFCSR_RW                 QME_TFCSR_SCOM
     #define QME_TFCSR_WO_CLEAR           QME_TFCSR_SCOM1
     #define QME_TFCSR_WO_OR              QME_TFCSR_SCOM2
 
+#else
+    #ifndef QME_IMAGE_SOURCE
+
+        #define QME_SCSR_WO_CLEAR            QME_SCSR_PPE1
+        #define QME_SCSR_WO_OR               QME_SCSR_PPE2
+
+        #define QME_TFCSR_WO_CLEAR           QME_TFCSR_PPE1
+        #define QME_TFCSR_WO_OR              QME_TFCSR_PPE2
+
+    #endif
 #endif
 
 //-------------------------
