@@ -2403,14 +2403,19 @@
   </targetType>
 
   <targetType>
-    <id>unit-core-power10</id>
+    <id>unit-core</id>
     <parent>unit</parent>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
     <attribute>
       <default>CORE</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-core-power10</id>
+    <parent>unit-core</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
 
@@ -2418,7 +2423,7 @@
      A collection of 4 threads -->
   <targetType>
     <id>unit-core-power9</id>
-    <parent>unit</parent>
+    <parent>unit-core</parent>
     <attribute>
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
@@ -2453,10 +2458,6 @@
     </attribute>
     <attribute>
       <id>PREVIOUS_WAKEUP_FAIL</id>
-    </attribute>
-    <attribute>
-      <default>CORE</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 

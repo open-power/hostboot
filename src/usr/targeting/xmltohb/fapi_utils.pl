@@ -263,7 +263,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_XBUS          => "unit-xbus-power9",
     TARGET_TYPE_ABUS          => "unit-abus-power9",
     TARGET_TYPE_L4            => "unit-l4-power9",
-    TARGET_TYPE_CORE          => "unit-core-power9",
+    TARGET_TYPE_CORE          => "unit-core",
     TARGET_TYPE_EQ            => "unit-eq",
     TARGET_TYPE_MCA           => "unit-mca-power9",
     TARGET_TYPE_MCBIST        => "unit-mcbist-power9",
