@@ -48,7 +48,10 @@
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
-    #include "p10_hcd_addresses.H"
+    #include "p10_scom_eq.H"
+    #include "p10_ppe_c.H"
+    using namespace scomt::eq;
+    using namespace scomt::ppe_c;
 #else
     #include "p10_scom_eq.H"
     #include "p10_scom_c.H"
@@ -102,7 +105,7 @@ p10_hcd_core_stopclocks(
 
     do
     {
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR_RW), l_mmioData ) );
+        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
 
         // use multicastOR to check 0
         if( MMIO_GET(MMIO_LOWBIT(33)) == 0 )

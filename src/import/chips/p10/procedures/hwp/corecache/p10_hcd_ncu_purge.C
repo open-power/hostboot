@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_cache_stopclocks.C $ */
+/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_ncu_purge.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,7 +26,7 @@
 
 
 ///
-/// @file  p10_hcd_cache_stopclocks.C
+/// @file  p10_hcd_ncu_purge.C
 /// @brief
 ///
 
@@ -43,90 +43,89 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#include "p10_hcd_cache_stopclocks.H"
-#include "p10_hcd_corecache_clock_control.H"
+#include "p10_hcd_ncu_purge.H"
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
-    #include "p10_scom_eq.H"
     #include "p10_ppe_c.H"
-    using namespace scomt::eq;
     using namespace scomt::ppe_c;
 #else
-    #include "p10_scom_eq.H"
     #include "p10_scom_c.H"
-    using namespace scomt::eq;
     using namespace scomt::c;
+#endif
+
+#ifdef __PPE_QME
+
+    extern void qme_ncu_purge_abort_detect();
+
 #endif
 
 //------------------------------------------------------------------------------
 // Constant Definitions
 //------------------------------------------------------------------------------
 
-enum P10_HCD_CACHE_STOPCLOCKS_CONSTANTS
+enum P10_HCD_NCU_PURGE_CONSTANTS
 {
-    HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS        = 10000,   // 10^4ns = 10us timeout
-    HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS          = 100,     // 100ns poll loop delay
-    HCD_L3_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE      = 3200,    // 3.2k sim cycle delay
+    HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
+    HCD_NCU_PURGE_DONE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
+    HCD_NCU_PURGE_DONE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
 };
 
 //------------------------------------------------------------------------------
-// Procedure: p10_hcd_cache_stopclocks
+// Procedure: p10_hcd_ncu_purge
 //------------------------------------------------------------------------------
 
 fapi2::ReturnCode
-p10_hcd_cache_stopclocks(
-    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_target)
+p10_hcd_ncu_purge(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
-        i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
-    uint32_t                l_regions  = i_target.getCoreSelect();
-    uint32_t                l_timeout  = 0;
-    fapi2::buffer<uint64_t> l_scomData = 0;
     fapi2::buffer<buffer_t> l_mmioData = 0;
+    uint32_t                l_timeout  = 0;
 
-    FAPI_INF(">>p10_hcd_cache_stopclocks");
+    FAPI_INF(">>p10_hcd_ncu_purge");
 
-    FAPI_DBG("Disable L3 Regional PSCOMs via CPLT_CTRL3[9-12:L3_REGIONS]");
-    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL3_WO_CLEAR, SCOM_LOAD32H(l_regions) ) );
+    FAPI_DBG("Assert NCU_PURGE_REQ via PCR_SCSR[9]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_1BIT(9) ) );
 
-    FAPI_DBG("Enable L3 Regional Fences via CPLT_CTRL1[9-12:L3_FENCES]");
-    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL1_WO_OR, SCOM_LOAD32H(l_regions) ) );
-
-    FAPI_TRY( p10_hcd_corecache_clock_control( eq_target, l_regions, HCD_CLK_STOP ) );
-
-    FAPI_DBG("Disable L3 Skewadjust via CPMS_CGCSR_[0:L3_CLK_SYNC_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(0) ) );
-
-    FAPI_DBG("Check L3 Skewadjust Removed via CPMS_CGCSR[32:L3_CLK_SYNC_DONE]");
-    l_timeout = HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
-                HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS;
+    FAPI_DBG("Wait for NCU_PURGE_DONE via PCR_SCSR[41]");
+    l_timeout = HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS /
+                HCD_NCU_PURGE_DONE_POLL_DELAY_HW_NS;
 
     do
     {
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
 
-        // use multicastOR to check 0
-        if( MMIO_GET(MMIO_LOWBIT(32)) == 0 )
+#ifdef __PPE_QME
+
+        qme_ncu_purge_abort_detect();
+
+#endif
+
+        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+
+        // use multicastAND to check 1
+        if( MMIO_GET( MMIO_LOWBIT(41) ) == 1 )
         {
             break;
         }
 
-        fapi2::delay(HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS,
-                     HCD_L3_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE);
+        fapi2::delay(HCD_NCU_PURGE_DONE_POLL_DELAY_HW_NS,
+                     HCD_NCU_PURGE_DONE_POLL_DELAY_SIM_CYCLE);
     }
     while( (--l_timeout) != 0 );
 
     FAPI_ASSERT((l_timeout != 0),
-                fapi2::L3_CLK_SYNC_DROP_TIMEOUT()
-                .set_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CGCSR(l_mmioData)
+                fapi2::NCU_PURGE_DONE_TIMEOUT()
+                .set_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS)
+                .set_QME_SCSR(l_mmioData)
                 .set_CORE_TARGET(i_target),
-                "L3 Clock Sync Drop Timeout");
+                "NCU Purge Done Timeout");
+
+    FAPI_DBG("Drop NCU_PURGE_REQ/ABORT via PCR_SCSR[9,10]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_CLEAR, MMIO_LOAD32H( BITS32(9, 2) ) ) );
 
 fapi_try_exit:
 
-    FAPI_INF("<<p10_hcd_cache_stopclocks");
+    FAPI_INF("<<p10_hcd_ncu_purge");
 
     return fapi2::current_err;
 

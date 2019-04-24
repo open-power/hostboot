@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_cache_stopclocks.C $ */
+/* $Source: src/import/chips/p10/procedures/hwp/corecache/p10_hcd_l2_tlbie_quiesce.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,7 +26,7 @@
 
 
 ///
-/// @file  p10_hcd_cache_stopclocks.C
+/// @file  p10_hcd_l2_tlbie_quiesce.C
 /// @brief
 ///
 
@@ -43,19 +43,14 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#include "p10_hcd_cache_stopclocks.H"
-#include "p10_hcd_corecache_clock_control.H"
+#include "p10_hcd_l2_tlbie_quiesce.H"
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
-    #include "p10_scom_eq.H"
     #include "p10_ppe_c.H"
-    using namespace scomt::eq;
     using namespace scomt::ppe_c;
 #else
-    #include "p10_scom_eq.H"
     #include "p10_scom_c.H"
-    using namespace scomt::eq;
     using namespace scomt::c;
 #endif
 
@@ -63,70 +58,34 @@
 // Constant Definitions
 //------------------------------------------------------------------------------
 
-enum P10_HCD_CACHE_STOPCLOCKS_CONSTANTS
+enum P10_HCD_L2_TLBIE_QUIESCE_CONSTANTS
 {
-    HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS        = 10000,   // 10^4ns = 10us timeout
-    HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS          = 100,     // 100ns poll loop delay
-    HCD_L3_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE      = 3200,    // 3.2k sim cycle delay
+    HCD_L2_TLBIE_QUIESCE_DELAY_HW_NS      = 5,   // 5ns quiesce delay
+    HCD_L2_TLBIE_QUIESCE_DELAY_SIM_CYCLE  = 32,  // 32 sim cycle delay
 };
 
 //------------------------------------------------------------------------------
-// Procedure: p10_hcd_cache_stopclocks
+// Procedure: p10_hcd_l2_tlbie_quiesce
 //------------------------------------------------------------------------------
 
 fapi2::ReturnCode
-p10_hcd_cache_stopclocks(
-    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_target)
+p10_hcd_l2_tlbie_quiesce(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
-        i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
-    uint32_t                l_regions  = i_target.getCoreSelect();
-    uint32_t                l_timeout  = 0;
-    fapi2::buffer<uint64_t> l_scomData = 0;
     fapi2::buffer<buffer_t> l_mmioData = 0;
 
-    FAPI_INF(">>p10_hcd_cache_stopclocks");
+    FAPI_INF(">>p10_hcd_l2_tlbie_quiesce");
 
-    FAPI_DBG("Disable L3 Regional PSCOMs via CPLT_CTRL3[9-12:L3_REGIONS]");
-    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL3_WO_CLEAR, SCOM_LOAD32H(l_regions) ) );
+    FAPI_DBG("Assert L2RCMD_INTF_QUIESCE/NCU_TLBIE_QUIESCE via PCR_SCSR[7,8]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_LOAD32H( BITS32(7, 2) ) ) );
 
-    FAPI_DBG("Enable L3 Regional Fences via CPLT_CTRL1[9-12:L3_FENCES]");
-    FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL1_WO_OR, SCOM_LOAD32H(l_regions) ) );
-
-    FAPI_TRY( p10_hcd_corecache_clock_control( eq_target, l_regions, HCD_CLK_STOP ) );
-
-    FAPI_DBG("Disable L3 Skewadjust via CPMS_CGCSR_[0:L3_CLK_SYNC_ENABLE]");
-    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(0) ) );
-
-    FAPI_DBG("Check L3 Skewadjust Removed via CPMS_CGCSR[32:L3_CLK_SYNC_DONE]");
-    l_timeout = HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
-                HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS;
-
-    do
-    {
-        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CGCSR), l_mmioData ) );
-
-        // use multicastOR to check 0
-        if( MMIO_GET(MMIO_LOWBIT(32)) == 0 )
-        {
-            break;
-        }
-
-        fapi2::delay(HCD_L3_CLK_SYNC_DROP_POLL_DELAY_HW_NS,
-                     HCD_L3_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE);
-    }
-    while( (--l_timeout) != 0 );
-
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::L3_CLK_SYNC_DROP_TIMEOUT()
-                .set_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS(HCD_L3_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS)
-                .set_CPMS_CGCSR(l_mmioData)
-                .set_CORE_TARGET(i_target),
-                "L3 Clock Sync Drop Timeout");
+    FAPI_DBG("Wait ~10 Cache clocks");
+    fapi2::delay(HCD_L2_TLBIE_QUIESCE_DELAY_HW_NS,
+                 HCD_L2_TLBIE_QUIESCE_DELAY_SIM_CYCLE);
 
 fapi_try_exit:
 
-    FAPI_INF("<<p10_hcd_cache_stopclocks");
+    FAPI_INF("<<p10_hcd_l2_tlbie_quiesce");
 
     return fapi2::current_err;
 

@@ -44,10 +44,11 @@
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
-    #include "p10_hcd_addresses.H"
+    #include "p10_ppe_c.H"
+    using namespace scomt::ppe_c;
 #else
-    #include "p10_scom_eq.H"
     #include "p10_scom_c.H"
+    using namespace scomt::c;
 #endif
 
 //------------------------------------------------------------------------------
@@ -81,26 +82,26 @@ const uint32_t HCD_PFET_SENSE_BITS[2][2] =
 
 const uint32_t HCD_CPMS_PFETCNTL[2] =
 {
-    0x200E0E28, //ECL2
-    0x200E0E20  //L3
+    CPMS_CL2_PFETCNTL,
+    CPMS_L3_PFETCNTL
 };
 
 const uint32_t HCD_CPMS_PFETCNTL_CLR[2] =
 {
-    0x200E0E2A, //ECL2
-    0x200E0E22  //L3
+    CPMS_CL2_PFETCNTL_WO_CLEAR,
+    CPMS_L3_PFETCNTL_WO_CLEAR
 };
 
 const uint32_t HCD_CPMS_PFETCNTL_OR[2] =
 {
-    0x200E0E2B, //ECL2
-    0x200E0E23  //L3
+    CPMS_CL2_PFETCNTL_WO_OR,
+    CPMS_L3_PFETCNTL_WO_OR
 };
 
 const uint32_t HCD_CPMS_PFETSTAT[2] =
 {
-    0x200E0E2C, //ECL2
-    0x200E0E24  //L3
+    CPMS_CL2_PFETSTAT,
+    CPMS_L3_PFETSTAT
 };
 
 //------------------------------------------------------------------------------
