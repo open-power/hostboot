@@ -149,6 +149,25 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_XBUS_COMPRESSION_WORKAROUND</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Modifies calibration gain targets and moves common mode to improve
+        DAC linearity and compression.
+      Enable only for Axone.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NO_NPU2_FIR</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>

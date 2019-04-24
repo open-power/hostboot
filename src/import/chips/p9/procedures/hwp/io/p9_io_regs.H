@@ -193,6 +193,14 @@
 #define EDIP_RX_BER_TIMEOUT                                0x800888000000003f, 56,  4 // rx_ber_timeout, used for when making bit error measurements with a servo op (see workbook table 4.10 for timer settings)
 #define EDIP_RX_CTL_MODE16_EO_PG                           0x800888000000003f, 48, 16 // register -- description
 #define EDIP_CHAN_FAIL_MASK                                0x0000000000000020, 15,  8 // scom mode reg spares.
+#define EDIP_RX_PG_SPARE_MODE_0                            0x800800000000003f, 48,  1 // per-group spare mode latch.
+#define EDIP_RX_PG_SPARE_MODE_1                            0x800800000000003f, 49,  1 // per-group spare mode latch.
+#define EDIP_RX_PG_SPARE_MODE_2                            0x800800000000003f, 50,  1 // per-group spare mode latch.
+#define EDIP_RX_RC_ENABLE_CM_FINE_CAL                      0x8008b8000000003f, 56,  1 // rx recalibration    common mode fine calibration enable
+#define EDIP_RX_EO_ENABLE_DAC_H1_CAL                       0x8008b0000000003f, 50,  1 // rx eye optimization h! dac calibration to reference
+#define EDIP_RX_EO_ENABLE_DAC_H1_TO_A_CAL                  0x8008b0000000003f, 61,  1 // rx eye optimization h! dac to amplitude dac cross-calibration
+#define EDIP_RX_A_INTEG_COARSE_GAIN                        0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+
 
 
 #define EDI_RX_WTM_STATE                                   0x800950000000003f, 48,  5 // main wiretest state machine current state (rjr)): \r\n\tx00: idle \r\n\tx01: drv data  wt \r\n\tx02: drv clock wt \r\n\tx03: drv data  0 \r\n\tx04: drv clock 0 \r\n\tx05: rx wt \r\n\tx06: wait all ones \r\n\tx07: reset pll \r\n\tx08: wait pll \r\n\tx09: drive clock \r\n\tx0a: drive data 1 \r\n\tx0b: wait all zeroes \r\n\tx0c: drive data 0 \r\n\tx0d: done \r\n\tx0e: unused \r\n\tx0f: unused \r\n\tx10: wait prev done \r\n\tx11: drv prev done \r\n\tx12: drv all done \r\n\tx13: wait all done \r\n\tx14: init tx fifo \r\n\tx15: unused \r\n\tx16: unused \r\n\tx17: unused \r\n\tx18: set c & d dr strength \r\n\tx19: set data only dr strength \r\n\tx1a: clock fail \r\n\tx1b: all bad lanes \r\n\tx1c: wt timeout fail \r\n\tx1d: pll/dll fail \r\n\tx1e: all ones fail \r\n\tx1f: all zeroes fail \r\n\trjr
@@ -2496,7 +2504,6 @@
 #define EDIP_RX_A_OFFSET_O0                                0x800020000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch.
 #define EDIP_RX_A_OFFSET_O1                                0x800020000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch.
 #define EDIP_RX_DAC_CNTL4_EO_PL                            0x800020000000003f, 48, 16 // register -- description
-#define EDIP_RX_A_INTEG_COARSE_GAIN                        0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define EDIP_RX_A_EVEN_INTEG_FINE_GAIN                     0x800028000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments.
 #define EDIP_RX_A_ODD_INTEG_FINE_GAIN                      0x800028000000003f, 57,  5 // this is integrator gain control used in making common mode adjustments.
 #define EDIP_RX_DAC_CNTL5_EO_PL                            0x800028000000003f, 48, 16 // register -- description
@@ -2703,9 +2710,6 @@
 #define EDIP_RX_A_PATH_OFF_EVEN                            0x800398000000003f, 48,  6 // eye opt a bank even path offset
 #define EDIP_RX_A_PATH_OFF_ODD                             0x800398000000003f, 54,  6 // eye opt a bank odd  path offset
 #define EDIP_RX_WORK_STAT3_EO_PL                           0x800398000000003f, 48, 16 // register -- description
-#define EDIP_RX_PG_SPARE_MODE_0                            0x800800000000003f, 48,  1 // per-group spare mode latch.
-#define EDIP_RX_PG_SPARE_MODE_1                            0x800800000000003f, 49,  1 // per-group spare mode latch.
-#define EDIP_RX_PG_SPARE_MODE_2                            0x800800000000003f, 50,  1 // per-group spare mode latch.
 #define EDIP_RX_PG_SPARE_MODE_3                            0x800800000000003f, 51,  1 // per-group spare mode latch.
 #define EDIP_RX_PG_SPARE_MODE_4                            0x800800000000003f, 52,  1 // chicken switch for hw219893.  fix is to prevent the rx_sls_hndshk_state sm and the rx_dyn_recal_hndshk_state sm from ever being allowed to run at the same time.  setting the cs turns this feature off.
 #define EDIP_RX_SPARE_MODE_PG                              0x800800000000003f, 48, 16 // register -- description
@@ -2803,7 +2807,6 @@
 #define EDIP_RX_EO_STEP_CNTL_EDI_ALIAS                     0x8008b0000000003f, 48, 16 // rx eye optimization step control edi alias
 #define EDIP_RX_EO_ENABLE_INTEG_LATCH_OFFSET_CAL           0x8008b0000000003f, 48,  1 // rx eye optimization latch offset adjustment enable with integrator-based disable
 #define EDIP_RX_EO_ENABLE_CTLE_COARSE_CAL                  0x8008b0000000003f, 49,  1 // rx eye optimization coarse ctle/peakin enable
-#define EDIP_RX_EO_ENABLE_DAC_H1_CAL                       0x8008b0000000003f, 50,  1 // rx eye optimization h! dac calibration to reference
 #define EDIP_RX_EO_ENABLE_VGA_CAL                          0x8008b0000000003f, 51,  1 // rx eye optimization vga gainand offset adjust enable
 #define EDIP_RX_EO_ENABLE_DFE_H1_CAL                       0x8008b0000000003f, 52,  1 // rx eye optimization dfe h1  adjust enable
 #define EDIP_RX_EO_ENABLE_H1AP_TWEAK                       0x8008b0000000003f, 53,  1 // rx eye optimization h1/an pr adjust enable
@@ -2814,7 +2817,6 @@
 #define EDIP_RX_EO_ENABLE_RESULT_CHECK                     0x8008b0000000003f, 58,  1 // rx eye optimization final results check enable
 #define EDIP_RX_EO_ENABLE_CTLE_EDGE_TRACK_ONLY             0x8008b0000000003f, 59,  1 // rx eye optimization ctle/peakin enable with edge tracking only
 #define EDIP_RX_EO_ENABLE_DFE_H2_H12_CAL                   0x8008b0000000003f, 60,  1 // rx eye optimization dfe h2 to h12 calibration enable
-#define EDIP_RX_EO_ENABLE_DAC_H1_TO_A_CAL                  0x8008b0000000003f, 61,  1 // rx eye optimization h! dac to amplitude dac cross-calibration
 #define EDIP_RX_EO_ENABLE_FINAL_L2U_ADJ                    0x8008b0000000003f, 62,  1 // rx eye optimization final rx fifo load-to-unload delay adjustment enable
 #define EDIP_RX_EO_ENABLE_DONE_SIGNALING                   0x8008b0000000003f, 63,  1 // rx eye optimization eye opt done signaling enable
 #define EDIP_RX_CTL_MODE21_EO_PG                           0x8008b0000000003f, 48, 16 // register -- description
@@ -2827,7 +2829,6 @@
 #define EDIP_RX_RC_ENABLE_H1AP_TWEAK                       0x8008b8000000003f, 53,  1 // rx recalibration    h1/an pr adjust enable
 #define EDIP_RX_RC_ENABLE_DDC                              0x8008b8000000003f, 54,  1 // rx recalibration    dynamic data centering enable
 #define EDIP_RX_RC_ENABLE_CM_COARSE_CAL                    0x8008b8000000003f, 55,  1 // rx recalibration    common mode coarse calibration enable
-#define EDIP_RX_RC_ENABLE_CM_FINE_CAL                      0x8008b8000000003f, 56,  1 // rx recalibration    common mode fine calibration enable
 #define EDIP_RX_RC_ENABLE_BER_TEST                         0x8008b8000000003f, 57,  1 // rx recalibration    unsupported, leave at 0. bit error rate test enable
 #define EDIP_RX_RC_ENABLE_RESULT_CHECK                     0x8008b8000000003f, 58,  1 // rx recalibration    unsupported, leave at 0. final results check enable
 #define EDIP_RX_RC_ENABLE_CTLE_EDGE_TRACK_ONLY             0x8008b8000000003f, 59,  1 // rx recalibration    ctle/peaking enable with edge tracking only
