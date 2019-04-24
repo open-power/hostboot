@@ -275,8 +275,8 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_SBE           => "unit-sbe-power9",
     TARGET_TYPE_PPE           => "unit-ppe-power9",
     TARGET_TYPE_PERV          => "unit-perv",
-    TARGET_TYPE_PEC           => "unit-pec-power9",
-    TARGET_TYPE_PHB           => "unit-phb-power9",
+    TARGET_TYPE_PEC           => "unit-pec",
+    TARGET_TYPE_PHB           => "unit-phb",
     TARGET_TYPE_MC            => "unit-mc-power9",
     TARGET_TYPE_OMI           => "unit-omi-power9",
     TARGET_TYPE_OMIC          => "unit-omic-power9",
@@ -286,6 +286,9 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_PMIC          => "pmic",
     TARGET_TYPE_NMMU          => "unit-nmmu-power10",
     TARGET_TYPE_FC            => "unit-fc-power10",
+    TARGET_TYPE_PAUC          => "unit-pauc-power10",
+    TARGET_TYPE_IOHS          => "unit-iohs-power10",
+    TARGET_TYPE_PAU           => "unit-pau-power10",
     };
 
     # Loop through all of the targets that this attribute

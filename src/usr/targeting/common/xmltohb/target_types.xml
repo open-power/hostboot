@@ -3795,14 +3795,19 @@
   </targetType>
 
   <targetType>
-    <id>unit-pec-power10</id>
+    <id>unit-pec</id>
     <parent>unit</parent>
-    <attribute>
-      <id>PARENT_PERVASIVE</id>
-    </attribute>
     <attribute>
       <default>PEC</default>
       <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-pec-power10</id>
+    <parent>unit-pec</parent>
+    <attribute>
+      <id>PARENT_PERVASIVE</id>
     </attribute>
   </targetType>
 
@@ -3811,7 +3816,7 @@
      Cumulus: 3 per chip  -->
   <targetType>
     <id>unit-pec-power9</id>
-    <parent>unit</parent>
+    <parent>unit-pec</parent>
     <attribute>
       <default>IO</default>
       <id>CDM_DOMAIN</id>
@@ -3901,10 +3906,6 @@
     <attribute>
       <id>PROC_PCIE_REFCLOCK_ENABLE</id>
     </attribute>
-    <attribute>
-      <default>PEC</default>
-      <id>TYPE</id>
-    </attribute>
   </targetType>
 
   <targetType>
@@ -3982,6 +3983,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-phb</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>PHB</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-phb-axone</id>
     <parent>unit-phb-power9</parent>
     <attribute>
@@ -4010,13 +4020,9 @@
 
   <targetType>
     <id>unit-phb-power10</id>
-    <parent>unit</parent>
+    <parent>unit-phb</parent>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>PHB</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -4025,7 +4031,7 @@
      Cumulus: 6 per PEC -->
   <targetType>
     <id>unit-phb-power9</id>
-    <parent>unit</parent>
+    <parent>unit-phb</parent>
     <attribute>
       <default>IO</default>
       <id>CDM_DOMAIN</id>
@@ -4063,10 +4069,6 @@
     </attribute>
     <attribute>
       <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>
-    </attribute>
-    <attribute>
-      <default>PHB</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
