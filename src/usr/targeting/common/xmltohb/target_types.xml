@@ -2944,6 +2944,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-mcc</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>TYPE</id>
+      <default>MCC</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-mcc-axone</id>
     <parent>unit-mcc-power9</parent>
     <attribute>
@@ -2954,13 +2963,9 @@
 
   <targetType>
     <id>unit-mcc-power10</id>
-    <parent>unit</parent>
+    <parent>unit-mcc</parent>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MCC</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -2970,7 +2975,7 @@
      Axone  : 8 total per chip (2 per MI) -->
   <targetType>
     <id>unit-mcc-power9</id>
-    <parent>unit</parent>
+    <parent>unit-mcc</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>MEM</default>
@@ -3002,10 +3007,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MCC</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3170,6 +3171,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-mi</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>TYPE</id>
+      <default>MI</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-mi-axone</id>
     <parent>unit-mi-power9</parent>
     <attribute>
@@ -3189,13 +3199,9 @@
 
   <targetType>
     <id>unit-mi-power10</id>
-    <parent>unit</parent>
+    <parent>unit-mi</parent>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MI</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3205,7 +3211,7 @@
      Axone  : 4 total per chip (2 per MC)-->
   <targetType>
     <id>unit-mi-power9</id>
-    <parent>unit</parent>
+    <parent>unit-mi</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>MEM</default>
@@ -3237,10 +3243,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>MI</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3631,6 +3633,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-omi</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>OMI</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-omi-axone</id>
     <parent>unit-omi-power9</parent>
     <attribute>
@@ -3641,16 +3652,12 @@
 
   <targetType>
     <id>unit-omi-power10</id>
-    <parent>unit</parent>
+    <parent>unit-omi</parent>
     <attribute>
       <id>OMIC_PARENT</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>OMI</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3662,7 +3669,7 @@
              2 on OMIC2,5     (still total 16) -->
   <targetType>
     <id>unit-omi-power9</id>
-    <parent>unit</parent>
+    <parent>unit-omi</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>MEM</default>
@@ -3698,8 +3705,13 @@
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-omic</id>
+    <parent>unit</parent>
     <attribute>
-      <default>OMI</default>
+      <default>OMIC</default>
       <id>TYPE</id>
     </attribute>
   </targetType>
@@ -3715,13 +3727,9 @@
 
   <targetType>
     <id>unit-omic-power10</id>
-    <parent>unit</parent>
+    <parent>unit-omic</parent>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>OMIC</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
@@ -3731,7 +3739,7 @@
      Axone  : 6 total per chip (3 per MC)-->
   <targetType>
     <id>unit-omic-power9</id>
-    <parent>unit</parent>
+    <parent>unit-omic</parent>
     <attribute>
       <id>CDM_DOMAIN</id>
       <default>MEM</default>
@@ -3763,10 +3771,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <default>OMIC</default>
-      <id>TYPE</id>
     </attribute>
   </targetType>
 
