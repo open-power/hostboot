@@ -53,6 +53,7 @@
   <description>Sector buffer strength</description>
   <valueType>uint8</valueType>
   <platInit/>
+  <default>0</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -62,6 +63,7 @@
   <valueType>uint8</valueType>
   <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
   <platInit/>
+  <default>DISABLE</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -70,6 +72,7 @@
   <description>value for pulse mode</description>
   <valueType>uint8</valueType>
   <platInit/>
+  <default>0</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
