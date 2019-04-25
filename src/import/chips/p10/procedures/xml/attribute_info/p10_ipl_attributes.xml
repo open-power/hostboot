@@ -139,20 +139,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_SYS_FORCE_ALL_CORES</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    Indicate that p10_sbe_select_ex should force selection to ALL good
-    EX chiplets having good quads,cores even if only a single EX chiplet mode is executed.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>ALL_CORES = 0x1, NOT_ALL_CORES = 0x0</enum>
-  <writeable/>
-  <platInit/>
-  <overrideOnly/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_SECURITY_ENABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Holds the state of Security Access Bit (SAB)</description>
