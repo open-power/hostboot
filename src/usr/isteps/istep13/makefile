@@ -30,7 +30,7 @@ CEN_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/centaur/procedures
 OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
 EXP_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures
 EXP_INCLUDE_PATH     = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-
+GEM_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/gemini/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -65,6 +65,9 @@ EXTRAINCDIR += ${EXP_INCLUDE_PATH}/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory
+EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 
 # from src/usr/isteps/istep13
 OBJS += call_host_disable_memvolt.o
@@ -130,9 +133,11 @@ include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mba_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_ddrphy_scom.mk
 include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_row_repair.mk
 
+
 OBJS += $(if $(CONFIG_AXONE),exp_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_draminit_mc.o,)
+OBJS += $(if $(CONFIG_AXONE),gem_draminit.o,)
 
 include ${ROOTPATH}/config.mk
 
@@ -149,4 +154,5 @@ VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
 VPATH    += ${CEN_PROCEDURES_PATH}/hwp/initfiles
 
 VPATH += $(if $(CONFIG_AXONE),${EXP_PROCEDURES_PATH}/hwp/memory,)
+VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
 VPATH += $(if $(CONFIG_AXONE),${OCMB_PROCEDURES_PATH}/hwp/initfiles/,)
