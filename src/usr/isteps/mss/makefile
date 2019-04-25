@@ -28,6 +28,7 @@ IMPORT_PATH              = ${ROOTPATH}/src/import
 PROCEDURES_PATH          = ${IMPORT_PATH}/chips/p9/procedures
 AXONE_PROCEDURES_PATH    = ${IMPORT_PATH}/chips/p9a/procedures
 EXPLORER_PROCEDURES_PATH = ${IMPORT_PATH}/chips/ocmb/explorer/procedures
+GEMINI_PROCEDURES_PATH   = ${IMPORT_PATH}/chips/ocmb/gemini/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
@@ -84,6 +85,9 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
+MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/
+MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/lib/
+
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -200,7 +204,14 @@ MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
 MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
 #must bring explorer_memory_size.o in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
 MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE)),explorer_memory_size.o)
+
+MSS_PATH_GEMINI := $(GEMINI_PROCEDURES_PATH)/hwp/memory/lib
+MSS_GEMINI_SOURCE := $(shell find $(MSS_PATH_GEMINI) -name '*.C' -exec basename {} \;)
+MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_GEMINI_SOURCE)),)
+
+
 MODULE = isteps_mss
+
 OBJS += $(MSS_MODULE_OBJS)
 $(call BUILD_MODULE)
 
