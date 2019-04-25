@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expupd/expupd_reasoncodes.H $                 */
+/* $Source: src/usr/isteps/expupd/expupd_trace.H $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,33 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __EXPUPD_TRACE_H
+#define __EXPUPD_TRACE_H
 
-#ifndef __EXPUPD_REASONCODES_H
-#define __EXPUPD_REASONCODES_H
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+#include <trace/interface.H>
 
-#include <hbotcompid.H>
-
-namespace EXPUPD
+namespace expupd
 {
 
-    enum ExpUpdModuleId
-    {
-        MOD_OCMB_FW_VALIDATE_IMAGE = 0x01,
-        MOD_PARSE_TAGGED_DATA_TRIPLET = 0x02,
-    };
+extern trace_desc_t *g_trac_expupd;
 
-    enum ExpUpdReasonCode
-    {
-        INVALID_PARMS                             = EXPUPD_COMP_ID | 0x01,
-        INVALID_EYE_CATCHER                       = EXPUPD_COMP_ID | 0x02,
-        INVALID_HEADER_VERSION                    = EXPUPD_COMP_ID | 0x03,
-        INVALID_HEADER_SIZE                       = EXPUPD_COMP_ID | 0x04,
-        MISSING_SHA512_HASH                       = EXPUPD_COMP_ID | 0x05,
-        INVALID_DATA_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x06,
-        INVALID_HASH_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x07,
-        INVALID_TAG_ID                            = EXPUPD_COMP_ID | 0x08,
-    };
-
-}; // namespace EXPUPD
+}   //  end namespace
 
 #endif

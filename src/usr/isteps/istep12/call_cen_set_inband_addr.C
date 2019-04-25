@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@
 /* FIXME RTC: 210975
 //HWP
 #include    <p9c_set_inband_addr.H>
+
+#include    <expupd/expupd.H>
 
 #ifdef CONFIG_AXONE
 #include    <exp_omi_init.H>
@@ -212,6 +214,11 @@ void* call_cen_set_inband_addr (void *io_pArgs)
 
         }
     }
+
+    // Check if any explorer chips require a firmware update and update them
+    // (skipped on MPIPL)
+    expupd::updateAll(l_StepError);
+
 #endif // CONFIG_AXONE
 
 

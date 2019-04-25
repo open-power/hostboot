@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -88,6 +88,13 @@
 #
 #
 ###############################################################################
+
+# ******************WARNING**********************
+#
+#   THIS FILE MUST BE KEPT IN SYNC WITH
+#   src/include/usr/expupd/ocmbFwImage_const.H
+#
+# ******************WARNING**********************
 
 use strict;
 use File::Basename;
