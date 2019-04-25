@@ -30,5 +30,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 
+OBJS += expupd.o
+OBJS += ocmbFwImage.o
+
 # Need to build exp_fw_update procedure
 OBJS += exp_fw_update.o

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expupd/expupd_reasoncodes.H $                 */
+/* $Source: src/usr/isteps/expupd/ocmbFwImage.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,33 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __OCMBFWIMAGE_H
+#define __OCMBFWIMAGE_H
 
-#ifndef __EXPUPD_REASONCODES_H
-#define __EXPUPD_REASONCODES_H
+/**
+ * @file ocmbFwImage.H
+ *
+ * Interface for validating the OCMB firmware image from PNOR
+ *
+ */
 
-#include <hbotcompid.H>
+#include <errl/errlentry.H>
 
-namespace EXPUPD
+namespace expupd
 {
 
-    enum ExpUpdModuleId
-    {
-        MOD_OCMB_FW_VALIDATE_IMAGE = 0x01,
-        MOD_PARSE_TAGGED_DATA_TRIPLET = 0x02,
-    };
+constexpr uint32_t HEADER_SHA512_SIZE = 64;
 
-    enum ExpUpdReasonCode
-    {
-        INVALID_PARMS                             = EXPUPD_COMP_ID | 0x01,
-        INVALID_EYE_CATCHER                       = EXPUPD_COMP_ID | 0x02,
-        INVALID_HEADER_VERSION                    = EXPUPD_COMP_ID | 0x03,
-        INVALID_HEADER_SIZE                       = EXPUPD_COMP_ID | 0x04,
-        MISSING_SHA512_HASH                       = EXPUPD_COMP_ID | 0x05,
-        INVALID_DATA_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x06,
-        INVALID_HASH_TRIPLET_SIZE                 = EXPUPD_COMP_ID | 0x07,
-        INVALID_TAG_ID                            = EXPUPD_COMP_ID | 0x08,
-    };
+/**
+ * @brief Parameters pertaining to an unpackaged (raw) OCMB firmware image
+ */
+typedef struct rawImageInfo
+{
+    const uint8_t* imagePtr;
+    size_t         imageSize;
+    const uint8_t* imageSHA512HashPtr;
+}rawImageInfo_t;
 
-}; // namespace EXPUPD
+/**
+ * @brief Validates OCMB firmware header of packaged image
+ *
+ * @param[in] i_imageStart Start address of packaged image
+ * @param[in] i_imageSize Size of packaged image
+ * @param[out] o_imageInfo Information pertaining to image after
+ *             being stripped of OCMB firmware header
+ * @return errlHndl_t indicating success or failure
+ *
+ */
+errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
+                               const uint64_t i_imageSize,
+                               rawImageInfo_t& o_imageInfo);
+
+}//namespace expupd
 
 #endif

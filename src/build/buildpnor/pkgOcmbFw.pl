@@ -89,6 +89,13 @@
 #
 ###############################################################################
 
+# ******************WARNING**********************
+#
+#   THIS FILE MUST BE KEPT IN SYNC WITH
+#   src/include/usr/expupd/ocmbFwImage_const.H
+#
+# ******************WARNING**********************
+
 use strict;
 use File::Basename;
 use Digest::SHA qw(sha512);
