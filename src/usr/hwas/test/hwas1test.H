@@ -2354,6 +2354,7 @@ public:
                         break;
                     case TYPE_OBUS_BRICK:
                         {
+#ifndef CONFIG_AXONE  //@todo-RTC:208518 - Add Axone OBUS_BRICK rules
                             //Two cases here:
                             //OBUS==SMP --> Target should be present regardless
                             //              of PG
@@ -2385,7 +2386,7 @@ public:
                                     TS_FAIL("testHWAS"
                                             "checkPartialGoodForDescendants> "
                                             "functional = 0x%x, should be true "
-                                            "because"
+                                            "because "
                                             "OBUS_BRICK is SMP: PG = 0x%04x. "
                                             "pDesc HUID 0x%.8x",
                                             checkPartialGoodForDescendants(
@@ -2410,7 +2411,7 @@ public:
                                     TS_FAIL("testHWAS"
                                             "checkPartialGoodForDescendants> "
                                             "functional = 0x%x, should be "
-                                            "false because"
+                                            "false because "
                                             "OBUS_BRICK is NVLINK: PG = "
                                             "0x%04x. "
                                             "pDesc HUID 0x%.8x",
@@ -2426,10 +2427,12 @@ public:
                             pgData[VPD_CP00_PG_N3_INDEX] =
                                 (uint16_t)VPD_CP00_PG_N3_GOOD;
 
+#endif
                             break;
                         }
 
                     case TYPE_NPU:
+#ifndef CONFIG_AXONE  //@todo-RTC:208518 - Add Axone NPU rules
                         TS_INFO( "testHWAScheckPartialGoodForDescendants: "
                                   "NPU is not functional");
                         pgData[VPD_CP00_PG_N3_INDEX] |=
@@ -2449,6 +2452,7 @@ public:
 
                         pgData[VPD_CP00_PG_N3_INDEX] =
                             (uint16_t)VPD_CP00_PG_N3_GOOD;
+#endif
                         break;
 
                     case TYPE_PERV:

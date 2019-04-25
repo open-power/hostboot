@@ -66,7 +66,6 @@ void test_fapi2GetChildren()
     uint32_t l_targetHuid = 0xFFFFFFFF;
     uint32_t l_actualSize = 0;
     uint32_t l_expectedSize = 0;
-    errlHndl_t l_err = nullptr;
     int numTests = 0;
     int numFails = 0;
 
@@ -611,17 +610,25 @@ void test_fapi2GetChildren()
                    TARGET_STATE_PRESENT).size(); } },
 
             // CAPP pervasive has 1 CAPP child
-            {PERV_CAPP_CUMULUS_CHILDREN,
+            {PERV_CAPP_AXONE_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                 { return ((i_unit == CAPP0_RANGE) || (i_unit == CAPP1_RANGE));},
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
                    TARGET_STATE_PRESENT).size(); } },
 
-            // OBUS pervasive has 3 OBUS BRICK children
-            {PERV_OBUS_BRICK_CHILDREN,
+            // OBUS0,3 pervasive has 2 OBUS BRICK children
+            {PERV_OBUS_BRICK03_AXONE_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
-                  { return ((i_unit >= OBUS_LOW) && (i_unit <= OBUS_HIGH)); },
+                  { return ((i_unit == OBUS_LOW+0) || (i_unit == OBUS_LOW+3)); },
+             [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
+                  { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
+                   TARGET_STATE_PRESENT).size(); } },
+
+            // OBUS1,2 pervasive has 1 OBUS BRICK child
+            {PERV_OBUS_BRICK12_AXONE_CHILDREN,
+             [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
+                  { return ((i_unit == OBUS_LOW+1) || (i_unit == OBUS_LOW+2)); },
              [](Target<fapi2::TARGET_TYPE_PERV>& i_perv)
                   { return i_perv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>(
                    TARGET_STATE_PRESENT).size(); } },
@@ -750,9 +757,9 @@ void test_fapi2GetChildren()
 
             if(candidateTarget == nullptr)
             {
-                TS_FAIL("test_fapi2GetChildren:: candidateTarget not found");
+                TS_FAIL("test_fapi2GetChildren:: candidateTarget not found - test %d", i);
                 numFails++;
-                break;
+                continue;
             }
 
             l_targetHuid = TARGETING::get_huid(candidateTarget);
@@ -764,9 +771,9 @@ void test_fapi2GetChildren()
 
             if(l_actualSize != l_expectedSize)
             {
-                TS_FAIL("test_fapi2GetChildren:: children of pervasive mismatch");
+                TS_FAIL("test_fapi2GetChildren:: children of pervasive mismatch for %.8X (exp=%d,act=%d)",
+                        l_targetHuid,l_expectedSize,l_actualSize);
                 numFails++;
-                break;
             }
 
         }
@@ -780,31 +787,6 @@ void test_fapi2GetChildren()
 
     }while(0);
 
-    if(l_actualSize != l_expectedSize)
-    {
-        /*@
-        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_TEST
-        * @reasoncode         fapi2::RC_INVALID_CHILD_COUNT
-        * @userdata1[0:31]    Expected Child Count
-        * @userdata1[32:63]   Actual Child Count
-        * @userdata2          Parent HUID
-        * @devdesc            Invalid amount of child cores found
-        *                     on a proc
-        */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_TEST,
-                                        fapi2::RC_INVALID_CHILD_COUNT,
-                                        TWO_UINT32_TO_UINT64(
-                                        TO_UINT32(
-                                        l_expectedSize),
-                                        TO_UINT32(
-                                        l_actualSize)),
-                                        l_targetHuid,
-                                        true/*SW Error*/);
-        errlCommit(l_err,HWPF_COMP_ID);
-        TS_FAIL("test_fapi2GetChildren Fail, for HUID: %d , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
-    }
     FAPI_INF("fapi2GetChildrenTest:: Test Complete. %d/%d fails",  numFails , numTests);
 }
 
@@ -818,7 +800,6 @@ void test_fapi2GetChildrenFilter()
     uint32_t l_targetHuid = 0xFFFFFFFF;
     uint32_t l_actualSize = 0;
     uint32_t l_expectedSize = 0;
-    errlHndl_t l_err = nullptr;
     TARGETING::Target * l_proc = nullptr;
     TARGETING::TargetHandleList l_chipList;
     do
@@ -835,7 +816,7 @@ void test_fapi2GetChildrenFilter()
         }
         else
         {
-            TS_FAIL("test_fapi2GetChildren Fail: could not find any proc, skipping tests");
+            TS_FAIL("test_fapi2GetChildrenFilter Fail: could not find any proc, skipping tests");
             numFails++;
             break;
         }
@@ -876,7 +857,7 @@ void test_fapi2GetChildrenFilter()
         if(l_actualSize != l_expectedSize)
         {
             numFails++;
-            break;
+            TS_FAIL("test_fapi2GetChildrenFilter Fail on PERV/ALL_CORES, for HUID: 0x%.8X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
         }
 
         // PERV - TARGET_FILTER_CORE1
@@ -890,7 +871,7 @@ void test_fapi2GetChildrenFilter()
         if(l_actualSize != l_expectedSize)
         {
             numFails++;
-            break;
+            TS_FAIL("test_fapi2GetChildrenFilter Fail on PERV/CORE1, for HUID: 0x%.8X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
         }
 
         if (isHwValid(l_proc, MY_MC))
@@ -906,13 +887,26 @@ void test_fapi2GetChildrenFilter()
             if(l_actualSize != l_expectedSize)
             {
                 numFails++;
-                break;
+                TS_FAIL("test_fapi2GetChildrenFilter Fail on PERV/ALL_MC, for HUID: 0x%.8X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
             }
         }
 
         // PERV - SYNC_MODE_ALL_IO_EXCEPT_NEST
-        // NOTE:  2 of 4 OBUS are Cumulus only, so expect 8 instead of 10 returned
-        l_expectedSize = 8;
+        l_expectedSize = 0;
+        TARGETING::ATTR_MODEL_type l_model = l_proc->getAttr<TARGETING::ATTR_MODEL>();
+        if (l_model == TARGETING::MODEL_NIMBUS)
+        {
+            // NOTE:  2 of 4 OBUS are Cumulus only, so expect 8 instead of 10 returned
+            l_expectedSize = 8;
+        }
+        else if (l_model == TARGETING::MODEL_CUMULUS)
+        {
+            l_expectedSize = 10;
+        }
+        else if (l_model == TARGETING::MODEL_AXONE)
+        {
+            l_expectedSize = 10;
+        }
         l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
                                                              TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST,
                                                              TARGET_STATE_PRESENT);
@@ -922,36 +916,10 @@ void test_fapi2GetChildrenFilter()
         if(l_actualSize != l_expectedSize)
         {
             numFails++;
-            break;
+            TS_FAIL("test_fapi2GetChildrenFilter Fail on PERV/ALL_IO_EXCEPT_NEST, for HUID: 0x%.8X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
         }
 
     }while(0);
-
-    if(l_actualSize != l_expectedSize)
-    {
-        /*@
-        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST
-        * @reasoncode         fapi2::RC_INVALID_CHILD_COUNT
-        * @userdata1[0:31]    Expected Child Count
-        * @userdata1[32:63]   Actual Child Count
-        * @userdata2          Parent HUID
-        * @devdesc            Invalid amount of child cores found
-        *                     on a proc
-        */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST,
-                                        fapi2::RC_INVALID_CHILD_COUNT,
-                                        TWO_UINT32_TO_UINT64(
-                                        TO_UINT32(
-                                        l_expectedSize),
-                                        TO_UINT32(
-                                        l_actualSize)),
-                                        l_targetHuid,
-                                        true/*SW Error*/);
-        errlCommit(l_err,HWPF_COMP_ID);
-        TS_FAIL("test_fapi2GetChildrenFilter Fail, for HUID: 0x%X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
-    }
 
     FAPI_INF("test_fapi2GetChildrenFilter: Test Complete. %d/%d fails",  numFails , numTests);
 }

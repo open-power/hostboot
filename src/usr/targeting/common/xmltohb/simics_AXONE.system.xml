@@ -53,13 +53,19 @@
      *     PEC 2 has 3 PHBs
      * Each Axone has 1 XBUS chiplet (1 XBUS Chiplet translates to multiple xbus units)
      * Each Axone has 4 OBUS (OB0 to OB3)
-     *     Each OBUS has 3 OBUS_BRICK
+     *     Each OBUS has up to 2 OBUS_BRICKs
+     *         OBUS0 has 2 OBUS_BRICKs
+     *         OBUS1 has 1 OBUS_BRICK
+     *         OBUS2 has 1 OBUS_BRICK
+     *         OBUS3 has 2 OBUS_BRICKs
+     * Each Axone has 3 NPU units, each associated with 2 OBUS_BRICKs
+     *     NPU0 is associated with OBUS0, used for NVLINK ( 4 x4 links).
+     *     NPU1 is associated with OBUS1/2, used for OpenCAPI ( 1 x8 link).
+     *     NPU2 is associated with OBUS3, used for NVLINK ( 4 x4 links).
      * Each Axone has 21 PPE units (including the SBE):
      *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.
      * Each chiplet existing in an Axone has 1 equivalent PERV unit
-     * Each Axone has 2 CAPP units  ##TBD## has 2 sys0node0proc0capp0 units
-     *    with same target ID...input MRW has capp0 and capp1...something
-     *    wrong in the processMrw.pl (same observed for Witherspoon)
+     * Each Axone has 1 CAPP unit
      * Each Axone has 1 OCC unit
 
     - p9Proc0(axone chip)
@@ -3487,11 +3493,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0obus0obus_brick2</id>
+    <id>sys0node0proc0obus1obus_brick0</id>
     <type>unit-obus-brick-axone</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-0/obus_brick-2</default>
+        <default>affinity:sys-0/node-0/proc-0/obus-1/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3499,7 +3505,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x09</default>
+        <default>0x0A</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -3519,51 +3525,6 @@
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-9</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-2</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0obus1obus_brick0</id>
-    <type>unit-obus-brick-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-1/obus_brick-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>0x0A</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c3</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00420003</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-10</default>
     </attribute>
     <attribute>
@@ -3577,19 +3538,19 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0obus1obus_brick1</id>
+    <id>sys0node0proc0obus2obus_brick0</id>
     <type>unit-obus-brick-axone</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-1/obus_brick-1</default>
+        <default>affinity:sys-0/node-0/proc-0/obus-2/obus_brick-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>4</default>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0A</default>
+        <default>0x0B</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -3605,97 +3566,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-10</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-1/obus_brick-1</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0obus1obus_brick2</id>
-    <type>unit-obus-brick-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-1/obus_brick-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>0x0A</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c5</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00420005</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-10</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-1/obus_brick-2</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
         <default>3</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0obus2obus_brick0</id>
-    <type>unit-obus-brick-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-2/obus_brick-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>0x0B</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c6</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00420006</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>6</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3712,96 +3583,6 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0obus2obus_brick1</id>
-    <type>unit-obus-brick-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-2/obus_brick-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>0x0B</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c7</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00420007</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-11</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-2/obus_brick-1</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0obus2obus_brick2</id>
-    <type>unit-obus-brick-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-2/obus_brick-2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>8</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>0x0B</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c8</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00420008</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>8</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-11</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-2/obus_brick-2</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
-        <default>2</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc0obus3obus_brick0</id>
     <type>unit-obus-brick-axone</type>
     <attribute>
@@ -3810,7 +3591,7 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>9</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
@@ -3818,11 +3599,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c9</default>
+        <default>pu.obus_brick:k0:n0:s0:p00:c6</default>
     </attribute>
     <attribute>
         <id>HUID</id>
-        <default>0x00420009</default>
+        <default>0x00420006</default>
     </attribute>
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
@@ -3830,7 +3611,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>9</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3855,7 +3636,7 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>10</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
@@ -3863,11 +3644,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c10</default>
+        <default>pu.obus_brick:k0:n0:s0:p00:c5</default>
     </attribute>
     <attribute>
         <id>HUID</id>
-        <default>0x0042000A</default>
+        <default>0x00420007</default>
     </attribute>
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
@@ -3875,7 +3656,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>10</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3891,48 +3672,156 @@
     </attribute>
 </targetInstance>
 
+
+<!-- ===================================================================== -->
+<!-- NPU Units for node 0 -->
+<!-- ===================================================================== -->
 <targetInstance>
-    <id>sys0node0proc0obus3obus_brick2</id>
-    <type>unit-obus-brick-axone</type>
+    <!-- Note : NPU0 covers OBUS0 -->
+    <id>sys0node0proc0npu0</id>
+    <type>unit-npu-axone</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/obus-3/obus_brick-2</default>
+        <default>affinity:sys-0/node-0/proc-0/npu-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>11</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0C</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.obus_brick:k0:n0:s0:p00:c11</default>
+        <default>0x05</default>
     </attribute>
     <attribute>
         <id>HUID</id>
-        <default>0x0042000B</default>
-    </attribute>
-    <attribute>
-        <id>OBUS_SLOT_INDEX</id>
-        <default>0xFF</default>
+        <default>0x00430000</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>11</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-12</default>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-2</default>
+        <default>physical:sys-0/node-0/proc-0/npu-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <!-- Note : NPU1 covers OBUS1 and OBUS2, but OBUS2 isn't wired out -->
+    <!--        on the Swift configuration -->
+    <id>sys0node0proc0npu1</id>
+    <type>unit-npu-axone</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/npu-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00430001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/npu-1</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NPU</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <!-- Note : NPU2 covers OBUS3 -->
+    <id>sys0node0proc0npu2</id>
+    <type>unit-npu-axone</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/npu-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x03</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00430002</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/npu-2</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NPU</default>
     </attribute>
 </targetInstance>
 
@@ -4069,54 +3958,6 @@
     </attribute>
 </targetInstance>
 
-<targetInstance>
-    <id>sys0node0proc0capp1</id>
-    <type>unit-capp-axone</type>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/capp-1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CHIPLET_ID</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>pu.capp:k0:n0:s0:p00:c1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>HUID</id>
-        <default>0x00210001</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>0x02090001</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-2</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/capp-1</default>
-    </attribute>
-    <attribute>
-        <id>REL_POS</id>
-        <default>1</default>
-    </attribute>
-</targetInstance>
 
 <!-- ===================================================================== -->
 <!-- OCC Units -->
@@ -12576,6 +12417,122 @@
     <attribute>
         <id>REL_POS</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PERV</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0perv10</id>
+    <type>unit-perv-axone</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-10</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.perv:k0:n0:s0:p00:c10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x002C000A</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-10</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PERV</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0perv11</id>
+    <type>unit-perv-axone</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-11</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu.perv:k0:n0:s0:p00:c11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x002C000B</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-11</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>TYPE</id>

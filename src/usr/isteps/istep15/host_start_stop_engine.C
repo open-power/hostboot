@@ -55,7 +55,7 @@ void* host_start_stop_engine (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine entry" );
     ISTEP_ERROR::IStepError     l_StepError;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl __attribute__((unused)) = NULL;
 
     // Cast to void just to get around unused var warning if #ifdef's dont work
     // out to actually use the l_errl variable

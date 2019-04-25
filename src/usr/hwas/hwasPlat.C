@@ -1202,7 +1202,10 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
                       DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
             errl = deviceRead(pTarget, &present, presentSize,
                             DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_PRIMARY));
-            errlCommit(errl, HWAS_COMP_ID);
+            if( errl )
+            {
+                errlCommit(errl, HWAS_COMP_ID);
+            }
             // errl is now null, move on to next target
         }
 #endif

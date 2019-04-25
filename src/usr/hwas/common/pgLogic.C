@@ -31,6 +31,7 @@
 #include <hwas/common/hwasError.H>
 
 using namespace HWAS::COMMON;
+using namespace HWAS; //needed for trace macros
 
 namespace PARTIAL_GOOD
 {
@@ -258,6 +259,9 @@ namespace PARTIAL_GOOD
 
             if (rulesIterator == pgRules_map.end())
             {
+                HWAS_ERR( "No rules found for type %d",
+                          i_target->getAttr<TARGETING::ATTR_TYPE>() );
+
                 // Target is missing from the table. This is an error, so break
                 // out of this section of code and return the appropriate error
                 // below.
@@ -345,6 +349,12 @@ namespace PARTIAL_GOOD
         // the following error if applicable.
         if ((l_errl == nullptr) && (o_targetPgLogic.size() == 0))
         {
+            HWAS_ERR( "No rule found for Target %.8X of type %d",
+                      get_huid(i_target),
+                      i_target->getAttr<TARGETING::ATTR_TYPE>() );
+            uint64_t userdata1 = static_cast<uint64_t>(i_target->getAttr<TARGETING::ATTR_TYPE>());
+            userdata1 <<= 32;
+            userdata1 |= static_cast<uint64_t>(get_huid(i_target));
             /*@
             * @errortype
             * @severity        ERRL_SEV_UNRECOVERABLE
@@ -359,15 +369,16 @@ namespace PARTIAL_GOOD
             *
             * @custdesc        A problem occured during IPL of the system:
             *                  Internal Firmware Error
-            * @userdata1       target type attribute
-            * @userdata2       HUID of the target
+            * @userdata1[00:31]  target type attribute
+            * @userdata1[32:63]  HUID of the target
+            * @userdata2       Number of rules for this target type
             */
             l_errl = hwasError(
                                ERRL_SEV_UNRECOVERABLE,
                                HWAS::MOD_FIND_RULES_FOR_TARGET,
                                HWAS::RC_NO_PG_LOGIC,
-                               i_target->getAttr<TARGETING::ATTR_TYPE>(),
-                               get_huid(i_target));
+                               userdata1,
+                               pgRules_map.size());
         }
 
         return l_errl;
@@ -482,8 +493,7 @@ namespace PARTIAL_GOOD
                     != TARGETING::OPTICS_CONFIG_MODE_SMP)
            && ((i_pgData[N3_PG_INDEX] & NPU_R1_PG_MASK) != ALL_OFF_AG_MASK))
         {
-            TRACFCOMP(HWAS::g_trac_imp_hwas,
-                      "pDesc 0x%.8X - OBUS_BRICK pgData[%d]: "
+            HWAS_INF( "pDesc 0x%.8X - OBUS_BRICK pgData[%d]: "
                       "actual 0x%04X, expected 0x%04X - bad",
                       i_desc->getAttr<TARGETING::ATTR_HUID>(),
                       N3_PG_INDEX,

@@ -1328,6 +1328,7 @@ sub setCommonAttrForChiplet
     }
     elsif ($tgt_type eq "OBUS_BRICK")
     {
+        #todo-RTC:209409-Handle Axone layout
         $unit_pos = $pos%3;
     }
     elsif ($tgt_type eq "SMPGROUP")
@@ -1528,6 +1529,7 @@ sub getPervasiveForUnit
         my $offset = 0;
         for my $obrick (0..$maxInstance{"OBUS_BRICK"}-1)
         {
+            #todo-RTC:209409-Handle Axone layout
             $offset += (($obrick%3 == 0) && ($obrick != 0)) ? 1 : 0;
             $unitToPervasive{"OBUS_BRICK$obrick"}
                 = PERVASIVE_PARENT_OBUS_OFFSET + $offset;

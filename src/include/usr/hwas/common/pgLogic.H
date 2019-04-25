@@ -681,6 +681,17 @@ namespace PARTIAL_GOOD
                         APPLICABLE_TO_ALL,
                         NO_SPECIAL_RULE
                     ),
+                    // @todo-RTC:208518 - Add Axone NPU PG rules
+                    // NPU Rule 2: This logic is for Axone only.
+                    new PartialGoodRule
+                    (
+                        {&PREDICATE_AXONE},
+                        NPU_R1_PG_MASK, //wrong
+                        ALL_OFF_AG_MASK,
+                        USE_CHIPLET_ID,
+                        APPLICABLE_TO_ALL,
+                        NO_SPECIAL_RULE
+                    ),
                 }// End of PG Rules for NPU Target
             },
             { TARGETING::TYPE_OBUS,
@@ -735,12 +746,23 @@ namespace PARTIAL_GOOD
                     //                    here.
                     new PartialGoodRule
                     (
-                        PREDICATE_P9,
+                        {&PREDICATE_NIMBUS, &PREDICATE_CUMULUS},
                         MASK_NA,
                         MASK_NA,
                         INDEX_NA,
                         APPLICABLE_TO_ALL,
                         ObusBrickSpecialRule
+                    ),
+                    // Axone will have some special rules related to the NPUs
+                    // @todo-RTC:208518 - Add Axone OBUS_BRICK PG rules
+                    new PartialGoodRule
+                    (
+                        {&PREDICATE_AXONE},
+                        MASK_NA,
+                        MASK_NA,
+                        INDEX_NA,
+                        APPLICABLE_TO_ALL,
+                        NO_SPECIAL_RULE
                     ),
                 }// End of PG Rules for OBUS BRICK Target
             },

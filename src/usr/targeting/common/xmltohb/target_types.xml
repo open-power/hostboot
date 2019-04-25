@@ -3111,6 +3111,7 @@
     </attribute>
   </targetType>
 
+  <!-- Three NPUs per proc -->
   <targetType>
     <id>unit-npu-axone</id>
     <parent>unit-npu-power9</parent>
@@ -3118,8 +3119,26 @@
       <id>MODEL</id>
       <default>AXONE</default>
     </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
   </targetType>
 
+  <!-- One NPU per proc -->
   <targetType>
     <id>unit-npu-cumulus</id>
     <parent>unit-npu-power9</parent>
@@ -3129,6 +3148,7 @@
     </attribute>
   </targetType>
 
+  <!-- One NPU per proc -->
   <targetType>
     <id>unit-npu-nimbus</id>
     <parent>unit-npu-power9</parent>
@@ -3138,7 +3158,6 @@
     </attribute>
   </targetType>
 
-  <!-- One NPU per proc -->
   <targetType>
     <id>unit-npu-power9</id>
     <parent>unit</parent>
