@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,6 +134,7 @@ namespace PARTIAL_GOOD
     // MC
     // PG/AG Masks
     const uint16_t MC_R1_AG_MASK                 = 0xE0FD;
+    const uint16_t MC_R1_AG_MASK_AXONE           = 0xE03D;
     const uint16_t MC_R2_PG_MASK                 = 0x0040;
     const uint16_t MC_R3_PG_MASK                 = 0x0020;
 

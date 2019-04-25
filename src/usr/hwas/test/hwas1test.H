@@ -48,8 +48,74 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
+const uint16_t pgDataAllGoodAxone[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
+                     {(uint16_t)HWAS::VPD_CP00_PG_FSI_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_PERVASIVE_GOOD_AXONE,
+                      (uint16_t)HWAS::VPD_CP00_PG_N0_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_N1_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_N2_GOOD_AXONE,
+                      (uint16_t)HWAS::VPD_CP00_PG_N3_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_XBUS_GOOD_CUMULUS,
+                      (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD_AXONE,
+                      (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD_AXONE,
+                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[0],
+                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[1],
+                      (uint16_t)HWAS::VPD_CP00_PG_PCIx_GOOD[2],
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_EPx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_ECxx_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_RESERVED_GOOD};
+
 // Buffer with all good data (CUMULUS chip)
-const uint16_t pgDataAllGood[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
+const uint16_t pgDataAllGoodCumulus[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
                      {(uint16_t)HWAS::VPD_CP00_PG_FSI_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_PERVASIVE_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_N0_GOOD,
@@ -371,9 +437,20 @@ public:
                               ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
                               : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
             uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
-            memcpy(pgData,
-                   pgDataAllGood,
-                   VPD_CP00_PG_DATA_LENGTH);
+
+            if(MODEL_AXONE == l_model)
+            {
+                memcpy(pgData,
+                      pgDataAllGoodAxone,
+                      VPD_CP00_PG_DATA_LENGTH);
+            }
+            else
+            {
+                  memcpy(pgData,
+                      pgDataAllGoodCumulus,
+                      VPD_CP00_PG_DATA_LENGTH);
+            }
+
             pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
             pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
             pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
@@ -460,9 +537,18 @@ public:
                             l_mask);
                 }
 
-                // Restore the "all good" data
-                pgData[VPD_CP00_PG_PERVASIVE_INDEX] =
-                    (uint16_t)VPD_CP00_PG_PERVASIVE_GOOD;
+                if(MODEL_AXONE == l_model)
+                {
+                    // Restore the "all good" data
+                    pgData[VPD_CP00_PG_PERVASIVE_INDEX] =
+                        (uint16_t)VPD_CP00_PG_PERVASIVE_GOOD_AXONE;
+                }
+                else
+                {
+                    // Restore the "all good" data
+                    pgData[VPD_CP00_PG_PERVASIVE_INDEX] =
+                        (uint16_t)VPD_CP00_PG_PERVASIVE_GOOD;
+                }
             }
 
             TS_INFO( "testHWASisChipFunctional: N0 is not functional");
@@ -562,6 +648,19 @@ public:
                 // Restore the "all good" data
                 pgData[VPD_CP00_PG_N2_INDEX] =
                     (uint16_t)VPD_CP00_PG_N2_GOOD;
+
+                if(MODEL_AXONE == l_model)
+                {
+                    // Restore the "all good" data
+                    pgData[VPD_CP00_PG_N2_INDEX] =
+                        (uint16_t)VPD_CP00_PG_N2_GOOD_AXONE;
+                }
+                else
+                {
+                    // Restore the "all good" data
+                    pgData[VPD_CP00_PG_N2_INDEX] =
+                        (uint16_t)VPD_CP00_PG_N2_GOOD;
+                }
             }
 
             TS_INFO( "testHWASisChipFunctional: N3 is not functional");
@@ -686,9 +785,20 @@ public:
                               ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
                               : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
             uint16_t pgData[VPD_CP00_PG_DATA_ENTRIES];
-            memcpy(pgData,
-                   pgDataAllGood,
-                   VPD_CP00_PG_DATA_LENGTH);
+
+            if(MODEL_AXONE == l_model)
+            {
+                memcpy(pgData,
+                      pgDataAllGoodAxone,
+                      VPD_CP00_PG_DATA_LENGTH);
+            }
+            else
+            {
+                  memcpy(pgData,
+                      pgDataAllGoodCumulus,
+                      VPD_CP00_PG_DATA_LENGTH);
+            }
+
             pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
             pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
             pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
@@ -1107,9 +1217,19 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
 
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
                         break;
@@ -1208,8 +1328,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
                         break;
@@ -1307,8 +1437,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
                         break;
@@ -1406,8 +1546,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
                         break;
@@ -1506,8 +1656,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[l_indexMC] = VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[l_indexMC] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
                         break;
@@ -1871,9 +2031,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
 
                         }
 
@@ -1987,9 +2156,18 @@ public:
                                         pDesc->getAttr<ATTR_HUID>());
                             }
 
-                            // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
-                                (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
                         }
 
                         // TEST WITH BAD MAGIC PORT (MCA0 or MCA4)
@@ -2038,8 +2216,18 @@ public:
                                     pDesc->getAttr<ATTR_HUID>());
                         }
 
-                        pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                        if(MODEL_AXONE == l_model)
+                        {
+                            // Restore the "all good" data
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
+                                (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                        }
+                        else
+                        {
+                            // Restore the "all good" data
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
+                                (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                        }
 
                         // Try bad MCA Port setting for MCA2/3 & MCA6/7
                         if ( VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2] !=
@@ -2147,8 +2335,19 @@ public:
                             }
 
                             // Restore the "all good" data
-                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
-                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            if(MODEL_AXONE == l_model)
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD_AXONE;
+                            }
+                            else
+                            {
+                                // Restore the "all good" data
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
+                                    (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                            }
+
 
                         }
 

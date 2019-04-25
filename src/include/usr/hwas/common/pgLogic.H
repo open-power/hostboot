@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,6 +129,7 @@ namespace PARTIAL_GOOD
     // MC
     // PG/AG Masks
     extern const uint16_t MC_R1_AG_MASK;
+    extern const uint16_t MC_R1_AG_MASK_AXONE;
     extern const uint16_t MC_R2_PG_MASK;
     extern const uint16_t MC_R3_PG_MASK;
 
@@ -533,17 +534,27 @@ namespace PARTIAL_GOOD
             },
             { TARGETING::TYPE_MC,
                 {
-                    // MC Rule 1
+                    // MC Rule 1 (Cumulus)
                     new PartialGoodRule
                     (
-                        {&PREDICATE_CUMULUS, &PREDICATE_AXONE},
+                        {&PREDICATE_CUMULUS},
                         ALL_ON_PG_MASK,
                         MC_R1_AG_MASK,
                         USE_CHIPLET_ID,
                         APPLICABLE_TO_ALL,
                         NO_SPECIAL_RULE
                     ),
-                    // MC Rule 2: Chiplet N1 must be checked for chip unit 1
+                    // MC Rule 1 (Axone)
+                    new PartialGoodRule
+                    (
+                        {&PREDICATE_AXONE},
+                        ALL_ON_PG_MASK,
+                        MC_R1_AG_MASK_AXONE,
+                        USE_CHIPLET_ID,
+                        APPLICABLE_TO_ALL,
+                        NO_SPECIAL_RULE
+                    ),
+                    // MC Rule 2: Chiplet N1 must be checked for chip unit 1 (Axone & Cumulus)
                     new PartialGoodRule
                     (
                         {&PREDICATE_CUMULUS, &PREDICATE_AXONE},
@@ -553,7 +564,7 @@ namespace PARTIAL_GOOD
                         ONE_BIT_CU_MASK,
                         NO_SPECIAL_RULE
                     ),
-                    // MC Rule 3: Chiplet N3 must be checked for chip unit 0
+                    // MC Rule 3: Chiplet N3 must be checked for chip unit 0 (Axone & Cumulus)
                     new PartialGoodRule
                     (
                         {&PREDICATE_CUMULUS, &PREDICATE_AXONE},

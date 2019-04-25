@@ -970,6 +970,13 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     uint16_t l_xbus = (l_model == MODEL_NIMBUS) ?
       VPD_CP00_PG_XBUS_GOOD_NIMBUS : VPD_CP00_PG_XBUS_GOOD_CUMULUS;
 
+    uint16_t l_perv = (l_model == MODEL_AXONE) ?
+      VPD_CP00_PG_PERVASIVE_GOOD_AXONE : VPD_CP00_PG_PERVASIVE_GOOD;
+
+    uint16_t l_n2 = (l_model == MODEL_AXONE) ?
+      VPD_CP00_PG_N2_GOOD_AXONE : VPD_CP00_PG_N2_GOOD;
+
+
     // Check all bits in FSI entry
     if (i_pgData[VPD_CP00_PG_FSI_INDEX] !=
         VPD_CP00_PG_FSI_GOOD)
@@ -985,14 +992,14 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     else
     // Check all bits in PRV entry
     if (i_pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
-        VPD_CP00_PG_PERVASIVE_GOOD)
+        l_perv)
     {
         HWAS_INF("pTarget %.8X - Pervasive pgData[%d]: "
                  "actual 0x%04X, expected 0x%04X - bad",
                  i_target->getAttr<ATTR_HUID>(),
                  VPD_CP00_PG_PERVASIVE_INDEX,
                  i_pgData[VPD_CP00_PG_PERVASIVE_INDEX],
-                 VPD_CP00_PG_PERVASIVE_GOOD);
+                 l_perv);
         l_chipFunctional = false;
     }
     else
@@ -1022,14 +1029,14 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     }
     else
     // Check all bits in N2 entry
-    if (i_pgData[VPD_CP00_PG_N2_INDEX] != VPD_CP00_PG_N2_GOOD)
+    if (i_pgData[VPD_CP00_PG_N2_INDEX] != l_n2)
     {
         HWAS_INF("pTarget %.8X - N2 pgData[%d]: "
                  "actual 0x%04X, expected 0x%04X - bad",
                  i_target->getAttr<ATTR_HUID>(),
                  VPD_CP00_PG_N2_INDEX,
                  i_pgData[VPD_CP00_PG_N2_INDEX],
-                 VPD_CP00_PG_N2_GOOD);
+                 l_n2);
         l_chipFunctional = false;
     }
     else
