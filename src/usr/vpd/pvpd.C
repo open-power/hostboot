@@ -42,6 +42,7 @@
 #include <config.h>
 #include "pvpd.H"
 #include "cvpd.H"
+#include "dvpd.H"
 #include "vpd.H"
 #include <initservice/initserviceif.H>
 

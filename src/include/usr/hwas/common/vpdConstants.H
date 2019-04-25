@@ -328,13 +328,13 @@ typedef std::array<model_ag_entry, MODEL_AG_DATA_ENTRIES> model_ag_entries;
 #endif
 
 // constants the platReadLx will use for looking at the VPD data
-const uint32_t VPD_CRP0_LX_HDR_DATA_LENGTH  = 256;
+const uint32_t VPD_CRP0_LX_HDR_DATA_LENGTH       = 256;
 
-const uint32_t VPD_CRP0_LX_FREQ_INDEP_INDEX = 8;
-const uint32_t VPD_CRP0_LX_PORT_DISABLED    = 0;
+const uint32_t VPD_CRP0_LX_FREQ_INDEP_INDEX      = 8;
+const uint32_t VPD_CRP0_LX_PORT_DISABLED         = 0;
 
-const uint8_t  VPD_CRP0_LX_MIN_X            = 1;
-const uint8_t  VPD_CRP0_LX_MAX_X            = 8;
+const uint8_t  VPD_CRP0_LX_MIN_X                 = 1;
+const uint8_t  VPD_CRP0_LX_MAX_X                 = 8;
 
 }
 

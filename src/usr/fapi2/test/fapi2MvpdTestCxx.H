@@ -326,7 +326,8 @@ public:
 
 #ifdef CONFIG_EARLY_TESTCASES
       // Requires some prereqs of step7
-      FAPI_INF("Skipping poundv tests");
+      FAPI_INF("Skipping poundv tests due to CONFIG_EARLY_TESTCASES");
+
 #else
       fapi2::ReturnCode   l_rc;
 
@@ -421,7 +422,8 @@ public:
 
 #ifdef CONFIG_EARLY_TESTCASES
       // Requires some prereqs of step7
-      FAPI_INF("Skipping poundv tests");
+      FAPI_INF("Skipping poundw tests due to CONFIG_EARLY_TESTCASES");
+
 #else
       fapi2::ReturnCode   l_rc;
 

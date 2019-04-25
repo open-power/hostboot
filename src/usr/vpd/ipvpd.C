@@ -1896,21 +1896,31 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                        offset,
                        i_recordName );
 
+            // convert data for SRC display
+            uint32_t exp_rec;
+            memcpy( &exp_rec, i_recordName, RECORD_BYTE_SIZE );
+            uint32_t act_rec;
+            memcpy( &act_rec, record, RECORD_BYTE_SIZE );
+
             /*@
              * @errortype
              * @reasoncode       VPD::VPD_RECORD_MISMATCH
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_IPVPD_FIND_KEYWORD_ADDR
-             * @userdata1        Current offset into VPD
-             * @userdata2        Start of Record offset
+             * @userdata1[00:31] Current offset into VPD
+             * @userdata1[32:63] Start of Record offset
+             * @userdata2[00:31] Expected record name
+             * @userdata2[32:63] Found record name
              * @devdesc          Record name does not match value expected for
              *                   offset read.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_IPVPD_FIND_KEYWORD_ADDR,
                                            VPD::VPD_RECORD_MISMATCH,
-                                           offset,
-                                           i_offset );
+                                           TWO_UINT32_TO_UINT64(offset,
+                                                                i_offset ),
+                                           TWO_UINT32_TO_UINT64(exp_rec,
+                                                                act_rec) );
 
             // Could be the VPD of the target wasn't set up properly
             // -- DECONFIG so that we can possibly keep booting
