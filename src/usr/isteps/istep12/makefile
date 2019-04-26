@@ -44,6 +44,9 @@ CENT_IO_HWP_PATH   = $(CENT_PROC_PATH)/hwp/io
 CENT_MEM_HWP_PATH  = $(CENT_PROC_PATH)/hwp/memory
 CENT_INITFILE_PATH = $(CENT_PROC_PATH)/hwp/initfiles
 
+GEM_PROCEDURES_PATH  = ${ROOTPATH}/src/import/chips/ocmb/gemini/procedures
+
+
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
@@ -68,6 +71,9 @@ EXTRAINCDIR += ${P9A_MSS_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_INC_PATH}
 EXTRAINCDIR += ${P9A_MSS_ACCESSOR_PATH}
+EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory
+EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 
 VPATH += $(P9_NEST_HWP_PATH)
 VPATH += $(P9_PERV_HWP_PATH)
@@ -125,6 +131,7 @@ VPATH += $(if $(CONFIG_AXONE),${P9A_MSS_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${EXPLORER_OMI_HWP_PATH},)
 VPATH += $(if $(CONFIG_AXONE),${P9_MEMORY_HWP_PATH},)
+VPATH += $(if $(CONFIG_AXONE),${GEM_PROCEDURES_PATH}/hwp/memory,)
 
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_utils.o,)
 OBJS  += $(if $(CONFIG_AXONE),exp_omi_setup.o,)
@@ -140,6 +147,6 @@ OBJS += $(if $(CONFIG_AXONE),p9a_omi_io_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_omic_io_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_dccal.o,)
-
+OBJS += $(if $(CONFIG_AXONE),gem_getecid.o,)
 
 include ${ROOTPATH}/config.mk
