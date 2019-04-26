@@ -49,6 +49,7 @@
 #ifdef CONFIG_AXONE
 #include    <exp_omi_setup.H>
 #include    <exp_omi_train.H>
+#include    <chipids.H> // for EXPLORER ID
 #endif
 
 using   namespace   ISTEP;
@@ -114,15 +115,27 @@ void* call_dmi_io_run_training (void *io_pArgs)
 
     for (const auto & l_ocmb_target : l_ocmbTargetList)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "exp_omi_setup HWP target HUID 0x%.08x",
-            TARGETING::get_huid(l_ocmb_target));
-
         //  call the HWP with each target
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb_target);
+            (l_ocmb_target);
 
-        FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+        // check EXPLORER first as this is most likely the configuration
+        uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+        if (chipId == POWER_CHIPID::EXPLORER_16)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "exp_omi_setup HWP target HUID 0x%.08x",
+                TARGETING::get_huid(l_ocmb_target));
+
+            FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+        }
+        else
+        {
+            // Gemini, just skip omi_setup call
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Skipping omi_setup HWP on target HUID 0x%.8X, chipId 0x%.4X",
+                TARGETING::get_huid(l_ocmb_target), chipId );
+        }
 
         //  process return code.
         if ( l_err )
@@ -143,8 +156,8 @@ void* call_dmi_io_run_training (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  exp_omi_setup HWP on target 0x%.08X, starting training", TARGETING::get_huid(l_ocmb_target));
-
+                "Start omi training on target HUID 0x%.8X",
+                TARGETING::get_huid(l_ocmb_target) );
             FAPI_INVOKE_HWP(l_err, exp_omi_train, l_fapi_ocmb_target);
 
             //  process return code.

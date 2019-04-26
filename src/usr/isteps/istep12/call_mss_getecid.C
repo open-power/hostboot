@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,14 @@
 #include    <util/utilmbox_scratch.H>
 
 //HWP
-#include    <p9c_mss_get_cen_ecid.H>
+#ifndef CONFIG_AXONE
+    #include <p9c_mss_get_cen_ecid.H>
+#else
+    #include <chipids.H>
+// @todo RTC 208512   #include  <exp_getecid.H>
+    #include  <gem_getecid.H>
+#endif
+
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -56,10 +63,39 @@ using   namespace   TARGETING;
 
 namespace ISTEP_12
 {
+void cumulus_mss_getecid(IStepError & io_istepError);
+void axone_mss_getecid(IStepError & io_istepError);
+
 void* call_mss_getecid (void *io_pArgs)
 {
     IStepError l_StepError;
 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid entry" );
+    auto l_procModel = TARGETING::targetService().getProcessorModel();
+
+    switch (l_procModel)
+    {
+        case TARGETING::MODEL_CUMULUS:
+            cumulus_mss_getecid(l_StepError);
+            break;
+        case TARGETING::MODEL_AXONE:
+            axone_mss_getecid(l_StepError);
+            break;
+        case TARGETING::MODEL_NIMBUS:
+        default:
+            break;
+    }
+
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_StepError.getErrorHandle();
+}
+
+#ifndef CONFIG_AXONE
+void cumulus_mss_getecid(IStepError & io_istepError)
+{
     errlHndl_t l_err = NULL;
     uint8_t    l_ddr_port_status = 0;
     uint8_t    l_cache_enable = 0;
@@ -71,28 +107,20 @@ void* call_mss_getecid (void *io_pArgs)
        { MSS_GET_CEN_ECID_DDR_STATUS_MBA0_BAD,
          MSS_GET_CEN_ECID_DDR_STATUS_MBA1_BAD };
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid entry" );
-
     // Get all Centaur targets
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    for (TargetHandleList::const_iterator
-            l_membuf_iter = l_membufTargetList.begin();
-            l_membuf_iter != l_membufTargetList.end();
-            ++l_membuf_iter)
+    for ( const auto & l_membuf_target : l_membufTargetList )
     {
-        //  make a local copy of the target for ease of use
-        TARGETING::Target* l_pCentaur = *l_membuf_iter;
-
         // Dump current run on target
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Running p9c_mss_get_cen_ecid HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+                "target HUID %.8X", TARGETING::get_huid(l_membuf_target));
 
         //  call the HWP with each target
         fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_centaur
-                (l_pCentaur);
+                (l_membuf_target);
 
         //  call the HWP with each fapi2::Target
         //  Note:  This HWP does not actually return the entire ECID data.  It
@@ -108,10 +136,10 @@ void* call_mss_getecid (void *io_pArgs)
                       l_err->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_err );
+            ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
             // Create IStep error log and cross reference error that occurred
-            l_StepError.addErrorDetails( l_err );
+            io_istepError.addErrorDetails( l_err );
 
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
@@ -131,22 +159,14 @@ void* call_mss_getecid (void *io_pArgs)
                 PredicateCTM l_mba_pred(CLASS_UNIT,TYPE_MBA);
                 TARGETING::TargetHandleList l_mbaTargetList;
                 getChildChiplets(l_mbaTargetList,
-                                 l_pCentaur,
+                                 l_membuf_target,
                                  TYPE_MBA);
 
-                uint8_t l_num_func_mbas = l_mbaTargetList.size();
-
-                for (TargetHandleList::const_iterator
-                        l_mba_iter = l_mbaTargetList.begin();
-                        l_mba_iter != l_mbaTargetList.end();
-                        ++l_mba_iter)
+                for ( const auto & l_mba_target : l_mbaTargetList )
                 {
-                    //  Make a local copy of the target for ease of use
-                    TARGETING::Target*  l_pMBA = *l_mba_iter;
-
                     // Get the MBA chip unit position
                     ATTR_CHIP_UNIT_type l_pos =
-                        l_pMBA->getAttr<ATTR_CHIP_UNIT>();
+                        l_mba_target->getAttr<ATTR_CHIP_UNIT>();
 
                     // Check the DDR port status to see if this MBA should be
                     // set to nonfunctional.
@@ -154,10 +174,9 @@ void* call_mss_getecid (void *io_pArgs)
                     {
                         // call HWAS to deconfigure this target
                         l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                                    *l_pMBA, HWAS::DeconfigGard::
-                                                DECONFIGURED_BY_MEMORY_CONFIG);
-                        l_num_func_mbas--;
-
+                                    *l_mba_target,
+                                    HWAS::DeconfigGard::
+                                    DECONFIGURED_BY_MEMORY_CONFIG);
                         if (l_err)
                         {
                             // shouldn't happen, but if it does, stop trying to
@@ -173,7 +192,7 @@ void* call_mss_getecid (void *io_pArgs)
                               "ERROR: error deconfiguring MBA or Centaur");
 
                     // Create IStep error log and cross ref error that occurred
-                    l_StepError.addErrorDetails( l_err );
+                    io_istepError.addErrorDetails( l_err );
 
                     // Commit Error
                     errlCommit( l_err, HWPF_COMP_ID );
@@ -212,12 +231,12 @@ void* call_mss_getecid (void *io_pArgs)
             // ATTR_CEN_MSS_CACHE_ENABLE is not set as writeable in src/import/chips/centaur/procedures/xml/attribute_info/memory_attributes.xml
             // Should we remove below code?
             // Set the ATTR_CEN_MSS_CACHE_ENABLE attribute
-            //l_pCentaur->setAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>(
+            //l_membuf_target->setAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>(
             //    l_cache_enable);
 
             // Read the ATTR_CEN_MSS_CACHE_ENABLE back to pick up any override
             uint8_t l_cache_enable_attr =
-                l_pCentaur->getAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>();
+                l_membuf_target->getAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>();
 
             if (l_cache_enable != l_cache_enable_attr)
             {
@@ -237,25 +256,21 @@ void* call_mss_getecid (void *io_pArgs)
             {
                 // Deconfigure the L4 Cache Targets (there should be 1)
                 TargetHandleList l_list;
-                getChildChiplets(l_list, l_pCentaur, TYPE_L4, false);
+                getChildChiplets(l_list, l_membuf_target, TYPE_L4, false);
 
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_mss_getecid: deconfiguring %d L4s (Centaur huid: 0x%.8X)",
-                    l_list.size(), get_huid(l_pCentaur));
+                    l_list.size(), get_huid(l_membuf_target));
 
-                for (TargetHandleList::const_iterator
-                        l_l4_iter = l_list.begin();
-                        l_l4_iter != l_list.end();
-                        ++l_l4_iter)
+                for ( const auto & l_l4_target : l_list )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_mss_getecid: deconfiguring L4 (huid: 0x%.8X)",
-                        get_huid( *l_l4_iter));
+                        get_huid(l_l4_target));
 
                     l_err = HWAS::theDeconfigGard().
-                        deconfigureTarget(**l_l4_iter ,
-                                    HWAS::DeconfigGard::
-                                                DECONFIGURED_BY_MEMORY_CONFIG);
+                        deconfigureTarget( *l_l4_target,
+                            HWAS::DeconfigGard::DECONFIGURED_BY_MEMORY_CONFIG);
 
                     if (l_err)
                     {
@@ -264,7 +279,7 @@ void* call_mss_getecid (void *io_pArgs)
 
                         // Create IStep error log
                         //   and cross reference error that occurred
-                        l_StepError.addErrorDetails( l_err);
+                        io_istepError.addErrorDetails( l_err);
 
                         // Commit Error
                         errlCommit(l_err, HWPF_COMP_ID);
@@ -281,11 +296,82 @@ void* call_mss_getecid (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS :  mss_get_cen_ecid HWP( )" );
     }
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
 }
+#else
+void cumulus_mss_getecid(IStepError & io_istepError)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "Error: Trying to call 'p9c_mss_get_cen_ecid' but Cumulus code is not compiled in");
+    assert(0, "Calling wrong Model's HWPs");
+}
+#endif
 
+#ifdef CONFIG_AXONE
+void axone_mss_getecid(IStepError & io_istepError)
+{
+    errlHndl_t l_err = NULL;
+
+    // Get all OCMB targets
+    TARGETING::TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+    bool isGeminiChip = false;
+    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    {
+        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
+            l_fapi_ocmb_target(l_ocmb_target);
+
+        // check EXPLORER first as this is most likely the configuration
+        uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+        if (chipId == POWER_CHIPID::EXPLORER_16)
+        {
+            isGeminiChip = false;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running exp_getecid HWP on target HUID 0x%.8X",
+                TARGETING::get_huid(l_ocmb_target) );
+            //@todo RTC 208512: FAPI_INVOKE_HWP(l_err, exp_getecid, l_fapi_ocmb_target);
+        }
+        else
+        {
+            isGeminiChip = true;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running gem_getecid HWP on target HUID 0x%.8X, chipId 0x%.4X",
+                TARGETING::get_huid(l_ocmb_target), chipId );
+            FAPI_INVOKE_HWP(l_err, gem_getecid, l_fapi_ocmb_target);
+        }
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X : %s_getecid HWP returned error",
+                l_err->reasonCode(), isGeminiChip?"gem":"exp");
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_ocmb_target).addToLog(l_err);
+
+            // Create IStep error log and cross reference to error that occurred
+            io_istepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+
+            break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS running %s_getecid HWP on target HUID 0x%.8X",
+                isGeminiChip?"gem":"exp", TARGETING::get_huid(l_ocmb_target) );
+        }
+    }
+}
+#else
+void axone_mss_getecid(IStepError & io_istepError)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "Error: Trying to call 'gem_getecid' or 'exp_getecid' but Axone code is not compiled in");
+    assert(0, "Calling wrong Model's HWPs");
+}
+#endif
 };

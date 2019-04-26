@@ -46,6 +46,7 @@
 #include  <fapi2.H>
 #ifdef CONFIG_AXONE
 #include  <exp_draminit_mc.H>
+#include  <chipids.H> // for EXPLORER ID
 #else
 #include  <p9_mss_draminit_mc.H>
 #include  <p9c_mss_draminit_mc.H>
@@ -124,8 +125,8 @@ void* call_mss_draminit_mc (void *io_pArgs)
         {
             // Dump current run on target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_draminit_mc HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_membuf_target));
+                "Running p9_mss_draminit_mc HWP on target HUID %.8X",
+                TARGETING::get_huid(l_membuf_target) );
 
             fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
                 (l_membuf_target);
@@ -140,23 +141,24 @@ void* call_mss_draminit_mc (void *io_pArgs)
                         l_err->reasonCode());
 
                 // capture the target data in the elog
-                ErrlUserDetailsTarget(l_fapi_membuf_target).addToLog( l_err );
+                ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
 
-                // Create IStep error log and cross reference to error that occurred
+                // Create IStep error log and cross reference to error
+                // that occurred
                 l_stepError.addErrorDetails( l_err );
 
                 // Commit Error
                 errlCommit( l_err, HWPF_COMP_ID );
- 
+
                 break;
             }
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS running p9c_mss_draminit_mc HWP on "
-                           "target HUID %.8X", TARGETING::get_huid(l_fapi_membuf_target));
+                           "target HUID %.8X",
+                           TARGETING::get_huid(l_membuf_target));
             }
-
         }
     }
 
@@ -168,17 +170,28 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
         for (const auto & l_ocmb_target : l_ocmbTargetList)
         {
-            // Dump current run on target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running exp_draminit_mc HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
+            // check EXPLORER first as this is most likely the configuration
+            uint32_t chipId = l_ocmb_target->getAttr< TARGETING::ATTR_CHIP_ID>();
+            if (chipId == POWER_CHIPID::EXPLORER_16)
+            {
+                fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+                    (l_ocmb_target);
 
-            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb_target);
+                // Dump current run on target
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running exp_draminit_mc HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
 
-            //  call the HWP with each fapi2::Target
-            FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
-
+                //  call the HWP with each fapi2::Target
+                FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
+            }
+            else
+            {
+                // Gemini, NOOP
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Skipping draminit_mc HWP on target HUID 0x%.8X, chipId 0x%.4X",
+                    TARGETING::get_huid(l_ocmb_target), chipId );
+            }
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -196,13 +209,12 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
                 break;
             }
-            else
+            else if (chipId == POWER_CHIPID::EXPLORER_16)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS running exp_draminit_mc HWP on "
-                           "target HUID %.8X", TARGETING::get_huid(l_ocmb_target));
+                   "SUCCESS running exp_draminit_mc HWP on target HUID %.8X",
+                   TARGETING::get_huid(l_ocmb_target));
             }
-
         }
 
 #endif
