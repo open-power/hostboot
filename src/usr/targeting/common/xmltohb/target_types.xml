@@ -3323,6 +3323,15 @@
   </targetType>
 
   <targetType>
+    <id>unit-nx-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>NX</default>
+      <id>TYPE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>unit-nx-power9</id>
     <parent>unit</parent>
     <attribute>
@@ -3593,6 +3602,15 @@
     <attribute>
       <default>NIMBUS</default>
       <id>MODEL</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>unit-occ-power10</id>
+    <parent>unit</parent>
+    <attribute>
+      <default>OCC</default>
+      <id>TYPE</id>
     </attribute>
   </targetType>
 
