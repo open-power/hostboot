@@ -40,7 +40,7 @@ namespace fapi2
 ///
 enum MulticastGroup : uint32_t
 {
-    MCGROUP_ALL,               ///< All chiplets, good or bad, a.k.a. broadcast
+    MCGROUP_ALL = 0,           ///< All chiplets, good or bad, a.k.a. broadcast
     MCGROUP_GOOD,              ///< All good chiplets
     MCGROUP_GOOD_NO_TP,        ///< All good chiplets except PERV
     MCGROUP_GOOD_MC,           ///< All good MC chiplets
@@ -49,6 +49,7 @@ enum MulticastGroup : uint32_t
     MCGROUP_GOOD_PCI,          ///< All good PCI chiplets
     MCGROUP_GOOD_EQ,           ///< All EQ chiplets with at least one good core
     MCGROUP_ALL_EQ,            ///< All EQ chiplets
+    MCGROUP_COUNT              ///< Must be last, can be used by platforms to allocate array-type mapping tables
 };
 
 }
