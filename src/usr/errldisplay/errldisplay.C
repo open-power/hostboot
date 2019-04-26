@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -340,22 +340,26 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
             CONSOLE::displayf(NULL, "  ComponentId %s (0x%04x)",
                              findComponentName( user_data->iv_header.iv_compId ),
                              user_data->iv_header.iv_compId );
-            switch ( user_data->iv_header.iv_sst )
+
+            if(user_data->iv_header.iv_compId == ERRL_COMP_ID)
             {
-                case ERRORLOG::ERRL_UDT_TARGET:
-                    CONSOLE::displayf(NULL, "  TARGET" );
-                    displayTarget( user_data->iv_pData, user_data->iv_Size );
-                    break;
-                case ERRORLOG::ERRL_UDT_CALLOUT:
-                    CONSOLE::displayf(NULL, "  CALLOUT" );
-                    displayCallout( user_data->iv_pData, user_data->iv_Size );
-                    break;
-                case ERRORLOG::ERRL_UDT_STRING:
-                    CONSOLE::displayf(NULL, "  STRING" );
-                    CONSOLE::displayf(NULL,
-                        "  %s",
-                        reinterpret_cast<char*>( user_data->iv_pData ) );
-                    break;
+                switch ( user_data->iv_header.iv_sst )
+                {
+                    case ERRORLOG::ERRL_UDT_TARGET:
+                        CONSOLE::displayf(NULL, "  TARGET" );
+                        displayTarget( user_data->iv_pData, user_data->iv_Size );
+                        break;
+                    case ERRORLOG::ERRL_UDT_CALLOUT:
+                        CONSOLE::displayf(NULL, "  CALLOUT" );
+                        displayCallout( user_data->iv_pData, user_data->iv_Size );
+                        break;
+                    case ERRORLOG::ERRL_UDT_STRING:
+                        CONSOLE::displayf(NULL, "  STRING" );
+                        CONSOLE::displayf(NULL,
+                            "  %s",
+                            reinterpret_cast<char*>( user_data->iv_pData ) );
+                        break;
+                }
             }
         }
 
