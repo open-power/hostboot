@@ -31,16 +31,12 @@ namespace Util
 bool isSimics() __attribute__((alias("__isSimicsRunning")));
 extern "C" bool __isSimicsRunning() NEVER_INLINE;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreturn-type"
-
 bool __isSimicsRunning()
 {
-    asm volatile("li 3, 0");
+    long register r3 asm("r3") = 0;
     MAGIC_INSTRUCTION(MAGIC_SIMICS_CHECK);
+    return r3;
 }
-
-#pragma GCC diagnostic pop
 
 bool isSimicsRunning()
 {

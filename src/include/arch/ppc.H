@@ -457,10 +457,12 @@ inline void MAGIC_INSTRUCTION(int _n)
 {
     register int n = _n;
     isync();
-    asm volatile("rlwimi %0,%0,0,%1,%2"       \
-        :: "i" (((n) >> 8) & 0x1f),           \
-        "i" (((n) >> 4) & 0xf),               \
-        "i" ((((n) >> 0) & 0xf) | 16));       \
+    long register r3 asm("r3");
+    asm volatile("rlwimi %1,%1,0,%2,%3"         \
+        : "=r"(r3) : "i" (((n) >> 8) & 0x1f),   \
+        "i" (((n) >> 4) & 0xf),                 \
+        "i" ((((n) >> 0) & 0xf) | 16),          \
+        "r"(r3));                               \
 }
 
 // Simics components that we can raise log levels for
