@@ -112,6 +112,10 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 FAPI_TRY( mss::attr_eff_engine<mss::exp::attr_eff_engine_fields>::set(l_spd_decoder) );
             }
         }
+
+        // Set up derived ATTRS
+        FAPI_TRY( mss::attr_derived_engine<mss::attr_engine_derived_fields>::set(dimm) );
+
     }// dimm
 
 fapi_try_exit:

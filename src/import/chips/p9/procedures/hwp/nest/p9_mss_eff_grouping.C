@@ -745,7 +745,7 @@ fapi2::ReturnCode EffGroupingMccAttrs::getAttrs(
     iv_dimmSize = (iv_ocmbs.size() * l_min_size);
 
     // Display this OMI's attribute info
-    FAPI_INF("EffGroupingMccAttrs::getAttrs: MCC %d, OCMBs attached %d, "
+    FAPI_INF("EffGroupingMccAttrs::getAttrs: MCC %d, OCMBs w/ memory attached %d, "
              "iv_dimmSize %d GB ",
              iv_unitPos, iv_ocmbs.size(), iv_dimmSize);
 
