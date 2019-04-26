@@ -198,10 +198,6 @@ MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_AXONE_SOURCE)),
 
 MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
 MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
-# TODO RTC: 207832 Remove filter-out commands when new lib files come
-MSS_EXPLORER_SOURCE := $(filter-out memdiags.C,$(MSS_EXPLORER_SOURCE))
-MSS_EXPLORER_SOURCE := $(filter-out mcbist.C,$(MSS_EXPLORER_SOURCE))
-MSS_EXPLORER_SOURCE := $(filter-out memory_size.C,$(MSS_EXPLORER_SOURCE))
 #must bring explorer_memory_size.o in even in Nimbus/Cumulus builds because of p9_mss_grouping nest HWP
 MSS_MODULE_OBJS += $(if $(CONFIG_AXONE),$(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE)),explorer_memory_size.o)
 MODULE = isteps_mss
