@@ -115,7 +115,7 @@ extern "C"
     typedef enum
     {
         N0_MM0_RING_ID  = 0x3,
-        N0_PE0_RING_ID   = 0x6,
+        N0_PE1_RING_ID   = 0x6,
     } p10_N0_RingId_t;
 
     /// P10 N1 chiplet ring ID enumeration
@@ -123,7 +123,7 @@ extern "C"
     typedef enum
     {
         N1_MM1_RING_ID  = 0x3,
-        N1_PE1_RING_ID  = 0x6,
+        N1_PE0_RING_ID  = 0x6,
     } p10_N1_RingId_t;
 
     /// P10 PCIe chiplet SCOM ring ID enumeration
@@ -145,52 +145,62 @@ extern "C"
     /// P10 AXONE chiplet ring ID enumeration
     typedef enum
     {
-        AXONE_PERV_RING_ID = 0x1,
-        AXONE_ODL_RING_ID  = 0x3,
-        AXONE_NDL_RING_ID  = 0x4,
-        AXONE_PDL_RING_ID  = 0x5,
+        AXONE_PDL_RING_ID = 0x4,
     } p10_AXONE_RingId_t;
 
     /// P10 PAU chiplet ring ID enumeration
     typedef enum
     {
-        PAU0346_0_RING_ID   = 0x2,
-        PAU0346_1_RING_ID   = 0x3,
-        PAU57_0_RING_ID     = 0x4,
-        PAU57_1_RING_ID     = 0x5,
-        PBPAU0346_0_RING_ID = 0x6,
-        PBPAU0346_1_RING_ID = 0x7,
-        PBPAU57_0_RING_ID   = 0x8,
-        PBPAU57_1_RING_ID   = 0x9,
-        PAU_TL_RING_ID      = 0xA,
-        PAU_IOPPE_RING_ID   = 0xB,
-        PAU_DLP_RING_ID     = 0xC,
+        PAU0346_0_RING_ID = 0x2,
+        PAU0346_1_RING_ID = 0x3,
+        PAU57_0_RING_ID   = 0x4,
+        PAU57_1_RING_ID   = 0x5,
+        PAU_TL_RING_ID    = 0x6,
+        PAU_IOPPE_RING_ID = 0xB,
     } p10_PAU_RingId_t;
 
     /// P10 MC chiplet ring ID enumeration
     typedef enum
     {
-        MC_RING_ID   = 0x2,
-        OMI0_RING_ID = 0x3,
-        OMI1_RING_ID = 0x4,
-        IOO0_RING_ID = 0x5,
-        IOO1_RING_ID = 0x6,
+        MC_0_RING_ID = 0x3,
+        MC_1_RING_ID = 0x4,
+        OMI0_RING_ID = 0x5,
+        OMI1_RING_ID = 0x6,
     } p10_MC_RingId_t;
+
+    /// P10 EQ chiplet ring ID enumeration
+    typedef enum
+    {
+        QME_RING_ID = 0x2,
+        L3_RING_ID = 0x3,
+    } p10_EQ_PSCOM_RingId_t;
+
+    typedef enum
+    {
+        L2_RING_ID = 0x0,
+        C_0_RING_ID = 0x2,
+        C_1_RING_ID = 0x3,
+        C_3_RING_ID = 0x5,
+    } p10_EQ_PSCOM2_RingId_t;
 
     /// -----------------------
     /// Satellite ID defintions
     /// -----------------------
     typedef enum
     {
-        NMMU_SAT_ID = 0x0,
+        NMMU_SAT_ID0 = 0x0,
+        NMMU_SAT_ID1 = 0x1,
     } p10_NMMU_SatId_t;
 
     typedef enum
     {
-        PEC_SAT_ID  = 0x0,
-        PHB0_SAT_ID = 0x1,
-        PHB1_SAT_ID = 0x2,
-        PHB2_SAT_ID = 0x3,
+        PEC_SAT_ID   = 0x0,
+        PHB0_AIB_SAT_ID = 0x1,
+        PHB1_AIB_SAT_ID = 0x2,
+        PHB2_AIB_SAT_ID = 0x3,
+        PHB0_PHB_SAT_ID = 0x4,
+        PHB1_PHB_SAT_ID = 0x5,
+        PHB2_PHB_SAT_ID = 0x6,
     } p10_PCI_SatId_t;
 
     typedef enum
@@ -201,7 +211,22 @@ extern "C"
         MC_SAT_ID8  = 0x8,
         MC_SAT_ID9  = 0x9,
         MC_SAT_ID12 = 0xC,
+        MC_SAT_ID13 = 0xD,
+        MC_SAT_ID14 = 0xE,
+        MC_SAT_ID15 = 0xF,
     } p10_MC_SatId_t;
+
+    typedef enum
+    {
+        PPE_SAT_ID0 = 0x0,
+        TL_SAT_ID   = 0x0,
+        PPE_SAT_ID1 = 0x1,
+    } p10_PAU_SatId_t;
+
+    typedef enum
+    {
+        DLP_SAT_ID = 0x0,
+    } p10_AXONE_SatId_t;
 
     /// *************************************
     ///          Perv target table
@@ -238,40 +263,6 @@ extern "C"
         EQ5_CHIPLET_ID,
         EQ6_CHIPLET_ID,
         EQ7_CHIPLET_ID,
-    };
-
-    struct PpeTargetInfo_t
-    {
-        const uint8_t targetInstance;    // Target instance
-        const uint8_t chipletId;         // Chiplet ID
-        const uint8_t endpointId;        // Endpoint ID
-        const uint8_t ringId;            // Ring ID
-        const uint8_t satId;             // Sat ID, 0xFF = don't care
-    };
-
-    /// *************************************
-    ///          PPE target table
-    /// *************************************
-    const PpeTargetInfo_t PpeTargetInfoTable[] =
-    {
-        // Instance  ChipletID    EndpointID  RingID    SatId
-        {     0,       0x00,         0xE,       0,       0x0 },
-        {     4,       0x00,         0x5,       0,       0x0 },
-        {     5,       0x00,         0x6,       0,       0x0 },
-        {     6,       0x00,         0x7,       0,       0x0 },
-        {     7,       0x00,         0x8,       0,       0x0 },
-        {    16,       0x10,         0x1,      11,       0x0 },
-        {    17,       0x11,         0x1,      11,       0x0 },
-        {    18,       0x12,         0x1,      11,       0x0 },
-        {    19,       0x13,         0x1,      11,       0x0 },
-        {    32,       0x20,         0xE,       0,       0x0 },
-        {    33,       0x21,         0xE,       0,       0x0 },
-        {    34,       0x22,         0xE,       0,       0x0 },
-        {    35,       0x23,         0xE,       0,       0x0 },
-        {    36,       0x24,         0xE,       0,       0x0 },
-        {    37,       0x25,         0xE,       0,       0x0 },
-        {    38,       0x26,         0xE,       0,       0x0 },
-        {    39,       0x27,         0xE,       0,       0x0 },
     };
 
 // ----------------------
@@ -418,6 +409,13 @@ extern "C"
                 return ((iv_addr >> 10) & 0xF);
             }
 
+            /// @brief Extract EQ ring field from SCOM address (bits 20:22)
+            /// @retval uint8_t Ring id value
+            inline uint8_t getEQRingId() const
+            {
+                return ((iv_addr >> 9) & 0x7);
+            }
+
             /// @brief Modify SCOM address, update ring field value
             /// @param[in] i_ring Ring field value to write
             /// @retval none
@@ -433,6 +431,13 @@ extern "C"
             inline uint8_t getSatId() const
             {
                 return ((iv_addr >> 6) & 0xF);
+            }
+
+            /// @brief Extract EQ satellite ID field from SCOM address (bits 23:25)
+            /// @retval uint8_t Ring id value
+            inline uint8_t getEQSatId() const
+            {
+                return ((iv_addr >> 6) & 0x7);
             }
 
             /// @brief Modify SCOM address, update satellite ID field
@@ -503,6 +508,15 @@ extern "C"
             inline uint32_t getIoLane() const
             {
                 return ((iv_addr >> 32) & 0x1F);
+            }
+
+            /// @brief Set the OBUS Super Wrapper Lane (bits 27:31)
+            ///        of an indirect scom address
+            /// @retval uint8_t Lane
+            inline void setIoLane(const uint8_t i_lane)
+            {
+                iv_addr &= 0xFFFFFFE0FFFFFFFFULL;
+                iv_addr |= ( ((uint64_t)i_lane & 0x1F) <<  32);
             }
 
             /// @brief Determine if SCOM address is valid/well-formed
@@ -661,14 +675,14 @@ extern "C"
             /// @retval uint8_t OMIC target instance.
             uint8_t getOmicTargetInstance();
 
-            /// @brief Determine if this address belongs to PPE target type
+            /// @brief Determine if this address belongs to PAUC target type
             /// @retval true or false.
-            bool isPpeTarget();
+            bool isPaucTarget();
 
-            /// @brief Determine the PPE instance for this address
-            /// Function prereq: Address must belong to PPE target type
-            /// @retval uint8_t PPE target instance.
-            uint8_t getPpeTargetInstance();
+            /// @brief Determine the PAUC instance for this address
+            /// Function prereq: Address must belong to PAUC target type
+            /// @retval uint8_t PAUC target instance.
+            uint8_t getPaucTargetInstance();
 
         private:
             uint64_t iv_addr;   ///< 64-bit raw SCOM address

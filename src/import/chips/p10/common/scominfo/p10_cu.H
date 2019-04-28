@@ -58,7 +58,7 @@ extern "C"
         PU_OMI_CHIPUNIT     = 11,           ///< OMI
         PU_OMIC_CHIPUNIT    = 12,           ///< OMIC
         PU_PAU_CHIPUNIT     = 13,           ///< PAU
-        PU_PPE_CHIPUNIT     = 14,           ///< PPE
+        PU_PAUC_CHIPUNIT    = 14,           ///< PAUC
         NONE                = 0xFF,         ///< None/Invalid
     } p10ChipUnits_t;
 
@@ -99,26 +99,26 @@ extern "C"
     const uint8_t MAX_PU_MCC_CHIPUNIT_NUM  =  7;
     const uint8_t MAX_PU_OMIC_CHIPUNIT_NUM =  7;
     const uint8_t MAX_PU_OMI_CHIPUNIT_NUM  = 15;
-    const uint8_t MAX_PU_PPE_CHIPUNIT_NUM  = 39; // Special case, with gaps
+    const uint8_t MAX_PU_PAUC_CHIPUNIT_NUM =  3;
 
     // Chip unit string/enum/max targes table
     const p10_chipUnitDescription_t ChipUnitDescriptionTable[] =
     {
-        { "pu"    , P10_NO_CU,        MAX_PU_CHIPUNIT_NUM      },
-        { "eq"    , PU_EQ_CHIPUNIT,   MAX_PU_EQ_CHIPUNIT_NUM   },
-        { "c"     , PU_C_CHIPUNIT,    MAX_PU_C_CHIPUNIT_NUM    },
-        { "pec"   , PU_PEC_CHIPUNIT,  MAX_PU_PEC_CHIPUNIT_NUM  },
-        { "phb"   , PU_PHB_CHIPUNIT,  MAX_PU_PHB_CHIPUNIT_NUM  },
-        { "nmmu"  , PU_NMMU_CHIPUNIT, MAX_PU_NMMU_CHIPUNIT_NUM },
-        { "perv"  , PU_PERV_CHIPUNIT, MAX_PU_PERV_CHIPUNIT_NUM },  // Special case, with gaps
-        { "iohs"  , PU_IOHS_CHIPUNIT, MAX_PU_IOHS_CHIPUNIT_NUM },
-        { "mc"    , PU_MC_CHIPUNIT,   MAX_PU_MC_CHIPUNIT_NUM   },
-        { "mi"    , PU_MI_CHIPUNIT,   MAX_PU_MI_CHIPUNIT_NUM   },
-        { "mcc"   , PU_MCC_CHIPUNIT,  MAX_PU_MCC_CHIPUNIT_NUM  },
-        { "omi"   , PU_OMI_CHIPUNIT,  MAX_PU_OMI_CHIPUNIT_NUM  },
-        { "omic"  , PU_OMIC_CHIPUNIT, MAX_PU_OMIC_CHIPUNIT_NUM },
-        { "pau"   , PU_PAU_CHIPUNIT,  MAX_PU_PAU_CHIPUNIT_NUM  },
-        { "ppe"   , PU_PPE_CHIPUNIT,  MAX_PU_PPE_CHIPUNIT_NUM  },  // Special case, with gaps
+        { "pu"    , P10_NO_CU,         MAX_PU_CHIPUNIT_NUM       },
+        { "eq"    , PU_EQ_CHIPUNIT,    MAX_PU_EQ_CHIPUNIT_NUM    },
+        { "c"     , PU_C_CHIPUNIT,     MAX_PU_C_CHIPUNIT_NUM     },
+        { "pec"   , PU_PEC_CHIPUNIT,   MAX_PU_PEC_CHIPUNIT_NUM   },
+        { "phb"   , PU_PHB_CHIPUNIT,   MAX_PU_PHB_CHIPUNIT_NUM   },
+        { "nmmu"  , PU_NMMU_CHIPUNIT,  MAX_PU_NMMU_CHIPUNIT_NUM  },
+        { "perv"  , PU_PERV_CHIPUNIT,  MAX_PU_PERV_CHIPUNIT_NUM  },  // Special case, with gaps
+        { "iohs"  , PU_IOHS_CHIPUNIT,  MAX_PU_IOHS_CHIPUNIT_NUM  },
+        { "mc"    , PU_MC_CHIPUNIT,    MAX_PU_MC_CHIPUNIT_NUM    },
+        { "mi"    , PU_MI_CHIPUNIT,    MAX_PU_MI_CHIPUNIT_NUM    },
+        { "mcc"   , PU_MCC_CHIPUNIT,   MAX_PU_MCC_CHIPUNIT_NUM   },
+        { "omi"   , PU_OMI_CHIPUNIT,   MAX_PU_OMI_CHIPUNIT_NUM   },
+        { "omic"  , PU_OMIC_CHIPUNIT,  MAX_PU_OMIC_CHIPUNIT_NUM  },
+        { "pau"   , PU_PAU_CHIPUNIT,   MAX_PU_PAU_CHIPUNIT_NUM   },
+        { "pauc"  , PU_PAUC_CHIPUNIT,  MAX_PU_PAUC_CHIPUNIT_NUM  },
     };
 
 } // extern "C"

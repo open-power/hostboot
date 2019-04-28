@@ -75,77 +75,6 @@ extern "C"
     }
 
     //################################################################################
-    /// @brief Translate the upper 32-bit of an indirect scom address.
-    ///        IOHS and OMI chip units can be targeted using PAU chiplets with
-    ///        indirect SCOM addresses.
-    ///
-    /// @param[in] i_p10CU         Chip unit type
-    /// @param[in] i_ecLevel       Chip EC level
-    /// @param[in] i_chipUnitNum   Instance number of the chip unit
-    /// @param[in] i_scomAddr      P10 SCOM address object
-    /// @param[in] i_mode          Translation mode, specifying different addr translation methods.
-    /// @retval Non-zero if error
-    ///
-    uint8_t xlateIoUpperAddr(
-        const p10ChipUnits_t i_p10CU,
-        const uint8_t i_ecLevel,
-        const uint8_t i_chipUnitNum,
-        p10_scom_addr& i_scomAddr,
-        const uint32_t i_mode)
-    {
-        uint8_t l_rc = 0;
-
-        do
-        {
-            ///
-            ///  PAU0 (lower right) -> MC0 (OMI 0/1/2/3) + IOHS0 + IOHS1
-            ///  PAU1 (upper right) -> MC2 (OMI 8/9/10/11) + IOHS2 + IOHS3
-            ///  PAU2 (lower left) -> MC1 (OMI 4/5/6/7) + IOHS4 + IOHS5
-            ///  PAU3 (upper left) -> MC3 (OMI 12/13/14/15) + IOHS6 + IOHS7
-            ///
-            ///  Group address bits (22:26) of upper 32-bit
-            ///    Group 0: IOHS[0]
-            ///    Group 1: IOHS[1]
-            ///
-            ///   From the OMI Link point of view, two DLs will target the same OMI PHY Group
-            ///     Group 2: OMIPHY[0] Lanes 0-7  (OMI DL0 x8)
-            ///     Group 2: OMIPHY[0] Lanes 8-15 (OMI DL1 x8)
-            ///     Group 3: OMIPHY[1] Lanes 0-7  (OMI DL2 x8)
-            ///     Group 3: OMIPHY[1] Lanes 8-15 (OMI DL3 x8)
-
-            // IOHS target
-            if (i_p10CU == PU_IOHS_CHIPUNIT)
-            {
-                // Group address = 0b00000 for IOHS0
-                //               = 0b00001 for IOHS1
-                i_scomAddr.setIoGroupAddr(i_chipUnitNum % 2);
-            }
-            // OMI target
-            else if (i_p10CU == PU_OMI_CHIPUNIT)
-            {
-                // Group address = 0b00010 for OMI0 and OMI1
-                //               = 0b00011 for OMI2 and OMI3
-                if ( (i_chipUnitNum % 4 <= 1) ) // OMI DL 0&1
-                {
-                    i_scomAddr.setIoGroupAddr(0x2);
-                }
-                else // OMI DL 2&3
-                {
-                    i_scomAddr.setIoGroupAddr(0x3);
-                }
-            }
-            else
-            {
-                l_rc = 1;
-            }
-
-        }
-        while (0);
-
-        return l_rc;
-    }
-
-    //################################################################################
     /// @brief Get the chiplet ID for a chip unit instance based on given
     ///        address and chip unit type
     /// @param[in]  i_addr          SCOM address
@@ -180,7 +109,7 @@ extern "C"
                     if ( (l_scom.getChipletId() >= N0_CHIPLET_ID) &&
                          (l_scom.getChipletId() <= N1_CHIPLET_ID) )
                     {
-                        o_chipletId = N0_CHIPLET_ID + i_chipUnitNum;
+                        o_chipletId = ((i_chipUnitNum) ? (N0_CHIPLET_ID) : (N1_CHIPLET_ID));
                     }
                     // If input address is of PCI chiplets
                     else
@@ -191,7 +120,19 @@ extern "C"
                     break;
 
                 case PU_PHB_CHIPUNIT:
-                    o_chipletId = (i_chipUnitNum / 3) + PCI0_CHIPLET_ID;
+
+                    // If input address is of Nest chiplets
+                    if ( (l_scom.getChipletId() >= N0_CHIPLET_ID) &&
+                         (l_scom.getChipletId() <= N1_CHIPLET_ID) )
+                    {
+                        o_chipletId = ((i_chipUnitNum / 3) ? (N0_CHIPLET_ID) : (N1_CHIPLET_ID));
+                    }
+                    // If input address is of PCI chiplets
+                    else
+                    {
+                        o_chipletId = (i_chipUnitNum / 3) + PCI0_CHIPLET_ID;
+                    }
+
                     break;
 
                 case PU_NMMU_CHIPUNIT:
@@ -232,17 +173,53 @@ extern "C"
                     break;
 
                 case PU_MCC_CHIPUNIT:
-                case PU_OMIC_CHIPUNIT:
                     o_chipletId = (i_chipUnitNum / 2) + MC0_CHIPLET_ID;
                     break;
 
-                case PU_OMI_CHIPUNIT:
-                    if ( (l_scom.getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
-                         (l_scom.getChipletId() <= MC3_CHIPLET_ID) )     // 0x0F
+                case PU_OMIC_CHIPUNIT:
+
+                    // PAU indirect
+                    if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                         (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
                     {
-                        o_chipletId = (i_chipUnitNum / 4) + MC0_CHIPLET_ID;
+                        // PAU0 --> OMIC 0/1
+                        // PAU1 --> OMIC 4/5
+                        // PAU2 --> OMIC 2/3
+                        // PAU3 --> OMIC 6/7
+                        if (i_chipUnitNum >= 0 && i_chipUnitNum <= 1)
+                        {
+                            o_chipletId = PAU0_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 2 && i_chipUnitNum <= 3)
+                        {
+                            o_chipletId = PAU2_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 4 && i_chipUnitNum <= 5)
+                        {
+                            o_chipletId = PAU1_CHIPLET_ID;
+                        }
+                        else if (i_chipUnitNum >= 6 && i_chipUnitNum <= 7)
+                        {
+                            o_chipletId = PAU3_CHIPLET_ID;
+                        }
+                        else
+                        {
+                            l_rc = 1;
+                        }
                     }
-                    else // input address is of PAU chiplets
+                    // MC direct
+                    else
+                    {
+                        o_chipletId = (i_chipUnitNum / 2) + MC0_CHIPLET_ID;
+                    }
+
+                    break;
+
+                case PU_OMI_CHIPUNIT:
+
+                    // PAU indirect
+                    if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                         (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
                     {
                         // PAU0 --> OMI 0/1/2/3
                         // PAU1 --> OMI 8/9/10/11
@@ -269,23 +246,16 @@ extern "C"
                             l_rc = 1;
                         }
                     }
+                    // MC direct
+                    else
+                    {
+                        o_chipletId = (i_chipUnitNum / 4) + MC0_CHIPLET_ID;
+                    }
 
                     break;
 
-                case PU_PPE_CHIPUNIT:
-
-                    // Look for i_chipUnitNum in table
-                    for (uint8_t l_index = 0;
-                         l_index < sizeof(PpeTargetInfoTable) / sizeof(PpeTargetInfo_t);
-                         l_index++)
-                    {
-                        if (i_chipUnitNum == PpeTargetInfoTable[l_index].targetInstance)
-                        {
-                            o_chipletId = PpeTargetInfoTable[l_index].chipletId;
-                            break;
-                        }
-                    }
-
+                case PU_PAUC_CHIPUNIT:
+                    o_chipletId = i_chipUnitNum + PAU0_CHIPLET_ID;
                     break;
 
                 case PU_PAU_CHIPUNIT:
@@ -313,7 +283,6 @@ extern "C"
     {
         uint8_t l_rc = 0;
         p10_scom_addr l_scom(i_scomAddr);
-        uint8_t l_index = 0;
         uint8_t l_chipletId = 0;
 
         do
@@ -355,14 +324,32 @@ extern "C"
 
                 case PU_PHB_CHIPUNIT:
 
-                    // Set ringId
-                    if ( i_chipUnitNum < 3 ) // PHB 0-2
+                    // If input address is of Nest chiplets
+                    if ( (l_scom.getChipletId() >= N0_CHIPLET_ID) &&
+                         (l_scom.getChipletId() <= N1_CHIPLET_ID) )
                     {
-                        l_scom.setRingId(i_chipUnitNum + 3);
+                        l_scom.setSatId(1 + (i_chipUnitNum % 3));
                     }
-                    else  // PHB 3-5
+                    // If input address is of PCI chiplets
+                    else
                     {
-                        l_scom.setRingId(i_chipUnitNum);
+                        if (l_scom.getRingId() == 2)
+                        {
+                            if ((l_scom.getSatId() >= 1) &&
+                                (l_scom.getSatId() <= 3))
+                            {
+                                l_scom.setSatId(1 + (i_chipUnitNum % 3));
+                            }
+                            else
+                            {
+                                l_scom.setSatId(4 + (i_chipUnitNum % 3));
+                            }
+                        }
+                        else
+                        {
+                            l_scom.setRingId(3 + (i_chipUnitNum % 3));
+                        }
+
                     }
 
                     break;
@@ -372,6 +359,9 @@ extern "C"
                     // Set Sat ID
                     if (i_chipUnitNum % 2)
                     {
+                        uint8_t l_offset = l_scom.getSatOffset();
+
+                        // MCC Sat ID
                         // For odd MCC instance, Sat Id is to be set to 5, or 9
                         // If input address is an even instance that has:
                         //   SatId = 0x4 --> set translated SatId to 0x5
@@ -386,9 +376,29 @@ extern "C"
                         {
                             l_scom.setSatId(0x9);
                         }
+                        // PBI Sat ID
+                        else if (l_scom.getSatId() == 0x0)
+                        {
+                            if ((l_offset >= 0x22) &&
+                                (l_offset <= 0x2B))
+                            {
+                                l_scom.setSatOffset(l_offset + 0x10);
+                            }
+                        }
+                        // MCBIST Sat ID
+                        else if (l_scom.getSatId() == 0xD)
+                        {
+                            if ((l_offset >= 0x00) &&
+                                (l_offset <= 0x1F))
+                            {
+                                l_scom.setSatOffset(l_offset + 0x20);
+                            }
+                        }
                     }
                     else
                     {
+                        uint8_t l_offset = l_scom.getSatOffset();
+
                         // For even MCC instance, Sat Id is to be set to 4, or 8
                         // If input address is an odd instance that has:
                         //   SatId = 0x5 --> set translated SatId to 0x4
@@ -403,39 +413,117 @@ extern "C"
                         {
                             l_scom.setSatId(0x8);
                         }
+                        // PBI Sat ID
+                        else if (l_scom.getSatId() == 0x0)
+                        {
+                            if ((l_offset >= 0x32) &&
+                                (l_offset <= 0x3B))
+                            {
+                                l_scom.setSatOffset(l_offset - 0x10);
+                            }
+                        }
+                        // MCBIST Sat ID
+                        else if (l_scom.getSatId() == 0xD)
+                        {
+                            if ((l_offset >= 0x20) &&
+                                (l_offset <= 0x3F))
+                            {
+                                l_scom.setSatOffset(l_offset - 0x20);
+                            }
+                        }
+                    }
+
+                    break;
+
+
+                case PU_IOHS_CHIPUNIT:
+
+                    // PAU indirect
+                    if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                         (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
+                    {
+                        // for odd IOHS instances, set IO group = 1
+                        if ( i_chipUnitNum % 2 )
+                        {
+                            l_scom.setIoGroupAddr(0x1);
+                        }
+                        // for even IOHS instances, set IO group = 0
+                        else
+                        {
+                            l_scom.setIoGroupAddr(0x0);
+                        }
                     }
 
                     break;
 
                 case PU_OMI_CHIPUNIT:
 
-                    // Set Ring ID
-                    if ( (i_chipUnitNum / 2) % 2 )
+                    // PAU indirect
+                    if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                         (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
                     {
-                        // For odd OMI instances after dividing by 2 (2, 3, 6, 7, 10, 11, 14, and 15)
-                        // If input address has ringId = 0x3 --> set translated RingId to 0x4
-                        //                             = 0x5 --> set translated RingId to 0x6
-                        // Leave RingId as is otherwise.
-                        if (l_scom.getRingId() == 0x3)
+                        // for odd OMI instances, set IO lane between 8-15
+                        if ( i_chipUnitNum % 2 )
                         {
-                            l_scom.setRingId(0x4);
+                            l_scom.setIoLane(8 + (l_scom.getIoLane() % 8));
                         }
-                        else if (l_scom.getRingId() == 0x5)
+                        // for even OMI instances, set IO lane between 0-7
+                        else
+                        {
+                            l_scom.setIoLane(0 + (l_scom.getIoLane() % 8));
+                        }
+
+                        // for odd OMI instances after dividing by 2, set IO group = 3
+                        if ( (i_chipUnitNum / 2) % 2 )
+                        {
+                            l_scom.setIoGroupAddr(0x3);
+                        }
+                        // for even OMI instances after dividing by 2, set IO group = 2
+                        else
+                        {
+                            l_scom.setIoGroupAddr(0x2);
+                        }
+                    }
+                    // MC direct
+                    else
+                    {
+                        // non-PM regs
+                        if ((l_scom.getSatOffset() >= 16) && (l_scom.getSatOffset() <= 47))
+                        {
+                            // for odd OMI instances, set sat reg ID between 32-47
+                            if ( i_chipUnitNum % 2 )
+                            {
+                                l_scom.setSatOffset(32 + (l_scom.getSatOffset() % 16));
+                            }
+                            // for even OMI instances, set sat reg ID between 16-31
+                            else
+                            {
+                                l_scom.setSatOffset(16 + (l_scom.getSatOffset() % 16));
+                            }
+                        }
+                        // PM regs
+                        else
+                        {
+                            // for odd OMI instances, set sat reg ID between 56-59
+                            if ( i_chipUnitNum % 2 )
+                            {
+                                l_scom.setSatOffset(56 + (l_scom.getSatOffset() % 4));
+                            }
+                            // for even OMI instances, set sat reg ID between 48-51
+                            else
+                            {
+                                l_scom.setSatOffset(48 + (l_scom.getSatOffset() % 4));
+                            }
+
+                        }
+
+                        // for odd OMI instances after dividing by 2, set ring ID = 6
+                        if ( (i_chipUnitNum / 2) % 2 )
                         {
                             l_scom.setRingId(0x6);
                         }
-                    }
-                    else
-                    {
-                        // For even OMI instances after dividing by 2 (0, 1, 4, 5, 8, 9, 12, and 13)
-                        // If input address has ringId = 0x4 --> set translated RingId to 0x3
-                        //                             = 0x6 --> set translated RingId to 0x5
-                        // Leave RingId as is otherwise.
-                        if (l_scom.getRingId() == 0x4)
-                        {
-                            l_scom.setRingId(0x3);
-                        }
-                        else if (l_scom.getRingId() == 0x6)
+                        // for even OMI instances after dividing by 2, set ring ID = 5
+                        else
                         {
                             l_scom.setRingId(0x5);
                         }
@@ -444,56 +532,34 @@ extern "C"
                     break;
 
                 case PU_OMIC_CHIPUNIT:
-                    if (i_chipUnitNum % 2)
+
+                    // PAU indirect
+                    if ( (l_scom.getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+                         (l_scom.getChipletId() <= PAU3_CHIPLET_ID) )    // 0x13
                     {
-                        // For odd OMIC instance, RingId is to be set to 4, or 6
-                        // If input address is an even instance that has:
-                        //   RingId = 0x3 --> set translated RingId to 0x4
-                        //          = 0x5 --> set translated RingId to 0x6
-                        //
-                        // If input address is an odd instance, leave the RingId
-                        // as input address.
-                        if (l_scom.getRingId() == 0x3)
+                        if (i_chipUnitNum % 2)
                         {
-                            l_scom.setRingId(0x4);
+                            // For odd OMIC instance, set IO group ID=3
+                            l_scom.setIoGroupAddr(0x3);
                         }
-                        else if (l_scom.getRingId() == 0x5)
+                        else
                         {
-                            l_scom.setRingId(0x6);
+                            // For even OMIC instance, set IO group ID=2
+                            l_scom.setIoGroupAddr(0x2);
                         }
                     }
+                    // MC direct
                     else
                     {
-                        // For even OMIC instance, RingId is to be set to 3, or 5
-                        // If input address is an odd instance that has:
-                        //   RingId = 0x4 --> set translated RingId to 0x3
-                        //          = 0x6 --> set translated RingId to 0x5
-                        // If input address is an even instance, leave the RingId
-                        // as input address.
-                        if (l_scom.getRingId() == 0x4)
+                        if (i_chipUnitNum % 2)
                         {
-                            l_scom.setRingId(0x3);
+                            // For odd OMIC instance, set ring ID=6
+                            l_scom.setRingId(0x6);
                         }
-                        else if (l_scom.getRingId() == 0x6)
+                        else
                         {
+                            // For even OMIC instance, set ring ID=5
                             l_scom.setRingId(0x5);
-                        }
-                    }
-
-                    break;
-
-                case PU_PPE_CHIPUNIT:
-
-                    // Look for i_chipUnitNum in table (instance)
-                    for (l_index = 0;
-                         l_index < sizeof(PpeTargetInfoTable) / sizeof(PpeTargetInfo_t);
-                         l_index++)
-                    {
-                        if (i_chipUnitNum == PpeTargetInfoTable[l_index].targetInstance)
-                        {
-                            l_scom.setEndpoint(PpeTargetInfoTable[l_index].endpointId);
-                            l_scom.setRingId(PpeTargetInfoTable[l_index].ringId);
-                            l_scom.setSatId(PpeTargetInfoTable[l_index].satId);
                         }
                     }
 
@@ -505,8 +571,6 @@ extern "C"
                     // If input address has:
                     //   RingId = 0x4 --> set translated RingId to 0x2
                     //            0x5 --> set translated RingId to 0x3
-                    //            0x8 --> set translated RingId to 0x6
-                    //            0x9 --> set translated RingId to 0x7
                     // Leave RingId as is otherwise
                     if ( (i_chipUnitNum == 0) ||
                          (i_chipUnitNum == 3) ||
@@ -521,22 +585,12 @@ extern "C"
                         {
                             l_scom.setRingId(0x3);
                         }
-                        else if (l_scom.getRingId() == 0x8)
-                        {
-                            l_scom.setRingId(0x6);
-                        }
-                        else if (l_scom.getRingId() == 0x9)
-                        {
-                            l_scom.setRingId(0x7);
-                        }
                     }
 
                     // Setting RingId for instances 1, 2, 5, and 7
                     // If input address has:
                     //   RingId = 0x2 --> set translated RingId to 0x4
                     //            0x3 --> set translated RingId to 0x5
-                    //            0x6 --> set translated RingId to 0x8
-                    //            0x7 --> set translated RingId to 0x9
                     // Leave RingId as is otherwise
                     else if ( (i_chipUnitNum == 1) ||
                               (i_chipUnitNum == 2) ||
@@ -550,14 +604,6 @@ extern "C"
                         else if (l_scom.getRingId() == 0x3)
                         {
                             l_scom.setRingId(0x5);
-                        }
-                        else if (l_scom.getRingId() == 0x6)
-                        {
-                            l_scom.setRingId(0x8);
-                        }
-                        else if (l_scom.getRingId() == 0x7)
-                        {
-                            l_scom.setRingId(0x9);
                         }
                     }
 
@@ -573,18 +619,6 @@ extern "C"
                 break;
             }
 
-            // Translate upper 32-bit of indirect scom address
-            if ( (l_chipletId >= PAU0_CHIPLET_ID) &&
-                 (l_chipletId <= PAU3_CHIPLET_ID) &&
-                 l_scom.isIndirect() )
-            {
-                l_rc = xlateIoUpperAddr(i_p10CU, i_ecLevel, i_chipUnitNum, l_scom, i_mode);
-
-                if (l_rc)
-                {
-                    break;
-                }
-            }
         }
         while(0);
 
@@ -716,13 +750,13 @@ extern "C"
                                         l_scom.getOmicTargetInstance()));
         }
 
-        // PPE registers
-        if (l_scom.isPpeTarget())
+        // PAUC registers
+        if (l_scom.isPaucTarget())
         {
             o_chipUnitRelated = true;
-            // PU_PPE_CHIPUNIT
-            o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_PPE_CHIPUNIT,
-                                        l_scom.getPpeTargetInstance()));
+            // PU_PAUC_CHIPUNIT
+            o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_PAUC_CHIPUNIT,
+                                        l_scom.getPaucTargetInstance()));
         }
 
         // PERV registers

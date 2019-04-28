@@ -96,8 +96,13 @@ extern "C"
                 {
                     l_coreTarget = true;
                 }
-                // or must be PSCOM endpoints
-                else if ( (getEndpoint() == PSCOM_ENDPOINT) ||    // 0x1
+                // or must be PSCOM endpoints -- ensure that ring ID is
+                // associated with a core resource on the first PSCOM
+                // endpoint (0x1), all are core rings on the second
+                // PSCOM endpoint (0x2)
+                else if ( ((getEndpoint() == PSCOM_ENDPOINT) &&   // 0x1
+                           ((getEQRingId() != PERV_RING_ID) &&    // 0x1
+                            (getEQRingId() != QME_RING_ID))) ||   // 0x2
                           (getEndpoint() == PSCOM_2_ENDPOINT) )   // 0x2
                 {
                     l_coreTarget = true;
@@ -152,7 +157,7 @@ extern "C"
             // For PEC addresses via NEST regions, ring ID must be 0x6
             if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
                  (getChipletId() <= N1_CHIPLET_ID) &&  // 0x3
-                 (getRingId() == N0_PE0_RING_ID) )     // 0x6
+                 (getRingId() == N0_PE1_RING_ID) )     // 0x6
             {
                 l_pecTarget = true;
             }
@@ -175,7 +180,7 @@ extern "C"
         uint8_t l_instance = 0;
 
         // PEC addresses via NEST regions
-        l_instance = getChipletId() - N0_CHIPLET_ID;
+        l_instance = N1_CHIPLET_ID - getChipletId();
 
         // PEC addresses via PCIE
         if ( (getChipletId() == PCI0_CHIPLET_ID) ||
@@ -206,10 +211,10 @@ extern "C"
                     l_phbTarget = true;
                 }
 
-                // or, Ring ID of 0x2, Sat ID 1-3
+                // or, Ring ID of 0x2, Sat ID 1-6
                 if ( (getRingId() == PCI_RING_ID) && // 0x2
-                     (getSatId() >= PHB0_SAT_ID) &&  // 0x1
-                     (getSatId() <= PHB2_SAT_ID) )   // 0x3
+                     (getSatId() >= PHB0_AIB_SAT_ID) &&  // 0x1
+                     (getSatId() <= PHB2_PHB_SAT_ID) )   // 0x6
                 {
                     l_phbTarget = true;
                 }
@@ -218,9 +223,9 @@ extern "C"
             // N0/N1 chiplet ID
             if ( (getChipletId() >= N0_CHIPLET_ID) &&  // 0x2
                  (getChipletId() <= N1_CHIPLET_ID) &&  // 0x3
-                 (getRingId() == N0_PE0_RING_ID)  &&   // 0x6
-                 (getSatId() >= PHB0_SAT_ID) &&        // 0x1
-                 (getSatId() <= PHB2_SAT_ID) )         // 0x3
+                 (getRingId() == N0_PE1_RING_ID)  &&   // 0x6
+                 (getSatId() >= PHB0_AIB_SAT_ID) &&    // 0x1
+                 (getSatId() <= PHB2_AIB_SAT_ID) )     // 0x3
             {
                 l_phbTarget = true;
             }
@@ -234,16 +239,19 @@ extern "C"
     {
         uint8_t l_instance = 0;
 
-        if ( (getChipletId() == N1_CHIPLET_ID) ||
+        if ( (getChipletId() == N0_CHIPLET_ID) ||
              (getChipletId() == PCI1_CHIPLET_ID) )
         {
             l_instance += 3;
         }
 
-        if ( (getRingId() == N0_PE0_RING_ID) ||
-             (getRingId() == PCI_RING_ID) )
+        if ( (getRingId() == N0_PE1_RING_ID) )
         {
             l_instance += (getSatId() - 1);
+        }
+        else if ( (getRingId() == PCI_RING_ID ) )
+        {
+            l_instance += ((getSatId() - 1) % 3);
         }
         else
         {
@@ -262,10 +270,11 @@ extern "C"
         if ( (getChipletId() == N0_CHIPLET_ID) ||
              (getChipletId() == N1_CHIPLET_ID) )
         {
-            // Endpoint must be PSCOM, ring ID must be 0x3, Sat ID must be 0
+            // Endpoint must be PSCOM, ring ID must be 0x3, Sat ID must be 0/1
             if ( (getEndpoint() == PSCOM_ENDPOINT) &&    // 0x1
-                 (getRingId() == N0_MM0_RING_ID)  &&    // 0x3
-                 (getSatId() == NMMU_SAT_ID) )           // 0x0
+                 (getRingId() == N0_MM0_RING_ID)  &&     // 0x3
+                 (getSatId() >= NMMU_SAT_ID0) &&         // 0x0
+                 (getSatId() <= NMMU_SAT_ID1) )          // 0x1
             {
                 l_nmmuTarget = true;
             }
@@ -294,13 +303,28 @@ extern "C"
             // See if Chiplet ID is a perv chiplet ID from table
             if (getChipletId() == PervTargetChipletIdTable[l_index])
             {
-                // If Endpoint is PSCOM_ENDPOINT, ring ID must be 0 or 1
-                if (getEndpoint() == PSCOM_ENDPOINT)        // 0x1
+                if (getEndpoint() == PSCOM_ENDPOINT)            // 0x1
                 {
-                    if ( (getRingId() == PSCOM_RING_ID) ||  // 0x0
-                         (getRingId() == PERV_RING_ID) )    // 0x1
+                    // EQ specific PSCOM endpoint logic
+                    // ensure ring being accessed is EQ scoped (non-core)
+                    if ( (getChipletId() >= EQ0_CHIPLET_ID) &&
+                         (getChipletId() <= EQ7_CHIPLET_ID) )
                     {
-                        l_pervTarget = true;
+                        if ( (getEQRingId() == PERV_RING_ID) || // 0x1
+                             (getEQRingId() == QME_RING_ID) )   // 0x2
+                        {
+                            l_pervTarget = true;
+                        }
+                    }
+
+                    // non-EQ chiplet, just match for ring ID = 0 / 1
+                    else
+                    {
+                        if ( (getRingId() == PSCOM_RING_ID) ||  // 0x0
+                             (getRingId() == PERV_RING_ID) )    // 0x1
+                        {
+                            l_pervTarget = true;
+                        }
                     }
                 }
                 else if (getEndpoint() == CLOCK_CTRL_ENDPOINT)  // 0x3
@@ -316,17 +340,6 @@ extern "C"
                     if ( getRingId() == PSCOM_RING_ID)                    // 0x0
                     {
                         l_pervTarget = true;
-                    }
-                }
-
-                // If chiplet is EQ and falls into the range
-                // of the cores, it's not a PERV target
-                if ( (getChipletId() >= EQ0_CHIPLET_ID) &&
-                     (getChipletId() <= EQ7_CHIPLET_ID) )
-                {
-                    if (getEndpoint() == PSCOM_ENDPOINT)
-                    {
-                        l_pervTarget = false;
                     }
                 }
 
@@ -359,9 +372,9 @@ extern "C"
             // If not a PERV target check for IOHS target that uses AXON chiplet
             if (l_iohsTarget == false)
             {
-                if ( (getEndpoint() == PSCOM_ENDPOINT) &&
-                     (getRingId() >= AXONE_PERV_RING_ID) &&   // 0x1
-                     (getRingId() <= AXONE_PDL_RING_ID) )     // 0x5
+                if ( (getEndpoint() == PSCOM_ENDPOINT)  &&
+                     (getRingId() == AXONE_PDL_RING_ID) &&  // 0x4
+                     (getSatId() == DLP_SAT_ID) )           // 0x0
                 {
                     l_iohsTarget = true;
                 }
@@ -369,19 +382,21 @@ extern "C"
         }
 
         // Target via PAU chiplets
-        else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
+        else if ( isIndirect()                        &&
+                  (getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
                   (getChipletId() <= PAU3_CHIPLET_ID) )   // 0x13
         {
             // Endpoint must be PSCOM and RingID is IOPPE
             if ( (getEndpoint() == PSCOM_ENDPOINT) &&
                  (getRingId() == PAU_IOPPE_RING_ID) )     // 0xB
             {
-                // Group address (bits 22:26 of upper address)
-                // must be 0b00000 or 0b00001
+                // Group address (bits 22:26 of upper address) must be 0b00000 or 0b00001,
+                // and indirect register address should be per-group or per-lane
                 // Group 0: IOHS[0]
                 // Group 1: IOHS[1]
-                if ( (getIoGroupAddr() == 0x0) ||
-                     (getIoGroupAddr() == 0x1) )
+                if ( ( (getIoGroupAddr() == 0x0) ||
+                       (getIoGroupAddr() == 0x1) ) &&
+                     ((getIoRegAddr() & 0x1E0) != 0x1E0) )
                 {
                     l_iohsTarget = true;
                 }
@@ -443,9 +458,7 @@ extern "C"
                  (getChipletId() <= PAU3_CHIPLET_ID) )
             {
                 if ( (getRingId() == PAU0346_0_RING_ID) || // 0x02
-                     (getRingId() == PAU0346_1_RING_ID) || // 0x03
-                     (getRingId() == PBPAU0346_0_RING_ID) || // 0x06
-                     (getRingId() == PBPAU0346_1_RING_ID) )  // 0x07
+                     (getRingId() == PAU0346_1_RING_ID) )  // 0x03
 
                 {
                     l_pauTarget = true;
@@ -453,10 +466,8 @@ extern "C"
                 else if ( (getChipletId() == PAU2_CHIPLET_ID) ||
                           (getChipletId() == PAU3_CHIPLET_ID) )
                 {
-                    if ( (getRingId() == PAU57_0_RING_ID)   || // 0x04
-                         (getRingId() == PAU57_1_RING_ID)   || // 0x05
-                         (getRingId() == PBPAU57_0_RING_ID) || // 0x08
-                         (getRingId() == PBPAU57_1_RING_ID) )  // 0x09
+                    if ( (getRingId() == PAU57_0_RING_ID) || // 0x04
+                         (getRingId() == PAU57_1_RING_ID) )  // 0x05
                     {
                         l_pauTarget = true;
                     }
@@ -473,9 +484,7 @@ extern "C"
         uint8_t l_instance = 0;
 
         if ( (getRingId() == PAU0346_0_RING_ID) || // 0x02
-             (getRingId() == PAU0346_1_RING_ID) || // 0x03
-             (getRingId() == PBPAU0346_0_RING_ID) || // 0x06
-             (getRingId() == PBPAU0346_1_RING_ID) )  // 0x07
+             (getRingId() == PAU0346_1_RING_ID) )  // 0x03
         {
             if (getChipletId() == PAU0_CHIPLET_ID)
             {
@@ -495,10 +504,8 @@ extern "C"
             }
         }
 
-        else if ( (getRingId() == PAU57_0_RING_ID)   || // 0x04
-                  (getRingId() == PAU57_1_RING_ID)   || // 0x05
-                  (getRingId() == PBPAU57_0_RING_ID) || // 0x08
-                  (getRingId() == PBPAU57_1_RING_ID) )  // 0x09
+        else if ( (getRingId() == PAU57_0_RING_ID) || // 0x04
+                  (getRingId() == PAU57_1_RING_ID) )  // 0x05
         {
             if (getChipletId() == PAU2_CHIPLET_ID)
             {
@@ -541,13 +548,28 @@ extern "C"
             {
                 l_miTarget = true;
             }
-            // Endpoint = PSCOM_ENDPOINT, and ringID = MC_RING_ID
+            // Endpoint = PSCOM_ENDPOINT, and ringID = MC_0_RING_ID
             else if ( (getEndpoint() == PSCOM_ENDPOINT) &&     // 0x1
-                      (getRingId() == MC_RING_ID) )            // 0x2
+                      (getRingId() == MC_0_RING_ID) )          // 0x3
             {
-                // Must have MI Sat ID
-                if ( (getSatId() == MC_SAT_ID0) ||  // 0x0
-                     (getSatId() == MC_SAT_ID12) )  // 0xC
+                // PBI satellite
+                if (getSatId() == MC_SAT_ID0)  // 0x0 (PBI)
+                {
+                    // avoid match on MCC register space
+                    if (!(((getSatOffset() >= 0x22) &&
+                           (getSatOffset() <= 0x2B)) ||
+                          ((getSatOffset() >= 0x32) &&
+                           (getSatOffset() <= 0x3B))))
+                    {
+                        l_miTarget = true;
+                    }
+                }
+
+                // MCBIST satellite ID space
+                // avoid match on MCC register space in 0xD
+                if ( (getSatId() == MC_SAT_ID12) || // 0xC,0xE,0xF (MCBIST)
+                     (getSatId() == MC_SAT_ID14) ||
+                     (getSatId() == MC_SAT_ID15) )
                 {
                     l_miTarget = true;
                 }
@@ -569,17 +591,35 @@ extern "C"
         bool l_mccTarget = false;
 
         // Chiplet ID must belong to MCs, Endpoint = PSCOM_ENDPOINT,
-        // and ringID = MC_RING_ID
+        // and ringID = MC_0_RING_ID
         if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
              (getChipletId() <= MC3_CHIPLET_ID) &&    // 0x0F
              (getEndpoint() == PSCOM_ENDPOINT) &&     // 0x1
-             (getRingId() == MC_RING_ID) )            // 0x2
+             (getRingId() == MC_0_RING_ID) )          // 0x3
         {
-            // Must have MCC Sat ID
+            // MCC Sat ID
             if ( (getSatId() == MC_SAT_ID4) ||  // 0x4
                  (getSatId() == MC_SAT_ID8) ||  // 0x8
                  (getSatId() == MC_SAT_ID5) ||  // 0x5
                  (getSatId() == MC_SAT_ID9) )   // 0x9
+            {
+                l_mccTarget = true;
+            }
+
+            // MCC register space in PBI
+            if (getSatId() == MC_SAT_ID0)
+            {
+                if (((getSatOffset() >= 0x22) &&
+                     (getSatOffset() <= 0x2B)) ||
+                    ((getSatOffset() >= 0x32) &&
+                     (getSatOffset() <= 0x3B)))
+                {
+                    l_mccTarget = true;
+                }
+            }
+
+            // MCC register space in MCBIST
+            if (getSatId() == MC_SAT_ID13)
             {
                 l_mccTarget = true;
             }
@@ -593,10 +633,31 @@ extern "C"
     {
         uint8_t l_instance = (getChipletId() - MC0_CHIPLET_ID) * 2;
 
+        // MCC Sat ID
         if ( (getSatId() == MC_SAT_ID5) ||  // 5
              (getSatId() == MC_SAT_ID9) )   // 9
         {
             l_instance += 1;
+        }
+
+        // MCC register space in PBI
+        if ( getSatId() == MC_SAT_ID0 )     // 0
+        {
+            if ((getSatOffset() >= 0x32) &&
+                (getSatOffset() <= 0x3B))
+            {
+                l_instance += 1;
+            }
+        }
+
+        // MCC register space in MCBIST
+        if ( getSatId() == MC_SAT_ID13)    // 13
+        {
+            // MSB of SatOffset denotes channel
+            if (getSatOffset() >= 0x20)
+            {
+                l_instance += 1;
+            }
         }
 
         return l_instance;
@@ -607,37 +668,45 @@ extern "C"
     {
         bool l_omiTarget = false;
 
-        // OMI can be targeted by MC or PAU chiplets (indirect scom)
-
-        // End point must be PSCOM
-        if ( (getEndpoint() == PSCOM_ENDPOINT) )      // 0x1
+        // PAU chiplet, IOPPE ringId (indirect scom)
+        if ( isIndirect()                          &&   // indirect
+             ( getChipletId() >= PAU0_CHIPLET_ID ) &&   // 0x10
+             ( getChipletId() <= PAU3_CHIPLET_ID ) &&   // 0x13
+             ( getEndpoint() == PSCOM_ENDPOINT )   &&   // 0x1
+             ( getRingId() == PAU_IOPPE_RING_ID)   &&   // 0xB
+             ( getSatId() == PPE_SAT_ID0) )             // 0x0
         {
-            // MC chiplet IDs
-            if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
-                 (getChipletId() <= MC3_CHIPLET_ID) )     // 0x0F
+            // Group address (bits 22:26 of upper address)
+            // must be 0b00010 or 0b00011 (for OMI)
+            if ( (getIoGroupAddr() == 0x2 ) ||
+                 (getIoGroupAddr() == 0x3 ) )
             {
-                // Check Ring IDs
-                if ( (getRingId() == OMI0_RING_ID) ||  // 0x3
-                     (getRingId() == IOO0_RING_ID) ||  // 0x5
-                     (getRingId() == OMI1_RING_ID) ||  // 0x4
-                     (getRingId() == IOO1_RING_ID) )   // 0x6
-                {
-                    l_omiTarget = true;
-                }
+                // Reg address must start with 0xxx (per lane)
+                uint32_t regAddr = getIoRegAddr();
 
-            }
-            // PAU chiplet, IOPPE ringId (indirect scom)
-            else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&   // 0x10
-                      (getChipletId() <= PAU3_CHIPLET_ID) &&   // 0x13
-                      (getRingId() == PAU_IOPPE_RING_ID) )     // 0xB
-            {
-                // Group address (bits 22:26 of upper address)
-                // must be 0b00010 or 0b00011
-                if ( (getIoGroupAddr() == 0x2) ||
-                     (getIoGroupAddr() == 0x3) )
+                if ( ( regAddr & 0x100 ) == 0x000 )
                 {
                     l_omiTarget = true;
                 }
+            }
+        }
+
+        // MC chiplet direct SCOM
+        if ( ( getChipletId() >= MC0_CHIPLET_ID ) &&   // 0x0C
+             ( getChipletId() <= MC3_CHIPLET_ID ) &&   // 0x0F
+             ( getEndpoint() == PSCOM_ENDPOINT )  &&   // 0x1
+             ( getRingId() >= OMI0_RING_ID )      &&   // 0x5
+             ( getRingId() <= OMI1_RING_ID )      &&   // 0x6
+             ( getSatId()  == MC_SAT_ID13 ) )          // 0xD (DL)
+        {
+            if (((getSatOffset() >= 16) &&             // 16:31 (subchannel 0)
+                 (getSatOffset() <= 47)) ||            // 32:47 (subchannel 1)
+                ((getSatOffset() >= 48) &&             // 48:51 (subchannel 0, pm regs)
+                 (getSatOffset() <= 51)) ||
+                ((getSatOffset() >= 56) &&             // 48:51 (subchannel 1, pm regs)
+                 (getSatOffset() <= 59)))
+            {
+                l_omiTarget = true;
             }
         }
 
@@ -649,60 +718,24 @@ extern "C"
     {
         uint8_t l_instance = 0;
 
-        // Chiplet ID is MC
-        if ( (getChipletId() >= MC0_CHIPLET_ID) &&
-             (getChipletId() <= MC3_CHIPLET_ID) )
+        // PAU chiplet indirect SCOM
+        if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
+             (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
         {
-            // Instances 0, 4, 8, 12
-            l_instance = (getChipletId() - MC0_CHIPLET_ID) * 4;
-
-            // Instances 2, 6, 10, 14
-            if ( (getRingId() == OMI1_RING_ID) ||  // 0x4
-                 (getRingId() == IOO1_RING_ID) )   // 0x6
-            {
-                l_instance += 2;
-            }
-
-            // Instances 1, 3, 5, 7, 9, 11, 13, 15
-            if (getSatId() == 1)
-            {
-                l_instance += 1;
-            }
-        }
-        // Chiplet ID is PAU
-        else if ( (getChipletId() >= PAU0_CHIPLET_ID) &&      // 0x10
-                  (getChipletId() <= PAU3_CHIPLET_ID) )       // 0x13
-        {
-            // If chiplet ID is PAU then this is indirect address.
-            // Use PAU and Group address (bits 22:26) to calculate instance.
-
-            ///  PAU0 (lower right) -> MC0 (OMI 0/1/2/3)
-            ///  PAU1 (upper right) -> MC2 (OMI 8/9/10/11)
-            ///  PAU2 (lower left) ->  MC1 (OMI 4/5/6/7)
-            ///  PAU3 (upper left) ->  MC3 (OMI 12/13/14/15)
-            ///
-            ///   From the OMI Link point of view, two DLs will target the same OMI PHY Group
-            ///     Group 2: OMIPHY[0] Lanes 0-7  (OMI DL0 x8)
-            ///     Group 2: OMIPHY[0] Lanes 8-15 (OMI DL1 x8)
-            ///     Group 3: OMIPHY[1] Lanes 0-7  (OMI DL2 x8)
-            ///     Group 3: OMIPHY[1] Lanes 8-15 (OMI DL3 x8)
-            //
-            // NOTE: Because two DLs will target the same OMI PHY Group,
-            //       returned instance (even number) covers that instance
-            //       and that instance+1 OMI.
-            //       Ex: Instance 0 represents instances 0 and 1
-            //                   14 represents instances 14 and 15
-
-            // Get first OMI instance in PAUx
-            if ( getChipletId() == PAU0_CHIPLET_ID)
+            // PAU0 --> OMI 0/1/2/3
+            // PAU1 --> OMI 8/9/10/11
+            // PAU2 --> OMI 4/5/6/7
+            // PAU3 --> OMI 12/13/14/15
+            // set basis based on direct chiplet ID
+            if (getChipletId() == PAU0_CHIPLET_ID)
             {
                 l_instance = 0;
             }
-            else if ( getChipletId() == PAU1_CHIPLET_ID)
+            else if (getChipletId() == PAU1_CHIPLET_ID)
             {
                 l_instance = 8;
             }
-            else if ( getChipletId() == PAU2_CHIPLET_ID)
+            else if (getChipletId() == PAU2_CHIPLET_ID)
             {
                 l_instance = 4;
             }
@@ -711,10 +744,40 @@ extern "C"
                 l_instance = 12;
             }
 
-            // Taks group address into account
+            // account for IO group address
             if (getIoGroupAddr() == 0x3)
             {
                 l_instance += 2;
+            }
+
+            // account for IO lane selection
+            if ( ( getIoLane() >= 8 ) &&
+                 ( getIoLane() <= 15) )
+            {
+                l_instance += 1;
+            }
+        }
+
+        // MC direct
+        if ( (getChipletId() >= MC0_CHIPLET_ID) &&
+             (getChipletId() <= MC3_CHIPLET_ID) )
+        {
+            // Instances 0, 4, 8, 12
+            l_instance = (getChipletId() - MC0_CHIPLET_ID) * 4;
+
+            // Instances 2, 6, 10, 14
+            if ( getRingId() == OMI1_RING_ID )     // 0x6
+            {
+                l_instance += 2;
+            }
+
+            // Instances 1, 3, 5, 7, 9, 11, 13, 15
+            if ( ((getSatOffset() >= 32) &&
+                  (getSatOffset() <= 47)) ||
+                 ((getSatOffset() >= 56) &&
+                  (getSatOffset() <= 59)) )
+            {
+                l_instance += 1;
             }
         }
 
@@ -726,20 +789,42 @@ extern "C"
     {
         bool l_omicTarget = false;
 
-        // Chiplet ID must belong to MCs, Endpoint = PSCOM_ENDPOINT,
-        // and ringID = one of MC controller ring IDs
-        if ( (getChipletId() >= MC0_CHIPLET_ID) &&    // 0x0C
-             (getChipletId() <= MC3_CHIPLET_ID) &&    // 0x0F
-             (getEndpoint() == PSCOM_ENDPOINT) )      // 0x1
+        // PAU chiplet, IOPPE ringId (indirect scom)
+        if ( isIndirect()                          &&   // indirect
+             ( getChipletId() >= PAU0_CHIPLET_ID ) &&   // 0x10
+             ( getChipletId() <= PAU3_CHIPLET_ID ) &&   // 0x13
+             ( getEndpoint() == PSCOM_ENDPOINT )   &&   // 0x1
+             ( getRingId() == PAU_IOPPE_RING_ID)   &&   // 0xB
+             ( getSatId() == PPE_SAT_ID0) )             // 0x0
         {
-            // Check RingId
-            if ( (getRingId() == OMI0_RING_ID) ||  // 0x3
-                 (getRingId() == IOO0_RING_ID) ||  // 0x5
-                 (getRingId() == OMI1_RING_ID) ||  // 0x4
-                 (getRingId() == IOO1_RING_ID) )   // 0x6
+            // Group address (bits 22:26 of upper address)
+            // must be 0b00010 or 0b00011 (for OMI)
+            if ( (getIoGroupAddr() == 0x2 ) ||
+                 (getIoGroupAddr() == 0x3 ) )
             {
-                l_omicTarget = true;
+                // Reg address must start with 1xxx (per group),
+                // excluding 1111 (per bus)
+                uint32_t regAddr = getIoRegAddr();
+
+                if ( ( ( regAddr & 0x1E0 ) != 0x1E0 ) &&
+                     ( ( regAddr & 0x100 ) == 0x100 ) )
+                {
+                    l_omicTarget = true;
+                }
             }
+        }
+
+        // MC chiplet direct SCOM
+        if ( ( getChipletId() >= MC0_CHIPLET_ID ) &&   // 0x0C
+             ( getChipletId() <= MC3_CHIPLET_ID ) &&   // 0x0F
+             ( getEndpoint() == PSCOM_ENDPOINT )  &&   // 0x1
+             ( getRingId() >= OMI0_RING_ID )      &&   // 0x5
+             ( getRingId() <= OMI1_RING_ID )      &&   // 0x6
+             ( getSatId()  == MC_SAT_ID13 )       &&   // 0xD (DL)
+             ( getSatOffset() >= 0 )              &&   // shared regs 0-15
+             ( getSatOffset() <= 15 ) )
+        {
+            l_omicTarget = true;
         }
 
         return l_omicTarget;
@@ -748,67 +833,103 @@ extern "C"
     // #####################################
     uint8_t p10_scom_addr::getOmicTargetInstance()
     {
-        uint8_t l_instance = (getChipletId() - MC0_CHIPLET_ID) * 2;
+        uint8_t l_instance = 0;
 
-        if ( (getRingId() == OMI1_RING_ID) ||  // 0x4
-             (getRingId() == IOO1_RING_ID) )   // 0x6
+        // PAU indirect
+        if ( ( getChipletId() >= PAU0_CHIPLET_ID ) &&   // 0x10
+             ( getChipletId() <= PAU3_CHIPLET_ID ) )    // 0x13
         {
-            l_instance += 1;
+            // PAU0 --> OMIC 0/1
+            // PAU1 --> OMIC 4/5
+            // PAU2 --> OMIC 2/3
+            // PAU3 --> OMIC 6/7
+            if (getChipletId() == 0)
+            {
+                l_instance = 0;
+            }
+            else if (getChipletId() == 1)
+            {
+                l_instance = 4;
+            }
+            else if (getChipletId() == 2)
+            {
+                l_instance = 2;
+            }
+            else
+            {
+                l_instance = 6;
+            }
+
+            if (getIoGroupAddr() == 0x3)
+            {
+                l_instance += 1;
+            }
+        }
+
+        // MC direct
+        if ( ( getChipletId() >= MC0_CHIPLET_ID ) &&   // 0x0C
+             ( getChipletId() <= MC3_CHIPLET_ID ) )    // 0x0F
+        {
+            l_instance = (getChipletId() - MC0_CHIPLET_ID) * 2;
+
+            if (getRingId() == 0x6)
+            {
+                l_instance += 1;
+            }
         }
 
         return l_instance;
     }
 
     // #####################################
-    bool p10_scom_addr::isPpeTarget()
+    bool p10_scom_addr::isPaucTarget()
     {
-        bool l_ppeTarget = false;
-        uint8_t l_index = 0;
+        bool l_paucTarget = false;
 
-        // Check against all entries in PPE target info table
-        for (l_index = 0;
-             l_index < sizeof(PpeTargetInfoTable) / sizeof(PpeTargetInfo_t);
-             l_index++)
+        if ( (getChipletId() >= PAU0_CHIPLET_ID) &&    // 0x10
+             (getChipletId() <= PAU3_CHIPLET_ID) )     // 0x13
         {
-            // Check for matches of chipletId, Endpoint, RingId, and SatId
-            if ( (getChipletId() == PpeTargetInfoTable[l_index].chipletId) &&
-                 (getEndpoint() == PpeTargetInfoTable[l_index].endpointId) &&
-                 (getRingId() == PpeTargetInfoTable[l_index].ringId) &&
-                 (getSatId() == PpeTargetInfoTable[l_index].satId) )
+            // allow access to perv endpoints on MC chiplets
+            if (isPervTarget())
             {
-                l_ppeTarget = true;
-                break;
+                l_paucTarget = true;
             }
-        }
-
-        return l_ppeTarget;
-    }
-
-    // #####################################
-    uint8_t p10_scom_addr::getPpeTargetInstance()
-    {
-        uint8_t l_instance = 0xFF;
-        uint8_t l_index = 0;
-
-        // Check against all entries in PPE target info table
-        for (l_index = 0;
-             l_index < sizeof(PpeTargetInfoTable) / sizeof(PpeTargetInfo_t);
-             l_index++)
-        {
-            // Check for matches of chipletId, Endpoint, and RingId
-            if ( (getChipletId() == PpeTargetInfoTable[l_index].chipletId) &&
-                 (getEndpoint() == PpeTargetInfoTable[l_index].endpointId) &&
-                 (getRingId() == PpeTargetInfoTable[l_index].ringId) )
+            else if ( getEndpoint() == PSCOM_ENDPOINT )  // 0x1
             {
-                // Check for matches of Sat ID (or Sat ID = don't care)
-                if ( (getSatId() == PpeTargetInfoTable[l_index].satId) ||
-                     (PpeTargetInfoTable[l_index].satId == 0xFF) )
+                // IO PPE access
+                if ( isDirect()                         && // direct
+                     (getRingId() == PAU_IOPPE_RING_ID) && // 0xB
+                     ( (getSatId() == PPE_SAT_ID0) ||      // 0x0
+                       (getSatId() == PPE_SAT_ID1) ) )     // 0x1
                 {
-                    l_instance = PpeTargetInfoTable[l_index].targetInstance;
-                    break;
+                    l_paucTarget = true;
+                }
+
+                // TL access
+                if ( (getRingId() == PAU_TL_RING_ID) &&    // 0x6
+                     ( (getSatId() == TL_SAT_ID) ) )       // 0x0
+                {
+                    l_paucTarget = true;
+                }
+
+                // per-bus IO super wrapper registers
+                if ( isIndirect()                        && // indirect
+                     ((getIoRegAddr() & 0x1E0) == 0x1E0) && // register(0:3) = 0b1111
+                     (getRingId() == PAU_IOPPE_RING_ID)  && // 0xB
+                     (getSatId() == PPE_SAT_ID0) )          // 0x0
+                {
+                    l_paucTarget = true;
                 }
             }
         }
+
+        return l_paucTarget;
+    }
+
+    // #####################################
+    uint8_t p10_scom_addr::getPaucTargetInstance()
+    {
+        uint8_t l_instance = (getChipletId() - PAU0_CHIPLET_ID);
 
         return l_instance;
     }
