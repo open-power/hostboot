@@ -82,6 +82,7 @@ enum TargetType : uint64_t
     TARGET_TYPE_IOHS          = 0x0000000200000000, ///< IOHS type
     TARGET_TYPE_FC            = 0x0000000400000000, ///< Fused Core type
     TARGET_TYPE_PMIC          = 0x0000000800000000, ///< PMIC type
+    TARGET_TYPE_IOPAU         = 0x0000001000000000, ///< IOPAU type
     TARGET_TYPE_MULTICAST     = 0x8000000000000000, ///< MULTICAST type
     TARGET_TYPE_ALL           = 0x7FFFFFFFFFFFFFFF, ///< Any/All types
     TARGET_TYPE_ALL_MC        = 0xFFFFFFFFFFFFFFFF, ///< Any/All types + Multicast
@@ -118,7 +119,8 @@ enum TargetType : uint64_t
                                 TARGET_TYPE_NMMU          |
                                 TARGET_TYPE_PAU           |
                                 TARGET_TYPE_IOHS          |
-                                TARGET_TYPE_FC,
+                                TARGET_TYPE_FC            |
+                                TARGET_TYPE_IOPAU,
 
     TARGET_TYPE_MULTICASTABLE = TARGET_TYPE_CORE   |
                                 TARGET_TYPE_EQ     |
