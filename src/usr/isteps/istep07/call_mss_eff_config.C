@@ -30,46 +30,59 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+
+// STD
 #include    <stdint.h>
+#include    <stdlib.h>
 #include    <map>
 
+// Generated
+#include    <attributeenums.H>
+#include    <config.h>
+
+// Errors and Tracing Support
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
-
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
-
 #include    <initservice/isteps_trace.H>
+#include    <errl/errlentry.H>
+#include    <errl/errludtarget.H>
+#include    <isteps/hwpisteperror.H>
+#include    <hbotcompid.H>
 
+// Pnor Support
 #include    <pnor/pnorif.H>
 
-//  targeting support
+// Targeting Support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
-#include    <config.h>
+// Fapi Support
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 
-// HWP
+// Nimbus Specific HWPs
 #include    <p9_mss_eff_config.H>
 #include    <p9_mss_eff_config_thermal.H>
 #include    <p9_mss_eff_grouping.H>
+
+// Cumulus Specific HWPs
 #include    <p9c_mss_eff_config.H>
 #include    <p9c_mss_eff_mb_interleave.H>
 #include    <p9c_mss_eff_config_thermal.H>
 
+// Axone Specific HWPs
 #ifdef CONFIG_AXONE
 #include    <p9a_mss_eff_config.H>
 #include    <p9a_mss_eff_config_thermal.H>
 #endif
 
-#include    <hbotcompid.H>
-
-#include    <nvram/nvram_interface.H>
+// SMF Support
 #include    <secureboot/smf.H>
-#include    <stdlib.h>
+
+// NVDIMM Support
+#include    <nvram/nvram_interface.H>
+
+
 
 namespace   ISTEP_07
 {
@@ -202,6 +215,10 @@ void*    call_mss_eff_config( void *io_pArgs )
     TARGETING::TargetHandleList l_mcsTargetList;
     TARGETING::TargetHandleList l_memportTargetList;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>> l_fapi_memport_targets;
+
+    //TODO RTC: 202491 Ensure endianess in simics matches hardware
+    l_sys->setAttr<TARGETING::ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_MMIO_ENDIAN_CTRL_NO_SWAP);
+    l_sys->setAttr<TARGETING::ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN>(fapi2::ENUM_ATTR_MSS_OCMB_EXP_STRUCT_ENDIAN_LITTLE_ENDIAN);
 
     if(l_procModel == TARGETING::MODEL_CUMULUS)
     {
