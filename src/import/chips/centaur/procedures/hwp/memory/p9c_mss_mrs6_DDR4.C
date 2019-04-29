@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@ extern "C"
     fapi2::ReturnCode p9c_mss_mrs6_DDR4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
     {
         uint32_t l_ccs_inst_cnt = 0;
+        fapi2::buffer<uint64_t> l_shadow_data;
 
         for (uint8_t l_port_number = 0; l_port_number < 2; ++l_port_number)
         {
@@ -64,6 +65,9 @@ extern "C"
             FAPI_DBG("%s Loading MRS6 for port %d", c_str(i_target), l_port_number);
             FAPI_TRY(mss_mr6_loader(i_target, l_port_number, l_ccs_inst_cnt), " mrs_load Failed");
         }
+
+        // Get MR0 Shadow reg
+        FAPI_TRY(fapi2::getScom(i_target, 0x8000c01c0301143f, l_shadow_data));
 
         // Execute the contents of CCS array
         if (l_ccs_inst_cnt  > 0)
@@ -73,6 +77,17 @@ extern "C"
             FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED");
             l_ccs_inst_cnt = 0;
         }
+
+        // Put MR0 Shadow Reg
+        FAPI_INF("Resetting MR0 Shadow registers to %016x", l_shadow_data);
+        FAPI_TRY(fapi2::putScom(i_target, 0x8001c01c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8000c01c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8001c11c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8000c11c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8001c21c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8000c21c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8001c31c0301143f, l_shadow_data));
+        FAPI_TRY(fapi2::putScom(i_target, 0x8000c31c0301143f, l_shadow_data));
 
     fapi_try_exit:
         return fapi2::current_err;
