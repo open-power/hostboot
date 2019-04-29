@@ -38,12 +38,27 @@
 
 #include <fapi2.H>
 #include <i2c_access.H>
-
 #include <vector>
-#include <lib/i2c/exp_i2c_fields.H>
-#include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/endian_utils.H>
-#include <generic/memory/lib/utils/poll.H>
+
+#ifdef __PPE__
+    #include <exp_i2c_fields.H>
+    #include <endian_utils.H>
+#else
+    #include <generic/memory/lib/utils/poll.H>
+    #include <lib/i2c/exp_i2c_fields.H>
+    #include <generic/memory/lib/utils/pos.H>
+    #include <generic/memory/lib/utils/endian_utils.H>
+#endif
+
+
+//Macro
+#ifdef __PPE__
+    #define TARGIDFORMAT "0x%08X"
+    #define TARGID i_target.get()
+#else
+    #define TARGIDFORMAT "%s"
+    #define TARGID mss::c_str(i_target)
+#endif
 
 namespace mss
 {
@@ -83,13 +98,14 @@ inline fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCM
 
     // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
     // If it's anything else we can just look up the status code
+
     FAPI_ASSERT( l_status == status_codes::SUCCESS,
                  fapi2::MSS_EXP_I2C_FW_STATUS_CODE_FAILED().
                  set_TARGET(i_target).
                  set_STATUS_CODE(l_status).
                  set_CMD_ID(i_cmd_id),
-                 "Status code did not return SUCCESS (%d), received (%d) for %s",
-                 status_codes::SUCCESS, l_status, mss::c_str(i_target) );
+                 "Status code did not return SUCCESS (%d), received (%d) for " TARGIDFORMAT ,
+                 status_codes::SUCCESS, l_status, TARGID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -112,6 +128,7 @@ inline void fw_status_setup(size_t& o_size,
     o_cmd_id.push_back(FW_STATUS);
 }
 
+#ifndef __PPE__
 ///
 /// @brief EXP_FW_BYPASS_4SEC_TIMEOUT setup helper function
 /// @param[out] o_cmd_id the explorer command ID
@@ -121,6 +138,7 @@ inline void fw_bypass_download_window_setup(std::vector<uint8_t>& o_cmd_id)
     o_cmd_id.clear();
     o_cmd_id.push_back(FW_BYPASS_4SEC_TIMEOUT);
 }
+#endif
 
 ///
 /// @brief get EXP_FW_STATUS bytes
@@ -190,7 +208,7 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     // This is a base function that will be utilized by the platform code
     // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
     // So, we're decomposing the polling library below
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    //fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     bool l_busy = true;
     uint8_t l_boot_stage = 0;
     uint64_t l_loop = 0;
@@ -211,28 +229,28 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY( fapi2::delay( i_delay, 200) );
     }
 
-    FAPI_DBG("%s stopped on loop %u/%u", mss::c_str(i_target), l_loop, i_loops);
-
+    FAPI_DBG(TARGIDFORMAT " stopped on loop %u/%u", TARGID , l_loop, i_loops);
     // Check that Explorer is not still in FW_BUSY state
+
     FAPI_ASSERT( !l_busy,
                  fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
                  set_TARGET(i_target),
-                 "Polling timeout on FW_STATUS command (still FW_BUSY) for %s",
-                 mss::c_str(i_target) );
-
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) for " TARGIDFORMAT,
+                 TARGID );
     // Check that Explorer is in RUNTIME_FW boot stage
     FAPI_ASSERT( (l_boot_stage == EXPECTED_BOOT_STAGE),
                  fapi2::MSS_EXP_I2C_WRONG_BOOT_STAGE().
                  set_TARGET(i_target).
                  set_BOOT_STAGE(l_boot_stage).
                  set_EXPECTED_BOOT_STAGE(EXPECTED_BOOT_STAGE),
-                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for %s",
-                 l_boot_stage, EXPECTED_BOOT_STAGE, mss::c_str(i_target) );
+                 "Polling timeout on FW_STATUS command (wrong boot stage: 0x%01x, expected 0x%01x) for " TARGIDFORMAT,
+                 l_boot_stage, EXPECTED_BOOT_STAGE, TARGID );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief EXP_FW_BOOT_CONFIG setup
 /// @param[in,out] io_data the data to go to boot config
@@ -390,6 +408,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#endif
 ///
 /// @brief Perform a register write operation on the given OCMB chip
 /// @param[in] i_target the OCMB target
@@ -416,13 +435,21 @@ inline  fapi2::ReturnCode fw_reg_write(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // currently are
     // Byte 2:5 = Address
     forceBE(i_addr, l_be_vector);
-    l_cmd_vector.insert(l_cmd_vector.end(), l_be_vector.begin(), l_be_vector.end());
+
+    for(std::vector<uint8_t>::iterator it = l_be_vector.begin(); it != l_be_vector.end(); ++it)
+    {
+        l_cmd_vector.push_back(*it);
+    }
 
     l_be_vector.clear();
     forceBE(l_input_data, l_be_vector);
 
     // Byte 6:9 = Data
-    l_cmd_vector.insert(l_cmd_vector.end(), l_be_vector.begin(), l_be_vector.end());
+
+    for(std::vector<uint8_t>::iterator it = l_be_vector.begin(); it != l_be_vector.end(); ++it)
+    {
+        l_cmd_vector.push_back(*it);
+    }
 
     // Use fapi2 putI2c interface to execute command
     FAPI_TRY(fapi2::putI2c(i_target, l_cmd_vector),
@@ -468,7 +495,11 @@ inline fapi2::ReturnCode fw_reg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     // directly to the cmd_vector in the same order it
     // currently is in
     // Byte 2:5 = Address
-    l_cmd_vector.insert(l_cmd_vector.end(), l_tmp_vector.begin(), l_tmp_vector.end());
+
+    for(std::vector<uint8_t>::iterator it = l_tmp_vector.begin(); it != l_tmp_vector.end(); ++it)
+    {
+        l_cmd_vector.push_back(*it);
+    }
 
     // Use fapi2 putI2c interface to execute command
     FAPI_TRY(fapi2::putI2c(i_target, l_cmd_vector),
@@ -554,6 +585,8 @@ inline uint32_t trans_micro_i2c_scom_addr(const uint32_t i_addr)
     return (i_addr | OCMB_UNCACHED_OFFSET) ;
 }
 
+#ifndef __PPE__
+
 ///
 /// @brief Issue the DOWNLOAD command to the given OCMB chip
 /// @param[in] i_target the OCMB target
@@ -600,6 +633,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#endif
 
 }// i2c
 }// exp

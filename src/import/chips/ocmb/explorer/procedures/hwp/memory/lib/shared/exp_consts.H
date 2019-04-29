@@ -36,7 +36,9 @@
 #ifndef MSS_EXP_CONSTS_H
 #define MSS_EXP_CONSTS_H
 
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#endif
 
 namespace mss
 {
@@ -46,6 +48,7 @@ namespace exp
 
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
 
+#ifndef __PPE__
 ///
 /// @brief enum list for the indexes for the address delays
 /// @note Taken from 07-MAY-19 firwmare document
@@ -126,6 +129,8 @@ enum sizes
     MAX_RANKS_DIMM1 = 2,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
 };
+
+#endif
 
 ///
 /// @brief explorer ffdc codes
@@ -241,6 +246,7 @@ enum status_codes
     FW_BUSY              = 0xFE,
 };
 
+#ifndef __PPE__
 ///
 /// @brief status codes for FW_BOOT_CONFIG
 ///
@@ -258,6 +264,7 @@ enum fw_boot_cfg_status
     FW_BOOT_CFG_UNSUPPORTED_SERDES_FREQ = 0x04,
 };
 
+#endif
 ///
 /// @brief I2C boot stage options
 /// @note certain cmds work in certain boot stages
@@ -305,9 +312,9 @@ enum addrSide
     RHS = 0x01
 };
 
-
 }// i2c
 
+#ifndef __PPE__
 namespace omi
 {
 
@@ -371,6 +378,8 @@ enum response_arg
 };
 
 }// omi
+#endif
+
 }// exp
 }// mss
 

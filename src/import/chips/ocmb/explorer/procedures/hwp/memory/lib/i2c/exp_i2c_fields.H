@@ -36,9 +36,14 @@
 #ifndef _MSS_EXP_I2C_FIELDS_H_
 #define _MSS_EXP_I2C_FIELDS_H_
 
-#include <generic/memory/lib/utils/mss_field.H>
-#include <lib/shared/exp_consts.H>
 #include <functional>
+#ifdef __PPE__
+    #include <mss_field.H>
+    #include <exp_consts.H>
+#else
+    #include <generic/memory/lib/utils/mss_field.H>
+    #include <lib/shared/exp_consts.H>
+#endif
 
 namespace mss
 {
@@ -241,6 +246,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     return mss::get_field<endian::BIG, F, TT>(i_target, i_data, EXP_I2C_GET_FIELD, o_value);
 }
 
+#ifndef __PPE__
 ///
 /// @brief Explorer I2C field setter
 /// @tparam IT Input type
@@ -461,6 +467,8 @@ inline fapi2::ReturnCode set_fw_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
 }// boot_cfg
 
+#endif
+
 namespace status
 {
 
@@ -478,6 +486,7 @@ inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_O
     return get_field<fields::BOOT_STAGE>(i_target, i_data, o_setting);
 }
 
+
 ///
 /// @brief STATUS_CODE getter
 /// @param[in] i_target the OCMB target
@@ -492,6 +501,7 @@ inline fapi2::ReturnCode get_status_code(const fapi2::Target<fapi2::TARGET_TYPE_
     return get_field<fields::STATUS_CODE>(i_target, i_data, o_setting);
 }
 
+#ifndef __PPE__
 ///
 /// @brief CMD_ID getter
 /// @param[in] i_target the OCMB target
@@ -505,6 +515,7 @@ inline fapi2::ReturnCode get_cmd_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 {
     return get_field<fields::CMD_ID>(i_target, i_data, o_setting);
 }
+#endif
 
 }// status
 }// i2c

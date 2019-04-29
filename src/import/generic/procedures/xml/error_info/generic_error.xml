@@ -687,6 +687,7 @@
         Settings are incorrect for received data.
         This could be code problem (decoding) or bad data.
     </description>
+    <ffdc>TARGET</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>BYTE</ffdc>
     <ffdc>FFDC_CODE</ffdc>

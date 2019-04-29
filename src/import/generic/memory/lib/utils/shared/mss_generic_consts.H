@@ -38,7 +38,9 @@
 #ifndef _MSS_GENERIC_CONSTS_H_
 #define _MSS_GENERIC_CONSTS_H_
 
-#include <cstdint>
+#ifndef __PPE__
+    #include <cstdint>
+#endif
 
 namespace mss
 {

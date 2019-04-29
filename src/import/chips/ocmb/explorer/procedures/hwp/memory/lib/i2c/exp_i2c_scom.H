@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,11 @@
 #ifndef _MSS_EXP_I2C_SCOM_H_
 #define _MSS_EXP_I2C_SCOM_H_
 
-#include <lib/i2c/exp_i2c.H>
+#ifdef __PPE__
+    #include <exp_i2c.H>
+#else
+    #include <lib/i2c/exp_i2c.H>
+#endif
 
 
 namespace mss
