@@ -22,3 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file pmic_enable_utils.H
+/// @brief Utility functions for PMIC enable operation
+///
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+#ifndef __PMIC_ENABLE_UTILS_H__
+#define __PMIC_ENABLE_UTILS_H__
+
+#include <fapi2.H>
+
+namespace mss
+{
+namespace pmic
+{
+
+///
+/// @brief Different enable operations
+///
+enum enable_mode
+{
+    SPD = 0, // Use values from the SPD (default). Overwrite the vendor region with SPD settings
+    MANUAL = 1, // Use voltage settings currently in the vendor region. (Changed via pmic_update, or factory defaults)
+};
+
+}// pmic
+}// mss
+
+#endif

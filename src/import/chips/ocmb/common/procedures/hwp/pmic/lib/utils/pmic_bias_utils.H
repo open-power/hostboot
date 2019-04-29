@@ -22,3 +22,52 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file pmic_bias_utils.H
+/// @brief Procedure definition to bias PMIC
+///
+// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HB
+
+#ifndef __PMIC_BIAS_UTILS_H__
+#define __PMIC_BIAS_UTILS_H__
+
+#include <fapi2.H>
+
+namespace mss
+{
+namespace pmic
+{
+
+///
+/// @brief Rail settings that the bias procedure can modify
+///
+enum setting
+{
+    // We order these by rail in groups of 4 so they match with the rail enums,
+    // so the rail can be derived from just a % 4 when we have more settings to change
+    SWA_VOLT = 0,
+    SWB_VOLT = 1,
+    SWC_VOLT = 2,
+    SWD_VOLT = 3,
+    NO_SETTING = 4,
+};
+
+///
+/// @brief Different methods of biasing
+///
+enum unit
+{
+    NO_UNIT = 0, // default value that we can use for error checking
+    VALUE = 1,
+    PERCENT = 2,
+};
+
+}// pmic
+}// mss
+
+#endif

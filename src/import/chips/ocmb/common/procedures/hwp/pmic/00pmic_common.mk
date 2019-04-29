@@ -22,3 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+MSS_PMIC_INCLUDES := $(GENPATH)
+MSS_PMIC_INCLUDES += $(ROOTPATH)
+MSS_PMIC_INCLUDES += $(ROOTPATH)/chips/ocmb/common/include
+MSS_PMIC_INCLUDES += $(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic/lib
+MSS_PMIC_INCLUDES += $(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic
+
+# For generic attribute accessors
+MSS_PMIC_INCLUDES += $(ROOTPATH)/generic/memory/lib
+
+CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
+
+# ADD_PMIC_MEMORY_INCDIRS
+#     This macro will add additional include paths for all memory modules
+ADD_PMIC_MEMORY_INCDIRS = $(call __ADD_MODULE_INCDIR,$(1),$(MSS_PMIC_INCLUDES))

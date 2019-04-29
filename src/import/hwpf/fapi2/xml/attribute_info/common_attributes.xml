@@ -129,7 +129,7 @@
       PROC - MC - MI - DMI
       PROC - MC - MI - MCC - OMI
         (OMIC - OMI is not supported)
-      PROC - PMIC
+      OCMB - PMIC
       MEMBUF - MBA - DIMM
       MEMBUF - L4
       OCMB - MEM_PORT - DIMM

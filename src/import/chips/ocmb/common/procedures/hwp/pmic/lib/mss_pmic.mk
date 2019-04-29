@@ -22,3 +22,28 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+MSS_PMIC_PATH := $(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic/lib
+
+MSS_PMIC_SOURCE := $(shell find $(MSS_PMIC_PATH) -name '*.C' -exec basename {} \;)
+
+MSS_PMIC_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_PMIC_SOURCE))
+
+MSS_PMIC_SOURCE_DIRS := $(shell find $(MSS_PMIC_PATH) -type d)
+
+# Define common source and include paths.
+define MSS_PMIC_MODULE_INCLUDES
+$(foreach dir, $(MSS_PMIC_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic)
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic/lib)
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/generic/memory/lib)
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
+$(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH))
+endef
+MODULE = mss_pmic
+OBJS += $(MSS_PMIC_MODULE_OBJS)
+
+$(eval $(call MSS_PMIC_MODULE_INCLUDES,$(MODULE)))
+$(call BUILD_MODULE)

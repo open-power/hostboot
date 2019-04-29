@@ -22,3 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+-include 00pmic_common.mk
+
+PROCEDURE=pmic_bias
+$(eval $(call ADD_PMIC_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call BUILD_PROCEDURE)
