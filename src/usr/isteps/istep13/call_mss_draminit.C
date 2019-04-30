@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-//Error handling and tracing
+// Error Handling and Tracing Support
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -32,12 +32,15 @@
 #include <initservice/initserviceif.H>
 #include <plat_trace.H>
 
-//Istep 13 framework
+// Generated files
+#include  <config.h>
+
+// Istep 13 framework
 #include <istepHelperFuncs.H>
 #include "istep13consts.H"
 #include "platform_vddr.H"
 
-// targeting support
+// Targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -47,18 +50,17 @@
 
 //From Import Directory (EKB Repository)
 #include  <fapi2.H>
-#include  <config.h>
 #ifndef CONFIG_AXONE
     #include  <p9_mss_draminit.H>
     #include  <p9c_mss_draminit.H>
 #else
 #include <chipids.H>
-// @todo RTC 207856   #include  <exp_draminit.H>
+    #include  <exp_draminit.H>
     #include  <gem_draminit.H>
 #endif
 
-#ifdef CONFIG_NVDIMM
 // NVDIMM support
+#ifdef CONFIG_NVDIMM
 #include    <isteps/nvdimm/nvdimm.H>
 #endif
 
@@ -254,7 +256,6 @@ void nimbus_mss_draminit(IStepError & io_istepError)
     }   // endfor   mcbist's
 }
 
-
 void cumulus_mss_draminit(IStepError & io_istepError)
 {
     errlHndl_t l_err = NULL;
@@ -346,7 +347,7 @@ void axone_mss_draminit(IStepError & io_istepError)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Running exp_draminit HWP on target HUID 0x%.8X",
                 TARGETING::get_huid(l_ocmb) );
-            //@todo RTC 207856: FAPI_INVOKE_HWP(l_err, exp_draminit, l_fapi_ocmb_target);
+            FAPI_INVOKE_HWP(l_err, exp_draminit, l_fapi_ocmb_target);
         }
         else
         {
@@ -392,7 +393,6 @@ void axone_mss_draminit(IStepError & io_istepError)
               "Error: Trying to call 'exp_draminit' or 'gem_draminit' but Axone code is not compiled in");
     assert(0, "Calling wrong Model's HWPs");
 }
-
 #endif
 
 };
