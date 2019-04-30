@@ -604,7 +604,7 @@ fapi2::ReturnCode setup_mc_config1_helper(const fapi2::Target<T>& i_target)
 
     // CFG_DL0_CFG1_PREIPL_PRBS
     l_val.template insertFromRight<TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME,
-                   TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME_LEN>(l_sim ? PREIPL_PRBS_1US : PREIPL_PRBS_64MS);
+                   TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_TIME_LEN>(l_sim ? PREIPL_PRBS_1US : PREIPL_PRBS_256MS);
 
     l_val.template writeBit<TT::MC_REG2_DL0_CONFIG1_CFG_PREIPL_PRBS_ENA, 1>(1); // Enable
 
