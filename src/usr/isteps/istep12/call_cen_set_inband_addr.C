@@ -217,7 +217,18 @@ void* call_cen_set_inband_addr (void *io_pArgs)
 
     // Check if any explorer chips require a firmware update and update them
     // (skipped on MPIPL)
-    expupd::updateAll(l_StepError);
+    Target* l_pTopLevel = nullptr;
+    targetService().getTopLevelTarget( l_pTopLevel );
+    assert(l_pTopLevel, "call_cen_set_inband_addr: no TopLevelTarget");
+    if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "skipping expupdUpdateAll due to MPIPL");
+    }
+    else
+    {
+        expupd::updateAll(l_StepError);
+    }
 
 #endif // CONFIG_AXONE
 
