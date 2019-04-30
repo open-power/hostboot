@@ -674,6 +674,18 @@ fapi2::ReturnCode correctMMIOEndianForStruct(std::vector<uint8_t>& io_data)
         io_data.erase(io_data.begin(), io_data.begin() + BUFFER_TRANSACTION_SIZE);
     }
 
+    // Because of how the OpenCapi interface breaks up the transaction, we also need to swap 32-bit word order
+    for (size_t l_idx = 0; l_idx < io_data.size(); l_idx += BUFFER_TRANSACTION_SIZE)
+    {
+        for (size_t l_bidx = l_idx; l_bidx < l_idx + BUFFER_TRANSACTION_SIZE / 2; l_bidx++)
+        {
+            uint8_t l_temp_first_word = io_data.at(l_bidx);
+            uint8_t l_temp_second_word = io_data.at(l_bidx + BUFFER_TRANSACTION_SIZE / 2);
+            io_data[l_bidx] = l_temp_second_word;
+            io_data[l_bidx + BUFFER_TRANSACTION_SIZE / 2] = l_temp_first_word;
+        }
+    }
+
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
     return fapi2::current_err;
