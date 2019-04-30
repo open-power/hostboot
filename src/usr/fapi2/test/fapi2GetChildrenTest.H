@@ -966,10 +966,12 @@ void test_fapi2getChildTargetsForCDG()
     int numFails = 0;
     TARGETING::Target * l_proc = nullptr;
     size_t l_expectedDimms = 0;
+    TARGETING::TargetHandleList l_chipList;
+// These port and socket arguments are not valid for Axone targets
+#ifndef CONFIG_AXONE
     size_t l_expectedDimmsUnderPort0 = 0;
     size_t l_expectedDimmsUnderPort1 = 0;
-    TARGETING::TargetHandleList l_chipList;
-
+#endif
     do
     {
         FAPI_DBG("start of test_fapi2getChildTargetsForCDG()");
@@ -992,20 +994,24 @@ void test_fapi2getChildTargetsForCDG()
         if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_NIMBUS)
         {
             l_expectedDimms = 16;
+// These port and socket arguments are not valid for Axone targets
+#ifndef CONFIG_AXONE
             l_expectedDimmsUnderPort0 = l_expectedDimms;
             l_expectedDimmsUnderPort1 = 0;
+#endif
         }
         else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS)
         {
             l_expectedDimms = 8;
+// These port and socket arguments are not valid for Axone targets
+#ifndef CONFIG_AXONE
             l_expectedDimmsUnderPort0 = l_expectedDimms/2;
             l_expectedDimmsUnderPort1 = l_expectedDimms/2;
+#endif
         }
         else if (l_proc->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_AXONE)
         {
             l_expectedDimms = 9;
-            l_expectedDimmsUnderPort0 = 0xFF; //wrong
-            l_expectedDimmsUnderPort1 = 0xFF; //wrong
         }
         else //both are nullptr
         {
@@ -1035,6 +1041,9 @@ void test_fapi2getChildTargetsForCDG()
             numFails++;
         }
 
+// These port and socket arguments are not valid for Axone targets
+// so skip testing them
+#ifndef CONFIG_AXONE
         // All dimms under port 0
         fapi2::getChildTargetsForCDG(fapi2_procTarget,
                 fapi2::TARGET_TYPE_DIMM,
@@ -1047,11 +1056,9 @@ void test_fapi2getChildTargetsForCDG()
 
         if(l_dimmList.size() != l_expectedDimmsUnderPort0)
         {
-#ifndef CONFIG_AXONE_BRING_UP
             TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
                     l_dimmList.size(),l_expectedDimmsUnderPort0);
             numFails++;
-#endif
         }
 
         // All dimms under port 1
@@ -1066,11 +1073,9 @@ void test_fapi2getChildTargetsForCDG()
 
         if(l_dimmList.size() != l_expectedDimmsUnderPort1)
         {
-#ifndef CONFIG_AXONE_BRING_UP
             TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
                     l_dimmList.size(),l_expectedDimmsUnderPort1);
             numFails++;
-#endif
         }
 
         // All dimms under socket 0
@@ -1084,11 +1089,9 @@ void test_fapi2getChildTargetsForCDG()
         numTests++;
         if(l_dimmList.size() != l_expectedDimms)
         {
-#ifndef CONFIG_AXONE_BRING_UP
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0 not equal expected %d",
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0x0, all ports, not equal expected %d",
                     l_dimmList.size(),l_expectedDimms);
             numFails++;
-#endif
         }
 
         // All dimms under socket 1
@@ -1106,6 +1109,7 @@ void test_fapi2getChildTargetsForCDG()
                     l_dimmList.size(),0);
             numFails++;
         }
+#endif
 
     }while(0);
 
