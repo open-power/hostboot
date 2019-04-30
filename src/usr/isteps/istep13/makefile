@@ -137,6 +137,7 @@ include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_row_repair.mk
 OBJS += $(if $(CONFIG_AXONE),exp_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),explorer_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),exp_draminit_mc.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_draminit.o,)
 OBJS += $(if $(CONFIG_AXONE),gem_draminit.o,)
 
 include ${ROOTPATH}/config.mk
