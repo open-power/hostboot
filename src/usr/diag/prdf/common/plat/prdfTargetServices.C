@@ -1485,7 +1485,7 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
    bool o_dramWidthX4 = false;
 
    PRDF_ASSERT( nullptr != i_trgt );
-   //uint8_t dramWidths = 0;
+   //uint8_t dramWidths[MAX_DIMM_PER_PORT];
 
    switch ( getTargetType(i_trgt) )
    {
@@ -1504,7 +1504,7 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
             //dramWidths = memPort->getAttr<ATTR_MEM_EFF_DRAM_WIDTH>();
             //uint8_t dimmSlct = getDimmSlct( i_trgt );
             //o_dramWidthX4 =
-            //  (fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 == dramWidths[dimmSlct]);
+            //  (TARGETING::MEM_EFF_DRAM_WIDTH_X4 == dramWidths[dimmSlct]);
             break;
 
         default:

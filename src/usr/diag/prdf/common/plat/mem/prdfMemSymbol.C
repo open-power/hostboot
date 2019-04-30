@@ -159,20 +159,24 @@ uint8_t MemSymbol::getDram() const
 {
     uint8_t dram = 0;
     TYPE trgtType = getTargetType( iv_trgt );
-    bool isX4  = isDramWidthX4( iv_trgt );
+    bool isX4 = true;
 
     if ( TYPE_MBA == trgtType )
     {
+        isX4 = isDramWidthX4( iv_trgt );
         dram = isX4 ? symbol2Nibble<TYPE_MBA>( iv_symbol )
                     : symbol2Byte  <TYPE_MBA>( iv_symbol );
     }
     else if ( TYPE_MCA == trgtType )
     {
+        isX4 = isDramWidthX4( iv_trgt );
         dram = isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
                     : symbol2Byte  <TYPE_MCA>( iv_symbol );
     }
     else if ( TYPE_OCMB_CHIP == trgtType )
     {
+        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        isX4 = isDramWidthX4( dimm );
         dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( iv_symbol )
                     : symbol2Byte  <TYPE_OCMB_CHIP>( iv_symbol );
     }
@@ -200,14 +204,24 @@ uint8_t MemSymbol::getDramRelCenDqs() const
     const uint8_t X4_DRAM_SPARE_UPPER = 19;
     const uint8_t X8_DRAM_SPARE = 9;
 
+    bool isX4 = true;
+    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    {
+        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        isX4 = isDramWidthX4( dimm );
+    }
+    else
+    {
+        isX4 = isDramWidthX4( iv_trgt );
+    }
 
-    uint8_t l_dramWidth = ( isDramWidthX4(iv_trgt) ) ? 4 : 8;
+    uint8_t l_dramWidth = ( isX4 ) ? 4 : 8;
     uint8_t l_dram = getDq() / l_dramWidth; // (x8: 0-9, x4: 0-19)
 
     // Adjust for spares
     if ( isDramSpared() )
     {
-        if ( isDramWidthX4(iv_trgt) )
+        if ( isX4 )
         {
             uint8_t l_bit  = getDq() % DQS_PER_BYTE;
             l_dram = ( l_bit < 4 ) ? X4_DRAM_SPARE_LOWER : X4_DRAM_SPARE_UPPER;
@@ -219,7 +233,7 @@ uint8_t MemSymbol::getDramRelCenDqs() const
     }
     else if ( isEccSpared() )
     {
-        l_dram = ( isDramWidthX4(iv_trgt) ) ? X4_ECC_SPARE : X8_ECC_SPARE;
+        l_dram = ( isX4 ) ? X4_ECC_SPARE : X8_ECC_SPARE;
     }
 
     return l_dram;
@@ -231,7 +245,16 @@ uint8_t MemSymbol::getDramRelCenDqs() const
 uint8_t MemSymbol::getDramPins() const
 {
     TYPE trgtType = getTargetType( iv_trgt );
-    bool isX4  = isDramWidthX4( iv_trgt );
+    bool isX4 = true;
+    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    {
+        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        isX4 = isDramWidthX4( dimm );
+    }
+    else
+    {
+        isX4 = isDramWidthX4( iv_trgt );
+    }
 
     uint32_t dps = 0;
     uint32_t spd = 0;
@@ -261,7 +284,16 @@ uint8_t MemSymbol::getDramSymbol() const
 {
     uint8_t dramSymbol = SYMBOLS_PER_RANK;
     TYPE trgtType = getTargetType( iv_trgt );
-    bool    isX4  = isDramWidthX4( iv_trgt );
+    bool isX4 = true;
+    if ( TYPE_MEM_PORT == getTargetType(iv_trgt) )
+    {
+        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        isX4 = isDramWidthX4( dimm );
+    }
+    else
+    {
+        isX4 = isDramWidthX4( iv_trgt );
+    }
     uint8_t dram  = getDram();
 
     if ( TYPE_MBA == trgtType )

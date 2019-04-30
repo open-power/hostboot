@@ -240,7 +240,11 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
         TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
-        const bool isX4 = isDramWidthX4(ocmbTrgt);
+        // TODO RTC 210072 - support for multiple ports
+        TargetHandle_t memPortTrgt = getConnectedChild( ocmbTrgt,
+                                                        TYPE_MEM_PORT, 0 );
+        TargetHandle_t dimm = getConnectedDimm( memPortTrgt, i_rank );
+        const bool isX4 = isDramWidthX4( dimm );
 
         // Use this map to keep track of the total counts per DRAM.
         DramCountMap dramCounts;

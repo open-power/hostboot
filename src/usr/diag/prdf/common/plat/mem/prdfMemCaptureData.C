@@ -66,8 +66,16 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     {
         TargetHandle_t trgt = i_memMru.getTrgt();
 
-        // Get the DRAM width.
-        extMemMru.isX4Dram = isDramWidthX4( trgt ) ? 1 : 0;
+        if ( TYPE_MEM_PORT == getTargetType(trgt) )
+        {
+            TargetHandle_t dimm = getConnectedDimm( trgt, i_memMru.getRank() );
+            extMemMru.isX4Dram = isDramWidthX4( dimm ) ? 1 : 0;
+        }
+        else
+        {
+            // Get the DRAM width.
+            extMemMru.isX4Dram = isDramWidthX4( trgt ) ? 1 : 0;
+        }
 
         // Get the DIMM type.
         if ( TYPE_MBA == getTargetType(trgt) )
@@ -220,8 +228,11 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         if ( data.rankDataList.size() > 0 )
         {
             data.header.rankCount = data.rankDataList.size();
-            data.header.isEccSp  = ( (TYPE_MBA == getTargetType(i_trgt)) &&
-                                     isDramWidthX4( i_trgt ) );
+            data.header.isEccSp   = false;
+            if ( TYPE_MBA == getTargetType(i_trgt) )
+            {
+                data.header.isEccSp = isDramWidthX4( i_trgt );
+            }
             UtilMem dramStream;
             dramStream << data;
 
