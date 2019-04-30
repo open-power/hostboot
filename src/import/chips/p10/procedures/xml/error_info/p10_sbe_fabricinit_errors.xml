@@ -24,6 +24,12 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 <!-- ******************************************************************** -->
+<registerFfdc>
+  <id>REG_FFDC_SBE_FABRICINIT</id>
+  <scomRegister>scomt::proc::PB_COM_ES3_MODE</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_SND_MODE_REG</scomRegister>
+</registerFfdc>
+<!-- ******************************************************************** -->
 <hwpError>
   <sbeError/>
   <rc>RC_P10_SBE_FABRICINIT_FBC_STOPPED</rc>
@@ -33,14 +39,11 @@
     commands from being broadcast, so fabric init will fail.
   </description>
   <ffdc>TARGET</ffdc>
-  <!-- TODO: Enable when scom defs are ready for collect_reg_ffdc_regs.C (RTC 205268) -->
-  <!--
   <collectRegisterFfdc>
     <id>REG_FFDC_SBE_FABRICINIT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <target>TARGET</target>
   </collectRegisterFfdc>
-  -->
   <callout>
     <target>TARGET</target>
     <priority>HIGH</priority>
