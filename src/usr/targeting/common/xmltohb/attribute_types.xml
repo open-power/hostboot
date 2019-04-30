@@ -884,6 +884,54 @@
   </attribute>
 
   <attribute>
+    <description>Specifies a target's eeprom content type.</description>
+    <hasStringConversion/>
+    <id>EEPROM_CONTENT_TYPE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <enumeration>
+        <id>EEPROM_CONTENT_TYPE</id>
+      </enumeration>
+    </simpleType>
+  </attribute>
+
+  <enumerationType>
+    <default>RAW</default>
+    <description>Enumeration indicating a target's eeprom
+        content type.
+        RAW - eeprom has no specified layout
+        ISDIMM - uses standard JEDEC layout for DDR memory
+        IBM_FRUVPD - uses ipz converged vpd layout with records/keywords for
+                     generic FRUs
+        IBM_MVPD - use ipz converged vpd layout with records/keywords for
+                   processor modules
+        DDIMM - uses Differential DIMM layout
+    </description>
+    <enumerator>
+      <name>RAW</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>ISDIMM</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>IBM_FRUVPD</name>
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <name>IBM_MVPD</name>
+      <value>3</value>
+    </enumerator>
+    <enumerator>
+      <name>DDIMM</name>
+      <value>4</value>
+    </enumerator>
+    <id>EEPROM_CONTENT_TYPE</id>
+  </enumerationType>
+
+  <attribute>
     <id>EEPROM_NV_INFO</id>
     <description>Information needed to address the NV controller on the NVDIMM</description>
     <complexType>
@@ -1179,8 +1227,9 @@
 
   <attribute>
     <complexType>
-      <description>Structure to define the addressing for an I2C
-                     slave device.</description>
+      <description>Structure to define the addressing for an attached I2C
+          eeprom device that contains secondary VPD info.
+      </description>
       <field>
         <default>physical:sys-0</default>
         <description>Entity path to the chip that contains the I2C
@@ -1189,49 +1238,49 @@
         <type>EntityPath</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>Port from the I2C Master device. This is a 6-bit
                          value.</description>
         <name>port</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>Device address on the I2C bus. This is a 7-bit value,
                          but then shifted 1 bit left.</description>
         <name>devAddr</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>I2C master engine. This is a 2-bit
                          value.</description>
         <name>engine</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x02</default>
+        <default>0xFF</default>
         <description>The number of bytes a device requires to set its
                          internal address/offset.</description>
         <name>byteAddrOffset</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x0</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The number of kilobytes a device can hold.  'Zero'
                          value possible for some devices.</description>
         <name>maxMemorySizeKB</name>
         <type>uint64_t</type>
       </field>
       <field>
-        <default>0x01</default>
+        <default>0xFF</default>
         <description>The number of chips making up an eeprom device.
             </description>
         <name>chipCount</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x0</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The maximum number of bytes that can be written to
                          a device at one time. 'Zero' value means no maximum
                          value is expected or checked.</description>
@@ -1239,7 +1288,7 @@
         <type>uint64_t</type>
       </field>
       <field>
-        <default>0xA</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The amount of time in milliseconds a device requires
                          on the completion of a write command to update its
                          internal memory.</description>
@@ -1264,6 +1313,12 @@
         <name>i2cMuxPath</name>
         <type>EntityPath</type>
       </field>
+      <field>
+        <default>0xFFFFFFFF</default>
+        <description>Indicates the target's eeprom content type</description>
+        <name>eepromContentType</name>
+        <type>uint32_t</type>
+      </field>
     </complexType>
     <description>Information needed to address the EERPROM slaves</description>
     <id>EEPROM_VPD_BACKUP_INFO</id>
@@ -1273,8 +1328,9 @@
 
   <attribute>
     <complexType>
-      <description>Structure to define the addressing for an I2C
-                     slave device.</description>
+      <description>Structure to define the addressing for an attached I2C
+          eeprom device that contains primary VPD info.
+      </description>
       <field>
         <default>physical:sys-0</default>
         <description>Entity path to the chip that contains the I2C
@@ -1283,28 +1339,28 @@
         <type>EntityPath</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>Port from the I2C Master device. This is a 6-bit
                          value.</description>
         <name>port</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>Device address on the I2C bus. This is a 7-bit value,
                          but then shifted 1 bit left.</description>
         <name>devAddr</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x80</default>
+        <default>0xFF</default>
         <description>I2C master engine. This is a 2-bit
                          value.</description>
         <name>engine</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x02</default>
+        <default>0xFF</default>
         <description>
                 The number of bytes a device requires to set its
                 internal address/offset. DDR4 DIMMs require a special EEPROM
@@ -1318,21 +1374,21 @@
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x0</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The number of kilobytes a device can hold.  'Zero'
                          value possible for some devices.</description>
         <name>maxMemorySizeKB</name>
         <type>uint64_t</type>
       </field>
       <field>
-        <default>0x01</default>
+        <default>0xFF</default>
         <description>The number of chips making up an eeprom device.
             </description>
         <name>chipCount</name>
         <type>uint8_t</type>
       </field>
       <field>
-        <default>0x0</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The maximum number of bytes that can be written to
                          a device at one time. 'Zero' value means no maximum
                          value is expected or checked.</description>
@@ -1340,7 +1396,7 @@
         <type>uint64_t</type>
       </field>
       <field>
-        <default>0xA</default>
+        <default>0xFFFFFFFFFFFFFFFF</default>
         <description>The amount of time in milliseconds a device requires
                          on the completion of a write command to update its
                          internal memory.</description>
@@ -1364,6 +1420,12 @@
         <description>Entity path to the I2C mux for this device.</description>
         <name>i2cMuxPath</name>
         <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0xFFFFFFFF</default>
+        <description>Indicates the target's eeprom content type</description>
+        <name>eepromContentType</name>
+        <type>uint32_t</type>
       </field>
     </complexType>
     <description>Information needed to address the EEPROM slaves</description>
