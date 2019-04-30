@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <lib/i2c/exp_i2c_fields.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/endian_utils.H>
+#include <generic/memory/lib/utils/poll.H>
 
 namespace mss
 {
@@ -184,6 +185,52 @@ inline fapi2::ReturnCode is_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // the I2C returns an ACK.
     std::vector<uint8_t> l_data;
     return fapi2::getI2c(i_target, l_size, l_cmd_id, l_data);
+}
+
+///
+/// @brief Helper function for exp_check_for_ready
+/// @param[in] i_target the controller
+/// @param[in] i_poll_count the number of times to run the fw_status command (default = 50)
+/// @param[in] i_delay delay in ns between fw_status command attempts (default = 200ns)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint64_t i_poll_count = DEFAULT_POLL_LIMIT,
+        const uint64_t i_delay = 200)
+{
+    // Using using default parameters from class, with overrides for delay and poll_count
+    mss::poll_parameters l_poll_params(DELAY_10NS,
+                                       200,
+                                       i_delay,
+                                       200,
+                                       i_poll_count);
+
+    // From MSCC explorer firmware arch spec
+    // 4.1.5: After power-up, the Explorer Chip will respond with NACK to all incoming I2C requests
+    // from the HOST until the I2C slave interface is ready to receive commands.
+    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
+    {
+        return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
+    }),
+    fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
+    set_TARGET(i_target),
+    "Failed to see an ACK from I2C -- polling timeout on %s",
+    mss::c_str(i_target) );
+
+    // We send the EXP_FW_STATUS command as a sanity check to see if it returns SUCCESS
+    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
+    {
+        return mss::exp::i2c::fw_status(i_target) == fapi2::FAPI2_RC_SUCCESS;
+    }),
+    fapi2::MSS_EXP_STATUS_POLLING_TIMEOUT().
+    set_TARGET(i_target),
+    "Failed to see a successful return code -- polling timeout on %s",
+    mss::c_str(i_target) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
