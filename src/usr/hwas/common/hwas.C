@@ -4068,6 +4068,33 @@ errlHndl_t updateProcCompatibilityRiskLevel()
     return l_err;
 }
 
+/**
+ * @brief  Normalize the RISK_LEVEL for Axone to use the upper range
+ */
+void normalizeRiskLevelForAxone( void )
+{
+    // Axone follows Nimbus DD2.3 settings except it can use
+    //  the low or high numbers.  Let's normalize it to the
+    //  high range to make things less confusing.
+    Target* pSys;
+    targetService().getTopLevelTarget(pSys);
+    auto l_risk = pSys->getAttr<TARGETING::ATTR_RISK_LEVEL>();
+    if( TARGETING::UTIL::P9A_RUGBY_FAVOR_SECURITY_LOWER == l_risk )
+    {
+        l_risk = TARGETING::UTIL::P9A_RUGBY_FAVOR_SECURITY;
+    }
+    else if( TARGETING::UTIL::P9A_RUGBY_FAVOR_PERFORMANCE_LOWER == l_risk )
+    {
+        l_risk = TARGETING::UTIL::P9A_RUGBY_FAVOR_PERFORMANCE;
+    }
+    else
+    {
+        // Nothing to change, just leave
+        return;
+    }
+    pSys->setAttr<TARGETING::ATTR_RISK_LEVEL>(l_risk);
+}
+
 errlHndl_t validateProcessorEcLevels()
 {
     HWAS_INF("validateProcessorEcLevels entry");
@@ -4112,6 +4139,12 @@ errlHndl_t validateProcessorEcLevels()
                 HWAS_ERR("validateProcessorEcLevels:: Unable to update RISK_LEVEL");
                 break;
             }
+        }
+        else if(TARGETING::MODEL_AXONE == l_model)
+        {
+            // Axone follows Nimbus DD2.3 settings except it can use
+            //  the low or high numbers, going to force one way.
+            normalizeRiskLevelForAxone();
         }
 
         //Loop through all functional procs and create error logs
