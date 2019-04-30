@@ -73,7 +73,19 @@ class MemDqBitmap
     /** @brief Constructor from components */
     MemDqBitmap( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
                  BitmapData i_d ) : iv_trgt(i_trgt), iv_rank(i_rank),
-                 iv_x4Dram(PlatServices::isDramWidthX4(i_trgt)), iv_data(i_d){}
+                 iv_x4Dram(true), iv_data(i_d)
+    {
+        if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) )
+        {
+            TARGETING::TargetHandle_t dimm =
+                PlatServices::getConnectedDimm( iv_trgt, iv_rank );
+            iv_x4Dram = PlatServices::isDramWidthX4( dimm );
+        }
+        else
+        {
+            iv_x4Dram = PlatServices::isDramWidthX4( iv_trgt );
+        }
+    }
 
   public: // functions
 

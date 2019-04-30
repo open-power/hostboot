@@ -1031,9 +1031,11 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
     errlHndl_t errl = NULL;
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memPort);
 
+    TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank,
+                                            i_symbol.getPortSlct() );
     uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_MBA>(
                                                      i_symbol.getDram(),
-                                                     isDramWidthX4(i_memPort) );
+                                                     isDramWidthX4(dimm) );
 
     FAPI_INVOKE_HWP( errl, mss_do_steering, fapiPort,
                      i_rank.getMaster(), l_dramSymbol,
@@ -1105,7 +1107,9 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
 
         bool isFullByte = ( ENUM_ATTR_MEM_EFF_DIMM_SPARE_FULL_BYTE ==
                             o_spareConfig );
-        bool isX4Dram = isDramWidthX4(i_memPort);
+
+        TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank, i_ps );
+        bool isX4Dram = isDramWidthX4(dimm);
 
         if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
         {
@@ -1216,7 +1220,8 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
 
     do
     {
-        const bool isX4 = isDramWidthX4( i_trgt );
+        TargetHandle_t dimm = getConnectedDimm( i_trgt, i_rank, i_ps );
+        const bool isX4 = isDramWidthX4( dimm );
         if ( isX4 )
         {
             // Always an ECC spare in x4 mode.
