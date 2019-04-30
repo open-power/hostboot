@@ -47,9 +47,9 @@
 #define VPD_PV_PSAV        0
 #define VPD_PV_CF1         1
 #define VPD_PV_CF2         2
-#define VPD_PV_WOFB        3
-#define VPD_PV_CF3         4
-#define VPD_PV_CF4         5
+#define VPD_PV_CF3         3
+#define VPD_PV_CF4         4
+#define VPD_PV_CF5         5
 #define VPD_PV_UT          6
 #define VPD_PV_FMAX        7
 
@@ -57,12 +57,34 @@
         "PowerSave ", \
         "CF1       ", \
         "CF2       ", \
-        "WOF Base  ", \
         "CF3       ", \
         "CF4       ", \
+        "CF5       ", \
         "UltraTurbo", \
         "Fmax      "  \
     }
+
+/// VPD #V Operating Points (eg Natural order)
+#define POWERSAVE   0
+#define CF1         1
+#define CF2         2
+#define CF3         3
+#define CF4         4
+#define CF5         5
+#define ULTRA       6
+#define FMAX        7
+#define PV_OP {POWERSAVE, CF1, CF2, CF3, CF4, CF5, ULTRA, FMAX}
+#define PV_OP_STR { \
+        "PowerSave ", \
+        "CF1       ", \
+        "CF2       ", \
+        "CF3       ", \
+        "CF4       ", \
+        "CF5       ", \
+        "Ultra     ", \
+        "Fmax      "  \
+    }
+
 
 #define VPD_PV_CORE_FREQ_MHZ    0
 #define VPD_PV_VDD_MV           1
@@ -90,24 +112,26 @@
 #define VPD_NUM_SLOPES_REGION       7
 #define REGION_POWERSAVE_CF1        0
 #define REGION_CF1_CF2              1
-#define REGION_CF2_WOF_BASE         2
-#define REGION_WOF_BASE_CF3         3
-#define REGION_CF3_CF4              4
-#define REGION_CF4_UT               5
+#define REGION_CF2_CF3              2
+#define REGION_CF3_CF4              3
+#define REGION_CF4_CF5              4
+#define REGION_CF5_UT               5
 #define REGION_UT_FMAX              6
-#define VPD_OP_SLOPES_REGION_ORDER {REGION_POWERSAVE_CF1, REGION_CF1_CF2, REGION_CF2_WOF_BASE, REGION_WOF_BASE_CF3, REGION_CF3_CF4, REGION_CF4_UT, REGION_UT_FMAX,}
-#define VPD_OP_SLOPES_REGION_ORDER_STR {"POWERSAVE_CF1", \
+#define VPD_OP_SLOPES_REGION_ORDER {REGION_POWERSAVE_CF1, REGION_CF1_CF2, REGION_CF2_CF3, REGION_CF3_CF4, REGION_CF4_CF5, REGION_CF5_UT, REGION_UT_FMAX,}
+#define VPD_OP_SLOPES_REGION_ORDER_STR { \
+        "POWERSAVE_CF1", \
         "CF1_CF2      ", \
-        "CF2_WOF_BASE ", \
-        "WOF_BASE_CF3 ", \
+        "CF2_CF3      ", \
         "CF3_CF4      ", \
-        "CF4_UT		  ", \
-        "UT_FMAX	  ", \
+        "CF4_CF5      ", \
+        "CF5_UT       ", \
+        "UT_FMAX      ", \
     }
 
 
 #define VID_SLOPE_FP_SHIFT_12       12
 #define THRESH_SLOPE_FP_SHIFT       12
+#define I_SLOPE_FP_SHIFT_9           9
 
 /// IDDQ readings,
 #define IDDQ_MEASUREMENTS     6
