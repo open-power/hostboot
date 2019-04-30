@@ -27,20 +27,19 @@
 <!-- This has all of the ADU registers that we need to collect for other errors -->
 <registerFfdc>
   <id>REG_FFDC_ADU_STATUS_REGISTER</id>
-  <scomRegister>PU_ALTD_STATUS_REG</scomRegister>
-  <scomRegister>PU_ALTD_CMD_REG</scomRegister>
-  <scomRegister>PU_ALTD_DATA_REG</scomRegister>
-  <scomRegister>PU_ALTD_OPTION_REG</scomRegister>
-  <scomRegister>PU_ALTD_ADDR_REG</scomRegister>
-  <scomRegister>PU_FORCE_ECC_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_ALTD_STATUS_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_ALTD_CMD_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_ALTD_DATA_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_ALTD_OPTION_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_ALTD_ADDR_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_FORCE_ECC_REG</scomRegister>
 </registerFfdc>
 <!-- ******************************************************************** -->
 <registerFfdc>
   <id>REG_FFDC_ADU_FBC_NOT_INITIALIZED</id>
-  <scomRegister>PU_SND_MODE_REG</scomRegister>
-  <!-- TODO: Enable when scom defs are ready for collect_reg_ffdc_regs.C (RTC 205268) -->
-  <!-- <scomRegister>PU_PB_ES3_MODE</scomRegister> -->
-  <scomRegister>PERV_INTERRUPT_TYPE_REG</scomRegister>
+  <scomRegister>scomt::proc::TP_TPBR_AD_SND_MODE_REG</scomRegister>
+  <scomRegister>scomt::proc::PB_COM_ES3_MODE</scomRegister>
+  <scomRegister>scomt::perv::ATTN_INTERRUPT_REG</scomRegister>
 </registerFfdc>
 <!-- ******************************************************************** -->
 <hwpError>
