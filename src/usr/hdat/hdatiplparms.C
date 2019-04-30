@@ -705,8 +705,16 @@ void HdatIplParms::hdatGetSystemParamters()
         HDAT_ERR(" Error in getting attribute PAYLOAD_IN_MIRROR_MEM");
     }
 
-    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
-          l_pSysTarget->getAttr<ATTR_RISK_LEVEL>() ? HDAT_RISK_LEVEL_ELEVATED : 0 ;
+    // Check both compat and native mode for relevant risk levels
+    ATTR_RISK_LEVEL_type l_risk = l_pSysTarget->getAttr<ATTR_RISK_LEVEL>();
+    if( !((l_risk == UTIL::P9N22_P9C12_RUGBY_FAVOR_SECURITY)
+          || (l_risk == UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY)) )
+    {
+        // running in a mode that doesn't favor security, set elevated risk
+        this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+          HDAT_RISK_LEVEL_ELEVATED;
+    }
+
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
           l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
 
