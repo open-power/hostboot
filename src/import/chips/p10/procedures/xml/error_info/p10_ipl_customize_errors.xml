@@ -451,4 +451,15 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_INPUT_SBE_IMAGE_NONZERO_RINGS_SIZE</rc>
+    <description>The DD specific input SBE image .rings size is not zero</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>INPUT_RINGS_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

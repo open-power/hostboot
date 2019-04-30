@@ -266,9 +266,10 @@ extern "C"
                               i_fapiTarget,
                               NULL,
                               l_recordLen ),
-                 "mvpdRingFunc: getMvpdField failed to get buffer size "
-                 "chipletId=0x%x, ringId=0x%x",
-                 i_chipletId,
+                 "mvpdRingFunc: getMvpdField failed to get buffer size for "
+                 "record=0x%x, keyword=0x%x and ringId=0x%x",
+                 i_record,
+                 i_keyword,
                  i_ringId);
 
         FAPI_DBG( "mvpdRingFunc: getMvpdField returned record len=0x%x",
@@ -283,10 +284,10 @@ extern "C"
                               i_fapiTarget,
                               l_recordBuf,
                               l_recordLen ),
-                 "mvpdRingFunc: getMvpdField failed "
-                 "chipletId=0x%x, evenOdd=0x%x, ringId=0x%x",
-                 i_chipletId,
-                 i_evenOdd,
+                 "mvpdRingFunc: getMvpdField failed to get the buffer for "
+                 "record=0x%x, keyword=0x%x and ringId=0x%x",
+                 i_record,
+                 i_keyword,
                  i_ringId);
 
         // find ring in the record. It is an error if not there for a "get".
@@ -380,9 +381,19 @@ extern "C"
             io_rRingBufsize = 0;
         }
 
-        FAPI_DBG( "mvpdRingFunc: exit bufsize= 0x%x rc= 0x%x",
-                  io_rRingBufsize,
-                  static_cast<uint32_t>(l_fapirc) );
+        if (l_fapirc)
+        {
+            FAPI_ERR( "mvpdRingFunc: Failed with bufsize=0x%x and rc=0x%x",
+                      io_rRingBufsize,
+                      static_cast<uint32_t>(l_fapirc) );
+        }
+        else
+        {
+            FAPI_DBG( "mvpdRingFunc: Exiting with bufsize=0x%x and rc=0x%x",
+                      io_rRingBufsize,
+                      static_cast<uint32_t>(l_fapirc) );
+        }
+
         return  l_fapirc;
     }
 

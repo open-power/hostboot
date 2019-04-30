@@ -2084,6 +2084,26 @@ ReturnCode p10_ipl_customize (
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
+        // Test the size of the DD specific SBE image's .rings section (it better be ==0).
+        l_rc = p9_xip_get_section(io_image, P9_XIP_SECTION_SBE_RINGS, &iplImgSection);
+
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                     fapi2::XIPC_XIP_GET_SECTION_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_XIP_RC(l_rc).
+                     set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
+                     set_DDLEVEL(UNDEFINED_DD_LEVEL).
+                     set_OCCURRENCE(1),
+                     "p9_xip_get_section() failed (1) w/rc=0x%08x getting SBE .rings"
+                     " section for ddLevel=0x%x",
+                     (uint32_t)l_rc, UNDEFINED_DD_LEVEL );
+
+        FAPI_ASSERT( iplImgSection.iv_size == 0,
+                     fapi2::XIPC_INPUT_SBE_IMAGE_NONZERO_RINGS_SIZE().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_INPUT_RINGS_SIZE(iplImgSection.iv_size),
+                     "The DD specific input SBE image must have a zero sized .rings section."
+                     "But the size of .rings is =%d\n", iplImgSection.iv_size );
 
         // Get the image size.
         l_rc = p9_xip_image_size(io_image, &l_currentImageSize);
@@ -2163,12 +2183,25 @@ ReturnCode p10_ipl_customize (
     // - Determine if there GPTR support, and overlays support, through Mvpd
     //////////////////////////////////////////////////////////////////////////
 
+    // First, determine the DD level
+    l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
+
+    FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
+                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(1),
+                 "FAPI_ATTR_GET(ATTR_EC) failed." );
+
+    FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
+
     switch (i_sysPhase)
     {
 
         case SYSPHASE_HB_SBE:
 
-            FAPI_DBG("Image size before any VPD updates: %d", l_currentImageSize);
+            FAPI_DBG("Image size w/empty .rings section before any VPD updates: %d", l_currentImageSize);
+
+            l_imageSizeWithoutRings = l_currentImageSize;
 
             // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
             l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
@@ -2232,46 +2265,26 @@ ReturnCode p10_ipl_customize (
                          (uintptr_t)io_imageSize,
                          (uintptr_t)io_ringSectionBufSize );
 
-            // Copy, save and delete the .rings section, wherever it is (even if
-            //   not the last section), and re-arrange other sections located above
-            //   the .rings section.
-            // Keep a copy of the original input image, io_image, in io_ringSectionBuf.
-            l_rc = p9_xip_delete_section(io_image, io_ringSectionBuf, l_currentImageSize, P9_XIP_SECTION_SBE_RINGS);
+            // Setup up nested section ID combination for SBE PPE image
+            mainSectionID = P9_XIP_SECTION_HW_SBE;
+            subSectionID = P9_XIP_SECTION_SBE_RINGS;
 
-            FAPI_ASSERT( l_rc == 0,
-                         fapi2::XIPC_XIP_API_MISC_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_XIP_RC(l_rc).
-                         set_OCCURRENCE(2),
-                         "p9_xip_delete_section() failed removing .rings w/rc=0x%08X",
-                         (uint32_t)l_rc );
-
-            // Make a note of the image size without .rings
-            l_rc = p9_xip_image_size(io_image, &l_imageSizeWithoutRings);
-
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
-                         fapi2::XIPC_XIP_API_MISC_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_XIP_RC(l_rc).
-                         set_OCCURRENCE(3),
-                         "p9_xip_image_size() failed (3) w/rc=0x%08X",
-                         (uint32_t)l_rc );
-
-            FAPI_DBG("Size of image before VPD update (excl .rings): %d", l_imageSizeWithoutRings);
-
-            // Get the size of our .rings section (assumption is NO DD support).
-            l_rc = p9_xip_get_section(io_ringSectionBuf, P9_XIP_SECTION_SBE_RINGS, &iplImgSection);
+            l_rc = p9_xip_get_sub_section( i_hwImage,
+                                           mainSectionID,
+                                           subSectionID,
+                                           &iplImgSection,
+                                           attrDdLevel );
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                          fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
-                         set_DDLEVEL(UNDEFINED_DD_LEVEL).
+                         set_DDLEVEL(attrDdLevel).
                          set_OCCURRENCE(1),
-                         "p9_xip_get_section() failed (1) w/rc=0x%08x getting SBE .rings"
-                         " section for ddLevel=0x%x",
-                         (uint32_t)l_rc, UNDEFINED_DD_LEVEL );
+                         "p9_xip_get_sub_section() failed (1) w/rc=0x%08X retrieving .sbe.rings"
+                         " section and ddLevel=0x%x",
+                         (uint32_t)l_rc, attrDdLevel );
 
             io_ringSectionBufSize = iplImgSection.iv_size;
 
@@ -2281,7 +2294,8 @@ ReturnCode p10_ipl_customize (
                          set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
                          set_DDLEVEL(UNDEFINED_DD_LEVEL).
                          set_OCCURRENCE(1),
-                         "Ring section size in SBE image is zero. No TOR. Can't append rings.");
+                         "p9_xip_get_sub_section() returned .sbe.rings size of size zero."
+                         "No TOR. Can't append rings.");
 
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
 
@@ -2292,13 +2306,13 @@ ReturnCode p10_ipl_customize (
             // Move .rings to the top of ringSectionBuf (which currently holds a copy of the
             //   io_image but which can now be destroyed.)
             memcpy( io_ringSectionBuf,
-                    (void*)((uint8_t*)io_ringSectionBuf + iplImgSection.iv_offset),
+                    (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
                     io_ringSectionBufSize );
 
             //----------------------------------------
             // Append VPD Rings to the .rings section
             //----------------------------------------
-
+#if 0
             l_fapiRc = fetch_and_insert_vpd_rings( i_procTarget,
                                                    io_ringSectionBuf,
                                                    io_ringSectionBufSize, // Running section size
@@ -2312,7 +2326,7 @@ ReturnCode p10_ipl_customize (
                                                    i_ringBuf3,
                                                    i_ringBufSize3,
                                                    io_bootCoreMask );
-
+#endif
             FAPI_DBG("-----------------------------------------------------------------------");
             FAPI_DBG("bootCoreMask:  Requested=0x%08X  Final=0x%08X",
                      l_requestedBootCoreMask, io_bootCoreMask);
@@ -2462,17 +2476,6 @@ ReturnCode p10_ipl_customize (
             //
             // Next, get the DD level specific set of QME rings from the HW image.
             //
-
-            // First, determine the DD level
-            l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
-
-            FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
-                         fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_OCCURRENCE(1),
-                         "FAPI_ATTR_GET(ATTR_EC) failed." );
-
-            FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
 
             // Setup up nested section ID combination for current PPE image
             mainSectionID = P9_XIP_SECTION_HW_QME;
