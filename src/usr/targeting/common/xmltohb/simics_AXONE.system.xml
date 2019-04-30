@@ -538,7 +538,7 @@
         <default>400,400,0,0,0,0,0,0,0,0,0,0,0,
                  400,400,400,400,0,0,0,0,0,0,0,0,0,
                  400,400,0,0,0,0,0,0,0,0,0,0,0,
-                 400,400,400,0,0,0,0,0,0,0,0,0,0</default>
+                 400,400,400,400,400,400,400,400,400,0,0,0,0</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -11364,6 +11364,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>2</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11410,6 +11415,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11456,6 +11466,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>4</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11502,6 +11517,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>5</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11548,6 +11568,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>6</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11594,6 +11619,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>7</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
@@ -11640,6 +11670,11 @@
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>8</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
 </targetInstance>
