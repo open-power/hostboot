@@ -250,7 +250,6 @@ typedef struct
     uint32_t            frequency_step_khz;
     uint32_t            occ_complex_frequency_mhz;  // Needed for FITs
     uint32_t            dpll_pstate0_value;  // @todo why this and reference_frequency_khz?
-    uint32_t            nest_frequency_mhz;  // Needed for FITs
 
     /// VPD operating points are biased but without load-line correction.
     /// Frequencies are in MHz, voltages are specified in units of 1mV, currents
@@ -281,11 +280,21 @@ typedef struct
     /// All are in 4.12 decimal form into uint16_t integer value
     uint16_t            ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
     uint16_t            voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            ps_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
-    uint16_t            current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_ac_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ps_dc_current_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            ac_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t            dc_current_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
 
     //AvsBusTopology
     AvsBusTopology_t avs_bus_topology;
+
+    uint32_t core_on_ratio_vdd;
+    uint32_t l3_on_ratio_vdd;
+    uint32_t mma_on_ratio_vdd;
+    uint32_t core_on_ratio_vcs;
+    uint32_t l3_on_ratio_vcs;
+    uint32_t vdd_vratio_weight;
+    uint32_t vcs_vratio_weight;
 
     // Biased Compare VID operating points
     // CompareVIDPoints_t vid_point_set[NUM_OP_POINTS];
