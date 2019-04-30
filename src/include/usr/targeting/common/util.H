@@ -102,6 +102,15 @@ namespace UTIL
         P9N23_P9C13_NATIVE_MODE_MINIMUM                = 0x04,
         P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY    = 0x04,
         P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_PERFORMANCE = 0x05,
+
+        // Axone modes (same as DD2.3 native mode)
+        P9A_RUGBY_FAVOR_SECURITY                       = 0x04,
+        P9A_RUGBY_FAVOR_PERFORMANCE                    = 0x05,
+        // The _LOWER numbered values are equivalent to the higher
+        //  values but they exist to maintain compatibility with
+        //  Nimbus DD2.3 settings.
+        P9A_RUGBY_FAVOR_SECURITY_LOWER                 = 0x00,
+        P9A_RUGBY_FAVOR_PERFORMANCE_LOWER              = 0x01,
     } Risk_level;
 }
 

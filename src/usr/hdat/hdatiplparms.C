@@ -564,10 +564,7 @@ static void hdatGetFeatureFlagInfo(
     l_ddLevel = l_pvr.getDDLevel();
 
     // Default to Nimbus DD2.3
-    uint8_t l_ddLvlIdx = 2;
-    l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
-    l_featFlagArrSize =
-        sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
+    uint8_t l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
 
     // Set the value based on DD level and risk level
     if (l_pvr.chipType == PVR_t::NIMBUS_CHIP)
@@ -586,12 +583,17 @@ static void hdatGetFeatureFlagInfo(
         {
             l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
         }
-
-        l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
-        l_featFlagArrSize =
-            sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
     }
-        
+    else if (l_pvr.chipFamily == PVR_t::P9_AXONE)
+    {
+        // Axone follows the Nimbus DD2.3 settings
+        l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
+    }
+
+    l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
+    l_featFlagArrSize =
+      sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx]);
+
     HDAT_DBG("Feature flag array size:0x%x, Model:0x%x, DD Level:0x%x "
         "Risk Level:0x%x", l_featFlagArrSize, l_pvr.chipType,
          l_ddLevel, l_riskLvl);
