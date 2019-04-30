@@ -8652,7 +8652,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -8719,7 +8719,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -8786,7 +8786,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -8853,7 +8853,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -8920,7 +8920,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -8987,7 +8987,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -9054,7 +9054,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -9121,7 +9121,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
         </default>
@@ -9188,7 +9188,7 @@
             <field><id>engine</id><value>3</value></field>
             <!-- Engine 3 Port 0 is directly attached to DDIMM8 in the simics axone model -->
             <field><id>port</id><value>0</value></field>
-            <field><id>devAddr</id><value>0xD0</value></field>
+            <field><id>devAddr</id><value>0x40</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
         </default>
