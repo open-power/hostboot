@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -31,11 +31,27 @@ $(OBJDIR)/%.list : $(OBJDIR)/%.o
 	$(C2) "    OBJDUMP    $(notdir $<)"
 	$(C1)$(OBJDUMP) -rdlCS $< > $@
 
+# SOURCE_FILE and INCLUDE_DIRS are variables that are either absolute
+# paths to the .C file being compiled and the include directories if
+# we're building with gcov, or else they are relative paths
+# otherwise. The key thing to remember is that they are lazily
+# expanded, so they're relevant to whatever rule they're used in. We
+# don't want to always have absolute paths because of build
+# performance and because it causes the build output with
+# BUILD_VERBOSE to be larger and less readable.
+ifdef HOSTBOOT_PROFILE
+SOURCE_FILE=$(shell readlink -f $<)
+INCLUDE_DIRS=$(shell $(ROOTPATH)/src/build/tools/cflags.sh $(INCFLAGS))
+else
+SOURCE_FILE=$<
+INCLUDE_DIRS=$(INCFLAGS)
+endif
+
 $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
-	            -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(SOURCE_FILE) \
+	            -o $@.trace $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 
@@ -43,7 +59,8 @@ $(OBJDIR)/%.o : %.C
 $(OBJDIR)/%.o : %.cc
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(CXXFLAGS) $< -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(CXX) -c $(CXXFLAGS) $(SOURCE_FILE) -o $@.trace \
+	               $(INCLUDE_DIRS) -iquote .
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace
 
@@ -54,12 +71,12 @@ $(OBJDIR)/%.o : %.c
 # CC_OVERRIDE is set in the makefile of the component
 ifndef CC_OVERRIDE
 	$(C2) "    CC         $(notdir $<)"
-	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $< \
-	           -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(CC) -c $(call FLAGS_FILTER, $(CFLAGS), $<) $(SOURCE_FILE) \
+	           -o $@.trace $(INCLUDE_DIRS) -iquote .
 else
 	$(C2) "    CXX        $(notdir $<)"
-	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $< \
-	            -o $@.trace $(INCFLAGS) -iquote .
+	$(C1)$(CXX) -c $(call FLAGS_FILTER, $(CXXFLAGS), $<) $(SOURCE_FILE) \
+	            -o $@.trace $(INCLUDE_DIRS) -iquote .
 endif
 	$(C1)$(TRACE_HASHER) $@ $(TRACE_FLAGS)
 	@rm $@.trace

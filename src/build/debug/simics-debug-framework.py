@@ -745,7 +745,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #file = open("hb_trace_debug.dat", "a")
         #file.write("%s\n" % (saveCommand))
         #file.close()
-
+    if arg == 7056:   # MAGIC_GCOV_DUMP_NOW
+        print('Gcov dumping chain from 0x%x' % (cpu.r3,))
+        SIM_run_alone(run_command, 'hb-GcovModuleUnload "address=%d"' % (cpu.r3,))
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )
@@ -769,4 +771,3 @@ SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback
 
 # Run the registration automatically whenever this script is loaded.
 register_hb_debug_framework_tools()
-

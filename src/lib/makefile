@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
+VPATH += ${ROOTPATH}/src/sys/prof
+
 OBJS += string.o
 OBJS += string_ext.o
 OBJS += string_utils.o
@@ -51,6 +53,9 @@ OBJS += utilmisc.o
 OBJS += tls.o
 OBJS += errno.o
 OBJS += tlsrt.o
+
+# Don't care about instrumenting basic library functions
+HOSTBOOT_PROFILE=
 
 ifdef HOSTBOOT_MEMORY_LEAKS
 COMMONFLAGS += -DHOSTBOOT_MEMORY_LEAKS=1

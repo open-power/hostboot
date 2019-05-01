@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2018
+# Contributors Listed Below - COPYRIGHT 2010,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
+
+# we need HBB to be small
+HOSTBOOT_PROFILE_NO_INSTRUMENT=1
 
 OBJS += start.o
 OBJS += kernel.o

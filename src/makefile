@@ -59,10 +59,6 @@ BASE_OBJECTS += sprintf.o
 BASE_OBJECTS += crc32.o
 BASE_OBJECTS += utilmisc.o
 
-ifdef HOSTBOOT_PROFILE
-BASE_OBJECTS += gcov.o
-endif
-
 BL_BASE_OBJECTS += bl_builtins.o
 
 BOOTLDR_OBJECTS += bl_start.o
@@ -135,6 +131,9 @@ DIRECT_BOOT_OBJECTS += assert.o
 DIRECT_BOOT_OBJECTS += workitem.o
 DIRECT_BOOT_OBJECTS += bltohbdatamgr.o
 DIRECT_BOOT_OBJECTS += errno.o
+ifdef HOSTBOOT_PROFILE
+DIRECT_BOOT_OBJECTS += gcov.o
+endif
 
 BASE_MODULES += trace
 BASE_MODULES += errl
@@ -149,6 +148,11 @@ BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
 BASE_MODULES += $(if $(CONFIG_CONSOLE),console)
+
+# This is exported so that gcov knows the list of base modules to
+# exclude from instrumentation. We can't simply export BASE_MODULES or
+# else we get duplicate modules in the list which causes linker errors.
+export BASE_MODULES_GCOV_BLACKLIST:=$(BASE_MODULES)
 
 EXTENDED_MODULES += istep06
 EXTENDED_MODULES += istep07
@@ -281,7 +285,12 @@ RUNTIME_OBJECTS += rt_assert.o
 RUNTIME_OBJECTS += rt_vfs.o
 RUNTIME_OBJECTS += rt_task.o
 RUNTIME_OBJECTS += rt_time.o
-RUNTIME_OBJECTS += ${RUNTIME_COMMON_OBJS}
+RUNTIME_OBJECTS += runtime_utils.o
+ifdef HOSTBOOT_PROFILE
+# we don't instrument runtime because we don't have space, but we
+# still link this in because it uses some object files that need it
+RUNTIME_OBJECTS += gcov.o
+endif
 
 RUNTIME_MODULES += trace_rt
 RUNTIME_MODULES += errl_rt
@@ -311,6 +320,11 @@ RUNTIME_MODULES += imageprocs_rt
 RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 RUNTIME_MODULES += mss_rt
 RUNTIME_MODULES += expaccess_rt
+
+# This is exported so that gcov knows the list of runtime modules to
+# exclude from instrumentation. We can't simply export RUNTIME_MODULES or
+# else we get duplicate modules in the list which causes linker errors.
+export RUNTIME_MODULES_GCOV_BLACKLIST:=$(RUNTIME_MODULES)
 
 RUNTIME_DATA_MODULES +=
 
@@ -408,10 +422,10 @@ $(IMGDIR)/hbotStringFile : $(IMAGES)
 #20K for bootloader code and data)
 #PROCESS: get size of hbibl.bin, sort with respect to 32k (32768),
 #then see if last word is 32k.  If not, the bootloader image is too big.
+
 MAX_BASE_SIZE = 925696
 MAX_BTLDR_SIZE = 32768
+
 imgsizecheck: ${IMGDIR}/hbicore.bin ${IMGDIR}/hbibl.bin
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbibl.bin; echo $(MAX_BTLDR_SIZE)) | sort -n | tail -n1), $(MAX_BTLDR_SIZE)),true, @echo ERROR: ${IMGDIR}/hbibl.bin too large.  Max allowed size is $(MAX_BTLDR_SIZE); false)
-
-

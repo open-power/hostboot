@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
@@ -6,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,15 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+#!/usr/bin/perl
 use strict;
+use warnings;
 use File::Path;
 use File::Basename;
+use IO::Handle;
 
 package Hostboot::Gcov;
 use Hostboot::_DebugFrameworkVMM qw(NotFound NotPresent getPhysicalAddr);
 
 use Exporter;
-our @EXPORT_OK = ('main');
+our @EXPORT_OK = ('init', 'main', 'parseGcovInfo');
 
 # NOTE:
 #
@@ -50,26 +52,37 @@ our @EXPORT_OK = ('main');
 
 use constant GCOV_EXTENDED_IMAGE_ADDRESS => (1024 * 1024 * 1024);
 use constant GCOV_INFO_HEAD_SYMBOLNAME => "_gcov_info_head";
+use constant GCOV_INFO_MAGIC_SYMBOLNAME => "_gcov_info_magic";
+use constant GCOV_MAGIC_IDENTIFIER => 0xbeefb055;
 
-use constant GCOV_INFO_VERSION_OFFSET => 0;
-use constant GCOV_INFO_NEXT_OFFSET => GCOV_INFO_VERSION_OFFSET + 8;
-use constant GCOV_INFO_TIMESTAMP_OFFSET => GCOV_INFO_NEXT_OFFSET + 8;
-use constant GCOV_INFO_FILENAME_OFFSET => GCOV_INFO_TIMESTAMP_OFFSET + 8;
-use constant GCOV_INFO_NFUNCTIONS_OFFSET => GCOV_INFO_FILENAME_OFFSET + 8;
-use constant GCOV_INFO_FUNCTIONS_OFFSET => GCOV_INFO_NFUNCTIONS_OFFSET + 8;
-use constant GCOV_INFO_CTRMASK_OFFSET => GCOV_INFO_FUNCTIONS_OFFSET + 8;
-use constant GCOV_INFO_COUNTS_OFFSET => GCOV_INFO_CTRMASK_OFFSET + 8;
+use constant GCOV_COUNTERS_492 => 9;
+use constant SIZEOF_PTR => 8;
+use constant SIZEOF_UINT64 => 8;
 
-use constant GCOV_FNINFO_IDENT_OFFSET => 0;
-use constant GCOV_FNINFO_CHECKSUM_OFFSET => GCOV_FNINFO_IDENT_OFFSET + 4;
-use constant GCOV_FNINFO_NCTRS_OFFSET => GCOV_FNINFO_CHECKSUM_OFFSET + 4;
-
-use constant GCOV_CTRINFO_COUNT_OFFSET => 0;
-use constant GCOV_CTRINFO_VALUEPTR_OFFSET => GCOV_CTRINFO_COUNT_OFFSET + 8;
-
-use constant GCOV_GCDA_MAGIC_VALUE => 0x67636461;
 use constant GCOV_FUNCTION_TAG => 0x01000000;
 use constant GCOV_COUNTERS_TAG => 0x01a10000;
+use constant GCOV_PROGRAM_SUMMARY_TAG => 0xa3000000;
+
+use constant GCOV_GCDA_MAGIC_VALUE => 0x67636461;
+
+# See gcov.h for the structs (gcov_info, gcov_fn_info) from which
+# these offsets derive
+
+use constant GCOV_INFO_VERSION_OFFSET_492 => 0;
+use constant GCOV_INFO_NEXT_OFFSET_492 => 8;
+use constant GCOV_INFO_TIMESTAMP_OFFSET_492 => 16;
+use constant GCOV_INFO_FILENAME_OFFSET_492 => 24;
+use constant GCOV_INFO_MERGE_OFFSET_492 => 32;
+use constant GCOV_INFO_N_FUNCTIONS_OFFSET_492 => 32 + (9 * 8);
+use constant GCOV_INFO_FUNCTIONS_OFFSET_492 => GCOV_INFO_N_FUNCTIONS_OFFSET_492 + 8;
+
+use constant GCOV_FN_INFO_IDENT_OFFSET_492 => 8;
+use constant GCOV_FN_INFO_LINENO_CHECKSUM_OFFSET_492 => 12;
+use constant GCOV_FN_INFO_CFG_CHECKSUM_OFFSET_492 => 16;
+use constant GCOV_FN_INFO_CTR_INFO_OFFSET_492 => 24;
+
+use constant GCOV_CTR_INFO_NUM_OFFSET_492 => 0;
+use constant GCOV_CTR_INFO_VALUES_OFFSET_492 => 8;
 
 # In memory format:
 #       GCC creates a 'gcov_info' structure for each .o file.  The info
@@ -134,20 +147,43 @@ use constant GCOV_COUNTERS_TAG => 0x01a10000;
 #       uint64_ts, containing instrumented counts, for the preceeding function.
 
 # Global of where we want the output to go.
-our $output_dir;
 our $debug_mode;
+our $hbicore_extended_bin_file;
+our $hbicore_extended_bin_file_size;
 BEGIN
 {
     $debug_mode = 0;
-    $output_dir = "";
 }
-return 1;
+
+sub init
+{
+    # TODO: We need to figure out how to handle reading data from
+    # HBB/HBRT for when those are instrumented. One hurdle is being
+    # able to determine from an address what module it belongs to,
+    # because HBB/HBI/HBRT are not necessarily laid out in memory as
+    # they are in PNOR or anywhere else.
+
+    my $hbicore_extended_bin_fname = "$ENV{SANDBOXROOT}/$ENV{SANDBOXNAME}/src/hbfw/img/hostboot_extended.bin";
+
+    userDebug("Opening " . $hbicore_extended_bin_fname . " for HBI\n");
+
+    unless (open($hbicore_extended_bin_file, "< $hbicore_extended_bin_fname")) {
+        ::userDisplay "Failed to open $hbicore_extended_bin_fname, exiting\n";
+        return 0;
+    }
+
+    binmode($hbicore_extended_bin_file);
+
+    $hbicore_extended_bin_file_size = -s $hbicore_extended_bin_fname;
+
+    return 1;
+}
 
 sub main
 {
-    # Pick a new output directory based on the time.
-    $output_dir = sprintf "gcov.output.%d/", time;
-    File::Path::mkpath($output_dir);
+    if (!init()) {
+        return;
+    }
 
     # Find all the hostboot modules.
     my @modules = getModules();
@@ -160,7 +196,10 @@ sub main
 
     my $pwd = `pwd`;
     chomp $pwd;
-    ::userDisplay "GCOV output written to: $pwd/$output_dir\n";
+
+    close $hbicore_extended_bin_file or die;
+
+    ::userDisplay("GCOV info extraction complete.\n");
 }
 
 sub parseModuleGcov
@@ -168,8 +207,23 @@ sub parseModuleGcov
     my $module = shift;
     ::userDisplay "Extracting GCOV info for ".$module."\n";
 
+    # Search for magic symbol.
+    my ($gcov_magic, $unused) =
+        ::findSymbolAddress($module.GCOV_INFO_MAGIC_SYMBOLNAME);
+
+    if (!defined($gcov_magic))
+    {
+        $gcov_magic = 0;
+    }
+
+    if ($gcov_magic == 0 || read32($gcov_magic, 1) != GCOV_MAGIC_IDENTIFIER)
+    {
+        ::userDisplay "\tgcov_magic at address " . (sprintf "0x%x", $gcov_magic) . " is incorrect.  Skipped.\n";
+        return;
+    }
+
     # Search for gcov_info chain symbol.
-    my ($gcov_info, $unused) =
+    my ($gcov_info, $unused2) =
         ::findSymbolAddress($module.GCOV_INFO_HEAD_SYMBOLNAME);
 
     userDebug("\tFound info at 0x" . (sprintf "%x", $gcov_info) . "\n");
@@ -181,7 +235,7 @@ sub parseModuleGcov
 
         if (($gcov_info eq NotFound) || ($gcov_info eq NotPresent))
         {
-            ::userDisplay "\tModule data is not present.\n";
+            ::userDisplay "\tModule data is not present, module might have been unloaded, skipping.\n";
             return;
         }
     }
@@ -189,7 +243,7 @@ sub parseModuleGcov
     # Check that we found the gcov_info chain.
     if ($gcov_info == 0)
     {
-        ::userDisplay "\tUnable to find gcov_info chain.  Skipped.\n";
+        ::userDisplay "\tUnable to find gcov_info chain, module might hvae been unloaded. Skipping.\n";
         return;
     }
 
@@ -202,39 +256,44 @@ sub parseGcovInfo
     my $info_ptr = shift;
     return if (0 eq $info_ptr);
 
-    my $filename = readStr(read64($info_ptr + GCOV_INFO_FILENAME_OFFSET));
-    userDebug("\tFile = ".$filename."\n");
+    userDebug("\tReading filename pointer from offset " . (sprintf "0x%x", ($info_ptr + GCOV_INFO_FILENAME_OFFSET_492)) . "\n");
 
-    my $version = read32($info_ptr + GCOV_INFO_VERSION_OFFSET);
-    my $stamp = read32($info_ptr + GCOV_INFO_TIMESTAMP_OFFSET);
+    my $filename_addr = read64($info_ptr + GCOV_INFO_FILENAME_OFFSET_492);
 
-    my $func_count = read32($info_ptr + GCOV_INFO_NFUNCTIONS_OFFSET);
-    userDebug("\tFunction Count = ".$func_count."\n");
+    userDebug("\tReading filename from offset " . (sprintf "0x%x", $filename_addr) . "\n");
 
-    my $funcs = read64($info_ptr + GCOV_INFO_FUNCTIONS_OFFSET);
-    userDebug("\tFunc Address = ".(sprintf "%x", $funcs)."\n");
+    my $filename = readStr($filename_addr);
 
-    my $ctrmask = read32($info_ptr + GCOV_INFO_CTRMASK_OFFSET);
-    if ($ctrmask % 2) # Check that COUNTER_ARCS is turned on.
-    {
-        # COUNTER_ARCS is on.  Create file, find arc-values array,
-        # parse functions.
+    if ($filename) {
+        ::userDisplay("\tFile = ".$filename."\n");
 
-        my $fd = createGcovFile($filename, $version, $stamp);
+        my $version = read32($info_ptr + GCOV_INFO_VERSION_OFFSET_492);
+        my $stamp = read32($info_ptr + GCOV_INFO_TIMESTAMP_OFFSET_492);
 
-        my $arcs_ptr = read64($info_ptr + GCOV_INFO_COUNTS_OFFSET +
-                                GCOV_CTRINFO_VALUEPTR_OFFSET);
-        parseGcovFuncs($fd, $funcs, $func_count, $ctrmask, $arcs_ptr);
+        my $func_count = read32($info_ptr + GCOV_INFO_N_FUNCTIONS_OFFSET_492);
+        userDebug("\tFunction Count = ".$func_count."\n");
 
-        close $fd;
-    }
-    else
-    {
-        userDebug("COUNTER_ARCS is missing!\n");
+        my $funcs = read64($info_ptr + GCOV_INFO_FUNCTIONS_OFFSET_492, 1);
+
+        if ($funcs ne NotFound && $funcs ne NotPresent) {
+            userDebug("\tFunc Address = ".(sprintf "0x%x", $funcs)."\n");
+
+            if ($version ne NotFound && $stamp ne NotFound && $func_count ne NotFound) {
+                my $fd = createGcovFile($filename, $version, $stamp);
+
+                parseGcovFuncs($fd, $funcs, $func_count);
+
+                close $fd or die $!;
+            }
+        } else {
+            userDebug("\tFunc Address is NULL, skipping\n");
+        }
+    } else {
+        userDebug("\tCannot read filename, skipping\n");
     }
 
     # Look for next .o in gcov_info chain, parse.
-    my $next = read64($info_ptr + GCOV_INFO_NEXT_OFFSET);
+    my $next = read64($info_ptr + GCOV_INFO_NEXT_OFFSET_492);
     parseGcovInfo($next);
 }
 
@@ -243,62 +302,95 @@ sub parseGcovFuncs
     my $fd = shift;
     my $func_ptr = shift;
     my $func_count = shift;
-    my $mask = shift;
-    my $val_ptr = shift;
 
-    my $fn_offset = 0;
+    my $GCOV_COUNTERS_SUMMABLE_492 = 1;
 
-    # Need to calculate the number of counters based on the bits on in
-    # the 'mask'.  This is used to determine the size of the function
-    # descriptor object.
-    my $counters = 0;
-    {
-        my $_mask = $mask;
+    print $fd pack('l', GCOV_PROGRAM_SUMMARY_TAG); # data.program.header.tag
 
-        while (0 != $_mask)
-        {
-            $counters++;
-            $_mask = ($_mask >> 1);
-        }
+    # for each GCOV_COUNTERS_SUMMABLE we have ten int32 (num, runs, and bitvector{8})
+    # plus three int64 (sum, max, sum_max) i.e. 10 + 3*2
+    # data.unit.header.length is the number of int32's we have following.
+    print $fd pack('l', 1 + $GCOV_COUNTERS_SUMMABLE_492 * (10 + 3 * 2)); # data.unit.header.length;
+
+    print $fd pack('l', 0); # data.summary:object.checksum (must be 0 according to docs)
+
+    for (my $i = 0; $i < $GCOV_COUNTERS_SUMMABLE_492;  $i++) {
+        print $fd pack('l', 0); # data.summary:object.count-summary.num
+        print $fd pack('l', 0); # data.summary:object.count-summary.runs
+        print $fd pack('l', 0); # data.summary:object.count-summary.sum@lo
+        print $fd pack('l', 0); # data.summary:object.count-summary.sum@hi
+        print $fd pack('l', 0); # data.summary:object.count-summary.max@lo
+        print $fd pack('l', 0); # data.summary:object.count-summary.max@hi
+        print $fd pack('l', 0); # data.summary:object.count-summary.sum_max@lo
+        print $fd pack('l', 0); # data.summary:object.count-summary.sum_max@hi
+
+        print $fd pack('l8', (0) x 8);   # data.summary:object.count-summary.histogram.bitvector{8}
     }
-
-    userDebug("\tCounters = ".$counters."\n");
-
-    # Round up the counter count to the nearest two for alignment of the
-    # function descriptor object.
-    if ($counters % 2)
-    {
-        $counters++;
-    }
-    my $func_size = GCOV_FNINFO_CHECKSUM_OFFSET + 4 * $counters;
-
-    userDebug("\tFunction size = ".$func_size."\n");
 
     # Iterate through the functions and parse.
     for(my $function = 0; $function < $func_count; $function++)
     {
-        my $func_off = ($func_ptr + $func_size * $function);
-        my $ident = read32($func_off + GCOV_FNINFO_IDENT_OFFSET);
-        my $chksum = read32($func_off + GCOV_FNINFO_CHECKSUM_OFFSET);
+        userDebug("\tFunction $function of $func_count\n");
 
-        userDebug("Ident = ".(sprintf "%x", $ident)."\n");
-        userDebug("Chksum = ".(sprintf "%x", $chksum)."\n");
+        my $fn_info_ptr = read64($func_ptr + SIZEOF_PTR*$function, 1);
+
+        if (($fn_info_ptr eq NotFound) || ($fn_info_ptr eq NotPresent))
+        {
+            userDebug("\tCannot read function info pointer, skipping\n");
+            next;
+        }
+
+        userDebug("\tfn_info_ptr = " . (sprintf "%x", $fn_info_ptr) . "\n");
+
+        my $ident = read32($fn_info_ptr + GCOV_FN_INFO_IDENT_OFFSET_492, 1);
+        my $lineno_chksum = read32($fn_info_ptr + GCOV_FN_INFO_LINENO_CHECKSUM_OFFSET_492, 1);
+        my $cfg_chksum = read32($fn_info_ptr + GCOV_FN_INFO_CFG_CHECKSUM_OFFSET_492, 1);
+        my $ctr_info_ptr = $fn_info_ptr + GCOV_FN_INFO_CTR_INFO_OFFSET_492;
+
+        if ($ident eq NotFound
+            || $lineno_chksum eq NotFound
+            || $cfg_chksum eq NotFound)
+        {
+            userDebug("Skipping because fn_info structure members are not readable\n");
+            next;
+        }
+
+        my $num_ctrs = read32($ctr_info_ptr + GCOV_CTR_INFO_NUM_OFFSET_492, 1);
+        my $ctrs_ptr = read64($ctr_info_ptr + GCOV_CTR_INFO_VALUES_OFFSET_492, 1);
+
+        if ($ctrs_ptr eq NotFound || $num_ctrs eq NotFound)
+        {
+            userDebug("Skipping because counters length isn't mapped\n");
+            next;
+        }
+
+        my $counters = readData($ctrs_ptr, SIZEOF_UINT64 * $num_ctrs);
+
+        userDebug("Ident = ".(sprintf "0x%x", $ident)."\n");
+        userDebug("lineno Chksum = ".(sprintf "0x%x", $lineno_chksum)."\n");
+        userDebug("cfg Chksum = ".(sprintf "0x%x", $cfg_chksum)."\n");
+        userDebug("Num counters = ".(sprintf "%d", $num_ctrs)."\n");
+        userDebug("ctrs_ptr = ".(sprintf "0x%x", $ctrs_ptr)."\n");
+
+        if (($counters eq NotFound) || ($counters eq NotPresent))
+        {
+            userDebug("Skipping because counter data not resident in memory\n");
+            next;
+        }
 
         print $fd pack('l', GCOV_FUNCTION_TAG);  # Write function tag.
-        print $fd pack('l', 2); # Write size = 2.
+        print $fd pack('l', 3); # Write size = 3.
         print $fd pack('l', $ident); # Write ident.
-        print $fd pack('l', $chksum); # Write checksum.
-
-        my $nctr_val = read32($func_off + GCOV_FNINFO_NCTRS_OFFSET);
-        userDebug("N-Counters = ".$nctr_val."\n");
+        print $fd pack('l', $lineno_chksum); # Write checksum.
+        print $fd pack('l', $cfg_chksum); # Write checksum.
 
         print $fd pack('l', GCOV_COUNTERS_TAG); # Write counter tag.
-        print $fd pack('l', $nctr_val * 2); # Write counter length.
+        print $fd pack('l', $num_ctrs * 2); # Write counter length.
 
         # Read each counter value, output.
         #       Read as one big block for performance reasons.
-        my $counters = readData($val_ptr + 8*($fn_offset), 8 * $nctr_val);
-        for(my $v_idx = 0; $v_idx < $nctr_val; $v_idx++)
+
+        for(my $v_idx = 0; $v_idx < $num_ctrs; $v_idx++)
         {
             my $val = substr $counters, 0, 8;
             $counters = substr $counters, 8;
@@ -306,15 +398,34 @@ sub parseGcovFuncs
             $val = unpack("Q", $val);
             userDebug("\tValue[$v_idx] = ".$val."\n");
 
+            my $preex_read_low = read($fd, my $low_word, 4);
+            my $preex_read_high = read($fd, my $high_word, 4);
+
+            if (!defined($preex_read_low) or !(defined($preex_read_high))) {
+                die;
+            }
+            my $preex_read = $preex_read_low + $preex_read_high;
+
+            if ($preex_read == 8)
+            {
+                my $preex_val = (unpack("l", $high_word) << 32) | unpack("l", $low_word);
+
+                $val += $preex_val;
+            }
+
+            if ($preex_read > 0)
+            {
+                seek $fd, -$preex_read, 1;
+            }
+            else
+            {
+                seek $fd, 0, 2;
+            }
+
             print $fd pack('l', $val & 0xFFFFFFFF);  # Write lower word.
             print $fd pack('l', $val >> 32) ; # Write upper word.
         }
-
-        # We used up a number of counters, so move the offset forward for
-        # the next function.
-        $fn_offset += $nctr_val;
     }
-
 }
 
 # The *.gcda filename found in the gcov_info struct is an absolute path to
@@ -330,16 +441,25 @@ sub createGcovFile
     my $version = shift;
     my $stamp = shift;
 
-    # Change *./../obj/ into obj/, prepend output_dir.
-    $name =~ s/.*\/obj\//obj\//;
-    $name = $output_dir.$name;
+    # if the file exists then we update it, if not we create it
+    my $GCOVFILE;
+    if (-e $name)
+    {
+        if (!open($GCOVFILE, "+<$name"))
+        {
+            ::userDisplay("Failed to open $name for reading/writing gcov information\n");
+            die;
+        }
+    }
+    else
+    {
+        if (!open($GCOVFILE, "+>$name"))
+        {
+            ::userDisplay("Failed to open $name for writing gcov information\n");
+            die;
+        }
+    }
 
-    # Make sure everything after 'obj/' exists (create subdirs).
-    my $dir = File::Basename::dirname($name);
-    File::Path::mkpath($dir);
-
-    # Create file.
-    open(my $GCOVFILE, "> $name");
     binmode($GCOVFILE);
 
     # Write out header.
@@ -377,6 +497,22 @@ sub isVirtualAddress
     return ($addr >= GCOV_EXTENDED_IMAGE_ADDRESS);
 }
 
+sub readExtImage
+{
+    my $addr = shift;
+    my $amount = shift;
+
+    if ($addr + $amount >= $hbicore_extended_bin_file_size) {
+        return NotFound;
+    }
+
+    seek $hbicore_extended_bin_file, $addr, 0;
+
+    read $hbicore_extended_bin_file, my ($contents), $amount;
+
+    return $contents;
+}
+
 # Utility to read a block of data from eithr memory or using the extended
 # image file as a fallback if not present in memory.
 use constant PAGESIZE => 4096;
@@ -401,8 +537,13 @@ sub readData
             my $paddr = getPhysicalAddr($addr);
             if ((NotFound eq $paddr) || (NotPresent eq $paddr))
             {
-                $paddr = $addr - GCOV_EXTENDED_IMAGE_ADDRESS;
-                $result = $result.::readExtImage($paddr, $amount);
+                my $tmpdata = readExtImage($addr - GCOV_EXTENDED_IMAGE_ADDRESS, $amount);
+
+                if ($tmpdata eq NotFound) {
+                    return NotFound;
+                }
+
+                $result = $result . $tmpdata;
             }
             else
             {
@@ -423,14 +564,27 @@ sub readData
 sub read64
 {
     my $addr = shift;
+    my $fallback = shift;
+
     my $old_addr = $addr;
     if (isVirtualAddress($addr))
     {
         $addr = getPhysicalAddr($addr);
         if ((NotFound eq $addr) || (NotPresent eq $addr))
         {
+            userDebug((sprintf "0x%x", $old_addr). " not translatable 2\n");
+
+            if (!$fallback) {
+                return NotFound;
+            }
+
             $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
-            my $result = ::readExtImage($addr, 8);
+            my $result = readExtImage($addr, 8);
+
+            if ($result eq NotFound) {
+                return NotFound;
+            }
+
             if (::littleendian()) { $result = reverse($result); }
             return unpack("Q", $result);
         }
@@ -444,14 +598,25 @@ sub read64
 sub read32
 {
     my $addr = shift;
+    my $fallback = shift;
+
     my $old_addr = $addr;
     if (isVirtualAddress($addr))
     {
         $addr = getPhysicalAddr($addr);
         if ((NotFound eq $addr) || (NotPresent eq $addr))
         {
+            userDebug((sprintf "0x%x", $old_addr). "not translatable 3\n");
+
+            if (!$fallback) {
+                return NotFound;
+            }
+
             $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
-            my $result = ::readExtImage($addr, 4);
+            my $result = readExtImage($addr, 4);
+            if ($result eq NotFound) {
+                return NotFound;
+            }
             if (::littleendian()) { $result = reverse($result); }
             return unpack("L", $result);
         }
@@ -471,8 +636,10 @@ sub read8
         $addr = getPhysicalAddr($addr);
         if ((NotFound eq $addr) || (NotPresent eq $addr))
         {
+            userDebug((sprintf "0x%x", $addr). "not translatable 4\n");
+
             $addr = $old_addr - GCOV_EXTENDED_IMAGE_ADDRESS;
-            my $result = ::readExtImage($addr, 1);
+            my $result = readExtImage($addr, 1);
             return unpack("C", $result);
         }
     }
@@ -486,31 +653,82 @@ sub readStr
 {
     my $addr = shift;
     my $old_addr = $addr;
+
     if (isVirtualAddress($addr))
     {
-        $addr = $addr - GCOV_EXTENDED_IMAGE_ADDRESS;
+        userDebug("it is a virtual address, addr is " . (sprintf "%x", $addr) . "\n");
+        my $phys_addr = getPhysicalAddr($addr);
 
-        # Virtual address, so need to read 1 byte at a time from the file.
-        my $string = "";
-        my $byte = 0;
-
-        do
+        if ((NotFound eq $phys_addr) || (NotPresent eq $phys_addr))
         {
-            $byte = ::readExtImage($addr,1);
-            $addr = $addr + 1;
+            userDebug("Translation not found, reading from pnor\n");
+            # Virtual address, so need to read 1 byte at a time from the file.
+            my $string = "";
+            my $byte = 0;
 
-            if (unpack("C",$byte) eq 0)
+            do
             {
-                return $string;
-            }
+                $byte = readExtImage($addr - GCOV_EXTENDED_IMAGE_ADDRESS, 1);
 
-            $string = $string.$byte;
+                if ($byte eq NotFound)
+                {
+                    return "";
+                }
 
-        } while (1)
+                $addr = $addr + 1;
+
+                if (unpack("C",$byte) eq 0)
+                {
+                    return $string;
+                }
+
+                $string = $string.$byte;
+            } while (1);
+        }
+        else
+        {
+            my $string = "";
+            my $byte = 0;
+
+            do
+            {
+                if (($addr & 0xfff) == 0)
+                {
+                    # we have to recalculate the physical address
+                    # whenever we cross a page boundary
+                    $phys_addr = getPhysicalAddr($addr);
+
+                    if ((NotFound eq $phys_addr) || (NotPresent eq $phys_addr))
+                    {
+                        userDebug((sprintf "0x%x", $addr). "not translatable 10\n");
+                        return "";
+                    }
+                }
+
+                $byte = read8($phys_addr);
+
+                if ($byte eq NotFound)
+                {
+                    userDebug("Cannot read byte from physical address\n");
+                    return "";
+                }
+
+                $addr += 1;
+                $phys_addr += 1;
+
+                if ($byte != 0)
+                {
+                    $string = $string . pack("C", $byte);
+                }
+            } while ($byte != 0);
+
+            return $string;
+        }
     }
     else
     {
-        ::readStr($addr);
+        userDebug("it is NOT a virtual address\n");
+        return ::readStr($addr);
     }
 }
 
@@ -531,3 +749,5 @@ sub helpInfo
         intro => [ "Extracts the GCOV information."],
     );
 }
+
+1; # Last expression in a perl module must be truthy.

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 
 ROOTPATH = ../..
+
+HOSTBOOT_PROFILE=
 
 COMMONFLAGS += -DBYTE_ORDER=BIG_ENDIAN
 COMMONFLAGS += -DBN_POWER64_MUL

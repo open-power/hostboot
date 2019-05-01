@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
+
+# Bootloader omitted from profiling to keep size down
+HOSTBOOT_PROFILE=
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/lpc/
