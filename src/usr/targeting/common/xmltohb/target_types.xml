@@ -1363,6 +1363,8 @@
     </attribute>
   </targetType>
 
+  <!-- This special I2C_MUX target adapts the MRW to Hostboot's specific I2C_MUX
+    target. All attributes should be declared against the parent target -->
   <targetType>
     <id>i2c_mux_pca9847</id>
     <parent>chip</parent>
@@ -1540,6 +1542,11 @@
       <default>CDIMM</default>
       <id>MODEL</id>
     </attribute>
+  </targetType>
+
+  <targetType>
+    <id>lcard-dimm-ddimm</id>
+    <parent>lcard-dimm</parent>
   </targetType>
 
   <targetType>
