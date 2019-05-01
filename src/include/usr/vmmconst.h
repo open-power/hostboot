@@ -60,21 +60,8 @@
 /** Base Segment Base Block Base Address */
 #define VMM_ADDR_BASE_BLOCK 0
 
-/** Base Segment Base Block size */
-#ifdef CONFIG_P9_SYSTEM
-#define VMM_BASE_BLOCK_SIZE (10*MEGABYTE)
-#else
-#define VMM_BASE_BLOCK_SIZE (8*MEGABYTE)
-#endif
-
-/** Base Segment Extended Memory Block Base Address */
-#define VMM_ADDR_EXTEND_BLOCK (VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE)
-
 /** Maximize size of Base Segment Memory after expansion */
 #define VMM_MEMORY_SIZE (64*MEGABYTE)
-
-/** Base Segment Extended Memory Block Size */
-#define VMM_EXTEND_BLOCK_SIZE (VMM_MEMORY_SIZE-VMM_BASE_BLOCK_SIZE)
 
 /**
  * Resource Providers
@@ -165,6 +152,7 @@ enum BlockPriority
 
 /** Physical Memory for OCC common space - 8MB total */
 /** OCC Common must be on an 8MB offset */
+#define VMM_OCC_BOOTLOADER_SIZE (1 * PAGESIZE)
 #define VMM_OCC_COMMON_START_OFFSET VMM_HOMER_REGION_END_OFFSET
 #define VMM_OCC_COMMON_SIZE_IN_MB 8
 #define VMM_OCC_COMMON_SIZE \

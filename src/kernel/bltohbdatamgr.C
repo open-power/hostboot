@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,6 +184,9 @@ printk("Version=%lX\n",i_data.version);
     {
         iv_data.secBackdoorBit = i_data.secBackdoorBit;
     }
+
+    iv_data.cacheSizeMb = i_data.cacheSizeMb;
+    printk("Hostboot cache size=%d MB\n", iv_data.cacheSizeMb);
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
@@ -386,5 +389,15 @@ const size_t BlToHbDataManager::getBlToHbDataSize() const
 const bool BlToHbDataManager::getSecBackdoor() const
 {
     return iv_data.secBackdoorBit;
+}
+
+const size_t BlToHbDataManager::getHbCacheSizeMb() const
+{
+    return iv_data.cacheSizeMb;
+}
+
+const size_t BlToHbDataManager::getHbCacheSizeBytes() const
+{
+    return iv_data.cacheSizeMb * MEGABYTE;
 }
 

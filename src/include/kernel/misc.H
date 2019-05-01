@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,17 +151,6 @@ namespace KernelMisc
             uint64_t iv_firstThread;
 
     };
-
-    /** @fn expand_full_cache
-     *
-     *  @brief Expands the image footprint from a half-cache to full-cache
-     *         mode or to reduced-cache mode.
-     *
-     *  @param[in] i_expandSize - Total expanded cache size.
-     *
-     *  @return 0 or -errno
-     */
-    int expand_full_cache(uint64_t i_expandSize);
 
     /** @fn populate_cache_lines
      *

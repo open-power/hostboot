@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <kernel/pagemgr.H>
 #include <kernel/spte.H>
 #include <kernel/memstate.H>
+#include <kernel/bltohbdatamgr.H>
 
 BaseSegment::~BaseSegment()
 {
@@ -50,6 +51,7 @@ void BaseSegment::_init()
 {
     // Assign segment to segment manager.
     SegmentManager::addSegment(this, SegmentManager::BASE_SEGMENT_ID);
+    size_t l_hbCacheSizeBytes = g_BlToHbDataManager.getHbCacheSizeBytes();
 
     // Create initial static 3 or 8MB block.
     switch (CpuID::getCpuType())
@@ -61,7 +63,7 @@ void BaseSegment::_init()
         case CORE_POWER9_CUMULUS:
         case CORE_POWER9_AXONE:
         default:
-            iv_physMemSize = VMM_BASE_BLOCK_SIZE;
+            iv_physMemSize = l_hbCacheSizeBytes;
             break;
     }
     // Base block is L3 cache physical memory size
@@ -69,7 +71,7 @@ void BaseSegment::_init()
     iv_block->setParent(this);
 
     // Set default page permissions on block.
-    for (uint64_t i = 0; i < VMM_BASE_BLOCK_SIZE; i += PAGESIZE)
+    for (uint64_t i = 0; i < l_hbCacheSizeBytes; i += PAGESIZE)
     {
         // External address filled in by linker as start of kernel's
         // data pages.
@@ -243,10 +245,14 @@ int BaseSegment::_mmExtend(void)
 {
     // The base address of the extended memory is the cache size.. The first x
     // pages is for the SPTE.. The remaining pages from the end of cache + SPTE
-    // up to VMM_MEMORY_SIZE of mainstore is added to the HEAP.
+    // is added to the HEAP.
 
-    uint64_t l_vaddr = VMM_ADDR_EXTEND_BLOCK; // Cache size
-    uint64_t l_size = VMM_EXTEND_BLOCK_SIZE;  // VMM - 8MB (base block)
+    // The end of cache
+    uint64_t l_vaddr = VMM_ADDR_BASE_BLOCK +
+                       g_BlToHbDataManager.getHbCacheSizeBytes();
+    // VMM - the size of the cache (how much the memory needs to be extended by)
+    uint64_t l_size = VMM_MEMORY_SIZE -
+                      g_BlToHbDataManager.getHbCacheSizeBytes();
 
     // Call to allocate a block passing in the requested address of where the
     // SPTEs should be created
@@ -286,7 +292,8 @@ int BaseSegment::_mmExtend(void)
 
     // Update the physical Memory size to now include some mainstore by adding
     // the extended block size to the physical mem size.
-    iv_physMemSize += VMM_EXTEND_BLOCK_SIZE;
+    iv_physMemSize += VMM_MEMORY_SIZE -
+                      g_BlToHbDataManager.getHbCacheSizeBytes();
 
 
     // Call to set the Hostboot MemSize and location needed for DUMP.

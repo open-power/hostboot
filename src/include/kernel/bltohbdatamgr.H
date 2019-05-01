@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,6 +216,20 @@ class BlToHbDataManager
         * @return bool true if enabled; false otherwise
         */
         const bool getSecBackdoor() const;
+
+        /*
+         * @brief Returns the number of megabytes of cache memory allocated
+         *        for hostboot.
+         * @return The size of hostboot cache in MB
+         */
+        const size_t getHbCacheSizeMb() const;
+
+        /*
+         * @brief Returns the number of bytes of cache memory allocated
+         *        for hostboot.
+         * @return The size of hostboot cache in bytes
+         */
+        const size_t getHbCacheSizeBytes() const;
 };
 
 // Extern global instance of the class

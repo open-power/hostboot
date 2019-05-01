@@ -42,7 +42,7 @@ class VmmManager
          */
         enum VMM_CONSTS
         {
-            INITIAL_MEM_SIZE = 4*MEGABYTE,
+            SINGLE_CACHE_SIZE_BYTES = 4*MEGABYTE,
 
             // Place the page table at the top side of the cache, 256k in size.
             PTSIZE = 256*KILOBYTE,

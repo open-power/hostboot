@@ -45,6 +45,7 @@
 
 #include <new>
 #include <usr/debugpointers.H>
+#include <kernel/bltohbdatamgr.H>
 
 // Track eviction requests due to aging pages
 uint32_t Block::cv_ro_evict_req = 0;
@@ -384,7 +385,7 @@ void Block::castOutPages(uint64_t i_type)
     }
 
     if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) && // Skip base area
-       (iv_baseAddr != VMM_ADDR_EXTEND_BLOCK)) // Skip extended memory.
+       (iv_baseAddr != (VMM_ADDR_BASE_BLOCK + g_BlToHbDataManager.getHbCacheSizeBytes()))) // Skip extended memory
     {
         // NOTE: All LRU constraints must be < 7, since getLRU() only reports
         // 3 bits worth of size (despite the uint8_t return type).

@@ -34,7 +34,6 @@
 #include <sys/mm.h>
 #include <errno.h>
 #include <kernel/pagemgr.H>
-#include <kernel/vmmmgr.H>              // INITIAL_MEM_SIZE
 #include <kernel/memstate.H>
 #include <kernel/intmsghandler.H>
 #include <kernel/hbdescriptor.H>
@@ -503,63 +502,6 @@ namespace KernelMisc
         kassert(false);
     }
 
-    int expand_full_cache(uint64_t i_expandSize)
-    {
-        static bool executed = false;
-
-        if (executed) // Why are we being called a second time?
-        {
-            return -EFAULT;
-        }
-
-        uint8_t* startAddr = nullptr;
-        uint8_t* endAddr = nullptr;
-
-        switch(CpuID::getCpuType())
-        {
-            case CORE_POWER8_MURANO:
-            case CORE_POWER8_VENICE:
-            case CORE_POWER8_NAPLES:
-            case CORE_POWER9_NIMBUS:
-            case CORE_POWER9_CUMULUS:
-            case CORE_POWER9_AXONE:
-                startAddr = reinterpret_cast<uint8_t*>
-                                         (VmmManager::INITIAL_MEM_SIZE);
-                endAddr = reinterpret_cast<uint8_t*>(i_expandSize);
-                break;
-
-            default:
-                kassert(false);
-                break;
-        }
-
-        if (startAddr != nullptr)
-        {
-            populate_cache_lines(
-                reinterpret_cast<uint64_t*>(startAddr),
-                reinterpret_cast<uint64_t*>(endAddr));
-            // Increment the start address by a page size to make a gap
-            // in memory that Hostboot will later populate with
-            // the OCC Bootloader image.
-            // see src/usr/isteps/pm/occCheckstop.C::loadOCCImageDuringIpl()
-            startAddr += PAGESIZE;
-            size_t pages = (reinterpret_cast<uint64_t>(endAddr) -
-                            reinterpret_cast<uint64_t>(startAddr)) / PAGESIZE;
-
-            PageManager::addMemory(reinterpret_cast<uint64_t>(startAddr),
-                                   pages);
-        }
-
-        executed = true;
-
-        KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                         (i_expandSize == VMM_BASE_BLOCK_SIZE)
-                                         ? KernelMemState::FULL_CACHE
-                                         : KernelMemState::REDUCED_CACHE);
-
-        return 0;
-    }
-
     void populate_cache_lines(uint64_t* i_start, uint64_t* i_end)
     {
         size_t cache_line_size = getCacheLineWords();
@@ -651,14 +593,14 @@ namespace KernelMisc
 namespace KernelMemState
 {
     void setMemScratchReg(MemLocation i_location,
-                          MemSize i_size)
+                          size_t i_sizeMb)
     {
         MemState_t l_MemData;
 
         l_MemData.location = i_location;
         l_MemData.hrmor = getHRMOR();
-        l_MemData.size = i_size;
-        kassert( i_size < KernelMemState::MAX_MEMORY );
+        l_MemData.size = i_sizeMb;
+        kassert( i_sizeMb < KernelMemState::MAX_MEMORY );
 
         isync();
         kernel_hbDescriptor.kernelMemoryState = l_MemData.fullData;

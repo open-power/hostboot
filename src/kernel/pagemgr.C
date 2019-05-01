@@ -40,7 +40,7 @@
 #include <kernel/misc.H>
 #include <usr/debugpointers.H>
 #include <kernel/cpumgr.H>
-
+#include <usr/vmmconst.h>
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -250,7 +250,7 @@ void PageManager::_initialize()
     //      [HBB max size][BlToHBData][8 byte aligned]
     //      [128 byte aligned Preserved-area][256K aligned Page Table]
     uint64_t l_endPreservedArea = VmmManager::endPreservedOffset();
-    uint64_t l_endInitCache = VmmManager::INITIAL_MEM_SIZE;
+    uint64_t l_endInitCache = VmmManager::SINGLE_CACHE_SIZE_BYTES;
     uint64_t l_pageTableOffset = VmmManager::pageTableOffset();
     uint64_t l_endPageTable = l_pageTableOffset + VmmManager::PTSIZE;
 
@@ -276,6 +276,18 @@ void PageManager::_initialize()
     iv_heap.addMemory(l_endPageTable, pages);
     totalPages += pages;
 
+    KernelMisc::populate_cache_lines(
+        reinterpret_cast<uint64_t*>(l_endInitCache),
+        reinterpret_cast<uint64_t*>(g_BlToHbDataManager.getHbCacheSizeBytes()));
+
+    // Reserve enough memory to fit the OCC BL at 4MB into the cache. For more
+    // details, see src/usr/isteps/pm/occCheckstop.C::loadOCCImageDuringIpl()
+    l_endInitCache += VMM_OCC_BOOTLOADER_SIZE; // Skip enough to fit OCC BL
+    pages = (g_BlToHbDataManager.getHbCacheSizeBytes() - l_endInitCache) /
+            PAGESIZE;
+    iv_heap.addMemory(l_endInitCache, pages);
+    totalPages += pages;
+
     printk("%ld pages.\n", totalPages);
 
     // Statistics
@@ -287,9 +299,8 @@ void PageManager::_initialize()
     iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
                               iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
                             KERNEL_HEAP_RESERVED_PAGES);
-
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                     KernelMemState::HALF_CACHE);
+                                     g_BlToHbDataManager.getHbCacheSizeMb());
 }
 
 void* PageManager::_allocatePage(size_t n, bool userspace)
@@ -445,7 +456,7 @@ void PageManagerCore::coalesce( void )
                             ((1 << bucket)*PAGESIZE);
             }
             else if(  reinterpret_cast<uint64_t>(p)
-                    < VmmManager::INITIAL_MEM_SIZE)
+                    < VmmManager::SINGLE_CACHE_SIZE_BYTES)
             {
                 p_idx = (  reinterpret_cast<uint64_t>(p)
                          - (  VmmManager::pageTableOffset()
@@ -455,7 +466,7 @@ void PageManagerCore::coalesce( void )
             else
             {
                 p_idx = (  reinterpret_cast<uint64_t>(p)
-                         - (  VmmManager::INITIAL_MEM_SIZE
+                         - (  VmmManager::SINGLE_CACHE_SIZE_BYTES
                             + PAGESIZE) )/
                                ((1 << bucket)*PAGESIZE);
             }

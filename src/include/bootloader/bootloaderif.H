@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,7 @@ struct BlToHbData
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), keyAddrStashData(0),
-                   secBackdoorBit(0) {}
+                   secBackdoorBit(0), cacheSizeMb(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -161,6 +161,8 @@ struct BlToHbData
     keyAddrPair_t  keyAddrStashData;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
+    // The cache size available to HB (in MB)
+    uint16_t cacheSizeMb;
 } __attribute__((packed));
 
 /**

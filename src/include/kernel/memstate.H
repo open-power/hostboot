@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,9 +55,6 @@ namespace KernelMemState
     enum MemSize
     {
           NO_MEM          =  0x000,
-          HALF_CACHE      =  0x004,
-          REDUCED_CACHE   =  0x008,
-          FULL_CACHE      =  0x00A,
           FULL_MEM        =  (VMM_MEMORY_SIZE/MEGABYTE),
           MAX_MEMORY      =  0xFFF  //max space allocated for size
     };
@@ -86,11 +83,11 @@ namespace KernelMemState
      *  This is used to update the core scratch reg with the current
      *  location of hostboot memory and the size it is.
      *
-     *  @param[in] uint16_t - location of the memory (L3 or Mainstore)
-     *  @param[in] uint32_t - size of the memory
+     *  @param[in] i_location - location of the memory (L3 or Mainstore)
+     *  @param[in] i_sizeMb - size of the memory in megabytes
      */
-    void setMemScratchReg( MemLocation i_location,
-                           MemSize i_size );
+    void setMemScratchReg(MemLocation i_location,
+                          size_t i_sizeMb);
 
 };
 

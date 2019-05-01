@@ -407,18 +407,16 @@ namespace Bootloader{
         writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE, hostboot_string);
 
         //Set core scratch 1 to the eventual HRMOR of Hostboot
-        // and 4MB of space.  The HRMOR spoofing is required in
-        // order for FSP code to be able to find the TI area without
+        // and the space SBE calculated for hostboot.  The HRMOR spoofing is
+        // required in order for FSP code to be able to find the TI area without
         // having to know exactly where we are in the boot flow.
         // See _updates_and_setup in bl_start.S for where we put
-        // our TI area below our actual HRMOR.  The 4MB size will
+        // our TI area below our actual HRMOR.  The size driven by SBE will
         // allow a dump to grab all of our working data along with
         // our actual image.
         KernelMemState::MemState_t l_memstate;
         l_memstate.location = KernelMemState::MEM_CONTAINED_L3;
         l_memstate.hrmor = (HBB_RUNNING_ADDR);
-        l_memstate.size = KernelMemState::HALF_CACHE;
-        writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
         // Copy SBE BL shared data into BL HB shared data
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
@@ -428,6 +426,12 @@ namespace Bootloader{
                ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0))
             ? l_blConfigData->lpcBAR
             : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+
+        g_blData->blToHbData.cacheSizeMb = 8; //l_blConfigData->cacheSize;
+
+        // TODO RTC 208792: Read and pass over the cache size from SBE to HBBL
+        l_memstate.size = g_blData->blToHbData.cacheSizeMb;//l_blConfigData->cacheSize;
+        writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
         //We dont know what the start of pnor is because we dont know the size
         uint64_t l_pnorStart = 0;

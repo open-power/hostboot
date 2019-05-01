@@ -977,15 +977,6 @@ namespace Systemcalls
 
         switch (size)
         {
-            case MM_EXTEND_REDUCED_CACHE:
-                TASK_SETRTN(t, KernelMisc::expand_full_cache(8*MEGABYTE));
-                break;
-
-            case MM_EXTEND_FULL_CACHE:
-                TASK_SETRTN(t,
-                            KernelMisc::expand_full_cache(VMM_BASE_BLOCK_SIZE));
-                break;
-
             case MM_EXTEND_REAL_MEMORY:
                 TASK_SETRTN(t, VmmManager::mmExtend());
                 break;

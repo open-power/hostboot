@@ -127,7 +127,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         void* l_homerVirtAddrBase = reinterpret_cast<void*>
-          (VmmManager::INITIAL_MEM_SIZE);
+          (VmmManager::SINGLE_CACHE_SIZE_BYTES);
         uint64_t l_homerPhysAddrBase = mm_virt_to_phys(l_homerVirtAddrBase);
         uint64_t l_commonPhysAddr = l_homerPhysAddrBase + VMM_HOMER_REGION_SIZE;
 

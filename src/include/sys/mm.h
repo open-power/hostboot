@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,8 +102,6 @@ int mm_set_permission(void* va, uint64_t size, uint64_t access_type);
 
 enum MM_EXTEND_SIZE
 {
-    MM_EXTEND_REDUCED_CACHE,   //< Extend memory to include reduced cache (8MB).
-    MM_EXTEND_FULL_CACHE,      //< Extend memory to include full cache (10MB).
     MM_EXTEND_REAL_MEMORY,     //< Extend memory into real mainstore.
 };
 

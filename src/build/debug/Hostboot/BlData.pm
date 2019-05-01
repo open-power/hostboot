@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2017,2019
 # [+] International Business Machines Corp.
 #
 #
@@ -208,7 +208,8 @@ sub main
 
     my $blToHbAddr = $dataAddr + $dataOffset;
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
-    my $blToHbSize = 172;
+    # @DEP_ON_BL_TO_HB_SIZE all of the tags need to be kept in sync
+    my $blToHbSize = 174;
     my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
     $dataOffset += ::alignUp($blToHbSize, 16);
