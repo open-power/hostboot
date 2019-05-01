@@ -41,6 +41,7 @@
 #include <fapi2_hwp_executor.H>
 #include <fapi2/hw_access.H>
 #include <lib/shared/exp_consts.H>
+#include "exptest_utils.H"
 
 extern trace_desc_t* g_trac_expscom;
 
@@ -107,6 +108,10 @@ private:
       return fapi2::getScom(i_target,i_address,o_data);
     }
 
+    // use this to keep track of if we need to unload any
+    // modules loaded by this testcase
+    bool mss_module_loaded;
+    TARGETING::HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR iv_serializeTestMutex;
 public:
 
     /**
@@ -128,11 +133,12 @@ public:
         TargetHandleList l_explorerList;
 
         do{
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomI2c");
-break;
-#endif
+            if (!iv_serializeTestMutex)
+            {
+                TS_FAIL("iv_serializedTestMutex is not setup");
+                break;
+            }
+
             // Get the system's OCMB chips, we will use these as test targets
             getAllChips( l_explorerList,
                           TYPE_OCMB_CHIP,
@@ -143,7 +149,6 @@ break;
                 TRACFCOMP( g_trac_expscom, "No OCMB targets found, skipping testExpscomI2c");
                 break;
             }
-
 
             // We will use the first and last targets for these scom tests
             auto l_firstExpChip = l_explorerList.front();
@@ -156,6 +161,10 @@ break;
             // Save away original scom switch info so we can restore it at the end of the test
             auto first_ocmb_info = l_firstExpChip->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
             auto last_ocmb_info  = l_lastExpChip->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
 
             // This goal of this tests is to make sure I2C scom to OCMB is working so force
             // scom to go over I2C path for these targets
@@ -178,7 +187,6 @@ break;
                     // Otherwise we know this is a native OCMB address and it is only 32 bits
                     l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
                 }
-
                 FAPI_INVOKE_HWP(l_err, put_scom,
                                 l_firstExpChip_fapi,
                                 l_testEntry.addr,
@@ -258,6 +266,9 @@ break;
             // Set ATTR_SCOM_SWITCHES back to their original values
             l_firstExpChip->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(first_ocmb_info);
             l_lastExpChip->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(last_ocmb_info);
+
+            // << atomic section
+            mutex_unlock(iv_serializeTestMutex);
         }while(0);
 
         TRACFCOMP( g_trac_expscom, "<< Exit  testExpscomI2c");
@@ -283,12 +294,11 @@ break;
         TargetHandleList l_explorerList;
 
         do{
-// Causing a data storage exception in c_str...
-#ifdef CONFIG_AXONE_BRING_UP
-TRACFCOMP( g_trac_expscom,"skipping testExpscomI2cPlatformPlatform");
-break;
-#endif
-
+            if (!iv_serializeTestMutex)
+            {
+                TS_FAIL("iv_serializedTestMutex is not setup");
+                break;
+            }
             getAllChips( l_explorerList,
                           TYPE_OCMB_CHIP,
                           true ); // true: return functional OCMBs
@@ -296,7 +306,7 @@ break;
 
             if(l_explorerList.size() == 0 )
             {
-                TRACFCOMP( g_trac_expscom, "No OCMB targets found, skipping testExpscomI2cPlatformPlatform");
+                TRACFCOMP( g_trac_expscom, "No OCMB targets found, skipping testExpscomI2cPlatform");
                 break;
             }
 
@@ -308,6 +318,10 @@ break;
             auto first_ocmb_info = l_firstExpChip->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
             auto last_ocmb_info  = l_lastExpChip->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
 
+            // Inband operations can't be run at the same time
+            // atomic section >>
+            mutex_lock(iv_serializeTestMutex);
+
             // This goal of this tests is to make sure I2C scom to OCMB is working so force
             // scom to go over I2C path for these targets
             l_firstExpChip->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(forceI2CScom);
@@ -316,97 +330,101 @@ break;
             // Loop through table for first and last OCMB targets
             for( uint32_t l_num=0; l_num < g_expscomAddrTableSz; l_num++)
             {
-                  // Read the test entry info from the global table at the top of this file
-                  testExpscomAddrData l_testEntry = g_expscomAddrTable[l_num];
+                // Read the test entry info from the global table at the top of this file
+                testExpscomAddrData l_testEntry = g_expscomAddrTable[l_num];
 
-                  if(l_testEntry.addr & mss::exp::i2c::IBM_SCOM_INDICATOR)
-                  {
-                      // If this is an IBM address then we expect 64 bits of data
-                      l_scom_buffer.insert<0,64,0,uint64_t>(l_testEntry.data);
-                  }
-                  else
-                  {
-                      // Otherwise we know this is a native OCMB address and it is only 32 bits
-                      l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
-                  }
-                  l_err = deviceWrite(l_firstExpChip,
-                                    &l_scom_buffer,
-                                    l_scomSize,
-                                    DEVICE_SCOM_ADDRESS( l_testEntry.addr));
-                  l_tests++;
-                  if(l_err)
-                  {
-                      FAIL_TEST_ERRL(l_firstExpChip,
+                if(l_testEntry.addr & mss::exp::i2c::IBM_SCOM_INDICATOR)
+                {
+                  // If this is an IBM address then we expect 64 bits of data
+                  l_scom_buffer.insert<0,64,0,uint64_t>(l_testEntry.data);
+                }
+                else
+                {
+                  // Otherwise we know this is a native OCMB address and it is only 32 bits
+                  l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
+                }
+                l_err = deviceWrite(l_firstExpChip,
+                                &l_scom_buffer,
+                                l_scomSize,
+                                DEVICE_SCOM_ADDRESS( l_testEntry.addr));
+                l_tests++;
+                if(l_err)
+                {
+                  FAIL_TEST_ERRL(l_firstExpChip,
+                            "testExpscomI2cPlatform>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+
+                }
+
+                l_err = deviceWrite(l_lastExpChip,
+                                  &l_scom_buffer,
+                                  l_scomSize,
+                                  DEVICE_SCOM_ADDRESS( l_testEntry.addr));
+                l_tests++;
+                if(l_err)
+                {
+                  FAIL_TEST_ERRL(l_firstExpChip,
                                 "testExpscomI2cPlatform>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
 
-                  }
+                }
+                // Flush scom buffers so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
 
-                  l_err = deviceWrite(l_lastExpChip,
-                                      &l_scom_buffer,
-                                      l_scomSize,
-                                      DEVICE_SCOM_ADDRESS( l_testEntry.addr));
-                  l_tests++;
-                  if(l_err)
-                  {
-                      FAIL_TEST_ERRL(l_firstExpChip,
-                                    "testExpscomI2cPlatform>> Failed putScom writing 0x%.16X to 0x%.8X on target w/ huid 0x%.8X");
+                // getScom to first OCMB over i2c
+                l_err = deviceRead(l_firstExpChip,
+                                &l_scom_buffer(),
+                                l_scomSize,
+                                DEVICE_SCOM_ADDRESS( l_testEntry.addr));
+                l_tests++;
+                if(l_err)
+                {
+                  FAIL_TEST_ERRL(l_firstExpChip,
+                            "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                }
 
-                  }
-                  // Flush scom buffers so it doesnt mess up next test
-                  l_scom_buffer.flush<0>();
-
-                  // getScom to first OCMB over i2c
-                  l_err = deviceRead(l_firstExpChip,
-                                    &l_scom_buffer(),
-                                    l_scomSize,
-                                    DEVICE_SCOM_ADDRESS( l_testEntry.addr));
-                  l_tests++;
-                  if(l_err)
-                  {
-                      FAIL_TEST_ERRL(l_firstExpChip,
-                                "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
-                  }
-
-                  l_tests++;
-                  if(l_scom_buffer() != l_testEntry.data)
-                  {
-                      l_fails++;
-                      TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
-                            l_testEntry.data,
-                            l_scom_buffer(),
-                            get_huid(l_firstExpChip));
-                  }
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                  l_fails++;
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                        l_testEntry.data,
+                        l_scom_buffer(),
+                        get_huid(l_firstExpChip));
+                }
 
 
-                  // Flush scom buffers so it doesnt mess up next test
-                  l_scom_buffer.flush<0>();
+                // Flush scom buffers so it doesnt mess up next test
+                l_scom_buffer.flush<0>();
 
-                  // getScom to last OCMB over i2c
-                  l_err = deviceRead(l_lastExpChip,
-                                     &l_scom_buffer(),
-                                     l_scomSize,
-                                     DEVICE_SCOM_ADDRESS( l_testEntry.addr));
-                  l_tests++;
-                  if(l_err)
-                  {
-                      FAIL_TEST_ERRL(l_firstExpChip,
-                                     "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
-                  }
+                // getScom to last OCMB over i2c
+                l_err = deviceRead(l_lastExpChip,
+                                 &l_scom_buffer(),
+                                 l_scomSize,
+                                 DEVICE_SCOM_ADDRESS( l_testEntry.addr));
+                l_tests++;
+                if(l_err)
+                {
+                  FAIL_TEST_ERRL(l_firstExpChip,
+                                 "testExpscomI2cPlatform>> Failed getScom reading 0x%.16X to 0x%.8X on target w/ huid 0x%.8X")
+                }
 
-                  l_tests++;
-                  if(l_scom_buffer() != l_testEntry.data)
-                  {
-                      l_fails++;
-                      TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
-                              l_testEntry.data,
-                              l_scom_buffer(),
-                              get_huid(l_firstExpChip));
-                  }
+                l_tests++;
+                if(l_scom_buffer() != l_testEntry.data)
+                {
+                  l_fails++;
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%.16X but got 0x%.16X on target w/ huid 0x%.8X",
+                          l_testEntry.data,
+                          l_scom_buffer(),
+                          get_huid(l_firstExpChip));
+                }
             }
 
             // Set ATTR_SCOM_SWITCHES back to their original values
             l_firstExpChip->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(first_ocmb_info);
             l_lastExpChip->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(last_ocmb_info);
+
+            // << atomic section
+            mutex_unlock(iv_serializeTestMutex);
+
         }while(0);
 
         TRACFCOMP( g_trac_expscom, "<< Exit  testExpscomI2cPlatform");
@@ -711,6 +729,45 @@ break;
 //         return;
 //   }
 
+    /**
+     * @brief Constructor
+     */
+    expscomTest() : CxxTest::TestSuite()
+    {
+        mss_module_loaded = false;
+
+        // All modules are loaded by runtime,
+        // so testcase loading of modules is not required
+#ifndef __HOSTBOOT_RUNTIME
+        errlHndl_t err = nullptr;
+
+        err = exptest::loadModule(mss_module_loaded, exptest::MSS_LIBRARY_NAME);
+        if(err)
+        {
+            TS_FAIL("expscomTest() - Constuctor: failed to load MSS module");
+            errlCommit( err, 0x10 );
+        }
+#endif
+        iv_serializeTestMutex = exptest::getTestMutex();
+    };
+
+
+    /**
+     * @brief Destructor
+     */
+    ~expscomTest()
+    {
+        errlHndl_t err = nullptr;
+        if (mss_module_loaded)
+        {
+            err = exptest::unloadModule(exptest::MSS_LIBRARY_NAME);
+            if(err)
+            {
+                TS_FAIL("~expscomTest() - Destructor: failed to unload MSS module");
+                errlCommit( err, 0x10 );
+            }
+        }
+    };
 
 };
 
