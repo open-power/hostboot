@@ -105,11 +105,12 @@ then
         else
             printf "\n\n$(date): FINISHED running (\"build-errl-parsers\" was started at $my_date)\n\n"
         fi
-
-
+elif [ "$CHIP" == "P10" ];
+then
+        echo "Skipping CxxTests for CHIP=$CHIP (temporarily disabled)"
 else
         printf "2) CHIP=$CHIP"
-        echo "CHIP3=$CHIP"
+        echo "CHIP=$CHIP"
 
 
         # Start CxxTest Simics execution.

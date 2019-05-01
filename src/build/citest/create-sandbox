@@ -74,8 +74,7 @@ fi
 # Run start_simics to populate simics directories.
 echo "----Setting up simics."
 
-if [ "$MACHINE" != "NIMBUS" ] && [ "$MACHINE" != "CUMULUS" ] && \
-   [ "$MACHINE" != "CUMULUS_CDIMM" ] && [ "$MACHINE" != "FSPBUILD" ];
+if [ "$MACHINE" != "FSPBUILD" ];
 then
     SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
     echo "mkdir -p ${SANDBOXBASE}/simics"

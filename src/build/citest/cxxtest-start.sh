@@ -33,12 +33,17 @@ fi
 
 HOSTBOOT_IMAGE=img/hbicore_test.bin
 
-# do not set this for anything prior to axone
-if [ "$MACHINE" != "NIMBUS" ] && [ "$MACHINE" != "CUMULUS" ] && \
-   [ "$MACHINE" != "CUMULUS_CDIMM" ] && [ "$MACHINE" != "FSPBUILD" ];
+# do not set this for FSP build
+if [ "$MACHINE" != "FSPBUILD" ];
 then
     export PATH=$PATH:$SANDBOXBASE/simics/
-    export START_SIMICS_CMD="runsim -m $MACHINE hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/axone.pnor sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
+    export START_SIMICS_CMD="\
+        runsim -m $MACHINE \
+        hb_script_to_run=$SANDBOXBASE/obj/ppc/simu/scripts/hbfw/startup.simics \
+        pnor_img=$SANDBOXBASE/obj/ppc/hbfw/img/p10.pnor \
+        sbe_seeprom_img=$SANDBOXBASE/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc \
+        num_procs=1 \
+        vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.

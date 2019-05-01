@@ -143,7 +143,7 @@ hb_helptext()
         echo "  Requires the hostboot image to be 'prime'd into the workspace."
         echo
         echo "  Environment Variables:"
-        echo "      MACHINE: Alternate simics machine type (default NIMBUS)"
+        echo "      MACHINE: Alternate simics machine type (default p10_standalone)"
         echo "      SIMICSOPTIONS: Additional options to always pass to the"
         echo "                     start simics script, such as '-nre'."
         echo
@@ -358,7 +358,7 @@ hb_simsetup()
     SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
 
     needs_machine_variable
-    if [ "${MACHINE}" == "AXONE" ]; then
+    if [ "${MACHINE}" == "p10_standalone" ]; then
         echo "mkdir -p ${SANDBOXBASE}/simics"
         execute_in_sandbox "mkdir -p ${SANDBOXBASE}/simics" "ppc"
         echo "tar ${SIMICS_LEVEL}  -C ${SANDBOXBASE}/simics/"
@@ -420,12 +420,12 @@ hb_startsimics()
         exit -1
     fi
 
-    if [ "${MACHINE}" == "AXONE" ]; then
+    if [ "${MACHINE}" == "p10_standalone" ]; then
         #export MYDIR=$bb/obj/ppc/hbfw/simics/startup.simics
-        #then /runsim -m axone -o hb_script_to_run=$MYDIR
+        #then /runsim -m p10_standalone -o hb_script_to_run=$MYDIR
         export MY_DIR="${SANDBOXBASE}/obj/ppc/simu/scripts/hbfw"
-        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
-        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/axone.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a" "ppc"
+        echo "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a"
+        execute_in_sandbox "cd ${SANDBOXBASE}/simics/ && ./runsim -m ${MACHINE} hb_script_to_run=${MY_DIR}/startup.simics pnor_img=${MY_DIR}/../../../hbfw/img/p10.pnor sbe_seeprom_img=${SANDBOXBASE}/images/ppc/lab/flash/sbe_seeprom_p9a_10.bin.ecc num_procs=1 vpd_proc=vpd/images/11a4199cd205aaad34566b1832e3ef6a" "ppc"
     else
         execute_in_sandbox \
             "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"

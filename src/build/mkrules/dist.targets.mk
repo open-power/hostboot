@@ -309,7 +309,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pkgOcmbFw.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
     src/build/buildpnor/pnorLayoutFSP.xml \
-    src/build/buildpnor/pnorLayoutAxone.xml \
+    src/build/buildpnor/pnorLayoutP10.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin.protected, ) \

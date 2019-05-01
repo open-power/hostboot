@@ -48,7 +48,7 @@ if ($hb_mode == 1) {
     }
 
 }else{
-    $hb_machine = "AXONE"
+    $hb_machine = "P10"
 }
 
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""

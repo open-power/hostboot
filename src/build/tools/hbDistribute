@@ -211,9 +211,9 @@ fi
 if [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_fsp_release ]]; then
     echo "FSP build, using fsp pnor xml layout"
     export PNOR_LAYOUT_SELECTED=FSP
-elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_axone_release ]]; then
-    echo "Axone build, using axone pnor xml layout"
-    export PNOR_LAYOUT_SELECTED=AXONE
+elif [[ -f ${PROJECT_ROOT}/obj/genfiles/hb_simics_p10_release ]]; then
+    echo "P10 build, using P10 PNOR XML layout"
+    export PNOR_LAYOUT_SELECTED=P10
 else
     echo "Non FSP build, using standalone (default) pnor xml layout"
     export PNOR_LAYOUT_SELECTED=STANDALONE
