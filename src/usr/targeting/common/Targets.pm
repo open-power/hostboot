@@ -78,6 +78,9 @@ my %maxInstance = (
     "NPU"           => 1,
     "MC"            => 2,
     "MI"            => 4,
+    "MCC"           => 8,
+    "OMI"           => 16,
+    "OCMB_CHIP"     => 12,
     "DMI"           => 8,
     "OCC"           => 1,
     "NV"            => 6,
@@ -655,9 +658,12 @@ sub buildAffinity
     my $omi             = -1;
     my $ocmb            = -1;
     my $i2c_mux         = -1;
+    my $dimm            = -1;
+    my $pmic            = -1;
     my $sys_phys        = "";
     my $node_phys       = "";
     my $node_aff        = "";
+    my $proc_fapi       = "";
     my $sys_pos         = 0; # There is always a single system target
     my $mcbist          = -1;
     my $num_mc          = 0 ;
@@ -796,32 +802,55 @@ sub buildAffinity
             # To get the corresponding proc, MC, or MI number for a given MCC
             # divide the MCC number by the number of MCCs per unit, then mod 2
             # to get the relative path in terms of 0 or 1
-            my $numOfMccsPerProc = 8;
+            my $numOfMccsPerProc = $maxInstance{$type};
             my $numOfMccsPerMc = 4;
             my $numOfMccsPerMi = 2;
             my $proc_num = ($mcc / $numOfMccsPerProc) % 2;
             my $mc_num = ($mcc / $numOfMccsPerMc) % 2;
             my $mi_num = ($mcc / $numOfMccsPerMi) % 2;
             my $mcc_num = $mcc % 2;
-            my $mcc_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num";
+            my $path = "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num";
+            my $mcc_aff = $node_aff . $path;
+            my $mcc_phys = $node_phys . $path;
             $self->setAttribute($target, "AFFINITY_PATH", $mcc_aff);
+            $self->setAttribute($target, "PHYS_PATH", $mcc_phys);
+
+            $self->setAttribute($target, "REL_POS", $mcc_num);
+            my $pos = $self->getAttribute($target, "CHIP_UNIT");
+            my $fapi_pos = $pos + $numOfMccsPerProc * $proc_fapi;
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+            $self->setAttribute($target, "ORDINAL_ID", $mcc);
         }
         elsif ($type eq "OMI")
         {
-            $omi++;
+            # We only want OMIs with MCC parent, skip over the ones with OMIC parent
+            my $parent = $self->getTargetParent($target);
+            my $parent_type = $self->getType($parent);
+            if ($parent_type eq "MCC")
+            {
+                $omi++;
 
-            # Same logic for MCC, but for OMI instead
-            my $numOfOmisPerProc = 16;
-            my $numOfOmisPerMc = 8;
-            my $numOfOmisPerMi = 4;
-            my $numOfOmisPerMcc = 2;
-            my $proc_num = ($omi / $numOfOmisPerProc) % 2;
-            my $mc_num = ($omi / $numOfOmisPerMc) % 2;
-            my $mi_num = ($omi / $numOfOmisPerMi) % 2;
-            my $mcc_num = ($omi / $numOfOmisPerMcc) % 2;
-            my $omi_num = $omi % 2;
-            my $omi_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num";
-            $self->setAttribute($target, "AFFINITY_PATH", $omi_aff);
+                # Same logic for MCC, but for OMI instead
+                my $numOfOmisPerProc = $maxInstance{$type};
+                my $numOfOmisPerMc = 8;
+                my $numOfOmisPerMi = 4;
+                my $numOfOmisPerMcc = 2;
+                my $proc_num = ($omi / $numOfOmisPerProc) % 2;
+                my $mc_num = ($omi / $numOfOmisPerMc) % 2;
+                my $mi_num = ($omi / $numOfOmisPerMi) % 2;
+                my $mcc_num = ($omi / $numOfOmisPerMcc) % 2;
+                my $omi_num = $omi % 2;
+                my $path = "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num";
+                my $omi_aff = $node_aff . $path;
+                my $omi_phys = $node_phys . $path;
+                $self->setAttribute($target, "AFFINITY_PATH", $omi_aff);
+                $self->setAttribute($target, "PHYS_PATH", $omi_phys);
+
+                my $pos = $self->getAttribute($target, "CHIP_UNIT");
+                my $fapi_pos = $pos + $numOfOmisPerProc * $proc_fapi;
+                $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+                $self->setAttribute($target, "ORDINAL_ID", $omi);
+            }
         }
         elsif ($type eq "BMC")
         {
@@ -850,14 +879,17 @@ sub buildAffinity
         }
         elsif ($type eq "OCMB_CHIP")
         {
-            $ocmb++;
-
+            # Ocmbs are not in order, so we take the parent dimm's FAPI_POS as
+            # our current ocmb number
+            # Ex. dimm19 = ocmb19
+            my $parent = $self->getTargetParent($target);
+            $ocmb = $self->getAttribute($parent, "FAPI_POS");
             $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb]{KEY} = $target;
-            $self->setHuid($target, $sys_pos, $ocmb);
+            $self->setHuid($target, $sys_pos, $node);
 
             my $ocmb_phys = $node_phys . "/ocmb_chip-$ocmb";
             # Same logic for MCC, but for OCMB_CHIP instead
-            my $numOfOcmbsPerProc = 16;
+            my $numOfOcmbsPerProc = $maxInstance{$type};
             my $numOfOcmbsPerMc = 8;
             my $numOfOcmbsPerMi = 4;
             my $numOfOcmbsPerMcc = 2;
@@ -882,18 +914,17 @@ sub buildAffinity
             $self->setAttribute($target, "MRU_ID", "0x00060000");
 
             $self->setAttribute($target, "POSITION", $ocmb);
-            $self->setAttribute($target, "FAPI_POS", $ocmb);
+            my $fapi_pos = $ocmb + $numOfOcmbsPerProc * $proc_fapi;
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+            $self->setAttribute($target, "REL_POS", "0");
 
             my $fapi_name = "FAPI_I2C_CONTROL_INFO";
             my $master_path = "physical:sys-0/node-0/proc-$proc_num";
-            my $mux_path = "physical:sys-0/node-0/i2c_mux-0";
             $self->setAttributeField($target, $fapi_name, "i2cMasterPath", $master_path);
-            $self->setAttributeField($target, $fapi_name, "i2cMuxPath", $mux_path);
 
             my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
             $self->setAttributeField($target, $eeprom_name, "i2cMasterPath", $master_path);
             $self->setAttributeField($target, $eeprom_name, "chipCount", "0x01");
-            $self->setAttributeField($target, $eeprom_name, "i2cMuxPath", $mux_path);
         }
         elsif ($type eq "I2C_MUX")
         {
@@ -909,7 +940,7 @@ sub buildAffinity
 
             my $i2c_phys = $node_phys . "/i2c_mux-$i2c_mux";
             $self->setAttribute($target, "PHYS_PATH", $i2c_phys);
-            $self->setHuid($target, $sys_pos, $i2c_mux);
+            $self->setHuid($target, $sys_pos, $node);
 
             my $fapi_name = "FAPI_I2C_CONTROL_INFO";
             my $master_path = $node_phys . "/proc-$proc_num";
@@ -935,6 +966,129 @@ sub buildAffinity
                     }
                 }
             }
+        }
+        # Witherspoon has its own DIMM parsing mechanism so don't want to
+        # interfere with it
+        elsif ($type eq "DIMM" && $self->getTargetType($target) eq "lcard-dimm-ddimm")
+        {
+            # Dimms are not posted in order, so need to get the dimm's position
+            $dimm = $self->getAttribute($target, "POSITION");
+
+            # Find the OMI bus connection to determine target values
+            my $proc_num = -1;
+            my $mc_num = -1;
+            my $mi_num = -1;
+            my $mcc_num = -1;
+            my $omi_num = -1;
+            my $conn = $self->findConnectionsByDirection($target, "OMI", "", 1);
+            if ($conn ne "")
+            {
+                foreach my $conn (@{$conn->{CONN}})
+                {
+                    my $source = $conn->{SOURCE};
+                    my @targets = split(/\//, $source);
+                    # Split the source into proc#, mc#, mi#, mcc#, omi#
+                    foreach my $target (@targets)
+                    {
+                        $target =~ s/\D//g;
+                    }
+                    $proc_num = @targets[4] % 2;
+                    $mc_num = @targets[7] % 2;
+                    $mi_num = @targets[8] % 2;
+                    $mcc_num = @targets[9] % 2;
+                    $omi_num = @targets[10] % 2;
+                }
+            }
+
+            $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
+            $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
+            $self->setAttribute($target, "FAPI_POS", $dimm);
+            $self->setAttribute($target, "ORDINAL_ID", $dimm);
+            $self->setAttribute($target, "REL_POS", 0);
+            $self->setAttribute($target, "VPD_REC_NUM", $dimm);
+
+            my $dimm_num = $dimm;
+            if ($dimm < 10)
+            {
+                $dimm_num = "0$dimm";
+            }
+            # chipunit:slot:node:system:position
+            $self->setAttribute($target, "FAPI_NAME", "dimm:k0:n0:s0:p$dimm_num");
+
+            my $ocmb_num = 0;
+            my $mem_num = 0;
+            $dimm_num = 0;
+            my $dimm_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-$ocmb_num/mem_port-$mem_num/dimm-$dimm_num";
+            $self->setAttribute($target, "AFFINITY_PATH", $dimm_aff);
+
+            my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
+            $self->setAttributeField($target, $eeprom_name, "chipCount", "0x01");
+            $self->setAttributeField($target, $eeprom_name, "i2cMasterPath", "physical:sys-0/node-0/proc-$proc_num");
+        }
+        elsif ($type eq "PMIC")
+        {
+            # Pmics are not in order, so we take the parent dimm's
+            # FAPI_POS * 2 as our current pmic number, adding one
+            # if it's a pmic1
+            # Ex. on a pmic0, dimm19 = pmic38
+            # Ex. on a pmic1, dimm19 = pmic39
+            my $instance_name = $self->getInstanceName($target);
+            my $parent = $self->getTargetParent($target);
+            my $fapi_pos = $self->getAttribute($parent, "FAPI_POS");
+            my $position = $self->getAttribute($target, "POSITION");
+            $pmic = $fapi_pos * 2 + $position;
+
+            $self->{targeting}{SYS}[0]{NODES}[$node]{PMICS}[$pmic]{KEY} = $target;
+            $self->setAttribute($target, "PHYS_PATH", $node_phys . "/pmic-$pmic");
+            $self->setAttribute($target, "ORDINAL_ID", $pmic);
+            $self->setAttribute($target, "REL_POS", $pmic % 2);
+            $self->setAttribute($target, "FAPI_POS", $pmic);
+            $self->setAttribute($target, "POSITION", $pmic);
+            $self->setHuid($target, $sys_pos, $node);
+
+            my $pmic_num = $pmic;
+            # The norm for FAPI_NAME has a two digit number at the end
+            if ($pmic < 10)
+            {
+                $pmic_num = "0$pmic";
+            }
+            # chipunit:slot:node:system:position
+            $self->setAttribute($target, "FAPI_NAME", "pmic:k0:n0:s0:p$pmic_num");
+
+            # Find the OMI bus connection to determine target values
+            my $proc_num = -1;
+            my $mc_num = -1;
+            my $mi_num = -1;
+            my $mcc_num = -1;
+            my $omi_num = -1;
+            my $conn = $self->findConnectionsByDirection($self->getTargetParent($target), "OMI", "", 1);
+            if ($conn ne "")
+            {
+                foreach my $conn (@{$conn->{CONN}})
+                {
+                    my $source = $conn->{SOURCE};
+                    my @targets = split(/\//, $source);
+                    # Split the source into proc#, mc#, mi#, mcc#, omi#
+                    foreach my $target (@targets)
+                    {
+                        $target =~ s/\D//g;
+                    }
+                    $proc_num = @targets[4] % 2;
+                    $mc_num = @targets[7] % 2;
+                    $mi_num = @targets[8] % 2;
+                    $mcc_num = @targets[9] % 2;
+                    $omi_num = @targets[10] % 2;
+                }
+            }
+
+            my $ocmb_num = 0;
+            $pmic_num %= 2;
+            my $pmic_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-$ocmb_num/pmic-$pmic_num";
+            $self->setAttribute($target, "AFFINITY_PATH", $pmic_aff);
+
+            my $fapi_name = "FAPI_I2C_CONTROL_INFO";
+            $self->setAttributeField($target, $fapi_name, "i2cMasterPath",
+                "physical:sys-0/node-0/proc-$proc_num");
         }
         elsif ($type eq "PROC")
         {
@@ -1013,14 +1167,14 @@ sub buildAffinity
             $self->setAttribute($target, "POSITION",        $proc);
 
             $self->setAttribute($target, "FABRIC_GROUP_ID",
-                  $self->getAttribute($socket,"FABRIC_GROUP_ID"));
+                $self->getAttribute($socket,"FABRIC_GROUP_ID"));
             $self->setAttribute($target, "FABRIC_CHIP_ID",
-                  $self->getAttribute($socket,"FABRIC_CHIP_ID"));
+                $self->getAttribute($socket,"FABRIC_CHIP_ID"));
             $self->setAttribute($target, "VPD_REC_NUM",    $proc);
-             $self->setAttribute($target, "FAPI_POS",
-                 $self->getAttribute($socket,"FABRIC_GROUP_ID") *
-                 NUM_PROCS_PER_GROUP +
-                 $self->getAttribute($socket,"FABRIC_CHIP_ID"));
+            $proc_fapi = $self->getAttribute($socket, "FABRIC_GROUP_ID") *
+                NUM_PROCS_PER_GROUP +
+                $self->getAttribute($socket, "FABRIC_CHIP_ID");
+            $self->setAttribute($target, "FAPI_POS", $proc_fapi);
 
             # Both for FSP and BMC based systems, it's good  enough
             # to look for processor with active LPC bus connected
@@ -1160,6 +1314,11 @@ sub iterateOverChiplets
     my $tgt_ptr        = $self->getTarget($target);
     my $tgt_type       = $self->getType($target);
 
+    # Previous OBUS parent
+    my $prev_obus = -1;
+    # Subtract factor for OBUS_BRICK
+    my $brick_sub = -1;
+
     my $target_children  = $self->getTargetChildren($target);
 
     if ($target_children eq "")
@@ -1254,13 +1413,27 @@ sub iterateOverChiplets
                 #System XML has some sensor target as hidden children
                 #of targets. We don't care for sensors in this function
                 #So, we can avoid them with this conditional
-
                 if ($unit_type ne "PCI" && $unit_type ne "NA" &&
                     $unit_type ne "FSI" && $unit_type ne "PSI" &&
                     $unit_type ne "SYSREFCLKENDPT" && $unit_type ne "MFREFCLKENDPT")
                 {
+                    if ($unit_type eq "OBUS_BRICK")
+                    {
+                        # Check to see if this is on a new obus
+                        # Current obus is the CHIP_UNIT of the parent obus
+                        my $curr_obus = $self->getAttribute($target,
+                            "CHIP_UNIT");
+                        if ($prev_obus ne $curr_obus)
+                        {
+                            my $brick_pos = $self->getAttribute($child,
+                                "CHIP_UNIT");
+                            $brick_sub = $brick_pos;
+                            $prev_obus = $curr_obus;
+                        }
+                    }
                     #set common attrs for child
-                    $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
+                    $self->setCommonAttrForChiplet($child, $sys, $node, $proc,
+                        $prev_obus, $brick_sub);
                     $self->iterateOverChiplets($child, $sys, $node, $proc);
                 }
             }
@@ -1290,6 +1463,8 @@ sub setCommonAttrForChiplet
     my $sys         = shift;
     my $node        = shift;
     my $proc        = shift;
+    my $prev_obus   = shift;
+    my $brick_sub   = shift;
 
     my $tgt_ptr        = $self->getTarget($target);
     my $tgt_type       = $self->getType($target);
@@ -1328,7 +1503,15 @@ sub setCommonAttrForChiplet
     }
     elsif ($tgt_type eq "OBUS_BRICK")
     {
-        $unit_pos = $pos%3;
+        # Relative position of OBUS_BRICK is just the difference between the
+        # current position and the position of the first obus_brick of the
+        # parent obus
+        # Ex: obus3 -> obus_brick9
+        #           -> obus_brick10
+        #           -> obus_brick11
+        # Position of first obus_brick of parent obus = 9
+        # Relative position of obus_brick11 = 11 - 9 = 2
+        $unit_pos = $pos - $brick_sub;
     }
     elsif ($tgt_type eq "SMPGROUP")
     {
@@ -2146,40 +2329,106 @@ sub findDestConnections
 
 }
 
-sub setEepromAttributesForOcmbChip
+sub setEepromAttributesForAxone
 {
     my $self      = shift;
     my $targetObj = shift;
+    # Expects ocmb target
     my $target    = shift;
 
     my %connections;
     my $num=0;
-    my $target_children = $self->getTargetChildren($target);
-    if ($target_children eq "")
-    {
-        return "";
-    }
 
-    my $name = "EEPROM_VPD_PRIMARY_INFO";
-    # SPD contains data for EEPROM_VPD_PRIMARY_INFO
+    my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
+    my $fapi_name = "FAPI_I2C_CONTROL_INFO";
+    # SPD contains data for EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO
     # SPD is the child of ocmb's parent, so get ocmb's parent
     # then look for the SPD child
+    # With the resulting info, we populate pmic0, pmic1, ocmb, and dimm
     my $target_parent = $self->getTargetParent($target);
+
+    # Need to store pmic targets because they get parsed before we
+    # do calculations for engine, port, and muxBusSelector
+    # pmics need these values, so we store them until we need them later
+    my $address = 0;
+    my @pmic_array;
     foreach my $child (@{ $self->getTargetChildren($target_parent) })
     {
-        my $instance_name = $self->getInstanceName($child);
-        if ($instance_name eq "spd")
+        my $type = $self->getTargetType($child);
+        if ($type eq "chip-spd-device")
         {
-            $targetObj->setAttributeField($target, $name, "byteAddrOffset",
-                $self->getAttribute($child, "BYTE_ADDRESS_OFFSET"));
-            $targetObj->setAttributeField($target, $name, "maxMemorySizeKB",
-                $self->getAttribute($child, "MEMORY_SIZE_IN_KB"));
-            $targetObj->setAttributeField($target, $name, "writeCycleTime",
-                $self->getAttribute($child, "WRITE_CYCLE_TIME"));
-            $targetObj->setAttributeField($target, $name, "writePageSize",
-                $self->getAttribute($child, "WRITE_PAGE_SIZE"));
-            # Each dimm target has one chip-ocmb and one spd target. So break here
-            last;
+            my $offset = $self->getAttribute($child, "BYTE_ADDRESS_OFFSET");
+            my $memory_size = $self->getAttribute($child, "MEMORY_SIZE_IN_KB");
+            my $cycle_time = $self->getAttribute($child, "WRITE_CYCLE_TIME");
+            my $page_size = $self->getAttribute($child, "WRITE_PAGE_SIZE");
+
+            # Populate EEPROM for ocmb
+            $targetObj->setAttributeField($target, $eeprom_name, "byteAddrOffset",
+                $offset);
+            $targetObj->setAttributeField($target, $eeprom_name, "maxMemorySizeKB",
+                $memory_size);
+            $targetObj->setAttributeField($target, $eeprom_name, "writeCycleTime",
+                $cycle_time);
+            $targetObj->setAttributeField($target, $eeprom_name, "writePageSize",
+                $page_size);
+
+            # Populate EEPROM for dimm
+            $targetObj->setAttributeField($target_parent, $eeprom_name, "byteAddrOffset",
+                $offset);
+            $targetObj->setAttributeField($target_parent, $eeprom_name, "maxMemorySizeKB",
+                $memory_size);
+            $targetObj->setAttributeField($target_parent, $eeprom_name, "writeCycleTime",
+                $cycle_time);
+            $targetObj->setAttributeField($target_parent, $eeprom_name, "writePageSize",
+                $page_size);
+
+            # spd only child is i2c-slave, which contains devAddr info
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+                # Populate EEPROM for dimm
+                $targetObj->setAttributeField($target_parent, $eeprom_name, "devAddr",
+                    $address);
+
+                # Populate EEPROM for ocmb
+                $targetObj->setAttributeField($target, $eeprom_name, "devAddr",
+                    $address);
+            }
+        }
+        elsif ($type eq "chip-vreg-generic")
+        {
+            push(@pmic_array, $child);
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                $type = $self->getTargetType($i2c_slave);
+                # pmic has child i2c_slave which contains the device address
+                if ($type eq "unit-i2c-slave")
+                {
+                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+
+                    # Populate FAPI for pmic
+                    $targetObj->setAttributeField($child, $fapi_name, "devAddr",
+                        $address);
+                    last;
+                }
+            }
+        }
+        elsif ($type eq "chip-ocmb")
+        {
+            foreach my $i2c_slave (@{ $self->getTargetChildren($child) })
+            {
+                # ocmb has multiple i2c-slaves, so we query with instance_name
+                my $instance_name = $self->getInstanceName($i2c_slave);
+                if ($instance_name eq "i2c-ocmb")
+                {
+                    $address = $self->getAttribute($i2c_slave, "I2C_ADDRESS");
+
+                    # Populate FAPI for ocmb
+                    $targetObj->setAttributeField($target, $fapi_name, "devAddr",
+                        $address);
+                    last;
+                }
+            }
         }
     }
 
@@ -2193,8 +2442,14 @@ sub setEepromAttributesForOcmbChip
         my $conn_source = @{$conn->{CONN}}[0]->{SOURCE};
         my $mux = $self->getAttribute($conn_source, "MUX_CHANNEL");
 
-        # PCA9847.i2cm-0 source, which connects the i2c-master-omi
+        # Parent PCA9848 determines the mux path
         my $parent = $self->getTargetParent($conn_source);
+        my $parent_pos = $self->getAttribute($parent, "POSITION");
+        my $i2c_mux_path = "physical:sys-0/node-0/i2c_mux-$parent_pos";
+
+        # pmics and ocmb all grab FRU_ID from parent dimm
+        my $fru = $self->getAttribute($target_parent, "FRU_ID");
+
         my $master_i2c = $self->findConnectionsByDirection($self->getTargetParent($conn_source), "I2C", "", 1);
         if ($master_i2c ne "")
         {
@@ -2206,27 +2461,56 @@ sub setEepromAttributesForOcmbChip
             my $dest = $master_i2c->{DEST};
             my $engine = $self->getAttribute($source, "I2C_ENGINE");
             my $port = $self->getAttribute($source, "I2C_PORT");
-            my $address = $self->getAttribute($dest, "I2C_ADDRESS");
 
-            my $fapi_name = "FAPI_I2C_CONTROL_INFO";
+            # Populate FAPI for ocmb
             $self->setAttributeField($target, $fapi_name, "engine",
                 $engine);
             $self->setAttributeField($target, $fapi_name, "port",
                 $port);
-            $self->setAttributeField($target, $fapi_name, "devAddr",
-                $address);
             $self->setAttributeField($target, $fapi_name, "i2cMuxBusSelector",
                 $mux);
+            $self->setAttributeField($target, $fapi_name, "i2cMuxPath",
+                $i2c_mux_path);
+            $self->setAttribute($target, "FRU_ID",
+                $fru);
 
-            my $eeprom_name = "EEPROM_VPD_PRIMARY_INFO";
+            # Populate EEPROM for ocmb
+            $self->setAttributeField($target, $eeprom_name, "i2cMuxPath",
+                $i2c_mux_path);
             $self->setAttributeField($target, $eeprom_name, "engine",
                 $engine);
             $self->setAttributeField($target, $eeprom_name, "port",
                 $port);
-            $self->setAttributeField($target, $eeprom_name, "devAddr",
-                $address);
             $self->setAttributeField($target, $eeprom_name, "i2cMuxBusSelector",
                 $mux);
+
+
+            # Populate FAPI for pmics
+            foreach my $pmic (@pmic_array)
+            {
+                $self->setAttributeField($pmic, $fapi_name, "engine",
+                    $engine);
+                $self->setAttributeField($pmic, $fapi_name, "port",
+                    $port);
+                $self->setAttributeField($pmic, $fapi_name, "i2cMuxBusSelector",
+                    $mux);
+                $self->setAttributeField($pmic, $fapi_name, "i2cMuxPath",
+                    $i2c_mux_path);
+                $self->setAttribute($pmic, "FRU_ID",
+                    $fru);
+            }
+
+            # Populate EEPROM for dimm
+            $self->setAttributeField($target_parent, $eeprom_name, "engine",
+                $engine);
+            $self->setAttributeField($target_parent, $eeprom_name, "port",
+                $port);
+            $self->setAttributeField($target_parent, $eeprom_name, "i2cMuxBusSelector",
+                $mux);
+            $self->setAttributeField($target_parent, $eeprom_name, "i2cMuxPath",
+                $i2c_mux_path);
+            $self->setAttribute($target_parent, "FRU_ID",
+                $fru);
         }
     }
 }
@@ -2737,7 +3021,6 @@ sub setHuid
         $index = $self->{huid_idx}->{$type};
     }
     else { $self->{huid_idx}->{$type} = 0; }
-
     # Format: SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
     my $huid = sprintf("%01x%01x%02x%04x", $sys, $node, $type_id, $index);
     $huid = "0x" . uc($huid);

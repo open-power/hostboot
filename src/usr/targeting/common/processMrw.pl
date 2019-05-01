@@ -48,22 +48,22 @@ my $system_config   = "";
 my $output_filename = "";
 
 # Map the OMI instance to its corresponding OMIC parent
-my %omi_map         = (4  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
-                       5  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
-                       6  => "physical:sys-0/node-0/proc-0/mc-0/omic-0",
-                       7  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
-                       2  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
-                       3  => "physical:sys-0/node-0/proc-0/mc-0/omic-1",
-                       0  => "physical:sys-0/node-0/proc-0/mc-0/omic-2",
-                       1  => "physical:sys-0/node-0/proc-0/mc-0/omic-2",
-                       12 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
-                       13 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
-                       14 => "physical:sys-0/node-0/proc-0/mc-1/omic-0",
-                       15 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
-                       10 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
-                       11 => "physical:sys-0/node-0/proc-0/mc-1/omic-1",
-                       8  => "physical:sys-0/node-0/proc-0/mc-1/omic-2",
-                       9  => "physical:sys-0/node-0/proc-0/mc-1/omic-2");
+my %omi_map         = (4  => "mc-0/omic-0",
+                       5  => "mc-0/omic-0",
+                       6  => "mc-0/omic-0",
+                       7  => "mc-0/omic-1",
+                       2  => "mc-0/omic-1",
+                       3  => "mc-0/omic-1",
+                       0  => "mc-0/omic-2",
+                       1  => "mc-0/omic-2",
+                       12 => "mc-1/omic-0",
+                       13 => "mc-1/omic-0",
+                       14 => "mc-1/omic-0",
+                       15 => "mc-1/omic-1",
+                       10 => "mc-1/omic-1",
+                       11 => "mc-1/omic-1",
+                       8  => "mc-1/omic-2",
+                       9  => "mc-1/omic-2");
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
@@ -1468,7 +1468,7 @@ sub setupBars
     foreach my $bar (keys %bars)
     {
         my $i_base = Math::BigInt->new($bars{$bar});
-            my $value=sprintf("0x%016s",substr((
+        my $value=sprintf("0x%016s",substr((
                         $i_base+$topoIndexOffset*$topoIndex)->as_hex(),2));
         $targetObj->setAttribute($target,$bar,$value);
     }
@@ -1675,6 +1675,9 @@ sub processMcbist
 ##
 sub processMc
 {
+    # TODO, work needs to be done for OMI_INBAND_BAR_BASE_ADDR_OFFSET
+    # Will be added in a later commit along with the other BARs
+    # RTC:210315
     my $targetObj    = shift;
     my $target       = shift;
 
@@ -1761,15 +1764,19 @@ sub processOmi
     # offset to add to the pervasive OMI parent offset.
     my $numberOfOmiPerMc = 8;
     my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
-
+    my $fapi_pos = $targetObj->getAttribute($target, "FAPI_POS");
     my $value = sprintf("0x%x",
                         Targets::PERVASIVE_PARENT_MI_OFFSET
                         + ($chip_unit / $numberOfOmiPerMc));
 
-    $targetObj->setAttribute( $target, "CHIPLET_ID", $value);
+    $targetObj->setAttribute($target, "CHIPLET_ID", $value);
 
-    $value = $omi_map{$chip_unit};
-    $targetObj->setAttribute( $target, "OMIC_PARENT", $value);
+    my $numberOfOmiPerProc = 16;
+    my $proc_num = $fapi_pos / $numberOfOmiPerProc;
+    # Mod by numberOfOmiPerProc to get the relative position to the proc
+    my $num = $fapi_pos % $numberOfOmiPerProc;
+    $value = "physical:sys-0/node-0/proc-$proc_num/" . $omi_map{$num};
+    $targetObj->setAttribute($target, "OMIC_PARENT", $value);
 }
 
 #--------------------------------------------------
@@ -1805,18 +1812,7 @@ sub processOcmbChip
     my $targetObj    = shift;
     my $target       = shift;
 
-    use integer;
-    # processMrw parses all of the values in the input xml
-    # Here we delete the values that are not needed
-    $targetObj->deleteAttribute($target, "CLASS");
-    $targetObj->deleteAttribute($target, "DIRECTION");
-    $targetObj->deleteAttribute($target, "FSI_OPTION_FLAGS");
-    $targetObj->deleteAttribute($target, "INSTANCE_PATH");
-    $targetObj->deleteAttribute($target, "MRW_TYPE");
-    $targetObj->deleteAttribute($target, "PRIMARY_CAPABILITIES");
-    $targetObj->deleteAttribute($target, "FRU_ID");
-
-    $targetObj->setEepromAttributesForOcmbChip($targetObj, $target);
+    $targetObj->setEepromAttributesForAxone($targetObj, $target);
 }
 
 #-------------------------------------------------g
@@ -1947,12 +1943,27 @@ sub processObus
                if ($match eq 0)
                {
                   $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
-
                }
             }
      }
    }
+
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+    my $value = sprintf("0x%x", Targets::PERVASIVE_PARENT_OBUS_OFFSET + $chip_unit);
+    $targetObj->setAttribute($target, "CHIPLET_ID", $value);
+
+    # Set CHIPLET_ID for OBUS_BRICKs
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $type = $targetObj->getType($child);
+        if ($type eq "OBUS_BRICK")
+        {
+            # OBUS_BRICK takes on CHIPLET_ID of OBUS parent
+            $targetObj->setAttribute($child, "CHIPLET_ID", $value);
+        }
+    }
 }
+
 #--------------------------------------------------
 ## XBUS
 ##
