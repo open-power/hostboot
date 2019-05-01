@@ -62,7 +62,7 @@ static const uint32_t CLK_REGION_SEL_THOLD_ARY = 50;
 static const uint32_t CLK_REGION_CLOCK_PULSE_USE_EVEN = 52;
 static const uint32_t CLK_REGION_CLOCK_START_RUNN_SUPPR_FIRST_CLK = 53;
 static const uint32_t CLK_REGION_CLOCK_STOP_RUNN_SUPPR_LAST_CLK = 54;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t CPLT_CONF0_RW = 0x0c0003c8ull;
 static const uint64_t CPLT_CONF0_WO_CLEAR = 0x0c0003e8ull;
@@ -116,7 +116,7 @@ static const uint32_t CPLT_CONF0_FREE_USAGE_60G = 60;
 static const uint32_t CPLT_CONF0_FREE_USAGE_61G = 61;
 static const uint32_t CPLT_CONF0_FREE_USAGE_62G = 62;
 static const uint32_t CPLT_CONF0_FREE_USAGE_63G = 63;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t CPLT_CTRL0_RW = 0x0c0003c0ull;
 static const uint64_t CPLT_CTRL0_WO_CLEAR = 0x0c0003e0ull;
@@ -169,7 +169,7 @@ static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_2 = 0x0c0107c2ull;
 
@@ -183,7 +183,7 @@ static const uint32_t EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_TO_CMP_LT_LEN = 24;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_DBG_INST2_COND_REG_2 = 0x0c0107c5ull;
 
@@ -197,13 +197,13 @@ static const uint32_t EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_TO_CMP_LT_LEN = 24;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_DBG_XTRA_TRACE_MODE = 0x0c0107d1ull;
 
 static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA = 0;
 static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_FIR_MODE_REG = 0x0c0403c8ull;
 
@@ -223,7 +223,7 @@ static const uint32_t EPS_FIR_MODE_REG_12 = 12;
 static const uint32_t EPS_FIR_MODE_REG_13 = 13;
 static const uint32_t EPS_FIR_MODE_REG_14 = 14;
 static const uint32_t EPS_FIR_MODE_REG_15 = 15;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_THERM_WSUB_DTS_TRC_RESULT = 0x0c0503c3ull;
 
@@ -232,10 +232,10 @@ static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_VALUE_LEN 
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_OVERFLOW_ERR = 44;
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT = 48;
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT_LEN = 16;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t EPS_THERM_WSUB_ERR_STATUS_REG = 0x0c0503d3ull;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t HOSTATTN = 0x0c0403c9ull;
 
@@ -293,7 +293,7 @@ static const uint32_t HOSTATTN_HOST_ATTN_IN50 = 50;
 static const uint32_t HOSTATTN_HOST_ATTN_IN51 = 51;
 static const uint32_t HOSTATTN_HOST_ATTN_IN52 = 52;
 static const uint32_t HOSTATTN_HOST_ATTN_IN53 = 53;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t HOSTATTN_MASK = 0x0c0403daull;
 
@@ -350,7 +350,7 @@ static const uint32_t HOSTATTN_MASK_50 = 50;
 static const uint32_t HOSTATTN_MASK_51 = 51;
 static const uint32_t HOSTATTN_MASK_52 = 52;
 static const uint32_t HOSTATTN_MASK_53 = 53;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t MBA_SCOMFIR_DBGCFG3Q = 0x0c010febull;
 
@@ -379,7 +379,7 @@ static const uint32_t MBA_SCOMFIR_DBGCFG3Q_CFG_WAT_CNT_VALUE = 45;
 static const uint32_t MBA_SCOMFIR_DBGCFG3Q_CFG_WAT_CNT_VALUE_LEN = 6;
 static const uint32_t MBA_SCOMFIR_DBGCFG3Q_CFG_WAT_TMR_VALUE = 51;
 static const uint32_t MBA_SCOMFIR_DBGCFG3Q_CFG_WAT_TMR_VALUE_LEN = 8;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t MBA_SCOMFIR_MISCFIRQ_RWX = 0x0c010fc0ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRQ_WOX_AND = 0x0c010fc1ull;
@@ -399,7 +399,7 @@ static const uint32_t MBA_SCOMFIR_MISCFIRQ_RESERVED_10 = 10;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_RESERVED_11 = 11;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_INTERNAL_SCOM_ERROR = 12;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_INTERNAL_SCOM_ERROR_CLONE = 13;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t OPCG_ALIGN = 0x0c0303c1ull;
 
@@ -425,10 +425,10 @@ static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
 static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t SCAN_CAPTUREDR = 0x0c03c3c0ull;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t SCOMFIR_MCFGPM1 = 0x0c010ff0ull;
 
@@ -437,7 +437,7 @@ static const uint32_t SCOMFIR_MCFGPM1_GROUP_BASE_ADDRESS = 1;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_BASE_ADDRESS_LEN = 24;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE = 25;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE_LEN = 15;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t SCOMFIR_MCMODE2 = 0x0c010fd3ull;
 
@@ -465,7 +465,7 @@ static const uint32_t SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL0_ENABLE = 55;
 static const uint32_t SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL1_ENABLE = 56;
 static const uint32_t SCOMFIR_MCMODE2_RESERVED_57_63 = 57;
 static const uint32_t SCOMFIR_MCMODE2_RESERVED_57_63_LEN = 7;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t TRA0_TR0_CONFIG_4 = 0x0c0107c7ull;
 
@@ -473,7 +473,7 @@ static const uint32_t TRA0_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA0_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B_LEN = 24;
-// mc/reg00048.H
+// mc/reg00000.H
 
 static const uint64_t TRA1_TR0_TRACE_LO_DATA_REG = 0x0c0107c1ull;
 
@@ -488,9 +488,9 @@ static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// mc/reg00048.H
+// mc/reg00000.H
 
 }
 }
-#include "mc/reg00048.H"
+#include "mc/reg00000.H"
 #endif

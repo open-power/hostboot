@@ -41,7 +41,7 @@ static const uint64_t DSTL_DSTLFIRACT0 = 0x0c010d06ull;
 
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0 = 0;
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 35;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -71,7 +71,7 @@ static const uint32_t DSTL_DSTLPSAVE1_MASTER_PSAVE_WSIZE = 56;
 static const uint32_t DSTL_DSTLPSAVE1_MASTER_PSAVE_WSIZE_LEN = 3;
 static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63_LEN = 5;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -95,7 +95,7 @@ static const uint32_t DSTL_DSTLTRACK_TLXVC3_CREDIT_TOTAL_SHADOW = 44;
 static const uint32_t DSTL_DSTLTRACK_TLXVC3_CREDIT_TOTAL_SHADOW_LEN = 4;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW = 50;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW_LEN = 7;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -145,12 +145,12 @@ static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0 = 40;
 static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0_LEN = 12;
 static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1 = 52;
 static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1_LEN = 12;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t REGS_PRX1_DLR_APCR = 0x0c01103cull;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -173,7 +173,7 @@ static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE = 26;
 static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE_LEN = 6;
 static const uint32_t SEC_CONFIG_EDPL_RATE = 48;
 static const uint32_t SEC_CONFIG_EDPL_RATE_LEN = 16;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -196,9 +196,9 @@ static const uint32_t USTL_USTLDBG_WAT_ENABLE2 = 20;
 static const uint32_t USTL_USTLDBG_WAT_ENABLE2_LEN = 2;
 static const uint32_t USTL_USTLDBG_WAT_ENABLE3 = 22;
 static const uint32_t USTL_USTLDBG_WAT_ENABLE3_LEN = 2;
-// mcc/reg00076.H
+// mcc/reg00012.H
 
 }
 }
-#include "mcc/reg00076.H"
+#include "mcc/reg00012.H"
 #endif

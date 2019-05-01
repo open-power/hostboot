@@ -41,7 +41,7 @@ static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f7cull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -73,7 +73,7 @@ static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN = 22;
 static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN_LEN = 2;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62 = 24;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62_LEN = 39;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -81,7 +81,7 @@ static const uint64_t ERR_INJ_LFSR = 0x0c01101bull;
 
 static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR = 0;
 static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR_LEN = 61;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -107,7 +107,7 @@ static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL = 32;
 static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN = 4;
 static const uint32_t LINK0_TX_LANE_CONTROL__FAILED = 48;
 static const uint32_t LINK0_TX_LANE_CONTROL__FAILED_LEN = 9;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -123,17 +123,17 @@ static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1 = 49;
 static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1_LEN = 7;
 static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2 = 57;
 static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t PERF_COUNT_LSB_0 = 0x0c011020ull;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t REGS_PRX0_DLR_APCR = 0x0c011038ull;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -203,7 +203,7 @@ static const uint32_t USTL_USTLFIR_RECOV_REG_PARITY_ERROR = 58;
 static const uint32_t USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO = 59;
 static const uint32_t USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO = 60;
 static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -214,9 +214,9 @@ static const uint32_t WDF_WBMGR_TAG_INFO_SLICE1_BUFFER_OVERRUN = 1;
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE2_BUFFER_OVERRUN = 2;
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE3_BUFFER_OVERRUN = 3;
 static const uint32_t WDF_WBMGR_TAG_INFO_TAG_OVERRUN = 4;
-// mcc/reg00066.H
+// mcc/reg00002.H
 
 }
 }
-#include "mcc/reg00066.H"
+#include "mcc/reg00002.H"
 #endif

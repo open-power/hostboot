@@ -51,7 +51,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_THRESHOLD2_LEN = 10;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_AGGRESSIVE_BUSY = 34;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_RSVD_35_43 = 35;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_RSVD_35_43_LEN = 9;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -101,7 +101,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF3_TIMEOUT_FORCE_CH_FAIL = 55;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_DISABLE_RETRY_AMO_HPC_WR_BAD_CR = 56;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_RESERVED_57_63 = 57;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_RESERVED_57_63_LEN = 7;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -109,7 +109,7 @@ static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY1A = 0x0c010f72ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN = 64;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -121,7 +121,7 @@ static const uint32_t DSTL_DSTLINJ_ERR_INJ_TYPE = 2;
 static const uint32_t DSTL_DSTLINJ_ERR_INJ_SUBCH_SEL = 3;
 static const uint32_t DSTL_DSTLINJ_RESERVED_4_15 = 4;
 static const uint32_t DSTL_DSTLINJ_RESERVED_4_15_LEN = 12;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -129,7 +129,7 @@ static const uint64_t MC_OMI_FIR_ACTION0_REG = 0x0c011b46ull;
 
 static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 = 0;
 static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN = 62;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -137,7 +137,7 @@ static const uint64_t MC_OMI_FIR_ACTION1_REG = 0x0c011b47ull;
 
 static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 = 0;
 static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN = 62;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -159,7 +159,7 @@ static const uint32_t PERF_SEL_CONFIG_6 = 48;
 static const uint32_t PERF_SEL_CONFIG_6_LEN = 8;
 static const uint32_t PERF_SEL_CONFIG_7 = 56;
 static const uint32_t PERF_SEL_CONFIG_7_LEN = 8;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -180,7 +180,7 @@ static const uint32_t WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ = 14;
 static const uint32_t WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 = 15;
 static const uint32_t WRITE_READCFG_EICR_PERSIST = 16;
 static const uint32_t WRITE_READCFG_EICR_PERSIST_LEN = 2;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -202,9 +202,9 @@ static const uint32_t WRITE_WRT_DSTL_ECC_3_ERR_TYPE = 48;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME = 56;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME_LEN = 8;
-// mcc/reg00071.H
+// mcc/reg00007.H
 
 }
 }
-#include "mcc/reg00071.H"
+#include "mcc/reg00007.H"
 #endif

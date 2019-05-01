@@ -59,7 +59,7 @@ static const uint32_t AXON_CPLT_CTRL5_16 = 16;
 static const uint32_t AXON_CPLT_CTRL5_17 = 17;
 static const uint32_t AXON_CPLT_CTRL5_18 = 18;
 static const uint32_t AXON_CPLT_CTRL5_19 = 19;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_EPS_DBG_INST1_COND_REG_2 = 0x180107c2ull;
 
@@ -73,7 +73,7 @@ static const uint32_t AXON_EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_2_TO_CMP_LT_LEN = 24;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_EPS_DBG_INST2_COND_REG_2 = 0x180107c5ull;
 
@@ -87,7 +87,7 @@ static const uint32_t AXON_EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_2_TO_CMP_LT_LEN = 24;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_EPS_DBG_TRACE_REG_1 = 0x180107ceull;
 
@@ -121,7 +121,7 @@ static const uint32_t AXON_EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_SELECTOR = 51;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT = 52;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP0_MASK_REG = 0x18040013ull;
 
@@ -148,13 +148,13 @@ static const uint32_t AXON_EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_DTS_RESULT2 = 0x18050002ull;
 
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT = 0;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT_LEN = 16;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t AXON_OPCG_REG0 = 0x18030002ull;
 
@@ -173,17 +173,17 @@ static const uint32_t AXON_OPCG_REG0_STOP_RUNN_ON_XSTOP = 13;
 static const uint32_t AXON_OPCG_REG0_OPCG_STARTS_BIST = 14;
 static const uint32_t AXON_OPCG_REG0_LOOP_COUNT = 21;
 static const uint32_t AXON_OPCG_REG0_LOOP_COUNT_LEN = 43;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t HEARTBEAT_REG = 0x180f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x180f001bull;
-// iohs/reg00033.H
+// iohs/reg00001.H
 
 }
 }
-#include "iohs/reg00033.H"
+#include "iohs/reg00001.H"
 #endif

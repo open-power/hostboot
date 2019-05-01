@@ -42,12 +42,12 @@ static const uint32_t ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// pec/reg00207.H
+// pec/reg00011.H
 
 static const uint64_t ATTN_INTERRUPT_REG = 0x080f001aull;
-// pec/reg00207.H
+// pec/reg00011.H
 
 }
 }
-#include "pec/reg00207.H"
+#include "pec/reg00011.H"
 #endif

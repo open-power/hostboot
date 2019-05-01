@@ -37,5 +37,5 @@ namespace pec
 
 }
 }
-#include "pec/reg00202.H"
+#include "pec/reg00006.H"
 #endif

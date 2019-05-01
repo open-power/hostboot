@@ -56,7 +56,7 @@ static const uint32_t BIST_BIST_UNIT12 = 16;
 static const uint32_t BIST_BIST_UNIT13 = 17;
 static const uint32_t BIST_BIST_UNIT14 = 18;
 static const uint32_t BIST_BIST_STROBE_WINDOW_EN = 48;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t CPLT_CTRL5_RW = 0x00000005ull;
 static const uint64_t CPLT_CTRL5_WO_CLEAR = 0x00000025ull;
@@ -82,7 +82,7 @@ static const uint32_t CPLT_CTRL5_16 = 16;
 static const uint32_t CPLT_CTRL5_17 = 17;
 static const uint32_t CPLT_CTRL5_18 = 18;
 static const uint32_t CPLT_CTRL5_19 = 19;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t DPLL_CNTL_NEST_REGS_ECHAR = 0x00000158ull;
 
@@ -94,7 +94,7 @@ static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MAX_ENCODED_DATA = 9;
 static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_MAX_ENCODED_DATA_LEN = 3;
 static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT = 61;
 static const uint32_t DPLL_CNTL_NEST_REGS_ECHAR_INVERTED_DYNAMIC_ENCODE_INJECT_LEN = 3;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT0 = 0x00050000ull;
 
@@ -104,13 +104,13 @@ static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_1_RESULT = 16;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_1_RESULT_LEN = 16;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT = 32;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT_LEN = 16;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t EPS_THERM_WSUB2_DTS_RESULT2 = 0x00050022ull;
 
 static const uint32_t EPS_THERM_WSUB2_DTS_RESULT2_DTS_8_RESULT = 0;
 static const uint32_t EPS_THERM_WSUB2_DTS_RESULT2_DTS_8_RESULT_LEN = 16;
-// perv/reg00227.H
+// perv/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -127,7 +127,7 @@ static const uint32_t L3TRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t L3TRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t L3TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L3TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00227.H
+// perv/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -135,7 +135,7 @@ static const uint64_t L3TRA0_TR0_CONFIG_1 = 0x00018204ull;
 
 static const uint32_t L3TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L3TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// perv/reg00227.H
+// perv/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -168,7 +168,7 @@ static const uint32_t L3TRA2_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA2_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA2_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA2_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// perv/reg00227.H
+// perv/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -176,7 +176,7 @@ static const uint64_t L3TRA2_TR1_CONFIG_0 = 0x000182a3ull;
 
 static const uint32_t L3TRA2_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA2_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00227.H
+// perv/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -184,28 +184,28 @@ static const uint64_t L3TRA3_TR1_TRACE_HI_DATA_REG = 0x000182e0ull;
 
 static const uint32_t L3TRA3_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L3TRA3_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t MULTICAST_GROUP_3 = 0x000f0003ull;
 
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP_LEN = 3;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x000f03feull;
 
 static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x000f0010ull;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA0_TR0_CONFIG_1 = 0x00010404ull;
 
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA2_TR0_CONFIG_9 = 0x00010509ull;
 
@@ -236,13 +236,13 @@ static const uint32_t TRA2_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA2_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA2_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA2_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA2_TR1_CONFIG_0 = 0x00010543ull;
 
 static const uint32_t TRA2_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA2_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA4_TR1_TRACE_LO_DATA_REG = 0x00010641ull;
 
@@ -257,30 +257,30 @@ static const uint32_t TRA4_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA4_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA4_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA4_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA5_TR1_CONFIG_1 = 0x000106c4ull;
 
 static const uint32_t TRA5_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA5_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA7_TR0_TRACE_HI_DATA_REG = 0x00010780ull;
 
 static const uint32_t TRA7_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA7_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t TRA7_TR0_CONFIG_0 = 0x00010783ull;
 
 static const uint32_t TRA7_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA7_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00227.H
+// perv/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x000f0017ull;
-// perv/reg00227.H
+// perv/reg00015.H
 
 }
 }
-#include "perv/reg00227.H"
+#include "perv/reg00015.H"
 #endif

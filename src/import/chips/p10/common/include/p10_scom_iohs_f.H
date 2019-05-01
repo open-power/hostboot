@@ -61,13 +61,13 @@ static const uint32_t AXON_DBG_CBS_CC_DBG_PCB_REQUEST_SINCE_RESET = 28;
 static const uint32_t AXON_DBG_CBS_CC_DBG_PARANOIA_TEST_ENABLE_CHANGE = 29;
 static const uint32_t AXON_DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE = 30;
 static const uint32_t AXON_DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_EPS_DBG_XTRA_TRACE_MODE = 0x180107d1ull;
 
 static const uint32_t AXON_EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA = 0;
 static const uint32_t AXON_EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP1_MASK_REG = 0x18040014ull;
 
@@ -94,20 +94,20 @@ static const uint32_t AXON_EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_EPS_PSC_RING_FENCE_MASK_LATCH_REG = 0x18010008ull;
 
 static const uint32_t AXON_EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK = 1;
 static const uint32_t AXON_EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK_LEN = 31;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ = 0x1805001cull;
 
 static const uint32_t AXON_EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE = 0;
 static const uint32_t AXON_EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t AXON_EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_ERROR_STATUS = 0x1803000full;
 
@@ -139,7 +139,7 @@ static const uint32_t AXON_ERROR_STATUS_VITL_ALIGN_ERR = 24;
 static const uint32_t AXON_ERROR_STATUS_UNIT_SYNC_LVL_ERR = 25;
 static const uint32_t AXON_ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t AXON_ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_OPCG_CAPT3 = 0x18030012ull;
 
@@ -167,7 +167,7 @@ static const uint32_t AXON_OPCG_CAPT3_12EVEN = 54;
 static const uint32_t AXON_OPCG_CAPT3_12EVEN_LEN = 5;
 static const uint32_t AXON_OPCG_CAPT3_12ODD = 59;
 static const uint32_t AXON_OPCG_CAPT3_12ODD_LEN = 5;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t AXON_RFIR = 0x18040001ull;
 
@@ -225,27 +225,27 @@ static const uint32_t AXON_RFIR_RECOV_IN50 = 50;
 static const uint32_t AXON_RFIR_RECOV_IN51 = 51;
 static const uint32_t AXON_RFIR_RECOV_IN52 = 52;
 static const uint32_t AXON_RFIR_RECOV_IN53 = 53;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t MULTICAST_GROUP_3 = 0x180f0003ull;
 
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP_LEN = 3;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x180f03feull;
 
 static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x180f0010ull;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x180f0017ull;
-// iohs/reg00047.H
+// iohs/reg00015.H
 
 }
 }
-#include "iohs/reg00047.H"
+#include "iohs/reg00015.H"
 #endif

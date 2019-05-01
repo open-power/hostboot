@@ -69,7 +69,7 @@ static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_SELECTOR = 51;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT = 52;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x20040011ull;
 
@@ -122,7 +122,7 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_48 = 48;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -142,7 +142,7 @@ static const uint32_t L3TRA0_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA0_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA0_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -150,7 +150,7 @@ static const uint64_t L3TRA1_TR0_TRACE_HI_DATA_REG = 0x20018240ull;
 
 static const uint32_t L3TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L3TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -158,7 +158,7 @@ static const uint64_t L3TRA1_TR0_CONFIG_1 = 0x20018244ull;
 
 static const uint32_t L3TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L3TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -178,7 +178,7 @@ static const uint32_t L3TRA1_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA1_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA1_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA1_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -195,7 +195,7 @@ static const uint32_t L3TRA2_TR1_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t L3TRA2_TR1_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t L3TRA2_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L3TRA2_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -228,7 +228,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA3_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA3_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA3_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// eq/reg00030.H
+// eq/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -236,7 +236,7 @@ static const uint64_t L3TRA3_TR1_CONFIG_0 = 0x200182e3ull;
 
 static const uint32_t L3TRA3_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA3_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t OPCG_REG1 = 0x20030003ull;
 
@@ -258,7 +258,7 @@ static const uint32_t OPCG_REG1_MISR_MODE = 57;
 static const uint32_t OPCG_REG1_INFINITE_MODE = 58;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t QME_DERP = 0x200e0250ull;
 
@@ -266,13 +266,13 @@ static const uint32_t QME_DERP_DEND = 0;
 static const uint32_t QME_DERP_DEND_LEN = 32;
 static const uint32_t QME_DERP_SOR = 32;
 static const uint32_t QME_DERP_SOR_LEN = 32;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t QME_EINR = 0x200e0274ull;
 
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT = 0;
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT_LEN = 64;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t QME_LFIR_RWX = 0x200e0000ull;
 static const uint64_t QME_LFIR_WOX_AND = 0x200e0001ull;
@@ -305,10 +305,10 @@ static const uint32_t QME_LFIR_SPARE23 = 23;
 static const uint32_t QME_LFIR_SPARE24 = 24;
 static const uint32_t QME_LFIR_FIR_PARITY_ERR_DUP = 25;
 static const uint32_t QME_LFIR_FIR_PARITY_ERR = 26;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t QME_PCBSII = 0x200e0038ull;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;
 
@@ -326,7 +326,7 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
-// eq/reg00030.H
+// eq/reg00014.H
 
 static const uint64_t XSTOP2 = 0x2003000dull;
 
@@ -351,9 +351,9 @@ static const uint32_t XSTOP2_XSTOP2_UNIT13 = 17;
 static const uint32_t XSTOP2_XSTOP2_UNIT14 = 18;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
-// eq/reg00030.H
+// eq/reg00014.H
 
 }
 }
-#include "eq/reg00030.H"
+#include "eq/reg00014.H"
 #endif

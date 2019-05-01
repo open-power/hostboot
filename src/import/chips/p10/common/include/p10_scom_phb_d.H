@@ -40,7 +40,7 @@ static const uint64_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP = 0x08010906
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
-// phb/reg00241.H
+// phb/reg00013.H
 
 static const uint64_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR = 0x08010900ull;
 
@@ -49,9 +49,9 @@ static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_4B = 1;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_AUTO_INC = 2;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN = 11;
-// phb/reg00241.H
+// phb/reg00013.H
 
 }
 }
-#include "phb/reg00241.H"
+#include "phb/reg00013.H"
 #endif

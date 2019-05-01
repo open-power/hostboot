@@ -58,9 +58,9 @@ static const uint32_t NET_CTRL1_SENSEADJ_RESET1 = 24;
 static const uint32_t NET_CTRL1_CLK_PULSE_EN = 25;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE = 26;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE_LEN = 2;
-// pec/reg00201.H
+// pec/reg00005.H
 
 }
 }
-#include "pec/reg00201.H"
+#include "pec/reg00005.H"
 #endif

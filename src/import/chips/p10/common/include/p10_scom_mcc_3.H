@@ -49,11 +49,13 @@ static const uint32_t LINK1_RX_LANE_CONTROL_LOCKED = 36;
 static const uint32_t LINK1_RX_LANE_CONTROL_LOCKED_LEN = 9;
 static const uint32_t LINK1_RX_LANE_CONTROL_FAILED = 48;
 static const uint32_t LINK1_RX_LANE_CONTROL_FAILED_LEN = 9;
-// mcc/reg00067.H
+// mcc/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
-static const uint64_t MC_OMI_FIR_MASK_REG_ = 0x0c011b43ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_SCOM = 0x0c011b43ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_SCOM1 = 0x0c011b44ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_SCOM2 = 0x0c011b45ull;
 
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK = 0;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN = 20;
@@ -62,12 +64,12 @@ static const uint32_t MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK_LEN = 20;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK = 40;
 static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN = 20;
 static const uint32_t MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK = 60;
-// mcc/reg00067.H
+// mcc/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t REGS_PRX0_DLR_APSR = 0x0c011039ull;
-// mcc/reg00067.H
+// mcc/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -85,9 +87,9 @@ static const uint32_t USTL_USTLMCHWFM_SCOM_COMMAND = 17;
 static const uint32_t USTL_USTLMCHWFM_SUB_CHANNEL_SELECT = 18;
 static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS = 19;
 static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS_LEN = 4;
-// mcc/reg00067.H
+// mcc/reg00003.H
 
 }
 }
-#include "mcc/reg00067.H"
+#include "mcc/reg00003.H"
 #endif

@@ -41,7 +41,7 @@ static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f7bull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -63,7 +63,7 @@ static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANA_POOL = 50;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANA_POOL_LEN = 6;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANB_POOL = 58;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANB_POOL_LEN = 6;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -103,11 +103,13 @@ static const uint32_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO = 29;
 static const uint32_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_LEN = 4;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_TLX_APPLICATION_INTERRUPT_RETRIED = 33;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_TLX_APPLICATION_INTERRUPT_RETRIED = 34;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
-static const uint64_t FIR_REG_ = 0x0c011000ull;
+static const uint64_t FIR_REG_SCOM = 0x0c011000ull;
+static const uint64_t FIR_REG_SCOM1 = 0x0c011001ull;
+static const uint64_t FIR_REG_SCOM2 = 0x0c011002ull;
 
 static const uint32_t FIR_REG_LINK0_TRAINED = 0;
 static const uint32_t FIR_REG_LINK1_TRAINED = 1;
@@ -170,7 +172,7 @@ static const uint32_t FIR_REG_LINK0_UNRECOVERABLE_ERROR = 58;
 static const uint32_t FIR_REG_LINK1_UNRECOVERABLE_ERROR = 59;
 static const uint32_t FIR_REG_LINK0_INTERNAL_ERROR = 60;
 static const uint32_t FIR_REG_LINK1_INTERNAL_ERROR = 61;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -194,7 +196,7 @@ static const uint32_t LAT_MEASURE_LINK0_TOD_LATENCY = 49;
 static const uint32_t LAT_MEASURE_LINK0_TOD_LATENCY_LEN = 7;
 static const uint32_t LAT_MEASURE_LINK1_TOD_LATENCY = 57;
 static const uint32_t LAT_MEASURE_LINK1_TOD_LATENCY_LEN = 7;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -208,7 +210,7 @@ static const uint32_t PERF_COUNTERS_1_6 = 32;
 static const uint32_t PERF_COUNTERS_1_6_LEN = 16;
 static const uint32_t PERF_COUNTERS_1_7 = 48;
 static const uint32_t PERF_COUNTERS_1_7_LEN = 16;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -235,7 +237,7 @@ static const uint32_t PHY_CONFIG_PRECODER_ENABLE = 60;
 static const uint32_t PHY_CONFIG_50G_MODE = 61;
 static const uint32_t PHY_CONFIG_DL_SELECT = 62;
 static const uint32_t PHY_CONFIG_DL_SELECT_LEN = 2;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -278,7 +280,7 @@ static const uint32_t USTL_USTLERRRPT_HANB_EXCESS_DATA_ERROR_HOLD_OUT = 33;
 static const uint32_t USTL_USTLERRRPT_HANA_BOGUS_QUEUE_OVERFLOW_HOLD_OUT = 34;
 static const uint32_t USTL_USTLERRRPT_HANA_META_PARITY_ERROR_HOLD_OUT = 36;
 static const uint32_t USTL_USTLERRRPT_HANB_META_PARITY_ERROR_HOLD_OUT = 37;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -286,9 +288,9 @@ static const uint64_t USTL_USTLFIRWOF = 0x0c010e08ull;
 
 static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF = 0;
 static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF_LEN = 62;
-// mcc/reg00075.H
+// mcc/reg00011.H
 
 }
 }
-#include "mcc/reg00075.H"
+#include "mcc/reg00011.H"
 #endif

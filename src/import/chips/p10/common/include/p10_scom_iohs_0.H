@@ -41,7 +41,7 @@ static const uint32_t AXON_EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
 static const uint32_t AXON_EPS_THERM_WSUB_INJECT_REG_TRIP_LEN = 2;
 static const uint32_t AXON_EPS_THERM_WSUB_INJECT_REG_MODE = 2;
 static const uint32_t AXON_EPS_THERM_WSUB_INJECT_REG_MODE_LEN = 2;
-// iohs/reg00032.H
+// iohs/reg00000.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_3 = 0x18010406ull;
 
@@ -49,7 +49,7 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_3_C = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_3_D_LEN = 24;
-// iohs/reg00032.H
+// iohs/reg00000.H
 
 static const uint64_t AXON_XSTOP1 = 0x1803000cull;
 
@@ -74,9 +74,9 @@ static const uint32_t AXON_XSTOP1_XSTOP1_UNIT13 = 17;
 static const uint32_t AXON_XSTOP1_XSTOP1_UNIT14 = 18;
 static const uint32_t AXON_XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
-// iohs/reg00032.H
+// iohs/reg00000.H
 
 }
 }
-#include "iohs/reg00032.H"
+#include "iohs/reg00000.H"
 #endif

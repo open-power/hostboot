@@ -51,7 +51,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF4_PSAVE_NUM_RMWBUF = 23;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF4_PSAVE_NUM_RMWBUF_LEN = 7;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF4_RESERVED30_31 = 30;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF4_RESERVED30_31_LEN = 2;
-// mcc/reg00068.H
+// mcc/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -59,7 +59,7 @@ static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY2A = 0x0c010f74ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2A_KEY2A = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
-// mcc/reg00068.H
+// mcc/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -103,14 +103,14 @@ static const uint32_t DSTL_DSTLCFG_CHANB_DL_CREDIT_RESET = 59;
 static const uint32_t DSTL_DSTLCFG_CREDITS_ON_DEBUG_BUS = 60;
 static const uint32_t DSTL_DSTLCFG_RESERVED_61_63 = 61;
 static const uint32_t DSTL_DSTLCFG_RESERVED_61_63_LEN = 3;
-// mcc/reg00068.H
+// mcc/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t PERF_COUNT_LSB_1 = 0x0c011021ull;
-// mcc/reg00068.H
+// mcc/reg00004.H
 
 }
 }
-#include "mcc/reg00068.H"
+#include "mcc/reg00004.H"
 #endif

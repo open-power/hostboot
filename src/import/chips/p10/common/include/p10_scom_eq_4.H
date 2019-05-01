@@ -52,7 +52,7 @@ static const uint32_t CLOCK_STAT_ARY_UNIT11_ARY = 15;
 static const uint32_t CLOCK_STAT_ARY_UNIT12_ARY = 16;
 static const uint32_t CLOCK_STAT_ARY_UNIT13_ARY = 17;
 static const uint32_t CLOCK_STAT_ARY_UNIT14_ARY = 18;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t EPS_THERM_WSUB_INJECT_REG = 0x20050011ull;
 
@@ -60,7 +60,7 @@ static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP_LEN = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE_LEN = 2;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG = 0x20050036ull;
 
@@ -68,7 +68,7 @@ static const uint32_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG_CLKSRC = 0;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
 static const uint32_t EPS_THERM_WSUB2_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
-// eq/reg00020.H
+// eq/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -78,7 +78,7 @@ static const uint32_t L3TRA0_TR1_CONFIG_4_A = 0;
 static const uint32_t L3TRA0_TR1_CONFIG_4_A_LEN = 24;
 static const uint32_t L3TRA0_TR1_CONFIG_4_B = 24;
 static const uint32_t L3TRA0_TR1_CONFIG_4_B_LEN = 24;
-// eq/reg00020.H
+// eq/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -88,7 +88,7 @@ static const uint32_t L3TRA1_TR0_CONFIG_2_A = 0;
 static const uint32_t L3TRA1_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t L3TRA1_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA1_TR0_CONFIG_2_B_LEN = 24;
-// eq/reg00020.H
+// eq/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -98,7 +98,7 @@ static const uint32_t L3TRA2_TR0_CONFIG_5_C = 0;
 static const uint32_t L3TRA2_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t L3TRA2_TR0_CONFIG_5_D = 24;
 static const uint32_t L3TRA2_TR0_CONFIG_5_D_LEN = 24;
-// eq/reg00020.H
+// eq/reg00004.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -108,7 +108,7 @@ static const uint32_t L3TRA3_TR1_CONFIG_3_C = 0;
 static const uint32_t L3TRA3_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_3_D = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_3_D_LEN = 24;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t OPCG_REG2 = 0x20030004ull;
 
@@ -124,24 +124,24 @@ static const uint32_t OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_MODE = 40;
 static const uint32_t OPCG_REG2_SM_LBIST_CNTRL = 48;
 static const uint32_t OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x20030020ull;
 
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_EISTR = 0x200e0270ull;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_LFIRACT0 = 0x200e0008ull;
 
 static const uint32_t QME_LFIRACT0_QME_LFIRACT0_FIR_ACTION1 = 0;
 static const uint32_t QME_LFIRACT0_QME_LFIRACT0_FIR_ACTION1_LEN = 27;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_PLSR = 0x200e0148ull;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_QHB = 0x200e0080ull;
 
@@ -149,7 +149,7 @@ static const uint32_t QME_QHB_COUNT = 0;
 static const uint32_t QME_QHB_COUNT_LEN = 16;
 static const uint32_t QME_QHB_ENABLE = 16;
 static const uint32_t QME_QHB_LOSS_THROTTLE_ENABLE = 17;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_RCSCR_SCOM = 0x200e0184ull;
 static const uint64_t QME_RCSCR_SCOM1 = 0x200e0187ull;
@@ -173,19 +173,19 @@ static const uint32_t QME_RCSCR_2_TARGET_INDEX = 51;
 static const uint32_t QME_RCSCR_2_TARGET_INDEX_LEN = 5;
 static const uint32_t QME_RCSCR_3_TARGET_INDEX = 59;
 static const uint32_t QME_RCSCR_3_TARGET_INDEX_LEN = 5;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_RS4BAR = 0x200e0160ull;
 
 static const uint32_t QME_RS4BAR_QME_RS4BAR_BASE = 0;
 static const uint32_t QME_RS4BAR_QME_RS4BAR_BASE_LEN = 32;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t QME_RS4DBGD = 0x200e0158ull;
 
 static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN = 0;
 static const uint32_t QME_RS4DBGD_QME_RS4DBGD_SCAN_DATA_IN_LEN = 64;
-// eq/reg00020.H
+// eq/reg00004.H
 
 static const uint64_t XSTOP1 = 0x2003000cull;
 
@@ -210,9 +210,9 @@ static const uint32_t XSTOP1_XSTOP1_UNIT13 = 17;
 static const uint32_t XSTOP1_XSTOP1_UNIT14 = 18;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
-// eq/reg00020.H
+// eq/reg00004.H
 
 }
 }
-#include "eq/reg00020.H"
+#include "eq/reg00004.H"
 #endif

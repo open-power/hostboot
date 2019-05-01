@@ -60,10 +60,10 @@ static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_DATA0 = 0x20050019ull;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_MODE_REG = 0x20050010ull;
 
@@ -77,7 +77,7 @@ static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS = 8;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS_LEN = 2;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_TRIGGER = 44;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t EPS_THERM_WSUB2_DTS_RESULT1 = 0x20050021ull;
 
@@ -87,7 +87,7 @@ static const uint32_t EPS_THERM_WSUB2_DTS_RESULT1_5_RESULT = 16;
 static const uint32_t EPS_THERM_WSUB2_DTS_RESULT1_5_RESULT_LEN = 16;
 static const uint32_t EPS_THERM_WSUB2_DTS_RESULT1_6_RESULT = 32;
 static const uint32_t EPS_THERM_WSUB2_DTS_RESULT1_6_RESULT_LEN = 16;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t ERROR_STATUS = 0x2003000full;
 
@@ -119,7 +119,7 @@ static const uint32_t ERROR_STATUS_VITL_ALIGN_ERR = 24;
 static const uint32_t ERROR_STATUS_UNIT_SYNC_LVL_ERR = 25;
 static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
-// eq/reg00021.H
+// eq/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -129,7 +129,7 @@ static const uint32_t L3TRA0_TR0_CONFIG_2_A = 0;
 static const uint32_t L3TRA0_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_2_B_LEN = 24;
-// eq/reg00021.H
+// eq/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -139,7 +139,7 @@ static const uint32_t L3TRA1_TR1_CONFIG_4_A = 0;
 static const uint32_t L3TRA1_TR1_CONFIG_4_A_LEN = 24;
 static const uint32_t L3TRA1_TR1_CONFIG_4_B = 24;
 static const uint32_t L3TRA1_TR1_CONFIG_4_B_LEN = 24;
-// eq/reg00021.H
+// eq/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -149,7 +149,7 @@ static const uint32_t L3TRA2_TR1_CONFIG_3_C = 0;
 static const uint32_t L3TRA2_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t L3TRA2_TR1_CONFIG_3_D = 24;
 static const uint32_t L3TRA2_TR1_CONFIG_3_D_LEN = 24;
-// eq/reg00021.H
+// eq/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -159,7 +159,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_5_C = 0;
 static const uint32_t L3TRA3_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_5_D = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_5_D_LEN = 24;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t NET_CTRL1_RWX = 0x200f0044ull;
 static const uint64_t NET_CTRL1_RWX_WAND = 0x200f0045ull;
@@ -184,7 +184,7 @@ static const uint32_t NET_CTRL1_SENSEADJ_RESET1 = 24;
 static const uint32_t NET_CTRL1_CLK_PULSE_EN = 25;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE = 26;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE_LEN = 2;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t QME_DB0 = 0x200e0100ull;
 
@@ -192,7 +192,7 @@ static const uint32_t QME_DB0_NUMBER = 0;
 static const uint32_t QME_DB0_NUMBER_LEN = 8;
 static const uint32_t QME_DB0_DATA = 8;
 static const uint32_t QME_DB0_DATA_LEN = 56;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t QME_EITR_RW = 0x200e026cull;
 static const uint64_t QME_EITR_WO_CLEAR = 0x200e026full;
@@ -200,12 +200,12 @@ static const uint64_t QME_EITR_WO_OR = 0x200e026eull;
 
 static const uint32_t QME_EITR_QME_EITR_INTERRUPT_TYPE = 0;
 static const uint32_t QME_EITR_QME_EITR_INTERRUPT_TYPE_LEN = 64;
-// eq/reg00021.H
+// eq/reg00005.H
 
 static const uint64_t SCAN_LONG_ROTATE = 0x20039000ull;
-// eq/reg00021.H
+// eq/reg00005.H
 
 }
 }
-#include "eq/reg00021.H"
+#include "eq/reg00005.H"
 #endif

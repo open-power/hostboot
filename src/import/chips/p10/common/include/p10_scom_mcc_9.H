@@ -50,7 +50,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_LEN = 3;
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO = 32;
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47 = 33;
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN = 15;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -84,7 +84,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL_LEN = 7;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL = 59;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL = 63;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -94,7 +94,7 @@ static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
 
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 35;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -104,7 +104,7 @@ static const uint32_t DSTL_DSTLSTATUS_A_FAIL_WOF = 0;
 static const uint32_t DSTL_DSTLSTATUS_A_FAIL_WOF_LEN = 10;
 static const uint32_t DSTL_DSTLSTATUS_B_FAIL_WOF = 10;
 static const uint32_t DSTL_DSTLSTATUS_B_FAIL_WOF_LEN = 10;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -118,7 +118,7 @@ static const uint32_t PMU_CNTR_1 = 32;
 static const uint32_t PMU_CNTR_1_LEN = 16;
 static const uint32_t PMU_CNTR_0 = 48;
 static const uint32_t PMU_CNTR_0_LEN = 16;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -150,7 +150,7 @@ static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT = 32;
 static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT_LEN = 4;
 static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE = 36;
 static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_LEN = 28;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -178,7 +178,7 @@ static const uint32_t WRITE_WRTCFG_DSTL_ONE_SHOT_INJ = 20;
 static const uint32_t WRITE_WRTCFG_DSTL_PERSISTANT_INJ = 21;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31 = 22;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31_LEN = 10;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -200,9 +200,9 @@ static const uint32_t WRITE_WRT_WDF_ECC_3_ERR_TYPE = 48;
 static const uint32_t WRITE_WRT_WDF_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WRITE_WRT_WDF_ECC_3_SYNDROME = 56;
 static const uint32_t WRITE_WRT_WDF_ECC_3_SYNDROME_LEN = 8;
-// mcc/reg00073.H
+// mcc/reg00009.H
 
 }
 }
-#include "mcc/reg00073.H"
+#include "mcc/reg00009.H"
 #endif

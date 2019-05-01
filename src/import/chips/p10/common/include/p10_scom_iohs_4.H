@@ -52,7 +52,7 @@ static const uint32_t AXON_CLOCK_STAT_NSL_UNIT11_NSL = 15;
 static const uint32_t AXON_CLOCK_STAT_NSL_UNIT12_NSL = 16;
 static const uint32_t AXON_CLOCK_STAT_NSL_UNIT13_NSL = 17;
 static const uint32_t AXON_CLOCK_STAT_NSL_UNIT14_NSL = 18;
-// iohs/reg00036.H
+// iohs/reg00004.H
 
 static const uint64_t AXON_CPLT_CTRL3_RW = 0x18000003ull;
 static const uint64_t AXON_CPLT_CTRL3_WO_CLEAR = 0x18000023ull;
@@ -73,12 +73,12 @@ static const uint32_t AXON_CPLT_CTRL3_11_PSCOM_EN = 15;
 static const uint32_t AXON_CPLT_CTRL3_12_PSCOM_EN = 16;
 static const uint32_t AXON_CPLT_CTRL3_13_PSCOM_EN = 17;
 static const uint32_t AXON_CPLT_CTRL3_14_PSCOM_EN = 18;
-// iohs/reg00036.H
+// iohs/reg00004.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_DATA0 = 0x18050019ull;
-// iohs/reg00036.H
+// iohs/reg00004.H
 
 }
 }
-#include "iohs/reg00036.H"
+#include "iohs/reg00004.H"
 #endif

@@ -46,7 +46,7 @@ static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_IODA_TABLE_AD
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_IODA_TABLE_DATA_ENABLE = 6;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_ADDR_ENABLE = 7;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_INDEX_ENABLE = 8;
-// phb/reg00237.H
+// phb/reg00009.H
 
 static const uint64_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL = 0x08010904ull;
 
@@ -55,14 +55,14 @@ static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
-// phb/reg00237.H
+// phb/reg00009.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x00000915ull;
-// phb/reg00237.H
+// phb/reg00009.H
 
 }
 }
-#include "phb/reg00237.H"
+#include "phb/reg00009.H"
 #endif

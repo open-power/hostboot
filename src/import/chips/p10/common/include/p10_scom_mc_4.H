@@ -41,7 +41,7 @@ static const uint32_t CLKMON_MONM_CLKRATIO_RATIO = 0;
 static const uint32_t CLKMON_MONM_CLKRATIO_RATIO_LEN = 12;
 static const uint32_t CLKMON_MONM_CLKRATIO_CFG0_SYNC_MODE = 12;
 static const uint32_t CLKMON_MONM_CLKRATIO_CFG1_SYNC_MODE = 13;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t CLOCK_STAT_ARY = 0x0c0303caull;
 
@@ -60,7 +60,7 @@ static const uint32_t CLOCK_STAT_ARY_UNIT11_ARY = 15;
 static const uint32_t CLOCK_STAT_ARY_UNIT12_ARY = 16;
 static const uint32_t CLOCK_STAT_ARY_UNIT13_ARY = 17;
 static const uint32_t CLOCK_STAT_ARY_UNIT14_ARY = 18;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t EPS_THERM_WSUB_INJECT_REG = 0x0c0503d1ull;
 
@@ -68,12 +68,12 @@ static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP_LEN = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE_LEN = 2;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t MBA_SCOMFIR_MCBPARMQ = 0x0c010fefull;
 
 static const uint32_t MBA_SCOMFIR_MCBPARMQ_MCBPARMQ_CFG_CLOCK_MONITOR_EN = 59;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t MBA_SCOMFIR_MCWATDATA3 = 0x0c010fddull;
 
@@ -81,7 +81,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA3_PATTERN_A = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA3_PATTERN_A_LEN = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA3_MASK_A_LEN = 22;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t OPCG_REG2 = 0x0c0303c4ull;
 
@@ -97,12 +97,12 @@ static const uint32_t OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t OPCG_REG2_PRPG_MODE = 40;
 static const uint32_t OPCG_REG2_SM_LBIST_CNTRL = 48;
 static const uint32_t OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t PCB_OPCG_GO = 0x0c0303e0ull;
 
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t TRA0_TR0_TRACE_LO_DATA_REG = 0x0c0107c1ull;
 
@@ -117,7 +117,7 @@ static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t TRA1_TR0_CONFIG_2 = 0x0c0107c5ull;
 
@@ -125,7 +125,7 @@ static const uint32_t TRA1_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_2_B_LEN = 24;
-// mc/reg00052.H
+// mc/reg00004.H
 
 static const uint64_t XSTOP1 = 0x0c0303ccull;
 
@@ -150,9 +150,9 @@ static const uint32_t XSTOP1_XSTOP1_UNIT13 = 17;
 static const uint32_t XSTOP1_XSTOP1_UNIT14 = 18;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_XSTOP1_WAIT_CYCLES_LEN = 12;
-// mc/reg00052.H
+// mc/reg00004.H
 
 }
 }
-#include "mc/reg00052.H"
+#include "mc/reg00004.H"
 #endif

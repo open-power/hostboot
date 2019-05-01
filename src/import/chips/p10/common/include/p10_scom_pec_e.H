@@ -51,9 +51,9 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
-// pec/reg00210.H
+// pec/reg00014.H
 
 }
 }
-#include "pec/reg00210.H"
+#include "pec/reg00014.H"
 #endif

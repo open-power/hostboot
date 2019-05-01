@@ -41,7 +41,7 @@ static const uint64_t FIR_WOF_REG = 0x0c011008ull;
 
 static const uint32_t FIR_WOF_REG_DLP_FIR_WOF = 0;
 static const uint32_t FIR_WOF_REG_DLP_FIR_WOF_LEN = 62;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -65,7 +65,7 @@ static const uint32_t LINK0_INFO_REPLAY_CAP_SYN_LEN = 8;
 static const uint32_t LINK0_INFO_ACK_FIFO_CAP_VALID = 52;
 static const uint32_t LINK0_INFO_ACK_FIFO_CAP_ADDR = 55;
 static const uint32_t LINK0_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -81,7 +81,7 @@ static const uint32_t LINK0_RX_LANE_CONTROL_LOCKED = 36;
 static const uint32_t LINK0_RX_LANE_CONTROL_LOCKED_LEN = 9;
 static const uint32_t LINK0_RX_LANE_CONTROL_FAILED = 48;
 static const uint32_t LINK0_RX_LANE_CONTROL_FAILED_LEN = 9;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -100,7 +100,7 @@ static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UNRECOV = 24;
 static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_UNRECOV_LEN = 14;
 static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_INTERNAL = 40;
 static const uint32_t LINK1_ERROR_STATUS_ERROR_STATUS_INTERNAL_LEN = 24;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -108,7 +108,7 @@ static const uint64_t MC_OMI_FIR_WOF_REG = 0x0c011b48ull;
 
 static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF = 0;
 static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF_LEN = 62;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -123,7 +123,7 @@ static const uint32_t MISC_ERROR_STATUS_OLL_ERROR_STATUS = 24;
 static const uint32_t MISC_ERROR_STATUS_OLL_ERROR_STATUS_LEN = 18;
 static const uint32_t MISC_ERROR_STATUS_ODL_ERROR_STATUS = 44;
 static const uint32_t MISC_ERROR_STATUS_ODL_ERROR_STATUS_LEN = 18;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -133,9 +133,9 @@ static const uint32_t REGS_PRX1_DLR_APOR_ACTIVITY_ACCUM = 0;
 static const uint32_t REGS_PRX1_DLR_APOR_ACTIVITY_ACCUM_LEN = 32;
 static const uint32_t REGS_PRX1_DLR_APOR_BASE_ACCUM = 32;
 static const uint32_t REGS_PRX1_DLR_APOR_BASE_ACCUM_LEN = 32;
-// mcc/reg00064.H
+// mcc/reg00000.H
 
 }
 }
-#include "mcc/reg00064.H"
+#include "mcc/reg00000.H"
 #endif

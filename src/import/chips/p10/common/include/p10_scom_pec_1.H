@@ -38,12 +38,12 @@ namespace pec
 static const uint64_t HEARTBEAT_REG = 0x080f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
-// pec/reg00197.H
+// pec/reg00001.H
 
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;
-// pec/reg00197.H
+// pec/reg00001.H
 
 }
 }
-#include "pec/reg00197.H"
+#include "pec/reg00001.H"
 #endif

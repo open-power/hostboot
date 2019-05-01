@@ -42,7 +42,7 @@ static const uint32_t CC_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CC_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t CTRL_ATOMIC_LOCK_REG = 0x0c0003ffull;
 
@@ -51,10 +51,10 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t EPS_FIR_SUM_MASK_REG = 0x0c0403d7ull;
 
@@ -63,7 +63,7 @@ static const uint32_t EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
 static const uint32_t EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB = 2;
 static const uint32_t EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
 static const uint32_t EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_DBG1_SCOM1Q = 0x0c010fd7ull;
 
@@ -71,13 +71,13 @@ static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DEBUG_BUS_64_87 = 0;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DEBUG_BUS_64_87_LEN = 24;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_RESERVED = 24;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_RESERVED_LEN = 40;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_MCEBUSEN2 = 0x0c010fe6ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS_LEN = 64;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_MCWATDATA7 = 0x0c010fe1ull;
 
@@ -85,7 +85,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA7_PATTERN_A = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_PATTERN_A_LEN = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_MASK_A = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_MASK_A_LEN = 22;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010fc3ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010fc4ull;
@@ -93,13 +93,13 @@ static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010fc5ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 14;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t MBA_SCOMFIR_MISCFIRWOF = 0x0c010fc8ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF_LEN = 14;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t OPCG_CAPT1 = 0x0c0303d0ull;
 
@@ -129,13 +129,13 @@ static const uint32_t OPCG_CAPT1_SEQ_11 = 54;
 static const uint32_t OPCG_CAPT1_SEQ_11_LEN = 5;
 static const uint32_t OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x0c0f03c0ull;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t SCAN_UPDATEDR_LONG = 0x0c03b3c0ull;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t SCOMFIR_MCFGP1 = 0x0c010fcbull;
 
@@ -152,7 +152,7 @@ static const uint32_t SCOMFIR_MCFGP1_R1_CONFIGURATION_GROUP_SIZE = 46;
 static const uint32_t SCOMFIR_MCFGP1_R1_CONFIGURATION_GROUP_SIZE_LEN = 8;
 static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE_LEN = 8;
-// mc/reg00061.H
+// mc/reg00013.H
 
 static const uint64_t TRA0_TR0_CONFIG_9 = 0x0c0107c9ull;
 
@@ -183,9 +183,9 @@ static const uint32_t TRA0_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// mc/reg00061.H
+// mc/reg00013.H
 
 }
 }
-#include "mc/reg00061.H"
+#include "mc/reg00013.H"
 #endif

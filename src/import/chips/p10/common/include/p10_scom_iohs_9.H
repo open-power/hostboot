@@ -42,7 +42,7 @@ static const uint32_t AXON_CTRL_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t AXON_CTRL_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t AXON_CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t AXON_CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_EPS_FIR_SUM_MASK_REG = 0x18040017ull;
 
@@ -51,7 +51,7 @@ static const uint32_t AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
 static const uint32_t AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB = 2;
 static const uint32_t AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
 static const uint32_t AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_EPS_PSC_PSCOM_ERROR_MASK = 0x18010002ull;
 
@@ -73,7 +73,7 @@ static const uint32_t AXON_EPS_PSC_PSCOM_ERROR_MASK_PCB_COMMAND_PARITY_ERROR = 1
 static const uint32_t AXON_EPS_PSC_PSCOM_ERROR_MASK_GENERAL_TIMEOUT = 15;
 static const uint32_t AXON_EPS_PSC_PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 16;
 static const uint32_t AXON_EPS_PSC_PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 17;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_HOSTATTN_MASK = 0x1804001aull;
 
@@ -130,7 +130,7 @@ static const uint32_t AXON_HOSTATTN_MASK_50 = 50;
 static const uint32_t AXON_HOSTATTN_MASK_51 = 51;
 static const uint32_t AXON_HOSTATTN_MASK_52 = 52;
 static const uint32_t AXON_HOSTATTN_MASK_53 = 53;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_OPCG_CAPT2 = 0x18030011ull;
 
@@ -158,12 +158,12 @@ static const uint32_t AXON_OPCG_CAPT2_23_06EVEN = 54;
 static const uint32_t AXON_OPCG_CAPT2_23_06EVEN_LEN = 5;
 static const uint32_t AXON_OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t AXON_OPCG_CAPT2_24_06ODD_LEN = 5;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_PCB_OPCG_GO = 0x18030020ull;
 
 static const uint32_t AXON_PCB_OPCG_GO_PCB_OPCGGO = 0;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG = 0x18010402ull;
 
@@ -181,15 +181,15 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t AXON_TRA0_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t AXON_TRA0_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t AXON_TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 static const uint64_t MULTICAST_GROUP_2 = 0x180f0002ull;
 
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP_LEN = 3;
-// iohs/reg00041.H
+// iohs/reg00009.H
 
 }
 }
-#include "iohs/reg00041.H"
+#include "iohs/reg00009.H"
 #endif

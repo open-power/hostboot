@@ -36,7 +36,7 @@ namespace iohs
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x180f0011ull;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t AXON_CPLT_CONF1_RW = 0x18000009ull;
 static const uint64_t AXON_CPLT_CONF1_WO_CLEAR = 0x18000029ull;
@@ -44,7 +44,7 @@ static const uint64_t AXON_CPLT_CONF1_WO_OR = 0x18000019ull;
 
 static const uint32_t AXON_CPLT_CONF1_OD_IOVALID_DC = 0;
 static const uint32_t AXON_CPLT_CONF1_EV_IOVALID_DC = 1;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t AXON_CPLT_CTRL1_RW = 0x18000001ull;
 static const uint64_t AXON_CPLT_CTRL1_WO_CLEAR = 0x18000021ull;
@@ -67,7 +67,7 @@ static const uint32_t AXON_CPLT_CTRL1_REGION11_FENCE_DC = 15;
 static const uint32_t AXON_CPLT_CTRL1_REGION12_FENCE_DC = 16;
 static const uint32_t AXON_CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t AXON_CPLT_CTRL1_REGION14_FENCE_DC = 18;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t AXON_EPS_DBG_MODE_REG = 0x180107c0ull;
 
@@ -88,10 +88,10 @@ static const uint32_t AXON_EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS = 20;
 static const uint32_t AXON_EPS_DBG_MODE_REG_INST1_CONDITION_HISTORY_STATUS_LEN = 3;
 static const uint32_t AXON_EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
 static const uint32_t AXON_EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_DATA2 = 0x1805001bull;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_MODE_REG = 0x1805000full;
 
@@ -114,13 +114,13 @@ static const uint32_t AXON_EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L1_LEN = 3;
 static const uint32_t AXON_EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2 = 24;
 static const uint32_t AXON_EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2_LEN = 3;
 static const uint32_t AXON_EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t EDRAM_STATUS = 0x180f0029ull;
 
 static const uint32_t EDRAM_STATUS_EDRAM_STAT = 0;
 static const uint32_t EDRAM_STATUS_EDRAM_STAT_LEN = 4;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 static const uint64_t ERROR_REG = 0x180f001full;
 
@@ -148,9 +148,9 @@ static const uint32_t ERROR_REG_CONFIG_REG_PARITY_ERROR = 22;
 static const uint32_t ERROR_REG_DIV_REG_PARITY_ERROR = 23;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR = 24;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR_LEN = 8;
-// iohs/reg00040.H
+// iohs/reg00008.H
 
 }
 }
-#include "iohs/reg00040.H"
+#include "iohs/reg00008.H"
 #endif

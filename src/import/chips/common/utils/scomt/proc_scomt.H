@@ -29,9 +29,8 @@
 #include "fapi2.H"
 #include "assert.h"
 
-// PPE platforms should define NO_SCOM_CHECKING
-#ifndef NO_SCOM_CHECKING
-    #define SCOM_CHECKING
+#ifdef NO_SCOM_CHECKING
+    #undef SCOM_CHECKING
 #endif
 
 #ifndef NO_SCOM_CHECKING_PLAT_ASSERT
@@ -81,13 +80,13 @@ static inline void enableRegchk()
 
 /// @brief Initialize the global scomt variables chip/ec from target attributes
 ///
-/// @param[in]    i_chip   The chip target to use to get chip/ec attributes
+/// @param[in]    i_target   The chip unit target to use to get chip/ec attributes
 /// @return FAPI2_RC_SUCCESS if success, else error code.
-static inline fapi2::ReturnCode init(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_chip)
+static inline fapi2::ReturnCode init(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_chip, chip));
-    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_chip, ec));
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_target, chip));
+    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_target, ec));
 fapi_try_exit:
 #endif
     return fapi2::current_err;
@@ -97,12 +96,23 @@ fapi_try_exit:
 ///
 /// @param[in]    i_target   The chip unit target to use to get chip/ec attributes
 /// @return FAPI2_RC_SUCCESS if success, else error code.
-static inline fapi2::ReturnCode init(const fapi2::Target<fapi2::TARGET_TYPE_CHIPLETS>& i_target)
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode init(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_chip, chip));
-    FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, l_chip, ec));
+
+    if (K & fapi2::TARGET_TYPE_CHIPLETS)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_CHIPLETS> l_chiplet = (fapi2::Target<fapi2::TARGET_TYPE_CHIPLETS>)i_target;
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip = l_chiplet.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_chip, chip));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, l_chip, ec));
+    }
+    else
+    {
+        assert(false);
+    }
+
 fapi_try_exit:
 #endif
     return fapi2::current_err;

@@ -38,7 +38,7 @@ namespace mc
 static const uint64_t CPLT_CONF1_RW = 0x0c0003c9ull;
 static const uint64_t CPLT_CONF1_WO_CLEAR = 0x0c0003e9ull;
 static const uint64_t CPLT_CONF1_WO_OR = 0x0c0003d9ull;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t CPLT_CTRL1_RW = 0x0c0003c1ull;
 static const uint64_t CPLT_CTRL1_WO_CLEAR = 0x0c0003e1ull;
@@ -61,13 +61,13 @@ static const uint32_t CPLT_CTRL1_REGION11_FENCE_DC = 15;
 static const uint32_t CPLT_CTRL1_REGION12_FENCE_DC = 16;
 static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x0c0107c3ull;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_DBG_INST2_COND_REG_3 = 0x0c0107c6ull;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_FIR_GXSTOP0_MASK_REG = 0x0c0403d3ull;
 
@@ -94,7 +94,7 @@ static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
 static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_PSC_PSCOM_STATUS_ERROR_REG = 0x0c0103c1ull;
 
@@ -134,20 +134,20 @@ static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_PCB_COMMAND_PARITY_
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_GENERAL_TIMEOUT = 33;
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 34;
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_PSC_RING_FENCE_MASK_LATCH_REG = 0x0c0103c8ull;
 
 static const uint32_t EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK = 1;
 static const uint32_t EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK_LEN = 31;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ = 0x0c0503dcull;
 
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE = 0;
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t LOCAL_XSTOP_MASK = 0x0c0403d9ull;
 
@@ -166,7 +166,7 @@ static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
 static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t SCOMFIR_MCFGP1A = 0x0c010fcfull;
 
@@ -181,7 +181,7 @@ static const uint32_t SCOMFIR_MCFGP1A_SMF_LOWER_ADDRESS = 24;
 static const uint32_t SCOMFIR_MCFGP1A_SMF_LOWER_ADDRESS_LEN = 19;
 static const uint32_t SCOMFIR_MCFGP1A_SMF_UPPER_ADDRESS = 43;
 static const uint32_t SCOMFIR_MCFGP1A_SMF_UPPER_ADDRESS_LEN = 19;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t SCOMFIR_MCFGPM0 = 0x0c010fe0ull;
 
@@ -190,7 +190,7 @@ static const uint32_t SCOMFIR_MCFGPM0_GROUP_BASE_ADDRESS = 1;
 static const uint32_t SCOMFIR_MCFGPM0_GROUP_BASE_ADDRESS_LEN = 24;
 static const uint32_t SCOMFIR_MCFGPM0_GROUP_SIZE = 25;
 static const uint32_t SCOMFIR_MCFGPM0_GROUP_SIZE_LEN = 15;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t SCOMFIR_MCFGPM0E = 0x0c010fdcull;
 
@@ -200,13 +200,13 @@ static const uint32_t SCOMFIR_MCFGPM0E_LOWER_ADDRESS = 2;
 static const uint32_t SCOMFIR_MCFGPM0E_LOWER_ADDRESS_LEN = 19;
 static const uint32_t SCOMFIR_MCFGPM0E_UPPER_ADDRESS = 21;
 static const uint32_t SCOMFIR_MCFGPM0E_UPPER_ADDRESS_LEN = 19;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t SCOMFIR_MCMODE3 = 0x0c010fefull;
 
 static const uint32_t SCOMFIR_MCMODE3_MCMODE3_RESERVED_0_10 = 0;
 static const uint32_t SCOMFIR_MCMODE3_MCMODE3_RESERVED_0_10_LEN = 11;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t TRA0_TR0_CONFIG_5 = 0x0c0107c8ull;
 
@@ -214,7 +214,7 @@ static const uint32_t TRA0_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA0_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_5_D_LEN = 24;
-// mc/reg00054.H
+// mc/reg00006.H
 
 static const uint64_t TRA1_TR0_CONFIG = 0x0c0107c2ull;
 
@@ -232,9 +232,9 @@ static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA1_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// mc/reg00054.H
+// mc/reg00006.H
 
 }
 }
-#include "mc/reg00054.H"
+#include "mc/reg00006.H"
 #endif

@@ -41,7 +41,7 @@ static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEA = 0x0c010f7eull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -49,7 +49,7 @@ static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEB = 0x0c010f77ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB_LEN = 17;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -73,7 +73,7 @@ static const uint32_t LINK1_INFO_REPLAY_CAP_SYN_LEN = 8;
 static const uint32_t LINK1_INFO_ACK_FIFO_CAP_VALID = 52;
 static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR = 55;
 static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -94,7 +94,7 @@ static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT = 32;
 static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT_LEN = 16;
 static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT = 48;
 static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT_LEN = 16;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -115,7 +115,7 @@ static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT = 32;
 static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT_LEN = 16;
 static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT = 48;
 static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT_LEN = 16;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -126,7 +126,7 @@ static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_TYPE = 1;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_TYPE_LEN = 8;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION = 9;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION_LEN = 31;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -155,9 +155,9 @@ static const uint32_t WRITE_WRTDBGMCA_WAT0_EVENT_SELECT_MCA = 20;
 static const uint32_t WRITE_WRTDBGMCA_WAT0_EVENT_SELECT_MCA_LEN = 4;
 static const uint32_t WRITE_WRTDBGMCA_WAT1_EVENT_SELECT_MCA = 24;
 static const uint32_t WRITE_WRTDBGMCA_WAT1_EVENT_SELECT_MCA_LEN = 4;
-// mcc/reg00069.H
+// mcc/reg00005.H
 
 }
 }
-#include "mcc/reg00069.H"
+#include "mcc/reg00005.H"
 #endif

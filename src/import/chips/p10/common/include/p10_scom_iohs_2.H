@@ -54,19 +54,19 @@ static const uint32_t AXON_CPLT_CTRL2_11_PGOOD = 15;
 static const uint32_t AXON_CPLT_CTRL2_12_PGOOD = 16;
 static const uint32_t AXON_CPLT_CTRL2_13_PGOOD = 17;
 static const uint32_t AXON_CPLT_CTRL2_14_PGOOD = 18;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_CPLT_MASK0 = 0x18000101ull;
 
 static const uint32_t AXON_CPLT_MASK0_ITR_MASK = 0;
 static const uint32_t AXON_CPLT_MASK0_ITR_MASK_LEN = 24;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_CTRL_PROTECT_MODE_REG = 0x180003feull;
 
 static const uint32_t AXON_CTRL_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t AXON_CTRL_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP3_MASK_REG = 0x18040016ull;
 
@@ -93,7 +93,7 @@ static const uint32_t AXON_EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_EPS_FIR_LOCAL_MASK_RW = 0x1804000dull;
 static const uint64_t AXON_EPS_FIR_LOCAL_MASK_WO_AND = 0x1804000eull;
@@ -148,10 +148,10 @@ static const uint32_t AXON_EPS_FIR_LOCAL_MASK_45 = 45;
 static const uint32_t AXON_EPS_FIR_LOCAL_MASK_46 = 46;
 static const uint32_t AXON_EPS_FIR_LOCAL_MASK_47 = 47;
 static const uint32_t AXON_EPS_FIR_LOCAL_MASK_48 = 48;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_DATA1 = 0x1805001aull;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 static const uint64_t AXON_LOCAL_FIR_RWX = 0x1804000aull;
 static const uint64_t AXON_LOCAL_FIR_WOX_AND = 0x1804000bull;
@@ -206,9 +206,9 @@ static const uint32_t AXON_LOCAL_FIR_45 = 45;
 static const uint32_t AXON_LOCAL_FIR_46 = 46;
 static const uint32_t AXON_LOCAL_FIR_47 = 47;
 static const uint32_t AXON_LOCAL_FIR_48 = 48;
-// iohs/reg00034.H
+// iohs/reg00002.H
 
 }
 }
-#include "iohs/reg00034.H"
+#include "iohs/reg00002.H"
 #endif

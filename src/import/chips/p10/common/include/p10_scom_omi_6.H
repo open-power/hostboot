@@ -37,5 +37,5 @@ namespace omi
 
 }
 }
-#include "omi/reg00102.H"
+#include "omi/reg00006.H"
 #endif

@@ -36,9 +36,9 @@ namespace phb
 
 
 static const uint64_t ETUX08_RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
-// phb/reg00239.H
+// phb/reg00011.H
 
 }
 }
-#include "phb/reg00239.H"
+#include "phb/reg00011.H"
 #endif

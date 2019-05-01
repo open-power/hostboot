@@ -39,18 +39,18 @@ static const uint64_t MULTICAST_GROUP_4 = 0x080f0004ull;
 
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
-// pec/reg00208.H
+// pec/reg00012.H
 
 static const uint64_t PRE_COUNTER_REG = 0x080f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
-// pec/reg00208.H
+// pec/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x080f001cull;
-// pec/reg00208.H
+// pec/reg00012.H
 
 }
 }
-#include "pec/reg00208.H"
+#include "pec/reg00012.H"
 #endif

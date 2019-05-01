@@ -52,16 +52,16 @@ static const uint32_t CLOCK_STAT_NSL_UNIT11_NSL = 15;
 static const uint32_t CLOCK_STAT_NSL_UNIT12_NSL = 16;
 static const uint32_t CLOCK_STAT_NSL_UNIT13_NSL = 17;
 static const uint32_t CLOCK_STAT_NSL_UNIT14_NSL = 18;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT2 = 0x0c0503c2ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT = 0;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT_LEN = 16;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_DATA1 = 0x0c0503daull;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t EPS_THERM_WSUB_MODE_REG = 0x0c0503cfull;
 
@@ -84,7 +84,7 @@ static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L1_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2 = 24;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t LOCAL_XSTOP = 0x0c0403d8ull;
 
@@ -104,10 +104,10 @@ static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN12 = 12;
 static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN13 = 13;
 static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN14 = 14;
 static const uint32_t LOCAL_XSTOP_LOCAL_XSTOP_IN15 = 15;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x0c0f03eaull;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t MBA_SCOMFIR_DBG0_SCOM1Q = 0x0c010fd5ull;
 
@@ -115,7 +115,7 @@ static const uint32_t MBA_SCOMFIR_DBG0_SCOM1Q_DEBUG_BUS_64_87 = 0;
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM1Q_DEBUG_BUS_64_87_LEN = 24;
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM1Q_RESERVED = 24;
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM1Q_RESERVED_LEN = 40;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t MBA_SCOMFIR_DBGCFG0Q = 0x0c010fe8ull;
 
@@ -130,13 +130,13 @@ static const uint32_t MBA_SCOMFIR_DBGCFG0Q_RESERVED_24_44_LEN = 21;
 static const uint32_t MBA_SCOMFIR_DBGCFG0Q_SCOM_SET_WAT_EXT_TRIGGER = 45;
 static const uint32_t MBA_SCOMFIR_DBGCFG0Q_SCOM_SET_WAT_EXT_RESET = 46;
 static const uint32_t MBA_SCOMFIR_DBGCFG0Q_SCOM_SET_WAT_EXT_ARM = 47;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x0c0f03c1ull;
 
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t NET_CTRL0_RWX = 0x0c0f03c0ull;
 static const uint64_t NET_CTRL0_RWX_WAND = 0x0c0f03c1ull;
@@ -171,15 +171,15 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t PHASE_COUNTER_RESET = 0x0c0303e8ull;
 
 static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x0c0f03d9ull;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t RFIR = 0x0c0403c1ull;
 
@@ -237,7 +237,7 @@ static const uint32_t RFIR_RECOV_IN50 = 50;
 static const uint32_t RFIR_RECOV_IN51 = 51;
 static const uint32_t RFIR_RECOV_IN52 = 52;
 static const uint32_t RFIR_RECOV_IN53 = 53;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t SCOMFIR_MCERPT0 = 0x0c010fdeull;
 
@@ -292,7 +292,7 @@ static const uint32_t SCOMFIR_MCERPT0_RCMD3_TRANSFERTAG_PARITY_ERROR = 58;
 static const uint32_t SCOMFIR_MCERPT0_MCFGPM0_PARITY_ERROR = 59;
 static const uint32_t SCOMFIR_MCERPT0_MCFGPM1_PARITY_ERROR = 60;
 static const uint32_t SCOMFIR_MCERPT0_MCWATCNTL2_PARITY_ERROR = 61;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t SCOMFIR_MCWATCNTL2 = 0x0c010fd9ull;
 
@@ -307,7 +307,7 @@ static const uint32_t SCOMFIR_MCWATCNTL2_CFG_PBI_DBG_SEL3_LEN = 7;
 static const uint32_t SCOMFIR_MCWATCNTL2_RESERVED_28_49 = 28;
 static const uint32_t SCOMFIR_MCWATCNTL2_RESERVED_28_49_LEN = 22;
 static const uint32_t SCOMFIR_MCWATCNTL2_CL_EARLY_HANG_MODE = 50;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t SPATTN_MASK = 0x0c0403c7ull;
 
@@ -346,7 +346,7 @@ static const uint32_t SPATTN_MASK_32 = 32;
 static const uint32_t SPATTN_MASK_33 = 33;
 static const uint32_t SPATTN_MASK_34 = 34;
 static const uint32_t SPATTN_MASK_35 = 35;
-// mc/reg00051.H
+// mc/reg00003.H
 
 static const uint64_t TRA0_TR0_CONFIG_3 = 0x0c0107c6ull;
 
@@ -354,9 +354,9 @@ static const uint32_t TRA0_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA0_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
-// mc/reg00051.H
+// mc/reg00003.H
 
 }
 }
-#include "mc/reg00051.H"
+#include "mc/reg00003.H"
 #endif

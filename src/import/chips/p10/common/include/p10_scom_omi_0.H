@@ -85,9 +85,9 @@ static const uint32_t ERROR_HOLD_03 = 60;
 static const uint32_t ERROR_HOLD_02 = 61;
 static const uint32_t ERROR_HOLD_01 = 62;
 static const uint32_t ERROR_HOLD_00 = 63;
-// omi/reg00096.H
+// omi/reg00000.H
 
 }
 }
-#include "omi/reg00096.H"
+#include "omi/reg00000.H"
 #endif

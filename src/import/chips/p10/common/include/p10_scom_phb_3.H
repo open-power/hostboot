@@ -36,10 +36,10 @@ namespace phb
 
 
 static const uint64_t ETUX08_RSB_REGS_WOF_REG = 0x08010910ull;
-// phb/reg00231.H
+// phb/reg00003.H
 
 static const uint64_t ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x08010915ull;
-// phb/reg00231.H
+// phb/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -54,7 +54,7 @@ static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_IODA_TABLE_AD
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_IODA_TABLE_DATA_ENABLE = 6;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_ADDR_ENABLE = 7;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_INDEX_ENABLE = 8;
-// phb/reg00231.H
+// phb/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -62,7 +62,7 @@ static const uint64_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK = 0x00000907
 
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE = 12;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE_LEN = 40;
-// phb/reg00231.H
+// phb/reg00003.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -73,9 +73,9 @@ static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_4B = 1;
 static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_AUTO_INC = 2;
 static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE_LEN = 11;
-// phb/reg00231.H
+// phb/reg00003.H
 
 }
 }
-#include "phb/reg00231.H"
+#include "phb/reg00003.H"
 #endif

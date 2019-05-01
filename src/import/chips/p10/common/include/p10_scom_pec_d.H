@@ -36,9 +36,9 @@ namespace pec
 
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x080f0000ull;
-// pec/reg00209.H
+// pec/reg00013.H
 
 }
 }
-#include "pec/reg00209.H"
+#include "pec/reg00013.H"
 #endif

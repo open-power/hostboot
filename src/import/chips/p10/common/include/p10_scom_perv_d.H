@@ -42,7 +42,7 @@ static const uint32_t CC_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CC_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t CTRL_ATOMIC_LOCK_REG = 0x000003ffull;
 
@@ -51,7 +51,7 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t DPLL_CNTL_NEST_REGS_STAT = 0x00000155ull;
 
@@ -63,10 +63,10 @@ static const uint32_t DPLL_CNTL_NEST_REGS_STAT_UPDATE_COMPLETE = 60;
 static const uint32_t DPLL_CNTL_NEST_REGS_STAT_FREQ_CHANGE = 61;
 static const uint32_t DPLL_CNTL_NEST_REGS_STAT_BLOCK_ACTIVE = 62;
 static const uint32_t DPLL_CNTL_NEST_REGS_STAT_LOCK = 63;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x000107d0ull;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t EPS_FIR_SUM_MASK_REG = 0x00040017ull;
 
@@ -75,14 +75,14 @@ static const uint32_t EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
 static const uint32_t EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB = 2;
 static const uint32_t EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
 static const uint32_t EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ = 0x0005003cull;
 
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_VALUE = 0;
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
-// perv/reg00225.H
+// perv/reg00013.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -115,7 +115,7 @@ static const uint32_t L3TRA0_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t L3TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L3TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// perv/reg00225.H
+// perv/reg00013.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -123,7 +123,7 @@ static const uint64_t L3TRA0_TR1_CONFIG_0 = 0x00018223ull;
 
 static const uint32_t L3TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00225.H
+// perv/reg00013.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -131,7 +131,7 @@ static const uint64_t L3TRA2_TR0_CONFIG_1 = 0x00018284ull;
 
 static const uint32_t L3TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L3TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// perv/reg00225.H
+// perv/reg00013.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -151,7 +151,7 @@ static const uint32_t L3TRA2_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA2_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA2_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA2_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// perv/reg00225.H
+// perv/reg00013.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -171,7 +171,7 @@ static const uint32_t L3TRA3_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t L3TRA3_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA3_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA3_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t OPCG_CAPT1 = 0x00030010ull;
 
@@ -201,13 +201,13 @@ static const uint32_t OPCG_CAPT1_SEQ_11 = 54;
 static const uint32_t OPCG_CAPT1_SEQ_11_LEN = 5;
 static const uint32_t OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x000f0000ull;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t SCAN_UPDATEDR_LONG = 0x0003b000ull;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA0_TR0_CONFIG_9 = 0x00010409ull;
 
@@ -238,19 +238,19 @@ static const uint32_t TRA0_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA0_TR1_CONFIG_0 = 0x00010443ull;
 
 static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA1_TR1_TRACE_HI_DATA_REG = 0x000104c0ull;
 
 static const uint32_t TRA1_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA1_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA2_TR0_TRACE_LO_DATA_REG = 0x00010501ull;
 
@@ -265,13 +265,13 @@ static const uint32_t TRA2_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA2_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA2_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA2_TR0_CONFIG_1 = 0x00010504ull;
 
 static const uint32_t TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA4_TR1_CONFIG = 0x00010642ull;
 
@@ -289,7 +289,7 @@ static const uint32_t TRA4_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA4_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA4_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA4_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA5_TR0_CONFIG = 0x00010682ull;
 
@@ -307,13 +307,13 @@ static const uint32_t TRA5_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
 static const uint32_t TRA5_TR0_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t TRA5_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA5_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA5_TR0_CONFIG_0 = 0x00010683ull;
 
 static const uint32_t TRA5_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TRA5_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// perv/reg00225.H
+// perv/reg00013.H
 
 static const uint64_t TRA5_TR1_CONFIG_9 = 0x000106c9ull;
 
@@ -344,9 +344,9 @@ static const uint32_t TRA5_TR1_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t TRA5_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA5_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA5_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// perv/reg00225.H
+// perv/reg00013.H
 
 }
 }
-#include "perv/reg00225.H"
+#include "perv/reg00013.H"
 #endif

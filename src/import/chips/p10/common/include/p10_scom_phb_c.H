@@ -36,14 +36,14 @@ namespace phb
 
 
 static const uint64_t ETUX08_RSB_REGS_ACTION1_REG = 0x0801090full;
-// phb/reg00240.H
+// phb/reg00012.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x00000913ull;
-// phb/reg00240.H
+// phb/reg00012.H
 
 }
 }
-#include "phb/reg00240.H"
+#include "phb/reg00012.H"
 #endif

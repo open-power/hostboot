@@ -42,7 +42,7 @@ static const uint32_t AXON_CC_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t AXON_CC_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t AXON_CC_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t AXON_CC_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_EPS_DBG_TRACE_MODE_REG_2 = 0x180107cfull;
 
@@ -56,7 +56,7 @@ static const uint32_t AXON_EPS_DBG_TRACE_MODE_REG_2_ACCUM_HIST_MODE = 20;
 static const uint32_t AXON_EPS_DBG_TRACE_MODE_REG_2_FRZ_COUNT_ON = 21;
 static const uint32_t AXON_EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK = 22;
 static const uint32_t AXON_EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK_LEN = 2;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_EPS_FIR_LOCAL_ACTION1 = 0x18040011ull;
 
@@ -109,10 +109,10 @@ static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_45 = 45;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_46 = 46;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_47 = 47;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION1_48 = 48;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_SCAN_UPDATEDR_LONG = 0x1803b000ull;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_SYNC_CONFIG = 0x18030000ull;
 
@@ -130,13 +130,13 @@ static const uint32_t AXON_SYNC_CONFIG_REGION_PGOOD_OVERRIDE = 12;
 static const uint32_t AXON_SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t AXON_SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t AXON_SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_0 = 0x18010403ull;
 
 static const uint32_t AXON_TRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 static const uint64_t AXON_XSTOP2 = 0x1803000dull;
 
@@ -161,9 +161,9 @@ static const uint32_t AXON_XSTOP2_XSTOP2_UNIT13 = 17;
 static const uint32_t AXON_XSTOP2_XSTOP2_UNIT14 = 18;
 static const uint32_t AXON_XSTOP2_XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP2_XSTOP2_WAIT_CYCLES_LEN = 12;
-// iohs/reg00042.H
+// iohs/reg00010.H
 
 }
 }
-#include "iohs/reg00042.H"
+#include "iohs/reg00010.H"
 #endif

@@ -73,13 +73,13 @@ static const uint32_t CONFIG0_VERSION = 56;
 static const uint32_t CONFIG0_VERSION_LEN = 6;
 static const uint32_t CONFIG0_RETRAIN = 62;
 static const uint32_t CONFIG0_RESET = 63;
-// omi/reg00107.H
+// omi/reg00011.H
 
 static const uint64_t DLX_CONFIG = 0x0c011768ull;
 
 static const uint32_t DLX_CONFIG_CFG_DLX1 = 32;
 static const uint32_t DLX_CONFIG_CFG_DLX1_LEN = 32;
-// omi/reg00107.H
+// omi/reg00011.H
 
 static const uint64_t ERROR_ACTION = 0x0c01176dull;
 
@@ -107,9 +107,9 @@ static const uint32_t ERROR_ACTION_1_ACTION = 56;
 static const uint32_t ERROR_ACTION_1_ACTION_LEN = 4;
 static const uint32_t ERROR_ACTION_0_ACTION = 60;
 static const uint32_t ERROR_ACTION_0_ACTION_LEN = 4;
-// omi/reg00107.H
+// omi/reg00011.H
 
 }
 }
-#include "omi/reg00107.H"
+#include "omi/reg00011.H"
 #endif

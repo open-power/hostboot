@@ -79,7 +79,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF2_BYP_RETRY_FULL_LEN = 2;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_DIS_NUM_CLEAN_MOD = 61;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_RESERVED_62 = 62;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_LOAD_RSVD_VALUES = 63;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -113,7 +113,7 @@ static const uint32_t CONTROL_1_ERR_INJ_COMMAND_LANES = 44;
 static const uint32_t CONTROL_1_ERR_INJ_COMMAND_LANES_LEN = 9;
 static const uint32_t CONTROL_1_COMMAND = 60;
 static const uint32_t CONTROL_1_COMMAND_LEN = 4;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -121,7 +121,7 @@ static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1A = 0x0c010f7aull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1A_KEY1A = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1A_KEY1A_LEN = 64;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -137,7 +137,7 @@ static const uint32_t LINK0_QUALITY_SPARE_COUNTER_1 = 49;
 static const uint32_t LINK0_QUALITY_SPARE_COUNTER_1_LEN = 7;
 static const uint32_t LINK0_QUALITY_SPARE_COUNTER_2 = 57;
 static const uint32_t LINK0_QUALITY_SPARE_COUNTER_2_LEN = 7;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -163,7 +163,7 @@ static const uint32_t LINK1_TX_LANE_CONTROL_08_CONTROL = 32;
 static const uint32_t LINK1_TX_LANE_CONTROL_08_CONTROL_LEN = 4;
 static const uint32_t LINK1_TX_LANE_CONTROL__FAILED = 48;
 static const uint32_t LINK1_TX_LANE_CONTROL__FAILED_LEN = 9;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -185,7 +185,7 @@ static const uint32_t WDF_DSTL_ECC_3_ERR_TYPE = 48;
 static const uint32_t WDF_DSTL_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WDF_DSTL_ECC_3_SYNDROME = 56;
 static const uint32_t WDF_DSTL_ECC_3_SYNDROME_LEN = 8;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -207,9 +207,9 @@ static const uint32_t WDF_ECC_3_ERR_TYPE = 48;
 static const uint32_t WDF_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WDF_ECC_3_SYNDROME = 56;
 static const uint32_t WDF_ECC_3_SYNDROME_LEN = 8;
-// mcc/reg00065.H
+// mcc/reg00001.H
 
 }
 }
-#include "mcc/reg00065.H"
+#include "mcc/reg00001.H"
 #endif

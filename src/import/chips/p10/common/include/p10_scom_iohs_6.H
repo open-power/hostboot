@@ -38,10 +38,10 @@ namespace iohs
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_FORCE_REG = 0x18050014ull;
 
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_FORCE_REG_F_SKITTER_READ = 0;
-// iohs/reg00038.H
+// iohs/reg00006.H
 
 static const uint64_t AXON_SCAN_LONG_ROTATE = 0x18039000ull;
-// iohs/reg00038.H
+// iohs/reg00006.H
 
 static const uint64_t AXON_SPATTN_NCX = 0x18040005ull;
 static const uint64_t AXON_SPATTN_ROX = 0x18040004ull;
@@ -82,7 +82,7 @@ static const uint32_t AXON_SPATTN_SPATTN_IN32 = 32;
 static const uint32_t AXON_SPATTN_SPATTN_IN33 = 33;
 static const uint32_t AXON_SPATTN_SPATTN_IN34 = 34;
 static const uint32_t AXON_SPATTN_SPATTN_IN35 = 35;
-// iohs/reg00038.H
+// iohs/reg00006.H
 
 static const uint64_t AXON_TRA0_TR0_TRACE_LO_DATA_REG = 0x18010401ull;
 
@@ -97,7 +97,7 @@ static const uint32_t AXON_TRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t AXON_TRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t AXON_TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t AXON_TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-// iohs/reg00038.H
+// iohs/reg00006.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_2 = 0x18010405ull;
 
@@ -105,9 +105,9 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_2_A = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_2_B_LEN = 24;
-// iohs/reg00038.H
+// iohs/reg00006.H
 
 }
 }
-#include "iohs/reg00038.H"
+#include "iohs/reg00006.H"
 #endif

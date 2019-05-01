@@ -41,9 +41,9 @@ static const uint32_t PM_REGS_DLR_APOR_ACTIVITY_ACCUM = 0;
 static const uint32_t PM_REGS_DLR_APOR_ACTIVITY_ACCUM_LEN = 32;
 static const uint32_t PM_REGS_DLR_APOR_BASE_ACCUM = 32;
 static const uint32_t PM_REGS_DLR_APOR_BASE_ACCUM_LEN = 32;
-// omi/reg00097.H
+// omi/reg00001.H
 
 }
 }
-#include "omi/reg00097.H"
+#include "omi/reg00001.H"
 #endif

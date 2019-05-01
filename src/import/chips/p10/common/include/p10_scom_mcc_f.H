@@ -55,7 +55,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHC = 24;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_LAT_THRESHC_LEN = 8;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED32_35 = 32;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED32_35_LEN = 4;
-// mcc/reg00079.H
+// mcc/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -63,7 +63,7 @@ static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEB = 0x0c010f7full;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB_LEN = 17;
-// mcc/reg00079.H
+// mcc/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -71,11 +71,13 @@ static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEA = 0x0c010f76ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
-// mcc/reg00079.H
+// mcc/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
-static const uint64_t MC_OMI_FIR_REG_ = 0x0c011b40ull;
+static const uint64_t MC_OMI_FIR_REG_SCOM = 0x0c011b40ull;
+static const uint64_t MC_OMI_FIR_REG_SCOM1 = 0x0c011b41ull;
+static const uint64_t MC_OMI_FIR_REG_SCOM2 = 0x0c011b42ull;
 
 static const uint32_t MC_OMI_FIR_REG_DL0_FATAL_ERROR = 0;
 static const uint32_t MC_OMI_FIR_REG_DL0_DATA_UE = 1;
@@ -118,7 +120,7 @@ static const uint32_t MC_OMI_FIR_REG_DL1_ENDPOINT_FIR5 = 37;
 static const uint32_t MC_OMI_FIR_REG_DL1_ENDPOINT_FIR6 = 38;
 static const uint32_t MC_OMI_FIR_REG_DL1_ENDPOINT_FIR7 = 39;
 static const uint32_t MC_OMI_FIR_REG_PERF_MON_WRAPPED = 60;
-// mcc/reg00079.H
+// mcc/reg00015.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -128,9 +130,9 @@ static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON = 0;
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 16;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON = 32;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 16;
-// mcc/reg00079.H
+// mcc/reg00015.H
 
 }
 }
-#include "mcc/reg00079.H"
+#include "mcc/reg00015.H"
 #endif

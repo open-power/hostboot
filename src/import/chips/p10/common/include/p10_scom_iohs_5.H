@@ -49,13 +49,13 @@ static const uint32_t AXON_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCES
 static const uint32_t AXON_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
 static const uint32_t AXON_EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t AXON_EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x18010007ull;
 
 static const uint32_t AXON_EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK = 0;
 static const uint32_t AXON_EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 32;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_EPS_PSC_PSCOM_STATUS_ERROR_REG = 0x18010001ull;
 
@@ -95,10 +95,10 @@ static const uint32_t AXON_EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_PCB_COMMAND_PA
 static const uint32_t AXON_EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_GENERAL_TIMEOUT = 33;
 static const uint32_t AXON_EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 34;
 static const uint32_t AXON_EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_CONTROL_REG = 0x18050012ull;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_LOCAL_XSTOP_MASK = 0x18040019ull;
 
@@ -117,21 +117,21 @@ static const uint32_t AXON_LOCAL_XSTOP_MASK_12 = 12;
 static const uint32_t AXON_LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t AXON_LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t AXON_LOCAL_XSTOP_MASK_15 = 15;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_PCB_OPCG_STOP = 0x18030030ull;
 
 static const uint32_t AXON_PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_SCAN32 = 0x18038000ull;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_SCAN64 = 0x1803e000ull;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_SCAN_CAPTUREDR_LONG = 0x1803d000ull;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_5 = 0x18010408ull;
 
@@ -139,7 +139,7 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_5_C = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_5_D = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_5_D_LEN = 24;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 static const uint64_t NET_CTRL1_RWX = 0x180f0044ull;
 static const uint64_t NET_CTRL1_RWX_WAND = 0x180f0045ull;
@@ -164,9 +164,9 @@ static const uint32_t NET_CTRL1_SENSEADJ_RESET1 = 24;
 static const uint32_t NET_CTRL1_CLK_PULSE_EN = 25;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE = 26;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE_LEN = 2;
-// iohs/reg00037.H
+// iohs/reg00005.H
 
 }
 }
-#include "iohs/reg00037.H"
+#include "iohs/reg00005.H"
 #endif

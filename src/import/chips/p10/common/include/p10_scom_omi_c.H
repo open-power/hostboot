@@ -39,10 +39,10 @@ static const uint64_t DLX_INFO = 0x0c011769ull;
 
 static const uint32_t DLX_INFO_DL1_STS_DLX_INFO = 0;
 static const uint32_t DLX_INFO_DL1_STS_DLX_INFO_LEN = 64;
-// omi/reg00108.H
+// omi/reg00012.H
 
 static const uint64_t PM_REGS_DLR_APSR = 0x0c011eb9ull;
-// omi/reg00108.H
+// omi/reg00012.H
 
 static const uint64_t TRAINING_STATUS = 0x0c011767ull;
 
@@ -62,9 +62,9 @@ static const uint32_t TRAINING_STATUS_RX_TS2 = 48;
 static const uint32_t TRAINING_STATUS_RX_TS2_LEN = 8;
 static const uint32_t TRAINING_STATUS_RX_TS3 = 56;
 static const uint32_t TRAINING_STATUS_RX_TS3_LEN = 8;
-// omi/reg00108.H
+// omi/reg00012.H
 
 }
 }
-#include "omi/reg00108.H"
+#include "omi/reg00012.H"
 #endif

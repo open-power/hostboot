@@ -39,7 +39,7 @@ static const uint64_t AXON_CC_PROTECT_MODE_REG = 0x180303feull;
 
 static const uint32_t AXON_CC_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t AXON_CC_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_CPLT_CTRL4_RW = 0x18000004ull;
 static const uint64_t AXON_CPLT_CTRL4_WO_CLEAR = 0x18000024ull;
@@ -60,13 +60,13 @@ static const uint32_t AXON_CPLT_CTRL4_11_FLUSHMODE_INH = 15;
 static const uint32_t AXON_CPLT_CTRL4_12_FLUSHMODE_INH = 16;
 static const uint32_t AXON_CPLT_CTRL4_13_FLUSHMODE_INH = 17;
 static const uint32_t AXON_CPLT_CTRL4_14_FLUSHMODE_INH = 18;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_EPS_DBG_INST1_COND_REG_3 = 0x180107c3ull;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_EPS_DBG_INST2_COND_REG_3 = 0x180107c6ull;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_EPS_DBG_TRACE_REG_0 = 0x180107cdull;
 
@@ -104,7 +104,7 @@ static const uint32_t AXON_EPS_DBG_TRACE_REG_0_TRIG0_LEVEL_SEL = 50;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_0_TRIG0_LEVEL_SEL_LEN = 4;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL = 54;
 static const uint32_t AXON_EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL_LEN = 4;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x18050016ull;
 
@@ -112,7 +112,7 @@ static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC = 0;
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_OPCG_REG1 = 0x18030003ull;
 
@@ -134,64 +134,64 @@ static const uint32_t AXON_OPCG_REG1_MISR_MODE = 57;
 static const uint32_t AXON_OPCG_REG1_INFINITE_MODE = 58;
 static const uint32_t AXON_OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t AXON_OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t AXON_SCAN_CAPTUREDR = 0x1803c000ull;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_0_REG = 0x180f0020ull;
 
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0 = 0;
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0_LEN = 6;
 static const uint32_t HANG_PULSE_0_REG_SUPPRESS_HANG_0 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_1_REG = 0x180f0021ull;
 
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1 = 0;
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1_LEN = 6;
 static const uint32_t HANG_PULSE_1_REG_SUPPRESS_HANG_1 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_2_REG = 0x180f0022ull;
 
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2 = 0;
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2_LEN = 6;
 static const uint32_t HANG_PULSE_2_REG_SUPPRESS_HANG_2 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_3_REG = 0x180f0023ull;
 
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3 = 0;
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3_LEN = 6;
 static const uint32_t HANG_PULSE_3_REG_SUPPRESS_HANG_3 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_4_REG = 0x180f0024ull;
 
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4 = 0;
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4_LEN = 6;
 static const uint32_t HANG_PULSE_4_REG_SUPPRESS_HANG_4 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_5_REG = 0x180f0025ull;
 
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5 = 0;
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5_LEN = 6;
 static const uint32_t HANG_PULSE_5_REG_SUPPRESS_HANG_5 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HANG_PULSE_6_REG = 0x180f0026ull;
 
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6 = 0;
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6_LEN = 6;
 static const uint32_t HANG_PULSE_6_REG_SUPPRESS_HANG_6 = 6;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 static const uint64_t HOSTATTN_INTERRUPT_REG = 0x180f002bull;
-// iohs/reg00039.H
+// iohs/reg00007.H
 
 }
 }
-#include "iohs/reg00039.H"
+#include "iohs/reg00007.H"
 #endif

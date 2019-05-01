@@ -39,21 +39,21 @@ static const uint64_t MULTICAST_GROUP_3 = 0x080f0003ull;
 
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP_LEN = 3;
-// pec/reg00211.H
+// pec/reg00015.H
 
 static const uint64_t PROTECT_MODE_REG = 0x080f03feull;
 
 static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
-// pec/reg00211.H
+// pec/reg00015.H
 
 static const uint64_t TIMEOUT_REG = 0x080f0010ull;
-// pec/reg00211.H
+// pec/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x080f0017ull;
-// pec/reg00211.H
+// pec/reg00015.H
 
 }
 }
-#include "pec/reg00211.H"
+#include "pec/reg00015.H"
 #endif

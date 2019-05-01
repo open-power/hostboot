@@ -52,7 +52,7 @@ static const uint32_t CYA_BITS_CRC_RETRAIN1 = 58;
 static const uint32_t CYA_BITS_CRC_RESET1 = 59;
 static const uint32_t CYA_BITS_RESERVED1 = 60;
 static const uint32_t CYA_BITS_RESERVED1_LEN = 4;
-// omi/reg00103.H
+// omi/reg00007.H
 
 static const uint64_t ERROR_MASK = 0x0c011762ull;
 
@@ -104,9 +104,9 @@ static const uint32_t ERROR_MASK_03 = 60;
 static const uint32_t ERROR_MASK_02 = 61;
 static const uint32_t ERROR_MASK_01 = 62;
 static const uint32_t ERROR_MASK_00 = 63;
-// omi/reg00103.H
+// omi/reg00007.H
 
 }
 }
-#include "omi/reg00103.H"
+#include "omi/reg00007.H"
 #endif

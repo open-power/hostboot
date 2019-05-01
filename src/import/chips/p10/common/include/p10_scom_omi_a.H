@@ -75,13 +75,13 @@ static const uint32_t CONFIG_TLEVENT_AFUFREEZE = 50;
 static const uint32_t CONFIG_TLEVENT_ALLFREEZE = 51;
 static const uint32_t CONFIG_CFG_SPARE = 52;
 static const uint32_t CONFIG_CFG_SPARE_LEN = 12;
-// omi/reg00106.H
+// omi/reg00010.H
 
 static const uint64_t ERROR_CAPTURE = 0x0c011764ull;
 
 static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO = 1;
 static const uint32_t ERROR_CAPTURE_DL1_ERROR_CAPTURE_INFO_LEN = 63;
-// omi/reg00106.H
+// omi/reg00010.H
 
 static const uint64_t STATUS = 0x0c011766ull;
 
@@ -111,9 +111,9 @@ static const uint32_t STATUS_RSVD3_LEN = 3;
 static const uint32_t STATUS_DESKEW_DONE = 55;
 static const uint32_t STATUS_LANES_DISABLED = 56;
 static const uint32_t STATUS_LANES_DISABLED_LEN = 8;
-// omi/reg00106.H
+// omi/reg00010.H
 
 }
 }
-#include "omi/reg00106.H"
+#include "omi/reg00010.H"
 #endif

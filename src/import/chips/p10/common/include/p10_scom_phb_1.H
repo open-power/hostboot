@@ -36,19 +36,19 @@ namespace phb
 
 
 static const uint64_t ETUX08_RSB_REGS_ACT0_REG = 0x0801090eull;
-// phb/reg00229.H
+// phb/reg00001.H
 
 static const uint64_t ETUX08_RSB_REGS_MASK_REG_RWX = 0x0801090bull;
 static const uint64_t ETUX08_RSB_REGS_MASK_REG_WOX_AND = 0x0801090cull;
 static const uint64_t ETUX08_RSB_REGS_MASK_REG_WOX_OR = 0x0801090dull;
-// phb/reg00229.H
+// phb/reg00001.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_REGS_PHB5_PMON_CONFIG = 0x00000917ull;
-// phb/reg00229.H
+// phb/reg00001.H
 
 }
 }
-#include "phb/reg00229.H"
+#include "phb/reg00001.H"
 #endif

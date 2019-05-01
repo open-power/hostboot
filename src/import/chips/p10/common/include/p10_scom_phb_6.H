@@ -99,17 +99,17 @@ static const uint32_t ETUX08_RSB_REGS_FIR_REG_TCE_COMMON_FATAL_ERROR = 59;
 static const uint32_t ETUX08_RSB_REGS_FIR_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t ETUX08_RSB_REGS_FIR_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t ETUX08_RSB_REGS_FIR_REG_FIR_INTERNAL_PARITY_ERROR = 63;
-// phb/reg00234.H
+// phb/reg00006.H
 
 static const uint64_t ETUX08_RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x08010913ull;
-// phb/reg00234.H
+// phb/reg00006.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_REGS_PHB5_PMON_EVENT_SEL = 0x00000918ull;
-// phb/reg00234.H
+// phb/reg00006.H
 
 }
 }
-#include "phb/reg00234.H"
+#include "phb/reg00006.H"
 #endif

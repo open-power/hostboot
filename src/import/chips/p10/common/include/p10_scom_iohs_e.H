@@ -62,7 +62,7 @@ static const uint32_t AXON_CLK_REGION_SEL_THOLD_ARY = 50;
 static const uint32_t AXON_CLK_REGION_CLOCK_PULSE_USE_EVEN = 52;
 static const uint32_t AXON_CLK_REGION_CLOCK_START_RUNN_SUPPR_FIRST_CLK = 53;
 static const uint32_t AXON_CLK_REGION_CLOCK_STOP_RUNN_SUPPR_LAST_CLK = 54;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_CPLT_CONF0_RW = 0x18000008ull;
 static const uint64_t AXON_CPLT_CONF0_WO_CLEAR = 0x18000028ull;
@@ -115,7 +115,7 @@ static const uint32_t AXON_CPLT_CONF0_FREE_USAGE_60G = 60;
 static const uint32_t AXON_CPLT_CONF0_FREE_USAGE_61G = 61;
 static const uint32_t AXON_CPLT_CONF0_FREE_USAGE_62G = 62;
 static const uint32_t AXON_CPLT_CONF0_FREE_USAGE_63G = 63;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_CPLT_CTRL0_RW = 0x18000000ull;
 static const uint64_t AXON_CPLT_CTRL0_WO_CLEAR = 0x18000020ull;
@@ -168,13 +168,13 @@ static const uint32_t AXON_CPLT_CTRL0_FREE_USAGE_60A = 60;
 static const uint32_t AXON_CPLT_CTRL0_FREE_USAGE_61A = 61;
 static const uint32_t AXON_CPLT_CTRL0_FREE_USAGE_62A = 62;
 static const uint32_t AXON_CPLT_CTRL0_FREE_USAGE_63A = 63;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_EPS_PSC_WRITE_PROTECT_ENABLE_REG = 0x18010005ull;
 
 static const uint32_t AXON_EPS_PSC_WRITE_PROTECT_ENABLE_REG_ENABLE_RING_LOCKING = 0;
 static const uint32_t AXON_EPS_PSC_WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_LOCAL_XSTOP = 0x18040018ull;
 
@@ -194,7 +194,7 @@ static const uint32_t AXON_LOCAL_XSTOP_LOCAL_XSTOP_IN12 = 12;
 static const uint32_t AXON_LOCAL_XSTOP_LOCAL_XSTOP_IN13 = 13;
 static const uint32_t AXON_LOCAL_XSTOP_LOCAL_XSTOP_IN14 = 14;
 static const uint32_t AXON_LOCAL_XSTOP_LOCAL_XSTOP_IN15 = 15;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_OPCG_ALIGN = 0x18030001ull;
 
@@ -220,15 +220,15 @@ static const uint32_t AXON_OPCG_ALIGN_SCAN_RATIO = 47;
 static const uint32_t AXON_OPCG_ALIGN_SCAN_RATIO_LEN = 5;
 static const uint32_t AXON_OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
 static const uint32_t AXON_OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_PHASE_COUNTER_RESET = 0x18030028ull;
 
 static const uint32_t AXON_PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_SCAN_UPDATEDR = 0x1803a000ull;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_SPATTN_MASK = 0x18040007ull;
 
@@ -267,7 +267,7 @@ static const uint32_t AXON_SPATTN_MASK_32 = 32;
 static const uint32_t AXON_SPATTN_MASK_33 = 33;
 static const uint32_t AXON_SPATTN_MASK_34 = 34;
 static const uint32_t AXON_SPATTN_MASK_35 = 35;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_9 = 0x18010409ull;
 
@@ -298,7 +298,7 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_9_ERROR_CMP_PATTERN = 33;
 static const uint32_t AXON_TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t AXON_TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t AXON_TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x180f001eull;
 
@@ -316,9 +316,9 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
-// iohs/reg00046.H
+// iohs/reg00014.H
 
 }
 }
-#include "iohs/reg00046.H"
+#include "iohs/reg00014.H"
 #endif

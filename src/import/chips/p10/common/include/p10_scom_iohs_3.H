@@ -56,7 +56,7 @@ static const uint32_t AXON_BIST_BIST_UNIT12 = 16;
 static const uint32_t AXON_BIST_BIST_UNIT13 = 17;
 static const uint32_t AXON_BIST_BIST_UNIT14 = 18;
 static const uint32_t AXON_BIST_BIST_STROBE_WINDOW_EN = 48;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_CLOCK_STAT_ARY = 0x1803000aull;
 
@@ -75,7 +75,7 @@ static const uint32_t AXON_CLOCK_STAT_ARY_UNIT11_ARY = 15;
 static const uint32_t AXON_CLOCK_STAT_ARY_UNIT12_ARY = 16;
 static const uint32_t AXON_CLOCK_STAT_ARY_UNIT13_ARY = 17;
 static const uint32_t AXON_CLOCK_STAT_ARY_UNIT14_ARY = 18;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_CLOCK_STAT_SL = 0x18030008ull;
 
@@ -94,7 +94,7 @@ static const uint32_t AXON_CLOCK_STAT_SL_UNIT11_SL = 15;
 static const uint32_t AXON_CLOCK_STAT_SL_UNIT12_SL = 16;
 static const uint32_t AXON_CLOCK_STAT_SL_UNIT13_SL = 17;
 static const uint32_t AXON_CLOCK_STAT_SL_UNIT14_SL = 18;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_EPS_FIR_MODE_REG = 0x18040008ull;
 
@@ -114,7 +114,7 @@ static const uint32_t AXON_EPS_FIR_MODE_REG_12 = 12;
 static const uint32_t AXON_EPS_FIR_MODE_REG_13 = 13;
 static const uint32_t AXON_EPS_FIR_MODE_REG_14 = 14;
 static const uint32_t AXON_EPS_FIR_MODE_REG_15 = 15;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_EPS_PSC_PSCOM_MODE_REG = 0x18010000ull;
 
@@ -128,7 +128,7 @@ static const uint32_t AXON_EPS_PSC_PSCOM_MODE_REG_FORCE_ALL_RINGS = 7;
 static const uint32_t AXON_EPS_PSC_PSCOM_MODE_REG_FSM_SELFRESET_ON_STATEVEC_PARITYERROR_ENABLE = 8;
 static const uint32_t AXON_EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t AXON_EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_OPCG_CAPT1 = 0x18030010ull;
 
@@ -158,13 +158,13 @@ static const uint32_t AXON_OPCG_CAPT1_SEQ_11 = 54;
 static const uint32_t AXON_OPCG_CAPT1_SEQ_11_LEN = 5;
 static const uint32_t AXON_OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t AXON_OPCG_CAPT1_SEQ_12_LEN = 5;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_TRA0_TR0_TRACE_HI_DATA_REG = 0x18010400ull;
 
 static const uint32_t AXON_TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t AXON_TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_4 = 0x18010407ull;
 
@@ -172,16 +172,16 @@ static const uint32_t AXON_TRA0_TR0_CONFIG_4_A = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_4_B = 24;
 static const uint32_t AXON_TRA0_TR0_CONFIG_4_B_LEN = 24;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x180f002aull;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x180f0001ull;
 
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t NET_CTRL0_RWX = 0x180f0040ull;
 static const uint64_t NET_CTRL0_RWX_WAND = 0x180f0041ull;
@@ -216,12 +216,12 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x180f0019ull;
-// iohs/reg00035.H
+// iohs/reg00003.H
 
 }
 }
-#include "iohs/reg00035.H"
+#include "iohs/reg00003.H"
 #endif

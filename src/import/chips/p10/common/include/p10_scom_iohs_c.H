@@ -59,7 +59,7 @@ static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_20I = 20;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_23I = 23;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP2_MASK_REG = 0x18040015ull;
 
@@ -86,7 +86,7 @@ static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t AXON_EPS_FIR_LOCAL_ACTION0 = 0x18040010ull;
 
@@ -139,7 +139,7 @@ static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_45 = 45;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_46 = 46;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_47 = 47;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_48 = 48;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t AXON_HOSTATTN = 0x18040009ull;
 
@@ -197,13 +197,13 @@ static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN50 = 50;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN51 = 51;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN52 = 52;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN53 = 53;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_1 = 0x18010404ull;
 
 static const uint32_t AXON_TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t AXON_XSTOP3 = 0x1803000eull;
 
@@ -228,24 +228,24 @@ static const uint32_t AXON_XSTOP3_XSTOP3_UNIT13 = 17;
 static const uint32_t AXON_XSTOP3_XSTOP3_UNIT14 = 18;
 static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t MULTICAST_GROUP_4 = 0x180f0004ull;
 
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t PRE_COUNTER_REG = 0x180f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x180f001cull;
-// iohs/reg00044.H
+// iohs/reg00012.H
 
 }
 }
-#include "iohs/reg00044.H"
+#include "iohs/reg00012.H"
 #endif

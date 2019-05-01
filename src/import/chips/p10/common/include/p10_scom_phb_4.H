@@ -39,9 +39,9 @@ static const uint64_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK = 0x08010907
 
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE = 12;
 static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE_LEN = 40;
-// phb/reg00232.H
+// phb/reg00004.H
 
 }
 }
-#include "phb/reg00232.H"
+#include "phb/reg00004.H"
 #endif

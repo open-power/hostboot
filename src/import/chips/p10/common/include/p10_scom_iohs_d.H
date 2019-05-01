@@ -36,7 +36,7 @@ namespace iohs
 
 
 static const uint64_t AXON_EPS_DBG_DEBUG_TRACE_CONTROL = 0x180107d0ull;
-// iohs/reg00045.H
+// iohs/reg00013.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_DTS_RESULT0 = 0x18050000ull;
 
@@ -46,7 +46,7 @@ static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT0_1_RESULT = 16;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT0_1_RESULT_LEN = 16;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT0_2_RESULT = 32;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT0_2_RESULT_LEN = 16;
-// iohs/reg00045.H
+// iohs/reg00013.H
 
 static const uint64_t AXON_OPCG_REG2 = 0x18030004ull;
 
@@ -62,12 +62,12 @@ static const uint32_t AXON_OPCG_REG2_PRPG_B_VAL_LEN = 12;
 static const uint32_t AXON_OPCG_REG2_PRPG_MODE = 40;
 static const uint32_t AXON_OPCG_REG2_SM_LBIST_CNTRL = 48;
 static const uint32_t AXON_OPCG_REG2_SM_LBIST_CNTRL_LEN = 16;
-// iohs/reg00045.H
+// iohs/reg00013.H
 
 static const uint64_t PRIMARY_ADDRESS_REG = 0x180f0000ull;
-// iohs/reg00045.H
+// iohs/reg00013.H
 
 }
 }
-#include "iohs/reg00045.H"
+#include "iohs/reg00013.H"
 #endif

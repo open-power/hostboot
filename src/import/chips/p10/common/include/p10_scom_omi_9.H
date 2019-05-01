@@ -53,12 +53,12 @@ static const uint32_t EDPL_MAX_COUNT_1_MAX_COUNT = 48;
 static const uint32_t EDPL_MAX_COUNT_1_MAX_COUNT_LEN = 8;
 static const uint32_t EDPL_MAX_COUNT_0_MAX_COUNT = 56;
 static const uint32_t EDPL_MAX_COUNT_0_MAX_COUNT_LEN = 8;
-// omi/reg00105.H
+// omi/reg00009.H
 
 static const uint64_t PM_REGS_DLR_APST = 0x0c011ebbull;
-// omi/reg00105.H
+// omi/reg00009.H
 
 }
 }
-#include "omi/reg00105.H"
+#include "omi/reg00009.H"
 #endif

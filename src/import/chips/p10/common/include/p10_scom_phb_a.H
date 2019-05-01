@@ -38,14 +38,14 @@ namespace phb
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_REGS_ACT0_REG = 0x0000090eull;
-// phb/reg00238.H
+// phb/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_REGS_MASK_REG_RWX = 0x0000090bull;
 static const uint64_t ETUX16_RSB_REGS_MASK_REG_WOX_AND = 0x0000090cull;
 static const uint64_t ETUX16_RSB_REGS_MASK_REG_WOX_OR = 0x0000090dull;
-// phb/reg00238.H
+// phb/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -54,9 +54,9 @@ static const uint64_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP = 0x00000906
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
-// phb/reg00238.H
+// phb/reg00010.H
 
 }
 }
-#include "phb/reg00238.H"
+#include "phb/reg00010.H"
 #endif

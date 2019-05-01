@@ -49,7 +49,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_CLX_DEBUG_SUM_MASK = 40;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_CLX_DEBUG_SUM_MASK_LEN = 22;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESET_KEEPER = 62;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESERVED63 = 63;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -73,7 +73,7 @@ static const uint32_t CONFIG_TIMEOUT = 48;
 static const uint32_t CONFIG_TIMEOUT_LEN = 4;
 static const uint32_t CONFIG_TIMER_1US = 52;
 static const uint32_t CONFIG_TIMER_1US_LEN = 12;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -99,7 +99,7 @@ static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER = 43;
 static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER_LEN = 5;
 static const uint32_t DLL_STATUS_0_LINK_CAP_VALID = 62;
 static const uint32_t DLL_STATUS_1_LINK_CAP_VALID = 63;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -149,7 +149,7 @@ static const uint32_t DSTL_DSTLERRRPT_WRDATA_CHANA_QUEUE_META_PARITY_ERR_HOLD_OU
 static const uint32_t DSTL_DSTLERRRPT_WRDATA_CHANB_QUEUE_META_PARITY_ERR_HOLD_OUT = 41;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_A_FAIL_STATE = 62;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE = 63;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -157,7 +157,7 @@ static const uint64_t DSTL_DSTLFIRWOF = 0x0c010d08ull;
 
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF = 0;
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF_LEN = 35;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -185,7 +185,7 @@ static const uint32_t DSTL_DSTLPSAVE0_SLAVE_PSAVE_EVENT_SEL = 36;
 static const uint32_t DSTL_DSTLPSAVE0_SLAVE_PSAVE_EVENT_SEL_LEN = 4;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_40_47 = 40;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_40_47_LEN = 8;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -220,7 +220,7 @@ static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN = 4;
 static const uint32_t OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS = 59;
 static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT = 60;
 static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN = 4;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -241,9 +241,9 @@ static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT = 32;
 static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT_LEN = 16;
 static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT = 48;
 static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT_LEN = 16;
-// mcc/reg00074.H
+// mcc/reg00010.H
 
 }
 }
-#include "mcc/reg00074.H"
+#include "mcc/reg00010.H"
 #endif

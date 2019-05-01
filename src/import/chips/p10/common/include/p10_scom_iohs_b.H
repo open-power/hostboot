@@ -42,10 +42,10 @@ static const uint32_t ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t ATTN_INTERRUPT_REG = 0x180f001aull;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_DBG_INST1_COND_REG_1 = 0x180107c1ull;
 
@@ -77,7 +77,7 @@ static const uint32_t AXON_EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT = 56;
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT_LEN = 4;
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT = 60;
 static const uint32_t AXON_EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT_LEN = 3;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_DBG_INST2_COND_REG_1 = 0x180107c4ull;
 
@@ -109,7 +109,7 @@ static const uint32_t AXON_EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT = 56;
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT_LEN = 4;
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT = 60;
 static const uint32_t AXON_EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT_LEN = 3;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP4_MASK_REG = 0x1804001bull;
 
@@ -136,13 +136,13 @@ static const uint32_t AXON_EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_PSC_WRITE_PROTECT_RINGS_REG = 0x18010006ull;
 
 static const uint32_t AXON_EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS = 0;
 static const uint32_t AXON_EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS_LEN = 32;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_DTS_RESULT1 = 0x18050001ull;
 
@@ -152,7 +152,7 @@ static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT1_5_RESULT = 16;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT1_5_RESULT_LEN = 16;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT1_6_RESULT = 32;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_RESULT1_6_RESULT_LEN = 16;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_DTS_TRC_RESULT = 0x18050003ull;
 
@@ -161,10 +161,10 @@ static const uint32_t AXON_EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_VALUE
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_OVERFLOW_ERR = 44;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT = 48;
 static const uint32_t AXON_EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT_LEN = 16;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_ERR_STATUS_REG = 0x18050013ull;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_EPS_THERM_WSUB_SKITTER_MODE_REG = 0x18050010ull;
 
@@ -178,7 +178,7 @@ static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS =
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS_LEN = 2;
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_TRIGGER = 44;
 static const uint32_t AXON_EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_FIR_MASK = 0x18040002ull;
 
@@ -235,7 +235,7 @@ static const uint32_t AXON_FIR_MASK_50 = 50;
 static const uint32_t AXON_FIR_MASK_51 = 51;
 static const uint32_t AXON_FIR_MASK_52 = 52;
 static const uint32_t AXON_FIR_MASK_53 = 53;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_SCAN_REGION_TYPE = 0x18030005ull;
 
@@ -270,7 +270,7 @@ static const uint32_t AXON_SCAN_REGION_TYPE_SCAN_TYPE_BNDY = 56;
 static const uint32_t AXON_SCAN_REGION_TYPE_SCAN_TYPE_FARR = 57;
 static const uint32_t AXON_SCAN_REGION_TYPE_SCAN_TYPE_CMSK = 58;
 static const uint32_t AXON_SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 static const uint64_t AXON_XFIR = 0x18040000ull;
 
@@ -328,9 +328,9 @@ static const uint32_t AXON_XFIR_XSTOP_IN50 = 50;
 static const uint32_t AXON_XFIR_XSTOP_IN51 = 51;
 static const uint32_t AXON_XFIR_XSTOP_IN52 = 52;
 static const uint32_t AXON_XFIR_XSTOP_IN53 = 53;
-// iohs/reg00043.H
+// iohs/reg00011.H
 
 }
 }
-#include "iohs/reg00043.H"
+#include "iohs/reg00011.H"
 #endif

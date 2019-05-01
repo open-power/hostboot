@@ -77,12 +77,12 @@ static const uint32_t CONFIG1_EDPL_TIME_LEN = 4;
 static const uint32_t CONFIG1_EDPL_THRESHOLD = 60;
 static const uint32_t CONFIG1_EDPL_THRESHOLD_LEN = 3;
 static const uint32_t CONFIG1_EDPL_ENA = 63;
-// omi/reg00109.H
+// omi/reg00013.H
 
 static const uint64_t PM_REGS_DLR_APCR = 0x0c011eb8ull;
-// omi/reg00109.H
+// omi/reg00013.H
 
 }
 }
-#include "omi/reg00109.H"
+#include "omi/reg00013.H"
 #endif

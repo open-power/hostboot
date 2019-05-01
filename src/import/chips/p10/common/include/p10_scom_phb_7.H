@@ -44,14 +44,14 @@ static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
 static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
-// phb/reg00235.H
+// phb/reg00007.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t ETUX16_RSB_REGS_WOF_REG = 0x00000910ull;
-// phb/reg00235.H
+// phb/reg00007.H
 
 }
 }
-#include "phb/reg00235.H"
+#include "phb/reg00007.H"
 #endif

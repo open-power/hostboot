@@ -36,13 +36,13 @@ namespace pec
 
 
 static const uint64_t ASSIST_INTERRUPT_REG = 0x080f0011ull;
-// pec/reg00204.H
+// pec/reg00008.H
 
 static const uint64_t EDRAM_STATUS = 0x080f0029ull;
 
 static const uint32_t EDRAM_STATUS_EDRAM_STAT = 0;
 static const uint32_t EDRAM_STATUS_EDRAM_STAT_LEN = 4;
-// pec/reg00204.H
+// pec/reg00008.H
 
 static const uint64_t ERROR_REG = 0x080f001full;
 
@@ -70,9 +70,9 @@ static const uint32_t ERROR_REG_CONFIG_REG_PARITY_ERROR = 22;
 static const uint32_t ERROR_REG_DIV_REG_PARITY_ERROR = 23;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR = 24;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR_LEN = 8;
-// pec/reg00204.H
+// pec/reg00008.H
 
 }
 }
-#include "pec/reg00204.H"
+#include "pec/reg00008.H"
 #endif

@@ -39,9 +39,9 @@ static const uint64_t MULTICAST_GROUP_2 = 0x080f0002ull;
 
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_2_MULTICAST2_GROUP_LEN = 3;
-// pec/reg00205.H
+// pec/reg00009.H
 
 }
 }
-#include "pec/reg00205.H"
+#include "pec/reg00009.H"
 #endif

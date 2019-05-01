@@ -59,13 +59,13 @@ static const uint32_t CPLT_STAT0_MC_TC_8_FIR_HOST_ATTN = 20;
 static const uint32_t CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t CPLT_STAT0_FREE_USAGE_23I = 23;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t MBA_SCOMFIR_DBG0_SCOM0Q = 0x0c010fd4ull;
 
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63 = 0;
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_63_LEN = 64;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t MBA_SCOMFIR_DBGCFG1Q = 0x0c010fe9ull;
 
@@ -79,14 +79,14 @@ static const uint32_t MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_RESET_SEL_LEN = 20;
 static const uint32_t MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL = 43;
 static const uint32_t MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_EXT_ARM_SEL_LEN = 20;
 static const uint32_t MBA_SCOMFIR_DBGCFG1Q_RESERVED_63 = 63;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t MBA_SCOMFIR_MCBCFGQ = 0x0c010fe0ull;
 
 static const uint32_t MBA_SCOMFIR_MCBCFGQ_RESET_KEEPER = 10;
 static const uint32_t MBA_SCOMFIR_MCBCFGQ_CFG_ENABLE_SPEC_ATTN = 62;
 static const uint32_t MBA_SCOMFIR_MCBCFGQ_CFG_ENABLE_HOST_ATTN = 63;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t MBA_SCOMFIR_MCWATDATA2 = 0x0c010fdcull;
 
@@ -94,7 +94,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA2_PATTERN_B = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA2_PATTERN_B_LEN = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA2_MASK_B = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA2_MASK_B_LEN = 22;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t SPATTN_NCX = 0x0c0403c5ull;
 static const uint64_t SPATTN_ROX = 0x0c0403c4ull;
@@ -135,7 +135,7 @@ static const uint32_t SPATTN_SPATTN_IN32 = 32;
 static const uint32_t SPATTN_SPATTN_IN33 = 33;
 static const uint32_t SPATTN_SPATTN_IN34 = 34;
 static const uint32_t SPATTN_SPATTN_IN35 = 35;
-// mc/reg00050.H
+// mc/reg00002.H
 
 static const uint64_t TRA1_TR0_CONFIG_3 = 0x0c0107c6ull;
 
@@ -143,9 +143,9 @@ static const uint32_t TRA1_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D_LEN = 24;
-// mc/reg00050.H
+// mc/reg00002.H
 
 }
 }
-#include "mc/reg00050.H"
+#include "mc/reg00002.H"
 #endif

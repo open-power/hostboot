@@ -101,9 +101,9 @@ static const uint32_t ETUX16_RSB_REGS_FIR_REG_TCE_COMMON_FATAL_ERROR = 59;
 static const uint32_t ETUX16_RSB_REGS_FIR_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t ETUX16_RSB_REGS_FIR_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t ETUX16_RSB_REGS_FIR_REG_FIR_INTERNAL_PARITY_ERROR = 63;
-// phb/reg00230.H
+// phb/reg00002.H
 
 }
 }
-#include "phb/reg00230.H"
+#include "phb/reg00002.H"
 #endif

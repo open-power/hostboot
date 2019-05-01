@@ -42,9 +42,9 @@ static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_UVIAR_REQ_4B = 1;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_UVIAR_AUTO_INC = 2;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE_LEN = 11;
-// phb/reg00242.H
+// phb/reg00014.H
 
 }
 }
-#include "phb/reg00242.H"
+#include "phb/reg00014.H"
 #endif

@@ -41,11 +41,13 @@ static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY2B = 0x0c010f75ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
-// mcc/reg00078.H
+// mcc/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
-static const uint64_t FIR_MASK_REG_ = 0x0c011003ull;
+static const uint64_t FIR_MASK_REG_SCOM = 0x0c011003ull;
+static const uint64_t FIR_MASK_REG_SCOM1 = 0x0c011004ull;
+static const uint64_t FIR_MASK_REG_SCOM2 = 0x0c011005ull;
 
 static const uint32_t FIR_MASK_REG_LINK0_TRAINED_MASK = 0;
 static const uint32_t FIR_MASK_REG_LINK1_TRAINED_MASK = 1;
@@ -108,7 +110,7 @@ static const uint32_t FIR_MASK_REG_LINK0_UNRECOVERABLE_ERROR_MASK = 58;
 static const uint32_t FIR_MASK_REG_LINK1_UNRECOVERABLE_ERROR_MASK = 59;
 static const uint32_t FIR_MASK_REG_LINK0_INTERNAL_ERROR_MASK = 60;
 static const uint32_t FIR_MASK_REG_LINK1_INTERNAL_ERROR_MASK = 61;
-// mcc/reg00078.H
+// mcc/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -118,7 +120,7 @@ static const uint32_t REGS_PRX0_DLR_APOR_ACTIVITY_ACCUM = 0;
 static const uint32_t REGS_PRX0_DLR_APOR_ACTIVITY_ACCUM_LEN = 32;
 static const uint32_t REGS_PRX0_DLR_APOR_BASE_ACCUM = 32;
 static const uint32_t REGS_PRX0_DLR_APOR_BASE_ACCUM_LEN = 32;
-// mcc/reg00078.H
+// mcc/reg00014.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -135,9 +137,9 @@ static const uint32_t USTL_USTLINJ_DATA_DW_SEL = 25;
 static const uint32_t USTL_USTLINJ_US_DATA_ERR_EN = 26;
 static const uint32_t USTL_USTLINJ_ONE_SHOT = 27;
 static const uint32_t USTL_USTLINJ_DATA_OUT = 28;
-// mcc/reg00078.H
+// mcc/reg00014.H
 
 }
 }
-#include "mcc/reg00078.H"
+#include "mcc/reg00014.H"
 #endif

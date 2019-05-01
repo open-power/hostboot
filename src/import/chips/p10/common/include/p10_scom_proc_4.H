@@ -45,13 +45,13 @@ static const uint32_t INT_CQ_END_BAR_SET_DIV_SEL_0_2 = 56;
 static const uint32_t INT_CQ_END_BAR_SET_DIV_SEL_0_2_LEN = 3;
 static const uint32_t INT_CQ_END_BAR_RANGE_0_4 = 59;
 static const uint32_t INT_CQ_END_BAR_RANGE_0_4_LEN = 5;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_CQ_PMC_1 = 0x02010829ull;
 
 static const uint32_t INT_CQ_PMC_1_INT_CQ_PMC_1_COUNT_0_47 = 16;
 static const uint32_t INT_CQ_PMC_1_INT_CQ_PMC_1_COUNT_0_47_LEN = 48;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_CQ_TTT_1 = 0x02010805ull;
 
@@ -73,19 +73,19 @@ static const uint32_t INT_CQ_TTT_1_ENTRY_6_0_3 = 32;
 static const uint32_t INT_CQ_TTT_1_ENTRY_6_0_3_LEN = 4;
 static const uint32_t INT_CQ_TTT_1_ENTRY_7_0_3 = 36;
 static const uint32_t INT_CQ_TTT_1_ENTRY_7_0_3_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_PC_NXC_REGS_SYNC_DONE = 0x02010a84ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_PC_NXC_REGS_WATCH0_DATA1 = 0x02010aa5ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_PC_NXC_REGS_WOF_ERR_DETAIL = 0x02010ad3ull;
 
 static const uint32_t INT_PC_NXC_REGS_WOF_ERR_DETAIL_INT_PC_NXC_WOF_ERR_DETAIL_ERROR = 0;
 static const uint32_t INT_PC_NXC_REGS_WOF_ERR_DETAIL_INT_PC_NXC_WOF_ERR_DETAIL_ERROR_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_PC_REGS_TCTXT_CFG = 0x02010b28ull;
 
@@ -113,7 +113,7 @@ static const uint32_t INT_PC_REGS_TCTXT_CFG_CFG_PCMD_ARB_QUERY_PRIO = 28;
 static const uint32_t INT_PC_REGS_TCTXT_CFG_CFG_PCMD_ARB_QUERY_PRIO_LEN = 2;
 static const uint32_t INT_PC_REGS_TCTXT_CFG_CFG_LGS_AGE = 30;
 static const uint32_t INT_PC_REGS_TCTXT_CFG_CFG_LGS_AGE_LEN = 2;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_EASC_PERF_EVENT_SEL_1 = 0x02010978ull;
 
@@ -149,7 +149,7 @@ static const uint32_t INT_VC_EASC_PERF_EVENT_SEL_1_HARD_DOES_DEM = 56;
 static const uint32_t INT_VC_EASC_PERF_EVENT_SEL_1_HARD_DOES_DEM_LEN = 4;
 static const uint32_t INT_VC_EASC_PERF_EVENT_SEL_1_LOC_DOES_DEM = 60;
 static const uint32_t INT_VC_EASC_PERF_EVENT_SEL_1_LOC_DOES_DEM_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_ENDC_FLUSH_CTRL = 0x02010980ull;
 
@@ -160,7 +160,7 @@ static const uint32_t INT_VC_ENDC_FLUSH_CTRL_POLL_WANT_INVALIDATE = 3;
 static const uint32_t INT_VC_ENDC_FLUSH_CTRL_RESERVED_4_6 = 4;
 static const uint32_t INT_VC_ENDC_FLUSH_CTRL_RESERVED_4_6_LEN = 3;
 static const uint32_t INT_VC_ENDC_FLUSH_CTRL_INJECT_WANT_INVALIDATE = 7;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_ENDC_PERF_EVENT_SEL_1 = 0x02010998ull;
 
@@ -196,10 +196,10 @@ static const uint32_t INT_VC_ENDC_PERF_EVENT_SEL_1_CMD_FROM_POOL = 56;
 static const uint32_t INT_VC_ENDC_PERF_EVENT_SEL_1_CMD_FROM_POOL_LEN = 4;
 static const uint32_t INT_VC_ENDC_PERF_EVENT_SEL_1_CMD_FROM_HARD = 60;
 static const uint32_t INT_VC_ENDC_PERF_EVENT_SEL_1_CMD_FROM_HARD_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_ENDC_WATCH3_DATA3 = 0x020109bfull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_ENDC_WATCH3_SPEC = 0x020109b8ull;
 
@@ -215,13 +215,13 @@ static const uint32_t INT_VC_ENDC_WATCH3_SPEC_RESERVED_32_39 = 32;
 static const uint32_t INT_VC_ENDC_WATCH3_SPEC_RESERVED_32_39_LEN = 8;
 static const uint32_t INT_VC_ENDC_WATCH3_SPEC_OFFSET = 40;
 static const uint32_t INT_VC_ENDC_WATCH3_SPEC_OFFSET_LEN = 24;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_ESBC_DBG_CACHE_EN = 0x02010955ull;
 
 static const uint32_t INT_VC_ESBC_DBG_CACHE_EN_INT_VC_ESBC_DBG_CACHE_EN_ENABLE = 0;
 static const uint32_t INT_VC_ESBC_DBG_CACHE_EN_INT_VC_ESBC_DBG_CACHE_EN_ENABLE_LEN = 16;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_QUEUES_CFG_REM_6 = 0x0201091dull;
 
@@ -258,7 +258,7 @@ static const uint32_t INT_VC_QUEUES_CFG_REM_6_RESERVED_48_49_LEN = 2;
 static const uint32_t INT_VC_QUEUES_CFG_REM_6_ERQ_FULL = 50;
 static const uint32_t INT_VC_QUEUES_CFG_REM_6_ERQ_IDLE = 51;
 static const uint32_t INT_VC_QUEUES_CFG_REM_6_ERQ_CFG_UPD_PND = 52;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_QUEUES_PERF_EVENT_SEL_5 = 0x0201092bull;
 
@@ -278,22 +278,22 @@ static const uint32_t INT_VC_QUEUES_PERF_EVENT_SEL_5_EQA_TO_ATX = 24;
 static const uint32_t INT_VC_QUEUES_PERF_EVENT_SEL_5_EQA_TO_ATX_LEN = 4;
 static const uint32_t INT_VC_QUEUES_PERF_EVENT_SEL_5_EQA_TO_ENDC = 28;
 static const uint32_t INT_VC_QUEUES_PERF_EVENT_SEL_5_EQA_TO_ENDC_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t INT_VC_VSD_TABLE_DATA = 0x02010901ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t MM0_MM_NMMU_PMU0_CTL_REG = 0x02010c4dull;
 
 static const uint32_t MM0_MM_NMMU_PMU0_CTL_REG_MM_PMU0_CTL = 0;
 static const uint32_t MM0_MM_NMMU_PMU0_CTL_REG_MM_PMU0_CTL_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t MM1_MM_CFG_NMMU_XLAT_CTL_REG1 = 0x03010c4bull;
 
 static const uint32_t MM1_MM_CFG_NMMU_XLAT_CTL_REG1_MM_CFG_XLAT_CTL_PTCR = 0;
 static const uint32_t MM1_MM_CFG_NMMU_XLAT_CTL_REG1_MM_CFG_XLAT_CTL_PTCR_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG = 0x03010c16ull;
 
@@ -303,7 +303,7 @@ static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_TARG_MIN 
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_TARG_MIN_LEN = 6;
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_CRED_MASK = 38;
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_CRED_MASK_LEN = 3;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX = 0x03010c00ull;
 static const uint64_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND = 0x03010c01ull;
@@ -329,25 +329,25 @@ static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR 
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR = 17;
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR = 18;
 static const uint32_t MM1_MM_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR = 19;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t MM1_MM_NMMU_PMU0_CTL_REG = 0x03010c4dull;
 
 static const uint32_t MM1_MM_NMMU_PMU0_CTL_REG_MM_PMU0_CTL = 0;
 static const uint32_t MM1_MM_NMMU_PMU0_CTL_REG_MM_PMU0_CTL_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t NX_CH4_ADDR_5_HASH_FUNCTION_REG = 0x02011146ull;
 
 static const uint32_t NX_CH4_ADDR_5_HASH_FUNCTION_REG_ADDRESS_5_HASH_FUNCTION = 0;
 static const uint32_t NX_CH4_ADDR_5_HASH_FUNCTION_REG_ADDRESS_5_HASH_FUNCTION_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t NX_CH4_DATATAG_1_HASH_FUNCTION_REG = 0x0201114dull;
 
 static const uint32_t NX_CH4_DATATAG_1_HASH_FUNCTION_REG_DATATAG_1_HASH_FUNCTION = 0;
 static const uint32_t NX_CH4_DATATAG_1_HASH_FUNCTION_REG_DATATAG_1_HASH_FUNCTION_LEN = 64;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t NX_DBG_ERRORINJ_CTRL = 0x0201110cull;
 
@@ -388,7 +388,7 @@ static const uint32_t NX_DBG_ERRORINJ_CTRL_CH4GZIP_ERRORINJ_SELECT = 51;
 static const uint32_t NX_DBG_ERRORINJ_CTRL_CH4GZIP_ERRORINJ_SELECT_LEN = 8;
 static const uint32_t NX_DBG_ERRORINJ_CTRL_DMA_OUTWR_QW0_UEINJ_ENA = 59;
 static const uint32_t NX_DBG_ERRORINJ_CTRL_DMA_OUTWR_QW4_UEINJ_ENA = 60;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t NX_DMA_WATCHDOG_HANG_TIMERS_CNTL = 0x0201105cull;
 
@@ -410,10 +410,10 @@ static const uint32_t NX_DMA_WATCHDOG_HANG_TIMERS_CNTL_CH4_WATCHDOG_REF_DIV_LEN 
 static const uint32_t NX_DMA_WATCHDOG_HANG_TIMERS_CNTL_DMA_HANG_TIMER_ENBL = 25;
 static const uint32_t NX_DMA_WATCHDOG_HANG_TIMERS_CNTL_DMA_HANG_TIMER_REF_DIV = 26;
 static const uint32_t NX_DMA_WATCHDOG_HANG_TIMERS_CNTL_DMA_HANG_TIMER_REF_DIV_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t NX_PBI_CQ_WRAP_NXCQ_SCOM_FIR_WOF_REG = 0x02011088ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM10_CFG_TLPM_REG = 0x1001181aull;
 
@@ -465,7 +465,7 @@ static const uint32_t PB_PTLSCOM10_CFG_TLPM_REG_CASCADE_PMU3 = 47;
 static const uint32_t PB_PTLSCOM10_CFG_TLPM_REG_CASCADE_PMU3_LEN = 3;
 static const uint32_t PB_PTLSCOM10_CFG_TLPM_REG_SPARE = 50;
 static const uint32_t PB_PTLSCOM10_CFG_TLPM_REG_SPARE_LEN = 6;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM10_FP23_CFG = 0x1001180bull;
 
@@ -499,10 +499,10 @@ static const uint32_t PB_PTLSCOM10_FP23_CFG_3_RUN_AFTER_FRAME_ERROR = 56;
 static const uint32_t PB_PTLSCOM10_FP23_CFG_3_BRICKWALL_CREDITS_TO_NEST = 57;
 static const uint32_t PB_PTLSCOM10_FP23_CFG_3_PRS_SPARE = 58;
 static const uint32_t PB_PTLSCOM10_FP23_CFG_3_PRS_SPARE_LEN = 6;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM10_PMU0_TLPM_COUNTER = 0x1001181bull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM10_PSAVE23_MISC_CFG = 0x10011817ull;
 
@@ -528,7 +528,7 @@ static const uint32_t PB_PTLSCOM10_PSAVE23_MISC_CFG_QTR_SPARE = 54;
 static const uint32_t PB_PTLSCOM10_PSAVE23_MISC_CFG_QTR_SPARE_LEN = 2;
 static const uint32_t PB_PTLSCOM10_PSAVE23_MISC_CFG_WSIZE = 56;
 static const uint32_t PB_PTLSCOM10_PSAVE23_MISC_CFG_WSIZE_LEN = 3;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM23_MAILBOX_CTL_REG = 0x1101182eull;
 
@@ -545,10 +545,10 @@ static const uint32_t PB_PTLSCOM23_MAILBOX_CTL_REG_B_LINK_ID = 9;
 static const uint32_t PB_PTLSCOM23_MAILBOX_CTL_REG_B_LINK_ID_LEN = 3;
 static const uint32_t PB_PTLSCOM23_MAILBOX_CTL_REG_B_SPARE = 12;
 static const uint32_t PB_PTLSCOM23_MAILBOX_CTL_REG_B_SPARE_LEN = 4;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM23_PMU2_TLPM_COUNTER = 0x1101181dull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM45_CFG_CNPM_REG = 0x1201181full;
 
@@ -600,10 +600,10 @@ static const uint32_t PB_PTLSCOM45_CFG_CNPM_REG_CASCADE_PMU3 = 47;
 static const uint32_t PB_PTLSCOM45_CFG_CNPM_REG_CASCADE_PMU3_LEN = 3;
 static const uint32_t PB_PTLSCOM45_CFG_CNPM_REG_SPARE = 50;
 static const uint32_t PB_PTLSCOM45_CFG_CNPM_REG_SPARE_LEN = 6;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM45_EN_DOB_ECC_ERR_REG = 0x12011818ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM45_PSAVE01_MODE_CFG = 0x12011814ull;
 
@@ -615,16 +615,16 @@ static const uint32_t PB_PTLSCOM45_PSAVE01_MODE_CFG_SPARE = 5;
 static const uint32_t PB_PTLSCOM45_PSAVE01_MODE_CFG_SPARE_LEN = 3;
 static const uint32_t PB_PTLSCOM45_PSAVE01_MODE_CFG_MIN_RAND_UC = 8;
 static const uint32_t PB_PTLSCOM45_PSAVE01_MODE_CFG_MIN_RAND_UC_LEN = 8;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM67_PTL_FIR_WOF_REG = 0x13011808ull;
 
 static const uint32_t PB_PTLSCOM67_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF = 0;
 static const uint32_t PB_PTLSCOM67_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF_LEN = 62;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_PTLSCOM67_TL_LINK_SYN_01_REG = 0x13011812ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_BRIDGE_HCA_MONITOR_0_ADDRESS_REG = 0x0301240dull;
 
@@ -633,7 +633,7 @@ static const uint32_t PB_BRIDGE_HCA_MONITOR_0_ADDRESS_REG_ADDRESS = 13;
 static const uint32_t PB_BRIDGE_HCA_MONITOR_0_ADDRESS_REG_ADDRESS_LEN = 17;
 static const uint32_t PB_BRIDGE_HCA_MONITOR_0_ADDRESS_REG_SIZE = 32;
 static const uint32_t PB_BRIDGE_HCA_MONITOR_0_ADDRESS_REG_SIZE_LEN = 15;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_FILT = 0x03011c86ull;
 
@@ -645,7 +645,7 @@ static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_FILT_MASK = 32;
 static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_FILT_MASK_LEN = 23;
 static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_FILT_CRESP_MASK = 59;
 static const uint32_t PB_BRIDGE_NHTM_NHTM0_SC_HTM_FILT_CRESP_MASK_LEN = 5;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBAIB_REGS_STACK_2_PBAIBTXCCR_REG = 0x080108cdull;
 
@@ -665,7 +665,7 @@ static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PBAIBTXCCR_REG_3_CCA = 48;
 static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PBAIBTXCCR_REG_3_CCA_LEN = 3;
 static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PBAIBTXCCR_REG_3_CCR = 58;
 static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PBAIBTXCCR_REG_3_CCR_LEN = 6;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBAIB_REGS_STACK_2_PFIR_REG_RWX = 0x080108c0ull;
 static const uint64_t PE0_PB_PBAIB_REGS_STACK_2_PFIR_REG_WOX_AND = 0x080108c1ull;
@@ -673,19 +673,19 @@ static const uint64_t PE0_PB_PBAIB_REGS_STACK_2_PFIR_REG_WOX_OR = 0x080108c2ull;
 
 static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PFIR_REG_PFIRPFIR = 0;
 static const uint32_t PE0_PB_PBAIB_REGS_STACK_2_PFIR_REG_PFIRPFIR_LEN = 6;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR0_REG = 0x0201184eull;
 
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR0_REG_PE_MMIO_BAR0 = 0;
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR0_REG_PE_MMIO_BAR0_LEN = 40;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR1_REG = 0x02011850ull;
 
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR1_REG_PE_MMIO_BAR1 = 0;
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_0_REGS_MMIOBAR1_REG_PE_MMIO_BAR1_LEN = 40;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_NFIR_REG_RWX = 0x02011880ull;
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_NFIR_REG_WOX_AND = 0x02011881ull;
@@ -693,22 +693,22 @@ static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_NFIR_REG_WOX_OR = 0x0201
 
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_NFIR_REG_NFIRNFIR = 0;
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_NFIR_REG_NFIRNFIR_LEN = 28;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_PE_DFREEZE_REG = 0x02011895ull;
 
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_PE_DFREEZE_REG_PE_DFREEZE = 0;
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_1_REGS_PE_DFREEZE_REG_PE_DFREEZE_LEN = 28;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PB_PBCQ_PEPBREGS_STACK_2_REGS_MMIOBAR0_MASK_REG = 0x020118cfull;
 
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_2_REGS_MMIOBAR0_MASK_REG_PE_MMIO_MASK0 = 0;
 static const uint32_t PE0_PB_PBCQ_PEPBREGS_STACK_2_REGS_MMIOBAR0_MASK_REG_PE_MMIO_MASK0_LEN = 40;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PHB0_ETUX16_RSB_REGS_PHB5_PMON_COUNTERS = 0x08010919ull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 static const uint64_t PE0_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR = 0x08010900ull;
 
@@ -717,17 +717,17 @@ static const uint32_t PE0_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_4B = 1;
 static const uint32_t PE0_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_AUTO_INC = 2;
 static const uint32_t PE0_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t PE0_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN = 11;
-// proc/reg00256.H
+// proc/reg00016.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t PE0_PHB1_ETUX08_RSB_REGS_ACTION1_REG = 0x0000094full;
-// proc/reg00256.H
+// proc/reg00016.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t PE0_PHB2_ETUX08_RSB_REGS_ACT0_REG = 0x0000098eull;
-// proc/reg00256.H
+// proc/reg00016.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -795,32 +795,32 @@ static const uint32_t PE0_PHB2_ETUX08_RSB_REGS_FIR_REG_TCE_COMMON_FATAL_ERROR = 
 static const uint32_t PE0_PHB2_ETUX08_RSB_REGS_FIR_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t PE0_PHB2_ETUX08_RSB_REGS_FIR_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t PE0_PHB2_ETUX08_RSB_REGS_FIR_REG_FIR_INTERNAL_PARITY_ERROR = 63;
-// proc/reg00257.H
+// proc/reg00017.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t PE0_PHB2_ETUX08_RSB_REGS_MASK_REG_RWX = 0x0000098bull;
 static const uint64_t PE0_PHB2_ETUX08_RSB_REGS_MASK_REG_WOX_AND = 0x0000098cull;
 static const uint64_t PE0_PHB2_ETUX08_RSB_REGS_MASK_REG_WOX_OR = 0x0000098dull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t PE1_PB_PBAIB_REGS_STACK_1_CERR_RPT_REG = 0x0901088bull;
 
 static const uint32_t PE1_PB_PBAIB_REGS_STACK_1_CERR_RPT_REG_PBAIB_CERR_RPT0 = 0;
 static const uint32_t PE1_PB_PBAIB_REGS_STACK_1_CERR_RPT_REG_PBAIB_CERR_RPT0_LEN = 21;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t PE1_PB_PBCQ_PEPBREGS_STACK_0_REGS_INTBAR_REG = 0x03011853ull;
 
 static const uint32_t PE1_PB_PBCQ_PEPBREGS_STACK_0_REGS_INTBAR_REG_PE_INT_BAR = 0;
 static const uint32_t PE1_PB_PBCQ_PEPBREGS_STACK_0_REGS_INTBAR_REG_PE_INT_BAR_LEN = 28;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t PE1_PB_PBCQ_PEPBREGS_STACK_2_REGS_PE_DFREEZE_REG = 0x030118d5ull;
 
 static const uint32_t PE1_PB_PBCQ_PEPBREGS_STACK_2_REGS_PE_DFREEZE_REG_PE_DFREEZE = 0;
 static const uint32_t PE1_PB_PBCQ_PEPBREGS_STACK_2_REGS_PE_DFREEZE_REG_PE_DFREEZE_LEN = 28;
-// proc/reg00257.H
+// proc/reg00017.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -831,15 +831,15 @@ static const uint32_t PE1_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_4B = 1;
 static const uint32_t PE1_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_AUTO_INC = 2;
 static const uint32_t PE1_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t PE1_PHB0_ETUX16_RSB_SCOM_SSR_PHB4_UVIAR_REQ_ADDR_VALUE_LEN = 11;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t PE1_PHB1_ETUX08_RSB_REGS_ACT0_REG = 0x0901094eull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t PE1_PHB1_ETUX08_RSB_REGS_MASK_REG_RWX = 0x0901094bull;
 static const uint64_t PE1_PHB1_ETUX08_RSB_REGS_MASK_REG_WOX_AND = 0x0901094cull;
 static const uint64_t PE1_PHB1_ETUX08_RSB_REGS_MASK_REG_WOX_OR = 0x0901094dull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPBR_AD_ADS_XSCOM_CMD_REG = 0x03001c1cull;
 
@@ -848,7 +848,7 @@ static const uint32_t TP_TPBR_AD_ADS_XSCOM_CMD_REG_SIZE = 5;
 static const uint32_t TP_TPBR_AD_ADS_XSCOM_CMD_REG_SIZE_LEN = 7;
 static const uint32_t TP_TPBR_AD_ADS_XSCOM_CMD_REG_ADR = 30;
 static const uint32_t TP_TPBR_AD_ADS_XSCOM_CMD_REG_ADR_LEN = 34;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPBR_PBA_PBAF_PBAPBTXT3 = 0x03021cd3ull;
 
@@ -870,13 +870,19 @@ static const uint32_t TP_TPBR_PBA_PBAF_PBAPBTXT3_6 = 32;
 static const uint32_t TP_TPBR_PBA_PBAF_PBAPBTXT3_6_LEN = 4;
 static const uint32_t TP_TPBR_PBA_PBAF_PBAPBTXT3_7 = 36;
 static const uint32_t TP_TPBR_PBA_PBAF_PBAPBTXT3_7_LEN = 4;
-// proc/reg00257.H
+// proc/reg00017.H
+
+static const uint64_t TP_TPBR_PBA_PBAO_BCUE_OCIBAR = 0x00068019ull;
+
+static const uint32_t TP_TPBR_PBA_PBAO_BCUE_OCIBAR_BCUE_OCIBAR_ADDR = 0;
+static const uint32_t TP_TPBR_PBA_PBAO_BCUE_OCIBAR_BCUE_OCIBAR_ADDR_LEN = 25;
+// proc/reg00017.H
 
 static const uint64_t TP_TPBR_PSIHB_IVT_OFFSET = 0x03011d18ull;
 
 static const uint32_t TP_TPBR_PSIHB_IVT_OFFSET_IVT_OFFSET_PAYLOAD = 0;
 static const uint32_t TP_TPBR_PSIHB_IVT_OFFSET_IVT_OFFSET_PAYLOAD_LEN = 28;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OACR = 0x0006d207ull;
 
@@ -887,7 +893,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OACR_HI_BUS_MODE = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OACR_READ_PIPELINE_CONTROL = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OACR_READ_PIPELINE_CONTROL_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_ARB_OCB_PIB_OACR_WRITE_PIPELINE_CONTROL = 7;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL = 0x00060000ull;
 
@@ -895,19 +901,19 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL_WATCHDOG_SEL = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL_WATCHDOG_SEL_LEN = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL_FIT_SEL = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL_FIT_SEL_LEN = 4;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIGPR0 = 0x00060040ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIGPR0_OCB_OCI_GPEXIVDR0_GPR0 = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE0_OCB_GPEXIGPR0_OCB_OCI_GPEXIVDR0_GPR0_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMGA = 0x00064012ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMGA_OCB_OCI_GPEXIRAMEDR_IR = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIRAMGA_OCB_OCI_GPEXIRAMEDR_IR_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIB = 0x00064016ull;
 
@@ -921,7 +927,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIB_RSP_INFO_LEN = 3;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIB_RESET_PENDING = 61;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIB_IFETCH_PENDING = 62;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIB_DATAOP_PENDING = 63;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBL = 0x00064027ull;
 
@@ -932,25 +938,25 @@ static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBL_RSP_INFO = 17;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBL_RSP_INFO_LEN = 3;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBL_IFETCH_PENDING = 30;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBL_DATAOP_PENDING = 31;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBU = 0x00064026ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBU_OCB_OCI_GPEXISIB_PIB_ADDR = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXISIBU_OCB_OCI_GPEXISIB_PIB_ADDR_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIGPR4 = 0x00066044ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIGPR4_OCB_OCI_GPEXIVDR4_GPR4 = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIGPR4_OCB_OCI_GPEXIVDR4_GPR4_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR = 0x00066031ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR_OCB_OCI_GPEXIDBGINF_LR = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXILR_OCB_OCI_GPEXIDBGINF_LR_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1 = 0x0006c801ull;
 
@@ -965,7 +971,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_NR_OF_FRAMES_LEN = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_HWCTRL_WRITE_WHILE_BRIDGE_BUSY_SCRESP_EN = 19;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_BUSY_RESPONSE_CODE = 20;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADCCR1_BUSY_RESPONSE_CODE_LEN = 3;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5 = 0x0006c825ull;
 
@@ -977,19 +983,19 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5_2 = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5_2_LEN = 16;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5_3 = 48;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RDATA5_3_LEN = 16;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_RESET = 0x0006c805ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RESET_OCB_OCI_ADC_RESET_HWCTRL = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_RESET_OCB_OCI_ADC_RESET_HWCTRL_LEN = 2;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_ADC_WDATA = 0x0006c810ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_WDATA_OCB_OCI_ADC_WDATA_HWCTRL = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_ADC_WDATA_OCB_OCI_ADC_WDATA_HWCTRL_LEN = 16;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_DORP0 = 0x0006c181ull;
 
@@ -997,31 +1003,31 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_DORP0_QUOTIENT = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_DORP0_QUOTIENT_LEN = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_DORP0_REMAINDER = 32;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_DORP0_REMAINDER_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_G0ISR0 = 0x0006c064ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_G1ISR0 = 0x0006c065ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_G2ISR0 = 0x0006c066ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_G3ISR0 = 0x0006c067ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SCMD0A = 0x0006c707ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCMD0A_CMD0A_RESERVED_0 = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCMD0A__CLEAR_STICKY_BITS_0A = 1;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRL20 = 0x0006c703ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRL20_OCB_OCI_O2SCTRL20_O2S_INTER_FRAME_DELAY_0 = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRL20_OCB_OCI_O2SCTRL20_O2S_INTER_FRAME_DELAY_0_LEN = 16;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRLS1 = 0x0006c721ull;
 
@@ -1031,22 +1037,22 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRLS1_IN_DELAY2_1 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRLS1_IN_DELAY2_1_LEN = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRLS1_IN_COUNT2_1 = 12;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SCTRLS1_IN_COUNT2_1_LEN = 6;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SRD2A = 0x0006c749ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SRD2A_OCB_OCI_O2SRD2A_O2S_RDATA_2A = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SRD2A_OCB_OCI_O2SRD2A_O2S_RDATA_2A_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_O2SWD0A = 0x0006c708ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SWD0A_OCB_OCI_O2SWD0A_O2S_WDATA_0A = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_O2SWD0A_OCB_OCI_O2SWD0A_O2S_WDATA_0A_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCBSHBR2 = 0x0006c223ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3 = 0x0006c234ull;
 
@@ -1063,13 +1069,13 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3_PUSH_WRITE_PTR_LEN = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3_PUSH_READ_PTR = 21;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3_PUSH_READ_PTR_LEN = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCBSHCS3_PUSH_ENABLE = 31;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCBSHI0 = 0x0006c205ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCBSLI2 = 0x0006c222ull;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG5_RW = 0x0006c0bbull;
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG5_WO_CLEAR = 0x0006c0bcull;
@@ -1077,13 +1083,13 @@ static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG5_WO_OR = 0x0006c0bdull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG5_OCB_OCI_OCCFLG5_OCC_FLAGS = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OCCFLG5_OCB_OCI_OCCFLG5_OCC_FLAGS_LEN = 32;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT0Q2 = 0x0006c402ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT0Q2_OCB_OCI_OPIT0Q2RR_PCB_INTR_PAYLOAD = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT0Q2_OCB_OCI_OPIT0Q2RR_PCB_INTR_PAYLOAD_LEN = 19;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_ROX = 0x0006c610ull;
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_WOX_CLEAR = 0x0006c611ull;
@@ -1096,25 +1102,25 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_4 = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_5 = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_6 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_7 = 7;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT3Q6 = 0x0006c41eull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT3Q6_OCB_OCI_OPIT3Q6RR_PCB_INTR_PAYLOAD = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT3Q6_OCB_OCI_OPIT3Q6RR_PCB_INTR_PAYLOAD_LEN = 19;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT4Q0 = 0x0006c420ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT4Q0_OCB_OCI_OPIT4Q0RR_PCB_INTR_PAYLOAD = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT4Q0_OCB_OCI_OPIT4Q0RR_PCB_INTR_PAYLOAD_LEN = 19;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q4 = 0x0006c43cull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q4_OCB_OCI_OPIT7Q4RR_PCB_INTR_PAYLOAD = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT7Q4_OCB_OCI_OPIT7Q4RR_PCB_INTR_PAYLOAD_LEN = 19;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C13RR = 0x0006c54dull;
 
@@ -1122,7 +1128,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C13RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C13RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C13RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C13RR_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C17 = 0x0006c451ull;
 
@@ -1130,7 +1136,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C17_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C17_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C17_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C17_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C20 = 0x0006c454ull;
 
@@ -1138,7 +1144,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C20_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C20_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C20_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C20_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C21RR = 0x0006c555ull;
 
@@ -1146,7 +1152,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C21RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C21RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C21RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT8C21RR_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C0 = 0x0006c460ull;
 
@@ -1154,7 +1160,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C0_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C0_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C0_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C0_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00017.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C11 = 0x0006c46bull;
 
@@ -1162,7 +1168,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C11_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C11_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C11_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C11_PAYLOAD_LEN = 17;
-// proc/reg00257.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14RR = 0x0006c56eull;
 
@@ -1170,7 +1176,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C14RR_PAYLOAD_LEN = 17;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26 = 0x0006c47aull;
 
@@ -1178,7 +1184,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26_PAYLOAD_LEN = 17;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26RR = 0x0006c57aull;
 
@@ -1186,7 +1192,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C26RR_PAYLOAD_LEN = 17;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C31RR = 0x0006c57full;
 
@@ -1194,7 +1200,7 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C31RR_SOURCE_CORE = 13;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C31RR_SOURCE_CORE_LEN = 2;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C31RR_PAYLOAD = 15;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT9C31RR_PAYLOAD_LEN = 17;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_ROX = 0x0006c684ull;
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_ROX_CLRPART = 0x0006c685ull;
@@ -1207,13 +1213,13 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_4 = 4;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_5 = 5;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_6 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITBPRC_7 = 7;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_OUISR0 = 0x0006c062ull;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_WOFICPING = 0x0006c781ull;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0 = 0x0006d010ull;
 
@@ -1221,65 +1227,307 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0_I_REGION = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0_I_REGION_LEN = 3;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0_B_ADDRESS = 3;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_PIB_OCBAR0_B_ADDRESS_LEN = 26;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRACT0 = 0x01010806ull;
 
 static const uint32_t TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRACT0_OCC_SCOM_OCCLFIRACT0_FIR_ACTION0 = 0;
 static const uint32_t TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRACT0_OCC_SCOM_OCCLFIRACT0_FIR_ACTION0_LEN = 62;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG106 = 0x0000806aull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG106_REGISTER106 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG106_REGISTER106_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG119 = 0x00008077ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG119_REGISTER119 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG119_REGISTER119_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG19 = 0x00008013ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG19_REGISTER19 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG19_REGISTER19_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG31 = 0x0000801full;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG31_REGISTER31 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG31_REGISTER31_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG50 = 0x00008032ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG50_REGISTER50 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG50_REGISTER50_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG67 = 0x00008043ull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG67_REGISTER67 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG67_REGISTER67_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG78 = 0x0000804eull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG78_REGISTER78 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG78_REGISTER78_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
 
 static const uint64_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG92 = 0x0000805cull;
 
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG92_REGISTER92 = 0;
 static const uint32_t TP_TPCHIP_OTPROM_SINGLE_OTP_ROM_REG92_REGISTER92_LEN = 64;
-// proc/reg00258.H
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_I2C_EXTENDED_STATUS_A = 0x00001808ull;
+
+static const uint32_t TP_TPVSB_FSI_W_I2C_EXTENDED_STATUS_A_MSM_CURR_STATE_000 = 11;
+static const uint32_t TP_TPVSB_FSI_W_I2C_EXTENDED_STATUS_A_MSM_CURR_STATE_000_LEN = 5;
+static const uint32_t TP_TPVSB_FSI_W_I2C_EXTENDED_STATUS_A_SELF_BUSY_000 = 25;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A = 0x00001802ull;
+
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_BIT_RATE_DIVISOR_000 = 0;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_BIT_RATE_DIVISOR_000_LEN = 16;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_PORT_NUMBER_000 = 16;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_PORT_NUMBER_000_LEN = 6;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_FGAT_MODE_000 = 28;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_DIAG_MODE_000 = 29;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_PACING_ALLOW_MODE_000 = 30;
+static const uint32_t TP_TPVSB_FSI_W_I2C_MODE_REGISTER_A_WRAP_MODE_000 = 31;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI = 0x00002806ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI_BYTE = 0x00002818ull;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_SCOM = 0x00050006ull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_M1A_DATA_AREA_14_RWX = 0x0000284eull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_M1A_DATA_AREA_6_RWX = 0x00002846ull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_M2A_DATA_AREA_10_RWX = 0x000028caull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_M2B_DATA_AREA_0_RWX = 0x00002900ull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_WO_CLEAR = 0x00002930ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_0_SPARE = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPFSI_TP_FENCE_VTLIO_DC = 1;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPFSI_TPI2C_BUS_FENCE_DC = 2;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPCFSI_OPB_SW0_FENCE_DC = 3;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPCFSI_OPB_SW0_FENCE_DC_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPCFSI_OPB_SW1_FENCE_DC = 6;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TPCFSI_OPB_SW1_FENCE_DC_LEN = 2;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_8_SPARE = 8;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_9_SPARE = 9;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_10_SPARE = 10;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_11_SPARE = 11;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_12_SPARE = 12;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_13_SPARE = 13;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_SPARE_FENCE_CONTROL = 14;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_VDD2VIO_LVL_FENCE_DC = 15;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI2PCB_DC = 16;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_OOB_MUX = 17;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_PIB2PCB_DC = 18;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_PCB2PCB_DC = 19;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI_CC_VSB_CBS_REQ = 20;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI_CC_VSB_CBS_CMD = 21;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_FSI_CC_VSB_CBS_CMD_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_24_SPARE_CBS_CONTROL = 24;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_25_SPARE_CBS_CONTROL = 25;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_26_SPARE_CBS_CONTROL = 26;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_27_SPARE_CBS_CONTROL = 27;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_ROOT_CTRL0_28_SPARE_RESET = 28;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_TP_IO_OCMB_RESET_B_EN = 29;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_PCB_RESET_DC = 30;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_CLEAR_GLOBAL_EP_RESET_DC = 31;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_COPY_RW = 0x00002911ull;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_WO_OR = 0x00002928ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST0_PORT_MUX_SEL_DC = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST1_PORT_MUX_SEL_DC = 1;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST2_PORT_MUX_SEL_DC = 2;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TPFSI_SPIMST3_PORT_MUX_SEL_DC = 3;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15 = 4;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_4_15_LEN = 12;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TP_FSI_FENCE_DC = 16;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_VITL_FENCE_DC = 17;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0_FENCE_DC = 18;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0LL_FENCE_DC = 19;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI0INV_FENCE_DC = 20;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1_FENCE_DC = 21;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSI1LL_FENCE_DC = 22;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_TCFSI_FSIA_FENCE_DC = 23;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31 = 24;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_SET_ROOT_CTRL8_24_31_LEN = 8;
+// proc/reg00018.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RWX = 0x00002839ull;
+
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_SR_SCRATCH_REGISTER_2 = 0;
+static const uint32_t TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_SR_SCRATCH_REGISTER_2_LEN = 32;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_ACK_EOT_WOX = 0x00002415ull;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_REQ_RESET = 0x000b0013ull;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_DOWNFIFO_SIG_EOT = 0x000b0012ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SBE_FIFO_FSB_UPFIFO_DATA_IN = 0x00002400ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_RWX = 0x00000c01ull;
+
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_WRITE_FLAG = 0;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_BROADCAST_FLAG = 1;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_ADDRESS = 2;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_ADDRESS_LEN = 14;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_REGION = 16;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_REGION_LEN = 12;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_TYPE = 28;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_COMMAND_REGISTER_SCAN_TYPE_LEN = 4;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_CONTROL_REGISTER_2_RWX = 0x00000c10ull;
+
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_CONTROL_REGISTER_2_SHIFT_CONTROL_REGISTER = 0;
+static const uint32_t TP_TPVSB_FSI_W_SHIFT_CONTROL_REGISTER_2_SHIFT_CONTROL_REGISTER_LEN = 32;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_0_RESET = 0x00020004ull;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CMD_WRDAT = 0x00020010ull;
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_A_PIB2OPB_COMP_P_1_CMD_WRDAT_WRITE_NOT_READ = 0;
+// proc/reg00018.H
+
+static const uint64_t TP_TPVSB_FSI_W_SLAVE_CMFSI_INCLUDE_MFSI_B_PIB2OPB_COMP_P_0_CRSIM = 0x00030006ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MATRB0_FSI0 = 0x000031d8ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MATRB0_SCOMFSI0 = 0x00000c76ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MDTRB0_FSI0 = 0x000031dcull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MDTRB0_SCOMFSI0 = 0x00000c77ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MRESP2_WOX = 0x000030d8ull;
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MRESP2_GENERAL_RESET_2 = 0;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MRESP2_ERROR_RESET_2 = 1;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSIEP1_FSI0 = 0x00003034ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSIEP1_SCOMFSI0 = 0x00000c0dull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MAESP0_FSI0 = 0x00003450ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MAESP0_SCOMFSI0 = 0x00000d14ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MCRSP1_FSI0 = 0x0000340cull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MCRSP1_SCOMFSI0 = 0x00000d03ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MCSIEP0_FSI0 = 0x00003470ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MCSIEP0_SCOMFSI0 = 0x00000d1cull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_RO = 0x000034d4ull;
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_0 = 1;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_0_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_1 = 5;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_1_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_2 = 9;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSTAP1_2_LEN = 3;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SCMBR = 0x0000084cull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SMBR = 0x00000844ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_A_SSI2M = 0x00000828ull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MAESP6_FSI1 = 0x00003068ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MAESP6_SCOMFSI1 = 0x00000c1aull;
+// proc/reg00018.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MDLYR_FSI1 = 0x00003004ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MDLYR_SCOMFSI1 = 0x00000c01ull;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MENP1_FSI1 = 0x00003014ull;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MENP1_SCOMFSI1 = 0x00000c05ull;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_RO = 0x000030ecull;
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_0 = 1;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_0_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_1 = 5;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_1_LEN = 3;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_2 = 9;
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_MST_0_MSTAP7_2_LEN = 3;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_SCRSIC0 = 0x00000850ull;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_SDMA = 0x00000804ull;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_SISC = 0x00000808ull;
+// proc/reg00019.H
+
+static const uint32_t TP_TPVSB_FSI_W_SLAVE_B_SRSIS4 = 0x0000087cull;
+// proc/reg00019.H
 
 }
 }
-#include "proc/reg00256.H"
-#include "proc/reg00257.H"
-#include "proc/reg00258.H"
+#include "proc/reg00016.H"
+#include "proc/reg00017.H"
+#include "proc/reg00018.H"
+#include "proc/reg00019.H"
 #endif

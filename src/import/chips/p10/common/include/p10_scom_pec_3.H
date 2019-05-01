@@ -36,13 +36,13 @@ namespace pec
 
 
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x080f002aull;
-// pec/reg00199.H
+// pec/reg00003.H
 
 static const uint64_t MULTICAST_GROUP_1 = 0x080f0001ull;
 
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
-// pec/reg00199.H
+// pec/reg00003.H
 
 static const uint64_t NET_CTRL0_RWX = 0x080f0040ull;
 static const uint64_t NET_CTRL0_RWX_WAND = 0x080f0041ull;
@@ -77,12 +77,12 @@ static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
-// pec/reg00199.H
+// pec/reg00003.H
 
 static const uint64_t PLL_LOCK_REG = 0x080f0019ull;
-// pec/reg00199.H
+// pec/reg00003.H
 
 }
 }
-#include "pec/reg00199.H"
+#include "pec/reg00003.H"
 #endif

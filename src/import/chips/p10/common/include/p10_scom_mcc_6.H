@@ -62,7 +62,7 @@ static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_ONE_SHOT_INJ = 24;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_PERSISTANT_INJ = 25;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31 = 26;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31_LEN = 6;
-// mcc/reg00070.H
+// mcc/reg00006.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -92,7 +92,7 @@ static const uint32_t DSTL_DSTLPSAVE2_MASTER_PSAVE_WSIZE = 56;
 static const uint32_t DSTL_DSTLPSAVE2_MASTER_PSAVE_WSIZE_LEN = 3;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63_LEN = 5;
-// mcc/reg00070.H
+// mcc/reg00006.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
@@ -111,14 +111,14 @@ static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV = 24;
 static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV_LEN = 14;
 static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL = 40;
 static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL_LEN = 24;
-// mcc/reg00070.H
+// mcc/reg00006.H
 
 //ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t REGS_PRX0_DLR_APST = 0x0c01103bull;
-// mcc/reg00070.H
+// mcc/reg00006.H
 
 }
 }
-#include "mcc/reg00070.H"
+#include "mcc/reg00006.H"
 #endif
