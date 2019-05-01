@@ -66,6 +66,17 @@ bool check_str_non_tsv_parity_workaround(const fapi2::Target<fapi2::TARGET_TYPE_
     bool l_tsv = false;
     bool l_str_enabled = false;
     bool l_is_nvdimm = false;
+    bool l_has_4r_dimm = false;
+    uint8_t l_master_ranks[MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY(eff_num_master_ranks_per_dimm(i_target, l_master_ranks));
+
+    // If we have either DIMM having four ranks, we need to disable parity mode
+    if((l_master_ranks[0] == fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R) ||
+       (l_master_ranks[1] == fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R))
+    {
+        l_has_4r_dimm = true;
+    }
 
     // Figure out if any hybrid memory is plugged
     FAPI_TRY(mss::eff_hybrid(i_target, l_hybrid));
@@ -101,11 +112,13 @@ bool check_str_non_tsv_parity_workaround(const fapi2::Target<fapi2::TARGET_TYPE_
     // 1) greater than or equal to DD2
     // 2) self time refresh is enabled
     // 3) the DIMM's are not TSV
-    FAPI_INF("%s %s DD2 STR: %s DIMM %s TSV", mss::c_str(i_target),
+    // 4) a 4R DIMM is present
+    FAPI_INF("%s %s DD2 STR: %s DIMM %s TSV %s DIMM", mss::c_str(i_target),
              l_less_than_dd2 ? "less than" : "greater than or equal to",
              l_str_enabled ? "enabled" : "disabled",
-             l_tsv ? "is" : "isn't");
-    return (!l_less_than_dd2) && l_str_enabled && (!l_tsv);
+             l_tsv ? "is" : "isn't",
+             l_has_4r_dimm ? "4R" : "not 4R");
+    return ((!l_less_than_dd2) && l_str_enabled && (!l_tsv)) || (l_has_4r_dimm);
 
 fapi_try_exit:
     FAPI_ERR("failed calling check_str_non_tsv_parity_workaround: 0x%lx (target: %s)",

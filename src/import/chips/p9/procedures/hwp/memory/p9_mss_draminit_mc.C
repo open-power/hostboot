@@ -88,7 +88,6 @@ extern "C"
                 for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
                 {
                     FAPI_TRY(mss::workarounds::str_non_tsv_parity(l_mca));
-                    FAPI_TRY(mss::configure_cid_parity(l_mca));
                 }
 
                 // TODO:RTC179508 - Cleanup draminit_mc

@@ -685,7 +685,7 @@ fapi2::ReturnCode configure_cid_parity( const fapi2::Target<T>& i_target)
         l_state = mss::states::OFF_N;
     }
 
-    FAPI_DBG( "Change RDTAG_DLY to %d for %s",  l_state, mss::c_str(i_target) );
+    FAPI_DBG( "Change CID_PARITY to %d for %s",  l_state, mss::c_str(i_target) );
 
     FAPI_TRY( read_farb1q_register(i_target, l_data) );
     set_cid_parity<T>(l_state, l_data);
