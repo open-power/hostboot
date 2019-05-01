@@ -57,32 +57,8 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_ZEROSECTION_RTN);
 
-        //make sure that the buffer is not null
-        PNOR::checkForNullBuffer(i_tocBuffer, o_errCode, l_ffs_hdr);
-
-        if(o_errCode != PNOR::NO_ERROR)
-        {
-            BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_READTOC_CHKNULLBUFFER_NULL);
-            // Always TI if NULL pointer is passed in
-            /*@
-             * @errortype
-             * @moduleid     Bootloader::MOD_PNORACC_READTOC
-             * @reasoncode   Bootloader::RC_CHK_NULL_BUFFER
-             * @userdata1[0:15]   TI_WITH_SRC
-             * @userdata1[16:31]  TI_BOOTLOADER
-             * @userdata1[32:63]  Failing address = 0
-             * @userdata2[0:31]   Pointer to TOC buffer
-             * @userdata2[32:63]  Error code
-             * @devdesc      Invalid TOC buffer pointer
-             * @custdesc     A problem occurred while running processor
-             *               boot code.
-             */
-            bl_terminate(Bootloader::MOD_PNORACC_READTOC,
-                         Bootloader::RC_CHK_NULL_BUFFER,
-                         reinterpret_cast<uint64_t>(i_tocBuffer),
-                         o_errCode);
-            break;
-        }
+        // Create a convenient way to access the ffs_hdr struct
+        l_ffs_hdr = reinterpret_cast<ffs_hdr*>(i_tocBuffer);
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_READTOC_CHECKNULLBUFFER_RTN);
 
@@ -233,8 +209,25 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
             //PNOR error found
             o_errCode = PNOR::LPC_ERR;
             BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_LPC_ERR);
-            //@TODO RTC:203989 Add LPC Error/Status Reg as part of FFDC
-            terminateExecuteTI();
+            /*@
+             * @errortype
+             * @moduleid     Bootloader::MOD_PNORACC_FINDTOC
+             * @reasoncode   Bootloader::RC_LPC_ERR
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @userdata2[0:31]   LPC error/status
+             * @userdata2[32:63]  Error code
+             * @devdesc      LPC error detected.
+             * @custdesc     A problem occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_PNORACC_FINDTOC,
+                         Bootloader::RC_LPC_ERR,
+                         (*l_val),
+                         o_errCode,
+                         true);
+            break;
         }
 
         //Copy Table of Contents from PNOR flash to a local buffer
@@ -293,10 +286,24 @@ void bl_pnorAccess::findTOC(uint64_t i_lpcBar, PNOR::SectionData_t * o_TOC,
                 (g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE))
             {
                 BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
-
-                // TI with data from readTOC
-                terminateExecuteTI();
-
+                /*@
+                 * @errortype
+                 * @moduleid     Bootloader::MOD_PNORACC_FINDTOC
+                 * @reasoncode   Bootloader::RC_TOC_NOT_FOUND_ERR
+                 * @userdata1[0:15]   TI_WITH_SRC
+                 * @userdata1[16:31]  TI_BOOTLOADER
+                 * @userdata1[32:63]  Failing address = 0
+                 * @userdata2    MMIO Address
+                 * @devdesc      TOC not found
+                 * @custdesc     A problem occurred while running processor
+                 *               boot code.
+                 */
+                bl_terminate(Bootloader::MOD_PNORACC_FINDTOC,
+                             Bootloader::RC_TOC_NOT_FOUND_ERR,
+                             // Extract the l_mmioAddr address among 2 - 32 bits
+                             (l_mmioAddr >> 32),
+                             l_mmioAddr,
+                             true);
                 break;
             }
         }

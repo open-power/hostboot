@@ -110,30 +110,6 @@ void PNOR::initializeSections(PNOR::SectionData_t io_toc[NUM_SECTIONS])
     }
 }
 
-
-
-/**
-  * @brief Ensure the buffer is not NULL, if it is, then return
-  *        the appropriate err code from the o_errCode param.
-  *        if the buffer is not NULL then cast it to a ffs_hdr
-  *        and return that out through the respective o_param
-  */
-void PNOR::checkForNullBuffer(uint8_t* i_tocBuffer,
-                              uint32_t& o_errCode,
-                              ffs_hdr*& o_ffs_hdr)
-{
-    if(!i_tocBuffer)
-    {
-        o_errCode |= BUFF_IS_NULL;
-        o_ffs_hdr = NULL;
-    }
-    else
-    {
-        o_ffs_hdr = (ffs_hdr*)i_tocBuffer;
-    }
-}
-
-
 /**
   * @brief Perform a series of checks on the header of the table of contents
   *        These checks include: looking for valid magic #, valid block size,

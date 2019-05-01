@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -144,12 +144,16 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
         // Zero out my table
         PNOR::initializeSections(o_TOC);
 
-        uint32_t l_errCode = 0;
-        ffs_hdr* l_ffs_hdr = NULL;
+        uint32_t l_errCode(0);
+        ffs_hdr* l_ffs_hdr(reinterpret_cast<ffs_hdr*>(i_tocBuffer));
 
         TRACDCOMP(g_trac_pnor, "PNOR::parseTOC verifying TOC");
+        if (!l_ffs_hdr)
+        {
+            l_errCode = PNOR::BUFF_IS_NULL;
+            l_ffs_hdr = nullptr;
+        }
 
-        PNOR::checkForNullBuffer(i_tocBuffer, l_errCode, l_ffs_hdr);
         //Check if the buffer is null
         if(l_errCode != NO_ERROR)
         {
