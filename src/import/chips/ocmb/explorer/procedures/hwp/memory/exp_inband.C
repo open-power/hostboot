@@ -516,8 +516,12 @@ fapi2::ReturnCode getRSP(
 {
     std::vector<uint8_t> l_data(static_cast<int>(sizeof(o_rsp)));
 
+    //TODO RTC: 209669 Remove workaround when simics model issue fixes
+    //                 endianess issues with doorbell register
+#ifndef CONFIG_AXONE_BRING_UP
     // Polls for the response to be ready first
     FAPI_TRY(poll_for_response_ready(i_target));
+#endif
 
     FAPI_INF("Reading the response buffer...");
     FAPI_TRY(fapi2::getMMIO(i_target, EXPLR_IB_RSP_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
