@@ -50,6 +50,7 @@ namespace Bootloader
         MOD_BOOTLOADER_VERIFY            = 0x05, /**< bootloader.C : verifyContainer */
         MOD_BOOTLOADER_ASSERT            = 0x06, /**< bootloader.H assert */
         MOD_BOOTLOADER_VERIFY_COMP_ID    = 0x07, /**< bootloader.C : verifyComponentId */
+        MOD_PNORACC_FINDTOC              = 0x08, /**< bl_pnorAccess.C : find TOC */
     };
 
 /**
@@ -75,6 +76,8 @@ namespace Bootloader
         RC_PNOR_SECID_OUT_OF_RANGE = HBBL_COMP_ID | 0x0D, /**< Requested PNOR SecId DNE in string array */
         RC_PNOR_NULLPTR            = HBBL_COMP_ID | 0x0E, /**< Requested address to compare is a nullptr */
         RC_BAD_WORK_LEN            = HBBL_COMP_ID | 0x0F, /**< Working length too large */
+        RC_LPC_ERR                 = HBBL_COMP_ID | 0x10, /**< LPC Error */
+        RC_TOC_NOT_FOUND_ERR       = HBBL_COMP_ID | 0x11, /**< TOC Not Found Error */
     };
 
 };  // end Bootloader

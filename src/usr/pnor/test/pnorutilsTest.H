@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[17] = 0x41;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
         if((l_errCode & PNOR::INVALID_MAGIC) == PNOR::INVALID_MAGIC)
@@ -92,7 +92,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[7] = 0x0;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -122,7 +122,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[31] = 0x80;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -153,7 +153,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[35] = 0x12;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -183,7 +183,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[38] = 0x10;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -213,7 +213,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[42] = 0x40;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -246,7 +246,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[39] = 0x33;
 
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
 
 
@@ -276,7 +276,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[208] = 0xFF;
         PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
         //parse through the entries and check for any errors
         ffs_entry* l_err_entry = NULL;
@@ -317,7 +317,7 @@ class pnorutilsTest : public CxxTest::TestSuite
 
         PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
         ffs_hdr* l_ffs_hdr = NULL;
-        PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
+        checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
         //parse through the entries and check for any errors
         ffs_entry* l_err_entry = NULL;
@@ -336,6 +336,29 @@ class pnorutilsTest : public CxxTest::TestSuite
 
         TRACFCOMP(g_trac_pnor, "pnorutilsTest::test_entryExtendsBeyondFlash: complete, Failed = %d", l_failed);
     }
+
+    private:
+
+        /**
+         * @brief Ensure the buffer is not NULL, if it is, then return
+         *        the appropriate err code from the o_errCode param.
+         *        If the buffer is not NULL then cast it to a ffs_hdr
+         *        and return that out through the o_ffs_hdr param.
+         */
+        void checkForNullBuffer(uint8_t* i_tocBuffer,
+                          uint32_t& o_errCode,
+                          ffs_hdr*& o_ffs_hdr)
+        {
+            if(!i_tocBuffer)
+            {
+                o_errCode |= PNOR::BUFF_IS_NULL;
+                o_ffs_hdr = NULL;
+            }
+            else
+            {
+                o_ffs_hdr = reinterpret_cast<ffs_hdr*>(i_tocBuffer);
+            }
+        }
 };
 
 #endif

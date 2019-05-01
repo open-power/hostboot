@@ -167,9 +167,6 @@ enum BootloaderTraces
     /** Bootloader main removeECC returned error */
     BTLDR_TRC_MAIN_REMOVEECC_FAIL            = 0xF1,
 
-    /** Bootloader PNOR Access readTOC checkForNullBuffer null buffer */
-    BTLDR_TRC_PA_READTOC_CHKNULLBUFFER_NULL  = 0xF2,
-
     /** Bootloader PNOR Access readTOC performHdrChecksum checksum error */
     BTLDR_TRC_PA_READTOC_HDRCHECKSUM_ERR     = 0xF3,
 
