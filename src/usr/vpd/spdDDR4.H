@@ -118,7 +118,7 @@ const KeywordData ddr4Data[] =
     { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, NA },
     { BANK_ADDRESS_BITS_DDR4,           0x04,   0x01,   0x30,   0x04, false, false, NA },
     { MODULE_NOMINAL_VOLTAGE_DDR4,      0x0b,   0x01,   0x3F,   0x00, false, false, NA },
-    { TIMEBASES_MTB     ,               0x11,   0x01,   0x0C,   0x02, false, false, NA },
+    { TIMEBASES_MTB,                    0x11,   0x01,   0x0C,   0x02, false, false, NA },
     { TIMEBASES_FTB,                    0x11,   0x01,   0x03,   0x00, false, false, NA },
     { TCK_MAX,                          0x13,   0x01,   0x00,   0x00, false, false, NA },
     { CAS_LATENCIES_SUPPORTED_DDR4,     0x17,   0x04,   0x00,   0x00, true,  false, NA },
@@ -186,6 +186,8 @@ const KeywordData ddr4Data[] =
     { LRMM_ODT_RTT_PARK_2400_3200,      0x9a,   0x01,   0x00,   0x00, false, false, LRMM },
     { RMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, RMM },
     { LRMM_CRC,                         0xff,   0x02,   0x00,   0x00, true,  false, LRMM },
+    { OCMB_MODULE_PART_NUMBER,          0x209,  0x30,   0x00,   0x00, false, false, DDIMM },
+    { OCMB_MODULE_SERIAL_NUMBER,        0x205,  0x04,   0x00,   0x00, false, false, DDIMM },
     { ENTIRE_SPD,                       0x00,  0x200,   0x00,   0x00, false, false,  ALL },
     //---------------------------------------------------------------------------------------
 };
