@@ -514,6 +514,7 @@ enum
     MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
+    MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
 
 
     // 8000-8999 are defined by the Simics CEC team

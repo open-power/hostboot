@@ -180,7 +180,7 @@ Layout Description
         <description>Payload (19.875MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
         <physicalOffset>0x1D2D000</physicalOffset>
-        <physicalRegionSize>0x13E0000</physicalRegionSize>
+        <physicalRegionSize>0x0600000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>

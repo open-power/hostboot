@@ -439,6 +439,8 @@ int main(int argc, char** argv)
             //     A contained member value might be something like
             //     _ZZ3fooE3bar.
             string sym_name = string((i->c_str())+1);
+            const char* gcovstr = "__gcov";
+            size_t gcovstrlen = strlen(gcovstr);
 
             cout << "Checking weak symbol: " << *i << endl;
 
@@ -451,6 +453,12 @@ int main(int argc, char** argv)
                         == j->find("traceData_codeInfo"))
                     && (*i != *j))
                 {
+                    if (strncmp((*j).c_str(),
+                        gcovstr,
+                        gcovstrlen)==0)
+                    {
+                        continue;
+                    }
                     cout << "\tDuplicate member found: " << *j << endl;
                     throw std::runtime_error(
                                 string("Duplicate weak symbol with contained "

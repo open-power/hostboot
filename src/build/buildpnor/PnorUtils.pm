@@ -374,10 +374,11 @@ sub checkSpaceConstraints
         {
             # If this is a test run increase HBI size by PAGE_SIZE until all test
             # cases fit
-            if ($testRun && $eyeCatch eq "HBI")
+            if ($eyeCatch eq "HBI")
             {
-                print "$this_func: Adjusting HBI size - ran out of space for test cases\n";
-                adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize);
+                print "Adjusting HBI size - ran out of space for test cases\n";
+                my $stopKey = findLayoutKeyByEyeCatch("TEST", \%$i_pnorLayoutRef);
+                adjustSecPhysSize(\%sectionHash, $layoutKey, $filesize, $stopKey);
             }
             else
             {
@@ -390,39 +391,35 @@ sub checkSpaceConstraints
 
 
 ###############################################################################
-# adjustHbiPhysSize - Adjust HBI physical size when running test cases and fix
-#                     up physical offsets of partitions after it
+# adjustSecPhysSize - Adjust section physical size when running test cases
+#                     and fix up physical offsets between partitions
+#                     (for example HBI and TEST)
 ################################################################################
-sub adjustHbiPhysSize
+sub adjustSecPhysSize
 {
-    my ($i_sectionHashRef, $i_hbiKey, $i_filesize) = @_;
-    my $this_func = (caller(0))[3];
+    my ($i_sectionHashRef, $i_secKey, $i_filesize, $i_stopKey) = @_;
 
     my %sectionHash = %$i_sectionHashRef;
 
     # Increment HBI physical size by PAGE_SIZE until the HBI file can fit
-    my $hbi_old = $sectionHash{$i_hbiKey}{physicalRegionSize};
-    while ($i_filesize > $sectionHash{$i_hbiKey}{physicalRegionSize})
+    my $sec_old = $sectionHash{$i_secKey}{physicalRegionSize};
+    while ($i_filesize > $sectionHash{$i_secKey}{physicalRegionSize})
     {
-        $sectionHash{$i_hbiKey}{physicalRegionSize} += PAGE_SIZE;
+        $sectionHash{$i_secKey}{physicalRegionSize} += PAGE_SIZE;
     }
-    my $hbi_move = $sectionHash{$i_hbiKey}{physicalRegionSize} - $hbi_old;
-    my $hbi_end = $sectionHash{$i_hbiKey}{physicalRegionSize} + $hbi_move;
+    my $sec_move = $sectionHash{$i_secKey}{physicalRegionSize} - $sec_old;
+    my $sec_end = $sectionHash{$i_secKey}{physicalRegionSize} + $sec_move;
 
     # Fix up physical offset affected by HBI size change
     foreach my $section (keys %sectionHash)
     {
-        # Only fix partitions after HBI
-        if ( $sectionHash{$section}{physicalOffset} >
-             $sectionHash{$i_hbiKey}{physicalOffset} )
+        # Only fix partitions after HBI and before $i_stopKey
+        if ($sectionHash{$section}{physicalOffset} > $sectionHash{$i_secKey}{physicalOffset}
+            && $sectionHash{$section}{physicalOffset} < $sectionHash{$i_stopKey}{physicalOffset})
         {
-            my $origoffset = $sectionHash{$section}{physicalOffset};
-            $sectionHash{$section}{physicalOffset} += $hbi_move;
-            trace(3, "$this_func: Section $sectionHash{$section}{eyeCatch} : " . sprintf("%X",$origoffset) . " --> " . sprintf("%X",$sectionHash{$section}{physicalOffset}));
-        }
-        else
-        {
-            printf "$this_func: Section $sectionHash{$section}{eyeCatch} : unchanged";
+            my $new_location = $sectionHash{$section}{physicalOffset} + $sec_move;
+            print "Moving section $sectionHash{$section}{eyeCatch} forward by $sec_move bytes to $new_location\n";
+            $sectionHash{$section}{physicalOffset} = $new_location;
         }
     }
 }

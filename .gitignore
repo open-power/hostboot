@@ -19,3 +19,5 @@ hbsandboxrc
 *.__afs*
 *~
 _SYNCAPP/
+gcov_report
+lcov_data

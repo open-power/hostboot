@@ -56,14 +56,28 @@ docs: src/build/doxygen/doxygen.conf
 citest:
 	src/build/citest/cxxtest-start.sh
 
+gcov: HOSTBOOT_PROFILE := 1
+
+export HOSTBOOT_PROFILE
+
 .PHONY: gcov
 gcov:
-	rm -rf obj/gcov/*
-	$(MAKE) gcov_pass
-	find obj/gcov/ -size 0c | xargs rm # Delete empty files.
-	genhtml obj/gcov/*.lcov -o obj/gcov/html --prefix `pwd` \
-	    --title `git describe --dirty`
-	@echo "View GCOV results with: firefox obj/gcov/html/index.html"
+	@echo Building Hostboot with profiling enabled.
+	$(MAKE)
+	@echo Run simics and execute the hb-Gcov command at the end of the simulation to extract gcov data.
+	@echo Then you can "make lcov" to generate the coverage report.
+
+.PHONY: lcov
+lcov:
+	rm -f obj/lcov_data
+	lcov -c --dir . -o obj/lcov_data --gcov-tool $(GCOV)
+	rm -rf obj/gcov_report
+	genhtml obj/lcov_data -o obj/gcov_report --ignore-errors source
+	@echo Coverage report now available in obj/gcov_report
+
+.PHONY: gcda_clean
+gcda_clean:
+	find -name '*.gcda' -exec rm -f {} \;
 
 $(GENDIR)/hwp_id.html :
 	$(ROOTPATH)/src/build/tools/hwp_id.pl -i -l > $@
