@@ -1204,74 +1204,80 @@ namespace SBE
                                  procIOMask ); // Bits(8:31) = EC00:EC23
 
                 // Check for no error and use of input cores
-                if ( (NULL == err) && (procIOMask == coreMask))
+                if (nullptr == err)
                 {
-                    // Procedure was successful
-                    procedure_success = true;
-
-                    o_actImgSize = static_cast<size_t>(tmpImgSize);
-
-                    TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
-                               "p9_xip_customize success=%d, procIOMask=0x%X "
-                               "o_actImgSize=0x%X",
-                               procedure_success, procIOMask, o_actImgSize);
-
-                    // exit inner loop
-                    break;
-                }
-                // Check if p9_xip_customize returned a different core mask
-                else if ( procIOMask != coreMask )
-                {
-                    // A different core mask is returned from p9_xip_customize
-                    // when the cores sent in couldn't fit, but possibly
-                    // a different procIOMask would work
-
-                    TRACFCOMP( g_trac_sbe,
-                               ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
-                               "p9_xip_customize) returned rc=0x%X, "
-                               "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
-                               "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
-                               "procIOMask=0x%.8X. coreCount=%d",
-                               ERRL_GETRC_SAFE(err), maxCores,
-                               TARGETING::get_huid(i_target),
-                               coreMask, procIOMask, coreCount);
-
-                    // Setup for next loop - update coreMask
-                    err = selectBestCores(i_target,
-                                          --coreCount,
-                                          coreMask);
-
-                    if ( err )
+                    // FAPI_INVOKE_HWP returned with no error, check input cores
+                    if (procIOMask == coreMask)
                     {
-                        TRACFCOMP(g_trac_sbe,
-                                  ERR_MRK"procCustomizeSbeImg() - "
-                                  "selectBestCores() failed rc=0x%X. "
-                                  "coreCount=0x%.8X. HUID=0x%X. Aborting "
-                                  "Customization of SBE Image",
-                                  err->reasonCode(), coreCount,
-                                  TARGETING::get_huid(i_target));
+                        // Procedure was successful
+                        procedure_success = true;
 
-                        // break from inner while loop
+                        o_actImgSize = static_cast<size_t>(tmpImgSize);
+
+                        TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
+                                 "p9_xip_customize success=%d, procIOMask=0x%X "
+                                 "o_actImgSize=0x%X",
+                                 procedure_success, procIOMask, o_actImgSize);
+
+                        // exit inner loop
                         break;
-                    }
-
-                    TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
-                               "next loop: coreMask=0x%.8X, coreCount=%d",
-                               coreMask, coreCount);
-
-                    // Check if loop will execute again
-                    // Clean up some data if it will
-                    if( coreCount >= min_cores )
+                    }  // end if (procIOMask == coreMask)
+                    // p9_xip_customize returned a different core mask:
+                    // procIOMask != coreMask
+                    else
                     {
-                        // Reset size and clear image buffer
-                        tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-                        memset ( io_imgPtr,
-                                 0,
-                                 tmpImgSize);
-                    }
+                        // A different core mask is returned from
+                        // p9_xip_customize, when the cores sent in couldn't
+                        // fit, but possibly a different procIOMask would work
+
+                        TRACFCOMP( g_trac_sbe,
+                                ERR_MRK"procCustomizeSbeImg(): FAPI_INVOKE_HWP("
+                                "p9_xip_customize) returned rc=0x%X, "
+                                "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
+                                "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
+                                "procIOMask=0x%.8X. coreCount=%d",
+                                ERRL_GETRC_SAFE(err), maxCores,
+                                TARGETING::get_huid(i_target),
+                                coreMask, procIOMask, coreCount);
+
+                        // Setup for next loop - update coreMask
+                        err = selectBestCores(i_target,
+                                              --coreCount,
+                                              coreMask);
+
+                        if ( err )
+                        {
+                            TRACFCOMP(g_trac_sbe,
+                                      ERR_MRK"procCustomizeSbeImg() - "
+                                      "selectBestCores() failed rc=0x%X. "
+                                      "coreCount=0x%.8X. HUID=0x%X. Aborting "
+                                      "Customization of SBE Image",
+                                      err->reasonCode(), coreCount,
+                                      TARGETING::get_huid(i_target));
+
+                            // break from inner while loop
+                            break;
+                        }
+
+                        TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
+                                   "next loop: coreMask=0x%.8X, coreCount=%d",
+                                   coreMask, coreCount);
+
+                        // Check if loop will execute again
+                        // Clean up some data if it will
+                        if( coreCount >= min_cores )
+                        {
+                            // Reset size and clear image buffer
+                            tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
+                            memset ( io_imgPtr,
+                                     0,
+                                     tmpImgSize);
+                        }
+                    } // end if (procIOMask == coreMask) ... else ...
 
                     // No break - keep looping
-                }
+
+                }  // end if (nullptr == err)
                 else
                 {
                     // Unexpected return code - create err and fail
@@ -1292,7 +1298,7 @@ namespace SBE
 
                     // break from inner while loop
                     break;
-                }
+                }  // end if (nullptr == err) ... else ...
             }  // end of inner while loop
 
             if(err)
