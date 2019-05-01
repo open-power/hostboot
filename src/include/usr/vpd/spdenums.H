@@ -341,7 +341,9 @@ enum
     LRMM_ODT_RTT_PARK_2400_3200      = SPD_FIRST_MOD_SPEC | 0xb2,
     RMM_CRC                          = SPD_FIRST_MOD_SPEC | 0xb3,
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb5,
+    OCMB_MODULE_PART_NUMBER          = SPD_FIRST_MOD_SPEC | 0xb5,
+    OCMB_MODULE_SERIAL_NUMBER        = SPD_FIRST_MOD_SPEC | 0xb6,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb7,
 
     // This keyword should be last in the list
     // Invalid Keyword
