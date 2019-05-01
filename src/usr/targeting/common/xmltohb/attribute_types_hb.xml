@@ -417,6 +417,18 @@
     </enumerator>
   </enumerationType>
 
+  <attribute>
+    <id>HB_MUTEX_SERIALIZE_TEST_LOCK</id>
+    <description>Hostboot mutex for serializing certain tests</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
   <!-- For POD Testing -->
   <attribute>
     <id>HB_MUTEX_TEST_LOCK</id>

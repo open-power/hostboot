@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,10 @@ MODULE = testexpaccess
 
 include test.mk
 
-#TODO RTC:196806 re-enable mmio communication tests when mmio works
+OBJS += exptest_utils.o
+
+#TODO RTC:249013 re-enable mmio communication tests when mmio works
+#TESTS = *.H
 TESTS = expscomtest.H
 
 include ${ROOTPATH}/config.mk
