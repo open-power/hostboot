@@ -43,6 +43,7 @@ enum nvdimm_err_status
 };
 
 #ifndef __HOSTBOOT_RUNTIME
+
 /**
  * @brief Entry function to NVDIMM management
  *        - Restore image from NVDIMM NAND flash to DRAM
@@ -69,17 +70,64 @@ void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
  **/
 bool nvdimm_update(TARGETING::TargetHandleList &i_nvdimmList);
 
-#endif
-
 
 /**
- * @brief Entry function to NVDIMM generate keys
- *        Generate encryption keys if required and set the FW key attribute
+ * @brief Entry function to NVDIMM unlock encryption
  *
  * @param[in] i_nvdimmList - list of nvdimm targets
  *
+ * @return true if no errors logged, else false
  */
-void nvdimm_gen_keys(TARGETING::TargetHandleList &i_nvdimmList);
+bool nvdimm_encrypt_unlock(TARGETING::TargetHandleList &i_nvdimmList);
+
+
+#endif
+
+// TODO RTC:210689 Handle return pass/fail
+//      Need to define what return=false means for the caller
+//      For all of the functions in this file
+/**
+ * @brief Entry function to NVDIMM generate keys
+ *        Generate encryption keys and set the FW key attribute
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimm_gen_keys(void);
+
+/**
+ * @brief Entry function to NVDIMM remove keys
+ *        Set the FW key attribute = 0
+ *        Tell HWSV to clear anchor key attribute
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimm_remove_keys(void);
+
+/**
+ * @brief Entry function to NVDIMM enable encryption
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimm_encrypt_enable(TARGETING::TargetHandleList &i_nvdimmList);
+
+/**
+ * @brief Entry function to NVDIMM crypto erase
+ *
+ * @param[in] i_nvdimmList - list of nvdimm targets
+ *
+ * @return true if no errors logged, else false
+ */
+bool nvdimm_crypto_erase(TARGETING::TargetHandleList &i_nvdimmList);
+
+/**
+ * @brief Helper function to get list of nvdimm target pointers
+ *
+ * @param[out] o_nvdimmList - list of nvdimm targets
+ *
+ */
+void nvdimm_getNvdimmList(TARGETING::TargetHandleList &o_nvdimmList);
 
 /**
  * @brief This function erases image on the nvdimm target
@@ -137,6 +185,15 @@ errlHndl_t nvdimmChangeArmState(TARGETING::Target *i_nvdimm, bool i_state);
  * @return true if no errors logged, else false
  */
 bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList);
+
+/**
+ * @brief  Disarms the trigger to enable backup in the event of a
+ *         power loss on each NVDIMM
+ *
+ * @param[in] i_nvdimmTargetList : list of dimms that are NVDIMMs
+ * @return true if no errors logged, else false
+ */
+bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList);
 
 /**
  * @brief NVDIMM protection state

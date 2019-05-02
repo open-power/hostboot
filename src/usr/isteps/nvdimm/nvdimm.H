@@ -27,6 +27,7 @@
 #define NVDIMM_H__
 
 #include <usr/errl/errlentry.H>
+#include <targeting/common/target.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -274,6 +275,18 @@ enum i2cReg : uint16_t
     TYPED_BLOCK_DATA_BYTE30 = 0x39E,
     TYPED_BLOCK_DATA_BYTE31 = 0x39F,
     TYPED_BLOCK_DATA_OFFSET = 0x3E0,
+    ENCRYPTION_COMMAND = 0x51F,
+    ENCRYPTION_CONFIG_STATUS = 0x520,
+    ENCRYPTION_ACCESS_KEY_SET = 0x521,
+    ENCRYPTION_ACCESS_KEY_VERIFY = 0x522,
+    ENCRYPTION_ACCESS_KEY_UNLOCK = 0x523,
+    ENCRYPTION_RAMDOM_STRING_SET = 0x524,
+    ENCRYPTION_RANDOM_STRING_VERIFY = 0x525,
+    ENCRYPTION_ERASE_KEY_SET = 0x526,
+    ENCRYPTION_ERASE_KEY_VERIFY = 0x527,
+    ENCRYPTION_ERASE_KEY_TEST = 0x528,
+    ENCRYPTION_ERASE_KEY_TEST_VERIFY = 0x529,
+    ENCRYPTION_KEY_VALIDATION = 0x52A,
 };
 
 // i2cReg macros
@@ -292,6 +305,7 @@ enum page : uint8_t
     TWO   = 0x02,
     THREE = 0x03,
     FOUR  = 0x04,
+    FIVE  = 0x05,
 };
 
 // Enums for inputs/expected output to/from the i2c registers
@@ -330,6 +344,7 @@ enum timeout : uint32_t
     OPS_POLL_TIME_MS = 5000,
     NV_READY_POLL_TIME_MS = 1000,
     PAGE_SWITCH_POLL_TIME_NS = 100,
+    KEY_WRITE_DELAY_MS = 100,
 };
 
 // Assign an id to each of the 6 major ops
@@ -351,6 +366,26 @@ enum misc
     DISARM_TRIGGER = 0,
     LOW = 0,
     HIGH = 1,
+};
+
+const size_t NUM_KEYS_IN_ATTR = 3;
+const size_t ENC_KEY_SIZE = 32;
+const size_t MAX_TPM_SIZE = 34;
+const uint8_t KEY_TERMINATE_BYTE = 0x00;
+const uint8_t KEY_ABORT_BYTE = 0xFF;
+const uint64_t DARN_ERROR_CODE = 0xFFFFFFFFFFFFFFFFull;
+const uint32_t MAX_DARN_ERRORS = 10;
+const uint32_t MAX_RANDOM_ATTEMPTS = 100;
+
+
+/**
+ * @brief Encryption key data
+ */
+struct nvdimmKeyData_t
+{
+    uint8_t rs[ENC_KEY_SIZE];   // Random String (RS)
+    uint8_t ek[ENC_KEY_SIZE];   // Erase Key (EK)
+    uint8_t ak[ENC_KEY_SIZE];   // Access Key (AK)
 };
 
 /**
@@ -434,6 +469,112 @@ errlHndl_t nvdimmPollStatus(TARGETING::Target *i_nvdimm, ops_id i_ops_id, uint32
  *      the error log.
  */
 errlHndl_t nvdimmSetESPolicy(TARGETING::Target* i_nvdimm);
+
+
+/**
+ * @brief Helper function to handle conflicting attribute keys
+ *
+ * @param[in] i_attrKeysFw - firmware key attribute
+ *
+ * @param[in] i_attrKeysAnchor - anchor key attribute
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_handleConflictingKeys(
+    TARGETING::ATTR_NVDIMM_ENCRYPTION_KEYS_FW_typeStdArr& i_attrKeysFw,
+    TARGETING::ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR_typeStdArr& i_attrKeysAnchor);
+
+
+/**
+ * @brief Helper function to validate attribute keys
+ *
+ * @param[in] i_attrData - pointer to attribute key data
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_checkValidAttrKeys( nvdimmKeyData_t* i_attrData );
+
+
+/**
+ * @brief Helper function to write encryption key regs (RS/EK/AK)
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_keyData - data to write to the key reg
+ *
+ * @param[in] i_keyReg - enum register to write key
+ *
+ * @param[in] i_verifyReg - enum register to verify key written
+ *
+ * @param[in] i_secondAttempt - normally false, true if verif check failed
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_setKeyReg(TARGETING::Target* i_nvdimm,
+                            uint8_t* i_keyData,
+                            uint32_t i_keyReg,
+                            uint32_t i_verifyReg,
+                            bool i_secondAttempt);
+
+
+/**
+ * @brief Helper function to generate randon number for encryption keys
+ *        Generates ENC_KEY_SIZE bytes of data
+ *        Different implementations for boot vs runtime
+ *
+ * @param[out] o_genData - pointer to generated data
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_getRandom(uint8_t* o_genData);
+
+
+/**
+ * @brief Helper function to make a random number valid for keys
+ *        Keys must not contain 0x00 or 0xFF
+ *         - 0x00 KEY_TERMINATE_BYTE terminates a key < 32 bytes
+ *         - 0xFF KEY_ABORT_BYTE aborts the key reg write process
+ *        This function finds invalid bytes in the first random number
+ *         and replaces with bytes from the second random number
+ *
+ * @param[out] o_genData - pointer to final generated data
+ *
+ * @param[in] i_xtraData - pointer to extra generated data
+ *
+ * @return - false if successful, true if failed
+ *
+ */
+bool nvdimm_keyifyRandomNumber(uint8_t* o_genData, uint8_t* i_xtraData);
+
+
+/**
+ * @brief Helper function to validate a random number
+ *
+ * @param[in] i_genData - pointer to generated data
+ *
+ * @return - true if valid, false if invalid
+ *
+ */
+bool nvdimm_validRandomNumber(uint8_t* i_genData);
+
+#ifndef __HOSTBOOT_RUNTIME
+
+/**
+ * @brief Helper function to get TPM pointer for random number generation
+ *
+ * @param[out] - pointer to a functional TPM or nullptr if no TPM found
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *                      the error log
+ */
+errlHndl_t nvdimm_getTPM(TARGETING::Target*& o_tpm);
+
+#endif
+
 } //End NVDIMM namespace
 
 

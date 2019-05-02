@@ -131,9 +131,10 @@ void* call_mss_power_cleanup (void *io_pArgs)
 
         // Run the nvdimm management functions if the list is not empty
         if (!l_nvdimmTargetList.empty()){
-            // Must generate encryption keys before the restore
-            NVDIMM::nvdimm_gen_keys(l_nvdimmTargetList);
+            NVDIMM::nvdimm_gen_keys();
+            NVDIMM::nvdimm_encrypt_unlock(l_nvdimmTargetList);
             NVDIMM::nvdimm_restore(l_nvdimmTargetList);
+            NVDIMM::nvdimm_encrypt_enable(l_nvdimmTargetList);
         }
     }
 #endif

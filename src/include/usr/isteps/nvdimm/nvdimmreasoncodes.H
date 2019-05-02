@@ -86,7 +86,15 @@ enum nvdimmModuleId
     WAIT_FW_OPS_BLOCK_RECEIVED              = 0x24,
     NVDIMM_IS_UPDATE_NEEDED                 = 0x25,
     NVDIMM_RUN_UPDATE_USING_LID             = 0x26,
-    NVDIMM_GEN_KEYS                         = 0x27,
+    NVDIMM_GET_TPM                          = 0x27,
+    NVDIMM_SET_KEY_REG                      = 0x28,
+    NVDIMM_ENCRYPT_ENABLE                   = 0x29,
+    NVDIMM_CRYPTO_ERASE                     = 0x2A,
+    NVDIMM_CHECK_VALID_ATTR_DATA            = 0x2B,
+    NVDIMM_HANDLE_CONFLICTING_KEYS          = 0x2C,
+    NVDIMM_ENCRYPT_UNLOCK                   = 0x2D,
+    NVDIMM_GET_DARN_NUMBER                  = 0x2E,
+    NVDIMM_KEYIFY_RANDOM_NUMBER             = 0x2F,
 };
 
 /**
@@ -140,6 +148,15 @@ enum nvdimmReasonCode
     NVDIMM_START_UPDATE                     = NVDIMM_COMP_ID | 0x28,   // start update
     NVDIMM_UPDATE_COMPLETE                  = NVDIMM_COMP_ID | 0x29,   // update completed
     NVDIMM_TPM_NOT_FOUND                    = NVDIMM_COMP_ID | 0x30,   // TPM not found
+    NVDIMM_VERIF_BYTE_CHECK_FAILED          = NVDIMM_COMP_ID | 0x31,   // Encryption key reg verif failed
+    NVDIMM_ENCRYPTION_ENABLE_FAILED         = NVDIMM_COMP_ID | 0x32,   // Encryption enable failed
+    NVDIMM_ENCRYPTION_ERASE_PENDING_FAILED  = NVDIMM_COMP_ID | 0x32,   // Encryption crypto erase pending failed
+    NVDIMM_ENCRYPTION_ERASE_FAILED          = NVDIMM_COMP_ID | 0x33,   // Encryption crypto erase failed
+    NVDIMM_ENCRYPTION_UNLOCK_FAILED         = NVDIMM_COMP_ID | 0x34,   // Encryption unlock failed
+    NVDIMM_ENCRYPTION_INVALID_ATTRIBUTE     = NVDIMM_COMP_ID | 0x35,   // Encryption attribute key data invalid
+    NVDIMM_ENCRYPTION_KEY_ATTRS_INVALID     = NVDIMM_COMP_ID | 0x36,   // Encryption key attributes are both invalid
+    NVDIMM_ENCRYPTION_MAX_DARN_ERRORS       = NVDIMM_COMP_ID | 0x37,   // Darn random key gen reached max errors
+    NVDIMM_ENCRYPTION_BAD_RANDOM_DATA       = NVDIMM_COMP_ID | 0x38,   // Generated key data not valid
 };
 
 enum UserDetailsTypes

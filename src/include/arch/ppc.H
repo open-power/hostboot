@@ -417,6 +417,26 @@ inline void writeScratchReg(uint64_t _scratch_addr, uint64_t _data)
 
 }
 
+#ifdef __HOSTBOOT_RUNTIME
+
+/** @brief  getDarn - deliver a random number instruction
+ *  Returns 64 bits of random data, requires random number generator
+ *  configured appropriately + locked down, only available at runtime.
+ */
+ALWAYS_INLINE
+inline uint64_t getDarn()
+{
+    register uint64_t rt = 0;
+    register uint64_t  L = 1;  // L=1 conditioned random number
+    asm volatile(".long 0x7C0005E6 | "
+                 "((%0 & 0x1F) << 21)  | "
+                 "((%1 & 0x3)  << 16)" :
+                 "=r" (rt), "=r" (L));
+    return rt;
+}
+
+#endif
+
 /** @brief  This is a special assembler instruction that is a nop on
  *  regular hardware, but has special meaning to Simics.  Code that
  *  executes this instruction in Simics will cause a "hap," a

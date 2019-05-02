@@ -37,6 +37,7 @@
 #include <targeting/common/utilFilter.H>
 #include <usr/runtime/rt_targeting.H>
 #include <runtime/interface.h>
+#include <arch/ppc.H>
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>  // implements some of these
 #include "../nvdimm.H" // for g_trac_nvdimm
@@ -358,7 +359,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             // the boot. This will notify the user that action is needed
             // on this module
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             continue;
         }
@@ -375,7 +376,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             // the boot. This will notify the user that action is needed
             // on this module
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             o_arm_successful = false;
             continue;
@@ -391,7 +392,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             // the boot. This will notify the user that action is needed
             // on this module
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             o_arm_successful = false;
             continue;
@@ -405,7 +406,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             // the boot. This will notify the user that action is needed
             // on this module
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             o_arm_successful = false;
             continue;
@@ -422,7 +423,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
             // the boot. This will notify the user that action is needed
             // on this module
             l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-            l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
             errlCommit( l_err, NVDIMM_COMP_ID );
             o_arm_successful = false;
 
@@ -433,7 +434,7 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmArm() nvdimm[%X], error disarming the nvdimm!",
                           TARGETING::get_huid(l_nvdimm));
                 l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-                l_err->collectTrace(NVDIMM_COMP_NAME, 1024);
+                l_err->collectTrace(NVDIMM_COMP_NAME);
                 errlCommit(l_err, NVDIMM_COMP_ID);
             }
 
@@ -444,6 +445,50 @@ bool nvdimmArm(TARGETING::TargetHandleList &i_nvdimmTargetList)
     TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmArm() returning %d",
               o_arm_successful);
     return o_arm_successful;
+}
+
+bool nvdimmDisarm(TARGETING::TargetHandleList &i_nvdimmTargetList)
+{
+    bool o_disarm_successful = true;
+
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimmDisarm() %d",
+        i_nvdimmTargetList.size());
+
+    errlHndl_t l_err = nullptr;
+
+    for (auto const l_nvdimm : i_nvdimmTargetList)
+    {
+        // skip if the nvdimm is in error state
+        if (NVDIMM::nvdimmInErrorState(l_nvdimm))
+        {
+            // error state means arming not successful
+            // RTC 210689 Handle return values
+            o_disarm_successful = false;
+            continue;
+        }
+
+        l_err = NVDIMM::nvdimmChangeArmState(l_nvdimm, DISARM_TRIGGER);
+        // If we run into any error here we will just
+        // commit the error log and move on. Let the
+        // system continue to boot and let the user
+        // salvage the data
+        if (l_err)
+        {
+            NVDIMM::nvdimmSetStatusFlag(l_nvdimm, NVDIMM::NSTD_ERR_NOBKUP);
+            // Committing the error as we don't want this to interrupt
+            // the boot. This will notify the user that action is needed
+            // on this module
+            l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            errlCommit( l_err, NVDIMM_COMP_ID );
+            o_disarm_successful = false;
+            continue;
+        }
+    }
+
+    TRACFCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmDisarm() returning %d",
+              o_disarm_successful);
+    return o_disarm_successful;
 }
 
 /**
@@ -465,6 +510,95 @@ bool nvdimmInErrorState(TARGETING::Target *i_nvdimm)
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimmInErrorState() HUID[%X]",TARGETING::get_huid(i_nvdimm));
     return l_ret;
+}
+
+
+// This could be made a generic utility
+errlHndl_t nvdimm_getDarnNumber(size_t i_genSize, uint8_t* o_genData)
+{
+    assert(i_genSize % sizeof(uint64_t) == 0,"nvdimm_getDarnNumber() bad i_genSize");
+
+    errlHndl_t l_err = nullptr;
+    uint64_t* l_darnData = reinterpret_cast<uint64_t*>(o_genData);
+
+    for (uint32_t l_loop = 0; l_loop < (i_genSize / sizeof(uint64_t)); l_loop++)
+    {
+        // Darn could return an error code
+        uint32_t l_darnErrors = 0;
+
+        while (l_darnErrors < MAX_DARN_ERRORS)
+        {
+            // Get a 64-bit random number with the darn instruction
+            l_darnData[l_loop] = getDarn();
+
+            if ( l_darnData[l_loop] != DARN_ERROR_CODE )
+            {
+                break;
+            }
+            else
+            {
+                l_darnErrors++;
+            }
+        }
+
+        if (l_darnErrors == MAX_DARN_ERRORS)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_getDarnNumber() reached MAX_DARN_ERRORS");
+            /*@
+            *@errortype
+            *@reasoncode       NVDIMM_ENCRYPTION_MAX_DARN_ERRORS
+            *@severity         ERRORLOG_SEV_PREDICTIVE
+            *@moduleid         NVDIMM_GET_DARN_NUMBER
+            *@userdata1        MAX_DARN_ERRORS
+            *@devdesc          Error using darn instruction
+            *@custdesc         NVDIMM encryption error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        NVDIMM_GET_DARN_NUMBER,
+                        NVDIMM_ENCRYPTION_MAX_DARN_ERRORS,
+                        MAX_DARN_ERRORS,
+                        ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME);
+            break;
+        }
+    }
+
+    return l_err;
+}
+
+
+errlHndl_t nvdimm_getRandom(uint8_t* o_genData)
+{
+    errlHndl_t l_err = nullptr;
+    uint8_t l_xtraData[ENC_KEY_SIZE] = {0};
+
+    do
+    {
+        // Get a random number with the darn instruction
+        l_err = nvdimm_getDarnNumber(ENC_KEY_SIZE, o_genData);
+        if (l_err)
+        {
+            break;
+        }
+
+        // Validate and update the random number
+        // Retry if more randomness required
+        do
+        {
+            //Get replacement data
+            l_err = nvdimm_getDarnNumber(ENC_KEY_SIZE, l_xtraData);
+            if (l_err)
+            {
+                break;
+            }
+
+        }while (nvdimm_keyifyRandomNumber(o_genData, l_xtraData));
+
+    }while (0);
+
+    return l_err;
 }
 
 } // end NVDIMM namespace
