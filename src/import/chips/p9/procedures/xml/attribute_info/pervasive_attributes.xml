@@ -753,7 +753,10 @@
 <attribute>
   <id>ATTR_MC_PLL_BUCKET</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>MC pll bucket selection in async mode for Cumulus</description>
+  <description>MC pll bucket selection.
+     See MEM_PLL_FREQ_LIST for Cumulus.
+     See OMI_PLL_FREQ_LIST for Axone.
+  </description>
   <valueType>uint8</valueType>
   <platInit/>
 </attribute>
