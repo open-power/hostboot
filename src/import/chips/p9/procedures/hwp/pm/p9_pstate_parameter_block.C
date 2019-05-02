@@ -2396,9 +2396,9 @@ void PlatPmPPB::compute_vpd_pts()
     //BIASED POINTS
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
-        uint32_t l_frequency_mhz = (iv_biased_vpd_pts[p].frequency_mhz);
-        uint32_t l_vdd_mv = (iv_biased_vpd_pts[p].vdd_mv);
-        uint32_t l_vcs_mv = (iv_biased_vpd_pts[p].vcs_mv);
+        uint32_t l_frequency_mhz = (iv_raw_vpd_pts[p].frequency_mhz);
+        uint32_t l_vdd_mv = (iv_raw_vpd_pts[p].vdd_mv);
+        uint32_t l_vcs_mv = (iv_raw_vpd_pts[p].vcs_mv);
 
         iv_operating_points[VPD_PT_SET_BIASED][p].vdd_mv =
                     bias_adjust_mv(l_vdd_mv, iv_bias[p].vdd_ext_hp);
