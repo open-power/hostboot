@@ -8650,7 +8650,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x08</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8664,8 +8665,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8716,7 +8717,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x09</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8730,8 +8732,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8782,7 +8784,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0A</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8796,8 +8799,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8848,7 +8851,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0B</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8862,8 +8866,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8914,7 +8918,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0C</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8928,8 +8933,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -8980,7 +8985,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0D</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -8994,8 +9000,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -9046,7 +9052,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0E</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -9060,8 +9067,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -9112,7 +9119,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0x0F</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/i2c_mux-0</value></field>
@@ -9126,8 +9134,8 @@
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
-            <!-- Engine 3 Port 0 connects to a 3 to 8 MUX attached to DDIMM1-8 in the simics axone model -->
-            <field><id>port</id><value>0</value></field>
+            <!-- Engine 3 Port 1 connects to a 3 to 8 MUX attached to DDIMM0-7 in the simics axone model -->
+            <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
@@ -9178,7 +9186,8 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <field><id>port</id><value>1</value></field>
+            <!-- Engine 3 Port 0 is directly attached to DDIMM8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xD0</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9191,8 +9200,8 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
-            <field><id>port</id><value>1</value></field>
+            <!-- Engine 3 Port 0 is directly attached to DDIMM8 in the simics axone model -->
+            <field><id>port</id><value>0</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
             <field><id>writeCycleTime</id><value>20</value></field>
@@ -9244,6 +9253,7 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>1</value></field>
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xD2</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9254,9 +9264,9 @@
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9309,6 +9319,7 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>1</value></field>
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xD4</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9319,9 +9330,9 @@
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
             <field><id>port</id><value>1</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9374,6 +9385,7 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>1</value></field>
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xD6</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9386,7 +9398,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <!-- Use incorrect devAddr so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>1</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9438,6 +9450,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>2</value></field>
             <field><id>devAddr</id><value>0xD2</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
@@ -9449,9 +9462,9 @@
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xA2</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
             <field><id>port</id><value>2</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9503,6 +9516,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>2</value></field>
             <field><id>devAddr</id><value>0xD4</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
@@ -9514,9 +9528,9 @@
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>chipCount</id><value>0x01</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xA4</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
             <field><id>port</id><value>2</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9568,6 +9582,7 @@
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>2</value></field>
             <field><id>devAddr</id><value>0xD6</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
@@ -9581,7 +9596,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA6</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>2</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
@@ -9634,6 +9649,7 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>2</value></field>
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>devAddr</id><value>0xD8</value></field>
             <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
             <field><id>i2cMuxPath</id><value>physical:sys-0</value></field>
@@ -9646,7 +9662,7 @@
             <field><id>chipCount</id><value>0x01</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
             <field><id>engine</id><value>3</value></field>
-            <!-- Engine 3 Port 1 is directly attached to DDIMM0 in the simics axone model -->
+            <!-- Use incorrect devAddr/port so device doesnt show present but we still detect that something should be there -->
             <field><id>port</id><value>2</value></field>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x4</value></field>
