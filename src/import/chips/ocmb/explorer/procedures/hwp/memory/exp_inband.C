@@ -533,11 +533,12 @@ fapi2::ReturnCode getRSP(
     if (o_rsp.response_length > 0)
     {
         // make sure expected size is a multiple of 8
-        o_data.resize( o_rsp.response_length +
-                       (8 - (o_rsp.response_length % 8)) );
+        const uint32_t l_padding = ((o_rsp.response_length % 8) > 0) ? (8 - (o_rsp.response_length % 8)) : 0;
+        o_data.resize( o_rsp.response_length + l_padding );
         FAPI_INF("Reading response data...");
 
         FAPI_TRY( fapi2::getMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, o_data) );
+        FAPI_TRY( correctMMIOEndianForStruct(o_data) );
     }
     else
     {
