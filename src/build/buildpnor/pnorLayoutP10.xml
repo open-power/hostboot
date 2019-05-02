@@ -189,12 +189,12 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Bootloader (28K)</description>
+        <description>Hostboot Bootloader (32K)</description>
         <eyeCatch>HBBL</eyeCatch>
         <physicalOffset>0x348F000</physicalOffset>
         <!-- Physical Size includes Header rounded to ECC valid size -->
-        <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
-        <physicalRegionSize>0x7000</physicalRegionSize>
+        <!-- Max size of actual HBBL content is 24K and 27K with ECC -->
+        <physicalRegionSize>0x8000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>
@@ -202,7 +202,7 @@ Layout Description
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x3496000</physicalOffset>
+        <physicalOffset>0x3497000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -210,7 +210,7 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x349B000</physicalOffset>
+        <physicalOffset>0x349C000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -218,7 +218,7 @@ Layout Description
     <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x349F000</physicalOffset>
+        <physicalOffset>0x34A0000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -229,7 +229,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x35BF000</physicalOffset>
+        <physicalOffset>0x35C0000</physicalOffset>
         <physicalRegionSize>0x600000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -238,7 +238,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x3BBF000</physicalOffset>
+        <physicalOffset>0x3BC0000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -246,7 +246,7 @@ Layout Description
     <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x3BC2000</physicalOffset>
+        <physicalOffset>0x3BC3000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -255,7 +255,7 @@ Layout Description
     <section>
         <description>Secureboot Test Load (12K)</description>
         <eyeCatch>TESTLOAD</eyeCatch>
-        <physicalOffset>0x3BE2000</physicalOffset>
+        <physicalOffset>0x3BE3000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -264,7 +264,7 @@ Layout Description
     <section>
         <description>Centaur Hw Ref Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x3BE5000</physicalOffset>
+        <physicalOffset>0x3BE6000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -273,7 +273,7 @@ Layout Description
     <section>
         <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalOffset>0x3BE8000</physicalOffset>
+        <physicalOffset>0x3BE9000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -282,7 +282,7 @@ Layout Description
     <section>
         <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalOffset>0x3C0C000</physicalOffset>
+        <physicalOffset>0x3C0D000</physicalOffset>
         <physicalRegionSize>0x4B000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -292,7 +292,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3C57000</physicalOffset>
+        <physicalOffset>0x3C58000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -301,7 +301,7 @@ Layout Description
     <section>
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x3C5B000</physicalOffset>
+        <physicalOffset>0x3C5C000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
