@@ -65,7 +65,7 @@ static const uint32_t EC_PC_TRACE2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // c/reg00001.H
 
-static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0 = 0x20020240ull;
+static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0 = 0x20020640ull;
 // c/reg00001.H
 
 static const uint64_t L2TRA_TR1_CONFIG = 0x20020082ull;

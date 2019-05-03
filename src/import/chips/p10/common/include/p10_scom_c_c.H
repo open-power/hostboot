@@ -53,7 +53,7 @@ static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_DONE = 32;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_DONE = 33;
 // c/reg00012.H
 
-static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0 = 0x20020200ull;
+static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT0 = 0x20020600ull;
 // c/reg00012.H
 
 static const uint64_t EC_PC_COMMON_SPR_SCOMC = 0x20020480ull;

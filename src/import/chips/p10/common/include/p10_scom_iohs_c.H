@@ -59,7 +59,7 @@ static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_20I = 20;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t AXON_CPLT_STAT0_FREE_USAGE_23I = 23;
-// iohs/reg00012.H
+// iohs/reg00051.H
 
 static const uint64_t AXON_EPS_FIR_GXSTOP2_MASK_REG = 0x18040015ull;
 
@@ -86,7 +86,7 @@ static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t AXON_EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// iohs/reg00012.H
+// iohs/reg00051.H
 
 static const uint64_t AXON_EPS_FIR_LOCAL_ACTION0 = 0x18040010ull;
 
@@ -139,7 +139,7 @@ static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_45 = 45;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_46 = 46;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_47 = 47;
 static const uint32_t AXON_EPS_FIR_LOCAL_ACTION0_48 = 48;
-// iohs/reg00012.H
+// iohs/reg00051.H
 
 static const uint64_t AXON_HOSTATTN = 0x18040009ull;
 
@@ -197,13 +197,13 @@ static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN50 = 50;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN51 = 51;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN52 = 52;
 static const uint32_t AXON_HOSTATTN_HOST_ATTN_IN53 = 53;
-// iohs/reg00012.H
+// iohs/reg00051.H
 
 static const uint64_t AXON_TRA0_TR0_CONFIG_1 = 0x18010404ull;
 
 static const uint32_t AXON_TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t AXON_TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-// iohs/reg00012.H
+// iohs/reg00051.H
 
 static const uint64_t AXON_XSTOP3 = 0x1803000eull;
 
@@ -228,24 +228,1729 @@ static const uint32_t AXON_XSTOP3_XSTOP3_UNIT13 = 17;
 static const uint32_t AXON_XSTOP3_XSTOP3_UNIT14 = 18;
 static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t AXON_XSTOP3_XSTOP3_WAIT_CYCLES_LEN = 12;
-// iohs/reg00012.H
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG = 0x800860200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG_RES_DAC = 50;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG_RES_DAC_LEN = 3;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG_BYPASS = 53;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE12_PG_PDWN_B = 54;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE1_PG = 0x800808200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE1_PG_CLKDIST_PDWN = 48;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE1_PG_CLKDIST_PDWN_LEN = 3;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE1_PG_16TO1 = 51;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG = 0x8008b0200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_FILTER_DEPTH = 48;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_FILTER_DEPTH_LEN = 5;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_TIMEOUT = 53;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_TIMEOUT_LEN = 4;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_SERVO_RESTORE_PR = 57;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_VOTE_RATIO_CFG = 58;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_VOTE_RATIO_CFG_LEN = 3;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_SERVO_THRESH4 = 61;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_SERVO_THRESH4_LEN = 2;
+static const uint32_t IOO_RX0_RXCTL_CTL_REGS_RX_MODE22_PG_VOTE_WIN_BOTH = 63;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT10_PG = 0x8009d0200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT10_PG_RX_PSAVE_FORCE_REQ_16_23_0 = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT10_PG_RX_PSAVE_FORCE_REQ_16_23_0_LEN = 8;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG = 0x800a20200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_TIME = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_TIME_LEN = 6;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_FIFO_TIME = 54;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_FIFO_TIME_LEN = 6;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_TIMER_DOUBLE_MODE = 61;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_FIFO_TIMER_DOUBLE_MODE = 62;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT20_PG_FW_VALID_BYPASS = 63;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT30_PG = 0x800a70200000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT30_PG_RX_B_LANE_DONE_16_23 = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT30_PG_RX_B_LANE_DONE_16_23_LEN = 8;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNTL3_PG = 0x800998200000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT16_PG = 0x800b08200000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_STAT26_PG = 0x800b58200000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL = 0x8003d02f0000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
+static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RUN_LANE_DL_MASK = 50;
+static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51;
+static const uint32_t IOO_RX0_RXCTL_DATASM_11_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_13_PLREGS_RX_CNTL2_PL = 0x8003c82d0000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL = 0x8003d8290000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_17_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_21_PLREGS_RX_CNTL3_PL = 0x8003d8350000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_21_PLREGS_RX_CNTL3_PL_REQ_ALT = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_21_PLREGS_RX_CNTL3_PL_STS_ALT = 49;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_7_PLREGS_RX_CNTL1_PL = 0x8003c0270000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_7_PLREGS_RX_CNTL1_PL_INIT_DONE = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_7_PLREGS_RX_CNTL1_PL_RECAL_DONE = 49;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_7_PLREGS_RX_STAT1_PL = 0x8003e0270000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL = 0x8003d0280000003full;
+
+static const uint32_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK = 48;
+static const uint32_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RECAL_DONE_DL_MASK = 49;
+static const uint32_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RUN_LANE_DL_MASK = 50;
+static const uint32_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51;
+static const uint32_t IOO_RX0_RXCTL_DATASM_8_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL = 0x800370200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_IORESET = 48;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET = 49;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A = 50;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B = 51;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A = 52;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B = 53;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE = 54;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN = 55;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK = 57;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN = 4;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR = 61;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN = 3;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_BIT_REGS_MODE5_PL = 0x800340200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE = 48;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN = 4;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE = 56;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN = 7;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_BIT_REGS_STAT3_PL = 0x8003a0200000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_BIT_REGS_FIR_MASK_PL = 0x800310200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK = 48;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK_LEN = 3;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX67_PL = 0x800218200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000 = 55;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX77_PL = 0x800268200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010 = 55;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL15_PL = 0x800078200000003full;
+
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN = 48;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN = 49;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX20_PL = 0x8000a0210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E = 55;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX30_PL = 0x8000f0210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX30_PL_RX_AD_LATCH_DAC_N011 = 55;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX30_PL_RX_AD_LATCH_DAC_N011_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX40_PL = 0x800140210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX40_PL_RX_AD_LATCH_DAC_E101 = 55;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX40_PL_RX_AD_LATCH_DAC_E101_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX50_PL = 0x800190210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX50_PL_RX_AD_LATCH_DAC_S111 = 55;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_A_CNTLX50_PL_RX_AD_LATCH_DAC_S111_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_B_CNTLX87_PL = 0x8002b8210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_B_CNTLX87_PL_RX_BD_LATCH_DAC_W100 = 55;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_LOFF_B_CNTLX87_PL_RX_BD_LATCH_DAC_W100_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL13_PL = 0x800068210000003full;
+
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL13_PL_COARSE = 48;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL13_PL_COARSE_LEN = 6;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL13_PL_GAIN = 54;
+static const uint32_t IOO_RX0_0_RD_1_RX_DAC_REGS_CNTL13_PL_GAIN_LEN = 4;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL = 0x800300220000003full;
+
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_0 = 48;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_1 = 49;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_2 = 50;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_3 = 51;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_4 = 52;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_5 = 53;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_6 = 54;
+static const uint32_t IOO_RX0_0_RD_2_RX_BIT_REGS_SPARE_MODE_PL_7 = 55;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX62_PL = 0x8001f0220000003full;
+
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011 = 55;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX72_PL = 0x800240220000003full;
+
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX72_PL_RX_BD_LATCH_DAC_E101 = 55;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX72_PL_RX_BD_LATCH_DAC_E101_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX89_PL = 0x8002c8220000003full;
+
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX89_PL_RX_BD_LATCH_DAC_W110 = 55;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_LOFF_B_CNTLX89_PL_RX_BD_LATCH_DAC_W110_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL = 0x800008220000003full;
+
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS = 48;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN = 6;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN = 54;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA = 55;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN = 3;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS = 58;
+static const uint32_t IOO_RX0_0_RD_2_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN = 6;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL4_PL = 0x800378230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL4_PL_A = 49;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL4_PL_A_LEN = 7;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL4_PL_B = 57;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_CNTL4_PL_B_LEN = 7;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL = 0x800328230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN = 48;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR = 49;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN = 50;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN = 51;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN = 52;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_LOCK_RATIO = 53;
+static const uint32_t IOO_RX0_0_RD_3_RX_BIT_REGS_MODE2_PL_LOCK_RATIO_LEN = 10;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_BIT_REGS_STAT4_PL = 0x8003a8230000003full;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX35_PL = 0x800118230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX35_PL_RX_AD_LATCH_DAC_E000 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX35_PL_RX_AD_LATCH_DAC_E000_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX45_PL = 0x800168230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX45_PL_RX_AD_LATCH_DAC_S010 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX45_PL_RX_AD_LATCH_DAC_S010_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX55_PL = 0x8001b8230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX55_PL_RX_AD_LATCH_DAC_W100 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_A_CNTLX55_PL_RX_AD_LATCH_DAC_W100_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX59_PL = 0x8001d8230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX69_PL = 0x800228230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX69_PL_RX_BD_LATCH_DAC_E010 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX69_PL_RX_BD_LATCH_DAC_E010_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX79_PL = 0x800278230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX79_PL_RX_BD_LATCH_DAC_S100 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX79_PL_RX_BD_LATCH_DAC_S100_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL = 0x800290230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111 = 55;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111_LEN = 9;
+// iohs/reg00051.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL = 0x800070230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL_DATA = 48;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL_DATA_LEN = 5;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL_EDGE = 54;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL14_PL_EDGE_LEN = 5;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL4_PL = 0x800020230000003full;
+
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL4_PL_GAIN = 48;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL4_PL_GAIN_LEN = 3;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL4_PL_FREQ = 51;
+static const uint32_t IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL4_PL_FREQ_LEN = 3;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTL6_PL = 0x800388240000003full;
+
+static const uint32_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL = 48;
+static const uint32_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL_LEN = 2;
+static const uint32_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_A = 50;
+static const uint32_t IOO_RX0_0_RD_4_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_B = 51;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_BIT_REGS_STAT6_PL = 0x8003b8240000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_BIT_REGS_FIR_PL = 0x800308240000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX26_PL = 0x8000d0240000003full;
+
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W = 55;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX66_PL = 0x800210240000003full;
+
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111 = 55;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX76_PL = 0x800260240000003full;
+
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001 = 55;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL = 0x800038240000003full;
+
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_A_BIST_EN = 48;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_B_BIST_EN = 49;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_BISTCLK_EN = 50;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_BISTCLK_EN_LEN = 2;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_A_PRBS15_ADJ = 52;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_A_PRBS15_ADJ_LEN = 4;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_B_PRBS15_ADJ = 56;
+static const uint32_t IOO_RX0_0_RD_4_RX_DAC_REGS_CNTL7_PL_B_PRBS15_ADJ_LEN = 4;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_BIT_REGS_FIR_ERROR_INJECT_PL = 0x800318250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_FIR_ERROR_INJECT_PL_RX_PL_FIR_ERR_INJ = 48;
+static const uint32_t IOO_RX0_0_RD_5_RX_BIT_REGS_FIR_ERROR_INJECT_PL_RX_PL_FIR_ERR_INJ_LEN = 3;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX21_PL = 0x8000a8250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S = 55;
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX31_PL = 0x8000f8250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100 = 55;
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX41_PL = 0x800148250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110 = 55;
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX51_PL = 0x800198250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000 = 55;
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL = 0x8002b0250000003full;
+
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011 = 55;
+static const uint32_t IOO_RX0_0_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX27_PL = 0x8000d8260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX37_PL = 0x800128260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX47_PL = 0x800178260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX57_PL = 0x8001c8260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX80_PL = 0x800280260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX90_PL = 0x8002d0260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111 = 55;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_0_RX_DAC_REGS_CNTL13_PL = 0x800068260000003full;
+
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_CNTL13_PL_COARSE = 48;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_CNTL13_PL_COARSE_LEN = 6;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_CNTL13_PL_GAIN = 54;
+static const uint32_t IOO_RX0_1_RD_0_RX_DAC_REGS_CNTL13_PL_GAIN_LEN = 4;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_BIT_REGS_CNTL4_PL = 0x800378270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_CNTL4_PL_A = 49;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_CNTL4_PL_A_LEN = 7;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_CNTL4_PL_B = 57;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_CNTL4_PL_B_LEN = 7;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_BIT_REGS_CNTLX5_PL = 0x800380270000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL = 0x800328270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN = 48;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR = 49;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN = 50;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN = 51;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN = 52;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_LOCK_RATIO = 53;
+static const uint32_t IOO_RX0_1_RD_RX_BIT_REGS_MODE2_PL_LOCK_RATIO_LEN = 10;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_BIT_REGS_STAT4_PL = 0x8003a8270000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_BIT_REGS_FIR_PL = 0x800308270000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX60_PL = 0x8001e0270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001 = 55;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX70_PL = 0x800230270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011 = 55;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL15_PL = 0x800078270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN = 48;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN = 49;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL = 0x800000270000003full;
+
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_0 = 48;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_1 = 49;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_2 = 50;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_3 = 51;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_4 = 52;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_5 = 53;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_6 = 54;
+static const uint32_t IOO_RX0_1_RD_RX_DAC_REGS_DATA_SPARE_MODE_PL_7 = 55;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL = 0x800370280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_IORESET = 48;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET = 49;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A = 50;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B = 51;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A = 52;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B = 53;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE = 54;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK = 57;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN = 4;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR = 61;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN = 3;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_BIT_REGS_MODE5_PL = 0x800340280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE = 48;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN = 4;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE = 56;
+static const uint32_t IOO_RX0_1_RD_2_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN = 7;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_BIT_REGS_STAT3_PL = 0x8003a0280000003full;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX22_PL = 0x8000b0280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX32_PL = 0x800100280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101 = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX42_PL = 0x800150280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111 = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX52_PL = 0x8001a0280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001 = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX85_PL = 0x8002a8280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010 = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL14_PL = 0x800070280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL14_PL_DATA = 48;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL14_PL_DATA_LEN = 5;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL14_PL_EDGE = 54;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL14_PL_EDGE_LEN = 5;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL = 0x800008280000003full;
+
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS = 48;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN = 6;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN = 54;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA = 55;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN = 3;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS = 58;
+static const uint32_t IOO_RX0_1_RD_2_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN = 6;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX19_PL = 0x800098310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX29_PL = 0x8000e8310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010 = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX39_PL = 0x800138310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100 = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX49_PL = 0x800188310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110 = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX25_PL = 0x8000c8310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX65_PL = 0x800208310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110 = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX75_PL = 0x800258310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000 = 55;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL4_PL = 0x800020310000003full;
+
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL4_PL_GAIN = 48;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL4_PL_GAIN_LEN = 3;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL4_PL_FREQ = 51;
+static const uint32_t IOO_RX0_1_RD_3_RX_DAC_REGS_CNTL4_PL_FREQ_LEN = 3;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL = 0x800120300000003full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL_RX_AD_LATCH_DAC_E001 = 55;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX36_PL_RX_AD_LATCH_DAC_E001_LEN = 9;
+// iohs/reg00052.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX46_PL = 0x800170300000003full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX46_PL_RX_AD_LATCH_DAC_S011 = 55;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX46_PL_RX_AD_LATCH_DAC_S011_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX56_PL = 0x8001c0300000003full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX56_PL_RX_AD_LATCH_DAC_W101 = 55;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_A_CNTLX56_PL_RX_AD_LATCH_DAC_W101_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_B_CNTLX81_PL = 0x800288300000003full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_B_CNTLX81_PL_RX_BD_LATCH_DAC_S110 = 55;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_LOFF_B_CNTLX81_PL_RX_BD_LATCH_DAC_S110_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL = 0x800038300000003full;
+
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_A_BIST_EN = 48;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_B_BIST_EN = 49;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_BISTCLK_EN = 50;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_BISTCLK_EN_LEN = 2;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_A_PRBS15_ADJ = 52;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_A_PRBS15_ADJ_LEN = 4;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_B_PRBS15_ADJ = 56;
+static const uint32_t IOO_RX0_1_RD_4_RX_DAC_REGS_CNTL7_PL_B_PRBS15_ADJ_LEN = 4;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL = 0x8003602f0000003full;
+
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT = 48;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC = 49;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL = 50;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL_LEN = 3;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A = 53;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A_LEN = 2;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B = 55;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B_LEN = 2;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL = 57;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A = 58;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN = 59;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_5_RX_BIT_REGS_MODE7_PL = 0x8003502f0000003full;
+
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL = 48;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL_LEN = 2;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO = 50;
+static const uint32_t IOO_RX0_1_RD_5_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO_LEN = 10;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_5_RX_BIT_REGS_STAT1_PL = 0x8003902f0000003full;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX61_PL = 0x8001e82f0000003full;
+
+static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX61_PL_RX_BD_LATCH_DAC_N010 = 55;
+static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX61_PL_RX_BD_LATCH_DAC_N010_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX71_PL = 0x8002382f0000003full;
+
+static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX71_PL_RX_BD_LATCH_DAC_E100 = 55;
+static const uint32_t IOO_RX0_1_RD_5_RX_DAC_REGS_LOFF_B_CNTLX71_PL_RX_BD_LATCH_DAC_E100_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_BIT_REGS_CNTL6_PL = 0x8003882e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL = 48;
+static const uint32_t IOO_RX0_2_RD_0_RX_BIT_REGS_CNTL6_PL_SAVE_FW_VAL_SEL_LEN = 2;
+static const uint32_t IOO_RX0_2_RD_0_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_A = 50;
+static const uint32_t IOO_RX0_2_RD_0_RX_BIT_REGS_CNTL6_PL_R_PSAVE_PH_FORCE_B = 51;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_BIT_REGS_STAT6_PL = 0x8003b82e0000003full;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX20_PL = 0x8000a02e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E = 55;
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX20_PL_RX_AE_LATCH_DAC_E_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX30_PL = 0x8000f02e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX30_PL_RX_AD_LATCH_DAC_N011 = 55;
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX30_PL_RX_AD_LATCH_DAC_N011_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX40_PL = 0x8001402e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX40_PL_RX_AD_LATCH_DAC_E101 = 55;
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX40_PL_RX_AD_LATCH_DAC_E101_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX50_PL = 0x8001902e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX50_PL_RX_AD_LATCH_DAC_S111 = 55;
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_A_CNTLX50_PL_RX_AD_LATCH_DAC_S111_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX87_PL = 0x8002b82e0000003full;
+
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX87_PL_RX_BD_LATCH_DAC_W100 = 55;
+static const uint32_t IOO_RX0_2_RD_0_RX_DAC_REGS_LOFF_B_CNTLX87_PL_RX_BD_LATCH_DAC_W100_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX67_PL = 0x8002182d0000003full;
+
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000 = 55;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX67_PL_RX_BD_LATCH_DAC_E000_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX77_PL = 0x8002682d0000003full;
+
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010 = 55;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_LOFF_B_CNTLX77_PL_RX_BD_LATCH_DAC_S010_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTLX9_PL = 0x8000482d0000003full;
+
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTLX9_PL_A_SPEC_MUX_SEL = 48;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTLX9_PL_A_SPEC_MUX_SEL_LEN = 7;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTLX9_PL_B_SPEC_MUX_SEL = 55;
+static const uint32_t IOO_RX0_2_RD_1_RX_DAC_REGS_CNTLX9_PL_B_SPEC_MUX_SEL_LEN = 7;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX35_PL = 0x8001182c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX35_PL_RX_AD_LATCH_DAC_E000 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX35_PL_RX_AD_LATCH_DAC_E000_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX45_PL = 0x8001682c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX45_PL_RX_AD_LATCH_DAC_S010 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX45_PL_RX_AD_LATCH_DAC_S010_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX55_PL = 0x8001b82c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX55_PL_RX_AD_LATCH_DAC_W100 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_A_CNTLX55_PL_RX_AD_LATCH_DAC_W100_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX59_PL = 0x8001d82c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX59_PL_RX_BD_LATCH_DAC_N000_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX69_PL = 0x8002282c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX69_PL_RX_BD_LATCH_DAC_E010 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX69_PL_RX_BD_LATCH_DAC_E010_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX79_PL = 0x8002782c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX79_PL_RX_BD_LATCH_DAC_S100 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX79_PL_RX_BD_LATCH_DAC_S100_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX82_PL = 0x8002902c0000003full;
+
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111 = 55;
+static const uint32_t IOO_RX0_2_RD_RX_DAC_REGS_LOFF_B_CNTLX82_PL_RX_BD_LATCH_DAC_S111_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_BIT_REGS_MODE7_PL = 0x8003502b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL = 48;
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_MODE7_PL_SAVE_CDRLOCK_MODE_SEL_LEN = 2;
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO = 50;
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_MODE7_PL_R_UNLOCK_RATIO_LEN = 10;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_BIT_REGS_STAT1_PL = 0x8003902b0000003full;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_BIT_REGS_FIR_MASK_PL = 0x8003102b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK = 48;
+static const uint32_t IOO_RX0_2_RD_3_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK_LEN = 3;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX62_PL = 0x8001f02b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011 = 55;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX62_PL_RX_BD_LATCH_DAC_N011_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX72_PL = 0x8002402b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX72_PL_RX_BD_LATCH_DAC_E101 = 55;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX72_PL_RX_BD_LATCH_DAC_E101_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX89_PL = 0x8002c82b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX89_PL_RX_BD_LATCH_DAC_W110 = 55;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_LOFF_B_CNTLX89_PL_RX_BD_LATCH_DAC_W110_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_3_RX_DAC_REGS_CNTL18_PL = 0x8000902b0000003full;
+
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_CNTL18_PL_DATA = 48;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_CNTL18_PL_DATA_LEN = 5;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_CNTL18_PL_EDGE = 54;
+static const uint32_t IOO_RX0_2_RD_3_RX_DAC_REGS_CNTL18_PL_EDGE_LEN = 5;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL = 0x8003702a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_IORESET = 48;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET = 49;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A = 50;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B = 51;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A = 52;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B = 53;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE = 54;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK = 57;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN = 4;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR = 61;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN = 3;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_BIT_REGS_MODE5_PL = 0x8003402a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE = 48;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN = 4;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE = 56;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN = 7;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_BIT_REGS_STAT3_PL = 0x8003a02a0000003full;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL = 0x8003002a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_0 = 48;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_1 = 49;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_2 = 50;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_3 = 51;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_4 = 52;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_5 = 53;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_6 = 54;
+static const uint32_t IOO_RX0_2_RD_4_RX_BIT_REGS_SPARE_MODE_PL_7 = 55;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL = 0x8000a82a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL = 0x8000f82a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100 = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL = 0x8001482a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110 = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX51_PL = 0x8001982a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000 = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX86_PL = 0x8002b02a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011 = 55;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_4_RX_DAC_REGS_CNTL17_PL = 0x8000882a0000003full;
+
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_CNTL17_PL_DATA = 48;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_CNTL17_PL_DATA_LEN = 5;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_CNTL17_PL_EDGE = 54;
+static const uint32_t IOO_RX0_2_RD_4_RX_DAC_REGS_CNTL17_PL_EDGE_LEN = 5;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX26_PL = 0x8000d0290000003full;
+
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W = 55;
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX66_PL = 0x800210290000003full;
+
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111 = 55;
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX76_PL = 0x800260290000003full;
+
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001 = 55;
+static const uint32_t IOO_RX0_2_RD_5_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001_LEN = 9;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG = 0x800c04200000003full;
+
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_0 = 48;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_1 = 49;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_2 = 50;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_3 = 51;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_4 = 52;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_5 = 53;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_6 = 54;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_7 = 55;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_8_9 = 56;
+static const uint32_t IOO_TX0_TXCTL_CTL_REGS_TX_SPARE_MODE_PG_8_9_LEN = 2;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL10_PG = 0x800d0c200000003full;
+
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL10_PG_2 = 48;
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL10_PG_2_LEN = 6;
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL10_PG_3 = 54;
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL10_PG_3_LEN = 6;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_FIR_MASK_PG = 0x800c8c200000003full;
+
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_FIR_MASK_PG_TX_PG_FIR_ERRS_MASK = 48;
+static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_FIR_MASK_PG_TX_PG_FIR_ERRS_MASK_LEN = 5;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL = 0x80047c200000003full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN = 16;
+// iohs/reg00053.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL = 0x8004cc200000003full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL_EN = 51;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL_SEL = 56;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL20_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL30_PL = 0x80051c200000003full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL30_PL_TX_FORCE_HS_FFE = 48;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL4_PL = 0x80044c200000003full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL4_PL_EN = 51;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL4_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL4_PL_SEL = 56;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL4_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL = 0x800424200000003full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN = 3;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_CLK_DISABLE = 56;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_RXCAL = 57;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL = 58;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN = 3;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_HOLD = 61;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL9_PL = 0x800474210000003full;
+
+static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_18_HS_EN = 48;
+static const uint32_t IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_18_HS_EN_LEN = 3;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL16_PL = 0x8004ac230000003full;
+
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL16_PL_I_TUNE = 48;
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN = 6;
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL16_PL_Q_TUNE = 54;
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN = 6;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL26_PL = 0x8004fc230000003full;
+
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN = 48;
+static const uint32_t IOO_TX0_0_DD_3_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN = 3;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_4_TX_BIT_REGS_FIR_MASK_PL = 0x80040c240000003full;
+
+static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK = 48;
+static const uint32_t IOO_TX0_0_DD_4_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN = 2;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL11_PL = 0x800484250000003full;
+
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN = 48;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN_LEN = 3;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL1G_PL = 0x800434250000003full;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL21_PL = 0x8004d4250000003full;
+
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL21_PL_EN = 51;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL21_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL21_PL_SEL = 56;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL21_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL = 0x800444250000003full;
+
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_TDR_ENABLE = 48;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE = 49;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_ENABLE = 50;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_CLEAR = 51;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
+static const uint32_t IOO_TX0_0_DD_5_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL11_PL = 0x800484260000003full;
+
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN = 48;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN_LEN = 3;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL1G_PL = 0x800434260000003full;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL21_PL = 0x8004d4260000003full;
+
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL21_PL_EN = 51;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL21_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL21_PL_SEL = 56;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_CNTL21_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_0_TX_BIT_REGS_FIR_ERROR_INJECT_PL = 0x800414260000003full;
+
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_ERR_INJ = 48;
+static const uint32_t IOO_TX0_1_DD_0_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_ERR_INJ_LEN = 2;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL7_PL = 0x800464270000003full;
+
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL7_PL_EN = 51;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL7_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL7_PL_SEL = 56;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_CNTL7_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL = 0x80041c270000003full;
+
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_LANE_PDWN = 48;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_LANE_INVERT = 49;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE = 50;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE_LEN = 2;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_PSAVE_REQ_DIS = 54;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_ERR_INJ_A_ENABLE = 55;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_ERR_INJ_B_ENABLE = 56;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_0 = 60;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_1 = 61;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_2 = 62;
+static const uint32_t IOO_TX0_1_DD_TX_BIT_REGS_MODE1_PL_PL_SPARE_MODE_3 = 63;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL = 0x800444280000003full;
+
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_TDR_ENABLE = 48;
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_PATTERN_ENABLE = 49;
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_ENABLE = 50;
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_BIST_PRBS_CLEAR = 51;
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_RXDET_ENABLE = 52;
+static const uint32_t IOO_TX0_1_DD_2_TX_BIT_REGS_CNTL3_PL_RXDET_PULSE = 53;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_2_TX_BIT_REGS_FIR_PL = 0x800404280000003full;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL = 0x8004b4310000003full;
+
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN = 48;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL = 49;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL_LEN = 3;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE = 52;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE_LEN = 5;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_DCC_PAT = 57;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_DCC_PAT_LEN = 4;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL17_PL_DCC_AZ = 61;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL27_PL = 0x800504310000003full;
+
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL27_PL_EN = 49;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL27_PL_EN_LEN = 7;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL27_PL_SEL = 56;
+static const uint32_t IOO_TX0_1_DD_3_TX_BIT_REGS_CNTL27_PL_SEL_LEN = 7;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL10_PL = 0x80047c2f0000003full;
+
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN = 48;
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN = 16;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL20_PL = 0x8004cc2f0000003full;
+
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL20_PL_EN = 51;
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL20_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL20_PL_SEL = 56;
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL20_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL30_PL = 0x80051c2f0000003full;
+
+static const uint32_t IOO_TX0_1_DD_5_TX_BIT_REGS_CNTL30_PL_TX_FORCE_HS_FFE = 48;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL19_PL = 0x8004c42e0000003full;
+
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL19_PL_EN = 51;
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL19_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL19_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL19_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL29_PL = 0x8005142e0000003full;
+
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL29_PL_TX_ATTEN_SAFE_EN = 48;
+static const uint32_t IOO_TX0_2_DD_0_TX_BIT_REGS_CNTL29_PL_TX_ATTEN_SAFE_EN_LEN = 16;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL13_PL = 0x8004942d0000003full;
+
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL13_PL_EN = 49;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL13_PL_EN_LEN = 7;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL13_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL13_PL_SEL_LEN = 7;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL23_PL = 0x8004e42d0000003full;
+
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL23_PL_TX_PSEG_MAIN_0_15_SAFE_EN = 48;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL23_PL_TX_PSEG_MAIN_0_15_SAFE_EN_LEN = 16;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL6_PL = 0x80045c2d0000003full;
+
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL6_PL_EN = 51;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL6_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL6_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_1_TX_BIT_REGS_CNTL6_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL15_PL = 0x8004a42c0000003full;
+
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL15_PL_EL_UNLOAD_TIMER_VAL = 48;
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL15_PL_EL_UNLOAD_TIMER_VAL_LEN = 4;
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL15_PL_EL_UNLOAD_TIMER_DOUBLE_MODE = 52;
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL15_PL_ISABLE_PL_SM = 53;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL25_PL = 0x8004f42c0000003full;
+
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL25_PL_TX_NSEG_MAIN_0_15_SAFE_EN = 48;
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL25_PL_TX_NSEG_MAIN_0_15_SAFE_EN_LEN = 16;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL2_PL = 0x80043c2c0000003full;
+
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL2_PL_RESET = 48;
+static const uint32_t IOO_TX0_2_DD_TX_BIT_REGS_CNTL2_PL_DOM_IORESET = 49;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_3_TX_BIT_REGS_FIR_MASK_PL = 0x80040c2b0000003full;
+
+static const uint32_t IOO_TX0_2_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK = 48;
+static const uint32_t IOO_TX0_2_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN = 2;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL12_PL = 0x80048c2a0000003full;
+
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL12_PL_EN = 49;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL12_PL_EN_LEN = 7;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL12_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL12_PL_SEL_LEN = 7;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL22_PL = 0x8004dc2a0000003full;
+
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL22_PL_EN = 51;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL22_PL_EN_LEN = 5;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL22_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_CNTL22_PL_SEL_LEN = 5;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_4_TX_BIT_REGS_STAT1_PL = 0x8005242a0000003full;
+
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS = 50;
+static const uint32_t IOO_TX0_2_DD_4_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN = 2;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL18_PL = 0x8004bc290000003full;
+
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL18_PL_TX_ATTEN_HS_EN = 48;
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL18_PL_TX_ATTEN_HS_EN_LEN = 16;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL28_PL = 0x80050c290000003full;
+
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL28_PL_EN = 49;
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL28_PL_EN_LEN = 7;
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL28_PL_SEL = 56;
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_CNTL28_PL_SEL_LEN = 7;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_ERROR_INJECT_PL = 0x800414290000003full;
+
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_ERR_INJ = 48;
+static const uint32_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_ERROR_INJECT_PL_TX_PL_FIR_ERR_INJ_LEN = 2;
+// iohs/reg00054.H
+
+//ERRCODE: // Some of the name targets not found in address targets: iohs
+
+static const uint64_t IOO_TX0_2_DD_5_TX_BIT_REGS_FIR_PL = 0x800404290000003full;
+// iohs/reg00054.H
 
 static const uint64_t MULTICAST_GROUP_4 = 0x180f0004ull;
 
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
-// iohs/reg00012.H
+// iohs/reg00054.H
+
+static const uint64_t PERF_TRACE_CONFIG = 0x1801101cull;
+
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0 = 0;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1 = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2 = 4;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3 = 6;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4 = 8;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5 = 10;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6 = 12;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7 = 14;
+static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0 = 16;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1 = 18;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2 = 20;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3 = 22;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4 = 24;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5 = 26;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6 = 28;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7 = 30;
+static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_PMULET_FREEZE_MODE = 32;
+static const uint32_t PERF_TRACE_CONFIG_COMMON_FREEZE_MODE = 33;
+static const uint32_t PERF_TRACE_CONFIG_PERF_RESET_MODE = 34;
+static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_ENABLE = 35;
+static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_FIXED_WINDOW = 36;
+static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_PRESCALE = 37;
+static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE = 38;
+static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE_LEN = 2;
+static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0 = 40;
+static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0_LEN = 12;
+static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1 = 52;
+static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1_LEN = 12;
+// iohs/reg00054.H
 
 static const uint64_t PRE_COUNTER_REG = 0x180f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
-// iohs/reg00012.H
+// iohs/reg00054.H
+
+static const uint64_t REGS_PRX1_DLR_APCR = 0x1801103cull;
+// iohs/reg00054.H
+
+static const uint64_t SEC_CONFIG = 0x1801100dull;
+
+static const uint32_t SEC_CONFIG_ENABLE_ERR_INJ = 0;
+static const uint32_t SEC_CONFIG_ENABLE_TRACE = 1;
+static const uint32_t SEC_CONFIG_RESET_INJ = 2;
+static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE = 12;
+static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE_LEN = 2;
+static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE = 14;
+static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE_LEN = 2;
+static const uint32_t SEC_CONFIG_SBE_ERROR_RATE = 16;
+static const uint32_t SEC_CONFIG_SBE_ERROR_RATE_LEN = 2;
+static const uint32_t SEC_CONFIG_RAND_ERROR_RATE = 18;
+static const uint32_t SEC_CONFIG_RAND_ERROR_RATE_LEN = 6;
+static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE = 24;
+static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE_LEN = 2;
+static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE = 26;
+static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE_LEN = 6;
+static const uint32_t SEC_CONFIG_EDPL_RATE = 48;
+static const uint32_t SEC_CONFIG_EDPL_RATE_LEN = 16;
+// iohs/reg00054.H
 
 static const uint64_t XSTOP_INTERRUPT_REG = 0x180f001cull;
-// iohs/reg00012.H
+// iohs/reg00054.H
 
 }
 }
-#include "iohs/reg00012.H"
+#include "iohs/reg00051.H"
+#include "iohs/reg00052.H"
+#include "iohs/reg00053.H"
+#include "iohs/reg00054.H"
 #endif

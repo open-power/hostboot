@@ -121,8 +121,6 @@ static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
 // eq/reg00005.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA0_TR0_CONFIG_2 = 0x20018205ull;
 
 static const uint32_t L3TRA0_TR0_CONFIG_2_A = 0;
@@ -130,8 +128,6 @@ static const uint32_t L3TRA0_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_2_B_LEN = 24;
 // eq/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA1_TR1_CONFIG_4 = 0x20018267ull;
 
@@ -141,8 +137,6 @@ static const uint32_t L3TRA1_TR1_CONFIG_4_B = 24;
 static const uint32_t L3TRA1_TR1_CONFIG_4_B_LEN = 24;
 // eq/reg00005.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR1_CONFIG_3 = 0x200182a6ull;
 
 static const uint32_t L3TRA2_TR1_CONFIG_3_C = 0;
@@ -150,8 +144,6 @@ static const uint32_t L3TRA2_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t L3TRA2_TR1_CONFIG_3_D = 24;
 static const uint32_t L3TRA2_TR1_CONFIG_3_D_LEN = 24;
 // eq/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA3_TR0_CONFIG_5 = 0x200182c8ull;
 

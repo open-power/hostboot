@@ -34,11 +34,11 @@ namespace omic
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_CTL_REGS_RX_MODE8_PG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004b46d0c00003f;
+    scomt::last_scom = CTL_REGS_RX_MODE8_PG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -48,14 +48,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_CTL_REGS_RX_MODE8_PG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004b46d0c00003f;
+    scomt::last_scom = CTL_REGS_RX_MODE8_PG;
 #endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL, o_data);
+    return fapi2::getScom(i_target, CTL_REGS_RX_MODE8_PG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -63,14 +63,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_CTL_REGS_RX_MODE8_PG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE8_PG));
 #endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL, i_data);
+    return fapi2::putScom(i_target, CTL_REGS_RX_MODE8_PG, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -78,487 +77,237 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.setBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.clearBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.getBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_BIST_HS_CUST_SEL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE8_PG_RX_BO_TIME(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE8_PG));
 #endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE_LEN>(i_data);
+    return o_data.insertFromRight<CTL_REGS_RX_MODE8_PG_RX_BO_TIME,
+           CTL_REGS_RX_MODE8_PG_RX_BO_TIME_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE8_PG_RX_BO_TIME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_IQ_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_MODE8_PG_RX_BO_TIME(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE8_PG));
 #endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT_LEN>(i_data);
+    return o_data.insertFromRight<CTL_REGS_RX_MODE8_PG_RX_BO_TIME,
+           CTL_REGS_RX_MODE8_PG_RX_BO_TIME_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE8_PG_RX_BO_TIME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_PAT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.setBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return o_data.clearBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004b46d0c00003f));
-#endif
-    return i_data.getBit<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL17_PL_DCC_AZ chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8005046d0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8005046d0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_MODE8_PG_RX_BO_TIME(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_MODE8_PG));
 #endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN_LEN>(o_data);
+    return i_data.extractToRight<CTL_REGS_RX_MODE8_PG_RX_BO_TIME,
+           CTL_REGS_RX_MODE8_PG_RX_BO_TIME_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_MODE8_PG_RX_BO_TIME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL(fapi2::buffer<uint64_t>& i_data,
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DATASM_REGS_RX_STAT12_PG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DATASM_REGS_RX_STAT12_PG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DATASM_REGS_RX_STAT12_PG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DATASM_REGS_RX_STAT12_PG;
 #endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL_LEN>(i_data);
+    return fapi2::getScom(i_target, DATASM_REGS_RX_STAT12_PG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DATASM_REGS_RX_STAT12_PG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_STAT12_PG));
+#endif
+    return fapi2::putScom(i_target, DATASM_REGS_RX_STAT12_PG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DATASM_REGS_RX_STAT22_PG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DATASM_REGS_RX_STAT22_PG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DATASM_REGS_RX_STAT22_PG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DATASM_REGS_RX_STAT22_PG;
+#endif
+    return fapi2::getScom(i_target, DATASM_REGS_RX_STAT22_PG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DATASM_REGS_RX_STAT22_PG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_STAT22_PG));
+#endif
+    return fapi2::putScom(i_target, DATASM_REGS_RX_STAT22_PG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_MC_OMI_FIR_ACTION0_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MC_OMI_FIR_ACTION0_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_MC_OMI_FIR_ACTION0_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = MC_OMI_FIR_ACTION0_REG;
+#endif
+    return fapi2::getScom(i_target, MC_OMI_FIR_ACTION0_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_MC_OMI_FIR_ACTION0_REG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION0_REG));
+#endif
+    return fapi2::putScom(i_target, MC_OMI_FIR_ACTION0_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION0_REG));
+#endif
+    return o_data.insertFromRight<MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0,
+           MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION0_REG));
 #endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL_LEN>(i_data);
+    return o_data.insertFromRight<MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0,
+           MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005046d0c00003f));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION0_REG));
 #endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL_LEN>(o_data);
+    return i_data.extractToRight<MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0,
+           MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_CNTL27_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_MC_OMI_FIR_ACTION1_REG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8005246d0c00003f;
+    scomt::last_scom = MC_OMI_FIR_ACTION1_REG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -568,14 +317,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_MC_OMI_FIR_ACTION1_REG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8005246d0c00003f;
+    scomt::last_scom = MC_OMI_FIR_ACTION1_REG;
 #endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL, o_data);
+    return fapi2::getScom(i_target, MC_OMI_FIR_ACTION1_REG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -583,14 +332,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_MC_OMI_FIR_ACTION1_REG(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8005246d0c00003f));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION1_REG));
 #endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL, i_data);
+    return fapi2::putScom(i_target, MC_OMI_FIR_ACTION1_REG, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -598,1506 +347,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005246d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005246d0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8005246d0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
-           TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_0_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80046c6b0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80046c6b0c00003f;
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION1_REG));
 #endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL, o_data);
+    return o_data.insertFromRight<MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1,
+           MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x80046c6b0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80046c6b0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN,
-           TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80046c6b0c00003f));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION1_REG));
 #endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN,
-           TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN>(i_data);
+    return o_data.insertFromRight<MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1,
+           MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80046c6b0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN,
-           TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_TX_BIT_REGS_FIR_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004046b0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_TX_BIT_REGS_FIR_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004046b0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_TX_BIT_REGS_FIR_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_TX_BIT_REGS_FIR_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004046b0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_TX_BIT_REGS_FIR_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004846a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004846a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004846a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004846a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004846a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004846a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_18_HS_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL1G_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004346a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL1G_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004346a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL1G_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL1G_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004346a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL1G_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004d46a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004d46a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
+    FAPI_TRY(scomt::chkReg(MC_OMI_FIR_ACTION1_REG));
 #endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN_LEN>(o_data);
+    return i_data.extractToRight<MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1,
+           MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004d46a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL21_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004546a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004546a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004546a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_CNTL5_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80040c6a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80040c6a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x80040c6a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80040c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80040c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80040c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_FIR_MASK_PL_TX_PL_FIR_ERRS_MASK chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80042c6a0c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80042c6a0c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL,
-           TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_D2_DIV_CTRL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.setBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.clearBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.getBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_TST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.setBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.clearBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.getBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_FFE_BOOST_EN chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.setBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return o_data.clearBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80042c6a0c00003f));
-#endif
-    return i_data.getBit<TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_3_TX_BIT_REGS_MODE3_PL_SEG_TEST_LEAKAGE_CTRL chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004ac680c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004ac680c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_I_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004ac680c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL16_PL_Q_TUNE chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004fc680c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8004fc680c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8004fc680c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004fc680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN(
-    const uint64_t i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004fc680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8004fc680c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL26_PL_TX_NSEG_MAIN_16_18_SAFE_EN chip: %x, ec: %x",
-             scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80045c680c00003f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x80045c680c00003f;
-#endif
-    return fapi2::getScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return fapi2::putScom(i_target, TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return o_data.insertFromRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x80045c680c00003f));
-#endif
-    return i_data.extractToRight<TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL,
-           TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access TX0_2_DEFAULT_DD_5_TX_BIT_REGS_CNTL6_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

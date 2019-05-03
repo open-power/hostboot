@@ -35,7 +35,19 @@ namespace phb
 {
 
 
-static const uint64_t ETUX08_RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
+static const uint64_t REGS_PE_SPARSE_PAGE_CNTL_REG = 0x03011856ull;
+
+static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_FV = 3;
+static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T3 = 4;
+static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T4 = 5;
+// phb/reg00011.H
+
+static const uint64_t RSB_REGS_ACT0_REG = 0x0801090eull;
+// phb/reg00011.H
+
+static const uint64_t RSB_REGS_MASK_REG_RWX = 0x0801090bull;
+static const uint64_t RSB_REGS_MASK_REG_WOX_AND = 0x0801090cull;
+static const uint64_t RSB_REGS_MASK_REG_WOX_OR = 0x0801090dull;
 // phb/reg00011.H
 
 }

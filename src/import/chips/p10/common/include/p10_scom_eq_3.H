@@ -104,8 +104,6 @@ static const uint32_t EPS_THERM_WSUB2_INJECT_REG_MODE = 2;
 static const uint32_t EPS_THERM_WSUB2_INJECT_REG_MODE_LEN = 2;
 // eq/reg00003.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA0_TR0_CONFIG_3 = 0x20018206ull;
 
 static const uint32_t L3TRA0_TR0_CONFIG_3_C = 0;
@@ -113,8 +111,6 @@ static const uint32_t L3TRA0_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t L3TRA0_TR0_CONFIG_3_D_LEN = 24;
 // eq/reg00003.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA1_TR1_TRACE_LO_DATA_REG = 0x20018261ull;
 
@@ -131,8 +127,6 @@ static const uint32_t L3TRA1_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L3TRA1_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // eq/reg00003.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA1_TR1_CONFIG_5 = 0x20018268ull;
 
 static const uint32_t L3TRA1_TR1_CONFIG_5_C = 0;
@@ -141,15 +135,11 @@ static const uint32_t L3TRA1_TR1_CONFIG_5_D = 24;
 static const uint32_t L3TRA1_TR1_CONFIG_5_D_LEN = 24;
 // eq/reg00003.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR0_TRACE_HI_DATA_REG = 0x20018280ull;
 
 static const uint32_t L3TRA2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L3TRA2_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // eq/reg00003.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA2_TR0_CONFIG = 0x20018282ull;
 
@@ -169,8 +159,6 @@ static const uint32_t L3TRA2_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA2_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 // eq/reg00003.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR1_CONFIG_2 = 0x200182a5ull;
 
 static const uint32_t L3TRA2_TR1_CONFIG_2_A = 0;
@@ -179,8 +167,6 @@ static const uint32_t L3TRA2_TR1_CONFIG_2_B = 24;
 static const uint32_t L3TRA2_TR1_CONFIG_2_B_LEN = 24;
 // eq/reg00003.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA3_TR0_CONFIG_4 = 0x200182c7ull;
 
 static const uint32_t L3TRA3_TR0_CONFIG_4_A = 0;
@@ -188,8 +174,6 @@ static const uint32_t L3TRA3_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_4_B = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_4_B_LEN = 24;
 // eq/reg00003.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA3_TR1_CONFIG = 0x200182e2ull;
 

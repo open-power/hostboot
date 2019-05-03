@@ -35,7 +35,7 @@ namespace mc
 {
 
 
-static const uint64_t EPS_FIR_GXSTOP3_MASK_REG = 0x0c0403d6ull;
+static const uint64_t EPS_FIR_GXSTOP3_MASK_REG = 0x0c040016ull;
 
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_XSTOP = 0;
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_RECOV = 1;
@@ -62,10 +62,10 @@ static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
 // mc/reg00005.H
 
-static const uint64_t EPS_THERM_WSUB_SKITTER_DATA0 = 0x0c0503d9ull;
+static const uint64_t EPS_THERM_WSUB_SKITTER_DATA0 = 0x0c050019ull;
 // mc/reg00005.H
 
-static const uint64_t EPS_THERM_WSUB_SKITTER_MODE_REG = 0x0c0503d0ull;
+static const uint64_t EPS_THERM_WSUB_SKITTER_MODE_REG = 0x0c050010ull;
 
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE = 0;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_DISABLE_SKITTER_STICKINESS = 1;
@@ -79,7 +79,7 @@ static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_T
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
 // mc/reg00005.H
 
-static const uint64_t ERROR_STATUS = 0x0c0303cfull;
+static const uint64_t ERROR_STATUS = 0x0c03000full;
 
 static const uint32_t ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR = 0;
 static const uint32_t ERROR_STATUS_PCB_READ_NOT_ALLOWED_ERR = 1;
@@ -111,9 +111,9 @@ static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
 // mc/reg00005.H
 
-static const uint64_t NET_CTRL1_RWX = 0x0c0f03c4ull;
-static const uint64_t NET_CTRL1_RWX_WAND = 0x0c0f03c5ull;
-static const uint64_t NET_CTRL1_RWX_WOR = 0x0c0f03c6ull;
+static const uint64_t NET_CTRL1_RWX = 0x0c0f0044ull;
+static const uint64_t NET_CTRL1_RWX_WAND = 0x0c0f0045ull;
+static const uint64_t NET_CTRL1_RWX_WOR = 0x0c0f0046ull;
 
 static const uint32_t NET_CTRL1_PLL_CLKIN_SEL = 0;
 static const uint32_t NET_CTRL1_CLK_DCC_BYPASS_EN = 1;
@@ -136,10 +136,10 @@ static const uint32_t NET_CTRL1_CLK_PULSE_MODE = 26;
 static const uint32_t NET_CTRL1_CLK_PULSE_MODE_LEN = 2;
 // mc/reg00005.H
 
-static const uint64_t SCAN_LONG_ROTATE = 0x0c0393c0ull;
+static const uint64_t SCAN_LONG_ROTATE = 0x0c039000ull;
 // mc/reg00005.H
 
-static const uint64_t SCOMFIR_MCERPT1 = 0x0c010fdfull;
+static const uint64_t SCOMFIR_MCERPT1 = 0x0c010c1full;
 
 static const uint32_t SCOMFIR_MCERPT1_WDF0_OVERRUN0_HOLD_OUT = 23;
 static const uint32_t SCOMFIR_MCERPT1_WDF0_OVERRUN1_HOLD_OUT = 24;
@@ -155,7 +155,7 @@ static const uint32_t SCOMFIR_MCERPT1_RCMD2_ADDRESS_PARITY_ERROR_ON_CAR3 = 62;
 static const uint32_t SCOMFIR_MCERPT1_RCMD3_ADDRESS_PARITY_ERROR_ON_CAR3 = 63;
 // mc/reg00005.H
 
-static const uint64_t SCOMFIR_MCSYNC = 0x0c010fd5ull;
+static const uint64_t SCOMFIR_MCSYNC = 0x0c010c15ull;
 
 static const uint32_t SCOMFIR_MCSYNC_CHANNEL_SELECT = 0;
 static const uint32_t SCOMFIR_MCSYNC_CHANNEL_SELECT_LEN = 8;
@@ -166,7 +166,7 @@ static const uint32_t SCOMFIR_MCSYNC_SYNC_RESERVED = 17;
 static const uint32_t SCOMFIR_MCSYNC_SYNC_RESERVED_LEN = 8;
 // mc/reg00005.H
 
-static const uint64_t TRA0_TR0_CONFIG_2 = 0x0c0107c5ull;
+static const uint64_t TRA0_TR0_CONFIG_2 = 0x0c010405ull;
 
 static const uint32_t TRA0_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA0_TR0_CONFIG_2_A_LEN = 24;
@@ -174,7 +174,7 @@ static const uint32_t TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_2_B_LEN = 24;
 // mc/reg00005.H
 
-static const uint64_t TRA1_TR0_TRACE_HI_DATA_REG = 0x0c0107c0ull;
+static const uint64_t TRA1_TR0_TRACE_HI_DATA_REG = 0x0c010440ull;
 
 static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA1_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;

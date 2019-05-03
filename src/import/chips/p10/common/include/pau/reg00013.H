@@ -38,7 +38,7 @@ static inline fapi2::ReturnCode PREP_XSL_MAIN_WRAP_ERR_MASK_1(const fapi2::Targe
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010aab;
+    scomt::last_scom = XSL_MAIN_WRAP_ERR_MASK_1;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -53,7 +53,7 @@ static inline fapi2::ReturnCode GET_XSL_MAIN_WRAP_ERR_MASK_1(const fapi2::Target
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010aab;
+    scomt::last_scom = XSL_MAIN_WRAP_ERR_MASK_1;
 #endif
     return fapi2::getScom(i_target, XSL_MAIN_WRAP_ERR_MASK_1, o_data);
 #ifdef SCOM_CHECKING
@@ -68,7 +68,7 @@ static inline fapi2::ReturnCode PUT_XSL_MAIN_WRAP_ERR_MASK_1(const fapi2::Target
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x10010aab));
+    FAPI_TRY(scomt::chkReg(XSL_MAIN_WRAP_ERR_MASK_1));
 #endif
     return fapi2::putScom(i_target, XSL_MAIN_WRAP_ERR_MASK_1, i_data);
 #ifdef SCOM_CHECKING
@@ -83,7 +83,7 @@ static inline fapi2::buffer<uint64_t>& SET_XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010aab));
+    FAPI_TRY(scomt::chkReg(XSL_MAIN_WRAP_ERR_MASK_1));
 #endif
     return o_data.insertFromRight<XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL,
            XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL_LEN>(i_data);
@@ -99,7 +99,7 @@ static inline fapi2::buffer<uint64_t>& SET_XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010aab));
+    FAPI_TRY(scomt::chkReg(XSL_MAIN_WRAP_ERR_MASK_1));
 #endif
     return o_data.insertFromRight<XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL,
            XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL_LEN>(i_data);
@@ -116,7 +116,7 @@ static inline fapi2::buffer<uint64_t>& GET_XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010aab));
+    FAPI_TRY(scomt::chkReg(XSL_MAIN_WRAP_ERR_MASK_1));
 #endif
     return i_data.extractToRight<XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL,
            XSL_MAIN_WRAP_ERR_MASK_1_XSL_WRAP_ERR_MASK_1_DIAL_LEN>(o_data);
@@ -133,7 +133,7 @@ static inline fapi2::ReturnCode PREP_XTS_ATSD_HYP10(const fapi2::Target<K, M, V>
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010b1a;
+    scomt::last_scom = XTS_ATSD_HYP10;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -148,7 +148,7 @@ static inline fapi2::ReturnCode GET_XTS_ATSD_HYP10(const fapi2::Target<K, M, V>&
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010b1a;
+    scomt::last_scom = XTS_ATSD_HYP10;
 #endif
     return fapi2::getScom(i_target, XTS_ATSD_HYP10, o_data);
 #ifdef SCOM_CHECKING
@@ -162,7 +162,7 @@ static inline fapi2::ReturnCode PUT_XTS_ATSD_HYP10(const fapi2::Target<K, M, V>&
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return fapi2::putScom(i_target, XTS_ATSD_HYP10, i_data);
 #ifdef SCOM_CHECKING
@@ -176,7 +176,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_ATSD_HYP10_MSRHV(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.insertFromRight<XTS_ATSD_HYP10_MSRHV,
            1>(i_data);
@@ -191,7 +191,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_ATSD_HYP10_MSRHV(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.insertFromRight<XTS_ATSD_HYP10_MSRHV,
            1>(i_data);
@@ -205,7 +205,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_XTS_ATSD_HYP10_MSRHV(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.setBit<XTS_ATSD_HYP10_MSRHV>();
 #ifdef SCOM_CHECKING
@@ -218,7 +218,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_XTS_ATSD_HYP10_MSRHV(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.clearBit<XTS_ATSD_HYP10_MSRHV>();
 #ifdef SCOM_CHECKING
@@ -232,7 +232,7 @@ static inline fapi2::buffer<uint64_t>& GET_XTS_ATSD_HYP10_MSRHV(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return i_data.extractToRight<XTS_ATSD_HYP10_MSRHV,
            1>(o_data);
@@ -246,7 +246,7 @@ fapi_try_exit:
 static inline bool GET_XTS_ATSD_HYP10_MSRHV(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return i_data.getBit<XTS_ATSD_HYP10_MSRHV>();
 #ifdef SCOM_CHECKING
@@ -260,7 +260,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_ATSD_HYP10_LPARID(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.insertFromRight<XTS_ATSD_HYP10_LPARID,
            XTS_ATSD_HYP10_LPARID_LEN>(i_data);
@@ -275,7 +275,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_ATSD_HYP10_LPARID(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return o_data.insertFromRight<XTS_ATSD_HYP10_LPARID,
            XTS_ATSD_HYP10_LPARID_LEN>(i_data);
@@ -290,7 +290,7 @@ static inline fapi2::buffer<uint64_t>& GET_XTS_ATSD_HYP10_LPARID(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010b1a));
+    FAPI_TRY(scomt::chkReg(XTS_ATSD_HYP10));
 #endif
     return i_data.extractToRight<XTS_ATSD_HYP10_LPARID,
            XTS_ATSD_HYP10_LPARID_LEN>(o_data);
@@ -306,7 +306,7 @@ static inline fapi2::ReturnCode PREP_XTS_REG_ERR_FIRST(const fapi2::Target<K, M,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010af3;
+    scomt::last_scom = XTS_REG_ERR_FIRST;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -321,7 +321,7 @@ static inline fapi2::ReturnCode GET_XTS_REG_ERR_FIRST(const fapi2::Target<K, M, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x10010af3;
+    scomt::last_scom = XTS_REG_ERR_FIRST;
 #endif
     return fapi2::getScom(i_target, XTS_REG_ERR_FIRST, o_data);
 #ifdef SCOM_CHECKING
@@ -335,7 +335,7 @@ static inline fapi2::ReturnCode PUT_XTS_REG_ERR_FIRST(const fapi2::Target<K, M, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x10010af3));
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_FIRST));
 #endif
     return fapi2::putScom(i_target, XTS_REG_ERR_FIRST, i_data);
 #ifdef SCOM_CHECKING
@@ -349,7 +349,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_FIRST_ERR_FIRST_BITS(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010af3));
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_FIRST));
 #endif
     return o_data.insertFromRight<XTS_REG_ERR_FIRST_ERR_FIRST_BITS,
            XTS_REG_ERR_FIRST_ERR_FIRST_BITS_LEN>(i_data);
@@ -364,7 +364,7 @@ static inline fapi2::buffer<uint64_t>& SET_XTS_REG_ERR_FIRST_ERR_FIRST_BITS(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010af3));
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_FIRST));
 #endif
     return o_data.insertFromRight<XTS_REG_ERR_FIRST_ERR_FIRST_BITS,
            XTS_REG_ERR_FIRST_ERR_FIRST_BITS_LEN>(i_data);
@@ -379,7 +379,7 @@ static inline fapi2::buffer<uint64_t>& GET_XTS_REG_ERR_FIRST_ERR_FIRST_BITS(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x10010af3));
+    FAPI_TRY(scomt::chkReg(XTS_REG_ERR_FIRST));
 #endif
     return i_data.extractToRight<XTS_REG_ERR_FIRST_ERR_FIRST_BITS,
            XTS_REG_ERR_FIRST_ERR_FIRST_BITS_LEN>(o_data);

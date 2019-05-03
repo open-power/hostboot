@@ -38,7 +38,7 @@ static inline fapi2::ReturnCode PREP_ATCL_CL_CLSCOM_MCAMOC(const fapi2::Target<K
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010c35;
+    scomt::last_scom = ATCL_CL_CLSCOM_MCAMOC;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -53,7 +53,7 @@ static inline fapi2::ReturnCode GET_ATCL_CL_CLSCOM_MCAMOC(const fapi2::Target<K,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010c35;
+    scomt::last_scom = ATCL_CL_CLSCOM_MCAMOC;
 #endif
     return fapi2::getScom(i_target, ATCL_CL_CLSCOM_MCAMOC, o_data);
 #ifdef SCOM_CHECKING
@@ -67,7 +67,7 @@ static inline fapi2::ReturnCode PUT_ATCL_CL_CLSCOM_MCAMOC(const fapi2::Target<K,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return fapi2::putScom(i_target, ATCL_CL_CLSCOM_MCAMOC, i_data);
 #ifdef SCOM_CHECKING
@@ -81,7 +81,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN,
            1>(i_data);
@@ -96,7 +96,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN,
            1>(i_data);
@@ -110,7 +110,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN>();
 #ifdef SCOM_CHECKING
@@ -123,7 +123,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN>();
 #ifdef SCOM_CHECKING
@@ -137,7 +137,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN,
            1>(o_data);
@@ -151,7 +151,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN>();
 #ifdef SCOM_CHECKING
@@ -165,7 +165,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0,
            1>(i_data);
@@ -180,7 +180,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0,
            1>(i_data);
@@ -194,7 +194,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0>();
 #ifdef SCOM_CHECKING
@@ -207,7 +207,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0>();
 #ifdef SCOM_CHECKING
@@ -221,7 +221,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0,
            1>(o_data);
@@ -235,7 +235,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0>();
 #ifdef SCOM_CHECKING
@@ -249,7 +249,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1,
            1>(i_data);
@@ -264,7 +264,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1,
            1>(i_data);
@@ -278,7 +278,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1>();
 #ifdef SCOM_CHECKING
@@ -291,7 +291,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1>();
 #ifdef SCOM_CHECKING
@@ -305,7 +305,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1,
            1>(o_data);
@@ -319,7 +319,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP1>();
 #ifdef SCOM_CHECKING
@@ -333,7 +333,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC,
            1>(i_data);
@@ -348,7 +348,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC,
            1>(i_data);
@@ -362,7 +362,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC>();
 #ifdef SCOM_CHECKING
@@ -375,7 +375,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC>();
 #ifdef SCOM_CHECKING
@@ -389,7 +389,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC,
            1>(o_data);
@@ -403,7 +403,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCAMOC_EN_RD_FROM_AMOC>();
 #ifdef SCOM_CHECKING
@@ -418,7 +418,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLIS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES,
            ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES_LEN>(i_data);
@@ -433,7 +433,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLIS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES,
            ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES_LEN>(i_data);
@@ -449,7 +449,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLIS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES,
            ATCL_CL_CLSCOM_MCAMOC_WRTO_AMO_COLLISION_RULES_LEN>(o_data);
@@ -464,7 +464,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT,
            ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_LEN>(i_data);
@@ -479,7 +479,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT,
            ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_LEN>(i_data);
@@ -494,7 +494,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT,
            ATCL_CL_CLSCOM_MCAMOC_AMO_SIZE_SELECT_LEN>(o_data);
@@ -509,7 +509,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO,
            1>(i_data);
@@ -524,7 +524,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO,
            1>(i_data);
@@ -538,7 +538,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO>();
 #ifdef SCOM_CHECKING
@@ -551,7 +551,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO>();
 #ifdef SCOM_CHECKING
@@ -565,7 +565,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WR
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO,
            1>(o_data);
@@ -579,7 +579,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN_WRTO>();
 #ifdef SCOM_CHECKING
@@ -593,7 +593,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47,
            ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN>(i_data);
@@ -608,7 +608,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47,
            ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN>(i_data);
@@ -623,7 +623,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c35));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCAMOC));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47,
            ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN>(o_data);
@@ -639,7 +639,7 @@ static inline fapi2::ReturnCode PREP_ATCL_CL_CLSCOM_MCWAT(const fapi2::Target<K,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010c3a;
+    scomt::last_scom = ATCL_CL_CLSCOM_MCWAT;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -654,7 +654,7 @@ static inline fapi2::ReturnCode GET_ATCL_CL_CLSCOM_MCWAT(const fapi2::Target<K, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010c3a;
+    scomt::last_scom = ATCL_CL_CLSCOM_MCWAT;
 #endif
     return fapi2::getScom(i_target, ATCL_CL_CLSCOM_MCWAT, o_data);
 #ifdef SCOM_CHECKING
@@ -668,7 +668,7 @@ static inline fapi2::ReturnCode PUT_ATCL_CL_CLSCOM_MCWAT(const fapi2::Target<K, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return fapi2::putScom(i_target, ATCL_CL_CLSCOM_MCWAT, i_data);
 #ifdef SCOM_CHECKING
@@ -682,7 +682,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL_LEN>(i_data);
@@ -697,7 +697,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL_LEN>(i_data);
@@ -712,7 +712,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_ST
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL_LEN>(o_data);
@@ -727,7 +727,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL_LEN>(i_data);
@@ -742,7 +742,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL_LEN>(i_data);
@@ -757,7 +757,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_RETRY_SEL_LEN>(o_data);
@@ -772,7 +772,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9,
            1>(i_data);
@@ -787,7 +787,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9,
            1>(i_data);
@@ -801,7 +801,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9>();
 #ifdef SCOM_CHECKING
@@ -814,7 +814,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9>();
 #ifdef SCOM_CHECKING
@@ -828,7 +828,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9,
            1>(o_data);
@@ -842,7 +842,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCWAT_RESERVED8_9(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCWAT_RESERVED8_9>();
 #ifdef SCOM_CHECKING
@@ -856,7 +856,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG,
            1>(i_data);
@@ -871,7 +871,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG,
            1>(i_data);
@@ -885,7 +885,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG>();
 #ifdef SCOM_CHECKING
@@ -898,7 +898,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG>();
 #ifdef SCOM_CHECKING
@@ -912,7 +912,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG,
            1>(o_data);
@@ -926,7 +926,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG>();
 #ifdef SCOM_CHECKING
@@ -940,7 +940,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE,
            1>(i_data);
@@ -955,7 +955,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE,
            1>(i_data);
@@ -969,7 +969,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE>();
 #ifdef SCOM_CHECKING
@@ -983,7 +983,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_H
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE>();
 #ifdef SCOM_CHECKING
@@ -997,7 +997,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HAN
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE,
            1>(o_data);
@@ -1011,7 +1011,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCWAT_ENABLE_EARLY_HANG_PULSE>();
 #ifdef SCOM_CHECKING
@@ -1025,7 +1025,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL_LEN>(i_data);
@@ -1040,7 +1040,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL_LEN>(i_data);
@@ -1055,7 +1055,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_ST
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_RRQ_STALL_SEL_LEN>(o_data);
@@ -1070,7 +1070,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL_LEN>(i_data);
@@ -1085,7 +1085,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_ST
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL_LEN>(i_data);
@@ -1100,7 +1100,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_ST
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_WRQ_STALL_SEL_LEN>(o_data);
@@ -1116,7 +1116,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL_LEN>(i_data);
@@ -1131,7 +1131,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL_LEN>(i_data);
@@ -1147,7 +1147,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_MERGE_STALL_SEL_LEN>(o_data);
@@ -1163,7 +1163,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL_LEN>(i_data);
@@ -1179,7 +1179,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL_LEN>(i_data);
@@ -1196,7 +1196,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLO
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_DEALLOC_STALL_SEL_LEN>(o_data);
@@ -1213,7 +1213,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL_LEN>(i_data);
@@ -1228,7 +1228,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL_LEN>(i_data);
@@ -1244,7 +1244,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CRESP_STALL_SEL_LEN>(o_data);
@@ -1259,7 +1259,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL_LEN>(i_data);
@@ -1274,7 +1274,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL_LEN>(i_data);
@@ -1289,7 +1289,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SE
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSTATE_DEBUG_SEL_LEN>(o_data);
@@ -1304,7 +1304,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL_LEN>(i_data);
@@ -1319,7 +1319,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL_LEN>(i_data);
@@ -1334,7 +1334,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_DISP_DEBUG_SEL_LEN>(o_data);
@@ -1349,7 +1349,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL_LEN>(i_data);
@@ -1364,7 +1364,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL_LEN>(i_data);
@@ -1379,7 +1379,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CHARB_DEBUG_SEL_LEN>(o_data);
@@ -1394,7 +1394,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL_LEN>(i_data);
@@ -1409,7 +1409,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL_LEN>(i_data);
@@ -1424,7 +1424,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL,
            ATCL_CL_CLSCOM_MCWAT_CLSX_DEBUG_SEL_LEN>(o_data);
@@ -1439,7 +1439,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL,
            ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN>(i_data);
@@ -1454,7 +1454,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL,
            ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN>(i_data);
@@ -1469,7 +1469,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL,
            ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN>(o_data);
@@ -1484,7 +1484,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBU
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL,
            1>(i_data);
@@ -1499,7 +1499,7 @@ static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBU
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.insertFromRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL,
            1>(i_data);
@@ -1513,7 +1513,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.setBit<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL>();
 #ifdef SCOM_CHECKING
@@ -1526,7 +1526,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return o_data.clearBit<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL>();
 #ifdef SCOM_CHECKING
@@ -1540,7 +1540,7 @@ static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBU
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.extractToRight<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL,
            1>(o_data);
@@ -1554,7 +1554,7 @@ fapi_try_exit:
 static inline bool GET_ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010c3a));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCWAT));
 #endif
     return i_data.getBit<ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL>();
 #ifdef SCOM_CHECKING
@@ -1569,7 +1569,7 @@ static inline fapi2::ReturnCode PREP_DSTL_DSTLFIRMASK_RW(const fapi2::Target<K, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d03;
+    scomt::last_scom = DSTL_DSTLFIRMASK_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1584,7 +1584,7 @@ static inline fapi2::ReturnCode GET_DSTL_DSTLFIRMASK_RW(const fapi2::Target<K, M
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d03;
+    scomt::last_scom = DSTL_DSTLFIRMASK_RW;
 #endif
     return fapi2::getScom(i_target, DSTL_DSTLFIRMASK_RW, o_data);
 #ifdef SCOM_CHECKING
@@ -1598,7 +1598,7 @@ static inline fapi2::ReturnCode PUT_DSTL_DSTLFIRMASK_RW(const fapi2::Target<K, M
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return fapi2::putScom(i_target, DSTL_DSTLFIRMASK_RW, i_data);
 #ifdef SCOM_CHECKING
@@ -1612,7 +1612,7 @@ static inline fapi2::ReturnCode PREP_DSTL_DSTLFIRMASK_WO_AND(const fapi2::Target
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d04;
+    scomt::last_scom = DSTL_DSTLFIRMASK_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1627,7 +1627,7 @@ static inline fapi2::ReturnCode GET_DSTL_DSTLFIRMASK_WO_AND(const fapi2::Target<
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d04;
+    scomt::last_scom = DSTL_DSTLFIRMASK_WO_AND;
 #endif
     return fapi2::getScom(i_target, DSTL_DSTLFIRMASK_WO_AND, o_data);
 #ifdef SCOM_CHECKING
@@ -1642,7 +1642,7 @@ static inline fapi2::ReturnCode PUT_DSTL_DSTLFIRMASK_WO_AND(const fapi2::Target<
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return fapi2::putScom(i_target, DSTL_DSTLFIRMASK_WO_AND, i_data);
 #ifdef SCOM_CHECKING
@@ -1656,7 +1656,7 @@ static inline fapi2::ReturnCode PREP_DSTL_DSTLFIRMASK_WO_OR(const fapi2::Target<
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d05;
+    scomt::last_scom = DSTL_DSTLFIRMASK_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1671,7 +1671,7 @@ static inline fapi2::ReturnCode GET_DSTL_DSTLFIRMASK_WO_OR(const fapi2::Target<K
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d05;
+    scomt::last_scom = DSTL_DSTLFIRMASK_WO_OR;
 #endif
     return fapi2::getScom(i_target, DSTL_DSTLFIRMASK_WO_OR, o_data);
 #ifdef SCOM_CHECKING
@@ -1686,7 +1686,7 @@ static inline fapi2::ReturnCode PUT_DSTL_DSTLFIRMASK_WO_OR(const fapi2::Target<K
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return fapi2::putScom(i_target, DSTL_DSTLFIRMASK_WO_OR, i_data);
 #ifdef SCOM_CHECKING
@@ -1700,7 +1700,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
            DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(i_data);
@@ -1715,7 +1715,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return o_data.insertFromRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
            DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(i_data);
@@ -1730,7 +1730,7 @@ static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d05, 0xc010d04, 0xc010d03));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLFIRMASK_RW, DSTL_DSTLFIRMASK_WO_AND, DSTL_DSTLFIRMASK_WO_OR));
 #endif
     return i_data.extractToRight<DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK,
            DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN>(o_data);
@@ -1746,7 +1746,7 @@ static inline fapi2::ReturnCode PREP_DSTL_DSTLSTATUS(const fapi2::Target<K, M, V
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d10;
+    scomt::last_scom = DSTL_DSTLSTATUS;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1761,7 +1761,7 @@ static inline fapi2::ReturnCode GET_DSTL_DSTLSTATUS(const fapi2::Target<K, M, V>
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010d10;
+    scomt::last_scom = DSTL_DSTLSTATUS;
 #endif
     return fapi2::getScom(i_target, DSTL_DSTLSTATUS, o_data);
 #ifdef SCOM_CHECKING
@@ -1775,7 +1775,7 @@ static inline fapi2::ReturnCode PUT_DSTL_DSTLSTATUS(const fapi2::Target<K, M, V>
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return fapi2::putScom(i_target, DSTL_DSTLSTATUS, i_data);
 #ifdef SCOM_CHECKING
@@ -1789,7 +1789,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLSTATUS_A_FAIL_WOF(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return o_data.insertFromRight<DSTL_DSTLSTATUS_A_FAIL_WOF,
            DSTL_DSTLSTATUS_A_FAIL_WOF_LEN>(i_data);
@@ -1804,7 +1804,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLSTATUS_A_FAIL_WOF(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return o_data.insertFromRight<DSTL_DSTLSTATUS_A_FAIL_WOF,
            DSTL_DSTLSTATUS_A_FAIL_WOF_LEN>(i_data);
@@ -1819,7 +1819,7 @@ static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLSTATUS_A_FAIL_WOF(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return i_data.extractToRight<DSTL_DSTLSTATUS_A_FAIL_WOF,
            DSTL_DSTLSTATUS_A_FAIL_WOF_LEN>(o_data);
@@ -1834,7 +1834,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLSTATUS_B_FAIL_WOF(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return o_data.insertFromRight<DSTL_DSTLSTATUS_B_FAIL_WOF,
            DSTL_DSTLSTATUS_B_FAIL_WOF_LEN>(i_data);
@@ -1849,7 +1849,7 @@ static inline fapi2::buffer<uint64_t>& SET_DSTL_DSTLSTATUS_B_FAIL_WOF(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return o_data.insertFromRight<DSTL_DSTLSTATUS_B_FAIL_WOF,
            DSTL_DSTLSTATUS_B_FAIL_WOF_LEN>(i_data);
@@ -1864,7 +1864,7 @@ static inline fapi2::buffer<uint64_t>& GET_DSTL_DSTLSTATUS_B_FAIL_WOF(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010d10));
+    FAPI_TRY(scomt::chkReg(DSTL_DSTLSTATUS));
 #endif
     return i_data.extractToRight<DSTL_DSTLSTATUS_B_FAIL_WOF,
            DSTL_DSTLSTATUS_B_FAIL_WOF_LEN>(o_data);
@@ -1876,234 +1876,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_PMU_CNTR(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc011b4f;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_PMU_CNTR(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc011b4f;
-#endif
-    return fapi2::getScom(i_target, PMU_CNTR, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_PMU_CNTR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return fapi2::putScom(i_target, PMU_CNTR, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_3(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_3,
-           PMU_CNTR_3_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_3(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_3,
-           PMU_CNTR_3_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PMU_CNTR_3(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return i_data.extractToRight<PMU_CNTR_3,
-           PMU_CNTR_3_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_2,
-           PMU_CNTR_2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_2,
-           PMU_CNTR_2_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PMU_CNTR_2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return i_data.extractToRight<PMU_CNTR_2,
-           PMU_CNTR_2_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_1(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_1,
-           PMU_CNTR_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_1(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_1,
-           PMU_CNTR_1_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PMU_CNTR_1(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return i_data.extractToRight<PMU_CNTR_1,
-           PMU_CNTR_1_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_0(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_0,
-           PMU_CNTR_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_PMU_CNTR_0(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return o_data.insertFromRight<PMU_CNTR_0,
-           PMU_CNTR_0_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_PMU_CNTR_0(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc011b4f));
-#endif
-    return i_data.extractToRight<PMU_CNTR_0,
-           PMU_CNTR_0_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access PMU_CNTR_0 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_WDF_WDFCFG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f60;
+    scomt::last_scom = WDF_WDFCFG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2117,7 +1894,7 @@ static inline fapi2::ReturnCode GET_WDF_WDFCFG(const fapi2::Target<K, M, V>& i_t
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f60;
+    scomt::last_scom = WDF_WDFCFG;
 #endif
     return fapi2::getScom(i_target, WDF_WDFCFG, o_data);
 #ifdef SCOM_CHECKING
@@ -2131,7 +1908,7 @@ static inline fapi2::ReturnCode PUT_WDF_WDFCFG(const fapi2::Target<K, M, V>& i_t
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return fapi2::putScom(i_target, WDF_WDFCFG, i_data);
 #ifdef SCOM_CHECKING
@@ -2145,7 +1922,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(i_data);
@@ -2160,7 +1937,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(i_data);
@@ -2174,7 +1951,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -2187,7 +1964,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -2201,7 +1978,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(o_data);
@@ -2215,7 +1992,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -2229,7 +2006,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(i_data);
@@ -2244,7 +2021,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(i_data);
@@ -2258,7 +2035,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -2271,7 +2048,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -2285,7 +2062,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(o_data);
@@ -2299,7 +2076,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -2313,7 +2090,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE,
            1>(i_data);
@@ -2328,7 +2105,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE,
            1>(i_data);
@@ -2342,7 +2119,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE>();
 #ifdef SCOM_CHECKING
@@ -2355,7 +2132,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE>();
 #ifdef SCOM_CHECKING
@@ -2369,7 +2146,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE,
            1>(o_data);
@@ -2383,7 +2160,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_CFG_WDF_SERIAL_SEQ_MODE>();
 #ifdef SCOM_CHECKING
@@ -2397,7 +2174,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_RESET_KEEPER(fapi2::buffer
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_RESET_KEEPER,
            1>(i_data);
@@ -2412,7 +2189,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_RESET_KEEPER(const uint64_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_RESET_KEEPER,
            1>(i_data);
@@ -2426,7 +2203,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -2439,7 +2216,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -2453,7 +2230,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_RESET_KEEPER(fapi2::buffer
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_RESET_KEEPER,
            1>(o_data);
@@ -2467,7 +2244,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -2481,7 +2258,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_MERGE_CAPACITY_LIMIT(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_MERGE_CAPACITY_LIMIT,
            WDF_WDFCFG_MERGE_CAPACITY_LIMIT_LEN>(i_data);
@@ -2496,7 +2273,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_MERGE_CAPACITY_LIMIT(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_MERGE_CAPACITY_LIMIT,
            WDF_WDFCFG_MERGE_CAPACITY_LIMIT_LEN>(i_data);
@@ -2511,7 +2288,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_MERGE_CAPACITY_LIMIT(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_MERGE_CAPACITY_LIMIT,
            WDF_WDFCFG_MERGE_CAPACITY_LIMIT_LEN>(o_data);
@@ -2526,7 +2303,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_8_11_SPARE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_8_11_SPARE,
            WDF_WDFCFG_WDFCFG_8_11_SPARE_LEN>(i_data);
@@ -2541,7 +2318,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_8_11_SPARE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_8_11_SPARE,
            WDF_WDFCFG_WDFCFG_8_11_SPARE_LEN>(i_data);
@@ -2556,7 +2333,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_WDFCFG_8_11_SPARE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_WDFCFG_8_11_SPARE,
            WDF_WDFCFG_WDFCFG_8_11_SPARE_LEN>(o_data);
@@ -2571,7 +2348,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_16_17_SPARE(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_16_17_SPARE,
            WDF_WDFCFG_WDFCFG_16_17_SPARE_LEN>(i_data);
@@ -2586,7 +2363,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_16_17_SPARE(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_16_17_SPARE,
            WDF_WDFCFG_WDFCFG_16_17_SPARE_LEN>(i_data);
@@ -2601,7 +2378,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_WDFCFG_16_17_SPARE(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_WDFCFG_16_17_SPARE,
            WDF_WDFCFG_WDFCFG_16_17_SPARE_LEN>(o_data);
@@ -2616,7 +2393,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW0_ERR_INJ(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW0_ERR_INJ,
            WDF_WDFCFG_DSTL_DW0_ERR_INJ_LEN>(i_data);
@@ -2631,7 +2408,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW0_ERR_INJ(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW0_ERR_INJ,
            WDF_WDFCFG_DSTL_DW0_ERR_INJ_LEN>(i_data);
@@ -2646,7 +2423,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_DW0_ERR_INJ(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_DW0_ERR_INJ,
            WDF_WDFCFG_DSTL_DW0_ERR_INJ_LEN>(o_data);
@@ -2661,7 +2438,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW1_ERR_INJ(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW1_ERR_INJ,
            WDF_WDFCFG_DSTL_DW1_ERR_INJ_LEN>(i_data);
@@ -2676,7 +2453,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW1_ERR_INJ(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW1_ERR_INJ,
            WDF_WDFCFG_DSTL_DW1_ERR_INJ_LEN>(i_data);
@@ -2691,7 +2468,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_DW1_ERR_INJ(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_DW1_ERR_INJ,
            WDF_WDFCFG_DSTL_DW1_ERR_INJ_LEN>(o_data);
@@ -2706,7 +2483,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW2_ERR_INJ(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW2_ERR_INJ,
            WDF_WDFCFG_DSTL_DW2_ERR_INJ_LEN>(i_data);
@@ -2721,7 +2498,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW2_ERR_INJ(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW2_ERR_INJ,
            WDF_WDFCFG_DSTL_DW2_ERR_INJ_LEN>(i_data);
@@ -2736,7 +2513,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_DW2_ERR_INJ(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_DW2_ERR_INJ,
            WDF_WDFCFG_DSTL_DW2_ERR_INJ_LEN>(o_data);
@@ -2751,7 +2528,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW3_ERR_INJ(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW3_ERR_INJ,
            WDF_WDFCFG_DSTL_DW3_ERR_INJ_LEN>(i_data);
@@ -2766,7 +2543,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_DW3_ERR_INJ(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_DW3_ERR_INJ,
            WDF_WDFCFG_DSTL_DW3_ERR_INJ_LEN>(i_data);
@@ -2781,7 +2558,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_DW3_ERR_INJ(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_DW3_ERR_INJ,
            WDF_WDFCFG_DSTL_DW3_ERR_INJ_LEN>(o_data);
@@ -2796,7 +2573,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_ONE_SHOT_INJ,
            1>(i_data);
@@ -2811,7 +2588,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_ONE_SHOT_INJ,
            1>(i_data);
@@ -2825,7 +2602,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2838,7 +2615,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2852,7 +2629,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_ONE_SHOT_INJ,
            1>(o_data);
@@ -2866,7 +2643,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2880,7 +2657,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_PERSISTANT_INJ(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_PERSISTANT_INJ,
            1>(i_data);
@@ -2895,7 +2672,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_PERSISTANT_INJ(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_DSTL_PERSISTANT_INJ,
            1>(i_data);
@@ -2909,7 +2686,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.setBit<WDF_WDFCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2922,7 +2699,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WDF_WDFCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.clearBit<WDF_WDFCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2936,7 +2713,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_DSTL_PERSISTANT_INJ(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_DSTL_PERSISTANT_INJ,
            1>(o_data);
@@ -2950,7 +2727,7 @@ fapi_try_exit:
 static inline bool GET_WDF_WDFCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.getBit<WDF_WDFCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -2964,7 +2741,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_28_31_SPARE(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_28_31_SPARE,
            WDF_WDFCFG_WDFCFG_28_31_SPARE_LEN>(i_data);
@@ -2979,7 +2756,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_WDFCFG_28_31_SPARE(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_WDFCFG_28_31_SPARE,
            WDF_WDFCFG_WDFCFG_28_31_SPARE_LEN>(i_data);
@@ -2994,7 +2771,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_WDFCFG_28_31_SPARE(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_WDFCFG_28_31_SPARE,
            WDF_WDFCFG_WDFCFG_28_31_SPARE_LEN>(o_data);
@@ -3009,7 +2786,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELEC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT_LEN>(i_data);
@@ -3024,7 +2801,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELEC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT_LEN>(i_data);
@@ -3039,7 +2816,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELEC
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_SELECT_LEN>(o_data);
@@ -3054,7 +2831,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_LEN>(i_data);
@@ -3069,7 +2846,7 @@ static inline fapi2::buffer<uint64_t>& SET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return o_data.insertFromRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_LEN>(i_data);
@@ -3084,7 +2861,7 @@ static inline fapi2::buffer<uint64_t>& GET_WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f60));
+    FAPI_TRY(scomt::chkReg(WDF_WDFCFG));
 #endif
     return i_data.extractToRight<WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE,
            WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_LEN>(o_data);
@@ -3100,7 +2877,7 @@ static inline fapi2::ReturnCode PREP_WRITE_WRTCFG(const fapi2::Target<K, M, V>& 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f68;
+    scomt::last_scom = WRITE_WRTCFG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3115,7 +2892,7 @@ static inline fapi2::ReturnCode GET_WRITE_WRTCFG(const fapi2::Target<K, M, V>& i
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f68;
+    scomt::last_scom = WRITE_WRTCFG;
 #endif
     return fapi2::getScom(i_target, WRITE_WRTCFG, o_data);
 #ifdef SCOM_CHECKING
@@ -3129,7 +2906,7 @@ static inline fapi2::ReturnCode PUT_WRITE_WRTCFG(const fapi2::Target<K, M, V>& i
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return fapi2::putScom(i_target, WRITE_WRTCFG, i_data);
 #ifdef SCOM_CHECKING
@@ -3143,7 +2920,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(i_data);
@@ -3158,7 +2935,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(i_data);
@@ -3172,7 +2949,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -3185,7 +2962,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -3199,7 +2976,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_D
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS,
            1>(o_data);
@@ -3213,7 +2990,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS>();
 #ifdef SCOM_CHECKING
@@ -3227,7 +3004,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(i_data);
@@ -3242,7 +3019,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(i_data);
@@ -3256,7 +3033,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -3269,7 +3046,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -3283,7 +3060,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_D
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS,
            1>(o_data);
@@ -3297,7 +3074,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS>();
 #ifdef SCOM_CHECKING
@@ -3311,7 +3088,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESET_KEEPER(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESET_KEEPER,
            1>(i_data);
@@ -3326,7 +3103,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESET_KEEPER(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESET_KEEPER,
            1>(i_data);
@@ -3340,7 +3117,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -3353,7 +3130,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -3367,7 +3144,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_RESET_KEEPER(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_RESET_KEEPER,
            1>(o_data);
@@ -3381,7 +3158,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_RESET_KEEPER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_RESET_KEEPER>();
 #ifdef SCOM_CHECKING
@@ -3395,7 +3172,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_MPIPL(fapi2::buffer<uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_MPIPL,
            1>(i_data);
@@ -3410,7 +3187,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_MPIPL(const uint64_t i_d
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_MPIPL,
            1>(i_data);
@@ -3424,7 +3201,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_MPIPL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_MPIPL>();
 #ifdef SCOM_CHECKING
@@ -3437,7 +3214,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_MPIPL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_MPIPL>();
 #ifdef SCOM_CHECKING
@@ -3451,7 +3228,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_MPIPL(fapi2::buffer<uint
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_MPIPL,
            1>(o_data);
@@ -3465,7 +3242,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_MPIPL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_MPIPL>();
 #ifdef SCOM_CHECKING
@@ -3479,7 +3256,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_ASYNC_INJ(fapi2::buffer<
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_ASYNC_INJ,
            WRITE_WRTCFG_ASYNC_INJ_LEN>(i_data);
@@ -3494,7 +3271,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_ASYNC_INJ(const uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_ASYNC_INJ,
            WRITE_WRTCFG_ASYNC_INJ_LEN>(i_data);
@@ -3509,7 +3286,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_ASYNC_INJ(fapi2::buffer<
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_ASYNC_INJ,
            WRITE_WRTCFG_ASYNC_INJ_LEN>(o_data);
@@ -3524,7 +3301,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_SPARE_8(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_SPARE_8,
            1>(i_data);
@@ -3539,7 +3316,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_SPARE_8(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_SPARE_8,
            1>(i_data);
@@ -3553,7 +3330,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_SPARE_8(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_SPARE_8>();
 #ifdef SCOM_CHECKING
@@ -3566,7 +3343,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_SPARE_8(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_SPARE_8>();
 #ifdef SCOM_CHECKING
@@ -3580,7 +3357,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_SPARE_8(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_SPARE_8,
            1>(o_data);
@@ -3594,7 +3371,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_SPARE_8(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_SPARE_8>();
 #ifdef SCOM_CHECKING
@@ -3608,7 +3385,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_NEW_WRITE_64B_MODE(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_NEW_WRITE_64B_MODE,
            1>(i_data);
@@ -3623,7 +3400,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_NEW_WRITE_64B_MODE(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_NEW_WRITE_64B_MODE,
            1>(i_data);
@@ -3637,7 +3414,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_NEW_WRITE_64B_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_NEW_WRITE_64B_MODE>();
 #ifdef SCOM_CHECKING
@@ -3650,7 +3427,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_NEW_WRITE_64B_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_NEW_WRITE_64B_MODE>();
 #ifdef SCOM_CHECKING
@@ -3664,7 +3441,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_NEW_WRITE_64B_MODE(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_NEW_WRITE_64B_MODE,
            1>(o_data);
@@ -3678,7 +3455,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_NEW_WRITE_64B_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_NEW_WRITE_64B_MODE>();
 #ifdef SCOM_CHECKING
@@ -3692,7 +3469,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_EN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE,
            1>(i_data);
@@ -3707,7 +3484,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_EN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE,
            1>(i_data);
@@ -3721,7 +3498,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -3734,7 +3511,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -3748,7 +3525,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_EN
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE,
            1>(o_data);
@@ -3762,7 +3539,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_CFG_OVERRUN_FORCE_SUE_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -3776,7 +3553,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESERVED_11(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESERVED_11,
            1>(i_data);
@@ -3791,7 +3568,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESERVED_11(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESERVED_11,
            1>(i_data);
@@ -3805,7 +3582,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESERVED_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_RESERVED_11>();
 #ifdef SCOM_CHECKING
@@ -3818,7 +3595,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_RESERVED_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_RESERVED_11>();
 #ifdef SCOM_CHECKING
@@ -3832,7 +3609,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_RESERVED_11(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_RESERVED_11,
            1>(o_data);
@@ -3846,7 +3623,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_RESERVED_11(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_RESERVED_11>();
 #ifdef SCOM_CHECKING
@@ -3860,7 +3637,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW0_ERR_INJ(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW0_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW0_ERR_INJ_LEN>(i_data);
@@ -3875,7 +3652,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW0_ERR_INJ(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW0_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW0_ERR_INJ_LEN>(i_data);
@@ -3890,7 +3667,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_DW0_ERR_INJ(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_DW0_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW0_ERR_INJ_LEN>(o_data);
@@ -3905,7 +3682,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW1_ERR_INJ(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW1_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW1_ERR_INJ_LEN>(i_data);
@@ -3920,7 +3697,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW1_ERR_INJ(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW1_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW1_ERR_INJ_LEN>(i_data);
@@ -3935,7 +3712,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_DW1_ERR_INJ(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_DW1_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW1_ERR_INJ_LEN>(o_data);
@@ -3950,7 +3727,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW2_ERR_INJ(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW2_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW2_ERR_INJ_LEN>(i_data);
@@ -3965,7 +3742,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW2_ERR_INJ(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW2_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW2_ERR_INJ_LEN>(i_data);
@@ -3980,7 +3757,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_DW2_ERR_INJ(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_DW2_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW2_ERR_INJ_LEN>(o_data);
@@ -3995,7 +3772,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW3_ERR_INJ(fapi2::
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW3_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW3_ERR_INJ_LEN>(i_data);
@@ -4010,7 +3787,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_DW3_ERR_INJ(const u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_DW3_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW3_ERR_INJ_LEN>(i_data);
@@ -4025,7 +3802,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_DW3_ERR_INJ(fapi2::
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_DW3_ERR_INJ,
            WRITE_WRTCFG_DSTL_DW3_ERR_INJ_LEN>(o_data);
@@ -4040,7 +3817,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(fapi2:
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ,
            1>(i_data);
@@ -4055,7 +3832,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(const 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ,
            1>(i_data);
@@ -4069,7 +3846,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4082,7 +3859,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4096,7 +3873,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(fapi2:
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ,
            1>(o_data);
@@ -4110,7 +3887,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_DSTL_ONE_SHOT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_DSTL_ONE_SHOT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4124,7 +3901,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_PERSISTANT_INJ,
            1>(i_data);
@@ -4139,7 +3916,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_DSTL_PERSISTANT_INJ,
            1>(i_data);
@@ -4153,7 +3930,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.setBit<WRITE_WRTCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4166,7 +3943,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.clearBit<WRITE_WRTCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4180,7 +3957,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_DSTL_PERSISTANT_INJ,
            1>(o_data);
@@ -4194,7 +3971,7 @@ fapi_try_exit:
 static inline bool GET_WRITE_WRTCFG_DSTL_PERSISTANT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.getBit<WRITE_WRTCFG_DSTL_PERSISTANT_INJ>();
 #ifdef SCOM_CHECKING
@@ -4208,7 +3985,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESERVED_22_31(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESERVED_22_31,
            WRITE_WRTCFG_RESERVED_22_31_LEN>(i_data);
@@ -4223,7 +4000,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRTCFG_RESERVED_22_31(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return o_data.insertFromRight<WRITE_WRTCFG_RESERVED_22_31,
            WRITE_WRTCFG_RESERVED_22_31_LEN>(i_data);
@@ -4238,7 +4015,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRTCFG_RESERVED_22_31(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f68));
+    FAPI_TRY(scomt::chkReg(WRITE_WRTCFG));
 #endif
     return i_data.extractToRight<WRITE_WRTCFG_RESERVED_22_31,
            WRITE_WRTCFG_RESERVED_22_31_LEN>(o_data);
@@ -4254,7 +4031,7 @@ static inline fapi2::ReturnCode PREP_WRITE_WRT_WDF_ECC(const fapi2::Target<K, M,
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f69;
+    scomt::last_scom = WRITE_WRT_WDF_ECC;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4269,7 +4046,7 @@ static inline fapi2::ReturnCode GET_WRITE_WRT_WDF_ECC(const fapi2::Target<K, M, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0xc010f69;
+    scomt::last_scom = WRITE_WRT_WDF_ECC;
 #endif
     return fapi2::getScom(i_target, WRITE_WRT_WDF_ECC, o_data);
 #ifdef SCOM_CHECKING
@@ -4283,7 +4060,7 @@ static inline fapi2::ReturnCode PUT_WRITE_WRT_WDF_ECC(const fapi2::Target<K, M, 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return fapi2::putScom(i_target, WRITE_WRT_WDF_ECC, i_data);
 #ifdef SCOM_CHECKING
@@ -4297,7 +4074,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_0_ERR_TYPE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_0_ERR_TYPE,
            WRITE_WRT_WDF_ECC_0_ERR_TYPE_LEN>(i_data);
@@ -4312,7 +4089,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_0_ERR_TYPE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_0_ERR_TYPE,
            WRITE_WRT_WDF_ECC_0_ERR_TYPE_LEN>(i_data);
@@ -4327,7 +4104,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_0_ERR_TYPE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_0_ERR_TYPE,
            WRITE_WRT_WDF_ECC_0_ERR_TYPE_LEN>(o_data);
@@ -4342,7 +4119,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_0_SYNDROME(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_0_SYNDROME,
            WRITE_WRT_WDF_ECC_0_SYNDROME_LEN>(i_data);
@@ -4357,7 +4134,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_0_SYNDROME(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_0_SYNDROME,
            WRITE_WRT_WDF_ECC_0_SYNDROME_LEN>(i_data);
@@ -4372,7 +4149,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_0_SYNDROME(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_0_SYNDROME,
            WRITE_WRT_WDF_ECC_0_SYNDROME_LEN>(o_data);
@@ -4387,7 +4164,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_1_ERR_TYPE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_1_ERR_TYPE,
            WRITE_WRT_WDF_ECC_1_ERR_TYPE_LEN>(i_data);
@@ -4402,7 +4179,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_1_ERR_TYPE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_1_ERR_TYPE,
            WRITE_WRT_WDF_ECC_1_ERR_TYPE_LEN>(i_data);
@@ -4417,7 +4194,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_1_ERR_TYPE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_1_ERR_TYPE,
            WRITE_WRT_WDF_ECC_1_ERR_TYPE_LEN>(o_data);
@@ -4432,7 +4209,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_1_SYNDROME(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_1_SYNDROME,
            WRITE_WRT_WDF_ECC_1_SYNDROME_LEN>(i_data);
@@ -4447,7 +4224,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_1_SYNDROME(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_1_SYNDROME,
            WRITE_WRT_WDF_ECC_1_SYNDROME_LEN>(i_data);
@@ -4462,7 +4239,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_1_SYNDROME(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_1_SYNDROME,
            WRITE_WRT_WDF_ECC_1_SYNDROME_LEN>(o_data);
@@ -4477,7 +4254,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_2_ERR_TYPE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_2_ERR_TYPE,
            WRITE_WRT_WDF_ECC_2_ERR_TYPE_LEN>(i_data);
@@ -4492,7 +4269,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_2_ERR_TYPE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_2_ERR_TYPE,
            WRITE_WRT_WDF_ECC_2_ERR_TYPE_LEN>(i_data);
@@ -4507,7 +4284,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_2_ERR_TYPE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_2_ERR_TYPE,
            WRITE_WRT_WDF_ECC_2_ERR_TYPE_LEN>(o_data);
@@ -4522,7 +4299,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_2_SYNDROME(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_2_SYNDROME,
            WRITE_WRT_WDF_ECC_2_SYNDROME_LEN>(i_data);
@@ -4537,7 +4314,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_2_SYNDROME(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_2_SYNDROME,
            WRITE_WRT_WDF_ECC_2_SYNDROME_LEN>(i_data);
@@ -4552,7 +4329,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_2_SYNDROME(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_2_SYNDROME,
            WRITE_WRT_WDF_ECC_2_SYNDROME_LEN>(o_data);
@@ -4567,7 +4344,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_3_ERR_TYPE(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_3_ERR_TYPE,
            WRITE_WRT_WDF_ECC_3_ERR_TYPE_LEN>(i_data);
@@ -4582,7 +4359,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_3_ERR_TYPE(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_3_ERR_TYPE,
            WRITE_WRT_WDF_ECC_3_ERR_TYPE_LEN>(i_data);
@@ -4597,7 +4374,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_3_ERR_TYPE(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_3_ERR_TYPE,
            WRITE_WRT_WDF_ECC_3_ERR_TYPE_LEN>(o_data);
@@ -4612,7 +4389,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_3_SYNDROME(fapi2::b
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_3_SYNDROME,
            WRITE_WRT_WDF_ECC_3_SYNDROME_LEN>(i_data);
@@ -4627,7 +4404,7 @@ static inline fapi2::buffer<uint64_t>& SET_WRITE_WRT_WDF_ECC_3_SYNDROME(const ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return o_data.insertFromRight<WRITE_WRT_WDF_ECC_3_SYNDROME,
            WRITE_WRT_WDF_ECC_3_SYNDROME_LEN>(i_data);
@@ -4642,7 +4419,7 @@ static inline fapi2::buffer<uint64_t>& GET_WRITE_WRT_WDF_ECC_3_SYNDROME(fapi2::b
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0xc010f69));
+    FAPI_TRY(scomt::chkReg(WRITE_WRT_WDF_ECC));
 #endif
     return i_data.extractToRight<WRITE_WRT_WDF_ECC_3_SYNDROME,
            WRITE_WRT_WDF_ECC_3_SYNDROME_LEN>(o_data);

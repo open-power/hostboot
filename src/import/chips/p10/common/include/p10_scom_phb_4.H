@@ -35,10 +35,15 @@ namespace phb
 {
 
 
-static const uint64_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK = 0x08010907ull;
+static const uint64_t REGS_NFIR_REG_RWX = 0x03011840ull;
+static const uint64_t REGS_NFIR_REG_WOX_AND = 0x03011841ull;
+static const uint64_t REGS_NFIR_REG_WOX_OR = 0x03011842ull;
 
-static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE = 12;
-static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_MSK_PHB4_SCOM_UV_SEC_INCL_MSK_VALUE_LEN = 40;
+static const uint32_t REGS_NFIR_REG_NFIRNFIR = 0;
+static const uint32_t REGS_NFIR_REG_NFIRNFIR_LEN = 28;
+// phb/reg00004.H
+
+static const uint64_t RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
 // phb/reg00004.H
 
 }

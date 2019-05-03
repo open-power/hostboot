@@ -39,7 +39,7 @@ static inline fapi2::ReturnCode PREP_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002b0650c00003f;
+    scomt::last_scom = RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -54,7 +54,7 @@ static inline fapi2::ReturnCode GET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX8
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002b0650c00003f;
+    scomt::last_scom = RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL;
 #endif
     return fapi2::getScom(i_target, RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -69,7 +69,7 @@ static inline fapi2::ReturnCode PUT_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX8
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002b0650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return fapi2::putScom(i_target, RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -84,7 +84,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b0650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(i_data);
@@ -101,7 +101,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b0650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(i_data);
@@ -118,7 +118,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b0650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return i_data.extractToRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(o_data);
@@ -135,7 +135,7 @@ static inline fapi2::ReturnCode PREP_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800088650c00003f;
+    scomt::last_scom = RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -150,7 +150,7 @@ static inline fapi2::ReturnCode GET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800088650c00003f;
+    scomt::last_scom = RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL;
 #endif
     return fapi2::getScom(i_target, RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -165,7 +165,7 @@ static inline fapi2::ReturnCode PUT_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return fapi2::putScom(i_target, RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -180,7 +180,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(i_data);
@@ -195,7 +195,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(i_data);
@@ -211,7 +211,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return i_data.extractToRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(o_data);
@@ -227,7 +227,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(i_data);
@@ -242,7 +242,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(i_data);
@@ -258,7 +258,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800088650c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL));
 #endif
     return i_data.extractToRight<RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_0_DEFAULT_RD_5_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(o_data);
@@ -274,7 +274,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000b06e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -289,7 +289,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000b06e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -304,7 +304,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000b06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -319,7 +319,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W_LEN>(i_data);
@@ -336,7 +336,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W_LEN>(i_data);
@@ -353,7 +353,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX22_PL_RX_AE_LATCH_DAC_W_LEN>(o_data);
@@ -370,7 +370,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001006e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -385,7 +385,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001006e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -400,7 +400,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001006e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -415,7 +415,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001006e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101_LEN>(i_data);
@@ -432,7 +432,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001006e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101_LEN>(i_data);
@@ -449,7 +449,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001006e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX32_PL_RX_AD_LATCH_DAC_N101_LEN>(o_data);
@@ -466,7 +466,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001506e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -481,7 +481,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001506e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -496,7 +496,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001506e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -511,7 +511,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001506e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111_LEN>(i_data);
@@ -528,7 +528,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001506e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111_LEN>(i_data);
@@ -545,7 +545,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001506e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX42_PL_RX_AD_LATCH_DAC_E111_LEN>(o_data);
@@ -562,7 +562,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001a06e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -577,7 +577,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001a06e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -592,7 +592,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001a06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -607,7 +607,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001a06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001_LEN>(i_data);
@@ -624,7 +624,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001a06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001_LEN>(i_data);
@@ -641,7 +641,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001a06e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_A_CNTLX52_PL_RX_AD_LATCH_DAC_W001_LEN>(o_data);
@@ -658,7 +658,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002a86e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -673,7 +673,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002a86e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -688,7 +688,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002a86e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -703,7 +703,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002a86e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010_LEN>(i_data);
@@ -720,7 +720,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002a86e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010_LEN>(i_data);
@@ -737,7 +737,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002a86e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010,
            RX0_1_RD_0_RX_DAC_REGS_LOFF_B_CNTLX85_PL_RX_BD_LATCH_DAC_W010_LEN>(o_data);
@@ -754,7 +754,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000086e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -769,7 +769,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000086e0c00003f;
+    scomt::last_scom = RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -784,7 +784,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -799,7 +799,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BAN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN>(i_data);
@@ -815,7 +815,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN>(i_data);
@@ -832,7 +832,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BAN
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_A_BANK_CONTROLS_LEN>(o_data);
@@ -849,7 +849,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN,
            1>(i_data);
@@ -864,7 +864,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN,
            1>(i_data);
@@ -879,7 +879,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN>();
 #ifdef SCOM_CHECKING
@@ -893,7 +893,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LAN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN>();
 #ifdef SCOM_CHECKING
@@ -908,7 +908,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN,
            1>(o_data);
@@ -922,7 +922,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_LANE_ANA_PDWN>();
 #ifdef SCOM_CHECKING
@@ -937,7 +937,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN>(i_data);
@@ -952,7 +952,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN>(i_data);
@@ -968,7 +968,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_PRBS_TEST_DATA_LEN>(o_data);
@@ -984,7 +984,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BAN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN>(i_data);
@@ -1000,7 +1000,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BAN
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN>(i_data);
@@ -1017,7 +1017,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BAN
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000086e0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS,
            RX0_1_RD_0_RX_DAC_REGS_CNTL1_PL_B_BANK_CONTROLS_LEN>(o_data);
@@ -1034,7 +1034,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_BIT_REGS_CNTL3_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003706f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_CNTL3_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1049,7 +1049,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003706f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_CNTL3_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_BIT_REGS_CNTL3_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -1064,7 +1064,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_BIT_REGS_CNTL3_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_BIT_REGS_CNTL3_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -1078,7 +1078,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET,
            1>(i_data);
@@ -1093,7 +1093,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET,
            1>(i_data);
@@ -1107,7 +1107,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1120,7 +1120,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1134,7 +1134,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET,
            1>(o_data);
@@ -1148,7 +1148,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1162,7 +1162,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_I
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET,
            1>(i_data);
@@ -1177,7 +1177,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_I
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET,
            1>(i_data);
@@ -1191,7 +1191,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1205,7 +1205,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1219,7 +1219,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_I
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET,
            1>(o_data);
@@ -1233,7 +1233,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_IODOM_IORESET>();
 #ifdef SCOM_CHECKING
@@ -1247,7 +1247,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A,
            1>(i_data);
@@ -1262,7 +1262,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A,
            1>(i_data);
@@ -1276,7 +1276,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A>();
 #ifdef SCOM_CHECKING
@@ -1290,7 +1290,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A>();
 #ifdef SCOM_CHECKING
@@ -1304,7 +1304,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A,
            1>(o_data);
@@ -1318,7 +1318,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_A>();
 #ifdef SCOM_CHECKING
@@ -1332,7 +1332,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B,
            1>(i_data);
@@ -1347,7 +1347,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B,
            1>(i_data);
@@ -1361,7 +1361,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B>();
 #ifdef SCOM_CHECKING
@@ -1375,7 +1375,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B>();
 #ifdef SCOM_CHECKING
@@ -1389,7 +1389,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_R
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B,
            1>(o_data);
@@ -1403,7 +1403,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_FW_RESET_B>();
 #ifdef SCOM_CHECKING
@@ -1418,7 +1418,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A,
            1>(i_data);
@@ -1434,7 +1434,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A,
            1>(i_data);
@@ -1450,7 +1450,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A>();
 #ifdef SCOM_CHECKING
@@ -1465,7 +1465,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A>();
 #ifdef SCOM_CHECKING
@@ -1481,7 +1481,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A,
            1>(o_data);
@@ -1496,7 +1496,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_A>();
 #ifdef SCOM_CHECKING
@@ -1512,7 +1512,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B,
            1>(i_data);
@@ -1528,7 +1528,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B,
            1>(i_data);
@@ -1544,7 +1544,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B>();
 #ifdef SCOM_CHECKING
@@ -1559,7 +1559,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BI
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B>();
 #ifdef SCOM_CHECKING
@@ -1575,7 +1575,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B,
            1>(o_data);
@@ -1590,7 +1590,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_PR_BIT_LOCK_DONE_B>();
 #ifdef SCOM_CHECKING
@@ -1606,7 +1606,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE,
            1>(i_data);
@@ -1622,7 +1622,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_P
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE,
            1>(i_data);
@@ -1638,7 +1638,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE>();
 #ifdef SCOM_CHECKING
@@ -1653,7 +1653,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE>();
 #ifdef SCOM_CHECKING
@@ -1669,7 +1669,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE,
            1>(o_data);
@@ -1684,7 +1684,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BERPL_PRBS_SEED_MODE>();
 #ifdef SCOM_CHECKING
@@ -1699,7 +1699,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN,
            1>(i_data);
@@ -1714,7 +1714,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN,
            1>(i_data);
@@ -1728,7 +1728,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN>();
 #ifdef SCOM_CHECKING
@@ -1741,7 +1741,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN>();
 #ifdef SCOM_CHECKING
@@ -1755,7 +1755,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN,
            1>(o_data);
@@ -1769,7 +1769,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_EN>();
 #ifdef SCOM_CHECKING
@@ -1783,7 +1783,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN>(i_data);
@@ -1798,7 +1798,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN>(i_data);
@@ -1813,7 +1813,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_ERR_TRAP_MASK_LEN>(o_data);
@@ -1829,7 +1829,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_CO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN>(i_data);
@@ -1846,7 +1846,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_CO
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN>(i_data);
@@ -1863,7 +1863,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_CO
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003706f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR,
            RX0_1_RD_RX_BIT_REGS_CNTL3_PL_BIAS_COUNTER_AGING_FACTOR_LEN>(o_data);
@@ -1880,7 +1880,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003606f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_CNTLX1_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -1895,7 +1895,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003606f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_CNTLX1_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_BIT_REGS_CNTLX1_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -1910,7 +1910,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_BIT_REGS_CNTLX1_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -1924,7 +1924,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT,
            1>(i_data);
@@ -1939,7 +1939,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_F
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT,
            1>(i_data);
@@ -1953,7 +1953,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT>();
 #ifdef SCOM_CHECKING
@@ -1966,7 +1966,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT>();
 #ifdef SCOM_CHECKING
@@ -1980,7 +1980,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_F
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT,
            1>(o_data);
@@ -1994,7 +1994,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_FORMAT>();
 #ifdef SCOM_CHECKING
@@ -2008,7 +2008,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC,
            1>(i_data);
@@ -2023,7 +2023,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_D
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC,
            1>(i_data);
@@ -2037,7 +2037,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC>();
 #ifdef SCOM_CHECKING
@@ -2051,7 +2051,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC>();
 #ifdef SCOM_CHECKING
@@ -2065,7 +2065,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_D
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC,
            1>(o_data);
@@ -2079,7 +2079,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_DATA_SRC>();
 #ifdef SCOM_CHECKING
@@ -2093,7 +2093,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL_LEN>(i_data);
@@ -2108,7 +2108,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL_LEN>(i_data);
@@ -2123,7 +2123,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_S
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_SEL_LEN>(o_data);
@@ -2138,7 +2138,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A_LEN>(i_data);
@@ -2153,7 +2153,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A_LEN>(i_data);
@@ -2168,7 +2168,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_A_LEN>(o_data);
@@ -2183,7 +2183,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B_LEN>(i_data);
@@ -2198,7 +2198,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B_LEN>(i_data);
@@ -2213,7 +2213,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B,
            RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PR_QUAD_SEL_B_LEN>(o_data);
@@ -2228,7 +2228,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL,
            1>(i_data);
@@ -2243,7 +2243,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL,
            1>(i_data);
@@ -2257,7 +2257,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL>();
 #ifdef SCOM_CHECKING
@@ -2271,7 +2271,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL>();
 #ifdef SCOM_CHECKING
@@ -2285,7 +2285,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL,
            1>(o_data);
@@ -2299,7 +2299,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_CAL_LANE_SEL>();
 #ifdef SCOM_CHECKING
@@ -2313,7 +2313,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A,
            1>(i_data);
@@ -2328,7 +2328,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A,
            1>(i_data);
@@ -2342,7 +2342,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A>();
 #ifdef SCOM_CHECKING
@@ -2355,7 +2355,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A>();
 #ifdef SCOM_CHECKING
@@ -2369,7 +2369,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_S
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A,
            1>(o_data);
@@ -2383,7 +2383,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_BANK_SEL_A>();
 #ifdef SCOM_CHECKING
@@ -2397,7 +2397,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN,
            1>(i_data);
@@ -2412,7 +2412,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_M
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN,
            1>(i_data);
@@ -2426,7 +2426,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.setBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN>();
 #ifdef SCOM_CHECKING
@@ -2439,7 +2439,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN>();
 #ifdef SCOM_CHECKING
@@ -2453,7 +2453,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_M
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN,
            1>(o_data);
@@ -2467,7 +2467,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003606f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_CNTLX1_PL));
 #endif
     return i_data.getBit<RX0_1_RD_RX_BIT_REGS_CNTLX1_PL_PIPE_MARGIN>();
 #ifdef SCOM_CHECKING
@@ -2482,7 +2482,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_BIT_REGS_MODE5_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003406f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_MODE5_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2497,7 +2497,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_BIT_REGS_MODE5_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003406f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_MODE5_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_BIT_REGS_MODE5_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2512,7 +2512,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_BIT_REGS_MODE5_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_BIT_REGS_MODE5_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -2527,7 +2527,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INER
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN>(i_data);
@@ -2543,7 +2543,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INER
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN>(i_data);
@@ -2560,7 +2560,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INER
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_FW_INERTIA_AMT_COARSE_LEN>(o_data);
@@ -2577,7 +2577,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_S
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN>(i_data);
@@ -2593,7 +2593,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_S
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN>(i_data);
@@ -2610,7 +2610,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_S
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003406f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_MODE5_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE,
            RX0_1_RD_RX_BIT_REGS_MODE5_PL_PHASE_STEP_COARSE_LEN>(o_data);
@@ -2627,7 +2627,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_BIT_REGS_STAT3_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003a06f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_STAT3_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2642,7 +2642,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_BIT_REGS_STAT3_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003a06f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_BIT_REGS_STAT3_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_BIT_REGS_STAT3_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2657,7 +2657,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_BIT_REGS_STAT3_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003a06f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_BIT_REGS_STAT3_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_BIT_REGS_STAT3_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -2672,7 +2672,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000986f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2687,7 +2687,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000986f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2702,7 +2702,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000986f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -2717,7 +2717,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000986f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N_LEN>(i_data);
@@ -2734,7 +2734,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000986f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N_LEN>(i_data);
@@ -2751,7 +2751,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000986f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX19_PL_RX_AE_LATCH_DAC_N_LEN>(o_data);
@@ -2768,7 +2768,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000e86f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2783,7 +2783,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000e86f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2798,7 +2798,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000e86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -2813,7 +2813,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000e86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010_LEN>(i_data);
@@ -2830,7 +2830,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000e86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010_LEN>(i_data);
@@ -2847,7 +2847,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000e86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX29_PL_RX_AD_LATCH_DAC_N010_LEN>(o_data);
@@ -2864,7 +2864,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001386f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2879,7 +2879,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001386f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2894,7 +2894,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001386f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -2909,7 +2909,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001386f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100_LEN>(i_data);
@@ -2926,7 +2926,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001386f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100_LEN>(i_data);
@@ -2943,7 +2943,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001386f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX39_PL_RX_AD_LATCH_DAC_E100_LEN>(o_data);
@@ -2960,7 +2960,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001886f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2975,7 +2975,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001886f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -2990,7 +2990,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3005,7 +3005,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110_LEN>(i_data);
@@ -3022,7 +3022,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110_LEN>(i_data);
@@ -3039,7 +3039,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110,
            RX0_1_RD_RX_DAC_REGS_LOFF_A_CNTLX49_PL_RX_AD_LATCH_DAC_S110_LEN>(o_data);
@@ -3056,7 +3056,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000c86f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3071,7 +3071,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000c86f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3086,7 +3086,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000c86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3101,7 +3101,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000c86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S_LEN>(i_data);
@@ -3118,7 +3118,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000c86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S_LEN>(i_data);
@@ -3135,7 +3135,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000c86f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX25_PL_RX_BE_LATCH_DAC_S_LEN>(o_data);
@@ -3152,7 +3152,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002086f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3167,7 +3167,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002086f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3182,7 +3182,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002086f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3197,7 +3197,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002086f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110_LEN>(i_data);
@@ -3214,7 +3214,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002086f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110_LEN>(i_data);
@@ -3231,7 +3231,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002086f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX65_PL_RX_BD_LATCH_DAC_N110_LEN>(o_data);
@@ -3248,7 +3248,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002586f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3263,7 +3263,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002586f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3278,7 +3278,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002586f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3293,7 +3293,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002586f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000_LEN>(i_data);
@@ -3310,7 +3310,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_P
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002586f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000_LEN>(i_data);
@@ -3327,7 +3327,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_P
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002586f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000,
            RX0_1_RD_RX_DAC_REGS_LOFF_B_CNTLX75_PL_RX_BD_LATCH_DAC_S000_LEN>(o_data);
@@ -3344,7 +3344,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_CNTL17_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000886f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_CNTL17_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3359,7 +3359,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000886f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_CNTL17_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_CNTL17_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3374,7 +3374,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_CNTL17_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_CNTL17_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3388,7 +3388,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(i_data);
@@ -3403,7 +3403,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(i_data);
@@ -3418,7 +3418,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_DATA_LEN>(o_data);
@@ -3433,7 +3433,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(i_data);
@@ -3448,7 +3448,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(i_data);
@@ -3463,7 +3463,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000886f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL17_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE,
            RX0_1_RD_RX_DAC_REGS_CNTL17_PL_EDGE_LEN>(o_data);
@@ -3479,7 +3479,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_RX_DAC_REGS_CNTL4_PL(const fapi2::
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000206f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_CNTL4_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3494,7 +3494,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000206f0c00003f;
+    scomt::last_scom = RX0_1_RD_RX_DAC_REGS_CNTL4_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_RX_DAC_REGS_CNTL4_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3509,7 +3509,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_RX_DAC_REGS_CNTL4_PL(const fapi2::T
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_RX_DAC_REGS_CNTL4_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3523,7 +3523,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN_LEN>(i_data);
@@ -3538,7 +3538,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN_LEN>(i_data);
@@ -3553,7 +3553,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_GAIN_LEN>(o_data);
@@ -3568,7 +3568,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ_LEN>(i_data);
@@ -3583,7 +3583,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ_LEN>(i_data);
@@ -3598,7 +3598,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000206f0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_RX_DAC_REGS_CNTL4_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ,
            RX0_1_RD_RX_DAC_REGS_CNTL4_PL_FREQ_LEN>(o_data);
@@ -3614,7 +3614,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800378670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3629,7 +3629,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800378670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3644,7 +3644,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3658,7 +3658,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A_LEN>(i_data);
@@ -3673,7 +3673,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A_LEN>(i_data);
@@ -3688,7 +3688,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_A_LEN>(o_data);
@@ -3703,7 +3703,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B_LEN>(i_data);
@@ -3718,7 +3718,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B_LEN>(i_data);
@@ -3733,7 +3733,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800378670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B,
            RX0_1_RD_2_RX_BIT_REGS_CNTL4_PL_B_LEN>(o_data);
@@ -3749,7 +3749,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800328670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_MODE2_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3764,7 +3764,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800328670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_MODE2_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_BIT_REGS_MODE2_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -3779,7 +3779,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_BIT_REGS_MODE2_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -3794,7 +3794,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN,
            1>(i_data);
@@ -3810,7 +3810,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN,
            1>(i_data);
@@ -3826,7 +3826,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.setBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN>();
 #ifdef SCOM_CHECKING
@@ -3841,7 +3841,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INV
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN>();
 #ifdef SCOM_CHECKING
@@ -3857,7 +3857,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN,
            1>(o_data);
@@ -3872,7 +3872,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.getBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_EN>();
 #ifdef SCOM_CHECKING
@@ -3888,7 +3888,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR,
            1>(i_data);
@@ -3905,7 +3905,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR,
            1>(i_data);
@@ -3921,7 +3921,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.setBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR>();
 #ifdef SCOM_CHECKING
@@ -3936,7 +3936,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INV
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR>();
 #ifdef SCOM_CHECKING
@@ -3952,7 +3952,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVAL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR,
            1>(o_data);
@@ -3967,7 +3967,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.getBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_INVALID_LOCK_FILTER_DIR>();
 #ifdef SCOM_CHECKING
@@ -3983,7 +3983,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN,
            1>(i_data);
@@ -3998,7 +3998,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN,
            1>(i_data);
@@ -4013,7 +4013,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.setBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN>();
 #ifdef SCOM_CHECKING
@@ -4027,7 +4027,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN>();
 #ifdef SCOM_CHECKING
@@ -4042,7 +4042,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN,
            1>(o_data);
@@ -4056,7 +4056,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.getBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_MODE_EN>();
 #ifdef SCOM_CHECKING
@@ -4071,7 +4071,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN,
            1>(i_data);
@@ -4087,7 +4087,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN,
            1>(i_data);
@@ -4103,7 +4103,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.setBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN>();
 #ifdef SCOM_CHECKING
@@ -4118,7 +4118,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN>();
 #ifdef SCOM_CHECKING
@@ -4134,7 +4134,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN,
            1>(o_data);
@@ -4149,7 +4149,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.getBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_COARSE_UNLOCK_EN>();
 #ifdef SCOM_CHECKING
@@ -4165,7 +4165,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN,
            1>(i_data);
@@ -4181,7 +4181,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN,
            1>(i_data);
@@ -4197,7 +4197,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.setBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN>();
 #ifdef SCOM_CHECKING
@@ -4212,7 +4212,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.clearBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN>();
 #ifdef SCOM_CHECKING
@@ -4228,7 +4228,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN,
            1>(o_data);
@@ -4243,7 +4243,7 @@ fapi_try_exit:
 static inline bool GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.getBit<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_INVALID_EN>();
 #ifdef SCOM_CHECKING
@@ -4258,7 +4258,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO,
            RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO_LEN>(i_data);
@@ -4273,7 +4273,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO,
            RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO_LEN>(i_data);
@@ -4288,7 +4288,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800328670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_MODE2_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO,
            RX0_1_RD_2_RX_BIT_REGS_MODE2_PL_LOCK_RATIO_LEN>(o_data);
@@ -4304,7 +4304,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_BIT_REGS_STAT4_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003a8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_STAT4_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4319,7 +4319,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_BIT_REGS_STAT4_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003a8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_STAT4_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_BIT_REGS_STAT4_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4334,7 +4334,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_BIT_REGS_STAT4_PL(const fapi2:
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003a8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_STAT4_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_BIT_REGS_STAT4_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4349,7 +4349,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL(const fa
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800310670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4364,7 +4364,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL(const fap
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800310670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4379,7 +4379,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL(const fap
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800310670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4394,7 +4394,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800310670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK,
            RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK_LEN>(i_data);
@@ -4410,7 +4410,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800310670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK,
            RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK_LEN>(i_data);
@@ -4427,7 +4427,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800310670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK,
            RX0_1_RD_2_RX_BIT_REGS_FIR_MASK_PL_RX_PL_FIR_ERRS_MASK_LEN>(o_data);
@@ -4444,7 +4444,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000d8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4459,7 +4459,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000d8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4474,7 +4474,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000d8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4489,7 +4489,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000_LEN>(i_data);
@@ -4506,7 +4506,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000_LEN>(i_data);
@@ -4523,7 +4523,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX27_PL_RX_AD_LATCH_DAC_N000_LEN>(o_data);
@@ -4540,7 +4540,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800128670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4555,7 +4555,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800128670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4570,7 +4570,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800128670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4585,7 +4585,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800128670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010_LEN>(i_data);
@@ -4602,7 +4602,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800128670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010_LEN>(i_data);
@@ -4619,7 +4619,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800128670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX37_PL_RX_AD_LATCH_DAC_E010_LEN>(o_data);
@@ -4636,7 +4636,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800178670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4651,7 +4651,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800178670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4666,7 +4666,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800178670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4681,7 +4681,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800178670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100_LEN>(i_data);
@@ -4698,7 +4698,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800178670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100_LEN>(i_data);
@@ -4715,7 +4715,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800178670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX47_PL_RX_AD_LATCH_DAC_S100_LEN>(o_data);
@@ -4732,7 +4732,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001c8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4747,7 +4747,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001c8670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4762,7 +4762,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001c8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4777,7 +4777,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001c8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110_LEN>(i_data);
@@ -4794,7 +4794,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001c8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110_LEN>(i_data);
@@ -4811,7 +4811,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001c8670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_A_CNTLX57_PL_RX_AD_LATCH_DAC_W110_LEN>(o_data);
@@ -4828,7 +4828,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800280670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4843,7 +4843,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800280670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4858,7 +4858,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800280670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4873,7 +4873,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800280670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101_LEN>(i_data);
@@ -4890,7 +4890,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800280670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101_LEN>(i_data);
@@ -4907,7 +4907,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800280670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX80_PL_RX_BD_LATCH_DAC_S101_LEN>(o_data);
@@ -4924,7 +4924,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002d0670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4939,7 +4939,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002d0670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -4954,7 +4954,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002d0670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -4969,7 +4969,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002d0670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111_LEN>(i_data);
@@ -4986,7 +4986,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002d0670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111_LEN>(i_data);
@@ -5003,7 +5003,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002d0670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111,
            RX0_1_RD_2_RX_DAC_REGS_LOFF_B_CNTLX90_PL_RX_BD_LATCH_DAC_W111_LEN>(o_data);
@@ -5020,7 +5020,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL(const fapi
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800080670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5035,7 +5035,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800080670c00003f;
+    scomt::last_scom = RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5050,7 +5050,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL(const fapi2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5064,7 +5064,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA_LEN>(i_data);
@@ -5079,7 +5079,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA_LEN>(i_data);
@@ -5094,7 +5094,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_DATA_LEN>(o_data);
@@ -5109,7 +5109,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE_LEN>(i_data);
@@ -5124,7 +5124,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE_LEN>(i_data);
@@ -5139,7 +5139,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800080670c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE,
            RX0_1_RD_2_RX_DAC_REGS_CNTL16_PL_EDGE_LEN>(o_data);
@@ -5155,7 +5155,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001e0660c00003f;
+    scomt::last_scom = RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5170,7 +5170,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001e0660c00003f;
+    scomt::last_scom = RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5185,7 +5185,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001e0660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5200,7 +5200,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001e0660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001_LEN>(i_data);
@@ -5217,7 +5217,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001e0660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001_LEN>(i_data);
@@ -5234,7 +5234,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001e0660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX60_PL_RX_BD_LATCH_DAC_N001_LEN>(o_data);
@@ -5251,7 +5251,7 @@ static inline fapi2::ReturnCode PREP_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL(co
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800230660c00003f;
+    scomt::last_scom = RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5266,7 +5266,7 @@ static inline fapi2::ReturnCode GET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x800230660c00003f;
+    scomt::last_scom = RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL;
 #endif
     return fapi2::getScom(i_target, RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5281,7 +5281,7 @@ static inline fapi2::ReturnCode PUT_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x800230660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL));
 #endif
     return fapi2::putScom(i_target, RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5296,7 +5296,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800230660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011_LEN>(i_data);
@@ -5313,7 +5313,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800230660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL));
 #endif
     return o_data.insertFromRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011_LEN>(i_data);
@@ -5330,7 +5330,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x800230660c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL));
 #endif
     return i_data.extractToRight<RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011,
            RX0_1_RD_3_RX_DAC_REGS_LOFF_B_CNTLX70_PL_RX_BD_LATCH_DAC_E011_LEN>(o_data);
@@ -5348,7 +5348,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000d06d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5363,7 +5363,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000d06d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5378,7 +5378,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000d06d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5393,7 +5393,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d06d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W_LEN>(i_data);
@@ -5410,7 +5410,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d06d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W_LEN>(i_data);
@@ -5427,7 +5427,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000d06d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX26_PL_RX_BE_LATCH_DAC_W_LEN>(o_data);
@@ -5445,7 +5445,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002106d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5460,7 +5460,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX6
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002106d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5475,7 +5475,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX6
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002106d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5490,7 +5490,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002106d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111_LEN>(i_data);
@@ -5507,7 +5507,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002106d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111_LEN>(i_data);
@@ -5524,7 +5524,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002106d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX66_PL_RX_BD_LATCH_DAC_N111_LEN>(o_data);
@@ -5542,7 +5542,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002606d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5557,7 +5557,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX7
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002606d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5572,7 +5572,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX7
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002606d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5587,7 +5587,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002606d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001_LEN>(i_data);
@@ -5604,7 +5604,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002606d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001_LEN>(i_data);
@@ -5621,7 +5621,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002606d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_LOFF_B_CNTLX76_PL_RX_BD_LATCH_DAC_S001_LEN>(o_data);
@@ -5638,7 +5638,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000186d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5653,7 +5653,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000186d0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5668,7 +5668,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5682,7 +5682,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN_LEN>(i_data);
@@ -5697,7 +5697,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN_LEN>(i_data);
@@ -5712,7 +5712,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_GAIN_LEN>(o_data);
@@ -5727,7 +5727,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ_LEN>(i_data);
@@ -5742,7 +5742,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ_LEN>(i_data);
@@ -5757,7 +5757,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000186d0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ,
            RX0_2_DEFAULT_RD_0_RX_DAC_REGS_CNTL3_PL_FREQ_LEN>(o_data);
@@ -5773,7 +5773,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003206c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -5788,7 +5788,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003206c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -5803,7 +5803,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -5818,7 +5818,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS,
            1>(i_data);
@@ -5835,7 +5835,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS,
            1>(i_data);
@@ -5851,7 +5851,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -5866,7 +5866,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -5882,7 +5882,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS,
            1>(o_data);
@@ -5897,7 +5897,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_DIG_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -5913,7 +5913,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS,
            1>(i_data);
@@ -5930,7 +5930,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS,
            1>(i_data);
@@ -5946,7 +5946,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -5961,7 +5961,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -5977,7 +5977,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS,
            1>(o_data);
@@ -5992,7 +5992,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_PSAVE_ANA_REQ_DIS>();
 #ifdef SCOM_CHECKING
@@ -6008,7 +6008,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN,
            1>(i_data);
@@ -6024,7 +6024,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN,
            1>(i_data);
@@ -6040,7 +6040,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN>();
 #ifdef SCOM_CHECKING
@@ -6055,7 +6055,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN>();
 #ifdef SCOM_CHECKING
@@ -6071,7 +6071,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN,
            1>(o_data);
@@ -6086,7 +6086,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_COUNT_EN>();
 #ifdef SCOM_CHECKING
@@ -6102,7 +6102,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL,
            1>(i_data);
@@ -6119,7 +6119,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL,
            1>(i_data);
@@ -6135,7 +6135,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL>();
 #ifdef SCOM_CHECKING
@@ -6150,7 +6150,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL>();
 #ifdef SCOM_CHECKING
@@ -6166,7 +6166,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL,
            1>(o_data);
@@ -6181,7 +6181,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_EXP_DATA_SEL>();
 #ifdef SCOM_CHECKING
@@ -6197,7 +6197,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL,
            RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL_LEN>(i_data);
@@ -6214,7 +6214,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL,
            RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL_LEN>(i_data);
@@ -6231,7 +6231,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL,
            RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BERPL_PATTERN_SEL_LEN>(o_data);
@@ -6248,7 +6248,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK,
            1>(i_data);
@@ -6265,7 +6265,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK,
            1>(i_data);
@@ -6281,7 +6281,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6296,7 +6296,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6312,7 +6312,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK,
            1>(o_data);
@@ -6327,7 +6327,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_REQ_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6343,7 +6343,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK,
            1>(i_data);
@@ -6360,7 +6360,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK,
            1>(i_data);
@@ -6376,7 +6376,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6391,7 +6391,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6407,7 +6407,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK,
            1>(o_data);
@@ -6422,7 +6422,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003206c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_1_RX_BIT_REGS_MODE1_PL_BUMP_SL_1UI_DONE_DL_MASK>();
 #ifdef SCOM_CHECKING
@@ -6439,7 +6439,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000a86c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6454,7 +6454,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000a86c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6469,7 +6469,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX2
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000a86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6484,7 +6484,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000a86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN>(i_data);
@@ -6501,7 +6501,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000a86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN>(i_data);
@@ -6518,7 +6518,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000a86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX21_PL_RX_AE_LATCH_DAC_S_LEN>(o_data);
@@ -6536,7 +6536,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000f86c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6551,7 +6551,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX3
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000f86c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6566,7 +6566,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX3
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000f86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6581,7 +6581,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000f86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN>(i_data);
@@ -6598,7 +6598,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000f86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN>(i_data);
@@ -6615,7 +6615,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000f86c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX31_PL_RX_AD_LATCH_DAC_N100_LEN>(o_data);
@@ -6633,7 +6633,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001486c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6648,7 +6648,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX4
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001486c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6663,7 +6663,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX4
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001486c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6678,7 +6678,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001486c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN>(i_data);
@@ -6695,7 +6695,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001486c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN>(i_data);
@@ -6712,7 +6712,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001486c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX41_PL_RX_AD_LATCH_DAC_E110_LEN>(o_data);
@@ -6730,7 +6730,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001986c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6745,7 +6745,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX5
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001986c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6760,7 +6760,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX5
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001986c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6775,7 +6775,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001986c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000_LEN>(i_data);
@@ -6792,7 +6792,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001986c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000_LEN>(i_data);
@@ -6809,7 +6809,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001986c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_A_CNTLX51_PL_RX_AD_LATCH_DAC_W000_LEN>(o_data);
@@ -6827,7 +6827,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002b06c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6842,7 +6842,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX8
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002b06c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6857,7 +6857,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX8
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002b06c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6872,7 +6872,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b06c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(i_data);
@@ -6889,7 +6889,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b06c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(i_data);
@@ -6906,7 +6906,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002b06c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_LOFF_B_CNTLX86_PL_RX_BD_LATCH_DAC_W011_LEN>(o_data);
@@ -6923,7 +6923,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL(con
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000306c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -6938,7 +6938,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000306c0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -6953,7 +6953,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL(cons
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -6968,7 +6968,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE_LEN>(i_data);
@@ -6983,7 +6983,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE_LEN>(i_data);
@@ -6999,7 +6999,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_COARSE_LEN>(o_data);
@@ -7014,7 +7014,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN_LEN>(i_data);
@@ -7029,7 +7029,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN_LEN>(i_data);
@@ -7044,7 +7044,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000306c0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN,
            RX0_2_DEFAULT_RD_1_RX_DAC_REGS_CNTL6_PL_GAIN_LEN>(o_data);
@@ -7060,7 +7060,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL(const
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003486b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7075,7 +7075,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL(const 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8003486b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -7090,7 +7090,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL(const 
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -7105,7 +7105,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL,
            RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL_LEN>(i_data);
@@ -7120,7 +7120,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL,
            RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL_LEN>(i_data);
@@ -7136,7 +7136,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL,
            RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIME_VAL_LEN>(o_data);
@@ -7152,7 +7152,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE,
            1>(i_data);
@@ -7169,7 +7169,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE,
            1>(i_data);
@@ -7185,7 +7185,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE>();
 #ifdef SCOM_CHECKING
@@ -7200,7 +7200,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE>();
 #ifdef SCOM_CHECKING
@@ -7216,7 +7216,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE,
            1>(o_data);
@@ -7231,7 +7231,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_TIMER_DOUBLE_MODE>();
 #ifdef SCOM_CHECKING
@@ -7247,7 +7247,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM,
            1>(i_data);
@@ -7263,7 +7263,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM,
            1>(i_data);
@@ -7279,7 +7279,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.setBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM>();
 #ifdef SCOM_CHECKING
@@ -7294,7 +7294,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return o_data.clearBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM>();
 #ifdef SCOM_CHECKING
@@ -7310,7 +7310,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM,
            1>(o_data);
@@ -7325,7 +7325,7 @@ fapi_try_exit:
 static inline bool GET_RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8003486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL));
 #endif
     return i_data.getBit<RX0_2_DEFAULT_RD_RX_BIT_REGS_MODE6_PL_DISABLE_SM>();
 #ifdef SCOM_CHECKING
@@ -7342,7 +7342,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000b86b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7357,7 +7357,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8000b86b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -7372,7 +7372,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8000b86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -7387,7 +7387,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N_LEN>(i_data);
@@ -7404,7 +7404,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N_LEN>(i_data);
@@ -7421,7 +7421,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8000b86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX23_PL_RX_BE_LATCH_DAC_N_LEN>(o_data);
@@ -7439,7 +7439,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001f86b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7454,7 +7454,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8001f86b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -7469,7 +7469,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8001f86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -7484,7 +7484,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001f86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(i_data);
@@ -7501,7 +7501,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001f86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(i_data);
@@ -7518,7 +7518,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8001f86b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX63_PL_RX_BD_LATCH_DAC_N100_LEN>(o_data);
@@ -7536,7 +7536,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002486b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7551,7 +7551,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002486b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -7566,7 +7566,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -7581,7 +7581,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(i_data);
@@ -7598,7 +7598,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(i_data);
@@ -7615,7 +7615,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002486b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX73_PL_RX_BD_LATCH_DAC_E110_LEN>(o_data);
@@ -7633,7 +7633,7 @@ static inline fapi2::ReturnCode PREP_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002c06b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7648,7 +7648,7 @@ static inline fapi2::ReturnCode GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8002c06b0c00003f;
+    scomt::last_scom = RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL;
 #endif
     return fapi2::getScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL, o_data);
 #ifdef SCOM_CHECKING
@@ -7663,7 +7663,7 @@ static inline fapi2::ReturnCode PUT_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8002c06b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
 #endif
     return fapi2::putScom(i_target, RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL, i_data);
 #ifdef SCOM_CHECKING
@@ -7678,7 +7678,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002c06b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(i_data);
@@ -7695,7 +7695,7 @@ static inline fapi2::buffer<uint64_t>& SET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002c06b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
 #endif
     return o_data.insertFromRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(i_data);
@@ -7712,7 +7712,7 @@ static inline fapi2::buffer<uint64_t>& GET_RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_C
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(0x8002c06b0c00003f));
+    FAPI_TRY(scomt::chkReg(RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL));
 #endif
     return i_data.extractToRight<RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101,
            RX0_2_DEFAULT_RD_RX_DAC_REGS_LOFF_B_CNTLX88_PL_RX_BD_LATCH_DAC_W101_LEN>(o_data);

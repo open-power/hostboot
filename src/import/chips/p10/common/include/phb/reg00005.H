@@ -34,11 +34,11 @@ namespace phb
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_ETUX08_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8010917;
+    scomt::last_scom = REGS_NFIRWOF_REG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -48,14 +48,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_ETUX08_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x8010917;
+    scomt::last_scom = REGS_NFIRWOF_REG;
 #endif
-    return fapi2::getScom(i_target, ETUX08_RSB_REGS_PHB5_PMON_CONFIG, o_data);
+    return fapi2::getScom(i_target, REGS_NFIRWOF_REG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -63,14 +63,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_ETUX08_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x8010917));
+    FAPI_TRY(scomt::chkReg(REGS_NFIRWOF_REG));
 #endif
-    return fapi2::putScom(i_target, ETUX08_RSB_REGS_PHB5_PMON_CONFIG, i_data);
+    return fapi2::putScom(i_target, REGS_NFIRWOF_REG, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -79,11 +78,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_ETUX16_RSB_REGS_PHB5_PMON_COUNTERS(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x919;
+    scomt::last_scom = RSB_REGS_PHB5_PMON_CONFIG;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -93,14 +92,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_ETUX16_RSB_REGS_PHB5_PMON_COUNTERS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = 0x919;
+    scomt::last_scom = RSB_REGS_PHB5_PMON_CONFIG;
 #endif
-    return fapi2::getScom(i_target, ETUX16_RSB_REGS_PHB5_PMON_COUNTERS, o_data);
+    return fapi2::getScom(i_target, RSB_REGS_PHB5_PMON_CONFIG, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -108,14 +107,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_ETUX16_RSB_REGS_PHB5_PMON_COUNTERS(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(0x919));
+    FAPI_TRY(scomt::chkReg(RSB_REGS_PHB5_PMON_CONFIG));
 #endif
-    return fapi2::putScom(i_target, ETUX16_RSB_REGS_PHB5_PMON_COUNTERS, i_data);
+    return fapi2::putScom(i_target, RSB_REGS_PHB5_PMON_CONFIG, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;

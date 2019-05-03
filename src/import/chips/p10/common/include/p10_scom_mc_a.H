@@ -41,7 +41,7 @@ static const uint32_t CC_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t CC_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // mc/reg00010.H
 
-static const uint64_t CLOCK_STAT_SL = 0x0c0303c8ull;
+static const uint64_t CLOCK_STAT_SL = 0x0c030008ull;
 
 static const uint32_t CLOCK_STAT_SL_PERV_SL = 4;
 static const uint32_t CLOCK_STAT_SL_UNIT1_SL = 5;
@@ -60,9 +60,9 @@ static const uint32_t CLOCK_STAT_SL_UNIT13_SL = 17;
 static const uint32_t CLOCK_STAT_SL_UNIT14_SL = 18;
 // mc/reg00010.H
 
-static const uint64_t CPLT_CTRL3_RW = 0x0c0003c3ull;
-static const uint64_t CPLT_CTRL3_WO_CLEAR = 0x0c0003e3ull;
-static const uint64_t CPLT_CTRL3_WO_OR = 0x0c0003d3ull;
+static const uint64_t CPLT_CTRL3_RW = 0x0c000003ull;
+static const uint64_t CPLT_CTRL3_WO_CLEAR = 0x0c000023ull;
+static const uint64_t CPLT_CTRL3_WO_OR = 0x0c000013ull;
 
 static const uint32_t CPLT_CTRL3_0_PSCOM_EN = 4;
 static const uint32_t CPLT_CTRL3_1_PSCOM_EN = 5;
@@ -145,13 +145,13 @@ static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT = 60;
 static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT_LEN = 3;
 // mc/reg00010.H
 
-static const uint64_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x0c0103c7ull;
+static const uint64_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x0c010007ull;
 
 static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK = 0;
 static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 32;
 // mc/reg00010.H
 
-static const uint64_t MBA_SCOMFIR_MCWATCNTL = 0x0c010fd9ull;
+static const uint64_t MBA_SCOMFIR_MCWATCNTL = 0x0c010f99ull;
 
 static const uint32_t MBA_SCOMFIR_MCWATCNTL_ENABLE_WAT = 0;
 static const uint32_t MBA_SCOMFIR_MCWATCNTL_SET_WAT_EXTERNAL_ARM = 1;
@@ -198,7 +198,7 @@ static const uint32_t MBA_SCOMFIR_MCWATCNTL_AND_22BIT_WAT_OUTPUTS = 62;
 static const uint32_t MBA_SCOMFIR_MCWATCNTL_RESERVED_63 = 63;
 // mc/reg00010.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA9 = 0x0c010fe3ull;
+static const uint64_t MBA_SCOMFIR_MCWATDATA9 = 0x0c010fa3ull;
 
 static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA9_EVENT_SELECT_LEN = 46;
@@ -206,9 +206,9 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL = 47;
 static const uint32_t MBA_SCOMFIR_MCWATDATA9_CONTROL_LEN = 17;
 // mc/reg00010.H
 
-static const uint64_t SCOMFIR_MCFIR_RWX = 0x0c010fc0ull;
-static const uint64_t SCOMFIR_MCFIR_WOX_AND = 0x0c010fc1ull;
-static const uint64_t SCOMFIR_MCFIR_WOX_OR = 0x0c010fc2ull;
+static const uint64_t SCOMFIR_MCFIR_RWX = 0x0c010c00ull;
+static const uint64_t SCOMFIR_MCFIR_WOX_AND = 0x0c010c01ull;
+static const uint64_t SCOMFIR_MCFIR_WOX_OR = 0x0c010c02ull;
 
 static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR = 0;
 static const uint32_t SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR = 1;
@@ -236,7 +236,7 @@ static const uint32_t SCOMFIR_MCFIR_INVALID_SMF_ACCESS = 22;
 static const uint32_t SCOMFIR_MCFIR_RESERVED_23 = 23;
 // mc/reg00010.H
 
-static const uint64_t SCOMFIR_MCMODE1 = 0x0c010fd2ull;
+static const uint64_t SCOMFIR_MCMODE1 = 0x0c010c12ull;
 
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY = 0;
 static const uint32_t SCOMFIR_MCMODE1_DISABLE_HIGH_PRIORITY_LEN = 10;

@@ -508,13 +508,14 @@ print CRFILE "#include <p10_scom_eq.H>\n";
 print CRFILE "#include <p10_scom_iohs.H>\n";
 print CRFILE "#include <p10_scom_mcc.H>\n";
 print CRFILE "#include <p10_scom_mc.H>\n";
-print CRFILE "#include <p10_scom_mi.H>\n";
 print CRFILE "#include <p10_scom_omic.H>\n";
 print CRFILE "#include <p10_scom_omi.H>\n";
 print CRFILE "#include <p10_scom_pec.H>\n";
 print CRFILE "#include <p10_scom_perv.H>\n";
 print CRFILE "#include <p10_scom_phb.H>\n";
 print CRFILE "#include <p10_scom_proc.H>\n";
+print CRFILE "#include <p10_scom_pauc.H>\n";
+print CRFILE "#include <p10_scom_nmmu.H>\n";
 
 print CRFILE "namespace fapi2\n";
 print CRFILE "{\n";

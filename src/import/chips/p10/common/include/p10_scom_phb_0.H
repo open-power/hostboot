@@ -35,25 +35,6 @@ namespace phb
 {
 
 
-static const uint64_t ETUX08_RSB_REGS_PHB5_PMON_COUNTERS = 0x08010919ull;
-// phb/reg00000.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ETUX16_RSB_REGS_ACTION1_REG = 0x0000090full;
-// phb/reg00000.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR = 0x00000900ull;
-
-static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VLD = 0;
-static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_4B = 1;
-static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_AUTO_INC = 2;
-static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE = 51;
-static const uint32_t ETUX16_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN = 11;
-// phb/reg00000.H
-
 }
 }
 #include "phb/reg00000.H"

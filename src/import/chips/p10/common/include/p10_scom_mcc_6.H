@@ -35,9 +35,7 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_DECRYPT_CRYPTOCFG = 0x0c010f78ull;
+static const uint64_t CRYPTO_DECRYPT_CRYPTOCFG = 0x0c010f58ull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_COR_DIS = 1;
@@ -63,8 +61,6 @@ static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_PERSISTANT_INJ = 25;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31 = 26;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31_LEN = 6;
 // mcc/reg00006.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSTLPSAVE2 = 0x0c010d14ull;
 
@@ -92,30 +88,6 @@ static const uint32_t DSTL_DSTLPSAVE2_MASTER_PSAVE_WSIZE = 56;
 static const uint32_t DSTL_DSTLPSAVE2_MASTER_PSAVE_WSIZE_LEN = 3;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63_LEN = 5;
-// mcc/reg00006.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t LINK0_ERROR_STATUS = 0x0c011016ull;
-
-static const uint32_t LINK0_ERROR_STATUS_RESET_KEEPER = 0;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_CE = 1;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_CE_LEN = 7;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UE = 8;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UE_LEN = 4;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_OSC = 12;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_OSC_LEN = 2;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_TRAIN = 16;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_TRAIN_LEN = 5;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV = 24;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_UNRECOV_LEN = 14;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL = 40;
-static const uint32_t LINK0_ERROR_STATUS_ERROR_STATUS_INTERNAL_LEN = 24;
-// mcc/reg00006.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t REGS_PRX0_DLR_APST = 0x0c01103bull;
 // mcc/reg00006.H
 
 }

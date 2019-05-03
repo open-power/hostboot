@@ -55,7 +55,7 @@ static const uint32_t CPMS_PFETDLY_MMA_POWUP_DLY = 12;
 static const uint32_t CPMS_PFETDLY_MMA_POWUP_DLY_LEN = 4;
 // c/reg00013.H
 
-static const uint64_t EC_LS_UNIT_HOLD_OUT0 = 0x20020280ull;
+static const uint64_t EC_LS_UNIT_HOLD_OUT0 = 0x200206c0ull;
 // c/reg00013.H
 
 static const uint64_t EC_PC_COMMON_SPR_MODE = 0x20020484ull;

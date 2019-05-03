@@ -35,15 +35,11 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t DSTL_DSTLFIRACT0 = 0x0c010d06ull;
 
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0 = 0;
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 35;
 // mcc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSTLPSAVE1 = 0x0c010d13ull;
 
@@ -73,8 +69,6 @@ static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63_LEN = 5;
 // mcc/reg00012.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t DSTL_DSTLTRACK = 0x0c010d0full;
 
 static const uint32_t DSTL_DSTLTRACK_CHANA_BUFFER_TLXDCP0_AVAILABLE = 0;
@@ -96,86 +90,6 @@ static const uint32_t DSTL_DSTLTRACK_TLXVC3_CREDIT_TOTAL_SHADOW_LEN = 4;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW = 50;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW_LEN = 7;
 // mcc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t PERF_TRACE_CONFIG = 0x0c01101cull;
-
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0 = 0;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_0_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1 = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_1_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2 = 4;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_2_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3 = 6;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_3_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4 = 8;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_4_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5 = 10;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_5_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6 = 12;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_6_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7 = 14;
-static const uint32_t PERF_TRACE_CONFIG_ENABLE_PERF_7_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0 = 16;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_0_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1 = 18;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_1_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2 = 20;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_2_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3 = 22;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_3_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4 = 24;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_4_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5 = 26;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_5_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6 = 28;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_6_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7 = 30;
-static const uint32_t PERF_TRACE_CONFIG_PERF_SIZE_7_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_PMULET_FREEZE_MODE = 32;
-static const uint32_t PERF_TRACE_CONFIG_COMMON_FREEZE_MODE = 33;
-static const uint32_t PERF_TRACE_CONFIG_PERF_RESET_MODE = 34;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_ENABLE = 35;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_FIXED_WINDOW = 36;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_PRESCALE = 37;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE = 38;
-static const uint32_t PERF_TRACE_CONFIG_PERFTRACE_MODE_LEN = 2;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0 = 40;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_0_LEN = 12;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1 = 52;
-static const uint32_t PERF_TRACE_CONFIG_TRACE_CONFIG_1_LEN = 12;
-// mcc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t REGS_PRX1_DLR_APCR = 0x0c01103cull;
-// mcc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t SEC_CONFIG = 0x0c01100dull;
-
-static const uint32_t SEC_CONFIG_ENABLE_ERR_INJ = 0;
-static const uint32_t SEC_CONFIG_ENABLE_TRACE = 1;
-static const uint32_t SEC_CONFIG_RESET_INJ = 2;
-static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE = 12;
-static const uint32_t SEC_CONFIG_LINK0_PSAVE_OVERRIDE_LEN = 2;
-static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE = 14;
-static const uint32_t SEC_CONFIG_LINK1_PSAVE_OVERRIDE_LEN = 2;
-static const uint32_t SEC_CONFIG_SBE_ERROR_RATE = 16;
-static const uint32_t SEC_CONFIG_SBE_ERROR_RATE_LEN = 2;
-static const uint32_t SEC_CONFIG_RAND_ERROR_RATE = 18;
-static const uint32_t SEC_CONFIG_RAND_ERROR_RATE_LEN = 6;
-static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE = 24;
-static const uint32_t SEC_CONFIG_INV_SH_ERROR_RATE_LEN = 2;
-static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE = 26;
-static const uint32_t SEC_CONFIG_SYNC_HEADER_ERROR_RATE_LEN = 6;
-static const uint32_t SEC_CONFIG_EDPL_RATE = 48;
-static const uint32_t SEC_CONFIG_EDPL_RATE_LEN = 16;
-// mcc/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t USTL_USTLDBG = 0x0c010e0dull;
 

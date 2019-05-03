@@ -35,15 +35,11 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f7cull;
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f5cull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
 // mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSLTWAT = 0x0c010d11ull;
 
@@ -74,68 +70,6 @@ static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN_LEN = 2;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62 = 24;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62_LEN = 39;
 // mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ERR_INJ_LFSR = 0x0c01101bull;
-
-static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR = 0;
-static const uint32_t ERR_INJ_LFSR_ERR_INJ_LFSR_LEN = 61;
-// mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t LINK0_TX_LANE_CONTROL = 0x0c011010ull;
-
-static const uint32_t LINK0_TX_LANE_CONTROL_00_CONTROL = 0;
-static const uint32_t LINK0_TX_LANE_CONTROL_00_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_01_CONTROL = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_01_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_02_CONTROL = 8;
-static const uint32_t LINK0_TX_LANE_CONTROL_02_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_03_CONTROL = 12;
-static const uint32_t LINK0_TX_LANE_CONTROL_03_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_04_CONTROL = 16;
-static const uint32_t LINK0_TX_LANE_CONTROL_04_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_05_CONTROL = 20;
-static const uint32_t LINK0_TX_LANE_CONTROL_05_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_06_CONTROL = 24;
-static const uint32_t LINK0_TX_LANE_CONTROL_06_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_07_CONTROL = 28;
-static const uint32_t LINK0_TX_LANE_CONTROL_07_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL = 32;
-static const uint32_t LINK0_TX_LANE_CONTROL_SP_CONTROL_LEN = 4;
-static const uint32_t LINK0_TX_LANE_CONTROL__FAILED = 48;
-static const uint32_t LINK0_TX_LANE_CONTROL__FAILED_LEN = 9;
-// mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t LINK1_QUALITY = 0x0c011027ull;
-
-static const uint32_t LINK1_QUALITY_TX_BW = 1;
-static const uint32_t LINK1_QUALITY_TX_BW_LEN = 11;
-static const uint32_t LINK1_QUALITY_RX_BW = 13;
-static const uint32_t LINK1_QUALITY_RX_BW_LEN = 11;
-static const uint32_t LINK1_QUALITY_ERROR_RATE = 25;
-static const uint32_t LINK1_QUALITY_ERROR_RATE_LEN = 23;
-static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1 = 49;
-static const uint32_t LINK1_QUALITY_SPARE_COUNTER_1_LEN = 7;
-static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2 = 57;
-static const uint32_t LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
-// mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t PERF_COUNT_LSB_0 = 0x0c011020ull;
-// mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t REGS_PRX0_DLR_APCR = 0x0c011038ull;
-// mcc/reg00002.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t USTL_USTLFIR_RWX = 0x0c010e00ull;
 static const uint64_t USTL_USTLFIR_WOX_AND = 0x0c010e01ull;
@@ -205,9 +139,7 @@ static const uint32_t USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO = 60;
 static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
 // mcc/reg00002.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WDF_WBMGR_TAG_INFO = 0x0c010f63ull;
+static const uint64_t WDF_WBMGR_TAG_INFO = 0x0c010f43ull;
 
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE0_BUFFER_OVERRUN = 0;
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE1_BUFFER_OVERRUN = 1;

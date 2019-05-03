@@ -56,7 +56,7 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
 // mc/reg00013.H
 
-static const uint64_t EPS_FIR_SUM_MASK_REG = 0x0c0403d7ull;
+static const uint64_t EPS_FIR_SUM_MASK_REG = 0x0c040017ull;
 
 static const uint32_t EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB = 0;
 static const uint32_t EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
@@ -65,7 +65,7 @@ static const uint32_t EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
 static const uint32_t EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
 // mc/reg00013.H
 
-static const uint64_t MBA_SCOMFIR_DBG1_SCOM1Q = 0x0c010fd7ull;
+static const uint64_t MBA_SCOMFIR_DBG1_SCOM1Q = 0x0c010f97ull;
 
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DEBUG_BUS_64_87 = 0;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DEBUG_BUS_64_87_LEN = 24;
@@ -73,13 +73,13 @@ static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_RESERVED = 24;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_RESERVED_LEN = 40;
 // mc/reg00013.H
 
-static const uint64_t MBA_SCOMFIR_MCEBUSEN2 = 0x0c010fe6ull;
+static const uint64_t MBA_SCOMFIR_MCEBUSEN2 = 0x0c010fa6ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS_LEN = 64;
 // mc/reg00013.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA7 = 0x0c010fe1ull;
+static const uint64_t MBA_SCOMFIR_MCWATDATA7 = 0x0c010fa1ull;
 
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_PATTERN_A = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_PATTERN_A_LEN = 22;
@@ -87,21 +87,21 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA7_MASK_A = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA7_MASK_A_LEN = 22;
 // mc/reg00013.H
 
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010fc3ull;
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010fc4ull;
-static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010fc5ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010f03ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010f04ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010f05ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 14;
 // mc/reg00013.H
 
-static const uint64_t MBA_SCOMFIR_MISCFIRWOF = 0x0c010fc8ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRWOF = 0x0c010f08ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF_LEN = 14;
 // mc/reg00013.H
 
-static const uint64_t OPCG_CAPT1 = 0x0c0303d0ull;
+static const uint64_t OPCG_CAPT1 = 0x0c030010ull;
 
 static const uint32_t OPCG_CAPT1_COUNT = 0;
 static const uint32_t OPCG_CAPT1_COUNT_LEN = 4;
@@ -131,13 +131,13 @@ static const uint32_t OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
 // mc/reg00013.H
 
-static const uint64_t PRIMARY_ADDRESS_REG = 0x0c0f03c0ull;
+static const uint64_t PRIMARY_ADDRESS_REG = 0x0c0f0000ull;
 // mc/reg00013.H
 
-static const uint64_t SCAN_UPDATEDR_LONG = 0x0c03b3c0ull;
+static const uint64_t SCAN_UPDATEDR_LONG = 0x0c03b000ull;
 // mc/reg00013.H
 
-static const uint64_t SCOMFIR_MCFGP1 = 0x0c010fcbull;
+static const uint64_t SCOMFIR_MCFGP1 = 0x0c010c0bull;
 
 static const uint32_t SCOMFIR_MCFGP1_1_VALID = 0;
 static const uint32_t SCOMFIR_MCFGP1_1_GROUP_BASE_ADDRESS = 1;
@@ -154,7 +154,7 @@ static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE_LEN = 8;
 // mc/reg00013.H
 
-static const uint64_t TRA0_TR0_CONFIG_9 = 0x0c0107c9ull;
+static const uint64_t TRA0_TR0_CONFIG_9 = 0x0c010409ull;
 
 static const uint32_t TRA0_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t TRA0_TR0_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;

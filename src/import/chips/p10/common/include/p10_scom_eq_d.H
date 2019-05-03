@@ -53,8 +53,6 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 // eq/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x200183f0ull;
 // eq/reg00013.H
 
@@ -73,8 +71,6 @@ static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_VALUE = 0;
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 // eq/reg00013.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA0_TR0_CONFIG_9 = 0x20018209ull;
 
@@ -107,23 +103,17 @@ static const uint32_t L3TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // eq/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA0_TR1_CONFIG_0 = 0x20018223ull;
 
 static const uint32_t L3TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA0_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // eq/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR0_CONFIG_1 = 0x20018284ull;
 
 static const uint32_t L3TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L3TRA2_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // eq/reg00013.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA2_TR1_CONFIG = 0x200182a2ull;
 
@@ -142,8 +132,6 @@ static const uint32_t L3TRA2_TR1_CONFIG_TRACE_RUN_STATUS = 19;
 static const uint32_t L3TRA2_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA2_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 // eq/reg00013.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA3_TR0_CONFIG = 0x200182c2ull;
 

@@ -35,6 +35,43 @@ namespace phb
 {
 
 
+static const uint64_t REGS_BARE_REG = 0x03011854ull;
+
+static const uint32_t REGS_BARE_REG_MMIO_BAR0_EN = 0;
+static const uint32_t REGS_BARE_REG_MMIO_BAR1_EN = 1;
+static const uint32_t REGS_BARE_REG_PHB_BAR_EN = 2;
+static const uint32_t REGS_BARE_REG_INT_BAR_EN = 3;
+// phb/reg00015.H
+
+static const uint64_t REGS_MMIOBAR0_REG = 0x0301184eull;
+
+static const uint32_t REGS_MMIOBAR0_REG_PE_MMIO_BAR0 = 0;
+static const uint32_t REGS_MMIOBAR0_REG_PE_MMIO_BAR0_LEN = 40;
+// phb/reg00015.H
+
+static const uint64_t REGS_MMIOBAR1_REG = 0x03011850ull;
+
+static const uint32_t REGS_MMIOBAR1_REG_PE_MMIO_BAR1 = 0;
+static const uint32_t REGS_MMIOBAR1_REG_PE_MMIO_BAR1_LEN = 40;
+// phb/reg00015.H
+
+static const uint64_t REGS_PBAIBTXDCR_REG = 0x0801084eull;
+
+static const uint32_t REGS_PBAIBTXDCR_REG_A = 33;
+static const uint32_t REGS_PBAIBTXDCR_REG_A_LEN = 2;
+static const uint32_t REGS_PBAIBTXDCR_REG_R = 44;
+static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
+// phb/reg00015.H
+
+static const uint64_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL = 0x08010904ull;
+
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_ENABLE = 0;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
+// phb/reg00015.H
+
 }
 }
 #include "phb/reg00015.H"

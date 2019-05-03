@@ -35,9 +35,7 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ATCL_CL_CLSCOM_MCAMOC = 0x0c010c35ull;
+static const uint64_t ATCL_CL_CLSCOM_MCAMOC = 0x0c010c25ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_ENABLE_CLEAN = 0;
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_FORCE_PF_DROP0 = 1;
@@ -52,9 +50,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47 = 33;
 static const uint32_t ATCL_CL_CLSCOM_MCAMOC_RESERVED33_47_LEN = 15;
 // mcc/reg00009.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ATCL_CL_CLSCOM_MCWAT = 0x0c010c3aull;
+static const uint64_t ATCL_CL_CLSCOM_MCWAT = 0x0c010c2aull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL = 0;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CHARB_WAT_CMD_STALL_SEL_LEN = 4;
@@ -86,8 +82,6 @@ static const uint32_t ATCL_CL_CLSCOM_MCWAT_WAT_BLOCK_WRBUF_AVAIL_LEN = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCWAT_CLSTATE_INT_DEBUG_SEL = 63;
 // mcc/reg00009.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t DSTL_DSTLFIRMASK_RW = 0x0c010d03ull;
 static const uint64_t DSTL_DSTLFIRMASK_WO_AND = 0x0c010d04ull;
 static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
@@ -95,8 +89,6 @@ static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
 static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 35;
 // mcc/reg00009.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSTLSTATUS = 0x0c010d10ull;
 
@@ -106,23 +98,7 @@ static const uint32_t DSTL_DSTLSTATUS_B_FAIL_WOF = 10;
 static const uint32_t DSTL_DSTLSTATUS_B_FAIL_WOF_LEN = 10;
 // mcc/reg00009.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t PMU_CNTR = 0x0c011b4full;
-
-static const uint32_t PMU_CNTR_3 = 0;
-static const uint32_t PMU_CNTR_3_LEN = 16;
-static const uint32_t PMU_CNTR_2 = 16;
-static const uint32_t PMU_CNTR_2_LEN = 16;
-static const uint32_t PMU_CNTR_1 = 32;
-static const uint32_t PMU_CNTR_1_LEN = 16;
-static const uint32_t PMU_CNTR_0 = 48;
-static const uint32_t PMU_CNTR_0_LEN = 16;
-// mcc/reg00009.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WDF_WDFCFG = 0x0c010f60ull;
+static const uint64_t WDF_WDFCFG = 0x0c010f40ull;
 
 static const uint32_t WDF_WDFCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
 static const uint32_t WDF_WDFCFG_CFG_WRITE_MODE_ECC_COR_DIS = 1;
@@ -152,9 +128,7 @@ static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE = 36;
 static const uint32_t WDF_WDFCFG_ECC_WDF_HCA_TIMEBASE_LEN = 28;
 // mcc/reg00009.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WRITE_WRTCFG = 0x0c010f68ull;
+static const uint64_t WRITE_WRTCFG = 0x0c010f48ull;
 
 static const uint32_t WRITE_WRTCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
 static const uint32_t WRITE_WRTCFG_CFG_WRITE_MODE_ECC_COR_DIS = 1;
@@ -180,9 +154,7 @@ static const uint32_t WRITE_WRTCFG_RESERVED_22_31 = 22;
 static const uint32_t WRITE_WRTCFG_RESERVED_22_31_LEN = 10;
 // mcc/reg00009.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WRITE_WRT_WDF_ECC = 0x0c010f69ull;
+static const uint64_t WRITE_WRT_WDF_ECC = 0x0c010f49ull;
 
 static const uint32_t WRITE_WRT_WDF_ECC_0_ERR_TYPE = 0;
 static const uint32_t WRITE_WRT_WDF_ECC_0_ERR_TYPE_LEN = 3;

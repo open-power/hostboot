@@ -68,8 +68,6 @@ static const uint32_t CTRL_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t CTRL_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // eq/reg00012.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t EPS_DBG_MODE_REG = 0x200183e0ull;
 
 static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE = 0;
@@ -118,8 +116,6 @@ static const uint32_t EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_GXSTOP4_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
 // eq/reg00012.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA1_TR0_CONFIG_9 = 0x20018249ull;
 
 static const uint32_t L3TRA1_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
@@ -151,15 +147,11 @@ static const uint32_t L3TRA1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // eq/reg00012.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA1_TR1_CONFIG_0 = 0x20018263ull;
 
 static const uint32_t L3TRA1_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA1_TR1_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // eq/reg00012.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA3_TR0_CONFIG_1 = 0x200182c4ull;
 

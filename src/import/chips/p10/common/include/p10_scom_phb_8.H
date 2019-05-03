@@ -35,6 +35,27 @@ namespace phb
 {
 
 
+static const uint64_t REGS_PFIRMASK_REG_RW = 0x08010843ull;
+static const uint64_t REGS_PFIRMASK_REG_WO_AND = 0x08010844ull;
+static const uint64_t REGS_PFIRMASK_REG_WO_OR = 0x08010845ull;
+
+static const uint32_t REGS_PFIRMASK_REG_PFIRMASK = 0;
+static const uint32_t REGS_PFIRMASK_REG_PFIRMASK_LEN = 6;
+// phb/reg00008.H
+
+static const uint64_t REGS_PFIRWOF_REG = 0x08010848ull;
+// phb/reg00008.H
+
+static const uint64_t RSB_REGS_ACTION1_REG = 0x0801090full;
+// phb/reg00008.H
+
+static const uint64_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP = 0x08010906ull;
+
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
+static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
+// phb/reg00008.H
+
 }
 }
 #include "phb/reg00008.H"

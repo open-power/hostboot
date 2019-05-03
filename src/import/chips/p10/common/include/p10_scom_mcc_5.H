@@ -35,89 +35,17 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEA = 0x0c010f7eull;
+static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEA = 0x0c010f5eull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
 // mcc/reg00005.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEB = 0x0c010f77ull;
+static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEB = 0x0c010f57ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB_LEN = 17;
 // mcc/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t LINK1_INFO = 0x0c011015ull;
-
-static const uint32_t LINK1_INFO_MAX_TIMEOUT = 0;
-static const uint32_t LINK1_INFO_MAX_TIMEOUT_LEN = 16;
-static const uint32_t LINK1_INFO_FRAME_CAP_VALID = 16;
-static const uint32_t LINK1_INFO_FRAME_CAP_INST = 17;
-static const uint32_t LINK1_INFO_FRAME_CAP_ADDR = 18;
-static const uint32_t LINK1_INFO_FRAME_CAP_ADDR_LEN = 6;
-static const uint32_t LINK1_INFO_FRAME_CAP_SYN = 24;
-static const uint32_t LINK1_INFO_FRAME_CAP_SYN_LEN = 8;
-static const uint32_t LINK1_INFO_REPLAY_CAP_VALID = 32;
-static const uint32_t LINK1_INFO_REPLAY_CAP_INST = 33;
-static const uint32_t LINK1_INFO_REPLAY_CAP_INST_LEN = 2;
-static const uint32_t LINK1_INFO_REPLAY_CAP_ADDR = 35;
-static const uint32_t LINK1_INFO_REPLAY_CAP_ADDR_LEN = 9;
-static const uint32_t LINK1_INFO_REPLAY_CAP_SYN = 44;
-static const uint32_t LINK1_INFO_REPLAY_CAP_SYN_LEN = 8;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_VALID = 52;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR = 55;
-static const uint32_t LINK1_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
-// mcc/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t REPLAY_THRESHOLD = 0x0c011018ull;
-
-static const uint32_t REPLAY_THRESHOLD_TB_SEL = 0;
-static const uint32_t REPLAY_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t REPLAY_THRESHOLD_TAP_SEL = 4;
-static const uint32_t REPLAY_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t REPLAY_THRESHOLD_ENABLE = 8;
-static const uint32_t REPLAY_THRESHOLD_ENABLE_LEN = 3;
-static const uint32_t REPLAY_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t REPLAY_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t REPLAY_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t REPLAY_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t REPLAY_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t REPLAY_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t REPLAY_THRESHOLD_LINK1_COUNT_LEN = 16;
-// mcc/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t SL_ECC_THRESHOLD = 0x0c011019ull;
-
-static const uint32_t SL_ECC_THRESHOLD_TB_SEL = 0;
-static const uint32_t SL_ECC_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t SL_ECC_THRESHOLD_TAP_SEL = 4;
-static const uint32_t SL_ECC_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t SL_ECC_THRESHOLD_ENABLE = 8;
-static const uint32_t SL_ECC_THRESHOLD_ENABLE_LEN = 2;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t SL_ECC_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t SL_ECC_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t SL_ECC_THRESHOLD_LINK1_COUNT_LEN = 16;
-// mcc/reg00005.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t USTL_USTLOCAPIERROR = 0x0c010e14ull;
 
@@ -128,9 +56,7 @@ static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION = 9;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION_LEN = 31;
 // mcc/reg00005.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WRITE_WRTDBGMCA = 0x0c010f6aull;
+static const uint64_t WRITE_WRTDBGMCA = 0x0c010f4aull;
 
 static const uint32_t WRITE_WRTDBGMCA_MCA_DBG_SEL_IN = 0;
 static const uint32_t WRITE_WRTDBGMCA_MCA_DBG_SEL_WRT = 1;

@@ -35,20 +35,18 @@ namespace phb
 {
 
 
-static const uint64_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP = 0x08010906ull;
+static const uint64_t REGS_PE_DFREEZE_REG = 0x03011855ull;
 
-static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
-static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
-static const uint32_t ETUX08_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
+static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE = 0;
+static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE_LEN = 28;
 // phb/reg00013.H
 
-static const uint64_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR = 0x08010900ull;
+static const uint64_t REGS_PFIR_REG_RWX = 0x08010840ull;
+static const uint64_t REGS_PFIR_REG_WOX_AND = 0x08010841ull;
+static const uint64_t REGS_PFIR_REG_WOX_OR = 0x08010842ull;
 
-static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VLD = 0;
-static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_4B = 1;
-static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_AUTO_INC = 2;
-static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE = 51;
-static const uint32_t ETUX08_RSB_SCOM_SSR_PHB4_HVIAR_REQ_ADDR_VALUE_LEN = 11;
+static const uint32_t REGS_PFIR_REG_PFIRPFIR = 0;
+static const uint32_t REGS_PFIR_REG_PFIRPFIR_LEN = 6;
 // phb/reg00013.H
 
 }

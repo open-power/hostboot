@@ -35,9 +35,7 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ATCL_CL_CLSCOM_MCEPSQ = 0x0c010c36ull;
+static const uint64_t ATCL_CL_CLSCOM_MCEPSQ = 0x0c010c26ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON = 0;
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON_LEN = 8;
@@ -55,17 +53,13 @@ static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON = 48;
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON_LEN = 8;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2B = 0x0c010f7dull;
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2B = 0x0c010f5dull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CRYPTO_ENCRYPT_CRYPTOCFG = 0x0c010f70ull;
+static const uint64_t CRYPTO_ENCRYPT_CRYPTOCFG = 0x0c010f50ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_COR_DIS = 1;
@@ -92,13 +86,6 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CRYPTOCFG_26_31_SPARE = 26;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CRYPTOCFG_26_31_SPARE_LEN = 6;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t REGS_PRX1_DLR_APST = 0x0c01103full;
-// mcc/reg00008.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t USTL_USTLBADRESP = 0x0c010e10ull;
 
 static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_VAL = 0;
@@ -113,8 +100,6 @@ static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG = 12;
 static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG_LEN = 6;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t USTL_USTLERRPT = 0x0c010e16ull;
 
 static const uint32_t USTL_USTLERRPT_WDF_CMT_PAR_ERR = 0;
@@ -127,15 +112,11 @@ static const uint32_t USTL_USTLERRPT_RESERVED = 6;
 static const uint32_t USTL_USTLERRPT_RESERVED_LEN = 10;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t USTL_USTLFIRACT0 = 0x0c010e06ull;
 
 static const uint32_t USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 = 0;
 static const uint32_t USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN = 62;
 // mcc/reg00008.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t USTL_USTLSTATUS = 0x0c010e0aull;
 
@@ -179,9 +160,7 @@ static const uint32_t USTL_USTLSTATUS_CHANA_FAIL_MEM_CNTL = 54;
 static const uint32_t USTL_USTLSTATUS_CHANB_FAIL_MEM_CNTL = 55;
 // mcc/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t WDF_WDFDBG = 0x0c010f64ull;
+static const uint64_t WDF_WDFDBG = 0x0c010f44ull;
 
 static const uint32_t WDF_WDFDBG_DBG_SEL_IN = 0;
 static const uint32_t WDF_WDFDBG_DBG_SEL_WDF = 1;

@@ -47,8 +47,6 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t ATTN_INTERRUPT_REG = 0x200f001aull;
 // eq/reg00011.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x200183efull;
 
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
@@ -151,15 +149,11 @@ static const uint64_t EPS_THERM_WSUB2_CONTROL_REG = 0x20050032ull;
 static const uint64_t EPS_THERM_WSUB2_SKITTER_DATA2 = 0x2005003bull;
 // eq/reg00011.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA0_TR1_CONFIG_1 = 0x20018224ull;
 
 static const uint32_t L3TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L3TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // eq/reg00011.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA1_TR0_TRACE_LO_DATA_REG = 0x20018241ull;
 
@@ -176,23 +170,17 @@ static const uint32_t L3TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L3TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 // eq/reg00011.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR0_CONFIG_0 = 0x20018283ull;
 
 static const uint32_t L3TRA2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L3TRA2_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 // eq/reg00011.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t L3TRA2_TR1_TRACE_HI_DATA_REG = 0x200182a0ull;
 
 static const uint32_t L3TRA2_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L3TRA2_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // eq/reg00011.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t L3TRA2_TR1_CONFIG_9 = 0x200182a9ull;
 

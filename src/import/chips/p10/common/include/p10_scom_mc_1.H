@@ -35,7 +35,7 @@ namespace mc
 {
 
 
-static const uint64_t DBG_CBS_CC = 0x0c0303d3ull;
+static const uint64_t DBG_CBS_CC = 0x0c030013ull;
 
 static const uint32_t DBG_CBS_CC_DBG_RESET_EP = 0;
 static const uint32_t DBG_CBS_CC_DBG_OPCG_IP = 1;
@@ -63,7 +63,7 @@ static const uint32_t DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE = 30;
 static const uint32_t DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
 // mc/reg00001.H
 
-static const uint64_t EPS_PSC_ADDR_TRAP_REG = 0x0c0103c3ull;
+static const uint64_t EPS_PSC_ADDR_TRAP_REG = 0x0c010003ull;
 
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_PCB_ADDRESS_OF_LAST_TRANSACTION_WITH_ERROR = 0;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_PCB_ADDRESS_OF_LAST_TRANSACTION_WITH_ERROR_LEN = 16;
@@ -79,7 +79,7 @@ static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
 // mc/reg00001.H
 
-static const uint64_t EPS_PSC_PSCOM_MODE_REG = 0x0c0103c0ull;
+static const uint64_t EPS_PSC_PSCOM_MODE_REG = 0x0c010000ull;
 
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_ABORT_ON_PCB_ADDR_PARITY_ERROR = 0;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_ABORT_ON_PCB_WDATA_PARITY_ERROR = 1;
@@ -93,7 +93,7 @@ static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
 // mc/reg00001.H
 
-static const uint64_t HEARTBEAT_REG = 0x0c0f03d8ull;
+static const uint64_t HEARTBEAT_REG = 0x0c0f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
 // mc/reg00001.H
@@ -134,13 +134,13 @@ static const uint32_t MBA_SCOMFIR_MCBERRPTQ_MCEBUSEN2_PE_HOLD_OUT = 19;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_MCEBUSEN3_PE_HOLD_OUT = 20;
 // mc/reg00001.H
 
-static const uint64_t MBA_SCOMFIR_MCEBUSEN0 = 0x0c010fe4ull;
+static const uint64_t MBA_SCOMFIR_MCEBUSEN0 = 0x0c010fa4ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN0_MCEBUSEN0_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN0_MCEBUSEN0_EVENT_BUS_SELECTS_LEN = 64;
 // mc/reg00001.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA5 = 0x0c010fdfull;
+static const uint64_t MBA_SCOMFIR_MCWATDATA5 = 0x0c010f9full;
 
 static const uint32_t MBA_SCOMFIR_MCWATDATA5_PATTERN_A = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA5_PATTERN_A_LEN = 22;
@@ -148,7 +148,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA5_MASK_A = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA5_MASK_A_LEN = 22;
 // mc/reg00001.H
 
-static const uint64_t OPCG_CAPT3 = 0x0c0303d2ull;
+static const uint64_t OPCG_CAPT3 = 0x0c030012ull;
 
 static const uint32_t OPCG_CAPT3_07EVEN = 4;
 static const uint32_t OPCG_CAPT3_07EVEN_LEN = 5;
@@ -176,16 +176,16 @@ static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // mc/reg00001.H
 
-static const uint64_t RECOV_INTERRUPT_REG = 0x0c0f03dbull;
+static const uint64_t RECOV_INTERRUPT_REG = 0x0c0f001bull;
 // mc/reg00001.H
 
-static const uint64_t SCAN32 = 0x0c0383c0ull;
+static const uint64_t SCAN32 = 0x0c038000ull;
 // mc/reg00001.H
 
-static const uint64_t SCAN64 = 0x0c03e3c0ull;
+static const uint64_t SCAN64 = 0x0c03e000ull;
 // mc/reg00001.H
 
-static const uint64_t SCOMFIR_MCTO = 0x0c010fdbull;
+static const uint64_t SCOMFIR_MCTO = 0x0c010c1bull;
 
 static const uint32_t SCOMFIR_MCTO_SELECT_PB_HANG_PULSE = 0;
 static const uint32_t SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE = 1;
@@ -207,13 +207,13 @@ static const uint32_t SCOMFIR_MCTO_CHANNEL_TIMEOUT_VALUE = 37;
 static const uint32_t SCOMFIR_MCTO_CHANNEL_TIMEOUT_VALUE_LEN = 3;
 // mc/reg00001.H
 
-static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x0c0107c0ull;
+static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x0c010400ull;
 
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 // mc/reg00001.H
 
-static const uint64_t TRA1_TR0_CONFIG_4 = 0x0c0107c7ull;
+static const uint64_t TRA1_TR0_CONFIG_4 = 0x0c010447ull;
 
 static const uint32_t TRA1_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_4_A_LEN = 24;

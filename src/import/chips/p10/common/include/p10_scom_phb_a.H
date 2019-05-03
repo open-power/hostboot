@@ -35,25 +35,24 @@ namespace phb
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
+static const uint64_t REGS_CQSTAT_REG = 0x0301184cull;
 
-static const uint64_t ETUX16_RSB_REGS_ACT0_REG = 0x0000090eull;
+static const uint32_t REGS_CQSTAT_REG_INBOUND_ACTIVE = 0;
+static const uint32_t REGS_CQSTAT_REG_OUTBOUND_ACTIVE = 1;
 // phb/reg00010.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
+static const uint64_t REGS_NFIRMASK_REG_RW = 0x03011843ull;
+static const uint64_t REGS_NFIRMASK_REG_WO_AND = 0x03011844ull;
+static const uint64_t REGS_NFIRMASK_REG_WO_OR = 0x03011845ull;
 
-static const uint64_t ETUX16_RSB_REGS_MASK_REG_RWX = 0x0000090bull;
-static const uint64_t ETUX16_RSB_REGS_MASK_REG_WOX_AND = 0x0000090cull;
-static const uint64_t ETUX16_RSB_REGS_MASK_REG_WOX_OR = 0x0000090dull;
+static const uint32_t REGS_NFIRMASK_REG_NFIRMASK = 0;
+static const uint32_t REGS_NFIRMASK_REG_NFIRMASK_LEN = 28;
 // phb/reg00010.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
+static const uint64_t REGS_PHBBAR_REG = 0x03011852ull;
 
-static const uint64_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP = 0x00000906ull;
-
-static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
-static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
-static const uint32_t ETUX16_RSB_REGS_UVI_PHB4_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
+static const uint32_t REGS_PHBBAR_REG_PE_PHB_BAR = 0;
+static const uint32_t REGS_PHBBAR_REG_PE_PHB_BAR_LEN = 42;
 // phb/reg00010.H
 
 }

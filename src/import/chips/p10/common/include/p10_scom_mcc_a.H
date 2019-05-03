@@ -35,9 +35,7 @@ namespace mcc
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ATCL_CL_CLSCOM_MCERRINJ = 0x0c010c38ull;
+static const uint64_t ATCL_CL_CLSCOM_MCERRINJ = 0x0c010c28ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_WB_ERR_INJ = 0;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_WB_ERR_INJ_LEN = 3;
@@ -50,58 +48,6 @@ static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_CLX_DEBUG_SUM_MASK_LEN = 22;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESET_KEEPER = 62;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESERVED63 = 63;
 // mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t CONFIG = 0x0c01100aull;
-
-static const uint32_t CONFIG_LINK_PAIR = 0;
-static const uint32_t CONFIG_DISABLE_SL_ECC = 1;
-static const uint32_t CONFIG_SL_UE_CRC_ERR = 4;
-static const uint32_t CONFIG_REPORT_SL_CHKBIT_ERR = 5;
-static const uint32_t CONFIG_BW_SAMPLE_SIZE = 6;
-static const uint32_t CONFIG_BW_WINDOW_SIZE = 7;
-static const uint32_t CONFIG_PACKET_DELAY_LIMIT = 11;
-static const uint32_t CONFIG_PACKET_DELAY_LIMIT_LEN = 5;
-static const uint32_t CONFIG_TDM_DELAY = 16;
-static const uint32_t CONFIG_TDM_DELAY_LEN = 4;
-static const uint32_t CONFIG_RECAL_TIMER = 29;
-static const uint32_t CONFIG_RECAL_TIMER_LEN = 15;
-static const uint32_t CONFIG_PSAVE_TIMEOUT = 44;
-static const uint32_t CONFIG_PSAVE_TIMEOUT_LEN = 4;
-static const uint32_t CONFIG_TIMEOUT = 48;
-static const uint32_t CONFIG_TIMEOUT_LEN = 4;
-static const uint32_t CONFIG_TIMER_1US = 52;
-static const uint32_t CONFIG_TIMER_1US_LEN = 12;
-// mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t DLL_STATUS = 0x0c011028ull;
-
-static const uint32_t DLL_STATUS_0_CURRENT_STATE = 4;
-static const uint32_t DLL_STATUS_0_CURRENT_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_0_PRIOR_STATE = 12;
-static const uint32_t DLL_STATUS_0_PRIOR_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_0_OPTICS_RST_B = 16;
-static const uint32_t DLL_STATUS_0_OPTICS_IRQ = 17;
-static const uint32_t DLL_STATUS_0_TRAINING = 18;
-static const uint32_t DLL_STATUS_0_MAX_PKT_TIMER = 19;
-static const uint32_t DLL_STATUS_0_MAX_PKT_TIMER_LEN = 5;
-static const uint32_t DLL_STATUS_1_CURRENT_STATE = 28;
-static const uint32_t DLL_STATUS_1_CURRENT_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_1_PRIOR_STATE = 36;
-static const uint32_t DLL_STATUS_1_PRIOR_STATE_LEN = 4;
-static const uint32_t DLL_STATUS_1_OPTICS_RST_B = 40;
-static const uint32_t DLL_STATUS_1_OPTICS_IRQ = 41;
-static const uint32_t DLL_STATUS_1_TRAINING = 42;
-static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER = 43;
-static const uint32_t DLL_STATUS_1_MAX_PKT_TIMER_LEN = 5;
-static const uint32_t DLL_STATUS_0_LINK_CAP_VALID = 62;
-static const uint32_t DLL_STATUS_1_LINK_CAP_VALID = 63;
-// mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSTLERRRPT = 0x0c010d0cull;
 
@@ -151,15 +97,11 @@ static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_A_FAIL_STATE = 62;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE = 63;
 // mcc/reg00010.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
 static const uint64_t DSTL_DSTLFIRWOF = 0x0c010d08ull;
 
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF = 0;
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF_LEN = 35;
 // mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
 
 static const uint64_t DSTL_DSTLPSAVE0 = 0x0c010d12ull;
 
@@ -185,62 +127,6 @@ static const uint32_t DSTL_DSTLPSAVE0_SLAVE_PSAVE_EVENT_SEL = 36;
 static const uint32_t DSTL_DSTLPSAVE0_SLAVE_PSAVE_EVENT_SEL_LEN = 4;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_40_47 = 40;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_40_47_LEN = 8;
-// mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t OPTICAL_CONFIG = 0x0c01100full;
-
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_BAD_LANE_COUNT = 0;
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_CLEAR_BAD_LANE_COUNT = 1;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_NO_SPARE = 2;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_CRC_ERROR = 3;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_DURATION_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX = 9;
-static const uint32_t OPTICAL_CONFIG_CONFIG_BAD_LANE_MAX_LEN = 7;
-static const uint32_t OPTICAL_CONFIG_CONFIG_DISABLE_LINK_FAIL_COUNT = 16;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION = 20;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_DURATION_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX = 25;
-static const uint32_t OPTICAL_CONFIG_CONFIG_LINK_FAIL_MAX_LEN = 7;
-static const uint32_t OPTICAL_CONFIG_CLEAR_LINK_FAIL_COUNTER = 32;
-static const uint32_t OPTICAL_CONFIG_CLEAR_BAD_LANE_COUNTER = 33;
-static const uint32_t OPTICAL_CONFIG_FULL_18_TX_LANE_SWAP = 39;
-static const uint32_t OPTICAL_CONFIG_LINK0_RX_LANE_SWAP = 40;
-static const uint32_t OPTICAL_CONFIG_LINK0_TX_LANE_SWAP = 41;
-static const uint32_t OPTICAL_CONFIG_LINK1_RX_LANE_SWAP = 42;
-static const uint32_t OPTICAL_CONFIG_LINK1_TX_LANE_SWAP = 43;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW = 44;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_LOW_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START = 48;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_START_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH = 52;
-static const uint32_t OPTICAL_CONFIG_CONFIG_ACK_QUEUE_HIGH_LEN = 4;
-static const uint32_t OPTICAL_CONFIG_CONFIG_FAST_ASYNC_CROSS = 59;
-static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT = 60;
-static const uint32_t OPTICAL_CONFIG_CONFIG_RECAL_ABORT_TIMEOUT_LEN = 4;
-// mcc/reg00010.H
-
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t RETRAIN_THRESHOLD = 0x0c01101aull;
-
-static const uint32_t RETRAIN_THRESHOLD_TB_SEL = 0;
-static const uint32_t RETRAIN_THRESHOLD_TB_SEL_LEN = 4;
-static const uint32_t RETRAIN_THRESHOLD_TAP_SEL = 4;
-static const uint32_t RETRAIN_THRESHOLD_TAP_SEL_LEN = 4;
-static const uint32_t RETRAIN_THRESHOLD_ENABLE = 8;
-static const uint32_t RETRAIN_THRESHOLD_ENABLE_LEN = 9;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_CLEAR = 26;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_CLEAR = 27;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TB_CLEAR = 28;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TAP_CLEAR = 29;
-static const uint32_t RETRAIN_THRESHOLD_DIS_TAP_STOP = 30;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT = 32;
-static const uint32_t RETRAIN_THRESHOLD_LINK0_COUNT_LEN = 16;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT = 48;
-static const uint32_t RETRAIN_THRESHOLD_LINK1_COUNT_LEN = 16;
 // mcc/reg00010.H
 
 }

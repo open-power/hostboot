@@ -35,10 +35,10 @@ namespace mc
 {
 
 
-static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x0c0503d2ull;
+static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x0c050012ull;
 // mc/reg00007.H
 
-static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x0c0503d6ull;
+static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x0c050016ull;
 
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC = 0;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
@@ -46,7 +46,7 @@ static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
 // mc/reg00007.H
 
-static const uint64_t FIR_MASK = 0x0c0403c2ull;
+static const uint64_t FIR_MASK = 0x0c040002ull;
 
 static const uint32_t FIR_MASK_01 = 1;
 static const uint32_t FIR_MASK_02 = 2;
@@ -103,65 +103,65 @@ static const uint32_t FIR_MASK_52 = 52;
 static const uint32_t FIR_MASK_53 = 53;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_0_REG = 0x0c0f03e0ull;
+static const uint64_t HANG_PULSE_0_REG = 0x0c0f0020ull;
 
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0 = 0;
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0_LEN = 6;
 static const uint32_t HANG_PULSE_0_REG_SUPPRESS_HANG_0 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_1_REG = 0x0c0f03e1ull;
+static const uint64_t HANG_PULSE_1_REG = 0x0c0f0021ull;
 
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1 = 0;
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1_LEN = 6;
 static const uint32_t HANG_PULSE_1_REG_SUPPRESS_HANG_1 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_2_REG = 0x0c0f03e2ull;
+static const uint64_t HANG_PULSE_2_REG = 0x0c0f0022ull;
 
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2 = 0;
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2_LEN = 6;
 static const uint32_t HANG_PULSE_2_REG_SUPPRESS_HANG_2 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_3_REG = 0x0c0f03e3ull;
+static const uint64_t HANG_PULSE_3_REG = 0x0c0f0023ull;
 
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3 = 0;
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3_LEN = 6;
 static const uint32_t HANG_PULSE_3_REG_SUPPRESS_HANG_3 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_4_REG = 0x0c0f03e4ull;
+static const uint64_t HANG_PULSE_4_REG = 0x0c0f0024ull;
 
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4 = 0;
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4_LEN = 6;
 static const uint32_t HANG_PULSE_4_REG_SUPPRESS_HANG_4 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_5_REG = 0x0c0f03e5ull;
+static const uint64_t HANG_PULSE_5_REG = 0x0c0f0025ull;
 
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5 = 0;
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5_LEN = 6;
 static const uint32_t HANG_PULSE_5_REG_SUPPRESS_HANG_5 = 6;
 // mc/reg00007.H
 
-static const uint64_t HANG_PULSE_6_REG = 0x0c0f03e6ull;
+static const uint64_t HANG_PULSE_6_REG = 0x0c0f0026ull;
 
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6 = 0;
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6_LEN = 6;
 static const uint32_t HANG_PULSE_6_REG_SUPPRESS_HANG_6 = 6;
 // mc/reg00007.H
 
-static const uint64_t HOSTATTN_INTERRUPT_REG = 0x0c0f03ebull;
+static const uint64_t HOSTATTN_INTERRUPT_REG = 0x0c0f002bull;
 // mc/reg00007.H
 
-static const uint64_t MBA_SCOMFIR_MCEBUSEN1 = 0x0c010fe5ull;
+static const uint64_t MBA_SCOMFIR_MCEBUSEN1 = 0x0c010fa5ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN1_MCEBUSEN1_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN1_MCEBUSEN1_EVENT_BUS_SELECTS_LEN = 64;
 // mc/reg00007.H
 
-static const uint64_t MBA_SCOMFIR_MCWATDATA4 = 0x0c010fdeull;
+static const uint64_t MBA_SCOMFIR_MCWATDATA4 = 0x0c010f9eull;
 
 static const uint32_t MBA_SCOMFIR_MCWATDATA4_PATTERN_B = 0;
 static const uint32_t MBA_SCOMFIR_MCWATDATA4_PATTERN_B_LEN = 22;
@@ -169,7 +169,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA4_MASK_B = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA4_MASK_B_LEN = 22;
 // mc/reg00007.H
 
-static const uint64_t OPCG_CAPT2 = 0x0c0303d1ull;
+static const uint64_t OPCG_CAPT2 = 0x0c030011ull;
 
 static const uint32_t OPCG_CAPT2_13_01EVEN = 4;
 static const uint32_t OPCG_CAPT2_13_01EVEN_LEN = 5;
@@ -197,10 +197,10 @@ static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
 // mc/reg00007.H
 
-static const uint64_t SCAN_UPDATEDR = 0x0c03a3c0ull;
+static const uint64_t SCAN_UPDATEDR = 0x0c03a000ull;
 // mc/reg00007.H
 
-static const uint64_t SCOMFIR_MCFGP0A = 0x0c010fceull;
+static const uint64_t SCOMFIR_MCFGP0A = 0x0c010c0eull;
 
 static const uint32_t SCOMFIR_MCFGP0A_HOLE_VALID = 0;
 static const uint32_t SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS = 1;
@@ -215,7 +215,7 @@ static const uint32_t SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS = 43;
 static const uint32_t SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS_LEN = 19;
 // mc/reg00007.H
 
-static const uint64_t SCOMFIR_MCFGPM1E = 0x0c010fddull;
+static const uint64_t SCOMFIR_MCFGPM1E = 0x0c010c1dull;
 
 static const uint32_t SCOMFIR_MCFGPM1E_VALID = 0;
 static const uint32_t SCOMFIR_MCFGPM1E_EXTEND_TO_END_OF_RANGE = 1;
@@ -225,7 +225,7 @@ static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS = 21;
 static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS_LEN = 19;
 // mc/reg00007.H
 
-static const uint64_t SYNC_CONFIG = 0x0c0303c0ull;
+static const uint64_t SYNC_CONFIG = 0x0c030000ull;
 
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_DELAY = 0;
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_DELAY_LEN = 4;
@@ -243,7 +243,7 @@ static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 // mc/reg00007.H
 
-static const uint64_t TRA1_TR0_CONFIG_5 = 0x0c0107c8ull;
+static const uint64_t TRA1_TR0_CONFIG_5 = 0x0c010448ull;
 
 static const uint32_t TRA1_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_5_C_LEN = 24;
@@ -251,7 +251,7 @@ static const uint32_t TRA1_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_5_D_LEN = 24;
 // mc/reg00007.H
 
-static const uint64_t XFIR = 0x0c0403c0ull;
+static const uint64_t XFIR = 0x0c040000ull;
 
 static const uint32_t XFIR_ANY_XSTOP = 0;
 static const uint32_t XFIR_SYSTEM_XSTOP = 1;

@@ -35,12 +35,10 @@ namespace phb
 {
 
 
-static const uint64_t ETUX08_RSB_REGS_PHB5_PMON_CONFIG = 0x08010917ull;
+static const uint64_t REGS_NFIRWOF_REG = 0x03011848ull;
 // phb/reg00005.H
 
-//ERRCODE: // Some of the name targets not found in address targets.
-
-static const uint64_t ETUX16_RSB_REGS_PHB5_PMON_COUNTERS = 0x00000919ull;
+static const uint64_t RSB_REGS_PHB5_PMON_CONFIG = 0x08010917ull;
 // phb/reg00005.H
 
 }
