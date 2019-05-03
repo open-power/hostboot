@@ -1,0 +1,563 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_fbc_eff_config_links.C $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_fbc_eff_config_links.C
+/// @brief Set fabric effective link config attributes (FAPI2)
+///
+/// *HWP HW Maintainer: Jenny Huynh <jhuynh@us.ibm.com>
+/// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HWP Consumed by: HB,FSP
+///
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+#include <p10_fbc_eff_config_links.H>
+#include <p10_fbc_utils.H>
+
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+///
+/// @brief Determine fabric link enable state, given endpoint target
+///
+/// @tparam T template parameter   passed in target
+/// @param[in]  i_target           Endpoint target (of type T)
+/// @param[out] o_link_is_enabled  0=link disabled, else enabled
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T> fapi2::ReturnCode p10_fbc_eff_config_links_query_link_en(
+    const fapi2::Target<T>& i_target,
+    uint8_t& o_link_is_enabled);
+// template specialization for XBUS target type
+template<>
+fapi2::ReturnCode p10_fbc_eff_config_links_query_link_en(
+    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
+    uint8_t& o_link_is_enabled)
+{
+    FAPI_DBG("Start");
+
+    fapi2::ATTR_LINK_TRAIN_Type l_link_train = 0;
+    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
+    //                       i_target,
+    //                       l_link_train),
+    //         "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+    if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+    }
+    else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+    }
+    else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+    }
+    else
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+    }
+
+//fapi_try_exit:
+    FAPI_DBG("End, o_link_is_enabled: 0x%x", o_link_is_enabled);
+    return fapi2::current_err;
+}
+
+// template specialization for OBUS target type
+template<>
+fapi2::ReturnCode p10_fbc_eff_config_links_query_link_en(
+    const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
+    uint8_t& o_link_is_enabled)
+{
+    FAPI_DBG("Start");
+
+    /*
+     validate that link is configured for SMP operation
+    fapi2::ATTR_OPTICS_CONFIG_MODE_Type l_link_config_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, i_target, l_link_config_mode),
+             "Error from FAPI_ATTR_GET (ATTR_OPTICS_CONFIG_MODE)");
+
+    if (l_link_config_mode != fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+    }
+    else
+    {
+        fapi2::ATTR_LINK_TRAIN_Type l_link_train;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
+                               i_target,
+                               l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+        if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+        }
+        else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+        }
+        else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+        }
+        else
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+        }
+    }
+
+    fapi_try_exit:
+    */
+    FAPI_DBG("End, o_link_is_enabled: 0x%x", o_link_is_enabled);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set fabric link enable attribute state, given endpoint target.
+///        This will shadow information posted to
+///        ATTR_PROC_FABRIC_[AX]_ATTACHED_CHIP_CNFG, accesible from the
+///        endpoint target type itself.
+///
+/// @tparam T template parameter  passed in target
+/// @param[in] i_target           Endpoint target (of type T)
+/// @param[in] i_enable           Boolean indicating link state
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode p10_fbc_eff_config_links_set_link_active_attr(
+    const fapi2::Target<T>& i_target,
+    const bool i_enable)
+{
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_active =
+        (i_enable) ?
+        (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) :
+        (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE);
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
+                           i_target,
+                           l_active),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Map endpoint target to X/A link ID
+///
+/// @tparam T template parameter    passed in target
+/// @param[in] i_loc_target         Endpoint target (of type T) of local end of link
+/// @param[in] i_link_ctl_arr       Array of X/A link control structures
+/// @param[in] i_link_ctl_arr_size  Number of entries in i_link_ctl_arr
+/// @param[in] o_link_id            X/A logical link ID
+///
+/// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T> fapi2::ReturnCode p10_fbc_eff_config_links_map_endp(
+    const fapi2::Target<T>& i_target,
+    //const p10_fbc_link_ctl_t i_link_ctl_arr[],
+    const uint8_t i_link_ctl_arr_size,
+    uint8_t& o_link_id)
+{
+    FAPI_DBG("Start");
+
+    /*
+    uint8_t l_loc_unit_id;
+    bool l_found = false;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_loc_unit_id),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    for (uint8_t l_link_id = 0; (l_link_id < i_link_ctl_arr_size) && !l_found; l_link_id++)
+    {
+        if ((static_cast<fapi2::TargetType>(i_link_ctl_arr[l_link_id].endp_type) == T) &&
+            (i_link_ctl_arr[l_link_id].endp_unit_id == l_loc_unit_id))
+        {
+            o_link_id = l_link_id;
+            l_found = true;
+        }
+    }
+
+    FAPI_ASSERT(l_found,
+                fapi2::P10_FBC_EFF_CONFIG_LINKS_LOOKUP_ERR()
+                .set_TARGET(i_target)
+                .set_UNIT_ID(l_loc_unit_id),
+                "Error finding matching X/A link for endpoint target");
+
+    fapi_try_exit:
+    */
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determine local/remote end parameters of link using endpoint target
+///
+/// @tparam T template parameter      passed in target
+/// @param[in]  i_loc_target          Endpoint target (of type T) of local end of link
+/// @param[in]  i_loc_fbc_chip_id     FBC Chip ID of local end chip
+/// @param[in]  i_loc_fbc_group_id    FBC Group ID of local end chip
+/// @param[in]  i_link_ctl_arr        Array of X/A link control structures
+/// @param[in]  i_link_ctl_arr_size   Number of entries in i_link_ctl_arr
+/// @param[in]  i_rem_fbc_id_is_chip  True=return FBC Chip ID in o_rem_fbc_id, false=FBC Group ID
+/// @param[out] o_loc_link_en         Array of local end link enables
+/// @param[out] o_rem_link_id         Array of remote end link IDs
+/// @param[out] o_rem_fbc_id          Array of remote end FBC Group/Chip IDs
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T> fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
+    const fapi2::Target<T>& i_loc_target,
+    const uint8_t i_loc_fbc_chip_id,
+    const uint8_t i_loc_fbc_group_id,
+    //const p10_fbc_link_ctl_t i_link_ctl_arr[],
+    const uint8_t i_link_ctl_arr_size,
+    bool i_rem_fbc_id_is_chip,
+    uint8_t o_loc_link_en[],
+    uint8_t o_rem_link_id[],
+    uint8_t o_rem_fbc_id[])
+{
+    FAPI_DBG("Start");
+
+    // A/X link ID for local end
+    uint8_t l_loc_link_id = 0;
+    // remote end target
+    fapi2::Target<T> l_rem_target;
+
+    // determine link ID/enable state for local end
+    FAPI_TRY(p10_fbc_eff_config_links_map_endp<T>(
+                 i_loc_target,
+                 //i_link_ctl_arr,
+                 i_link_ctl_arr_size,
+                 l_loc_link_id),
+             "Error from p10_fbc_eff_config_links_map_endp (local)");
+
+    FAPI_TRY(p10_fbc_eff_config_links_query_link_en<T>(i_loc_target, o_loc_link_en[l_loc_link_id]),
+             "Error from p10_fbc_eff_config_links_query_link_en (local)");
+
+    // local end link target is enabled, query remote end
+    if (o_loc_link_en[l_loc_link_id])
+    {
+        // obtain endpoint target associated with remote end of link
+        fapi2::ReturnCode l_rc = i_loc_target.getOtherEnd(l_rem_target);
+
+        if (l_rc)
+        {
+            // endpoint target for remote end of link is not configured
+            o_loc_link_en[l_loc_link_id] = 0;
+        }
+        else
+        {
+            // endpoint target is configured, qualify local link enable with remote endpoint state
+            FAPI_TRY(p10_fbc_eff_config_links_query_link_en<T>(l_rem_target, o_loc_link_en[l_loc_link_id]),
+                     "Error from p10_fbc_eff_config_links_query_link_en (remote)");
+        }
+    }
+
+    // link is enabled, gather remaining remote end parameters
+    if (o_loc_link_en[l_loc_link_id])
+    {
+        uint8_t l_rem_fbc_group_id;
+        uint8_t l_rem_fbc_chip_id;
+
+        FAPI_TRY(p10_fbc_eff_config_links_map_endp<T>(
+                     l_rem_target,
+                     //i_link_ctl_arr,
+                     i_link_ctl_arr_size,
+                     o_rem_link_id[l_loc_link_id]),
+                 "Error from p10_fbc_eff_config_links_map_endp (remote)");
+
+        //// return either chip or group ID of remote chip
+        //FAPI_TRY(p10_fbc_utils_get_chip_id_attr(l_rem_target, l_rem_fbc_chip_id),
+        //         "Error from p10_fbc_utils_get_chip_id_attr (remote)");
+
+        //FAPI_TRY(p10_fbc_utils_get_group_id_attr(l_rem_target, l_rem_fbc_group_id),
+        //         "Error from p10_fbc_utils_get_group_id_attr (remote)");
+
+        if (i_rem_fbc_id_is_chip)
+        {
+            //// assert that group IDs match, return remote chip ID
+            //FAPI_ASSERT(l_rem_fbc_group_id == i_loc_fbc_group_id,
+            //            fapi2::P10_FBC_EFF_CONFIG_LINKS_GROUP_ID_ERR()
+            //            .set_LOC_TARGET(i_loc_target)
+            //            .set_REM_TARGET(l_rem_target)
+            //            .set_LOC_FBC_GROUP_ID(i_loc_fbc_group_id)
+            //            .set_REM_FBC_GROUP_ID(l_rem_fbc_group_id),
+            //            "Local and remote endpoints expected to lie in the same group have different group IDs");
+            o_rem_fbc_id[l_loc_link_id] = l_rem_fbc_chip_id;
+        }
+        else
+        {
+            //// assert that chip IDs match, return remote group ID
+            //FAPI_ASSERT(l_rem_fbc_chip_id == i_loc_fbc_chip_id,
+            //            fapi2::P10_FBC_EFF_CONFIG_LINKS_CHIP_ID_ERR()
+            //            .set_LOC_TARGET(i_loc_target)
+            //            .set_REM_TARGET(l_rem_target)
+            //            .set_LOC_FBC_CHIP_ID(i_loc_fbc_chip_id)
+            //            .set_REM_FBC_CHIP_ID(l_rem_fbc_chip_id),
+            //            "Local and remote endpoints expected to lie in different groups have different chip IDs");
+            o_rem_fbc_id[l_loc_link_id] = l_rem_fbc_group_id;
+        }
+
+    }
+
+    FAPI_TRY(p10_fbc_eff_config_links_set_link_active_attr(
+                 i_loc_target,
+                 o_loc_link_en[l_loc_link_id]),
+             "Error from p10_fbc_eff_config_links_set_link_active_attr");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// See doxygen comments in header file
+fapi2::ReturnCode p10_fbc_eff_config_links(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    //p10_build_smp_operation i_op,
+    bool i_process_electrical,
+    bool i_process_optical)
+
+{
+    FAPI_DBG("Start");
+    /*
+        FAPI_DBG("Input args: i_op: %d, i_process_electrical: %d, i_process_optical: %d\n",
+                 i_op, i_process_electrical, i_process_optical);
+
+        // local chip fabric chip/group IDs
+        uint8_t l_loc_fbc_chip_id;
+        uint8_t l_loc_fbc_group_id;
+
+        // logical link (X/A) configuration parameters, init arrays to default values
+        // enable on local end
+        uint8_t l_x_en[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
+        uint8_t l_x_num = 0;
+        uint8_t l_a_en[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
+        uint8_t l_a_num = 0;
+        // link/fabric ID on remote end
+        // indexed by link ID on local end
+        uint8_t l_x_rem_link_id[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
+        uint8_t l_x_rem_fbc_chip_id[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
+        uint8_t l_a_rem_link_id[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
+        uint8_t l_a_rem_fbc_group_id[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
+
+        // atttribute defining X link pump mode
+        fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+        // seed arrays with previously written attribute state
+        if (i_op == SMP_ACTIVATE_PHASE2)
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, i_target, l_x_num),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_x_rem_link_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_chip_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINKS_CNFG)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID, i_target, l_a_rem_link_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_group_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
+        }
+
+        FAPI_TRY(p10_fbc_utils_get_chip_id_attr(i_target, l_loc_fbc_chip_id),
+                 "Error from p10_fbc_utils_get_chip_id_attr");
+        FAPI_TRY(p10_fbc_utils_get_group_id_attr(i_target, l_loc_fbc_group_id),
+                 "Error from p10_fbc_utils_get_group_id_attr");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, FAPI_SYSTEM, l_pump_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE");
+
+        if (i_process_electrical)
+        {
+            // process XBUS (electrical) endp targets
+            auto l_electrical_targets = i_target.getChildren<fapi2::TARGET_TYPE_XBUS>();
+
+            for (auto l_iter = l_electrical_targets.begin();
+                 l_iter != l_electrical_targets.end();
+                 l_iter++)
+            {
+                FAPI_TRY(p10_fbc_eff_config_links_query_endp<fapi2::TARGET_TYPE_XBUS>(
+                             *l_iter,
+                             l_loc_fbc_chip_id,
+                             l_loc_fbc_group_id,
+                             P10_FBC_XBUS_LINK_CTL_ARR,
+                             P10_FBC_UTILS_MAX_X_LINKS,
+                             (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE),
+                             l_x_en,
+                             l_x_rem_link_id,
+                             l_x_rem_fbc_chip_id),
+                         "Error from p10_fbc_eff_config_links_query_endp (electrical)");
+            }
+        }
+
+        if (i_process_optical)
+        {
+            // process OBUS (optical) endp targets
+            auto l_optical_targets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
+
+            // determine optical link usage mode
+            // - if configured for X link use, fill in logical X link attributes
+            // - if configured for A link use, fill in logical A link attributes
+            fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_smp_optics_mode;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, FAPI_SYSTEM, l_smp_optics_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_SMP_OPTICS_MODE)");
+
+            for (auto l_iter = l_optical_targets.begin();
+                 l_iter != l_optical_targets.end();
+                 l_iter++)
+            {
+                if (l_smp_optics_mode == fapi2::ENUM_ATTR_PROC_FABRIC_SMP_OPTICS_MODE_OPTICS_IS_X_BUS)
+                {
+                    FAPI_TRY(p10_fbc_eff_config_links_query_endp<fapi2::TARGET_TYPE_OBUS>(
+                                 *l_iter,
+                                 l_loc_fbc_chip_id,
+                                 l_loc_fbc_group_id,
+                                 P10_FBC_XBUS_LINK_CTL_ARR,
+                                 P10_FBC_UTILS_MAX_X_LINKS,
+                                 (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE),
+                                 l_x_en,
+                                 l_x_rem_link_id,
+                                 l_x_rem_fbc_chip_id),
+                             "Error from p10_fbc_eff_config_links_query_endp (optical, X)");
+                }
+                else
+                {
+                    FAPI_TRY(p10_fbc_eff_config_links_query_endp<fapi2::TARGET_TYPE_OBUS>(
+                                 *l_iter,
+                                 l_loc_fbc_chip_id,
+                                 l_loc_fbc_group_id,
+                                 P10_FBC_ABUS_LINK_CTL_ARR,
+                                 P10_FBC_UTILS_MAX_A_LINKS,
+                                 false,
+                                 l_a_en,
+                                 l_a_rem_link_id,
+                                 l_a_rem_fbc_group_id),
+                             "Error from p10_fbc_eff_config_links_query_endp (optical, A)");
+                }
+            }
+        }
+
+        // set attributes
+        l_x_num = 0;
+        l_a_num = 0;
+
+        for (uint8_t l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_X_LINKS; l_link_id++)
+        {
+            if (l_x_en[l_link_id])
+            {
+                l_x_num++;
+            }
+        }
+
+        for (uint8_t l_link_id = 0; l_link_id < P10_FBC_UTILS_MAX_A_LINKS; l_link_id++)
+        {
+            if (l_a_en[l_link_id])
+            {
+                l_a_num++;
+            }
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, i_target, l_x_num),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_x_rem_link_id),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_chip_id),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_LINKS_CNFG)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID, i_target, l_a_rem_link_id),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_group_id),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
+
+        // initialize all aggregate link related attributes?
+        if (i_op == SMP_ACTIVATE_PHASE1)
+        {
+            // aggregate (local+remote) delays
+            uint32_t l_x_agg_link_delay[P10_FBC_UTILS_MAX_X_LINKS];
+            uint32_t l_a_agg_link_delay[P10_FBC_UTILS_MAX_A_LINKS];
+            std::fill_n(l_x_agg_link_delay, P10_FBC_UTILS_MAX_X_LINKS, 0xFFFFFFFF);
+            std::fill_n(l_a_agg_link_delay, P10_FBC_UTILS_MAX_A_LINKS, 0xFFFFFFFF);
+
+            // aggregate model/address disable on local end
+            uint8_t l_x_addr_dis[P10_FBC_UTILS_MAX_X_LINKS] = { 0 };
+            uint8_t l_x_aggregate = 0;
+            uint8_t l_a_addr_dis[P10_FBC_UTILS_MAX_A_LINKS] = { 0 };
+            uint8_t l_a_aggregate = 0;
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINK_DELAY, i_target, l_x_agg_link_delay),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINK_DELAY");
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, i_target, l_x_addr_dis),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_AGGREGATE, i_target, l_x_aggregate),
+                     "Error setting FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_AGGREGATE)");
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, i_target, l_a_addr_dis),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_AGGREGATE, i_target, l_a_aggregate),
+                     "Error setting FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_AGGREGATE)");
+        }
+
+    fapi_try_exit:
+    */
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
