@@ -344,6 +344,7 @@ fapi_try_exit:
 /// @param[in]     i_startmaster   Bit to configure to start Master
 /// @param[in]     i_regions       Enable required REGIONS
 /// @param[in]     i_clock_types   Clock Types to be selected (SL/NSL/ARY)
+/// @param[in]     i_unicast       true if input target is unicast, else its multicast target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
         fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_OR > & i_mcast_target,
@@ -457,7 +458,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
             FAPI_DBG("Check for clocks running NSL");
             //Getting CLOCK_STAT_NSL register value uisng MULTICAST_OR target for clock start
             FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CLOCK_STAT_NSL, l_nsl_clock_status));
-            FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_nsl_clock_status);
+            FAPI_DBG("regions value:  %#018lX, nsl status: %#018lX", l_data64, l_nsl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_nsl_clock_status) == 0),
                         fapi2::THOLD_ERR()
@@ -473,7 +474,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
             FAPI_DBG("Check for clocks running ARY");
             //Getting CLOCK_STAT_ARY register value uisng MULTICAST_OR target for clock start
             FAPI_TRY(fapi2::getScom(i_mcast_target, PERV_CLOCK_STAT_ARY, l_ary_clock_status));
-            FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_ary_clock_status);
+            FAPI_DBG("regions value:  %#018lX, ary status: %#018lX", l_data64, l_ary_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_ary_clock_status) == 0),
                         fapi2::THOLD_ERR()
@@ -505,7 +506,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
             FAPI_DBG("Check for clocks stop NSL");
             //Getting CLOCK_STAT_NSL register value uisng MULTICAST_AND target for clock stop
             FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CLOCK_STAT_NSL, l_nsl_clock_status));
-            FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_nsl_clock_status);
+            FAPI_DBG("regions value:  %#018lX, nsl status: %#018lX", l_data64, l_nsl_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_nsl_clock_status) == l_data64),
                         fapi2::THOLD_ERR()
@@ -521,7 +522,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_clock_start_stop(const
             FAPI_DBG("Check for clocks stop ARY");
             //Getting CLOCK_STAT_ARY register value uisng MULTICAST_AND target for clock stop
             FAPI_TRY(fapi2::getScom(l_mcast_and_target, PERV_CLOCK_STAT_ARY, l_ary_clock_status));
-            FAPI_DBG("regions value:  %#018lX, sl status: %#018lX", l_data64, l_ary_clock_status);
+            FAPI_DBG("regions value:  %#018lX, ary status: %#018lX", l_data64, l_ary_clock_status);
 
             FAPI_ASSERT(((l_data64 & l_ary_clock_status) == l_data64),
                         fapi2::THOLD_ERR()
