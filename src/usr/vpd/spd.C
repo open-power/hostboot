@@ -173,26 +173,6 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
                         VPD::vpdCmdTarget i_location );
 
 /**
- * @brief This function will scan the table and return the entry
- *      corresponding to the keyword being requested.
- *
- * @param[in] i_keyword - The keyword being requested.
- *
- * @param[in] i_memType - The memory type of the target.
- *
- * @param[in] i_target - Target (only used for callouts)
- *
- * @param[out] o_entry - The table entry corresponding to the keyword.
- *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to
- *      the error log.
- */
-errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
-                             uint64_t i_memType,
-                             TARGETING::Target * i_target,
-                             const KeywordData *& o_entry );
-
-/**
  * @brief This function will set the size of SPD for the given target based on
  *        the DIMM type.
  *
