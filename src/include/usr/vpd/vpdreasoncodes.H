@@ -99,6 +99,7 @@ enum vpdModuleId
 
     // OCMB SPD
     VPD_OCMB_GET_SPD                        = 0x90,
+    VPD_OCMB_SPD_PERFORM_OP                 = 0x91,
 
 
 };
