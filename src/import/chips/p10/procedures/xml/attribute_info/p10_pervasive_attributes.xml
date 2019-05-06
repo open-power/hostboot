@@ -196,6 +196,17 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_MASTER_CORE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+  Indicates the master boot core selected by p10_sbe_select_ex.
+  Ranges from 0 to 31.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_ACTIVE_CORES_VEC</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Bit vector indicating the active boot cores selected by
@@ -219,7 +230,7 @@
   <id>ATTR_ACTIVE_CORES_NUM</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Number of necessary active boot cores required. Must be set by
-  the platform before calling p10_sbe_select_ex.  If ATTR_ACTIVE_CORES is
+  the platform before calling p10_sbe_select_ex.  If ATTR_ACTIVE_CORES_VEC is
   overridden, this attribute value must be greater than or equal to the number
   of bits on in ATTR_ACTIVE_CORES_VEC.
   </description>
@@ -231,9 +242,9 @@
   <id>ATTR_BACKING_CACHES_NUM</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Number of necessary backing caches required. Must be set by
-  the platform before calling p10_sbe_select_ex.  If ATTR_BACKING_CACHES is
+  the platform before calling p10_sbe_select_ex.  If ATTR_BACKING_CACHES_VEC is
   overridden, this attribute value must be greater than or equal to the number
-  of bits on in ATTR_BACKING_CACHES.
+  of bits on in ATTR_BACKING_CACHES_VEC.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
