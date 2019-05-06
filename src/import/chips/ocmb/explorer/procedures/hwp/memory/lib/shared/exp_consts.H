@@ -117,8 +117,6 @@ enum ecid_consts
     DATA_IN_SIZE = 16,
     // TK - Will need to be changed once ATTR_ECID is made larger
     ATTR_ECID_SIZE = 2,
-    // 32 bit registers with getScom/putScom use the right-most 32 bits
-    REG_BIT_OFFSET = 32,
 };
 
 ///

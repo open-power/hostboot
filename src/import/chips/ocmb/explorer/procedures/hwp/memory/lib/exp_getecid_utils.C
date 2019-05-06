@@ -36,7 +36,7 @@
 #include <lib/i2c/exp_i2c.H>
 #include <lib/shared/exp_consts.H>
 #include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 #include <mss_explorer_attribute_setters.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
 
@@ -68,8 +68,7 @@ fapi2::ReturnCode get_enterprise_and_half_dimm_from_fuse(
     o_enterprise_mode = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_NON_ENTERPRISE; // 0
 
     // If we support enterprise mode, enable it until otherwise overridden in OMI_SETUP
-    if(!l_reg_resp_buffer.getBit < EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS
-       + mss::exp::ecid_consts::REG_BIT_OFFSET > ())
+    if(!l_reg_resp_buffer.getBit <EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS> ())
     {
         o_enterprise_mode = fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE; // 1, enabled
     }

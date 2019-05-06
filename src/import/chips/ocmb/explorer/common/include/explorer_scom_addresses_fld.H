@@ -6950,6 +6950,4 @@ static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_LEFT_LEN                  =
 static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_RIGHT                     = 35  ;
 static const uint8_t EXPLR_WDF_WSPAR_CFG_STEERING_R3_RIGHT_LEN                 = 5   ;
 
-static const uint8_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 10  ;
-
 #endif

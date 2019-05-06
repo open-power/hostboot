@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-
 #ifndef __EXPLR_SCOM_ADDRESSES_FLD_FIXES_H
 #define __EXPLR_SCOM_ADDRESSES_FLD_FIXES_H
 
-static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL = 63;
+static const uint64_t EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL           = 63;
+static const uint64_t EXPLR_EFUSE_IMAGE_OUT_0_ENTERPRISE_MODE_DIS               = 53;
 
 #endif
