@@ -67,7 +67,7 @@
   <hwpError>
     <sbeError/>
     <rc>RC_SBE_SELECT_EX_INSUFFICIENT_ACTIVE_CORES_ERROR</rc>
-    <description>The requested backing caches were not able to be configured.
+    <description>The requested active cores were not able to be configured.
     </description>
     <ffdc>CHIP</ffdc>
     <ffdc>CORE_CONFIG</ffdc>
@@ -110,7 +110,7 @@
   <hwpError>
     <sbeError/>
     <rc>RC_SBE_SELECT_EX_NEEDED_CONFIG_ERROR</rc>
-    <description>Need core configuration cannot be satisified
+    <description>Core configuration needed cannot be satisfied.
     </description>
     <ffdc>CHIP</ffdc>
     <ffdc>NEEDED_CONFIG</ffdc>
