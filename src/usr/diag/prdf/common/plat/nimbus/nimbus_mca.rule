@@ -279,7 +279,7 @@ group gMCACALFIR
     (rMCACALFIR, bit(7)) ? self_th_1;
 
     /** MCACALFIR[8]
-     *  event_n active on DDR interface
+     *  Active NVDIMM Attention
      */
     (rMCACALFIR, bit(8)) ? analyzeNvdimms;
 
