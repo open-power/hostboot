@@ -91,7 +91,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>RCS PLL input for FPLL #3</description>
   <valueType>uint8</valueType>
-  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1</enum>
+  <enum>RCS_PLLA = 0x0, RCS_PLLB = 0x1, FREQ_100MHZ = 0x2</enum>
   <platInit/>
   <mrwHide/>
 </attribute>
@@ -291,7 +291,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Mux 23 input from FPLL</description>
   <valueType>uint8</valueType>
-  <enum>FPLL_4 = 0, FPLL_3 = 1</enum>
+  <enum>FPLL_4 = 0, FPLL_3 = 1, MUX_0D = 2</enum>
   <platInit/>
   <mrwHide/>
 </attribute>
@@ -301,7 +301,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>PCI0 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FREQ_100MHZ = 0, MUX_23 = 1</enum>
+  <enum>FREQ_100MHZ = 1, MUX_23 = 0</enum>
   <platInit/>
   <mrwHide/>
 </attribute>
@@ -311,7 +311,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>PCI1 LCPLL input</description>
   <valueType>uint8</valueType>
-  <enum>FREQ_100MHZ = 0, MUX_23 = 1</enum>
+  <enum>FREQ_100MHZ = 1, MUX_23 = 0</enum>
   <platInit/>
   <mrwHide/>
 </attribute>
