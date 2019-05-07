@@ -67,7 +67,6 @@ void* call_proc_npu_scominit( void *io_pArgs )
 {
     IStepError l_stepError;
 
-    #ifndef CONFIG_AXONE_BRING_UP
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_npu_scominit entry");
     if (!INITSERVICE::isSMPWrapConfig())
     {
@@ -76,9 +75,6 @@ void* call_proc_npu_scominit( void *io_pArgs )
                                   HWPF_COMP_ID, TYPE_PROC);
     }
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_npu_scominit exit");
-    #else
-    TRACFCOMP(g_trac_isteps_trace, "Skipping call_proc_npu_scominit in Axone during bringup");
-    #endif
 
     return l_stepError.getErrorHandle();
 }
