@@ -26,9 +26,9 @@
   <!-- ********************************************************************* -->
   <registerFfdc>
     <id>REG_FFDC_PROC_L2_REGISTERS</id>
-    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_FIR_MASK_REG_RW</scomRegister>
+ <!--   <scomRegister>scomt::c::L2_L2MISC_L2CERRS_FIR_MASK_REG_RW</scomRegister>
     <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PRD_PURGE_CMD_REG</scomRegister>
-    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG</scomRegister>
+    <scomRegister>scomt::c::L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG</scomRegister> -->
   </registerFfdc>
   <!-- ********************************************************************* -->
   <hwpError>
