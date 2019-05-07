@@ -40,72 +40,72 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-//
-// base epsilon table values
-//
-
 const uint32_t EPSILON_MIN_VALUE = 0x1;
 const uint32_t EPSILON_MAX_VALUE = 0xFFFFFFFF;
 
 const uint8_t NUM_EPSILON_READ_TIERS = 3;
 const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
-// LE epsilon (2 chips per-group)
-const uint32_t EPSILON_R_T0_LE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_LE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T2_LE[] = {   67,   69,   71,   74,   79,  103 };
-const uint32_t EPSILON_W_T0_LE[] = {    0,    0,    0,    0,    0,    5 };
-const uint32_t EPSILON_W_T1_LE[] = {   15,   16,   17,   19,   21,   33 };
+// Low-end Epsilons (2 chips/group, 1 group)
+const uint32_t EPSILON_R_T0_LE[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_LE[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_LE[] = { 172, 179, 189, 204, 225 };
+const uint32_t EPSILON_W_T0_LE[] = {   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_W_T1_LE[] = {  96,  93,  89,  83,  75 };
 
-// HE epsilon (4 chips per-group)
-const uint32_t EPSILON_R_T0_HE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_HE[] = {   92,   94,   96,   99,  104,  128 };
-const uint32_t EPSILON_R_T2_HE[] = {  209,  210,  213,  216,  221,  245 };
-const uint32_t EPSILON_W_T0_HE[] = {   28,   29,   30,   32,   34,   46 };
-const uint32_t EPSILON_W_T1_HE[] = {  117,  118,  119,  121,  123,  135 };
+// Low-end Epsilons (2 chips/group, 2 groups)
+const uint32_t EPSILON_R_T0_LD[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_LD[] = { 155, 163, 173, 188, 210 };
+const uint32_t EPSILON_R_T2_LD[] = { 298, 311, 329, 353, 390 };
+const uint32_t EPSILON_W_T0_LD[] = {  78,  75,  72,  67,  59 };
+const uint32_t EPSILON_W_T1_LD[] = { 202, 205, 210, 217, 227 };
 
-// HE epsilon (flat 4 Zeppelin)
-const uint32_t EPSILON_R_T0_F4[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_F4[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T2_F4[] = {   83,   84,   87,   90,   95,  119 };
-const uint32_t EPSILON_W_T0_F4[] = {    0,    0,    0,    0,    0,    5 };
-const uint32_t EPSILON_W_T1_F4[] = {   18,   19,   20,   22,   24,   36 };
+// Mid-range Epsilons (4 chips/group, 1 group)
+// @TODO RTC210056 Currently using F8 values; revisit when new values available
+const uint32_t EPSILON_R_T0_MR[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_MR[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_MR[] = { 208, 221, 237, 261, 295 };
+const uint32_t EPSILON_W_T0_MR[] = {   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_W_T1_MR[] = {  93,  92,  91,  89,  87 };
 
-// HE epsilon (flat 8 configuration)
-const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T2_F8[] = {  148,  149,  152,  155,  160,  184 };
-const uint32_t EPSILON_W_T0_F8[] = {    0,    0,    0,    0,    0,    5 };
-const uint32_t EPSILON_W_T1_F8[] = {   76,   77,   78,   80,   82,   94 };
+// Flat-8 Epsilons (8 chips/group, 1 group)
+const uint32_t EPSILON_R_T0_F8[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_F8[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T2_F8[] = { 208, 221, 237, 261, 295 };
+const uint32_t EPSILON_W_T0_F8[] = {   0,   0,   0,   0,   0 };
+const uint32_t EPSILON_W_T1_F8[] = {  93,  92,  91,  89,  87 };
+
+// High-end Epsilons (4 chips/group, 4 groups)
+const uint32_t EPSILON_R_T0_HE[] = {   9,   9,  10,  10,  11 };
+const uint32_t EPSILON_R_T1_HE[] = { 174, 184, 196, 214, 240 };
+const uint32_t EPSILON_R_T2_HE[] = { 328, 344, 365, 395, 440 };
+const uint32_t EPSILON_W_T0_HE[] = {  85,  84,  82,  80,  76 };
+const uint32_t EPSILON_W_T1_HE[] = { 219, 226, 234, 246, 264 };
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
 ///
-/// @brief Utility function to apply positive/negative scaing factor
+/// @brief Utility function to apply positive/negative scaling factor
 ///        to base epsilon value
 ///
 /// @param[in] i_gb_percentage      Scaling factor (e.g. 20% = 20)
-/// @param[in/out] io_target_value  Target epsilon value, after application of
-///                                 scaling factor
-///                                 NOTE: scaling will be clamped to
-///                                 minimum/maximum value
-///
+/// @param[in/out] io_target_value  Input is the current input epsilon value.
+///                                 Output is the adjusted epsilon value after applying
+///                                 scaling factor. Note: Scaling will be clamped to
+///                                 min/max epsilon value if thresholds are exceeded.
 /// @return void.
 ///
 void p10_fbc_eff_config_guardband_epsilon(
-    const uint8_t i_gb_percentage,
+    const int8_t i_gb_percentage,
     uint32_t& io_target_value)
 {
-    FAPI_DBG("Start");
-    uint32_t l_delta =  ((io_target_value * i_gb_percentage) / 100) +
-                        (((io_target_value * i_gb_percentage) % 100) ? (1) : (0));
-
-    // Apply guardband
     if (i_gb_percentage >= 0)
     {
-        // Clamp to maximum value if necessary
+        uint32_t l_delta =  ((io_target_value * i_gb_percentage) / 100) +
+                            (((io_target_value * i_gb_percentage) % 100) ? (1) : (0));
+
         if (l_delta > (EPSILON_MAX_VALUE - io_target_value))
         {
             FAPI_DBG("Guardband application generated out-of-range target value, clamping to maximum value!");
@@ -118,8 +118,10 @@ void p10_fbc_eff_config_guardband_epsilon(
     }
     else
     {
-        // Clamp to minimum value if necessary
-        if (l_delta >= io_target_value)
+        uint32_t l_delta =  ((io_target_value * (-1) * i_gb_percentage) / 100) +
+                            (((io_target_value * (-1) * i_gb_percentage) % 100) ? (1) : (0));
+
+        if (l_delta > (io_target_value - EPSILON_MIN_VALUE))
         {
             FAPI_DBG("Guardband application generated out-of-range target value, clamping to minimum value!");
             io_target_value = EPSILON_MIN_VALUE;
@@ -130,460 +132,325 @@ void p10_fbc_eff_config_guardband_epsilon(
         }
     }
 
-    FAPI_DBG("End");
     return;
 }
 
 ///
-/// @brief Calculate target epsilon settings to apply based on
-///        system configuration
-///
-/// @param[in] i_target              System target
-/// @param[in] i_core_floor_ratio    Fabric/core floor enum
-/// @param[in] i_core_ceiling_ratio  Fabric/core ceiling enum
-/// @param[in] i_freq_fbc            Absolute fabric frequency
-/// @param[in] i_freq_core_ceiling   Absolute core ceiling frequency
-///
+/// @brief Calculate target epsilon settings to apply based on system configuration
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
-    uint8_t i_core_floor_ratio,
-    uint8_t i_core_ceiling_ratio,
-    uint64_t i_freq_fbc,
-    uint64_t i_freq_core_ceiling)
-//const fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type i_core_floor_ratio,
-//const fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type i_core_ceiling_ratio,
-//const fapi2::ATTR_FREQ_PB_MHZ_Type i_freq_fbc,
-//const fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type i_freq_core_ceiling)
+fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(void)
 {
     FAPI_DBG("Start");
 
-    /*
-        // epsilon output attributes
-        uint32_t l_eps_r[NUM_EPSILON_READ_TIERS];
-        uint32_t l_eps_w[NUM_EPSILON_WRITE_TIERS];
-        fapi2::ATTR_PROC_EPS_GB_PERCENTAGE_Type l_eps_gb;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_EPS_GB_PERCENTAGE_Type l_eps_gb;
+    fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_eps_table_type;
+    fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
+    fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO_Type l_freq_ratio;
+    uint32_t l_eps_r[NUM_EPSILON_READ_TIERS];
+    uint32_t l_eps_w[NUM_EPSILON_WRITE_TIERS];
 
-        // fetch epsilon table type/pump mode attributes
-        fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_eps_table_type;
-        fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, FAPI_SYSTEM, l_eps_table_type),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_TABLE_TYPE)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_BROADCAST_MODE)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO, FAPI_SYSTEM, l_freq_ratio),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_CORE_FREQ_RATIO)");
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, i_target, l_eps_table_type),
-                 "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_TABLE_TYPE)");
+    FAPI_DBG("Using epsilons for table type (0x%.2X), broadcast mode (0x%.2X), freq ratio (0x%.2X)",
+             l_eps_table_type, l_broadcast_mode, l_freq_ratio);
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, i_target, l_pump_mode),
-                 "Error from FAPI_ATTR_GET(ATTR_PROC_FABRIC_PUMP_MODE)");
+    // @TODO RTC210056 Update interpretation of epsilon values for P10
+    switch(l_eps_table_type)
+    {
+        case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_LE:
 
-        switch(l_eps_table_type)
-        {
-            case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE:
-
-                if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
-                {
-                    l_eps_r[0] = EPSILON_R_T0_HE[i_core_floor_ratio];
-                    l_eps_r[1] = EPSILON_R_T1_HE[i_core_floor_ratio];
-                    l_eps_r[2] = EPSILON_R_T2_HE[i_core_floor_ratio];
-
-                    l_eps_w[0] = EPSILON_W_T0_HE[i_core_floor_ratio];
-                    l_eps_w[1] = EPSILON_W_T1_HE[i_core_floor_ratio];
-                }
-                else
-                {
-                    l_eps_r[0] = EPSILON_R_T0_F4[i_core_floor_ratio];
-                    l_eps_r[1] = EPSILON_R_T1_F4[i_core_floor_ratio];
-                    l_eps_r[2] = EPSILON_R_T2_F4[i_core_floor_ratio];
-
-                    l_eps_w[0] = EPSILON_W_T0_F4[i_core_floor_ratio];
-                    l_eps_w[1] = EPSILON_W_T1_F4[i_core_floor_ratio];
-                }
-
-                break;
-
-            case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8:
-                l_eps_r[0] = EPSILON_R_T0_F8[i_core_floor_ratio];
-
-                if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
-                {
-                    l_eps_r[1] = EPSILON_R_T1_F8[i_core_floor_ratio];
-                }
-                else
-                {
-                    l_eps_r[1] = EPSILON_R_T0_F8[i_core_floor_ratio];
-                }
-
-                l_eps_r[2] = EPSILON_R_T2_F8[i_core_floor_ratio];
-
-                l_eps_w[0] = EPSILON_W_T0_F8[i_core_floor_ratio];
-                l_eps_w[1] = EPSILON_W_T1_F8[i_core_floor_ratio];
-                break;
-
-            case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_LE:
-                l_eps_r[0] = EPSILON_R_T0_LE[i_core_floor_ratio];
-
-                if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
-                {
-                  l_eps_r[1] = EPSILON_R_T1_LE[i_core_floor_ratio];
-                }
-                else
-                {
-                  l_eps_r[1] = EPSILON_R_T0_LE[i_core_floor_ratio];
-                }
-
-                l_eps_r[2] = EPSILON_R_T2_LE[i_core_floor_ratio];
-
-                l_eps_w[0] = EPSILON_W_T0_LE[i_core_floor_ratio];
-                l_eps_w[1] = EPSILON_W_T1_LE[i_core_floor_ratio];
-                break;
-
-            default:
+            // Low-end with DCMs
+            if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE)
+            {
+                l_eps_r[0] = EPSILON_R_T0_LD[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T1_LD[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_LD[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_LD[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_LD[l_freq_ratio];
+            }
+            // Low-end with SCMs
+            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+            {
+                l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T1_LE[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
+            }
+            // Low-end with SCMs (lab only)
+            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
+            {
+                l_eps_r[0] = EPSILON_R_T0_LE[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T2_LE[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_LE[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_LE[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_LE[l_freq_ratio];
+            }
+            else
+            {
                 FAPI_ASSERT(false,
-                            fapi2::P10_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_TYPE_ERR()
-                            .set_TABLE_TYPE(l_eps_table_type),
-                            "Invalid epsilon table type 0x%.8X", l_eps_table_type);
-                break;
-        }
-
-        // dump base epsilon values
-        FAPI_DBG("Base epsilon values read from table:");
-
-        for (uint32_t ii = 0; ii < NUM_EPSILON_READ_TIERS; ii++)
-        {
-            FAPI_DBG(" R_T[%d] = %d", ii, l_eps_r[ii]);
-        }
-
-        for (uint32_t ii = 0; ii < NUM_EPSILON_WRITE_TIERS; ii++)
-        {
-            FAPI_DBG(" W_T[%d] = %d", ii, l_eps_w[ii]);
-        }
-
-        // set guardband default value to +20%
-        l_eps_gb = +20;
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_GB_PERCENTAGE, i_target, l_eps_gb),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_GB_PERCENTAGE)");
-
-        // get gardband attribute
-        // Note: if a user makes an attribute override with CONST, it would
-        // override the above default value settings. This mechanism is to
-        // allow users to change the default settings for testing.
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_GB_PERCENTAGE, i_target, l_eps_gb),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_EPS_GB_PERCENTAGE)");
-
-        FAPI_DBG("ATTR_PROC_EPS_GB_PERCENTAGE %s%d, ",
-                 (l_eps_gb >= 0) ? ("+") : ("-"), l_eps_gb);
-
-        // scale base epsilon values if core is running 2x nest frequency
-        //if (i_core_ceiling_ratio == fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_8_8)
-        if (0)
-        {
-            FAPI_DBG("Scaling based on ceiling frequency");
-            uint8_t l_scale_percentage =
-                100 *
-                i_freq_core_ceiling /
-                (2 * i_freq_fbc);
-            l_scale_percentage -= 100;
-
-            // scale/apply guardband read epsilons
-            for (uint32_t ii = 0; ii < NUM_EPSILON_READ_TIERS; ii++)
-            {
-                p10_fbc_eff_config_guardband_epsilon(l_scale_percentage, l_eps_r[ii]);
-
+                            fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
+                            .set_TABLE_TYPE(l_eps_table_type)
+                            .set_BROADCAST_MODE(l_broadcast_mode),
+                            "Unsupported broadcast mode for the epsilon table type!");
             }
 
-            // Scale write epsilons
-            for (uint32_t ii = 0; ii < NUM_EPSILON_WRITE_TIERS; ii++)
+            break;
+
+        case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_MR:
+
+            // Mid-range with SCMs
+            if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
             {
-                p10_fbc_eff_config_guardband_epsilon(l_scale_percentage, l_eps_w[ii]);
+                l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T1_MR[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
             }
-        }
+            // Mid-range with SCMs (lab only)
+            else if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_NODE)
+            {
+                l_eps_r[0] = EPSILON_R_T0_MR[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T2_MR[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_MR[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
+            }
+            else // Mid-range with DCMs should use EPS_TYPE_HE instead
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
+                            .set_TABLE_TYPE(l_eps_table_type)
+                            .set_BROADCAST_MODE(l_broadcast_mode),
+                            "Unsupported broadcast mode for the epsilon table type!");
+            }
 
-        // scale based on guardband, and output final values
-        FAPI_DBG("Scaled epsilon values based on %s%d percent guardband:",
-                 (l_eps_gb >= 0) ? ("+") : ("-"),
-                 l_eps_gb);
+            break;
 
-        for (uint32_t ii = 0; ii < NUM_EPSILON_READ_TIERS; ii++)
-        {
-            p10_fbc_eff_config_guardband_epsilon(l_eps_gb, l_eps_r[ii]);
-            FAPI_DBG(" R_T[%d] = %d", ii, l_eps_r[ii]);
-        }
+        case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE:
 
-        for (uint32_t ii = 0; ii < NUM_EPSILON_WRITE_TIERS; ii++)
-        {
-            p10_fbc_eff_config_guardband_epsilon(l_eps_gb, l_eps_w[ii]);
-            FAPI_DBG(" W_T[%d] = %d", ii, l_eps_w[ii]);
-        }
+            // High-end with SCMs, Mid-range with DCMs (lab only)
+            if (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE)
+            {
+                l_eps_r[0] = EPSILON_R_T0_HE[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T1_HE[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_HE[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_HE[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_HE[l_freq_ratio];
+            }
+            // High-end Flat-8, Mid-range with DCMs (lab only)
+            else if(l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)
+            {
+                l_eps_r[0] = EPSILON_R_T0_F8[l_freq_ratio];
+                l_eps_r[1] = EPSILON_R_T1_F8[l_freq_ratio];
+                l_eps_r[2] = EPSILON_R_T2_F8[l_freq_ratio];
+                l_eps_w[0] = EPSILON_W_T0_F8[l_freq_ratio];
+                l_eps_w[1] = EPSILON_W_T1_F8[l_freq_ratio];
+            }
+            else // 1HOP_CHIP_IS_NODE not supported for EPS_TYPE_HE
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR()
+                            .set_TABLE_TYPE(l_eps_table_type)
+                            .set_BROADCAST_MODE(l_broadcast_mode),
+                            "Unsupported broadcast mode for the epsilon table type!");
+            }
 
-        // check relationship of epsilon counters:
-        //   read tier values are strictly increasing
-        //   write tier values are strictly increaing
-        if ((l_eps_r[0] > l_eps_r[1]) ||
-            (l_eps_r[1] > l_eps_r[2]) ||
-            (l_eps_w[0] > l_eps_w[1]))
-        {
+            break;
+
+        default:
             FAPI_ASSERT(false,
-                        fapi2::P10_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_ERR()
-                        .set_TABLE_TYPE(l_eps_table_type)
-                        .set_EPS_GB_PERCENTAGE(l_eps_gb)
-                        .set_PUMP_MODE(l_pump_mode)
-                        .set_R_T0(l_eps_r[0])
-                        .set_R_T1(l_eps_r[1])
-                        .set_R_T2(l_eps_r[2])
-                        .set_W_T0(l_eps_w[0])
-                        .set_W_T1(l_eps_w[1]),
-                        "Invalid relationship between base epsilon values");
-        }
+                        fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_TABLE_TYPE_ERR()
+                        .set_TABLE_TYPE(l_eps_table_type),
+                        "Unsupported epsilon table type specified!");
+            break;
+    }
 
-        // write attributes
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, i_target, l_eps_r[0]),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T0)");
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, i_target, l_eps_r[1]),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T1)");
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, i_target, l_eps_r[2]),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T2)");
+    // dump base epsilon values
+    FAPI_DBG("Base epsilon values read from table:");
 
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, i_target, l_eps_w[0]),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T1)");
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, i_target, l_eps_w[1]),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T2)");
+    for (uint32_t ii = 0; ii < NUM_EPSILON_READ_TIERS; ii++)
+    {
+        FAPI_DBG("  R_T[%d] = %d", ii, l_eps_r[ii]);
+    }
 
-    fapi_try_exit:
-    */
+    for (uint32_t ii = 0; ii < NUM_EPSILON_WRITE_TIERS; ii++)
+    {
+        FAPI_DBG("  W_T[%d] = %d", ii, l_eps_w[ii]);
+    }
+
+    // get gardband attribute to pickup any user adjustments
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_GB_PERCENTAGE, FAPI_SYSTEM, l_eps_gb),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_EPS_GB_PERCENTAGE)");
+
+    // scale based on guardband, and output final values
+    FAPI_DBG("Scaled epsilon values based on %d percent guardband:", l_eps_gb);
+
+    for (uint32_t ii = 0; ii < NUM_EPSILON_READ_TIERS; ii++)
+    {
+        p10_fbc_eff_config_guardband_epsilon(l_eps_gb, l_eps_r[ii]);
+        FAPI_DBG("  R_T[%d] = %d", ii, l_eps_r[ii]);
+    }
+
+    for (uint32_t ii = 0; ii < NUM_EPSILON_WRITE_TIERS; ii++)
+    {
+        p10_fbc_eff_config_guardband_epsilon(l_eps_gb, l_eps_w[ii]);
+        FAPI_DBG("  W_T[%d] = %d", ii, l_eps_w[ii]);
+    }
+
+    // check relationship of epsilon counters:
+    //   read tier values are strictly increasing
+    //   write tier values are strictly increaing
+    FAPI_ASSERT((l_eps_r[0] <= l_eps_r[1]) &&
+                (l_eps_r[1] <= l_eps_r[2]) &&
+                (l_eps_w[0] <= l_eps_w[1]),
+                fapi2::P10_FBC_EFF_CONFIG_EPSILON_INVALID_VALUES_ERR()
+                .set_TABLE_TYPE(l_eps_table_type)
+                .set_EPS_GB_PERCENTAGE(l_eps_gb)
+                .set_BROADCAST_MODE(l_broadcast_mode)
+                .set_R_T0(l_eps_r[0])
+                .set_R_T1(l_eps_r[1])
+                .set_R_T2(l_eps_r[2])
+                .set_W_T0(l_eps_w[0])
+                .set_W_T1(l_eps_w[1]),
+                "Invalid relationship between base epsilon values!");
+
+    // write attributes
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, FAPI_SYSTEM, l_eps_r[0]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T0)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, FAPI_SYSTEM, l_eps_r[1]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, FAPI_SYSTEM, l_eps_r[2]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T2)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, FAPI_SYSTEM, l_eps_w[0]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM, l_eps_w[1]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T2)");
+
+fapi_try_exit:
     FAPI_INF("End");
     return fapi2::current_err;
 }
 
 ///
-/// @brief Process fabric/core frequency attributes and generate
-///        derived attributes to drive fabric configuration
-///
-/// @param[in]     i_target               System target
-/// @param[in/out] io_core_floor_ratio    Fabric/core floor enum
-/// @param[in/out] io_core_ceiling_ratio  Fabric/core ceiling enum
-/// @param[in/out] io_freq_fbc            Absolute fabric frequency
-/// @param[in/out] io_freq_core_ceiling   Absolute core ceiling frequency
-///
+/// @brief Process fabric/core frequency attributes to drive fabric configuration
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_eff_config_process_freq_attributes(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
-    uint8_t io_core_floor_ratio,
-    uint8_t io_core_ceiling_ratio,
-    uint64_t io_freq_fbc,
-    uint64_t io_freq_core_ceiling)
-//fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type& io_core_floor_ratio,
-//fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type& io_core_ceiling_ratio,
-//fapi2::ATTR_FREQ_PB_MHZ_Type& io_freq_fbc,
-//fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type& io_freq_core_ceiling)
+fapi2::ReturnCode p10_fbc_eff_config_freq_attrs(void)
 {
     FAPI_DBG("Start");
 
-    /*
-        uint32_t l_freq_core_floor;
-        uint32_t l_freq_core_nom;
-        uint8_t l_async_safe_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_PERFORMANCE_MODE;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_freq_floor;
+    fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_freq_ceiling;
+    fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO_Type l_freq_ratio;
+    fapi2::ATTR_PROC_FABRIC_ASYNC_MODE_Type l_async_perf_mode = fapi2::ENUM_ATTR_PROC_FABRIC_ASYNC_MODE_PERF_MODE;
 
-         get core floor/nominal/ceiling frequency attributes
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, i_target, l_freq_core_floor),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR_MHZ)");
+    // get core floor/ceiling frequency attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, FAPI_SYSTEM, l_freq_floor),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, FAPI_SYSTEM, l_freq_ceiling),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ)");
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_NOMINAL_MHZ, i_target, l_freq_core_nom),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL_MHZ)");
+    // verify the floor/ceiling frequencies are valid
+    FAPI_ASSERT(l_freq_ceiling >= l_freq_floor,
+                fapi2::P10_FBC_EFF_CONFIG_CORE_FREQ_RANGE_ERR()
+                .set_FREQ_CORE_FLOOR(l_freq_floor)
+                .set_FREQ_CORE_CEILING(l_freq_ceiling),
+                "Invalid core frequency ranges! Floor: 0x%.8X, Ceiling: 0x%.8X",
+                l_freq_floor, l_freq_ceiling);
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, i_target, io_freq_core_ceiling),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING_MHZ)");
+    // determine table index based on core floor/ceiling frequency ratio
+    // breakpoint ratio: floor 4.0, ceiling 4.0 (floor::ceiling ratio = 8/8)
+    if ((8 * l_freq_floor) >= (8 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_8_8;
+    }
+    // breakpoint ratio: floor 3.5, ceiling 4.0 (floor::ceiling ratio = 7/8)
+    else if ((8 * l_freq_floor) >= (7 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_7_8;
+    }
+    // breakpoint ratio: floor 3.0, ceiling 4.0 (floor::ceiling ratio = 6/8)
+    else if ((8 * l_freq_floor) >= (6 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_6_8;
+    }
+    // breakpoint ratio: floor 2.5, ceiling 4.0 (floor::ceiling ratio = 5/8)
+    else if ((8 * l_freq_floor) >= (5 * l_freq_ceiling))
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_5_8;
+    }
+    // breakpoint ratio: floor 2.0, ceiling 4.0 (floor::ceiling ratio = 4/8)
+    else if (8 * l_freq_floor >= 4 * l_freq_ceiling)
+    {
+        l_freq_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FREQ_RATIO_RATIO_4_8;
+    }
+    // Under-range, raise error
+    else
+    {
+        FAPI_ASSERT(false,
+                    fapi2::P10_FBC_EFF_CONFIG_CORE_FREQ_RATIO_ERR()
+                    .set_FREQ_CORE_FLOOR(l_freq_floor)
+                    .set_FREQ_CORE_CEILING(l_freq_ceiling),
+                    "Unsupported core floor/ceiling frequency ratio = (%d/%d)",
+                    l_freq_floor, l_freq_ceiling);
+    }
 
-        // verify the floor/nominal/ceiling frequencies
-        // expect ceiling >= nominal, nominal >= floor
-        FAPI_ASSERT(((io_freq_core_ceiling >= l_freq_core_nom) &&
-                     (l_freq_core_nom >= l_freq_core_floor)),
-                    fapi2::P10_FBC_EFF_CONFIG_CORE_FREQ_RANGE_ERR()
-                    .set_FREQ_CORE_CEILING(io_freq_core_ceiling)
-                    .set_FREQ_CORE_NOM(l_freq_core_nom)
-                    .set_FREQ_CORE_FLOOR(l_freq_core_floor),
-                    "Invalid core frequency ranges: FLOOR: 0x%.8X, NOMINAL: 0x%.8X, CEILING: 0x%.8X",
-                    l_freq_core_floor, l_freq_core_nom, io_freq_core_ceiling);
+    // write attributes
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_CORE_FREQ_RATIO, FAPI_SYSTEM, l_freq_ratio),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_CORE_FREQ_RATIO)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_ASYNC_MODE, FAPI_SYSTEM, l_async_perf_mode),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_ASYNC_MODE)");
 
-        // calculate fabric/core frequency ratio attributes
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, i_target, io_freq_fbc),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_PB_MHZ)");
-
-        // determine table index based on fabric/core floor frequency ratio
-        // breakpoint ratio: core floor 4.0, pb 2.0 (cache floor :: pb = 8/8)
-        if ((l_freq_core_floor) >= (2 * io_freq_fbc))
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_8_8;
-        }
-        // breakpoint ratio: core floor 3.5, pb 2.0 (cache floor :: pb = 7/8)
-        else if ((4 * l_freq_core_floor) >= (7 * io_freq_fbc))
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_7_8;
-        }
-        // breakpoint ratio: core floor 3.0, pb 2.0 (cache floor :: pb = 6/8)
-        else if ((2 * l_freq_core_floor) >= (3 * io_freq_fbc))
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_6_8;
-        }
-        // breakpoint ratio: core floor 2.5, pb 2.0 (cache floor :: pb = 5/8)
-        else if ((4 * l_freq_core_floor) >= (5 * io_freq_fbc))
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_5_8;
-        }
-        // breakpoint ratio: core floor 2.0, pb 2.0 (cache floor :: pb = 4/8)
-        else if (l_freq_core_floor >= io_freq_fbc)
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_4_8;
-        }
-        // breakpoint ratio: core floor 1.0, pb 2.0 (cache floor :: pb = 2/8)
-        else if ((2 * l_freq_core_floor) >= io_freq_fbc)
-        {
-            io_core_floor_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_RATIO_2_8;
-        }
-        // Under-range, raise error
-        else
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P10_FBC_EFF_CONFIG_CORE_FLOOR_FREQ_RATIO_ERR()
-                        .set_FREQ_PB(io_freq_fbc)
-                        .set_FREQ_CORE_FLOOR(l_freq_core_floor)
-                        .set_FREQ_CORE_FLOOR_MIN_SUPPORTED(io_freq_fbc / 2),
-                        "Unsupported core floor/PB frequency ratio = (%d/%d)",
-                        l_freq_core_floor, io_freq_fbc);
-        }
-
-        // determine table index based on fabric/core ceiling frequency ratio
-        // breakpoint ratio: core ceiling 4.0, pb 2.0 (cache ceiling :: pb = 8/8)
-        if ((io_freq_core_ceiling) >= (2 * io_freq_fbc))
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_8_8;
-        }
-        // breakpoint ratio: core ceiling 3.5, pb 2.0 (cache ceiling :: pb = 7/8)
-        else if ((4 * io_freq_core_ceiling) >= (7 * io_freq_fbc))
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_7_8;
-        }
-        // breakpoint ratio: core ceiling 3.0, pb 2.0 (cache ceiling :: pb = 6/8)
-        else if ((2 * io_freq_core_ceiling) >= (3 * io_freq_fbc))
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_6_8;
-        }
-        // breakpoint ratio: core ceiling 2.5, pb 2.0 (cache ceiling :: pb = 5/8)
-        else if ((4 * io_freq_core_ceiling) >= (5 * io_freq_fbc))
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_5_8;
-        }
-        // breakpoint ratio: core ceiling 2.0, pb 2.0 (cache ceiling :: pb = 4/8)
-        else if (io_freq_core_ceiling >= io_freq_fbc)
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_4_8;
-        }
-        // breakpoint ratio: core ceiling 1.0, pb 2.0 (cache ceiling :: pb = 2/8)
-        else if ((2 * io_freq_core_ceiling) >= io_freq_fbc)
-        {
-            io_core_ceiling_ratio = fapi2::ENUM_ATTR_PROC_FABRIC_CORE_CEILING_RATIO_RATIO_2_8;
-        }
-        // Under-range, raise error
-        else
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P10_FBC_EFF_CONFIG_CORE_CEILING_FREQ_RATIO_ERR()
-                        .set_FREQ_PB(io_freq_fbc)
-                        .set_FREQ_CORE_CEILING(io_freq_core_ceiling)
-                        .set_FREQ_CORE_CEILING_MIN_SUPPORTED(io_freq_fbc / 2),
-                        "Unsupported core ceiling/PB frequency ratio = (%d/%d)",
-                        io_freq_core_ceiling, io_freq_fbc);
-        }
-
-        // write attributes
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO, i_target, io_core_floor_ratio),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_CORE_FLOOR_RATIO)");
-
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO, i_target, io_core_ceiling_ratio),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_CORE_CEILING_RATIO)");
-
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE, i_target, l_async_safe_mode),
-                 "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_ASYNC_SAFE_MODE)");
-
-    fapi_try_exit:
-    */
+fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
 
 ///
 /// @brief Reset attributes related to link usage
-///
-/// @param[in] i_target  System target
-///
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p10_fbc_eff_config_reset_attrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target)
+fapi2::ReturnCode p10_fbc_eff_config_reset_attrs(void)
 {
     FAPI_DBG("Start");
 
-    /*
-        fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_inactive = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
 
-        for (auto l_proc_target : i_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    {
+        for (auto l_iohs_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
         {
-            for (auto l_obus_chiplet_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_OBUS>())
-            {
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
-                                       l_obus_chiplet_target,
-                                       l_link_active),
-                         "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE (OBUS)");
-            }
-
-            for (auto l_xbus_chiplet_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_XBUS>())
-            {
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
-                                       l_xbus_chiplet_target,
-                                       l_link_active),
-                         "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE (XBUS)");
-            }
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs_target, l_link_inactive),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
         }
+    }
 
-    fapi_try_exit:
-    */
+fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
 
 /// See doxygen comments in header file
-fapi2::ReturnCode p10_fbc_eff_config()
+fapi2::ReturnCode p10_fbc_eff_config(void)
 {
     FAPI_DBG("Start");
 
-    /*
-        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type l_core_floor_ratio;
-        fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type l_core_ceiling_ratio;
-        fapi2::ATTR_FREQ_PB_MHZ_Type l_freq_fbc;
-        fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_freq_core_ceiling;
+    FAPI_TRY(p10_fbc_eff_config_freq_attrs(), "Error from p10_fbc_eff_config_freq_attrs");
+    FAPI_TRY(p10_fbc_eff_config_calc_epsilons(), "Error from p10_fbc_eff_config_calc_epsilons");
+    FAPI_TRY(p10_fbc_eff_config_reset_attrs(), "Error from p10_fbc_eff_config_reset_attrs");
 
-        FAPI_TRY(p10_fbc_eff_config_process_freq_attributes(
-                     FAPI_SYSTEM,
-                     l_core_floor_ratio,
-                     l_core_ceiling_ratio,
-                     l_freq_fbc,
-                     l_freq_core_ceiling),
-                 "Error from p10_fbc_eff_config_process_freq_attributes");
-
-        FAPI_TRY(p10_fbc_eff_config_calc_epsilons(
-                     FAPI_SYSTEM,
-                     l_core_floor_ratio,
-                     l_core_ceiling_ratio,
-                     l_freq_fbc,
-                     l_freq_core_ceiling),
-                 "Error from p10_fbc_eff_config_calc_epsilons");
-
-        FAPI_TRY(p10_fbc_eff_config_reset_attrs(
-                     FAPI_SYSTEM),
-                 "Error from p10_fbc_eff_config_reset_attrs");
-
-    fapi_try_exit:
-    */
+fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
