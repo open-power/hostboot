@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -156,6 +157,122 @@
 
   <entry>
       <name>ATTR_BACKUP_SEEPROM_SELECT</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+       <name>ATTR_CP_REFCLOCK_SELECT</name>
+       <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_PAU_DPLL_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_FREQ_PAU_MHZ</name>
+      <value>0x00000960</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_CP_FILTER_1_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_CP_FILTER_2_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_CP_FILTER_3_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_FREQ_CORE_BOOT_MHZ</name>
+      <value>0x0</value>
+  </entry>
+
+  <entry>
+      <name>ATTR_CP_FILTER_4_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_NEST_DPLL_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX15_IOHS0_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX16_IOHS1_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX17_IOHS2_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX18_IOHS3_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX19_IOHS4_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX20_IOHS5_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX21_IOHS6_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX22_IOHS7_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX24_PCI0_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_CLOCK_MUX25_PCI1_LCPLL_INPUT</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_SECTOR_BUFFER_STRENGTH</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_MC_PLL</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_IOHS_PLL</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PULSE_MODE_ENABLE</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PULSE_MODE_VALUE</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_IO_TANK_PLL_BYPASS</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PROC_FABRIC_TOPOLOGY_ID</name>
+      <value>0x0</value>
+  </entry>
+  <entry>
+      <name>ATTR_PROC_FABRIC_TOPOLOGY_MODE</name>
       <value>0x0</value>
   </entry>
 </entries>
