@@ -405,18 +405,6 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
                 i_target, i_partType, i_priority,
                 i_deconfigState, i_gardErrorType);
 
-    // Need targeting for nvdimm check
-    if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
-    {
-        // Add procedure callout to replace the cable to the NVDIMM
-        if( (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_DIMM)
-           && ( isNVDIMM(i_target) ) )
-        {
-            addProcedureCallout( HWAS::EPUB_PRC_NVDIMM_ERR,
-                                 HWAS::SRCI_PRIORITY_HIGH );
-        }
-    }
-
     const void* pData = nullptr;
     uint32_t size = 0;
     TARGETING::EntityPath* ep = nullptr;
@@ -598,13 +586,6 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
                 get_huid(i_target), i_priority,
                 i_deconfigState, i_gardErrorType);
         #endif
-
-        // Add procedure callout to replace the cable to the NVDIMM
-        if( isNVDIMM(i_target) )
-        {
-            addProcedureCallout( HWAS::EPUB_PRC_NVDIMM_ERR,
-                                 HWAS::SRCI_PRIORITY_HIGH );
-        }
 
         TARGETING::EntityPath ep;
         TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
