@@ -40,7 +40,7 @@
 #include <lib/dimm/rank.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/mcbist.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <lib/mcbist/memdiags.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/fir/unmask.H>

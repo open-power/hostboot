@@ -40,7 +40,7 @@
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 
 using fapi2::TARGET_TYPE_OCMB_CHIP;
 using fapi2::TARGET_TYPE_SYSTEM;

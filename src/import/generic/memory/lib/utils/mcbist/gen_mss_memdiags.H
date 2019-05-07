@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file memdiags.H
+/// @file gen_mss_memdiags.H
 /// @brief API for memory diagnostics
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
@@ -41,9 +41,9 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
-#include <generic/memory/lib/utils/mcbist/gen_address.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
-#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/conversions.H>

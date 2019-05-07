@@ -33,13 +33,13 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_RANK_H_
-#define _MSS_RANK_H_
+#ifndef _MSS_GENERIC_RANK_H_
+#define _MSS_GENERIC_RANK_H_
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/find.H>
-#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss

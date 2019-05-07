@@ -42,7 +42,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/mc/port.H>

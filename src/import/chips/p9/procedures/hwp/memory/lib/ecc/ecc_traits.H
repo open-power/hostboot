@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,6 +194,26 @@ class eccTraits<fapi2::TARGET_TYPE_MCA>
             SHADOW_RANK = MCA_MSR_RANK,
             SHADOW_RANK_LEN = MCA_MSR_RANK_LEN,
 
+            // Address trap format
+            TRAP_ADDRESS_PORT = 0,
+            TRAP_ADDRESS_PORT_LEN = 2,
+            TRAP_ADDRESS_DIMM = 2,
+            TRAP_ADDRESS_DIMM_LEN = 1,
+            TRAP_ADDRESS_MRANK = 3,
+            TRAP_ADDRESS_MRANK_LEN = 2,
+            TRAP_ADDRESS_SRANK = 5,
+            TRAP_ADDRESS_SRANK_LEN = 3,
+            TRAP_ADDRESS_ROW = 8,
+            TRAP_ADDRESS_ROW_LEN = 18,
+            TRAP_ADDRESS_COL = 26,
+            TRAP_ADDRESS_COL_LEN = 7,
+            TRAP_ADDRESS_BANK = 33,
+            TRAP_ADDRESS_BANK_LEN = 3,
+            TRAP_ADDRESS_BANK_GROUP = 36,
+            TRAP_ADDRESS_BANK_GROUP_LEN = 2,
+
+            TRAP_ADDRESS = 0,
+            TRAP_ADDRESS_LEN = 38
         };
 
         // Symbol to Galois code mapping table
@@ -243,6 +263,8 @@ class eccTraits<fapi2::TARGET_TYPE_MCA>
             11, 10,  9,  8,
             3,  2,  1,  0
         };
+
+
 
 };
 

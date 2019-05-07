@@ -102,8 +102,11 @@ fapi_try_exit:
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
 inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
 {
-    io_data.insertFromRight<TT::NCE_ADDR_TRAP, TT::NCE_ADDR_TRAP_LEN>(uint64_t(i_address));
-    FAPI_INF("set_address: 0x%016lx", uint64_t(i_address));
+    // construct trap_address from mcbist address
+    const auto l_addr = trap_address<>(i_address);
+
+    io_data.insert<TT::NCE_ADDR_TRAP, TT::NCE_ADDR_TRAP_LEN>(uint64_t(l_addr));
+    FAPI_INF("set_address: 0x%016lx", uint64_t(l_addr));
 }
 
 ///
@@ -116,8 +119,9 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
 inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
 {
-    uint64_t l_addr = 0;
-    i_data.extractToRight<TT::NCE_ADDR_TRAP, TT::NCE_ADDR_TRAP_LEN>(l_addr);
+    // construct trap_address from i_data
+    const auto l_addr = trap_address<>(uint64_t(i_data));
+    // construct mcbist::address from trap_address
     o_address = mcbist::address(l_addr);
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
 }

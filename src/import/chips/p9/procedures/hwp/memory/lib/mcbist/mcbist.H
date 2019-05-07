@@ -51,8 +51,8 @@
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
-#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/dump_regs.H>
 #include <lib/workarounds/mcbist_workarounds.H>

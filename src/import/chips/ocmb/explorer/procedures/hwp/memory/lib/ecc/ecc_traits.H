@@ -66,6 +66,28 @@ class eccTraits<fapi2::TARGET_TYPE_MEM_PORT>
         {
             FIRMWARE_MS_ADDRESS = EXPLR_RDF_FWMS0_ADDRESS,
             FIRMWARE_MS_ADDRESS_LEN = EXPLR_RDF_FWMS0_ADDRESS_LEN,
+
+            // Address trap format
+            TRAP_ADDRESS_PORT = 0,
+            TRAP_ADDRESS_PORT_LEN = 0,
+            TRAP_ADDRESS_DIMM = 1,
+            TRAP_ADDRESS_DIMM_LEN = 1,
+            TRAP_ADDRESS_MRANK = 2,
+            TRAP_ADDRESS_MRANK_LEN = 2,
+            TRAP_ADDRESS_SRANK = 4,
+            TRAP_ADDRESS_SRANK_LEN = 3,
+            TRAP_ADDRESS_ROW = 7,
+            TRAP_ADDRESS_ROW_LEN = 18,
+            TRAP_ADDRESS_COL = 25,
+            // MCBIST address only need col(3 to 9) although address trap can provide col(2 to 9)
+            TRAP_ADDRESS_COL_LEN = 7,
+            TRAP_ADDRESS_BANK = 33,
+            TRAP_ADDRESS_BANK_LEN = 3,
+            TRAP_ADDRESS_BANK_GROUP = 36,
+            TRAP_ADDRESS_BANK_GROUP_LEN = 2,
+
+            TRAP_ADDRESS = 0,
+            TRAP_ADDRESS_LEN = 38,
         };
 };
 

@@ -40,7 +40,7 @@
 
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/mcbist/gen_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
@@ -78,7 +78,6 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
 
         // Multi-ports, dimms
         static constexpr mss::states MULTI_PORTS = mss::states::YES;
-        static constexpr mss::states MULTI_DIMMS = mss::states::YES;
 
         // Subtest
         static constexpr size_t SUBTEST_PER_REG = 4;

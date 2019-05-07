@@ -41,7 +41,7 @@
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
-#include <generic/memory/lib/utils/mcbist/gen_address.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 
 
 #endif

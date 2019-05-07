@@ -40,8 +40,8 @@
 
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
-#include <generic/memory/lib/utils/mcbist/gen_patterns.H>
-#include <generic/memory/lib/utils/mcbist/gen_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/num.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
@@ -340,11 +340,7 @@ class subtest_t
         ///
         inline void enable_dimm( const uint64_t i_dimm )
         {
-            if (TT::MULTI_DIMMS == mss::states::YES)
-            {
-                iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
-            }
-
+            iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
             return;
         }
 
@@ -372,10 +368,8 @@ class subtest_t
         ///
         inline uint64_t get_dimm() const
         {
-            if (TT::MULTI_DIMMS == mss::states::YES)
-            {
-                return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
-            }
+
+            return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
 
             return 0;
         }
