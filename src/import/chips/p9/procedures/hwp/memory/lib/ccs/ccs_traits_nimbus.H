@@ -119,7 +119,7 @@ class ccsTraits<mss::mc_type::NIMBUS>
             NTTM_RW_DATA_DLY = MCBIST_CCS_MODEQ_NTTM_RW_DATA_DLY,
             NTTM_RW_DATA_DLY_LEN = MCBIST_CCS_MODEQ_NTTM_RW_DATA_DLY_LEN,
             IDLE_PAT_BANK_2 = MCBIST_CCS_MODEQ_IDLE_PAT_BANK_2,
-            DR_PARITY_ENABLE = MCBIST_CCS_MODEQ_DDR_PARITY_ENABLE,
+            DDR_PARITY_ENABLE = MCBIST_CCS_MODEQ_DDR_PARITY_ENABLE,
             IDLE_PAT_PARITY = MCBIST_CCS_MODEQ_IDLE_PAT_PARITY,
 
             // MCB_CNTRL
@@ -265,6 +265,9 @@ class ccsTraits<mss::mc_type::NIMBUS>
         {
             return fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target);
         }
+
+        // Lab values
+        static constexpr uint64_t LAB_MRS_CMD = 0x000008F000000000;
 };
 
 #endif

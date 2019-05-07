@@ -127,6 +127,13 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
 
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = MCBIST_MCBFD0Q;
+        static constexpr uint64_t PATTERN1_REG = MCBIST_MCBFD1Q;
+        static constexpr uint64_t PATTERN2_REG = MCBIST_MCBFD2Q;
+        static constexpr uint64_t PATTERN3_REG = MCBIST_MCBFD3Q;
+        static constexpr uint64_t PATTERN4_REG = MCBIST_MCBFD4Q;
+        static constexpr uint64_t PATTERN5_REG = MCBIST_MCBFD5Q;
+        static constexpr uint64_t PATTERN6_REG = MCBIST_MCBFD6Q;
+        static constexpr uint64_t PATTERN7_REG = MCBIST_MCBFD7Q;
 
         static constexpr uint64_t DATA_ROTATE_CNFG_REG = MCBIST_MCBDRCRQ;
         static constexpr uint64_t DATA_ROTATE_SEED_REG = MCBIST_MCBDRSRQ;
