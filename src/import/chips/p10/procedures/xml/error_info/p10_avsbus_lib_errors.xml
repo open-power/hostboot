@@ -1,0 +1,246 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_avsbus_lib_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PROCPM_AVSBUS_POLL_TIMEOUT</rc>
+      <description>
+      A timeout occured while polling OCB status register O2SST for o2s_ongoing=0
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+      <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
+      <description>
+      A timeout occured reading/writing voltage from an AVSBus
+      interface
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+      <ffdc>AVSBUS_CMD_TYPE</ffdc>
+      <ffdc>AVSBUS_CMD_GROUP</ffdc>
+      <ffdc>AVSBUS_CMD_DATATYPE</ffdc>
+      <ffdc>AVSBUS_RAILSELECT</ffdc>
+      <ffdc>AVSBUS_CMD_DATA</ffdc>
+      <ffdc>CRC</ffdc>
+      <ffdc>AVSBUS_OP_TYPE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ********************************************************************-->
+    <hwpError>
+      <rc>RC_PROCPM_AVSBUS_IDLEFRAME_TIMEOUT</rc>
+      <description>
+        A timeout occured writing an idle from to an AVSBus interface
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_ZERO_RESP_ERROR</rc>
+      <description>
+        AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>BACKPLANE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_NO_RESP_ERROR</rc>
+      <description>
+        AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>BACKPLANE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_MASTER_BAD_CRC_ERROR</rc>
+      <description>
+        AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>BACKPLANE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_SLAVE_BAD_CRC_ERROR</rc>
+      <description>
+        AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>BACKPLANE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR</rc>
+      <description>
+        AVS command failed. Valid data sent but no action is taken due to unavailable resource.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>VRM</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>BACKPLANE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>CODE</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_INVALID_DATA_ERROR</rc>
+      <description>
+        AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>VRM</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    </hwpError>
+    <!-- ******************************************************************** -->
+</hwpErrors>

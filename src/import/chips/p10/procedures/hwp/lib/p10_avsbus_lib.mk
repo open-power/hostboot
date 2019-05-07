@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 MODULE=p10_avsbus_lib
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/common/pmlib/include/registers)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 #p9_avsbus_lib_PATH+=$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib
 $(call BUILD_MODULE)

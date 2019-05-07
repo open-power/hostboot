@@ -45,9 +45,10 @@ namespace p10avslib
 
 enum avsRails
 {
-    VDD,
-    VDN,
-    VCS
+    AVS_VDD,
+    AVS_VCS,
+    AVS_VDN,
+    AVS_VIO
 };
 
 enum avsBusNum

@@ -36,8 +36,8 @@
 ///
 
 #include <p10_avsbus_lib.H>
-#include <p10_avsbus_registers.H>
-#include <p10_ocb_firmware_registers.h>
+#include <p10_avsbus_scom.H>
+#include <ocb_firmware_registers.h>
 
 //##############################################################################
 // Function which generates a 3 bit CRC value for 29 bit data
@@ -106,7 +106,7 @@ avsInitExtVoltageControl(
     l_data64.insertFromRight<6, 6>(O2SCTRLF_value.fields.o2s_out_count1_an);
     l_data64.insertFromRight<12, 6>(O2SCTRLF_value.fields.o2s_in_delay1_an);
     FAPI_TRY(putScom(i_target,
-                     p10avslib::OCB_O2SCTRLF[i_avsBusNum][i_o2sBridgeNum],
+                     p10avslib::OCB_O2SCTRLF[i_avsBusNum],
                      l_data64));
 
     // Note:  the buffer is a 32bit buffer.  make sure it is left
@@ -124,7 +124,7 @@ avsInitExtVoltageControl(
     l_data64.flush<0>();
     l_data64.insertFromRight<12, 6>(O2SCTRLS_value.fields.o2s_in_count2_an);
     FAPI_TRY(putScom(i_target,
-                     p10avslib::OCB_O2SCTRLS[i_avsBusNum][i_o2sBridgeNum],
+                     p10avslib::OCB_O2SCTRLS[i_avsBusNum],
                      l_data64));
 
     // O2SCTRL1
@@ -149,16 +149,16 @@ avsInitExtVoltageControl(
 
     ocb_o2sctrl10a_t O2SCTRL1_value;
     O2SCTRL1_value.fields.o2s_bridge_enable_an = 1;
-    O2SCTRL1_value.fields.o2s_bridge_enable_bn = 0;
+    O2SCTRL1_value.fields.o2s_bridge_enable_bn = 1;
 
     //Nest frequency attribute in MHz
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_nest_frequency));
 
     // AVSBus frequency attribute in KHz
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AVSBUS_FREQUENCY,
-                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           i_target,
                            l_value));
 
     if (l_value == 0)
@@ -179,34 +179,34 @@ avsInitExtVoltageControl(
 
     O2SCTRL1_value.fields.o2s_clock_divider_an = l_divider;
     O2SCTRL1_value.fields.o2s_nr_of_frames_an = 1;
-    O2SCTRL1_value.fields.o2s_cpol_an = 0;
-    O2SCTRL1_value.fields.o2s_cpha_an = 1; //TBD as per spec it is 0 (both in P9 and P10)
 
     l_data64.flush<0>();
     l_data64.insertFromRight<0, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_an);
     l_data64.insertFromRight<1, 1>(O2SCTRL1_value.fields.o2s_bridge_enable_bn);
-    l_data64.insertFromRight<2, 1>(O2SCTRL1_value.fields.o2s_cpol_an);
-    l_data64.insertFromRight<3, 1>(O2SCTRL1_value.fields.o2s_cpha_an);
     l_data64.insertFromRight<4, 10>(O2SCTRL1_value.fields.o2s_clock_divider_an);
     l_data64.insertFromRight<17, 1>(O2SCTRL1_value.fields.o2s_nr_of_frames_an);
     FAPI_TRY(putScom(i_target,
-                     p10avslib::OCB_O2SCTRL1[i_avsBusNum][i_o2sBridgeNum],
+                     p10avslib::OCB_O2SCTRL1[i_avsBusNum],
                      l_data64));
 
     // O2SCTRL2
     // OCC O2S Control2
-    // [ 0:16] o2s_inter_frame_delay = filled in with ATTR l_data64
-    // Needs to be 10us or greater for SPIVID part operation
-    // Set to ~16us for conservatism using a 100ns hang pulse
-    // 16us = 16000ns -> 16000/100 = 160 = 0xA0;  aligned to 0:16 -> 0x005
+    // [ 0:15] o2s_inter_frame_delay
+    // Delay between two frames of a two command set as measured from the end of
+    // the last bit of the first frame until the chip select of the second frame
+    // is  asserted.
+    // Delay is computed as: (value * SPI clock)
+    // 0x00000: Wait 1 SPI Clock
+    // 0x00001 - 0x1FFFF: value = number of ~SPI Clocks
+    // Max. delay at the fastest SPI clock is 1.3ms.
     ocb_o2sctrl20a_t O2SCTRL2_value;
     O2SCTRL2_value.fields.o2s_inter_frame_delay_an = 0x0;
 
     l_data64.flush<0>();
-    l_data64.insertFromRight<0, 17>
+    l_data64.insertFromRight<0, 16>
     (O2SCTRL2_value.fields.o2s_inter_frame_delay_an);
     FAPI_TRY(putScom(i_target,
-                     p10avslib::OCB_O2SCTRL2[i_avsBusNum][i_o2sBridgeNum],
+                     p10avslib::OCB_O2SCTRL2[i_avsBusNum],
                      l_data64));
 
 fapi_try_exit:

@@ -2724,19 +2724,21 @@ typedef union ocb_o2sctrl10a
 #ifdef _BIG_ENDIAN
         uint32_t o2s_bridge_enable_an : 1;
         uint32_t o2s_bridge_enable_bn : 1;
-        uint32_t o2s_cpol_an : 1;
-        uint32_t o2s_cpha_an : 1;
+        uint32_t o2sctrl1an_reserved_2_3 : 2;
         uint32_t o2s_clock_divider_an : 10;
         uint32_t o2sctrl1an_reserved_14_16 : 3;
         uint32_t o2s_nr_of_frames_an : 1;
-        uint32_t reserved1 : 14;
+        uint32_t o2sctrl1an_reserved_18_19 : 2;
+        uint32_t o2s_slv_data_delay : 7;
+        uint32_t reserved1 : 5;
 #else
-        uint32_t reserved1 : 14;
+        uint32_t reserved1 : 5;
+        uint32_t o2s_slv_data_delay : 7;
+        uint32_t o2sctrl1an_reserved_18_19 : 2;
         uint32_t o2s_nr_of_frames_an : 1;
         uint32_t o2sctrl1an_reserved_14_16 : 3;
         uint32_t o2s_clock_divider_an : 10;
-        uint32_t o2s_cpha_an : 1;
-        uint32_t o2s_cpol_an : 1;
+        uint32_t o2sctrl1an_reserved_2_3 : 2;
         uint32_t o2s_bridge_enable_bn: 1;
         uint32_t o2s_bridge_enable_an : 1;
 #endif // _BIG_ENDIAN
@@ -2752,11 +2754,11 @@ typedef union ocb_o2sctrl20a
     struct
     {
 #ifdef _BIG_ENDIAN
-        uint32_t o2s_inter_frame_delay_an : 17;
-        uint32_t reserved1 : 15;
+        uint32_t o2s_inter_frame_delay_an : 16;
+        uint32_t reserved1 : 16;
 #else
-        uint32_t reserved1 : 15;
-        uint32_t o2s_inter_frame_delay_an : 17;
+        uint32_t reserved1 : 16;
+        uint32_t o2s_inter_frame_delay_an : 16;
 #endif // _BIG_ENDIAN
     } fields;
 } ocb_o2sctrl20a_t;
