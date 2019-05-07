@@ -79,9 +79,33 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide minimum frequency of the core mesh clock, in MHz.
+    This is the lowest floor frequency across all chips in the system.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The system-wide maximum frequency of the core mesh clock, in MHz.
+    This is the highest ceiling frequency across all chips in the system.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_CORE_BOOT_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Core boot frequency at 1:1 from Nest DPLL</description>
+  <description>
+    Core boot frequency at 1:1 from Nest DPLL
+  </description>
   <valueType>uint32</valueType>
   <platInit/>
 </attribute>
@@ -89,7 +113,9 @@
 <attribute>
   <id>ATTR_FREQ_CORE_BOOT_MULT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Core boot frequency multiplier</description>
+  <description>
+    Core boot frequency multiplier
+  </description>
   <valueType>uint16</valueType>
   <writeable/>
   <platInit/>
