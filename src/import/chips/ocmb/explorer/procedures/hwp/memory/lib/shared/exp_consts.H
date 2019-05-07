@@ -147,6 +147,7 @@ enum ffdc_codes
     SET_MRAM_SUPPORT = 0x1049,
     SET_3DS_HEIGHT = 0x1050,
     SET_SPD_CL_SUPPORTED = 0x1051,
+    SET_SERDES_FREQ = 0x1052,
 };
 
 ///

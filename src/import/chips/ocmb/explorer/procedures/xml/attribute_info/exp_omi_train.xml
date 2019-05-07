@@ -44,7 +44,8 @@
         <valueType>uint8</valueType>
         <enum>
             NORMAL_MODE = 0,
-            MANUFACTURING_MODE = 1
+            MANUFACTURING_MODE = 1,
+            PRODUCT_QUALIFICATION_MODE = 2
         </enum>
         <initToZero/>
         <platInit/>
@@ -106,20 +107,20 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_OCMB_EXP_BOOT_CONFIG_BOOT_MODE</id>
+        <id>ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DFE_DISABLE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-            Indicates the full boot or step-by-step boot
+            Set to disable DFE
         </description>
         <valueType>uint8</valueType>
         <enum>
-            FULL_BOOT = 0,
-            STEP_BY_STEP_BOOT = 1
+            DEFAULT = 0,
+            DISABLED = 1
         </enum>
         <initToZero/>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_boot_mode</mssAccessorName>
+        <mssAccessorName>ocmb_exp_boot_config_dfe_disable</mssAccessorName>
     </attribute>
 
      <attribute>
