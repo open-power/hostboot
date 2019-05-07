@@ -443,14 +443,52 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_ASYNC_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Configuration for fabric asynchronous boundary crossings that exist
+    between the fabric and the MC/PAU/IOHS units.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    PERF_MODE = 0x0,
+    SAFE_MODE = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_CORE_FREQ_RATIO</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor core floor/ceiling frequency ratio used for epsilon calculations.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    RATIO_8_8 = 0x0,
+    RATIO_7_8 = 0x1,
+    RATIO_6_8 = 0x2,
+    RATIO_5_8 = 0x3,
+    RATIO_4_8 = 0x4
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_EPS_GB_PERCENTAGE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Guardband percentage to apply to baseline epsilon calculations
-    Set by p10_fbc_eff_config.
+    Guardband percentage to apply to baseline epsilon calculations.
+    A positive value can be provided to add additional guardband, or a
+    negative value can be provided to reduce the guardband.
+
+    Note that base epsilon table values have a 20% guardband by default,
+    therefore, setting this attribute to -16 (for -16% guardband) will
+    provide epsilon values with approximately 0% guardband.
   </description>
   <valueType>int8</valueType>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -464,8 +502,8 @@
   <valueType>uint8</valueType>
   <enum>
     EPS_TYPE_LE = 0x01,
-    EPS_TYPE_HE = 0x02,
-    EPS_TYPE_HE_F8 = 0x03
+    EPS_TYPE_MR = 0x02,
+    EPS_TYPE_HE = 0x03
   </enum>
   <platInit/>
 </attribute>
