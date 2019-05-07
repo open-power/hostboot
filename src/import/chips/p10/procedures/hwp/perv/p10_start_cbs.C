@@ -61,6 +61,9 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     FAPI_INF("p10_start_cbs: Entering ...");
 
+    FAPI_DBG("Clearing  Selfboot message register before every boot ");
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_MSG_FSI, 0));
+
     FAPI_DBG("Configuring Prevent SBE start option");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
