@@ -767,7 +767,7 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
     // As such, let's run the nvdimm with rank median vref value so later on we can just load
     // the vref in 1 ccs sequence.
     if ((l_hybrid[0] ==  fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID) &&
-        (l_hybrid_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM) && !iv_wr_vref)
+        (l_hybrid_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM) && iv_wr_vref)
     {
         FAPI_TRY(mss::workarounds::wr_vref::nvdimm_workaround(i_target, i_rp, i_abort_on_error));
 

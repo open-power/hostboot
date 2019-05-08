@@ -883,6 +883,29 @@ inline instruction_t self_refresh_exit_command( const uint64_t i_rank, const uin
     return instruction_t(i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
+///
+/// @brief Setup refresh command instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @param[in] i_idle the idle time to the next command (default to 0)
+/// @return the self-refresh entry command CCS instruction
+/// @note THIS IS FOR DDR4 NON-LRDIMM ONLY RIGHT NOW
+///
+inline instruction_t refresh_command( const uint64_t i_rank, const uint16_t i_idle = 0 )
+{
+    using TT = ccsTraits<DEFAULT_MC_TYPE>;
+
+    // Refresh is self-refresh entry with CKE high
+    auto l_refresh_template = self_refresh_entry_command(i_rank, i_idle);
+
+    // CKE is high
+    l_refresh_template.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+
+    return l_refresh_template;
+}
+
 //
 // These functions are a little sugar to keep callers from doing the traits-dance to get the
 // appropriate bit field

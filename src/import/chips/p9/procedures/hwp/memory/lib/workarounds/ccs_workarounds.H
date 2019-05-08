@@ -164,6 +164,24 @@ namespace nvdimm
 {
 
 ///
+/// @brief add_refreshes() helper
+/// @param[in] i_target The MCA target where the program will be executed on
+/// @param[in,out] i_program the MCBIST ccs program to append the refreshes
+/// @return FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode add_refreshes_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       mss::ccs::program& io_program);
+
+///
+/// @brief Adds refreshes at the beginning and end of the program
+/// @param[in] i_target The MCA target where the program will be executed on
+/// @param[in,out] io_program the MCBIST ccs program to add the refreshes
+/// @return FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode add_refreshes(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                mss::ccs::program& io_program);
+
+///
 /// @brief Execute a set of CCS instructions
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the vector of instructions

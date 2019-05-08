@@ -123,6 +123,7 @@ class mcTraits<fapi2::TARGET_TYPE_MCA>
             EMERGENCY_M = MCA_MBA_FARB4Q_EMERGENCY_M,
             EMERGENCY_M_LEN = MCA_MBA_FARB4Q_EMERGENCY_M_LEN,
             CFG_STR_ENABLE = MCA_MBASTR0Q_CFG_STR_ENABLE,
+            CFG_STR_STATE = MCA_MBA_FARB6Q_CFG_STR_STATE,
 
             MIN_DOMAIN_REDUCTION_ENABLE = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE,
             MIN_MAX_DOMAINS_ENABLE = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE,
@@ -189,6 +190,43 @@ enum
 
 namespace mc
 {
+///
+/// @brief Reads the contents of the FARB6Q
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode read_farb6q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    o_data = 0;
+
+    FAPI_TRY( mss::getScom(i_target, TT::FARB6Q, o_data ), "%s failed to read FARB6Q regiser", mss::c_str(i_target));
+    FAPI_DBG("%s FARB6Q has data 0x%016lx", mss::c_str(i_target), o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the contents of the FARB6Q
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::FARB6Q, i_data ), "%s failed to write FARB6Q regiser", mss::c_str(i_target));
+    FAPI_DBG("%s FARB6Q has data 0x%016lx", mss::c_str(i_target), i_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Reads the contents of the MBARPC0
@@ -404,6 +442,20 @@ inline void get_enter_self_time_refresh_time( const fapi2::buffer<uint64_t>& i_d
 {
     o_value = i_data.extractToRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>();
     FAPI_DBG("get_enter_self_time_refresh_time %d", o_value);
+}
+
+///
+/// @brief Gets the port self time refresh state
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the current STR state of the given port
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_self_time_refresh_state( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::CFG_STR_STATE>() ? mss::states::ON : mss::states::OFF;
+    FAPI_DBG("get_self_time_refresh_state to %d", o_state);
 }
 
 ///
