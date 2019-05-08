@@ -281,7 +281,7 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
 // Avoid linker errors with the template.
 template class MemCeTable<TYPE_MCA>;
 template class MemCeTable<TYPE_MBA>;
-template class MemCeTable<TYPE_MEM_PORT>;
+template class MemCeTable<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------
 

@@ -947,11 +947,11 @@ int32_t mssGetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
 }
 
 template<>
-int32_t mssGetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
-                                       const MemRank & i_rank,
-                                       MemSymbol & o_port0Spare,
-                                       MemSymbol & o_port1Spare,
-                                       MemSymbol & o_eccSpare )
+int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+                                        const MemRank & i_rank,
+                                        MemSymbol & o_port0Spare,
+                                        MemSymbol & o_port1Spare,
+                                        MemSymbol & o_eccSpare )
 {
     int32_t o_rc = SUCCESS;
 

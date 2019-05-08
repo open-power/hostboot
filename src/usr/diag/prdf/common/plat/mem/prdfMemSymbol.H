@@ -95,7 +95,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a Galois field.
-     * @param  i_trgt   MBA, MCA, or MEM_PORT target.
+     * @param  i_trgt   MBA, MCA, or OCMB_CHIP target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_galois The Galois field.
      * @param  i_mask   The bit mask.
@@ -122,7 +122,7 @@ class MemSymbol
     MemRank getRank() const { return iv_rank; };
 
     /** @return The port select for this symbol. Only relevant on MBA. Will
-     *          always return 0 for MCA and MEM_PORT. */
+     *          always return 0 for MCA and OCMB. */
     uint8_t getPortSlct() const;
 
     /** @return The DRAM index for this symbol. */

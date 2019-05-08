@@ -209,7 +209,7 @@ void getMnfgMemCeTh<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
                                uint32_t & o_cePerDimm );
 
 template
-void getMnfgMemCeTh<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+void getMnfgMemCeTh<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     const MemRank & i_rank, uint32_t & o_cePerDram, uint32_t & o_cePerRank,
     uint32_t & o_cePerDimm );
 
