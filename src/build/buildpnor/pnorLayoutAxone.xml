@@ -280,10 +280,10 @@ Layout Description
         <preserved/>
     </section>
     <section>
-        <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
+        <description>Open CAPI Memory Buffer (OCMB) Firmware (1164K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
         <physicalOffset>0x3C0C000</physicalOffset>
-        <physicalRegionSize>0x4B000</physicalRegionSize>
+        <physicalRegionSize>0x123000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <readOnly/>
@@ -292,7 +292,7 @@ Layout Description
     <section>
         <description>HDAT Data (16K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalOffset>0x3C57000</physicalOffset>
+        <physicalOffset>0x3D2F000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -301,7 +301,7 @@ Layout Description
     <section>
         <description>Eeprom Cache(512K)</description>
         <eyeCatch>EECACHE</eyeCatch>
-        <physicalOffset>0x3C5B000</physicalOffset>
+        <physicalOffset>0x3D33000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
