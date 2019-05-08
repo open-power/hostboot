@@ -87,20 +87,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    Processor fabric topology ID based on memory availability. If the
-    master chip has memory then EFF_TOPOLOGY_ID = TOPOLOGY_ID, if not
-    then the first socket with a memory behind it will swap topology
-    IDs with the master chip to form EFF_TOPOLOGY_ID. All else remains
-    the same.
-  </description>
-  <valueType>uint8</valueType>
-  <platInit/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
