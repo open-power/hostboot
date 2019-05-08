@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 
 #include <prdfCenMbaDataBundle.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfOcmbDataBundle.H>
+#include <prdfTargetServices.H>
 
 namespace PRDF
 {
@@ -62,6 +64,16 @@ uint32_t addCeTableEntry<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
 }
 
 template<> inline
+uint32_t addCeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                                     const MemAddr & i_addr,
+                                                     const MemSymbol & i_symbol,
+                                                     bool i_isHard )
+{
+    return getOcmbDataBundle(i_chip)->iv_ceTable.addEntry( i_addr, i_symbol,
+                                                           i_isHard );
+}
+
+template<> inline
 uint32_t addCeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                                const MemAddr & i_addr,
                                                const MemSymbol & i_symbol,
@@ -88,6 +100,14 @@ void addUeTableEntry<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
                                            const MemAddr & i_addr )
 {
     getMcaDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
+}
+
+template<> inline
+void addUeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                                 UE_TABLE::Type i_type,
+                                                 const MemAddr & i_addr )
+{
+    getOcmbDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
 }
 
 template<> inline
@@ -118,6 +138,14 @@ void resetEccFfdc<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
 }
 
 template<> inline
+void resetEccFfdc<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                              const MemRank & i_rank,
+                                              AddrRangeType i_type )
+{
+    getOcmbDataBundle(i_chip)->iv_ceTable.deactivateRank( i_rank, i_type );
+}
+
+template<> inline
 void resetEccFfdc<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank,
                                         AddrRangeType i_type )
@@ -134,7 +162,7 @@ void resetEccFfdc<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
 
 /**
  * @brief  Generic wrapper to push a TdEntry to the Targeted Diagnostics queue.
- * @param  i_chip  MCA or MBA.
+ * @param  i_chip  MCA, MBA, or MEM_PORT.
  * @param  i_entry The new TdEntry.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
@@ -153,6 +181,13 @@ void pushToQueue<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                        TdEntry * i_entry )
 {
     getMbaDataBundle(i_chip)->getTdCtlr()->pushToQueue( i_entry );
+}
+
+template<> inline
+void pushToQueue<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                             TdEntry * i_entry )
+{
+    getOcmbDataBundle(i_chip)->getTdCtlr()->pushToQueue( i_entry );
 }
 
 #endif // Hostboot IPL/Runtime
@@ -176,6 +211,13 @@ template<> inline
 MemIplCeStats<TARGETING::TYPE_MCA> * getIplCeStats( ExtensibleChip * i_chip )
 {
     return getMcaDataBundle(i_chip)->getIplCeStats();
+}
+
+template<> inline
+MemIplCeStats<TARGETING::TYPE_OCMB_CHIP> * getIplCeStats(
+    ExtensibleChip * i_chip )
+{
+    return getOcmbDataBundle(i_chip)->getIplCeStats();
 }
 
 template<> inline
@@ -211,6 +253,13 @@ uint32_t handleTdEvent<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
 }
 
 template<> inline
+uint32_t handleTdEvent<TARGETING::TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
+                                                  STEP_CODE_DATA_STRUCT & io_sc)
+{
+    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleTdEvent( io_sc );
+}
+
+template<> inline
 uint32_t handleTdEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                              STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -241,6 +290,27 @@ void banTps<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
 {
     getMbaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
 }
+
+template<> inline
+void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank )
+{
+    // Ban TPS on this rank.
+    getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
+    // Permanently mask mainline NCEs and TCEs because of the TPS ban.
+    getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
+}
+
+template<> inline
+void banTps<TARGETING::TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank )
+{
+    // Call banTps for the parent OCMB
+    ExtensibleChip * ocmbChip = PlatServices::getConnectedParent( i_chip,
+                                                    TARGETING::TYPE_OCMB_CHIP );
+    banTps<TARGETING::TYPE_OCMB_CHIP>( ocmbChip, i_rank );
+}
+
 
 #endif // Hostboot Runtime only
 

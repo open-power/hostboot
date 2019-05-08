@@ -110,6 +110,69 @@ uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+template<>
+uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank,
+                                       MemMark & o_mark )
+{
+    #define PRDF_FUNC "[readChipMark<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 207389
+    o_mark = MemMark(); // ensure invalid
+
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    o_rc = hwms->ForceRead(); // always read latest
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    else
+    {
+        // HWMSx[0:7] contains the Galois field
+        uint8_t galois = hwms->GetBitFieldJustified(0,8);
+
+        // If the Galois field is zero, do nothing and use the default
+        // constructor for o_mark
+        if (0 != galois)
+        {
+            // get the target
+            TargetHandle_t trgt = i_chip->getTrgt();
+
+            // get the MemMark
+            o_mark = MemMark(trgt, i_rank, galois);
+        }
+    }
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t readChipMark<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                      const MemRank & i_rank,
+                                      MemMark & o_mark )
+{
+    #define PRDF_FUNC "[readChipMark<TYPE_MEM_PORT>] "
+
+    uint32_t o_rc = SUCCESS;
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    // TODO RTC 207389
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 //------------------------------------------------------------------------------
 
 template<>
@@ -188,6 +251,41 @@ uint32_t clearChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t clearChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[clearChipMark<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 207389
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    // Clear the entire HWMSx register.
+    hwms->clearAllBits();
+
+    o_rc = hwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
                                    const MemRank & i_rank, MemMark & o_mark )
 {
@@ -241,6 +339,88 @@ uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
             o_mark = MemMark(trgt, i_rank, galois);
         }
     }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank,
+                                         MemMark & o_mark )
+{
+    #define PRDF_FUNC "[readSymbolMark<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 207389
+    o_mark = MemMark(); // ensure invalid
+
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    o_rc = fwms->ForceRead(); // always read latest
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    else
+    {
+        // FWMSx[0:7] contains the Galois field
+        uint8_t galois = fwms->GetBitFieldJustified(0,8);
+
+        // If the Galois field is zero, do nothing and use the default
+        // constructor for o_mark
+        if (0 != galois)
+        {
+            // check other fields for accuracy - assert on failure
+
+            // FWMSx[8] should be 1 to indicate a symbol mark.
+            PRDF_ASSERT( fwms->IsBitSet(8) );
+
+            // FWMSx[9:11] should be 0b101 to indicate master rank.
+            PRDF_ASSERT( 0x5 == fwms->GetBitFieldJustified(9,3) );
+
+            // FWMSx[12:14] is the master rank and should match the register
+            //              number.
+            PRDF_ASSERT( i_rank.getMaster() ==
+                         fwms->GetBitFieldJustified(12,3) );
+
+            // FWMSx[15:22] should be all zeros
+            PRDF_ASSERT( 0x0 == fwms->GetBitFieldJustified(15,8) );
+
+            // get the target
+            TargetHandle_t trgt = i_chip->getTrgt();
+
+            // get the MemMark
+            o_mark = MemMark(trgt, i_rank, galois);
+        }
+    }
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t readSymbolMark<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank,
+                                        MemMark & o_mark )
+{
+    #define PRDF_FUNC "[readSymbolMark<TYPE_MEM_PORT>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    // TODO RTC 207389
 
     return o_rc;
 
@@ -343,6 +523,41 @@ uint32_t clearSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
         PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
                   msName, i_chip->getHuid() );
     }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[clearSymbolMark<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 207389
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    // Clear the entire FWMSx register.
+    fwms->clearAllBits();
+
+    o_rc = fwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+    */
 
     return o_rc;
 
@@ -1136,6 +1351,121 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+template<>
+uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                             const MemRank & i_rank,
+                                             STEP_CODE_DATA_STRUCT & io_sc,
+                                             const MemMark & i_chipMark,
+                                             const MemMark & i_symMark,
+                                             TdEntry * & o_dsdEvent,
+                                             bool & o_allRepairsUsed )
+{
+    #define PRDF_FUNC "[__applyRasPolicies<TYPE_OCMB_CHIP>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 207389
+    do
+    {
+        const uint8_t ps   = i_chipMark.getSymbol().getPortSlct();
+        const uint8_t dram = i_chipMark.getSymbol().getDram();
+
+        const bool isX4 = isDramWidthX4( i_chip->getTrgt() );
+
+        // Determine if DRAM sparing is enabled.
+        bool isEnabled = false;
+        o_rc = isDramSparingEnabled<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
+                                               isEnabled );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isDramSparingEnabled() failed." );
+            break;
+        }
+
+        if ( isEnabled )
+        {
+            // Sparing is enabled. Get the current spares in hardware.
+            MemSymbol sp0, sp1, ecc;
+            o_rc = mssGetSteerMux<TARGETING::TYPE_MBA>( i_chip->getTrgt(),
+                                                        i_rank, sp0, sp1, ecc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
+                          i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            // Add the spares to the callout list if they exist.
+            __addCallout( i_chip, i_rank, sp0, io_sc );
+            __addCallout( i_chip, i_rank, sp1, io_sc );
+            __addCallout( i_chip, i_rank, ecc, io_sc );
+
+            // Add the row repairs to the callout list if they exist
+            o_rc = __addRowRepairCallout<TARGETING::TYPE_MBA>( i_chip, i_rank,
+                                                               io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__addRowRepairCallout(0x%08x,0x%02x) "
+                          "failed.", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            // If the chip mark is on a spare then the spare is bad and hardware
+            // can not steer it to another DRAM even if one is available (e.g.
+            // the ECC spare). In this this case, make error log predictive.
+            if ( ( (0 == ps) && sp0.isValid() && (dram == sp0.getDram()) ) ||
+                 ( (1 == ps) && sp1.isValid() && (dram == sp1.getDram()) ) ||
+                 ( isX4      && ecc.isValid() && (dram == ecc.getDram()) ) )
+            {
+                o_allRepairsUsed = true;
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                                                  PRDFSIG_VcmBadSpare );
+                break; // Nothing more to do.
+            }
+
+            // Certain DIMMs may have had spares intentially made unavailable by
+            // the manufacturer. Check the VPD for available spares.
+            bool spAvail, eccAvail;
+            o_rc = isSpareAvailable<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
+                                               spAvail, eccAvail );
+            if ( spAvail )
+            {
+                // A spare DRAM is available.
+                o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
+                                                     i_chipMark };
+            }
+            else if ( eccAvail )
+            {
+                // The ECC spare is available.
+                o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
+                                                     i_chipMark, true };
+            }
+            else
+            {
+                // Chip mark is in place and sparing is not possible.
+                o_allRepairsUsed = true;
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                                                  PRDFSIG_AllDramRepairs );
+            }
+        }
+        // There is no DRAM sparing so simply check if both the chip and symbol
+        // mark have been used.
+        else if ( i_chipMark.isValid() && i_symMark.isValid() )
+        {
+            o_allRepairsUsed = true;
+            io_sc.service_data->setSignature( i_chip->getHuid(),
+                                              PRDFSIG_AllDramRepairs );
+        }
+
+    } while (0);
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
@@ -1290,7 +1620,16 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // Set the chip mark in the DRAM Repairs VPD.
         if ( !areDramRepairsDisabled() )
         {
-            o_rc = setDramInVpd( i_chip, i_rank, chipMark.getSymbol() );
+            if ( TYPE_OCMB_CHIP == i_chip->getType() )
+            {
+                ExtensibleChip * memPort = getConnectedChild( i_chip,
+                    TYPE_MEM_PORT, chipMark.getSymbol().getPortSlct() );
+                o_rc = setDramInVpd( memPort, i_rank, chipMark.getSymbol() );
+            }
+            else
+            {
+                o_rc = setDramInVpd( i_chip, i_rank, chipMark.getSymbol() );
+            }
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
@@ -1314,6 +1653,10 @@ template
 uint32_t chipMarkCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
                                     STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t chipMarkCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          STEP_CODE_DATA_STRUCT & io_sc );
 
 #endif // not supported on FSP
 

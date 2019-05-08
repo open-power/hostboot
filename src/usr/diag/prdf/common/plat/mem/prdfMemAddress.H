@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -226,13 +226,14 @@ uint32_t getMemMaintEndAddr( ExtensibleChip * i_chip, MemAddr & o_addr );
  *  - if there are more than one configured ports behind the MCBIST.
  *  - if all configured ports have the same geometry.
  *
- * @note   Only supported for MCBIST.
- * @param  i_mcbChip An MCBIST chip.
- * @param  o_mcaList A list of all MCAs targeted by the command.
+ * @note   Only supported for MCBIST/OCMB.
+ * @param  i_mcbChip An MCBIST/OCMB chip.
+ * @param  o_portList A list of all MCAs/MEM_PORTs targeted by the command.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+template<TARGETING::TYPE T>
 uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
-                             std::vector<ExtensibleChip *> & o_mcaList );
+                             ExtensibleChipList & o_portList );
 
 #endif
 

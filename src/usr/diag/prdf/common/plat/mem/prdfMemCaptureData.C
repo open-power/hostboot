@@ -39,6 +39,7 @@
 #include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfOcmbDataBundle.H>
 #include <prdfMemRowRepair.H>
 
 
@@ -171,7 +172,6 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
         if( CEN_VPD_DIMM_SPARE_NO_SPARE != spareConfig )
             data.header.isSpareDram = true;
-
 
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
@@ -459,6 +459,33 @@ void captureIueCounts<McaDataBundle*>( TARGETING::TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<>
+void captureIueCounts<OcmbDataBundle*>( TARGETING::TargetHandle_t i_trgt,
+                                        OcmbDataBundle * i_db,
+                                        CaptureData & io_cd )
+{
+    #ifdef __HOSTBOOT_MODULE
+
+    uint8_t sz_capData = i_db->iv_iueTh.size()*2;
+    uint8_t capData[sz_capData] = {};
+    uint8_t idx = 0;
+
+    for ( auto & th_pair : i_db->iv_iueTh )
+    {
+        capData[idx]   = th_pair.first;
+        capData[idx+1] = th_pair.second.getCount();
+        idx += 2;
+    }
+
+    // Add data to capture data.
+    BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
+    io_cd.Add( i_trgt, Util::hashString("IUE_COUNTS"), bs );
+
+    #endif
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -494,6 +521,45 @@ void addEccData<TYPE_MCBIST>( ExtensibleChip * i_chip,
     // Add data for each connected MCA.
     ExtensibleChipList list = getConnected( i_chip, TYPE_MCA );
     for ( auto & mcaChip : list ) { addEccData<TYPE_MCA>(mcaChip, io_sc); }
+}
+
+template<>
+void addEccData<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+    TargetHandle_t trgt = i_chip->getTrgt();
+    ExtensibleChip * ocmb = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
+    OcmbDataBundle * db = getOcmbDataBundle( ocmb );
+
+    // Add DRAM repairs data from hardware.
+    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmb->getTrgt(), cd );
+
+    // Add DRAM repairs data from VPD.
+    captureDramRepairsVpd<TYPE_MEM_PORT>( trgt, cd );
+
+    // Add IUE counts to capture data.
+    captureIueCounts<OcmbDataBundle*>( ocmb->getTrgt(), db, cd );
+
+    // Add CE table to capture data.
+    db->iv_ceTable.addCapData( cd );
+
+    // Add UE table to capture data.
+    db->iv_ueTable.addCapData( cd );
+}
+
+template<>
+void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    // Add data for each connected MEM_PORT.
+    ExtensibleChipList list = getConnected( i_chip, TYPE_MEM_PORT );
+    for ( auto & port : list ) { addEccData<TYPE_MEM_PORT>(port, io_sc); }
 }
 
 template<>

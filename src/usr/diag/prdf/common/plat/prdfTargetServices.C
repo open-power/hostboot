@@ -1626,6 +1626,18 @@ void getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
     __getMasterRanks<TYPE_MEM_PORT>( i_trgt, o_ranks, 0, i_ds );
 }
 
+template<>
+void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                     std::vector<MemRank> & o_ranks,
+                                     uint8_t i_ds )
+{
+    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+    // will be supported in the future. Updates will need to be made here so we
+    // can get the relevant port.
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    __getMasterRanks<TYPE_MEM_PORT>( memPort, o_ranks, 0, i_ds );
+}
+
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>

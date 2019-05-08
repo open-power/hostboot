@@ -107,6 +107,36 @@ void __recaptureRegs<TYPE_MCBIST>( STEP_CODE_DATA_STRUCT & io_sc,
 }
 
 template<>
+void __recaptureRegs<TYPE_OCMB_CHIP>( STEP_CODE_DATA_STRUCT & io_sc,
+                                   ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[__recaptureRegs<TYPE_OCMB_CHIP>] "
+
+    RegDataCache & cache = RegDataCache::getCachedRegisters();
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+    // refresh and recapture the ocmb registers
+    const char * ocmbRegs[] =
+    {
+        "MCBISTFIR", "RDFFIR", "MBSEC0", "MBSEC1", "OCMB_MBSSYMEC0",
+        "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2", "OCMB_MBSSYMEC3",
+        "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5", "OCMB_MBSSYMEC6",
+        "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
+    };
+
+    for ( uint32_t i = 0; i < sizeof(ocmbRegs)/sizeof(char*); i++ )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg =
+            i_chip->getRegister( ocmbRegs[i] );
+        cache.flush( i_chip, reg );
+    }
+
+    i_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_ocmb") );
+
+    #undef PRDF_FUNC
+}
+
+template<>
 void __recaptureRegs<TYPE_MBA>( STEP_CODE_DATA_STRUCT & io_sc,
                                 ExtensibleChip * i_chip )
 {
@@ -358,8 +388,9 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
         uint32_t count = symData.size();
         switch ( T )
         {
-            case TYPE_MCA: PRDF_ASSERT( 1 <= count && count <= 2 ); break;
-            case TYPE_MBA: PRDF_ASSERT( 1 == count               ); break;
+            case TYPE_MCA:       PRDF_ASSERT( 1 <= count && count <= 2 ); break;
+            case TYPE_MBA:       PRDF_ASSERT( 1 == count               ); break;
+            case TYPE_OCMB_CHIP: PRDF_ASSERT( 1 <= count && count <= 2 ); break;
             default: PRDF_ASSERT( false );
         }
 
@@ -405,6 +436,14 @@ uint32_t __handleSoftInterCeEte<TYPE_MCA>( ExtensibleChip * i_chip,
                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
     return __handleNceEte<TYPE_MCA>( i_chip, i_addr, io_sc );
+}
+
+template<>
+uint32_t __handleSoftInterCeEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                                 const MemAddr & i_addr,
+                                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    return __handleNceEte<TYPE_OCMB_CHIP>( i_chip, i_addr, io_sc );
 }
 
 template<>
@@ -465,6 +504,52 @@ uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip,
         io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
                                               PRDFSIG_MaintIUE );
         o_rc = MemEcc::handleMemIue<TYPE_MCA>( i_chip, i_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t __handleRceEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank,
+                                         bool & o_errorsFound,
+                                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[__handleRceEte] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Should only get this attention in MNFG mode.
+    PRDF_ASSERT( mfgMode() );
+
+    do
+    {
+        // The RCE ETE attention could be from IUE, IMPE, or IRCD. Need to check
+        // RDFFIR[37] to determine if there was at least one IUE.
+        SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister( "RDFFIR" );
+        o_rc = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on RDFFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+        if ( !fir->IsBitSet(37) ) break; // nothing else to do
+
+        // Handle the IUE.
+        o_errorsFound = true;
+        io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
+                                              PRDFSIG_MaintIUE );
+        o_rc = MemEcc::handleMemIue<TYPE_OCMB_CHIP>( i_chip, i_rank, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
@@ -698,6 +783,11 @@ template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                     const MemAddr & i_addr,
+                                     bool & o_errorsFound,
+                                     STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -776,6 +866,76 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::unmaskEccAttns()
             PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_AND" );
             break;
         }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::maskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::maskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister( "RDFFIR_MASK_OR" );
+
+    mask->clearAllBits();
+    mask->SetBit(8); // Mainline read NCE
+    mask->SetBit(9); // Mainline read TCE
+
+    o_rc = mask->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR" );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Memory CEs were masked at the beginning of the TD procedure, so
+    // clear and unmask them. Also, it is possible that memory UEs have
+    // thresholded so clear and unmask them as well.
+
+    SCAN_COMM_REGISTER_CLASS * fir  = iv_chip->getRegister( "RDFFIR_AND" );
+    SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister( "RDFFIR_MASK_AND" );
+
+    fir->setAllBits(); mask->setAllBits();
+
+    // Do not unmask NCE and TCE attentions if they have been permanently
+    // masked due to certain TPS conditions.
+    if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+    {
+        fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
+        fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE
+    }
+    fir->ClearBit(14); mask->ClearBit(14); // Mainline read UE
+
+    o_rc = fir->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_AND" );
+    }
+
+    o_rc = mask->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_AND" );
     }
 
     return o_rc;
@@ -887,6 +1047,21 @@ SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MCA>( ExtensibleChip * i_chip )
 }
 
 template<>
+SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_OCMB_CHIP>(
+                                                ExtensibleChip * i_chip )
+{
+    return i_chip->getRegister( "RDFFIR_AND" );
+}
+
+template<>
+SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MEM_PORT>(
+                                                ExtensibleChip * i_chip )
+{
+    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
+    return ocmbChip->getRegister( "RDFFIR_AND" );
+}
+
+template<>
 SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
 {
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
@@ -969,6 +1144,85 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
     #undef PRDF_FUNC
 }
 
+template <>
+uint32_t __findChipMarks<TYPE_MEM_PORT>(
+    TdRankList<TYPE_OCMB_CHIP> & i_rankList )
+{
+    #define PRDF_FUNC "[__findChipMarks] "
+
+    uint32_t o_rc = SUCCESS;
+
+    for ( auto & entry : i_rankList.getList() )
+    {
+        ExtensibleChip * memPort = entry.getChip();
+        MemRank          rank = entry.getRank();
+
+        ExtensibleChip * ocmb = getConnectedParent( memPort, TYPE_OCMB_CHIP );
+
+        // Call readChipMark to get MemMark.
+        MemMark chipMark;
+        o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( ocmb, rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
+                      ocmb->getHuid(), rank.getKey() );
+            break;
+        }
+
+        if ( !chipMark.isValid() ) continue; // no chip mark present
+
+        // Get the DQ Bitmap data.
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap( memPort->getTrgt(), rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
+                      memPort->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // Check if the chip mark is verified or not.
+        bool cmVerified = false;
+        o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed on 0x%08x "
+                      "0x%02x", memPort->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // If the chip mark is unverified, add a VcmEvent to the TD queue.
+        if ( !cmVerified )
+        {
+            // Chip mark is not present in VPD. Add it to queue.
+            TdEntry * e = new VcmEvent<TYPE_OCMB_CHIP>{ ocmb, rank, chipMark };
+            MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( ocmb, e );
+
+            // We will want to clear the MPE attention for the unverified chip
+            // mark so we don't get any redundant attentions for chip marks that
+            // are already in the queue. This is reset/reload safe because
+            // initialize() will be called again and we can redetect the
+            // unverified chip marks.
+            SCAN_COMM_REGISTER_CLASS* reg =__getEccFirAnd<TYPE_OCMB_CHIP>(ocmb);
+            reg->setAllBits();
+            reg->ClearBit(  0 + rank.getMaster() ); // fetch
+            reg->ClearBit( 20 + rank.getMaster() ); // scrub
+            o_rc = reg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on ECC FIR AND: 0x%08x",
+                          ocmb->getHuid() );
+                break;
+            }
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+
 template<>
 uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
 {
@@ -991,6 +1245,45 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
 
         // Find all unverified chip marks.
         o_rc = __findChipMarks<TYPE_MCA>( iv_rankList );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // At this point, the TD controller is initialized.
+        iv_initialized = true;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::initialize] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( iv_initialized ) break; // nothing to do
+
+        // Unmask the fetch attentions just in case there were masked during a
+        // TD procedure prior to a reset/reload.
+        o_rc = unmaskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+            break;
+        }
+
+        // Find all unverified chip marks.
+        o_rc = __findChipMarks<TYPE_MEM_PORT>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1147,6 +1440,119 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::handleRrFo()
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MCBIST>(0x%08x) "
+                              "failed", iv_chip->getHuid() );
+                }
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check if maintenance command complete attention is set.
+        SCAN_COMM_REGISTER_CLASS * mcbistfir =
+                                iv_chip->getRegister("MCBISTFIR");
+        o_rc = mcbistfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR");
+            break;
+        }
+
+        // If there is a command complete attention, nothing to do, break out.
+        if ( mcbistfir->IsBitSet(10) )
+            break;
+
+
+        // Check if a command is not running.
+        // If bit 0 of MCB_CNTLSTAT is on, a mcbist run is in progress.
+        SCAN_COMM_REGISTER_CLASS * mcb_cntlstat =
+            iv_chip->getRegister("MCB_CNTLSTAT");
+        o_rc = mcb_cntlstat->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCB_CNTLSTAT" );
+            break;
+        }
+
+        // If a command is not running, set command complete attn, break.
+        if ( !mcb_cntlstat->IsBitSet(0) )
+        {
+            SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
+                iv_chip->getRegister("MCBISTFIR_OR");
+            mcbistfir_or->SetBit( 10 );
+
+            mcbistfir_or->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCBISTFIR_OR" );
+            }
+            break;
+        }
+
+        // Check if there are unverified chip marks.
+        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
+
+        for ( auto & entry : vectorList )
+        {
+            ExtensibleChip * memPortChip = entry.getChip();
+            MemRank rank = entry.getRank();
+
+            // Get the chip mark
+            MemMark chipMark;
+            o_rc = MarkStore::readChipMark<TYPE_MEM_PORT>( memPortChip, rank,
+                                                           chipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MEM_PORT>(0x%08x,%d) "
+                          "failed", memPortChip->getHuid(), rank.getMaster() );
+                break;
+            }
+
+            if ( !chipMark.isValid() ) continue; // no chip mark present
+
+            // Get the DQ Bitmap data.
+            TargetHandle_t memPortTrgt = memPortChip->GetChipHandle();
+            MemDqBitmap dqBitmap;
+
+            o_rc = getBadDqBitmap( memPortTrgt, rank, dqBitmap );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
+                          getHuid(memPortTrgt), rank.getMaster() );
+                break;
+            }
+
+            // Check if the chip mark is verified or not.
+            bool cmVerified = false;
+            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark failed." );
+                break;
+            }
+
+            // If there are any unverified chip marks, stop the command, break.
+            if ( !cmVerified )
+            {
+                o_rc = stopBgScrub<TYPE_OCMB_CHIP>( iv_chip );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_OCMB_CHIP>(0x%08x) "
                               "failed", iv_chip->getHuid() );
                 }
                 break;
@@ -1327,6 +1733,44 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
 }
 
 template<>
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume )
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_canResume = false;
+
+    // It is possible that we were running a TD procedure and the PRD service
+    // was reset. Therefore, we must check if background scrubbing was actually
+    // configured. There really is not a good way of doing this. A scrub command
+    // is a scrub command the only difference is the speed. Unfortunately, that
+    // speed can change depending on how the hardware team tunes it. For now, we
+    // can use the stop conditions, which should be unique for background scrub,
+    // to determine if it has been configured.
+
+    SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( "MBSTR" );
+    o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on MBSTR: iv_chip=0x%08x",
+                  iv_chip->getHuid() );
+    }
+    else if ( 0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
+              0xf != reg->GetBitFieldJustified(4,4) && // NCE soft TH
+              0xf != reg->GetBitFieldJustified(8,4) && // NCE hard TH
+              reg->IsBitSet(34)                     && // pause on MPE
+              reg->IsBitSet(35)                     )  // pause on UE
+    {
+        o_canResume = true;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
 uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume )
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::canResumeBgScrub] "
@@ -1365,6 +1809,7 @@ uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume )
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_MBA>;
+template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------
 

@@ -137,6 +137,61 @@ uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 }
 
 template<>
+uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                      const MemAddr & i_addr,
+                                      UE_TABLE::Type i_type,
+                                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::handleMemUe<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 208211
+    do
+    {
+        // First check to see if this is a side-effect UE.
+        SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister("DDRPHYFIR");
+        o_rc = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on DDRPHYFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Check DDRPHYFIR[54:55,57:59] to determine if this is a side-effect.
+        if ( 0 != (fir->GetBitFieldJustified(54,6) & 0x37) )
+        {
+            // This is a side-effect. Callout the MCA.
+            PRDF_TRAC( PRDF_FUNC "Memory UE is side-effect of DDRPHY error" );
+            io_sc.service_data->SetCallout( i_chip->getTrgt() );
+            io_sc.service_data->setServiceCall();
+        }
+        else
+        {
+            // Handle the memory UE.
+            o_rc = __handleMemUe<TYPE_MCA>( i_chip, i_addr, i_type, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
+                          i_chip->getHuid(), i_type );
+                break;
+            }
+        }
+
+    } while (0);
+    */
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
 uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                                 UE_TABLE::Type i_type,
                                 STEP_CODE_DATA_STRUCT & io_sc )
@@ -493,6 +548,11 @@ template
 uint32_t handleMpe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                               UE_TABLE::Type i_type,
                               STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t handleMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                    const MemAddr & i_addr,
+                                    UE_TABLE::Type i_type,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -581,6 +641,10 @@ template
 uint32_t analyzeFetchMpe<TYPE_MBA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
                                     STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -794,6 +858,9 @@ uint32_t analyzeFetchNceTce<TYPE_MCA>( ExtensibleChip * i_chip,
 template
 uint32_t analyzeFetchNceTce<TYPE_MBA>( ExtensibleChip * i_chip,
                                        STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchNceTce<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                             STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -949,6 +1016,94 @@ uint32_t handleMemIue<TYPE_MCA>( ExtensibleChip * i_chip,
     } while (0);
 
     #endif // __HOSTBOOT_MODULE
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank,
+                                       STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::handleMemIue] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
+    /* TODO RTC 208211
+
+    // Add the DIMM to the callout list.
+    MemoryMru mm { i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK };
+    io_sc.service_data->SetCallout( mm );
+
+    #ifdef __HOSTBOOT_MODULE
+
+    do
+    {
+        // Nothing else to do if handling a system checkstop.
+        if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) break;
+
+        // Get the data bundle from chip.
+        McaDataBundle * db = getMcaDataBundle( i_chip );
+
+        // If we have already caused a port fail, mask the IUE bits.
+        if ( true == db->iv_iuePortFail )
+        {
+            SCAN_COMM_REGISTER_CLASS * mask_or =
+                i_chip->getRegister("MCAECCFIR_MASK_OR");
+
+            mask_or->SetBit(17);
+            mask_or->SetBit(37);
+
+            o_rc = mask_or->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x",
+                          i_chip->getHuid() );
+                break;
+            }
+        }
+
+        // Get the DIMM select.
+        uint8_t ds = i_rank.getDimmSlct();
+
+        // Initialize threshold if it doesn't exist yet.
+        if ( 0 == db->iv_iueTh.count(ds) )
+        {
+            db->iv_iueTh[ds] = TimeBasedThreshold( getIueTh() );
+        }
+
+        // Increment the count and check if at threshold.
+        if ( db->iv_iueTh[ds].inc(io_sc) )
+        {
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+
+            // The port fail will be triggered in the PostAnalysis plugin after
+            // the error log has been committed.
+
+            // Mask off the entire port to avoid collateral.
+            o_rc = MemEcc::maskMemPort<TYPE_MCA>( i_chip );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort(0x%08x) failed",
+                          i_chip->getHuid() );
+                break;
+            }
+        }
+
+    } while (0);
+
+    #endif // __HOSTBOOT_MODULE
+
+    */
 
     return o_rc;
 

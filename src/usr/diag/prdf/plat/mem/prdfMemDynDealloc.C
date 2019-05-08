@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -474,6 +474,104 @@ int32_t __getPortAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
 }
 
 template <>
+int32_t __getPortAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                       uint64_t & o_addr )
+{
+    int32_t o_rc = SUCCESS;
+
+    o_addr = 0;
+    // TODO RTC 198756
+    // Local vars for address fields
+    uint64_t col   = reverseBits(i_addr.getCol(),  7);   // C9 C8 C7 C6 C5 C4 C3
+    uint64_t row   = reverseBits(i_addr.getRow(), 18);   // R17 R16 R15 .. R1 R0
+    uint64_t bnk   = i_addr.getBank();                   //     BG0 BG1 B0 B1 B2
+    uint64_t srnk  = i_addr.getRank().getSlave();        //             S0 S1 S2
+    uint64_t mrnk  = i_addr.getRank().getRankSlct();     //                M0 M1
+    uint64_t dslct = i_addr.getRank().getDimmSlct();     //                    D
+
+    // Determine if a two DIMM config is used. Also, determine how many
+    // mrank (M0-M1), srnk (S0-S2), or extra row (R17-R15) bits are used.
+    bool twoDimmConfig;
+    uint8_t mrnkBits, srnkBits, extraRowBits;
+    o_rc = __getAddrConfig( i_chip, dslct, twoDimmConfig, mrnkBits, srnkBits,
+                            extraRowBits );
+    if ( SUCCESS != o_rc ) return o_rc;
+
+    // Mask off the non-configured bits. If this address came from hardware,
+    // this would not be a problem. However, the get_mrank_range() and
+    // get_srank_range() HWPS got lazy just set the entire fields and did not
+    // take into account the actual bit ranges.
+    mrnk = __maskBits( mrnk, mrnkBits );
+    srnk = __maskBits( srnk, srnkBits );
+    row  = __maskBits( row,  15 + extraRowBits );
+
+    // Combine master and slave ranks.
+    uint64_t rnk     = (mrnk << srnkBits) | srnk;
+    uint8_t  rnkBits = mrnkBits + srnkBits;
+
+    // Now split the DIMM select and combined rank into components.
+    uint64_t rnk_pt1     = 0, rnk_pt2     = 0, rnk_pt3     = 0;
+    uint8_t  rnkBits_pt1 = 0, rnkBits_pt2 = 0, rnkBits_pt3 = 0;
+
+    if ( 0 == rnkBits )
+    {
+        if ( twoDimmConfig ) // The DIMM select goes into part 3.
+        {
+            rnk_pt3 = dslct; rnkBits_pt3 = 1;
+        }
+    }
+    else // At least one master or slave.
+    {
+        // Put the LSB of the combined rank in part 3 and the rest in part 2.
+        rnk_pt3 = rnk & 0x1; rnkBits_pt3 = 1;
+        rnk_pt2 = rnk >> 1;  rnkBits_pt2 = rnkBits - 1;
+
+        if ( twoDimmConfig ) // The DIMM select goes into part 1.
+        {
+            rnk_pt1 = dslct; rnkBits_pt1 = 1;
+        }
+    }
+
+    // Split the row into its components.
+    uint64_t r17_r15 = (row & 0x38000) >> 15;
+    uint64_t r14     = (row & 0x04000) >> 14;
+    uint64_t r13     = (row & 0x02000) >> 13;
+    uint64_t r12_r0  = (row & 0x01fff);
+
+    // Split the column into its components.
+    uint64_t c9_c4 = (col & 0x7e) >> 1;
+    uint64_t c3    = (col & 0x01);
+
+    // Split the bank into its components.
+    uint64_t b0      = (bnk & 0x10) >> 4;
+    uint64_t b1      = (bnk & 0x08) >> 3;
+    // NOTE: B2 is not supported on Nimbus.
+    uint64_t bg0_bg1 = (bnk & 0x03);
+
+    // Now start building the flexible part of the address (bits 0-7,23-33).
+    o_addr = (o_addr << rnkBits_pt1 ) | rnk_pt1;
+    o_addr = (o_addr << extraRowBits) | r17_r15;
+    o_addr = (o_addr << rnkBits_pt2 ) | rnk_pt2;
+    o_addr = (o_addr << 6           ) | c9_c4;
+    o_addr = (o_addr << 1           ) | b0;
+    o_addr = (o_addr << rnkBits_pt3 ) | rnk_pt3;
+    o_addr = (o_addr << 1           ) | b1;
+    o_addr = (o_addr << 2           ) | bg0_bg1;
+    o_addr = (o_addr << 1           ) | c3;
+
+    // C2 is in bit 34, but the Nimbus physical address does not contain a C2.
+    // It will be set to 0 for now. Also, bits 35-39 are the rest of the cache
+    // line address, which we do not need. So, that will be set to 0 as well.
+    o_addr <<= 6;
+
+    // Finally, insert R14,R12-R0,R13 into bits 8-22.
+    o_addr  = ((o_addr & 0xfffffe0000ull) << 15) | (o_addr & 0x000001ffffull);
+    o_addr |= ((r14 << 14) | (r12_r0 << 1) | r13) << 17;
+
+    return o_rc;
+}
+
+template <>
 int32_t __getPortAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
                                  uint64_t & o_addr )
 {
@@ -582,6 +680,22 @@ void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
     o_mcfgp  = mcs_chip->getRegister("MCFGP");
     o_mcfgpm = mcs_chip->getRegister("MCFGPM");
 
+}
+
+template<>
+void __getGrpPrms<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t o_portPos,
+                                   SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
+                                   SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
+{
+    PRDF_ERR( "__getGrpPrms: Function not supported yet" );
+    /* TODO RTC 198756
+    // Get the connected MCS chip and MCA target position.
+    ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
+    o_portPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+
+    o_mcfgp  = mcs_chip->getRegister("MCFGP");
+    o_mcfgpm = mcs_chip->getRegister("MCFGPM");
+    */
 }
 
 template<>
@@ -975,6 +1089,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
 }
 template int32_t page<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr );
 template int32_t page<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr );
+template int32_t page<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemAddr i_addr);
 
 //------------------------------------------------------------------------------
 

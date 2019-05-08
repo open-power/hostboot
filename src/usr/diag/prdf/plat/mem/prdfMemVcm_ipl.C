@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,12 @@ bool __iueCheck( uint32_t i_eccAttns );
 
 template<> inline
 bool __iueCheck<TYPE_MCA>( uint32_t i_eccAttns )
+{
+    return ( 0 != (i_eccAttns & MAINT_IUE) );
+}
+
+template<> inline
+bool __iueCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
 {
     return ( 0 != (i_eccAttns & MAINT_IUE) );
 }
@@ -218,6 +224,7 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
 // Avoid linker errors with the template.
 template class VcmEvent<TYPE_MCA>;
 template class VcmEvent<TYPE_MBA>;
+template class VcmEvent<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF
 
