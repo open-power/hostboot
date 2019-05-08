@@ -87,9 +87,9 @@ uint8_t symbol2Dq<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2Dq<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+uint8_t symbol2Dq<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
-    // MEM_PORT case is identical to MCA
+    // OCMB_CHIP case is identical to MCA
     return symbol2Dq<TARGETING::TYPE_MCA>(i_symbol);
 }
 
@@ -122,10 +122,12 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2PortSlct<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+uint8_t symbol2PortSlct<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
-    // Port select does not exist on MEM_PORT. Always return 0 so that code will
-    // continue to work.
+    // TODO RTC 210072 - Explorer only has one port, as such we can just
+    // return 0. However, multiple ports will be supported in the future,
+    // We'll need to figure out how to convert the symbol to a port select for
+    // OCMB at that time.
     return 0;
 }
 
@@ -218,9 +220,9 @@ uint8_t nibble2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x4Dram )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t nibble2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_x4Dram )
+uint8_t nibble2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x4Dram )
 {
-    // MEM_PORT case is identical to MCA
+    // OCMB_CHIP case is identical to MCA
     return nibble2Symbol<TARGETING::TYPE_MCA>(i_x4Dram);
 }
 
@@ -258,9 +260,9 @@ uint8_t byte2Symbol<TARGETING::TYPE_MCA>( uint8_t i_x8Dram )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t byte2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_x8Dram )
+uint8_t byte2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_x8Dram )
 {
-    // MEM_PORT case is identical to MCA
+    // OCMB_CHIP case is identical to MCA
     return byte2Symbol<TARGETING::TYPE_MCA>(i_x8Dram);
 }
 
@@ -286,9 +288,9 @@ uint8_t symbol2Nibble<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2Nibble<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+uint8_t symbol2Nibble<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
-    // MEM_PORT case is identical to MCA
+    // OCMB_CHIP case is identical to MCA
     return symbol2Nibble<TARGETING::TYPE_MCA>(i_symbol);
 }
 
@@ -314,9 +316,9 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<>
-uint8_t symbol2Byte<TARGETING::TYPE_MEM_PORT>( uint8_t i_symbol )
+uint8_t symbol2Byte<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 {
-    // MEM_PORT case is identical to MCA
+    // OCMB_CHIP case is identical to MCA
     return symbol2Byte<TARGETING::TYPE_MCA>(i_symbol);
 }
 

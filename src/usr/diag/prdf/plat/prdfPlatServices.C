@@ -696,13 +696,13 @@ bool isRowRepairEnabled<TYPE_MCA>( ExtensibleChip * i_chip,
 }
 
 template<>
-bool isRowRepairEnabled<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank )
+bool isRowRepairEnabled<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[PlatServices::isRowRepairEnabled<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[PlatServices::isRowRepairEnabled<TYPE_OCMB_CHIP>] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     bool o_isEnabled = false;
 

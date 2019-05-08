@@ -53,7 +53,7 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) ||
                  TYPE_MCA == getTargetType(i_trgt) ||
-                 TYPE_MEM_PORT == getTargetType(i_trgt) );
+                 TYPE_OCMB_CHIP == getTargetType(i_trgt) );
     // Allowing an invalid symbol. Use isValid() to check validity.
     PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
 }
@@ -83,9 +83,9 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
         if ( 0 != (i_mask & 0xaa) ) pins |= EVEN_SYMBOL_DQ;
         if ( 0 != (i_mask & 0x55) ) pins |= ODD_SYMBOL_DQ;
     }
-    else if ( TYPE_MCA == trgtType || TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_MCA == trgtType || TYPE_OCMB_CHIP == trgtType )
     {
-        // 1 pin for MCA/MEM_PORT.
+        // 1 pin for MCA/TYPE_OCMB_CHIP.
         if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
     }
     else
@@ -112,9 +112,9 @@ uint8_t MemSymbol::getDq() const
     {
         dq = symbol2Dq<TYPE_MCA>( iv_symbol );
     }
-    else if ( TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_OCMB_CHIP == trgtType )
     {
-        dq = symbol2Dq<TYPE_MEM_PORT>( iv_symbol );
+        dq = symbol2Dq<TYPE_OCMB_CHIP>( iv_symbol );
     }
     else
     {
@@ -140,9 +140,9 @@ uint8_t MemSymbol::getPortSlct() const
     {
         portSlct = symbol2PortSlct<TYPE_MCA>( iv_symbol );
     }
-    else if ( TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_OCMB_CHIP == trgtType )
     {
-        portSlct = symbol2PortSlct<TYPE_MEM_PORT>( iv_symbol );
+        portSlct = symbol2PortSlct<TYPE_OCMB_CHIP>( iv_symbol );
     }
     else
     {
@@ -171,10 +171,10 @@ uint8_t MemSymbol::getDram() const
         dram = isX4 ? symbol2Nibble<TYPE_MCA>( iv_symbol )
                     : symbol2Byte  <TYPE_MCA>( iv_symbol );
     }
-    else if ( TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_OCMB_CHIP == trgtType )
     {
-        dram = isX4 ? symbol2Nibble<TYPE_MEM_PORT>( iv_symbol )
-                    : symbol2Byte  <TYPE_MEM_PORT>( iv_symbol );
+        dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( iv_symbol )
+                    : symbol2Byte  <TYPE_OCMB_CHIP>( iv_symbol );
     }
     else
     {
@@ -241,7 +241,7 @@ uint8_t MemSymbol::getDramPins() const
         dps = MBA_DQS_PER_SYMBOL;
         spd = isX4 ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE;
     }
-    else if ( TYPE_MCA == trgtType || TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_MCA == trgtType || TYPE_OCMB_CHIP == trgtType )
     {
         dps = MEM_DQS_PER_SYMBOL;
         spd = isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
@@ -274,10 +274,10 @@ uint8_t MemSymbol::getDramSymbol() const
         dramSymbol = isX4 ? nibble2Symbol<TYPE_MCA>( dram )
                           : byte2Symbol  <TYPE_MCA>( dram );
     }
-    else if ( TYPE_MEM_PORT == trgtType )
+    else if ( TYPE_OCMB_CHIP == trgtType )
     {
-        dramSymbol = isX4 ? nibble2Symbol<TYPE_MEM_PORT>( dram )
-                          : byte2Symbol  <TYPE_MEM_PORT>( dram );
+        dramSymbol = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( dram )
+                          : byte2Symbol  <TYPE_OCMB_CHIP>( dram );
     }
     else
     {
@@ -435,16 +435,16 @@ uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t getMemReadSymbol<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank,
-                                          MemSymbol & o_sym1,
-                                          MemSymbol & o_sym2 )
+uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                           const MemRank & i_rank,
+                                           MemSymbol & o_sym1,
+                                           MemSymbol & o_sym2 )
 {
-    #define PRDF_FUNC "[getMemReadSymbol<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[getMemReadSymbol<TYPE_OCMB_CHIP>] "
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -453,14 +453,12 @@ uint32_t getMemReadSymbol<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
     do
     {
         // Get the NCE/TCE galois and mask from hardware.
-        ExtensibleChip * ocmbChip = getConnectedParent(i_chip, TYPE_OCMB_CHIP);
-
-        SCAN_COMM_REGISTER_CLASS * reg = ocmbChip->getRegister("MBSEVR0");
+        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("MBSEVR0");
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on MBSEVR0: "
-                      "ocmbChip=0x%08x", ocmbChip->getHuid() );
+                      "i_chip=0x%08x", i_chip->getHuid() );
             break;
         }
 
@@ -480,8 +478,8 @@ uint32_t getMemReadSymbol<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
                                         tceGalois, tceMask );
 
         MemSymbol sp0, sp1, ecc;
-        o_rc = mssGetSteerMux<TYPE_MEM_PORT>( i_chip->getTrgt(), i_rank,
-                                              sp0, sp1, ecc );
+        o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(), i_rank,
+                                               sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "

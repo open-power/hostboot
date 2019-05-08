@@ -409,8 +409,8 @@ uint32_t checkEccFirs<TYPE_MCA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t checkEccFirs<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                      uint32_t & o_eccAttns )
+uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       uint32_t & o_eccAttns )
 {
     #define PRDF_FUNC "[checkEccFirs<TYPE_MEM_PORT>] "
 
@@ -421,10 +421,8 @@ uint32_t checkEccFirs<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MEM_PORT == i_chip->getType() );
 
-    ExtensibleChip * ocmbChip = getConnectedParent( i_chip, TYPE_OCMB_CHIP );
-
-    SCAN_COMM_REGISTER_CLASS * rdffir    = ocmbChip->getRegister( "RDFFIR" );
-    SCAN_COMM_REGISTER_CLASS * mcbistfir = ocmbChip->getRegister( "MCBISTFIR" );
+    SCAN_COMM_REGISTER_CLASS * rdffir    = i_chip->getRegister( "RDFFIR" );
+    SCAN_COMM_REGISTER_CLASS * mcbistfir = i_chip->getRegister( "MCBISTFIR" );
 
     do
     {
@@ -453,7 +451,7 @@ uint32_t checkEccFirs<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR: mcbChip=0x%08x",
-                      ocmbChip->getHuid() );
+                      i_chip->getHuid() );
             break;
         }
 

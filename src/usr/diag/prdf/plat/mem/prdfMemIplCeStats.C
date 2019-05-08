@@ -83,8 +83,8 @@ void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct,
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MEM_PORT>::banAnalysis( uint8_t i_dimmSlct,
-                                                uint8_t i_portSlct )
+void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct,
+                                                 uint8_t i_portSlct )
 {
     PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
     PRDF_ASSERT( 0 == i_portSlct );
@@ -117,9 +117,9 @@ void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct )
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MEM_PORT>::banAnalysis( uint8_t i_dimmSlct )
+void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct )
 {
-    // Only one DIMM per DIMM select on MEM_PORT.
+    // Only one DIMM per DIMM select on OCMB_CHIP.
     banAnalysis( i_dimmSlct, 0 );
 }
 
@@ -481,6 +481,6 @@ void MemIplCeStats<T>::addMruAndCommitErrl( const MemoryMru & i_memmru,
 // need these templates to avoid linker errors
 template class MemIplCeStats<TYPE_MCA>;
 template class MemIplCeStats<TYPE_MBA>;
-template class MemIplCeStats<TYPE_MEM_PORT>;
+template class MemIplCeStats<TYPE_OCMB_CHIP>;
 
 } // end namespace PRDF

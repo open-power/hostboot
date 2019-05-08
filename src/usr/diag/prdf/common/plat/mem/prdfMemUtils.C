@@ -224,12 +224,12 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 template<>
-int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                       const MemRank & i_rank,
-                                       MaintSymbols & o_maintStats,
-                                       MemSymbol & o_chipMark, uint8_t i_thr )
+int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank,
+                                        MaintSymbols & o_maintStats,
+                                        MemSymbol & o_chipMark, uint8_t i_thr )
 {
-    #define PRDF_FUNC "[MemUtils::collectCeStats<TYPE_MEM_PORT>] "
+    #define PRDF_FUNC "[MemUtils::collectCeStats<TYPE_OCMB_CHIP>] "
 
     int32_t o_rc = SUCCESS;
     o_chipMark = MemSymbol(); // Initially invalid.
@@ -238,10 +238,9 @@ int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
     {
         PRDF_ASSERT( 0 != i_thr );
 
-        TargetHandle_t memPortTrgt = i_chip->getTrgt();
-        ExtensibleChip * ocmbChip = getConnectedParent(i_chip, TYPE_OCMB_CHIP);
+        TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
-        const bool isX4 = isDramWidthX4(memPortTrgt);
+        const bool isX4 = isDramWidthX4(ocmbTrgt);
 
         // Use this map to keep track of the total counts per DRAM.
         DramCountMap dramCounts;
@@ -252,7 +251,7 @@ int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
         for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
         {
             reg_str = ocmbCeStatReg[regIdx];
-            reg     = ocmbChip->getRegister( reg_str );
+            reg     = i_chip->getRegister( reg_str );
 
             o_rc = reg->Read();
             if ( SUCCESS != o_rc )
@@ -272,8 +271,8 @@ int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
                 uint8_t sym  = baseSymbol + i;
                 PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
-                uint8_t dram = isX4 ? symbol2Nibble<TYPE_MEM_PORT>( sym )
-                                    : symbol2Byte  <TYPE_MEM_PORT>( sym );
+                uint8_t dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( sym )
+                                    : symbol2Byte  <TYPE_OCMB_CHIP>( sym );
 
                 // Keep track of the total DRAM counts.
                 dramCounts[dram].totalCount += count;
@@ -286,7 +285,7 @@ int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
                     dramCounts[dram].symbolCount++;
 
                     SymbolData symData;
-                    symData.symbol = MemSymbol::fromSymbol( memPortTrgt, i_rank,
+                    symData.symbol = MemSymbol::fromSymbol( ocmbTrgt, i_rank,
                         sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
                     if ( !symData.symbol.isValid() )
                     {
@@ -329,11 +328,11 @@ int32_t collectCeStats<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
 
         if ( 0 != highestCount )
         {
-            uint8_t sym = isX4 ? nibble2Symbol<TYPE_MEM_PORT>( highestDram )
-                               : byte2Symbol  <TYPE_MEM_PORT>( highestDram );
+            uint8_t sym = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( highestDram )
+                               : byte2Symbol  <TYPE_OCMB_CHIP>( highestDram );
             PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
-            o_chipMark  = MemSymbol::fromSymbol( memPortTrgt, i_rank, sym );
+            o_chipMark  = MemSymbol::fromSymbol( ocmbTrgt, i_rank, sym );
         }
 
     } while(0);
@@ -597,6 +596,25 @@ uint8_t getDramSize<TYPE_MEM_PORT>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
     }
 
     return tmp[i_dimmSlct];
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint8_t getDramSize<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, uint8_t i_dimmSlct)
+{
+    #define PRDF_FUNC "[MemUtils::getDramSize] "
+
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+    PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
+
+    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
+    // will be supported in the future. Updates will need to be made here so we
+    // can get the relevant port.
+
+    ExtensibleChip * memPort = getConnectedChild( i_chip, TYPE_MEM_PORT, 0 );
+
+    return getDramSize<TYPE_MEM_PORT>( memPort, i_dimmSlct );
 
     #undef PRDF_FUNC
 }
