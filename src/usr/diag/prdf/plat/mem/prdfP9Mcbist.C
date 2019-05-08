@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -301,9 +301,9 @@ int32_t commandAddrTimeout( ExtensibleChip * i_chip,
     // was executed. Restarting the command will likely fail with the same
     // issue. Callout and gard all MCAs in which the command was executed.
 
-    std::vector<ExtensibleChip *> mcaList;
+    ExtensibleChipList mcaList;
 
-    if ( SUCCESS != getMcbistMaintPort(i_chip, mcaList) )
+    if ( SUCCESS != getMcbistMaintPort<TYPE_MCBIST>(i_chip, mcaList) )
     {
         PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
                   i_chip->getHuid() );

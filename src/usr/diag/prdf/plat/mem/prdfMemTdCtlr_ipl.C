@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,6 +160,14 @@ bool __mnfgCeCheck<TYPE_MCA>( uint32_t i_eccAttns )
 }
 
 template<> inline
+bool __mnfgCeCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
+{
+    return ( (  0 != (i_eccAttns & MAINT_HARD_NCE_ETE) ) &&
+             ( (0 != (i_eccAttns & MAINT_NCE)) ||
+               (0 != (i_eccAttns & MAINT_TCE))         ) );
+}
+
+template<> inline
 bool __mnfgCeCheck<TYPE_MBA>( uint32_t i_eccAttns )
 {
     return ( 0 != (i_eccAttns & MAINT_HARD_NCE_ETE) );
@@ -251,12 +259,18 @@ template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                     const MemAddr & i_addr,
+                                     bool & o_errorsFound,
+                                     STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_MBA>;
+template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------
 

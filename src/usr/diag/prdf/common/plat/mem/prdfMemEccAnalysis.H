@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ namespace MemEcc
  * @brief  Adds the memory CE to the callout list and CE table. Will also issue
  *         dynamic memory deallocation when appropriate. Returns true if TPS is
  *         required.
- * @param  i_chip   MCA or MBA.
+ * @param  i_chip   MCA, MBA, or MEM_PORT.
  * @param  i_addr   Failed address.
  * @param  i_symbol Failed symbol.
  * @param  o_doTps  True if TPS is required. False otherwise.

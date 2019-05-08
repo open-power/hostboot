@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -248,8 +248,8 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
     do
     {
         // Get all ports in which the command was run.
-        std::vector<ExtensibleChip *> portList;
-        o_rc = getMcbistMaintPort( i_chip, portList );
+        ExtensibleChipList portList;
+        o_rc = getMcbistMaintPort<TYPE_MCBIST>( i_chip, portList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
@@ -283,6 +283,60 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
         }
         if ( SUCCESS != o_rc ) break;
 
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                               TdRankListEntry & o_stoppedRank,
+                                               const MemAddr & i_addr,
+                                               bool & o_errorsFound,
+                                               STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[__analyzeCmdComplete] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_errorsFound = false;
+
+    do
+    {
+        // Get all ports in which the command was run.
+        ExtensibleChipList portList;
+        o_rc = getMcbistMaintPort<TYPE_OCMB_CHIP>( i_chip, portList );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // In broadcast mode, the rank configuration for all ports will be the
+        // same. In non-broadcast mode, there will only be one MEM_PORT in
+        // the list. Therefore, we can simply use the first MEM_PORT in the
+        // list for all configs.
+        ExtensibleChip * stopChip = portList.front();
+
+        // Update iv_stoppedRank.
+        o_stoppedRank = __getStopRank<TYPE_MEM_PORT>( stopChip, i_addr );
+
+        // Check the OCMB for ECC errors.
+        bool errorsFound;
+        o_rc = __checkEcc<TYPE_OCMB_CHIP>( i_chip, i_addr, errorsFound, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_OCMB_CHIP>(0x%08x) failed",
+                      i_chip->getHuid() );
+            o_rc |= o_rc;
+            break;
+        }
+
+        if ( errorsFound ) o_errorsFound = true;
+        if ( SUCCESS != o_rc ) break;
     } while (0);
 
     return o_rc;
@@ -397,7 +451,13 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 
     // Get the version to use.
     uint8_t version = TD_CTLR_DATA::VERSION_1;
+    bool isNimbus = false;
     if ( MODEL_NIMBUS == getChipModel(getMasterProc()) )
+    {
+        version = TD_CTLR_DATA::VERSION_2;
+        isNimbus = true;
+    }
+    else if ( MODEL_AXONE == getChipModel(getMasterProc()) )
     {
         version = TD_CTLR_DATA::VERSION_2;
     }
@@ -443,6 +503,11 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_CTLR_DATA::VERSION_2 == version )
         {
             curPort = iv_curProcedure->getChip()->getPos() % MAX_MCA_PER_MCBIST;
+            if ( !isNimbus )
+            {
+                TargetHandle_t portTrgt = iv_curProcedure->getChip()->getTrgt();
+                curPort = portTrgt->getAttr<ATTR_REL_POS>();
+            }
         }
     }
 
@@ -475,6 +540,11 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         if ( TD_CTLR_DATA::VERSION_2 == version )
         {
             itPort = queue[n]->getChip()->getPos() % MAX_MCA_PER_MCBIST;
+            if ( !isNimbus )
+            {
+                TargetHandle_t portTrgt = queue[n]->getChip()->getTrgt();
+                itPort = portTrgt->getAttr<ATTR_REL_POS>();
+            }
         }
 
         bsb.setFieldJustify( pos, 3, itMrnk ); pos+=3;
@@ -502,6 +572,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_MBA>;
+template class MemTdCtlr<TYPE_OCMB_CHIP>;
 
 //------------------------------------------------------------------------------
 

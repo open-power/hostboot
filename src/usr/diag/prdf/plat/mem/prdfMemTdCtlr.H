@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,14 +54,14 @@ class MemTdCtlr
     /**
      * @brief Constructor
      *
-     * This contructor will only be called in the MCBIST or MBA data bundle,
-     * which already checks for a valid type.
+     * This contructor will only be called in the MCBIST, MBA, or OCMB data
+     * bundle, which already checks for a valid type.
      *
      * Need to initialize iv_stoppedRank to a valid entry in iv_rankList. Use
      * the last entry in the list so that the 'next' rank is the first entry
      * in the list.
      *
-     * @param i_chip An MCBIST or MBA chip.
+     * @param i_chip An MCBIST, MBA, or OCMB chip.
      */
     explicit MemTdCtlr( ExtensibleChip * i_chip ) :
         iv_chip( i_chip ), iv_rankList( i_chip ),
@@ -122,7 +122,7 @@ class MemTdCtlr
     /**
      * @brief  Bans TPS on the given rank. Any attempts to add a TPS procedure
      *         to the queue for this rank will be ignored.
-     * @param  i_chip MCA or MBA chip.
+     * @param  i_chip MCA, MBA, or OCMB chip.
      * @param  i_rank The target slave rank.
      */
     void banTps( ExtensibleChip * i_chip, const MemRank & i_rank )
@@ -302,7 +302,7 @@ class MemTdCtlr
 
   private: // instance variables
 
-    /** An MCBIST or MBA chip associated with this TD controller. */
+    /** An MCBIST, MBA, or OCMB chip associated with this TD controller. */
     ExtensibleChip * const iv_chip;
 
     /** The TD queue that contains all of the pending TD procedures. */
