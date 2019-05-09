@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,8 @@ extern "C"
 // Utility function to check parameters and get the Bad DQ bitmap
 //------------------------------------------------------------------------------
 fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_port,
     const uint8_t i_dimm,
     const uint8_t i_rank,
@@ -115,8 +115,8 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
@@ -151,8 +151,8 @@ fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
 
 //------------------------------------------------------------------------------
 fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
-    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|fapi2::TARGET_TYPE_MEM_PORT>
-    & i_fapiTrgt,
+    <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA|
+     fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],
@@ -179,17 +179,8 @@ fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
         // Add the rank bitmap to the DIMM bitmap and write the bitmap.
         memcpy( l_dqBitmap[i_rank], i_data, mss::BAD_DQ_BYTE_COUNT );
 
-        errlHndl_t l_errl = nullptr;
-        TARGETING::TargetHandle_t l_trgt = nullptr;
-        l_errl = fapi2::platAttrSvc::getTargetingTarget(i_fapiTrgt, l_trgt);
-        if ( l_errl )
-        {
-            FAPI_ERR( "p9DimmSetBadDqBitmap: Error from getTargetingTarget" );
-            break;
-        }
-
         l_rc = FAPI_ATTR_SET( fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTrgt,
-                l_dqBitmap );
+                              l_dqBitmap );
 
         if ( l_rc )
         {
