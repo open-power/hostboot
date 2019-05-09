@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -33,7 +33,7 @@
 #include <devicefw/driverif.H>
 #include <config.h>
 #include "vpd.H"
-
+#include <i2c/eeprom_const.H>
 
 /** @file ipvpd.H
  *  @brief Provides base support for i/p-Series style IBM VPD
@@ -79,11 +79,35 @@ class IpVpdFacade
     /**
      * @brief Structure for all VPD dd input parameter arguments
      */
-    typedef struct
+    typedef struct device_driver_input_args
     {
-        VPD::vpdRecord record;
-        VPD::vpdKeyword keyword;
-        VPD::vpdCmdTarget location;
+        VPD::vpdRecord        record;
+        VPD::vpdKeyword       keyword;
+        VPD::vpdCmdTarget     location;
+        EEPROM::EEPROM_SOURCE eepromSource;
+
+        // Default constructor
+        device_driver_input_args() : record(0xFFFFFFFF),
+                                     keyword(0xFFFFFFFF),
+                                     location(VPD::AUTOSELECT),
+                                     eepromSource(EEPROM::AUTOSELECT)
+        {};
+
+        // This constructor allows for existing code using brace-enclosed
+        // initializer lists of the first three arguments to continue to
+        // function normally. Since the default behavior for EEPROM_SOURCE is
+        // AUTOSELECT, setting it automatically here is done to maintain that
+        // default assumption.
+        device_driver_input_args(VPD::vpdRecord    i_record,
+                                 VPD::vpdKeyword   i_keyword,
+                                 VPD::vpdCmdTarget i_location)
+            : record(i_record),
+              keyword(i_keyword),
+              location(i_location),
+              eepromSource(EEPROM::AUTOSELECT)
+        {};
+
+
     } input_args_t;
 
     /**
@@ -236,6 +260,28 @@ class IpVpdFacade
     bool hasVpdPresent ( TARGETING::Target * i_target,
                          VPD::vpdRecord record,
                          VPD::vpdKeyword keyword );
+
+
+    /**
+     * @brief This function compares the specified record/keyword
+     *        in CACHE/HARDWARE and returns the result.  A mismatch
+     *        will not return an error.
+     *
+     * @param[in]  i_target    Target device
+     *
+     * @param[in]  i_record    Record to compare
+     *
+     * @param[in]  i_keyword   Keyword to compare
+     *
+     * @param[out] o_match     Result of compare
+     *
+     * @return errlHndl_t      NULL if successful, otherwise a pointer to the
+     *                         error log.
+     */
+    errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
+                                  VPD::vpdRecord      i_record,
+                                  VPD::vpdKeyword     i_keyword,
+                                  bool              & o_match);
 
     /**
      * @brief This function compares the specified record/keyword
@@ -594,6 +640,8 @@ class IpVpdFacade
                                  uint64_t& o_byteAddr,
                                  input_args_t i_args );
 
+
+
     /**
      * @brief This function calls the PNOR or EEPROM version of
      *           the fetchData function based on the configInfo
@@ -613,12 +661,38 @@ class IpVpdFacade
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t fetchData ( uint64_t i_byteAddr,
-                           size_t i_numBytes,
-                           void * o_data,
-                           TARGETING::Target * i_target,
-                           VPD::vpdCmdTarget i_location,
-                           const char* i_record );
+    errlHndl_t fetchData(uint64_t            i_byteAddr,
+                         size_t              i_numBytes,
+                         void *              o_data,
+                         TARGETING::Target * i_target,
+                         VPD::vpdCmdTarget   i_location,
+                         const char*         i_record);
+
+    /**
+     * @brief This function calls the PNOR or EEPROM version of
+     *           the fetchData function based on the configInfo
+     *
+     * @param[in] i_byteAddr  The offset to be read.
+     *
+     * @param[in] i_numBytes  The number of bytes to read.
+     *
+     * @param[out] o_data     The data buffer where the data will be placed.
+     *
+     * @param[in] i_target    Target device.
+     *
+     * @param[in] i_args      The input arguments
+     *
+     * @param[in] i_record    String representation of the record.
+     *
+     * @return errHndl_t      NULL if successful, otherwise a pointer to the
+     *                        error log.
+     */
+    errlHndl_t fetchData(uint64_t            i_byteAddr,
+                         size_t              i_numBytes,
+                         void *              o_data,
+                         TARGETING::Target * i_target,
+                         input_args_t        i_args,
+                         const char*         i_record);
 
     /**
      * @brief This function actually reads the data from PNOR
@@ -653,10 +727,11 @@ class IpVpdFacade
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    errlHndl_t fetchDataFromEeprom ( uint64_t i_byteAddr,
-                                     size_t i_numBytes,
-                                     void * o_data,
-                                     TARGETING::Target * i_target );
+    errlHndl_t fetchDataFromEeprom(uint64_t i_byteAddr,
+               size_t i_numBytes,
+               void * o_data,
+               TARGETING::Target * i_target,
+               EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
    /**
      * @brief This function compares 2 ipvpd record values.  Used for binary
