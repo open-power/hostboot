@@ -24,6 +24,22 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <attributes>
+  <attribute>
+    <id>ATTR_MSS_MRW_NVDIMM_SLOT_POSITION</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+      The position of a dimm is based on which mca it is
+      associated with and which drop behind that mca, with
+      16 dimms possible per processor socket.  The formula is:
+      [processor position with no gaps, i.e. 0,1,2,3]*16 +
+      [mca position on this processor * 2] + [dimm location behind this mca]
+    </description>
+    <valueType>uint8</valueType>
+    <default>0xFF</default>
+    <platInit/>
+    <mrwHide/>
+    <mssAccessorName>mrw_nvdimm_slot_position</mssAccessorName>
+  </attribute>
 
   <attribute>
     <id>ATTR_MSS_MRW_UNSUPPORTED_RANK_CONFIG</id>
