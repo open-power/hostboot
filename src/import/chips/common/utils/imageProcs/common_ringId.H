@@ -105,13 +105,18 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //                     Key TOR constants - Begin                             //
 //                                                                           //
 
+// P9 TOR versions (kept here for historic context)
 //#define TOR_VERSION  1  // Initial version. Large RS4 header.
 //#define TOR_VERSION  2  // Reduced RS4 header.
 //#define TOR_VERSION  3  // Added TOR magic header.
 //#define TOR_VERSION  4  // TOR API code restructuring.
 //#define TOR_VERSION  5  // Removed TOR-level DD handling.
 //#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
-#define TOR_VERSION  7  // Added three more runtime risk levels (RL3/4/5)
+//#define TOR_VERSION  7  // Added three more runtime risk levels (RL3/4/5)
+
+// P10 TOR versions
+#define TOR_VERSION  1  // Removed all ring variant support. Only BASE rings supported now.
+
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
