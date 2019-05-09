@@ -388,6 +388,8 @@ ZEPPELIN_MEMD_IMG = ${ENGD_MEMDPATH:Fzeppelin_memd_output.dat}
 FLEETWOOD_MEMD_IMG = ${ENGD_MEMDPATH:Ffleetwood_memd_output.dat}
 ZZ_HBD_IMG = ${HBFW_TARGPATH:FZZ_hb_targeting.bin}
 ZZ2U_HBD_IMG = ${HBFW_TARGPATH:FZZ-2U_hb_targeting.bin}
+ZZGEN4_HBD_IMG = ${HBFW_TARGPATH:FZZ-GEN4_hb_targeting.bin}
+ZZ2UGEN4_HBD_IMG = ${HBFW_TARGPATH:FZZ-2U-GEN4_hb_targeting.bin}
 ZEPPELIN_HBD_IMG = ${HBFW_TARGPATH:FZEPPELIN_hb_targeting.bin}
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
@@ -427,7 +429,8 @@ ZZ_HBD_FINAL_IMG = ZZ.HBD.bin
 ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
 FLEETWOOD_HBD_FINAL_IMGS = FLEETWOOD.HBD_NODE_0.bin,FLEETWOOD.HBD_NODE_1.bin,FLEETWOOD.HBD_NODE_2.bin,FLEETWOOD.HBD_NODE_3.bin,FLEETWOOD_MST.HBD_NODE_0.bin,FLEETWOOD_2N.HBD_NODE_0.bin,FLEETWOOD_2N.HBD_NODE_1.bin,FLEETWOOD_2N.HBD_NODE_2.bin,FLEETWOOD_2N.HBD_NODE_3.bin
 ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
-
+ZZGEN4_HBD_FINAL_IMG = ZZ-GEN4.HBD.bin
+ZZ2UGEN4_HBD_FINAL_IMG = ZZ-2U-GEN4.HBD.bin
 
 
 # Decide which PNOR to build
@@ -449,6 +452,8 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
     GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P},MEMD=${${ZEPPELIN_MEMD_IMG}:P},HBD=${${ZEPPELIN_HBD_IMG}:P}
     GEN_FLEETWOOD_BIN_FILES = FLEETWOOD:WOFDATA=${${FLEETWOOD_WOFDATA_IMG}:P},MEMD=${${FLEETWOOD_MEMD_IMG}:P},${FLEETWOOD_HBD_IMGS}
     GEN_ZZ2U_BIN_FILES = ZZ-2U:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P},HBD=${${ZZ2U_HBD_IMG}:P}
+    GEN_ZZGEN4_BIN_FILES = ZZ-GEN4:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P},HBD=${${ZZGEN4_HBD_IMG}:P}
+    GEN_ZZ2UGEN4_BIN_FILES = ZZ-2U-GEN4:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P},HBD=${${ZZ2UGEN4_HBD_IMG}:P}
 
     SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
@@ -460,6 +465,8 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
                              --systemBinFiles ${GEN_ZEPPELIN_BIN_FILES} \
                              --systemBinFiles ${GEN_FLEETWOOD_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ2U_BIN_FILES} \
+                             --systemBinFiles ${GEN_ZZGEN4_BIN_FILES} \
+                             --systemBinFiles ${GEN_ZZ2UGEN4_BIN_FILES} \
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
