@@ -61,12 +61,37 @@ class UdNvdimmParms : public ERRORLOG::ErrlUserDetails
      */
     virtual ~UdNvdimmParms();
 
-  private:
     // Disabled
-    UdNvdimmParms(UdNvdimmParms &);
-    UdNvdimmParms & operator=(UdNvdimmParms &);
+    UdNvdimmParms(UdNvdimmParms &) = delete;
+    UdNvdimmParms & operator=(UdNvdimmParms &) = delete;
 };
 
-} // end NVDIMM namespace
 
+/**
+ * @class UdNvdimmOPParms
+ *
+ * Adds NVDIMM information to an error log as user detail data
+ */
+class UdNvdimmOPParms : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_i2cInfo      Miscellaneous Parameters
+     */
+    UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo );
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdNvdimmOPParms();
+
+    // Disabled
+    UdNvdimmOPParms() = delete;
+    UdNvdimmOPParms(UdNvdimmOPParms &) = delete;
+    UdNvdimmOPParms & operator=(UdNvdimmOPParms &) = delete;
+};
+
+} // end of namespace NVDIMM
 #endif

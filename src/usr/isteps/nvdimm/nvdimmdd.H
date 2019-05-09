@@ -92,6 +92,78 @@ struct nvdimm_addr_t
     }
 };
 
+/**
+ * @brief Structure of registers for error log traces
+ */
+struct nvdimm_reg_t
+{
+    uint8_t Module_Health;
+    uint8_t Module_Health_Status0;
+    uint8_t Module_Health_Status1;
+    uint8_t CSave_Status;
+    uint8_t CSave_Info;
+    uint8_t CSave_Fail_Info0;
+    uint8_t CSave_Fail_Info1;
+    uint8_t CSave_Timeout0;
+    uint8_t CSave_Timeout1;
+    uint8_t Error_Threshold_Status;
+    uint8_t NVDimm_Ready;
+    uint8_t NVDimm_CMD_Status0;
+    uint8_t Erase_Status;
+    uint8_t Erase_Timeout0;
+    uint8_t Erase_Timeout1;
+    uint8_t Abort_CMD_Timeout;
+    uint8_t Set_ES_Policy_Status;
+    uint8_t Restore_Status;
+    uint8_t Restore_Fail_Info;
+    uint8_t Restore_Timeout0;
+    uint8_t Restore_Timeout1;
+    uint8_t Arm_Status;
+    uint8_t Arm_Timeout0;
+    uint8_t Arm_Timeout1;
+    uint8_t Set_Event_Notification_Status;
+
+    /**
+     *  @brief Construct a default nvdimm_reg_t
+     */
+    nvdimm_reg_t()
+        : Module_Health(0),
+          Module_Health_Status0(0),
+          Module_Health_Status1(0),
+          CSave_Status(0),
+          CSave_Info(0),
+          CSave_Fail_Info0(0),
+          CSave_Fail_Info1(0),
+          CSave_Timeout0(0),
+          CSave_Timeout1(0),
+          Error_Threshold_Status(0),
+          NVDimm_Ready(0),
+          NVDimm_CMD_Status0(0),
+          Erase_Status(0),
+          Erase_Timeout0(0),
+          Erase_Timeout1(0),
+          Abort_CMD_Timeout(0),
+          Set_ES_Policy_Status(0),
+          Restore_Status(0),
+          Restore_Fail_Info(0),
+          Restore_Timeout0(0),
+          Restore_Timeout1(0),
+          Arm_Status(0),
+          Arm_Timeout0(0),
+          Arm_Timeout1(0),
+          Set_Event_Notification_Status(0)
+
+    {
+    }
+
+    /**
+     *  @brief Default deconstructor of nvdimm_reg_t
+     */
+    ~nvdimm_reg_t() = default;
+
+};
+
+
 /*
  * @brief Miscellaneous enums for NVDIMM
  */

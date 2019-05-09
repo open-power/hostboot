@@ -29,17 +29,18 @@
 
 namespace NVDIMM
 {
+
 enum nvdimm_err_status
 {
-    NSTD_VAL_NOPRSV      = 0x08, // memory valid, contents not preserved (genesis)
-    NSTD_VAL_NOPRSV_MASK = 0xF7,
-    NSTD_VAL_PRSV        = 0x04, // memory contents preserved
-    NSTD_VAL_PRSV_MASK   = 0xFB,
-    NSTD_ERR_NOPRSV      = 0x02, // memory failed to preserve contents
-    NSTD_ERR_NOPRSV_MASK = 0xFD,
-    NSTD_ERR_NOBKUP      = 0x01, // memory unable to preserve future content
-    NSTD_ERR_NOBKUP_MASK = 0xFE,
-    NSTD_ERR             = 0x03, // NSTD_ERR_NOPRSV+NSTD_ERR_NOBKUP
+    NSTD_VAL_ERASED          = 0x08, // Image erased, SCM device contents not persisted
+    NSTD_VAL_ERASED_MASK     = 0xF7,
+    NSTD_VAL_ERROR           = 0x04, // Valid image successfully restored, SCM persisted
+    NSTD_VAL_ERROR_MASK      = 0xFB,
+    NSTD_VAL_SR_FAILED       = 0x02, // Save/Restore failed to persist memory contents
+    NSTD_VAL_SR_FAILED_MASK  = 0xFD,
+    NSTD_VAL_DISARMED        = 0x01, // memory unable to preserve future content
+    NSTD_VAL_DISARMED_MASK   = 0xFE,
+    NSTD_ERR                 = 0x03, // NSTD_ERR_NOPRSV+NSTD_ERR_NOBKUP
 };
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -54,7 +55,7 @@ enum nvdimm_err_status
  * @param[in] i_nvdimmList - list of nvdimm targets
  *
  **/
-void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
+errlHndl_t nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 
 
 /**
@@ -273,7 +274,8 @@ errlHndl_t notifyNvdimmProtectionChange(TARGETING::Target* i_target,
  *        - Disarms the trigger for draminit
  * @param i_target     nvdimm target
  */
-void nvdimm_init(TARGETING::Target *i_nvdimm);
+errlHndl_t nvdimm_init(TARGETING::Target *i_nvdimm);
+
 }
 
 #endif  // NVDIMM_EXT_H__

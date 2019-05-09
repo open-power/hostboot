@@ -164,6 +164,119 @@ private:
     UdParserNvdimmParms & operator=(const UdParserNvdimmParms&);
 };
 
+/**
+ * @class UdParserNvdimmOPParms
+ *
+ * Parses UdNvdimmOPParms
+ */
+class UdParserNvdimmOPParms : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserNvdimmOPParms() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserNvdimmOPParms() = default;
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("NVDIMM I2C Register Traces");
+
+        //***** Memorr Layout *****
+        // 1 byte   : MODULE_HEALTH
+        // 1 byte   : MODULE_HEALTH_STATUS0
+        // 1 byte   : MODULE_HEALTH_STATUS1
+        // 1 byte   : CSAVE_STATUS
+        // 1 byte   : CSAVE_INFO
+        // 1 byte   : CSAVE_FAIL_INFO0
+        // 1 byte   : CSAVE_FAIL_INFO1
+        // 1 byte   : ERROR_THRESHOLD_STATUS
+        // 1 byte   : NVDIMM_READY
+        // 1 byte   : NVDIMM_CMD_STATUS0
+        // 1 byte   : ERASE_STATUS
+        // 1 byte   : ERASE_TIMEOUT0
+        // 1 byte   : ERASE_TIMEOUT1
+        // 1 byte   : ABORT_CMD_TIMEOUT
+        // 1 byte   : SET_ES_POLICY_STATUS
+        // 1 byte   : RESTORE_STATUS
+        // 1 byte   : RESTORE_FAIL_INFO
+        // 1 byte   : RESTORE_TIMEOUT0
+        // 1 byte   : RESTORE_TIMEOUT1
+        // 1 byte   : ARM_STATUS
+        // 1 byte   : ARM_TIMEOUT0
+        // 1 byte   : ARM_TIMEOUT1
+        // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
+        //
+
+        i_parser.PrintNumber("Module Health Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Module Health Status0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Module Health Status1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Info Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("CSave Fail Info1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Error Threshold Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("NVDIMM Ready Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("NVDIMM CMD Status0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Erase Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Erase Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Erase Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Abort CMD Timeout Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Set ES Policy Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Restore Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Restore Fail Info0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Restore Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Restore Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Arm Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Arm Timeout0 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Arm Timeout1 Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+        i_parser.PrintNumber("Set Event Notification Status Register: ","%.2lX",TO_UINT8(l_databuf));
+        ++l_databuf;
+    }
+
+    // Disabled
+    UdParserNvdimmOPParms(const UdParserNvdimmOPParms&) = delete;
+    UdParserNvdimmOPParms & operator=(UdParserNvdimmOPParms &) = delete;
+};
+
 } // end NVDIMM namespace
 
 #endif

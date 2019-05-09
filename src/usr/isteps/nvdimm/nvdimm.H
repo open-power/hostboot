@@ -343,12 +343,17 @@ enum i2c_out_values : uint8_t
     CHARGE_IN_PROGRESS          = 0x01,
     SAVE_SUCCESS                = 0x01,
     RSTR_SUCCESS                = 0X01,
-    ARM_SUCCESS                 = 0X09,
+    ARM_SUCCESS                 = 0X01,
     ERASE_SUCCESS               = 0X01,
     ES_SUCCESS                  = 0x05,
     CHARGE_SUCCESS              = 0x00,
     NV_READY                    = 0xA5,
     FACTORY_RESET_IN_PROGRESS   = 0x03,
+    NO_RESET_N                  = 0x20,
+    RESET_N_ARMED               = 0x08,
+    ES_POLICY_ERROR             = 0x02,
+    ARM_ERROR                   = 0X02,
+    RSTR_ERROR                  = 0x02,
 };
 
 // Timeout-related enum
@@ -421,6 +426,49 @@ union scap_status_union
 } PACKED;
 
 typedef scap_status_union scap_status_register_t;
+
+// Bits in Health Status Check Registers
+enum health_status : uint8_t
+{
+    // Module Health Status0
+    VOLTAGE_REGULATOR_FAILED    = 0x01,
+    VDD_LOST                    = 0x02,
+    VPP_LOST                    = 0x04,
+    VTT_LOST                    = 0x08,
+    DRAM_NOT_SELF_REFRESH       = 0x10,
+    CONTROLLER_HARDWARE_ERROR   = 0x20,
+    NVM_CONTROLLER_ERROR        = 0x40,
+    NVM_LIFETIME_ERROR          = 0x80,
+    // Module Health Status1
+    NOT_ENOUGH_ENERGY_FOR_CSAVE = 0x01,
+    INVALID_FIRMWARE_ERROR      = 0x02,
+    CONFIG_DATA_ERROR           = 0x04,
+    NO_ES_PRESENT               = 0x08,
+    ES_POLICY_NOT_SET           = 0x10,
+    ES_HARDWARE_FAILURE         = 0x20,
+    ES_HEALTH_ASSESSMENT_ERROR  = 0x40,
+    // Error Threshold Status
+    ES_LIFETIME_ERROR           = 0x02,
+    ES_TEMP_ERROR               = 0x04,
+};
+
+// Int representation for health status function call
+enum health_function : uint8_t
+{
+    HEALTH_SAVE        = 0x01,
+    HEALTH_RESTORE     = 0x02,
+    HEALTH_UPDATE      = 0x03,
+    HEALTH_PRE_ARM     = 0x04,
+    HEALTH_POST_ARM    = 0x05,
+};
+
+// Event notification register values
+enum event_n : uint8_t
+{
+    PERSISTENCY_NOTIFICATION            = 0x01,
+    SET_EVENT_NOTIFICATION_ERROR        = 0x02,
+    PERSISTENCY_ENABLED                 = 0x04,
+};
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C
@@ -503,7 +551,6 @@ errlHndl_t nvdimmPollStatus(TARGETING::Target *i_nvdimm, ops_id i_ops_id, uint32
  *      the error log.
  */
 errlHndl_t nvdimmSetESPolicy(TARGETING::Target* i_nvdimm);
-
 
 /**
  * @brief Helper function to handle conflicting attribute keys
@@ -630,6 +677,18 @@ errlHndl_t nvdimmResetController(TARGETING::Target *i_nvdimm);
 errlHndl_t nvdimm_getTPM(TARGETING::Target*& o_tpm);
 
 #endif
+
+/**
+ * @brief This function checks for valid image on the given target
+ *
+ * @param[in] i_nvdimm - nvdimm target with NV controller
+ *
+ * @param[out] o_imgValid - return true if the target has a valid image
+ *
+ * @return errlHndl_t - Null if successful, otherwise a pointer to
+ *      the error log.
+ */
+errlHndl_t nvdimmValidImage(TARGETING::Target *i_nvdimm, bool &o_imgValid);
 
 } //End NVDIMM namespace
 

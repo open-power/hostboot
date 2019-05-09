@@ -158,9 +158,46 @@ UdNvdimmParms::UdNvdimmParms( uint8_t i_opType,
 }
 
 //------------------------------------------------------------------------------
-UdNvdimmParms::~UdNvdimmParms()
-{
+UdNvdimmParms::~UdNvdimmParms() = default;
 
+//------------------------------------------------------------------------------
+//  NVDIMM Dimm Operation Parameters and Errors
+//------------------------------------------------------------------------------
+UdNvdimmOPParms::UdNvdimmOPParms( const nvdimm_reg_t &i_RegInfo )
+{
+   // Version control for ErrorUD struct
+   iv_CompId = NVDIMM_COMP_ID;
+   iv_Version = 3;
+   iv_SubSection = NVDIMM_OP_PARAMETERS;
+
+   //***** Memory Layout *****
+   // 1 byte   : MODULE_HEALTH
+   // 1 byte   : MODULE_HEALTH_STATUS0
+   // 1 byte   : MODULE_HEALTH_STATUS1
+   // 1 byte   : CSAVE_STATUS
+   // 1 byte   : CSAVE_INFO
+   // 1 byte   : CSAVE_FAIL_INFO0
+   // 1 byte   : CSAVE_FAIL_INFO1
+   // 1 byte   : ERROR_THRESHOLD_STATUS
+   // 1 byte   : NVDIMM_READY
+   // 1 byte   : NVDIMM_CMD_STATUS0
+   // 1 byte   : ABORT_CMD_TIMEOUT
+   // 1 byte   : ERASE_STATUS
+   // 1 byte   : ERASE_TIMEOUT0
+   // 1 byte   : ERASE_TIMEOUT1
+   // 1 byte   : SET_ES_POLICY_STATUS
+   // 1 byte   : RESTORE_STATUS
+   // 1 byte   : RESTORE_FAIL_INFO
+   // 1 byte   : RESTORE_TIMEOUT0
+   // 1 byte   : RESTORE_TIMEOUT1
+   // 1 byte   : ARM_STATUS
+   // 1 byte   : SET_EVENT_NOTIFICATION_STATUS
+
+   char * l_pBuf = reinterpret_cast<char *>( reallocUsrBuf(sizeof(i_RegInfo)));
+   memcpy(l_pBuf, &i_RegInfo, sizeof(i_RegInfo));
 }
+
+// Default the deconstructor
+UdNvdimmOPParms::~UdNvdimmOPParms() = default;
 
 } // end NVDIMM namespace

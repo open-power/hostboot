@@ -47,6 +47,7 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/ffdc/
 OBJS += nvdimm.o
 OBJS += nvdimmdd.o
 OBJS += errlud_nvdimm.o
+OBJS += nvdimmErrorLog.o
 
 ifneq (${HOSTBOOT_RUNTIME},1)
 

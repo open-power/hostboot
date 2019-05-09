@@ -99,6 +99,10 @@ enum nvdimmModuleId
     SEND_ATTR_NVDIMM_ARMED                  = 0x31,
     NVDIMM_FACTORY_RESET                    = 0x32,
     NVDIMM_HEALTH_CHECK                     = 0x33,
+    NVDIMM_CHECK_RESETN                     = 0x34,
+    NVDIMM_CHECK_CSAVE                      = 0x35,
+    NVDIMM_MODULE_HEALTH_STATUS_CHECK       = 0x36,
+    NVDIMM_SET_EVENT_NOTIFICATION           = 0x37,
 };
 
 /**
@@ -151,27 +155,48 @@ enum nvdimmReasonCode
     NVDIMM_UPDATE_NOT_SUPPORTED             = NVDIMM_COMP_ID | 0x27,   // NV controller cannot be updated
     NVDIMM_START_UPDATE                     = NVDIMM_COMP_ID | 0x28,   // start update
     NVDIMM_UPDATE_COMPLETE                  = NVDIMM_COMP_ID | 0x29,   // update completed
-    NVDIMM_TPM_NOT_FOUND                    = NVDIMM_COMP_ID | 0x30,   // TPM not found
-    NVDIMM_VERIF_BYTE_CHECK_FAILED          = NVDIMM_COMP_ID | 0x31,   // Encryption key reg verif failed
-    NVDIMM_ENCRYPTION_ENABLE_FAILED         = NVDIMM_COMP_ID | 0x32,   // Encryption enable failed
-    NVDIMM_ENCRYPTION_ERASE_PENDING_FAILED  = NVDIMM_COMP_ID | 0x32,   // Encryption crypto erase pending failed
-    NVDIMM_ENCRYPTION_ERASE_FAILED          = NVDIMM_COMP_ID | 0x33,   // Encryption crypto erase failed
-    NVDIMM_ENCRYPTION_UNLOCK_FAILED         = NVDIMM_COMP_ID | 0x34,   // Encryption unlock failed
-    NVDIMM_ENCRYPTION_INVALID_ATTRIBUTE     = NVDIMM_COMP_ID | 0x35,   // Encryption attribute key data invalid
-    NVDIMM_ENCRYPTION_KEY_ATTRS_INVALID     = NVDIMM_COMP_ID | 0x36,   // Encryption key attributes are both invalid
-    NVDIMM_ENCRYPTION_MAX_DARN_ERRORS       = NVDIMM_COMP_ID | 0x37,   // Darn random key gen reached max errors
-    NVDIMM_ENCRYPTION_BAD_RANDOM_DATA       = NVDIMM_COMP_ID | 0x38,   // Generated key data not valid
-    NVDIMM_CANNOT_MAKE_ATTRIBUTE            = NVDIMM_COMP_ID | 0x39,   // Cannot make Attribute
-    NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE = NVDIMM_COMP_ID | 0x3A,   // !< pertains to ES_CMD_STATUS0[0]; the health check in progress flag
-    NVDIMM_HEALTH_CHECK_REPORTED_FAILURE    = NVDIMM_COMP_ID | 0x3B,   // !< pertains to ES_CMD_STATUS0[2]; the health check reported a failure flag
-    NVDIMM_LIFETIME_MIN_REQ_NOT_MET         = NVDIMM_COMP_ID | 0x3C,   // !< pertains to ES_LIFETIME; BPM does not meet minimum requirement for a new BPM
-    NVDIMM_HEALTH_CHECK_NEVER_INITIATED     = NVDIMM_COMP_ID | 0x3D,   // !< A health check was never initiated at start of IPL
+    NVDIMM_TPM_NOT_FOUND                    = NVDIMM_COMP_ID | 0x2A,   // TPM not found
+    NVDIMM_POWER_SAVE_FAILURE               = NVDIMM_COMP_ID | 0x2B,   // Save failed due to power loss
+    NVDIMM_CSAVE_ERROR                      = NVDIMM_COMP_ID | 0x2C,   // CSave failed due to error
+    NVDIMM_VOLTAGE_REGULATOR_FAILED         = NVDIMM_COMP_ID | 0x2D,
+    NVDIMM_VDD_LOST                         = NVDIMM_COMP_ID | 0x2E,
+    NVDIMM_VPP_LOST                         = NVDIMM_COMP_ID | 0x2F,
+    NVDIMM_VTT_LOST                         = NVDIMM_COMP_ID | 0x30,
+    NVDIMM_DRAM_NOT_SELF_REFRESH            = NVDIMM_COMP_ID | 0x31,
+    NVDIMM_CONTROLLER_HARDWARE_ERROR        = NVDIMM_COMP_ID | 0x32,
+    NVDIMM_NVM_CONTROLLER_ERROR             = NVDIMM_COMP_ID | 0x33,
+    NVDIMM_NVM_LIFETIME_ERROR               = NVDIMM_COMP_ID | 0x34,
+    NVDIMM_NOT_ENOUGH_ENERGY_FOR_CSAVE      = NVDIMM_COMP_ID | 0x35,
+    NVDIMM_INVALID_FIRMWARE_ERROR           = NVDIMM_COMP_ID | 0x36,   // Module Health Status Registers
+    NVDIMM_CONFIG_DATA_ERROR                = NVDIMM_COMP_ID | 0x37,
+    NVDIMM_NO_ES_PRESENT                    = NVDIMM_COMP_ID | 0x38,
+    NVDIMM_ES_POLICY_NOT_SET                = NVDIMM_COMP_ID | 0x39,
+    NVDIMM_ES_HARDWARE_FAILURE              = NVDIMM_COMP_ID | 0x3A,
+    NVDIMM_ES_HEALTH_ASSESSMENT_ERROR       = NVDIMM_COMP_ID | 0x3B,
+    NVDIMM_ES_LIFETIME_ERROR                = NVDIMM_COMP_ID | 0x3C,
+    NVDIMM_ES_TEMP_ERROR                    = NVDIMM_COMP_ID | 0x3D,
+    NVDIMM_SET_EVENT_NOTIFICATION_ERROR     = NVDIMM_COMP_ID | 0x3E,
+    NVDIMM_VERIF_BYTE_CHECK_FAILED          = NVDIMM_COMP_ID | 0x3F,   // Encryption key reg verif failed
+    NVDIMM_ENCRYPTION_ENABLE_FAILED         = NVDIMM_COMP_ID | 0x40,   // Encryption enable failed
+    NVDIMM_ENCRYPTION_ERASE_PENDING_FAILED  = NVDIMM_COMP_ID | 0x41,   // Encryption crypto erase pending failed
+    NVDIMM_ENCRYPTION_ERASE_FAILED          = NVDIMM_COMP_ID | 0x42,   // Encryption crypto erase failed
+    NVDIMM_ENCRYPTION_UNLOCK_FAILED         = NVDIMM_COMP_ID | 0x43,   // Encryption unlock failed
+    NVDIMM_ENCRYPTION_INVALID_ATTRIBUTE     = NVDIMM_COMP_ID | 0x44,   // Encryption attribute key data invalid
+    NVDIMM_ENCRYPTION_KEY_ATTRS_INVALID     = NVDIMM_COMP_ID | 0x45,   // Encryption key attributes are both invalid
+    NVDIMM_ENCRYPTION_MAX_DARN_ERRORS       = NVDIMM_COMP_ID | 0x46,   // Darn random key gen reached max errors
+    NVDIMM_ENCRYPTION_BAD_RANDOM_DATA       = NVDIMM_COMP_ID | 0x47,   // Generated key data not valid
+    NVDIMM_CANNOT_MAKE_ATTRIBUTE            = NVDIMM_COMP_ID | 0x48,   // Cannot make Attribute
+    NVDIMM_HEALTH_CHECK_IN_PROGRESS_FAILURE = NVDIMM_COMP_ID | 0x49,   // !< pertains to ES_CMD_STATUS0[0]; the health check in progress flag
+    NVDIMM_HEALTH_CHECK_REPORTED_FAILURE    = NVDIMM_COMP_ID | 0x4A,   // !< pertains to ES_CMD_STATUS0[2]; the health check reported a failure flag
+    NVDIMM_LIFETIME_MIN_REQ_NOT_MET         = NVDIMM_COMP_ID | 0x4B,   // !< pertains to ES_LIFETIME; BPM does not meet minimum requirement for a new BPM
+    NVDIMM_HEALTH_CHECK_NEVER_INITIATED     = NVDIMM_COMP_ID | 0x4C,   // !< A health check was never initiated at start of IPL
 };
 
 enum UserDetailsTypes
 {
         NVDIMM_UDT_NO_FORMAT       = 0x0,
         NVDIMM_UDT_PARAMETERS      = 0x1,
+        NVDIMM_OP_PARAMETERS       = 0x2,
 };
 
 };  // end NVDIMM

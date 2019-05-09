@@ -79,6 +79,7 @@ TRAC_INIT( & g_trac_nvdimmr, "NVDIMMR", KILOBYTE );
 #define MAX_READ_RETRY_SECS  30
 // ----------------------------------------------
 
+using namespace TARGETING;
 
 namespace
 {

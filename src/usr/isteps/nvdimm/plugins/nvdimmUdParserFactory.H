@@ -38,14 +38,14 @@ namespace NVDIMM
             {
                 registerParser<NVDIMM::UdParserNvdimmParms>
                   (NVDIMM_UDT_PARAMETERS);
+                registerParser<NVDIMM::UdParserNvdimmOPParms>
+                  (NVDIMM_OP_PARAMETERS);
             }
 
-        private:
-
-            UserDetailsParserFactory(const UserDetailsParserFactory &);
-            UserDetailsParserFactory & operator=
-                (const UserDetailsParserFactory &);
+            UserDetailsParserFactory(const UserDetailsParserFactory &) = delete;
+            UserDetailsParserFactory & operator=(UserDetailsParserFactory &) = delete;
     };
+
 };
 
 #endif
