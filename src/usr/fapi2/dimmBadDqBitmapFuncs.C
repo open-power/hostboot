@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,8 +39,8 @@ using namespace mss;
 //------------------------------------------------------------------------------
 // Utility function to check parameters and get the Bad DQ bitmap
 //------------------------------------------------------------------------------
-fapi2::ReturnCode dimmBadDqCheckParamGetBitmap(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
+fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     const uint8_t i_port,
     const uint8_t i_dimm,
     const uint8_t i_rank,
@@ -95,10 +95,10 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap(
                 if ( l_dimm == i_dimm )
                 {
                     o_dimmTrgt = dimmTrgt;
-                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(dimmTrgt);
+                    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapiDimm(dimmTrgt);
                     // Port and dimm are correct, get the Bad DQ bitmap
                     l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP,
-                                          l_fapi2DimmTrgt,
+                                          l_fapiDimm,
                                           o_dqBitmap );
                     if ( l_rc ) break;
                 }
@@ -117,8 +117,8 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap(
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode p10DimmGetBadDqBitmap(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
+fapi2::ReturnCode p10DimmGetBadDqBitmap( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[BAD_DQ_BYTE_COUNT])
@@ -151,8 +151,8 @@ fapi2::ReturnCode p10DimmGetBadDqBitmap(
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode p10DimmSetBadDqBitmap(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_fapiTrgt,
+fapi2::ReturnCode p10DimmSetBadDqBitmap( const fapi2::Target
+    <fapi2::TARGET_TYPE_MEM_PORT|fapi2::TARGET_TYPE_OCMB_CHIP>& i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     const uint8_t (&i_data)[BAD_DQ_BYTE_COUNT])
@@ -178,19 +178,9 @@ fapi2::ReturnCode p10DimmSetBadDqBitmap(
         // Add the rank bitmap to the DIMM bitmap and write the bitmap.
         memcpy( l_dqBitmap[i_rank], i_data, BAD_DQ_BYTE_COUNT );
 
-        errlHndl_t l_errl = nullptr;
-        TARGETING::TargetHandle_t l_trgt = nullptr;
-        l_errl = fapi2::platAttrSvc::getTargetingTarget(i_fapiTrgt, l_trgt);
-        if ( l_errl )
-        {
-            FAPI_ERR( "p10DimmSetBadDqBitmap: Error from getTargetingTarget" );
-            break;
-        }
-
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2DimmTrgt(l_dimmTrgt);
-
-        l_rc = FAPI_ATTR_SET( fapi2::ATTR_BAD_DQ_BITMAP, l_fapi2DimmTrgt,
-                l_dqBitmap );
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTrgt );
+        l_rc = FAPI_ATTR_SET( fapi2::ATTR_BAD_DQ_BITMAP, l_fapiDimm,
+                              l_dqBitmap );
 
         if ( l_rc )
         {
