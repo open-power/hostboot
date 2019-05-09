@@ -118,13 +118,23 @@ const bool g_usePNOR = true;
 *
 * @param[in] i_dimmType - The DIMM to verify if valid
 *
-* @return boolean - return true if given paramter is a known DIMM type,
+* @return boolean - return true if given parameter is a known DIMM type,
 *                   false otherwise
 */
 bool isValidDimmType ( uint8_t i_dimmType );
 
-//@TODO RTC 203788 doxygen
-bool isValidDimmType(uint8_t i_memType,
+/**
+  * @brief Determines if the given DIMM type is a known DIMM type or not by
+  *        calling the correct isValidDimmType function for OCMB_SPD or SPD.
+  *
+  * @param[in] i_dimmType   - The DIMM to verify if valid
+  *
+  * @param[in] i_eepromType - The eeprom content type of the DIMM
+  *
+  * @return boolean - return true if given paramter is a known DIMM type,
+  *                   false otherwise
+  */
+bool isValidDimmType(uint8_t i_dimmType,
                      TARGETING::EEPROM_CONTENT_TYPE i_eepromType);
 
 
@@ -145,15 +155,17 @@ bool isValidDimmType(uint8_t i_memType,
 bool compareEntries ( const KeywordData e1,
                       const KeywordData e2 );
 
-// @TODO RTC 203788 update comment block
 /**
  * @brief This function will read the DIMM memory type.
  *
- * @param[out] o_memType - The memory type value to return.
+ * @param[out] o_memType     - The memory type value to return.
  *
- * @param[in] i_target - The target to read data from.
+ * @param[in] i_target       - The target to read data from.
  *
- * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ * @param[in] i_location     - The SPD source (PNOR/SEEPROM).
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
+ *                             Default to AUTOSELECT.
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
@@ -163,23 +175,25 @@ errlHndl_t getMemType(uint8_t & o_memType,
                      VPD::vpdCmdTarget i_location,
                      EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
-// @TODO RTC 203788 update comment block
 /**
- * @brief This function will read the DIMM memory type.
+ * @brief This function will read the DIMM memory type by calling the correct
+ *        function given the eeprom content type.
  *
- * @param[out] o_memType - The memory type value to return.
+ * @param[out] o_memType     - The memory type value to return.
  *
- * @param[in] i_target - The target to read data from.
+ * @param[in] i_target       - The target to read data from.
  *
- * @param[in] i_location - The SPD source (PNOR/SEEPROM).
+ * @param[in] i_eepromType   - The Eeprom content type of the target.
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
  */
-errlHndl_t getMemType(uint8_t &                  o_memType,
-                     TARGETING::Target *         i_target,
+errlHndl_t getMemType(uint8_t &                     o_memType,
+                     TARGETING::Target *            i_target,
                      TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
-                     EEPROM::EEPROM_SOURCE       i_eepromSource);
+                     EEPROM::EEPROM_SOURCE          i_eepromSource);
 
 /**
  * @brief This function will read the DIMM module type.
@@ -2278,7 +2292,21 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     TRACSSCOMP(g_trac_spd, EXIT_MRK"spd.C::setPartAndSerialNumberAttributes()");
 }
 
-// @TODO RTC 203788 Doxygen
+/*
+ * @brief Read keyword from SPD by determining which function to call based on
+ *        eeprom content type.
+ *
+ * @param[in]     i_target         target to read data from
+ * @param[in]     i_eepromType     Eeprom content type of the target.
+ * @param[in]     i_keyword        keyword from spdenums.H to read
+ * @param[in]     i_memType        The memory type of this target.
+ * @param[in/out] io_buffer        data buffer SPD will be written to
+ * @param[in/out] io_buflen        length of the given data buffer
+ * @param[in]     i_eepromSource   The EEPROM source (CACHE/HARDWARE).
+ *
+ *
+ * @return        errlHndl_t       nullptr on success. Otherwise, error log.
+ */
 errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
                                 TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
                           const VPD::vpdKeyword             i_keyword,

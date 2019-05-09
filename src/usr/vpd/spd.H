@@ -508,7 +508,7 @@ errlHndl_t cmpPnorToSeeprom( TARGETING::Target * i_target,
                              bool &o_match );
 
 /**
- * @brief This function compares value of the keyword in PNOR/SEEPROM
+ * @brief This function compares value of the keyword in CACHE/HARDWARE
  *        and returns the result
  *
  * @param[in] i_target - Target device

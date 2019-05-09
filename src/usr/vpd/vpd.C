@@ -673,6 +673,67 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
     return l_err;
 }
 
+/**
+ * @brief This function compares the specified record/keyword in
+ *        CACHE/HARDWARE by calling the correct function based on the
+ *        target's eeprom content type and returns the result.  A mismatch
+ *        will not return an error.
+ *
+ * @param[in]  i_target     Target device
+ *
+ * @param[in]  i_eepromType Eeprom content type for the target.
+ *
+ * @param[in]  i_keyword    Keyword to compare
+ *
+ * @param[in]  i_record     Record to compare
+ *
+ * @param[out] o_match      Result of compare
+ *
+ * @return errlHndl_t       NULL if successful, otherwise a pointer to the
+ *                          error log.
+ */
+errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
+                              TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                              vpdKeyword                     i_keyword,
+                              vpdRecord                      i_record,
+                              bool&                          o_match)
+{
+    errlHndl_t l_err = nullptr;
+
+    if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_MVPD)
+       || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_FRUVPD))
+    {
+        auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+        IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
+
+        // If we have a NODE, use pvpd api
+        if(l_type == TARGETING::TYPE_NODE)
+        {
+            l_ipvpd = &(Singleton<PvpdFacade>::instance());
+        }
+
+        l_err = l_ipvpd->cmpEecacheToEeprom(i_target,
+                                            i_record,
+                                            i_keyword,
+                                            o_match);
+    }
+    else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+            || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
+    {
+        l_err = SPD::cmpEecacheToEeprom(i_target,
+                                        i_eepromType,
+                                        i_keyword,
+                                        o_match);
+    }
+    else
+    {
+        assert(false, "Error, invalid EEPROM type passed to cmpEecacheToEeprom");
+    }
+
+    return l_err;
+}
+
+
 // ------------------------------------------------------------------
 // ensureEepromCacheIsInSync
 // ------------------------------------------------------------------
@@ -688,23 +749,12 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
     vpdKeyword l_keywordPN = 0;
     vpdKeyword l_keywordSN = 0;
 
-    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
-
-    //@TODO RTC 203788 Uncomment when used for IBM_MVPD and IBM_FRUVPD content
-    //                 types.
-//    IpVpdFacade* l_ipvpd = &(Singleton<MvpdFacade>::instance());
-//
-//    // If we have a NODE, use pvpd api
-//    if(l_type == TARGETING::TYPE_NODE)
-//    {
-//        l_ipvpd = &(Singleton<PvpdFacade>::instance());
-//    }
-//
     do
     {
         // Get the correct Part and serial numbers
         l_err = getPnAndSnRecordAndKeywords(i_target,
-                                            l_type,
+                                            i_target->
+                                                getAttr<TARGETING::ATTR_TYPE>(),
                                             l_record,
                                             l_keywordPN,
                                             l_keywordSN);
@@ -718,27 +768,15 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 
         // Compare the Part Numbers in CACHE/HARDWARE
         bool l_matchPN = false;
-        if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_MVPD)
-           || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_FRUVPD))
-        {
-           // @TODO: RTC 203788 Implement cmpEecacheToEeprom
-           // l_err = l_ipvpd->cmpEecacheToEeprom(i_target,
-           //                                     l_record,
-           //                                     l_keywordPN,
-           //                                     l_matchPN);
-        }
-        else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
-                || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
-        {
-            l_err = SPD::cmpEecacheToEeprom(i_target,
-                                            i_eepromType,
-                                            l_keywordPN,
-                                            l_matchPN);
-        }
+        l_err = cmpEecacheToEeprom(i_target,
+                                   i_eepromType,
+                                   l_keywordPN,
+                                   l_record,
+                                   l_matchPN);
 
         if (l_err)
         {
-            TRACDCOMP(g_trac_vpd,ERR_MRK
+            TRACFCOMP(g_trac_vpd,ERR_MRK
                       "VPD::ensureEepromCacheIsInSync: "
                       "Error checking for CACHE/HARDWARE PN match");
             break;
@@ -746,27 +784,17 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 
         // Compare the Serial Numbers in CACHE/HARDWARE
         bool l_matchSN = false;
-        if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_MVPD)
-           || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_IBM_FRUVPD))
-        {
-            //@TODO RTC 203788: Implement for this case
-           // l_err = l_ipvpd->cmpEecacheToEeprom(i_target,
-           //                                     l_record,
-           //                                     l_keywordSN,
-           //                                     l_matchSN);
-        }
-        else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
-                || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
-        {
-            l_err = SPD::cmpEecacheToEeprom(i_target,
-                                            i_eepromType,
-                                            l_keywordSN,
-                                            l_matchSN);
-        }
+        l_err = cmpEecacheToEeprom(i_target,
+                                   i_eepromType,
+                                   l_keywordSN,
+                                   l_record,
+                                   l_matchSN);
 
         if (l_err)
         {
-            TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureEepromCacheIsInSync: Error checking for CACHE/HARDWARE SN match");
+            TRACFCOMP(g_trac_vpd, ERR_MRK
+                     "VPD::ensureEepromCacheIsInSync: Error checking for "
+                     "CACHE/HARDWARE SN match");
             break;
         }
 
@@ -786,7 +814,8 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
         if (o_isInSync)
         {
             TRACFCOMP(g_trac_vpd,
-                      "VPD::ensureEepromCacheIsInSync: CACHE_PN/SN == HARDWARE_PN/SN for target %.8X",
+                      "VPD::ensureEepromCacheIsInSync: "
+                      "CACHE_PN/SN == HARDWARE_PN/SN for target %.8X",
                       TARGETING::get_huid(i_target));
         }
         else

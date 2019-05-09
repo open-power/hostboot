@@ -319,6 +319,109 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
 }
 
 // ------------------------------------------------------------------
+// IpVpdFacade::cmpEecacheToEeprom
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
+                                           VPD::vpdRecord      i_record,
+                                           VPD::vpdKeyword     i_keyword,
+                                           bool              & o_match)
+{
+    errlHndl_t l_err = nullptr;
+
+    TRACSSCOMP(g_trac_vpd, ENTER_MRK"cmpEecacheToEeprom() ");
+
+    o_match = false;
+
+    input_args_t l_cacheArgs;
+    l_cacheArgs.record = i_record;
+    l_cacheArgs.keyword = i_keyword;
+    l_cacheArgs.location = VPD::SEEPROM;
+    l_cacheArgs.eepromSource = EEPROM::CACHE;
+
+    input_args_t l_hardwareArgs;
+    l_hardwareArgs.record = i_record;
+    l_hardwareArgs.keyword = i_keyword;
+    l_hardwareArgs.location = VPD::SEEPROM;
+    l_hardwareArgs.eepromSource = EEPROM::HARDWARE;
+
+    do
+    {
+        // Get the CACHE size
+        size_t l_sizeCache = 0;
+
+        l_err = read(i_target,
+                     nullptr,
+                     l_sizeCache,
+                     l_cacheArgs);
+
+        if( l_err || (l_sizeCache == 0) )
+        {
+            break;
+        }
+
+        // Get the CACHE data
+        uint8_t l_dataCache[l_sizeCache];
+        l_err = read( i_target,
+                      l_dataCache,
+                      l_sizeCache,
+                      l_cacheArgs );
+
+        if( l_err )
+        {
+            break;
+        }
+
+        // Get the HARDWARE size
+        size_t l_sizeHardware = 0;
+        l_err = read( i_target,
+                      nullptr,
+                      l_sizeHardware,
+                      l_hardwareArgs );
+
+        if( l_err || (l_sizeHardware == 0) )
+        {
+            break;
+        }
+
+        // Get the HARDWARE data
+        uint8_t l_dataHardware[l_sizeHardware];
+        l_err = read( i_target,
+                      l_dataHardware,
+                      l_sizeHardware,
+                      l_hardwareArgs );
+
+        if( l_err )
+        {
+            break;
+        }
+
+        // Compare the CACHE/HARDWARE keyword size/data
+        if( l_sizeCache != l_sizeHardware )
+        {
+            // Leave o_match == false since there isn't a match.
+            break;
+        }
+
+        if( memcmp( l_dataCache,
+                    l_dataHardware,
+                    l_sizeCache ) != 0 )
+        {
+            TRACFCOMP( g_trac_vpd, "cmpEecacheToEeprom found mismatch for HUID %.8X 0x%X:0x%X", TARGETING::get_huid(i_target), i_record, i_keyword );
+            TRACFBIN( g_trac_vpd, "HARDWARE", l_dataHardware, l_sizeHardware );
+            TRACFBIN( g_trac_vpd, "CACHE", l_dataCache, l_sizeCache );
+            break;
+        }
+
+        o_match = true;
+
+    } while(0);
+
+    TRACSSCOMP( g_trac_vpd, EXIT_MRK"cmpEecacheToEeprom()" );
+
+    return l_err;
+}
+
+// ------------------------------------------------------------------
 // IpVpdFacade::cmpPnorToSeeprom
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::cmpPnorToSeeprom ( TARGETING::Target * i_target,
@@ -1618,6 +1721,36 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
     return err;
 }
 
+
+// ------------------------------------------------------------------
+// IpVpdFacade::fetchData
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::fetchData ( uint64_t            i_byteAddr,
+                                    size_t              i_numBytes,
+                                    void *              o_data,
+                                    TARGETING::Target * i_target,
+                                    VPD::vpdCmdTarget   i_location,
+                                    const char*         i_record )
+{
+    errlHndl_t err = nullptr;
+
+    // Create an input_args struct which will default EEPROM_SOURCE
+    // to EEPROM::AUTOSELECT.
+    input_args_t inputArgs;
+
+    // Set the VPD location to the given location (PNOR/SEEPROM).
+    inputArgs.location = i_location;
+
+    err = fetchData(i_byteAddr,
+                    i_numBytes,
+                    o_data,
+                    i_target,
+                    inputArgs,
+                    i_record);
+
+    return err;
+}
+
 // ------------------------------------------------------------------
 // IpVpdFacade::fetchData
 // ------------------------------------------------------------------
@@ -1625,7 +1758,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                     size_t i_numBytes,
                                     void * o_data,
                                     TARGETING::Target * i_target,
-                                    VPD::vpdCmdTarget i_location,
+                                    input_args_t i_args,
                                     const char* i_record )
 {
     errlHndl_t err = NULL;
@@ -1636,12 +1769,12 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
     configError = VPD::resolveVpdSource( i_target,
                                          iv_configInfo.vpdReadPNOR,
                                          iv_configInfo.vpdReadHW,
-                                         i_location,
+                                         i_args.location,
                                          vpdSource );
 
     // Look for a record override in our image unless explicitly told not to
     bool l_foundOverride = false;
-    if( (i_location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
+    if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
     {
         uint8_t* l_overridePtr = nullptr;
         VPD::RecordTargetPair_t l_recTarg =
@@ -1694,7 +1827,11 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
     }
     else if ( (vpdSource == VPD::SEEPROM) && !l_foundOverride )
     {
-        err = fetchDataFromEeprom( i_byteAddr, i_numBytes, o_data, i_target );
+        err = fetchDataFromEeprom(i_byteAddr,
+                                  i_numBytes,
+                                  o_data,
+                                  i_target,
+                                  i_args.eepromSource);
     }
     else
     {
@@ -1723,7 +1860,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                        VPD::VPD_READ_SOURCE_UNRESOLVED,
                                        TWO_UINT32_TO_UINT64(
                                             TARGETING::get_huid(i_target),
-                                            i_location ),
+                                            i_args.location ),
                                        TWO_UINT32_TO_UINT64(
                                             iv_configInfo.vpdReadPNOR,
                                             iv_configInfo.vpdReadHW ),
@@ -1777,10 +1914,11 @@ errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
 // ------------------------------------------------------------------
 // IpVpdFacade::fetchDataFromEeprom
 // ------------------------------------------------------------------
-errlHndl_t IpVpdFacade::fetchDataFromEeprom ( uint64_t i_byteAddr,
-                                              size_t i_numBytes,
-                                              void * o_data,
-                                              TARGETING::Target * i_target )
+errlHndl_t IpVpdFacade::fetchDataFromEeprom(uint64_t i_byteAddr,
+                                           size_t i_numBytes,
+                                           void * o_data,
+                                           TARGETING::Target * i_target,
+                                           EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err = NULL;
     TRACSSCOMP( g_trac_vpd,
@@ -1797,7 +1935,8 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom ( uint64_t i_byteAddr,
                                   i_numBytes,
                                   DEVICE_EEPROM_ADDRESS(
                                       EEPROM::VPD_PRIMARY,
-                                      i_byteAddr, EEPROM::AUTOSELECT ) );
+                                      i_byteAddr,
+                                      i_eepromSource ) );
         if( err )
         {
             break;

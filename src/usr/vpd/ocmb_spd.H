@@ -30,23 +30,18 @@
 namespace SPD
 {
 
-/**
-* @brief Read keyword from SPD
-*
-*        Currently used to detect I2C_MUTEX and OCMB_CHIP targets
-*
-* @param[in]     i_target     OCMB target to read data from
-* @param[in/out] io_buffer    databuffer SPD will be written to
-* @param[in/out] io_buflen    length of the given data buffer
-* @param[in]     i_keyword    keyword from spdenums.H to read
-* @param[in]     i_memType    The memory type of this target.
-* @param[in]     i_location   The EEPROM source (CACHE/HARDWARE).
-*
-* @pre io_buffer and i_target must be non-null
-* @pre currenlty only supported value for i_keyword is ENTIRE_SPD
-*
-* @return  errlHndl_t
-*/
+/*
+ * @brief Read keyword from SPD
+ *
+ * @param[in]     i_target     OCMB target to read data from
+ * @param[in/out] io_buffer    databuffer SPD will be written to
+ * @param[in/out] io_buflen    length of the given data buffer
+ * @param[in]     i_keyword    keyword from spdenums.H to read
+ * @param[in]     i_memType    The memory type of this target.
+ * @param[in]     i_location   The EEPROM source (CACHE/HARDWARE).
+ *
+ * @return        errlHndl_t   nullptr on success. Otherwise, error log.
+ */
 errlHndl_t ocmbGetSPD(TARGETING::TargetHandle_t        i_target,
                       void*                            io_buffer,
                       size_t&                          io_buflen,
@@ -54,13 +49,31 @@ errlHndl_t ocmbGetSPD(TARGETING::TargetHandle_t        i_target,
                       const uint8_t                    i_memType,
                       EEPROM::EEPROM_SOURCE            i_location);
 
-// @TODO RTC 203788 doxygen
+/*
+ * @brief Determine if the given DIMM type is a known DIMM type or not
+ *
+ * @param[in] i_dimmType - The DIMM to verify if valid
+ *
+ * @return boolean - return true if given parameter is a known DIMM type,
+ *                   false otherwise
+ */
 bool isValidOcmbDimmType(const uint8_t i_dimmType);
 
-// @TODO RTC 203788 doxygen
+/*
+ * @brief This function will read the DIMM memory type for OCMBs.
+ *
+ * @param[out] o_memType     - The memory type value to return.
+ *
+ * @param[in] i_target       - The target to read data from.
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer
+ *      to the error log.
+ */
 errlHndl_t getMemType(uint8_t&                      o_memType,
                       TARGETING::TargetHandle_t     i_target,
-                      EEPROM::EEPROM_SOURCE         i_location);
+                      EEPROM::EEPROM_SOURCE         i_eepromSource);
 
 /**
  * @param This function is a wrapper for reading the correct keyword.
