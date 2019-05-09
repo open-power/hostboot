@@ -217,6 +217,7 @@ enum status_codes
     SUCCESS              = 0x00,
     ADDRESS_OUT_OF_RANGE = 0x01,
     ADDRESS_PROHIBITED   = 0x02,
+    FW_BUSY              = 0xFE,
 };
 
 ///

@@ -118,6 +118,26 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
+    <description>
+      Received FW_BUSY status after polling timeout for
+      command ID EXP_FW_STATUS
+    </description>
+    <ffdc>STATUS_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT</rc>
     <description>
       Polling the explorer I2C slave interface for an ACK

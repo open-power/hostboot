@@ -59,14 +59,26 @@ namespace check
 /// @param[in] i_target the OCMB target
 /// @param[in] i_cmd_id the command ID
 /// @param[in] i_data data to check from EXP_FW_STATUS
+/// @param[out] o_busy true if explorer returns FW_BUSY status, false otherwise
 ///
 inline fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const uint8_t i_cmd_id,
-                                      const std::vector<uint8_t>& i_data )
+                                      const std::vector<uint8_t>& i_data,
+                                      bool& o_busy )
 {
+    // Set o_busy to false just in case we don't make it to where we check it
+    o_busy = false;
+
     // Set to a high number to make sure check for SUCCESS (== 0) isn't a fluke
     uint8_t l_status = ~(0);
     FAPI_TRY( status::get_status_code(i_target, i_data, l_status) );
+
+    // We need to try again if we get a FW_BUSY status, so set the flag
+    if (l_status == status_codes::FW_BUSY)
+    {
+        o_busy = true;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
     // If it's anything else we can just look up the status code
@@ -127,11 +139,37 @@ fapi_try_exit:
 ///
 inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    std::vector<uint8_t> l_data;
+    constexpr uint64_t NUM_LOOPS = 50;
+    // So, why aren't we using the memory team's polling API?
+    // This is a base function that will be utilized by the platform code
+    // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
+    // So, we're decomposing the polling library below
+    bool l_busy = true;
+    uint64_t l_loop = 0;
 
-    // Get data and check for errors
-    FAPI_TRY(get_fw_status(i_target, l_data));
-    FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data) );
+    // Loop until we max our our loop count or get a doorbell response
+    for(; l_loop < NUM_LOOPS && l_busy; ++l_loop)
+    {
+        std::vector<uint8_t> l_data;
+        FAPI_TRY(get_fw_status(i_target, l_data));
+        FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data, l_busy) );
+
+        if (l_busy)
+        {
+            FAPI_INF( "%s reutrned FW_BUSY status. Retrying...", mss::c_str(i_target) );
+            FAPI_TRY( fapi2::delay( DELAY_100NS, 200) );
+        }
+    }
+
+    FAPI_DBG("%s stopped on loop%u/%u. %s",
+             mss::c_str(i_target), l_loop, NUM_LOOPS, (l_busy ? "FW_BUSY" : "SUCCESS"));
+
+    // Check that Explorer is not still in FW_BUSY state
+    FAPI_ASSERT( !l_busy,
+                 fapi2::MSS_EXP_I2C_FW_STATUS_BUSY().
+                 set_TARGET(i_target),
+                 "Polling timeout on FW_STATUS command (still FW_BUSY) for %s",
+                 mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
