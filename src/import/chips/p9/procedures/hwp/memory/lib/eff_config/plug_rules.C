@@ -297,9 +297,10 @@ fapi_try_exit:
 fapi2::ReturnCode dimm_slot_is_nv_capable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         bool& o_is_capable)
 {
-    const auto l_pos = mss::pos(i_target);
-
+    uint8_t l_pos = 0;
     fapi2::buffer<uint64_t> l_plug_rules_bitmap = 0;
+
+    FAPI_TRY( mss::mrw_nvdimm_slot_position(i_target, l_pos) );
 
     FAPI_TRY( mss::mrw_nvdimm_plug_rules(l_plug_rules_bitmap) );
 
