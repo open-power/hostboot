@@ -32,7 +32,7 @@
       Target base address is not cacheline aligned.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>EX_TARGET</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>TARGET_BASE_ADDRESS</ffdc>
     <ffdc>HRMOR_OFFSET</ffdc>
     <ffdc>BOOTLOADER_OFFSET</ffdc>
@@ -50,27 +50,8 @@
       Payload size is invalid.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
-  <!-- FIXME @RTC202058 -->
-    <ffdc>EX_TARGET</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>PAYLOAD_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P10_MASTER_CORE_NOT_FOUND</rc>
-    <description>
-      Procedure: p10_sbe_load_bootloader
-      The master core is not found from the EX master target
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-  <!-- FIXME @RTC202058 -->
-    <ffdc>EX_TARGET</ffdc>
-    <ffdc>MASTER_CORE_UNIT_POS</ffdc>
-    <ffdc>FUSED_MODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
