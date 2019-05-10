@@ -1033,7 +1033,7 @@ inline fapi2::ReturnCode set_rank_field( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK()
                          .set_RANK(i_rank)
-                         .set_MCA_TARGET(i_target)
+                         .set_PORT_TARGET(i_target)
                          .set_FUNCTION(SET_RANK_FIELD),
                          "%s Invalid rank (%d) in set_rank_field",
                          mss::c_str(i_target),
@@ -1101,7 +1101,7 @@ inline fapi2::ReturnCode get_rank_field( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK()
                          .set_RANK(i_rank)
-                         .set_MCA_TARGET(i_target)
+                         .set_PORT_TARGET(i_target)
                          .set_FUNCTION(GET_RANK_FIELD),
                          "%s Invalid rank (%d) in get_ranks_in_pair",
                          mss::c_str(i_target),
@@ -1171,7 +1171,7 @@ inline fapi2::ReturnCode set_pair_valid( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK()
                          .set_RANK(i_rank)
-                         .set_MCA_TARGET(i_target)
+                         .set_PORT_TARGET(i_target)
                          .set_FUNCTION(SET_PAIR_VALID),
                          "%s Invalid rank (%d) in get_ranks_in_pair",
                          mss::c_str(i_target),
@@ -1243,7 +1243,7 @@ inline fapi2::ReturnCode get_pair_valid( const fapi2::Target<T> i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK()
                          .set_RANK(i_rank)
-                         .set_MCA_TARGET(i_target)
+                         .set_PORT_TARGET(i_target)
                          .set_FUNCTION(GET_PAIR_VALID),
                          "%s Invalid rank (%d) passed into get get_pair_valid",
                          mss::c_str(i_target),
@@ -1350,7 +1350,7 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
         FAPI_ASSERT( l_ordinal < MAX_RANK_PER_DIMM,
                      fapi2::MSS_INVALID_RANK()
                      .set_RANK(l_ordinal)
-                     .set_MCA_TARGET(i_target)
+                     .set_PORT_TARGET(i_target)
                      .set_FUNCTION(GET_RANKS_IN_PAIR),
                      "%s Invalid rank (%d) in set_ranks_in_pair",
                      mss::c_str(i_target),

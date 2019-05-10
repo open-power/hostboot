@@ -4626,7 +4626,7 @@ fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     // Checks for i_rp in bounds
     FAPI_ASSERT(i_rp < MAX_RANK_PAIRS,
                 fapi2::MSS_INVALID_RANK().
-                set_MCA_TARGET(i_target).
+                set_PORT_TARGET(i_target).
                 set_RANK(i_rp).
                 set_FUNCTION(i_function),
                 "%s rank pair is out of bounds %lu", mss::c_str(i_target), i_rp);

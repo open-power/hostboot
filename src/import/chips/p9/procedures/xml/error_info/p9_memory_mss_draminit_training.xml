@@ -658,20 +658,6 @@
 </hwpError>
 
 <hwpError>
-  <rc>RC_MSS_INVALID_RANK</rc>
-  <description>
-     Invalid rank passed into function
-  </description>
-  <ffdc>FUNCTION</ffdc>
-  <ffdc>RANK</ffdc>
-  <ffdc>MCA_TARGET</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
-
-<hwpError>
   <rc>RC_MSS_INVALID_RANK_PAIR</rc>
   <description>
     Invalid rank pair passed into function

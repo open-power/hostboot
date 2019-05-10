@@ -59,6 +59,7 @@ EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
@@ -133,7 +134,6 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/gemini/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/error_info/*.xml)
-
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \

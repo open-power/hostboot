@@ -660,14 +660,14 @@ fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_
         // If the rank vector is empty log an error
         FAPI_ASSERT(!l_ranks.empty(),
                     fapi2::MSS_INVALID_RANK().
-                    set_MCA_TARGET(i_target).
+                    set_PORT_TARGET(i_target).
                     set_RANK(i_rp).
                     set_FUNCTION(mss::ffdc_function_codes::WR_VREF_TRAINING_WORKAROUND),
                     "%s rank pair is empty! %lu", mss::c_str(i_target), i_rp);
 
         FAPI_ASSERT(l_ranks[0] != NO_RANK,
                     fapi2::MSS_INVALID_RANK().
-                    set_MCA_TARGET(i_target).
+                    set_PORT_TARGET(i_target).
                     set_RANK(NO_RANK).
                     set_FUNCTION(mss::ffdc_function_codes::WR_VREF_TRAINING_WORKAROUND),
                     "%s rank pair has no ranks %lu", mss::c_str(i_target), i_rp);

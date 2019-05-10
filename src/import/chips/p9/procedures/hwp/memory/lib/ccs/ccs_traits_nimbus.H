@@ -59,6 +59,7 @@ class ccsTraits<mss::mc_type::NIMBUS>
         static constexpr uint64_t STATQ_REG = MCBIST_CCS_STATQ;
 
         static constexpr uint64_t PORTS_PER_MC_TARGET = mss::PORTS_PER_MCBIST;
+        static constexpr uint64_t CCS_MAX_DIMM_PER_PORT = mss::MAX_DIMM_PER_PORT;
         static constexpr uint64_t CCS_MAX_MRANK_PER_PORT = mss::MAX_MRANK_PER_PORT;
         static constexpr uint64_t CCS_MAX_RANK_PER_DIMM = mss::MAX_RANK_PER_DIMM;
         static constexpr uint64_t CCS_MAX_RANKS_DIMM1 = mss::MAX_RANKS_DIMM1;

@@ -160,9 +160,9 @@ class instruction_t
             // First, check rank - we need to make sure that we have a valid rank
             FAPI_ASSERT(iv_rank < TT::CCS_MAX_MRANK_PER_PORT,
                         fapi2::MSS_INVALID_RANK()
-                        .set_MCA_TARGET(i_target)
+                        .set_PORT_TARGET(i_target)
                         .set_RANK(iv_rank)
-                        .set_FUNCTION(ffdc_function_codes::CCS_INST_CONFIGURE_RANK),
+                        .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
                         "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
 
             // Now the fun happens and we can deal with the actual encoding
@@ -217,9 +217,9 @@ class instruction_t
                 // So, we pass always if we're DIMM0, or if our DIMM rank is less than the maximum number of DIMM's on rank 1
                 FAPI_ASSERT(l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1 || l_is_dimm0,
                             fapi2::MSS_INVALID_RANK()
-                            .set_MCA_TARGET(i_target)
+                            .set_PORT_TARGET(i_target)
                             .set_RANK(iv_rank)
-                            .set_FUNCTION(ffdc_function_codes::CCS_INST_CONFIGURE_RANK),
+                            .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
                             "%s rank out of bounds rank%u", mss::c_str(i_target), iv_rank);
             }
 
@@ -255,7 +255,7 @@ inline fapi2::ReturnCode get_rank_config(const fapi2::Target<DEFAULT_MEM_PORT_TA
     constexpr uint8_t QUAD_RANK_ENABLE = 4;
     o_rank_config = rank_configuration::DUAL_DIRECT;
 
-    uint8_t l_num_master_ranks[MAX_DIMM_PER_PORT] = {};
+    uint8_t l_num_master_ranks[TT::CCS_MAX_DIMM_PER_PORT] = {};
     FAPI_TRY(TT::get_rank_config_attr(i_target, l_num_master_ranks));
 
     // We only need to check DIMM0
@@ -913,27 +913,14 @@ inline instruction_t refresh_command( const uint64_t i_rank, const uint16_t i_id
 
 ///
 /// @brief Select the port(s) to be used by the CCS
+/// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-inline fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_t i_ports)
-{
-    fapi2::buffer<uint64_t> l_data;
-    fapi2::buffer<uint64_t> l_ports;
-
-    // Not handling multiple ports here, can't do that for CCS. BRS
-    FAPI_TRY( l_ports.setBit(i_ports) );
-
-    FAPI_TRY( mss::getScom(i_target, TT::MCB_CNTL_REG, l_data) );
-    l_data.insert<TT::MCB_CNTL_PORT_SEL, TT::MCB_CNTL_PORT_SEL_LEN>(l_ports);
-    FAPI_TRY( mss::putScom(i_target, TT::MCB_CNTL_REG, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
+fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_t i_ports);
 
 ///
 /// @brief User sets to a '1'b to tell the Hdw to stop CCS whenever failure occurs. When a
@@ -1290,7 +1277,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
 
             FAPI_INF("executing CCS array for port %d (%s)", l_port_index, mss::c_str(p));
-            FAPI_TRY( select_ports( i_target, l_port_index), "Error in ccs execute" );
+            FAPI_TRY( select_ports<DEFAULT_MC_TYPE>( i_target, l_port_index), "Error in ccs execute" );
             FAPI_TRY( execute_inst_array(i_target, i_program, p), "Error in ccs execute" );
         }
     }

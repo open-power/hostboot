@@ -240,6 +240,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_RANK</rc>
+    <description>
+      Invalid rank passed into function
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>

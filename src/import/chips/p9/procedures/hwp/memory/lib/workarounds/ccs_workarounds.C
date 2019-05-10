@@ -463,7 +463,7 @@ fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_tar
             // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
             FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_port),
                      mss::c_str(i_port));
-            FAPI_TRY( mss::ccs::select_ports( i_target, mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_port)),
+            FAPI_TRY( mss::ccs::select_ports<mss::mc_type::NIMBUS>( i_target, mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_port)),
                       "Error in ccs execute" );
             FAPI_TRY( execute_inst_array(i_target, i_program, i_port), "Error in ccs execute" );
         }

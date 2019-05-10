@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -48,3 +48,4 @@ EXTRAINCDIR += ${GENDIR}/plugins/prdf/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/plugins/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/

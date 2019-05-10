@@ -61,6 +61,30 @@ namespace ccs
 {
 
 ///
+/// @brief Select the port(s) to be used by the CCS - EXPLORER specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_ports the buffer representing the ports
+///
+template<>
+fapi2::ReturnCode select_ports<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        uint64_t i_ports)
+{
+    typedef ccsTraits<mss::mc_type::NIMBUS> TT;
+    fapi2::buffer<uint64_t> l_data;
+    fapi2::buffer<uint64_t> l_ports;
+
+    // Not handling multiple ports here, can't do that for CCS. BRS
+    FAPI_TRY( l_ports.setBit(i_ports) );
+
+    FAPI_TRY( mss::getScom(i_target, TT::MCB_CNTL_REG, l_data) );
+    l_data.insert<TT::MCB_CNTL_PORT_SEL, TT::MCB_CNTL_PORT_SEL_LEN>(l_ports);
+    FAPI_TRY( mss::putScom(i_target, TT::MCB_CNTL_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Execute a set of CCS instructions - multiple ports - NIMBUS specialization
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports

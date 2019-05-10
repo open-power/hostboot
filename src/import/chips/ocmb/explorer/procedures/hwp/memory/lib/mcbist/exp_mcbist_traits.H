@@ -126,6 +126,13 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = EXPLR_MCBIST_MCBFD0Q;
+        static constexpr uint64_t PATTERN1_REG = EXPLR_MCBIST_MCBFD1Q;
+        static constexpr uint64_t PATTERN2_REG = EXPLR_MCBIST_MCBFD2Q;
+        static constexpr uint64_t PATTERN3_REG = EXPLR_MCBIST_MCBFD3Q;
+        static constexpr uint64_t PATTERN4_REG = EXPLR_MCBIST_MCBFD4Q;
+        static constexpr uint64_t PATTERN5_REG = EXPLR_MCBIST_MCBFD5Q;
+        static constexpr uint64_t PATTERN6_REG = EXPLR_MCBIST_MCBFD6Q;
+        static constexpr uint64_t PATTERN7_REG = EXPLR_MCBIST_MCBFD7Q;
 
         static constexpr uint64_t DATA_ROTATE_CNFG_REG = EXPLR_MCBIST_MCBDRCRQ;
         static constexpr uint64_t DATA_ROTATE_SEED_REG = EXPLR_MCBIST_MCBDRSRQ;

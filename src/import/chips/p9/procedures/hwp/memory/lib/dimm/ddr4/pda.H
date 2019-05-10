@@ -317,7 +317,7 @@ class commands
             // Check for a valid rank
             FAPI_ASSERT(mss::rank::is_rank_on_dimm(i_target, i_rank),
                         fapi2::MSS_INVALID_RANK().
-                        set_MCA_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target)).
+                        set_PORT_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target)).
                         set_RANK(i_rank).
                         set_FUNCTION(mss::ffdc_function_codes::PDA_ADD_COMMAND),
                         "%s does not have rank %lu", mss::c_str(i_target), i_rank);

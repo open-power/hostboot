@@ -186,9 +186,6 @@ enum ffdc_function_codes
     // LR training function
     DWL_CALL_OUT = 130,
     MREP_CALL_OUT = 131,
-
-
-    CCS_INST_CONFIGURE_RANK = 132,
 };
 
 // Static consts describing the bits used in the cal_step_enable attribute

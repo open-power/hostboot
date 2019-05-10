@@ -216,4 +216,186 @@
     </deconfigure>
   </hwpError>
 
+  <registerFfdc>
+    <id>REG_FFDC_EXP_CCS_FAILURE</id>
+    <scomRegister>EXPLR_MCBIST_CCS_MODEQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_STATQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_CNTLQ</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MCBMCATQ</scomRegister>
+
+    <!-- Instructions -->
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_00</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_01</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_02</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_03</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_04</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_05</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_06</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_07</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_08</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_09</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_10</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_11</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_12</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_13</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_14</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_15</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_16</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_17</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_18</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_19</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_20</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_21</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_22</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_23</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_24</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_25</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_26</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_27</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_28</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_29</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_30</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR0_31</scomRegister>
+
+    <!-- Control array -->
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_00</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_01</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_02</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_03</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_04</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_05</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_06</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_07</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_08</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_09</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_10</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_11</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_12</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_13</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_14</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_15</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_16</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_17</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_18</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_19</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_20</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_21</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_22</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_23</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_24</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_25</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_26</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_27</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_28</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_29</scomRegister>
+
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_30</scomRegister>
+    <scomRegister>EXPLR_MCBIST_CCS_INST_ARR1_31</scomRegister>
+
+    <!-- to get the CCS state machine hung state -->
+    <scomRegister>EXPLR_MCBIST_MBA_MCBERRPT0Q</scomRegister>
+    <scomRegister>EXPLR_MCBIST_MBA_MCBERRPT1Q</scomRegister>
+  </registerFfdc>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_READ_MISCOMPARE</rc>
+    <description>
+        CCS reports a read miscompare.
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_UE_SUE</rc>
+    <description>
+        CCS reports a UE or SUE in the CCS program array
+        Chould be an indicator of corruption in the CCS program
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_CCS_HUNG</rc>
+    <description>
+        Software reported that the machine is not seeing the CCS finish in the alloted time
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+   <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_CCS_HUNG_TRYING_TO_STOP</rc>
+    <description>
+        CCS failed to return from in-progress status while trying to stop a previous program
+        Software reported that CCS did not finish in alloted time after manually triggering stop
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
 </hwpErrors>

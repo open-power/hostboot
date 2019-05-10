@@ -85,6 +85,7 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/fir/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/phy/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ccs/
 MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${GEMINI_PROCEDURES_PATH}/hwp/memory/lib/
 
@@ -186,7 +187,6 @@ endef
 
 $(call BUILD_GENERATED)
 
-
 # Generate pmic_accessors header file
 GENERATED = gen_pmic_accessors
 COMMAND = gen_accessors.pl
@@ -207,7 +207,6 @@ define gen_pmic_accessors_RUN
 endef
 
 $(call BUILD_GENERATED)
-
 
 # Add common and generated parts to object list.
 

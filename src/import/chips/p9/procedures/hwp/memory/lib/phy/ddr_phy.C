@@ -1304,7 +1304,7 @@ fapi2::ReturnCode override_odt_wr_config( const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_ASSERT( i_rank < MAX_MRANK_PER_PORT,
                  fapi2::MSS_INVALID_RANK()
                  .set_RANK(i_rank)
-                 .set_MCA_TARGET(i_target)
+                 .set_PORT_TARGET(i_target)
                  .set_FUNCTION(OVERRIDE_ODT_WR_CONFIG),
                  "%s had invalid rank (0x%016lx) passed into override_odt_wr_config",
                  mss::c_str(i_target),
