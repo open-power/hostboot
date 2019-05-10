@@ -365,6 +365,20 @@ TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
+#ifdef __HOSTBOOT_MODULE
+uint32_t getChipId( TARGETING::TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( NULL != i_trgt );
+
+    TargetHandle_t parent = getParentChip( i_trgt );
+    PRDF_ASSERT( NULL != parent );
+
+    return parent->getAttr<ATTR_CHIP_ID>();
+}
+#endif
+
+//------------------------------------------------------------------------------
+
 uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt )
 {
     PRDF_ASSERT( NULL != i_trgt );

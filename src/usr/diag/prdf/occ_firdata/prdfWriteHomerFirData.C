@@ -942,20 +942,30 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
         // Iterate all of the OCMB chips.
         for ( auto & ocmb : getFunctionalTargetList(TYPE_OCMB_CHIP) )
         {
-            // Get the chip model type.
-            HOMER_ChipType_t modelType = HOMER_CHIP_INVALID;
-            switch ( getChipModel(ocmb) )
+            // TODO: remove depricated MODEL_EXPLORER once MODEL_OCMB is
+            // supported.
+            if ( MODEL_EXPLORER == getChipModel(ocmb) ) continue;
+
+            // Get the OCMB chip type.
+            HOMER_ChipType_t ocmbType = HOMER_CHIP_INVALID;
+            switch ( getChipId(ocmb) )
             {
-                case MODEL_EXPLORER: modelType = HOMER_CHIP_EXPLORER; break;
+                case POWER_CHIPID::GEMINI:
+                    // Skip Gemini OCMBs. They can exist, but PRD won't support
+                    // them (set invalid).
+                    ocmbType = HOMER_CHIP_INVALID; break;
+                case POWER_CHIPID::EXPLORER:
+                    ocmbType = HOMER_CHIP_EXPLORER; break;
                 default:
                     PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
-                              modelType, getHuid(ocmb) );
+                              ocmbType, getHuid(ocmb) );
                     PRDF_ASSERT( false );
             }
+            if ( HOMER_CHIP_INVALID == ocmbType ) continue;
 
             // Init the chip info.
             HOMER_ChipInfo_t ci;
-            __initChipInfo( ocmb, modelType, MAX_OCMB_PER_NODE, ci );
+            __initChipInfo( ocmb, ocmbType, MAX_OCMB_PER_NODE, ci );
 
             // NOTE: Explorer does not have any unit data.
 

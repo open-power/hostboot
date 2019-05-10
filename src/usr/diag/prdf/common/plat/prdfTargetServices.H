@@ -42,6 +42,10 @@
 #include <targeting/common/target.H>
 #include <prdfParserEnums.H>
 
+#ifdef __HOSTBOOT_MODULE
+  #include <chipids.H>
+#endif
+
 //------------------------------------------------------------------------------
 
 namespace PRDF
@@ -144,6 +148,20 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target );
  * @return The model of a chip.
  */
 TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt );
+
+#ifdef __HOSTBOOT_MODULE
+
+// NOTE: This should be used instead of getChipModel() because of the case of
+//       MODEL_OCMB, where we need the chip ID to distinguish between Explorer
+//       and Gemini.
+
+/**
+ * @param  i_trgt A chip target or any unit target within the chip.
+ * @return The chip ID.
+ */
+uint32_t getChipId( TARGETING::TargetHandle_t i_trgt );
+
+#endif
 
 /**
  * @param  i_trgt A chip target or any unit target within the chip.
