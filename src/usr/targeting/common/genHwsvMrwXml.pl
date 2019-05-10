@@ -6077,6 +6077,14 @@ sub generate_is_dimm
 
         my $uidstr = sprintf( "0x%02X03%04X", $node, $dimm_rel_node );
 
+        # Generate the slot position for mvdimm restrictions
+        #  The formula is:
+        #   [processor position with no gaps, i.e. 0,1,2,3]*16 +
+        #   [mca position on this processor * 2] + [dimm location behind this mca]
+        my $nvdimmslot = ($proc * MAX_MCA_PER_PROC * ARCH_LIMIT_DIMM_PER_MCA)
+          + ($mca * 2) + ($dimm_rel_mca);
+        
+
         # add dimm to mcbist array
         push(@{$mcbist_dimms{$node . $proc."_".$mcb_rel_proc}}, "n${node}:p${pos}");
 
@@ -6115,6 +6123,10 @@ sub generate_is_dimm
     <attribute>
         <id>REL_POS</id>
         <default>$dimm_drop</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MRW_NVDIMM_SLOT_POSITION</id>
+        <default>$nvdimmslot</default>
     </attribute>
     <attribute>
         <id>POS_ON_MEM_PORT</id>
