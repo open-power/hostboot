@@ -1225,9 +1225,7 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
         }
 
         // Check for any DRAM spares.
-        // TODO RTC 207273 - no TARGETING support for attr yet
-        //uint8_t cnfg = TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE;
-        uint8_t cnfg = 0;
+        uint8_t cnfg = TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE;
         o_rc = getDimmSpareConfig<TYPE_MEM_PORT>( i_trgt, i_rank, i_ps, cnfg );
         if ( SUCCESS != o_rc )
         {
@@ -1235,9 +1233,7 @@ uint32_t isDramSparingEnabled<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
                       "failed", getHuid(i_trgt), i_rank.getKey(), i_ps );
             break;
         }
-        // TODO RTC 207273 - no TARGETING support for attr yet
-        //o_spareEnable = (TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE; != cnfg);
-        o_spareEnable = (0 != cnfg);
+        o_spareEnable = (TARGETING::MEM_EFF_DIMM_SPARE_NO_SPARE != cnfg);
 
     }while(0);
 
@@ -1312,12 +1308,22 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
         if ( !dramSparingEnabled ) break;
 
         // Get the current spares in hardware
+        TargetHandle_t steerTrgt = i_trgt;
         MemSymbol sp0, sp1, ecc;
-        o_rc = mssGetSteerMux<T>( i_trgt, i_rank, sp0, sp1, ecc );
+        if ( TYPE_MEM_PORT == T )
+        {
+            steerTrgt = getConnectedParent( i_trgt, TYPE_OCMB_CHIP );
+            o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>( steerTrgt, i_rank, sp0, sp1,
+                                                   ecc );
+        }
+        else
+        {
+            o_rc = mssGetSteerMux<T>( steerTrgt, i_rank, sp0, sp1, ecc );
+        }
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
-                      getHuid(i_trgt), i_rank.getKey() );
+                      getHuid(steerTrgt), i_rank.getKey() );
             break;
         }
 
@@ -1360,6 +1366,10 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 template
 uint32_t isSpareAvailable<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
+    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
+
+template
+uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
     MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 //------------------------------------------------------------------------------

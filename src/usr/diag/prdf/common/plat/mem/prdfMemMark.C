@@ -46,7 +46,7 @@ namespace MarkStore
 {
 
 //##############################################################################
-//                  Utilities to read/write markstore (MCA)
+//                  Utilities to read/write markstore
 //##############################################################################
 
 //  - We have the ability to set chip marks via the FWMSx registers, but there
@@ -62,15 +62,19 @@ namespace MarkStore
 //    mark per master rank. This matches the P8 behavior. This could be improved
 //    upon later if we have the time, but doubtful.
 //  - Summary:
-//      - Chip marks will use HWMS0-7 registers (0x07010AD0-0x07010AD7).
-//      - Symbol marks will use FWMS0-7 registers (0x07010AD8-0x07010ADF).
+//      - Chip marks will use HWMS0-7 registers:
+//          Nimbus: (0x07010AD0-0x07010AD7)
+//          Axone:  (0x08011C10-0x08011C17)
+//      - Symbol marks will use FWMS0-7 registers:
+//          Nimbus: (0x07010AD8-0x07010ADF)
+//          Axone:  (0x08011C18-0x08011C1F)
 //      - Each register maps to master ranks 0-7.
 
-template<>
-uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                 const MemRank & i_rank, MemMark & o_mark )
+template<TARGETING::TYPE T>
+uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       MemMark & o_mark )
 {
-    #define PRDF_FUNC "[readChipMark<TYPE_MCA>] "
+    #define PRDF_FUNC "[readChipMark<T>] "
 
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
@@ -110,77 +114,21 @@ uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-template<>
+template
+uint32_t readChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
+                                 const MemRank & i_rank, MemMark & o_mark );
+template
 uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                        const MemRank & i_rank,
-                                       MemMark & o_mark )
-{
-    #define PRDF_FUNC "[readChipMark<TYPE_OCMB_CHIP>] "
+                                       MemMark & o_mark );
 
-    uint32_t o_rc = SUCCESS;
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207389
-    o_mark = MemMark(); // ensure invalid
-
-    // get the register name
-    char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
-
-    o_rc = hwms->ForceRead(); // always read latest
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-    else
-    {
-        // HWMSx[0:7] contains the Galois field
-        uint8_t galois = hwms->GetBitFieldJustified(0,8);
-
-        // If the Galois field is zero, do nothing and use the default
-        // constructor for o_mark
-        if (0 != galois)
-        {
-            // get the target
-            TargetHandle_t trgt = i_chip->getTrgt();
-
-            // get the MemMark
-            o_mark = MemMark(trgt, i_rank, galois);
-        }
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t readChipMark<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                      const MemRank & i_rank,
-                                      MemMark & o_mark )
-{
-    #define PRDF_FUNC "[readChipMark<TYPE_MEM_PORT>] "
-
-    uint32_t o_rc = SUCCESS;
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    // TODO RTC 207389
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank,
-                                  const MemMark & i_mark )
+template<TARGETING::TYPE T>
+uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
+                        const MemMark & i_mark )
 {
-    #define PRDF_FUNC "[writeChipMark<TYPE_MCA>] "
+    #define PRDF_FUNC "[writeChipMark<T>] "
 
     PRDF_ASSERT( i_mark.isValid() );
 
@@ -216,80 +164,60 @@ uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+template
+uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
+                                  const MemRank & i_rank,
+                                  const MemMark & i_mark );
+template
+uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank,
+                                        const MemMark & i_mark );
+
 //------------------------------------------------------------------------------
 
-template<>
+template<TARGETING::TYPE T>
+uint32_t clearChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[clearChipMark<T>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // get the register name
+    char msName[64];
+    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
+
+    // Clear the entire HWMSx register.
+    hwms->clearAllBits();
+
+    o_rc = hwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
 uint32_t clearChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                  const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[clearChipMark<TYPE_MCA>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    // get the register name
-    char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
-
-    // Clear the entire HWMSx register.
-    hwms->clearAllBits();
-
-    o_rc = hwms->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
+                                  const MemRank & i_rank );
+template
 uint32_t clearChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[clearChipMark<TYPE_OCMB_CHIP>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207389
-    // get the register name
-    char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
-
-    // Clear the entire HWMSx register.
-    hwms->clearAllBits();
-
-    o_rc = hwms->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
+                                        const MemRank & i_rank );
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                   const MemRank & i_rank, MemMark & o_mark )
+template<TARGETING::TYPE T>
+uint32_t readSymbolMark( ExtensibleChip * i_chip,
+                         const MemRank & i_rank, MemMark & o_mark )
 {
-    #define PRDF_FUNC "[readSymbolMark<TYPE_MCA>] "
+    #define PRDF_FUNC "[readSymbolMark<T>] "
 
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
@@ -345,96 +273,21 @@ uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-template<>
+template
+uint32_t readSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank, MemMark & o_mark );
+template
 uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                          const MemRank & i_rank,
-                                         MemMark & o_mark )
-{
-    #define PRDF_FUNC "[readSymbolMark<TYPE_OCMB_CHIP>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207389
-    o_mark = MemMark(); // ensure invalid
-
-    // get the register name
-    char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
-
-    o_rc = fwms->ForceRead(); // always read latest
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-    else
-    {
-        // FWMSx[0:7] contains the Galois field
-        uint8_t galois = fwms->GetBitFieldJustified(0,8);
-
-        // If the Galois field is zero, do nothing and use the default
-        // constructor for o_mark
-        if (0 != galois)
-        {
-            // check other fields for accuracy - assert on failure
-
-            // FWMSx[8] should be 1 to indicate a symbol mark.
-            PRDF_ASSERT( fwms->IsBitSet(8) );
-
-            // FWMSx[9:11] should be 0b101 to indicate master rank.
-            PRDF_ASSERT( 0x5 == fwms->GetBitFieldJustified(9,3) );
-
-            // FWMSx[12:14] is the master rank and should match the register
-            //              number.
-            PRDF_ASSERT( i_rank.getMaster() ==
-                         fwms->GetBitFieldJustified(12,3) );
-
-            // FWMSx[15:22] should be all zeros
-            PRDF_ASSERT( 0x0 == fwms->GetBitFieldJustified(15,8) );
-
-            // get the target
-            TargetHandle_t trgt = i_chip->getTrgt();
-
-            // get the MemMark
-            o_mark = MemMark(trgt, i_rank, galois);
-        }
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t readSymbolMark<TYPE_MEM_PORT>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank,
-                                        MemMark & o_mark )
-{
-    #define PRDF_FUNC "[readSymbolMark<TYPE_MEM_PORT>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    // TODO RTC 207389
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
+                                         MemMark & o_mark );
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank,
-                                    const MemMark & i_mark )
+template<TARGETING::TYPE T>
+uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          const MemMark & i_mark )
 {
-    #define PRDF_FUNC "[writeSymbolMark<TYPE_MCA>] "
+    #define PRDF_FUNC "[writeSymbolMark<T>] "
 
     PRDF_ASSERT( i_mark.isValid() );
 
@@ -474,95 +327,78 @@ uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
                   msName, i_chip->getHuid() );
     }
 
-    // Nimbus symbol mark performance workaround
-    // When a symbol mark is placed at runtime
-    #ifdef __HOSTBOOT_RUNTIME
-
-    // Trigger WAT logic to 'disable bypass'
-    // Get the ECC Debug/WAT Control register
-    SCAN_COMM_REGISTER_CLASS * dbgr = i_chip->getRegister( "DBGR" );
-
-    // Set DBGR[8] = 0b1
-    dbgr->SetBit( 8 );
-    o_rc = dbgr->Write();
-    if ( SUCCESS != o_rc )
+    // Nimbus only symbol mark performance workaround
+    if ( T == TYPE_MCA )
     {
-        PRDF_ERR( PRDF_FUNC "Write() failed on DBGR: mca=0x%08x",
-                  i_chip->getHuid() );
+        // When a symbol mark is placed at runtime
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Trigger WAT logic to 'disable bypass'
+        // Get the ECC Debug/WAT Control register
+        SCAN_COMM_REGISTER_CLASS * dbgr = i_chip->getRegister( "DBGR" );
+
+        // Set DBGR[8] = 0b1
+        dbgr->SetBit( 8 );
+        o_rc = dbgr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on DBGR: mca=0x%08x",
+                      i_chip->getHuid() );
+        }
+        #endif
     }
-    #endif
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
+template
+uint32_t writeSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    const MemMark & i_mark );
+template
+uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          const MemMark & i_mark );
+
 //------------------------------------------------------------------------------
 
-template<>
+template<TARGETING::TYPE T>
+uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[clearSymbolMark<T>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // get the register name
+    char msName[64];
+    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    // get the mark store register
+    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
+
+    // Clear the entire FWMSx register.
+    fwms->clearAllBits();
+
+    o_rc = fwms->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
+                  msName, i_chip->getHuid() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
 uint32_t clearSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[clearSymbolMark<TYPE_MCA>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    // get the register name
-    char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
-
-    // Clear the entire FWMSx register.
-    fwms->clearAllBits();
-
-    o_rc = fwms->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
+                                    const MemRank & i_rank );
+template
 uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[clearSymbolMark<TYPE_OCMB_CHIP>] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207389
-    // get the register name
-    char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
-
-    // get the mark store register
-    SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
-
-    // Clear the entire FWMSx register.
-    fwms->clearAllBits();
-
-    o_rc = fwms->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on %s: i_chip=0x%08x",
-                  msName, i_chip->getHuid() );
-    }
-    */
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
+                                          const MemRank & i_rank );
 
 //##############################################################################
 //                  Utilities to read/write markstore (MBA)
@@ -1364,19 +1200,22 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "Function not supported yet" );
-    /* TODO RTC 207389
     do
     {
         const uint8_t ps   = i_chipMark.getSymbol().getPortSlct();
         const uint8_t dram = i_chipMark.getSymbol().getDram();
 
-        const bool isX4 = isDramWidthX4( i_chip->getTrgt() );
+        ExtensibleChip * memPort = getConnectedChild(i_chip, TYPE_MEM_PORT, ps);
+
+        TargetHandle_t dimmTrgt = getConnectedDimm( memPort->getTrgt(), i_rank,
+                                                    ps );
+
+        const bool isX4 = isDramWidthX4( dimmTrgt );
 
         // Determine if DRAM sparing is enabled.
         bool isEnabled = false;
-        o_rc = isDramSparingEnabled<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
-                                               isEnabled );
+        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort->getTrgt(), i_rank,
+                                                    ps, isEnabled );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isDramSparingEnabled() failed." );
@@ -1387,8 +1226,9 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             // Sparing is enabled. Get the current spares in hardware.
             MemSymbol sp0, sp1, ecc;
-            o_rc = mssGetSteerMux<TARGETING::TYPE_MBA>( i_chip->getTrgt(),
-                                                        i_rank, sp0, sp1, ecc );
+            o_rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>( i_chip->getTrgt(),
+                                                              i_rank, sp0, sp1,
+                                                              ecc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
@@ -1402,8 +1242,9 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             __addCallout( i_chip, i_rank, ecc, io_sc );
 
             // Add the row repairs to the callout list if they exist
-            o_rc = __addRowRepairCallout<TARGETING::TYPE_MBA>( i_chip, i_rank,
-                                                               io_sc );
+            o_rc = __addRowRepairCallout<TARGETING::TYPE_MEM_PORT>( memPort,
+                                                                    i_rank,
+                                                                    io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__addRowRepairCallout(0x%08x,0x%02x) "
@@ -1427,19 +1268,19 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // Certain DIMMs may have had spares intentially made unavailable by
             // the manufacturer. Check the VPD for available spares.
             bool spAvail, eccAvail;
-            o_rc = isSpareAvailable<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
-                                               spAvail, eccAvail );
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort->getTrgt(), i_rank,
+                                                    ps, spAvail, eccAvail );
             if ( spAvail )
             {
                 // A spare DRAM is available.
-                o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
-                                                     i_chipMark };
+                o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
+                                                           i_chipMark };
             }
             else if ( eccAvail )
             {
                 // The ECC spare is available.
-                o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
-                                                     i_chipMark, true };
+                o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
+                                                           i_chipMark, true };
             }
             else
             {
@@ -1459,7 +1300,6 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     } while (0);
-    */
 
     return o_rc;
 
@@ -1571,6 +1411,11 @@ uint32_t applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
                                      const MemRank & i_rank,
                                      STEP_CODE_DATA_STRUCT & io_sc,
                                      TdEntry * & o_dsdEvent );
+template
+uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                           const MemRank & i_rank,
+                                           STEP_CODE_DATA_STRUCT & io_sc,
+                                           TdEntry * & o_dsdEvent );
 
 //------------------------------------------------------------------------------
 

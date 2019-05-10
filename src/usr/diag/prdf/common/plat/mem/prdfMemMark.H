@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ class MemMark
 
     /**
      * @brief Constructor from components.
-     * @param i_trgt   MBA or MCA target.
+     * @param i_trgt   MBA, MCA, or OCMB target.
      * @param i_rank   The rank this mark is on.
      * @param i_galois The Galois field.
      */
@@ -68,7 +68,7 @@ class MemMark
 
     /**
      * @brief Constructor from components.
-     * @param i_trgt   MBA or MCA target.
+     * @param i_trgt   MBA, MCA, or OCMB target.
      * @param i_rank   The rank this mark is on.
      * @param i_symbol The symbol representing this mark.
      */
@@ -112,7 +112,7 @@ namespace MarkStore
 
 /**
  * @brief  Reads markstore and returns the chip mark for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA, or OCMB chip.
  * @param  i_rank Target rank.
  * @param  o_mark The returned chip mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
@@ -123,7 +123,7 @@ uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Writes a chip mark into markstore for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA, or OCMB chip.
  * @param  i_rank Target rank.
  * @param  i_mark Target chip mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
@@ -134,7 +134,7 @@ uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Clear chip mark in markstore for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA, or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
@@ -143,7 +143,7 @@ uint32_t clearChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 /**
  * @brief  Reads markstore and returns the symbol mark for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA. or OCMB chip.
  * @param  i_rank Target rank.
  * @param  o_mark The returned symbol mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
@@ -154,7 +154,7 @@ uint32_t readSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Writes a symbol mark into markstore for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA, or OCMB chip.
  * @param  i_rank Target rank.
  * @param  i_mark Target symbol mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
@@ -165,7 +165,7 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Clear symbol mark in markstore for the given rank.
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA. or OCMB chip.
  * @param  i_rank Target rank.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
@@ -187,7 +187,7 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
  *    repairs have been used.
  *  - Returns a new DsdEvent if DRAM sparing is available.
  *
- * @param  i_chip     MBA or MCA chip.
+ * @param  i_chip     MBA, MCA, or OCMB chip.
  * @param  i_rank     Target rank.
  * @param  io_sc      The step code data struct.
  * @param  o_dsdEvent A new DsdEvent if DRAM sparing is available. Otherwise,
@@ -211,7 +211,7 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
  *      - Sets the DRAM in the DRAM Repair VPD if DRAM repairs.
  *      - Adds a DSD procedure to the TD queue if a DRAM spare is available
  *
- * @param  i_chip MBA or MCA chip.
+ * @param  i_chip MBA, MCA, or OCMB chip.
  * @param  i_rank Target rank.
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
