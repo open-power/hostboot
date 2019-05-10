@@ -1514,8 +1514,8 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 
             // Get the chip mark
             MemMark chipMark;
-            o_rc = MarkStore::readChipMark<TYPE_MEM_PORT>( memPortChip, rank,
-                                                           chipMark );
+            o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( iv_chip, rank,
+                                                            chipMark );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MEM_PORT>(0x%08x,%d) "

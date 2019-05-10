@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,6 +124,14 @@ uint32_t getRowRepairData<TYPE_MCA>( TargetHandle_t i_dimm,
 {
     return __getRowRepairData<TYPE_MCA, fapi2::TARGET_TYPE_MCA>( i_dimm, i_rank,
                                                                  o_rowRepair );
+}
+
+template<>
+uint32_t getRowRepairData<TYPE_MEM_PORT>( TargetHandle_t i_dimm,
+    const MemRank & i_rank, MemRowRepair & o_rowRepair )
+{
+    return __getRowRepairData<TYPE_MEM_PORT, fapi2::TARGET_TYPE_MEM_PORT>(
+        i_dimm, i_rank, o_rowRepair );
 }
 
 //------------------------------------------------------------------------------
