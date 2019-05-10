@@ -515,6 +515,7 @@ print CRFILE "#include <p10_scom_perv.H>\n";
 print CRFILE "#include <p10_scom_phb.H>\n";
 print CRFILE "#include <p10_scom_proc.H>\n";
 print CRFILE "#include <p10_scom_pauc.H>\n";
+print CRFILE "#include <p10_scom_pau.H>\n";
 print CRFILE "#include <p10_scom_nmmu.H>\n";
 
 print CRFILE "namespace fapi2\n";
