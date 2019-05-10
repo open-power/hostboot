@@ -3903,8 +3903,12 @@
       <name>CENTAUR</name>
       <value>48</value>
     </enumerator>
+    <!-- @TODO 210226: Remove EXPLORER once dependencies have switched to OCMB -->
     <enumerator>
       <name>EXPLORER</name>
+    </enumerator>
+    <enumerator>
+      <name>OCMB</name>
     </enumerator>
     <enumerator>
       <name>JEDEC</name>

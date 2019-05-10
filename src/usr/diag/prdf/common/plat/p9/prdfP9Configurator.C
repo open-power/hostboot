@@ -243,7 +243,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
 {
     errlHndl_t errl = nullptr;
 
-    std::map<TARGETING::MODEL, std::map<TARGETING::TYPE, const char *>> fnMap =
+    std::map<uint32_t, std::map<TARGETING::TYPE, const char *>> fnMap =
     {
         { MODEL_NIMBUS,   { { TYPE_PROC,   nimbus_proc    },
                             { TYPE_EQ,     nimbus_eq      },
@@ -285,7 +285,9 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                             { TYPE_MI,     axone_mi       },
                             { TYPE_MCC,    axone_mcc      },
                             { TYPE_OMIC,   axone_omic     }, } },
-        { MODEL_EXPLORER, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
+        #ifdef __HOSTBOOT_MODULE
+        { POWER_CHIPID::EXPLORER, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
+        #endif
     };
 
     // Get references to factory objects.
@@ -299,7 +301,22 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     // Iterate all the targets for this type and add to given domain.
     for ( const auto & trgt : getFunctionalTargetList(i_type) )
     {
-        TARGETING::MODEL model = getChipModel( trgt );
+        uint32_t model = getChipModel( trgt );
+
+        #ifdef __HOSTBOOT_MODULE
+        // TODO: remove depricated MODEL_EXPLORER once MODEL_OCMB is supported.
+        if ( MODEL_EXPLORER == model ) continue;
+
+        // Special case for OCMBs (hostboot only issue for P9).
+        if ( MODEL_OCMB == model )
+        {
+             // Use the chip ID instead of model.
+            model = getChipId( trgt );
+
+            // Skip Gemini OCMBs. They can exist, but PRD won't support them.
+            if ( POWER_CHIPID::GEMINI == model ) continue;
+        }
+        #endif
 
         // Ensure this model is supported.
         if ( fnMap.end() == fnMap.find(model) )
