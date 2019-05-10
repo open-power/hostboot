@@ -57,4 +57,84 @@
             <target>TARGET</target>
         </deconfigure>
     </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_TWI_INVALID_STATUS_ID</rc>
+        <description>
+            The status_id field of the TWI status was invalid
+        </description>
+        <ffdc>TARGET</ffdc>
+        <ffdc>STATUS_ID</ffdc>
+        <ffdc>STATUS_WORD32</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <target>TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_TWI_UNEXPECTED_STATUS</rc>
+        <description>
+            Received unexpected TWI status
+        </description>
+        <ffdc>TARGET</ffdc>
+        <ffdc>EXPECTED_STATUS</ffdc>
+        <ffdc>STATUS</ffdc>
+        <ffdc>STATUS_WORD32</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <target>TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_TWI_UNEXPECTED_WRITE_OFFSET</rc>
+        <description>
+            Received unexpected TWI write offset
+        </description>
+        <ffdc>TARGET</ffdc>
+        <ffdc>EXPECTED_OFFSET</ffdc>
+        <ffdc>WRITE_OFFSET</ffdc>
+        <ffdc>STATUS_WORD32</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <target>TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+    </hwpError>
+
+    <hwpError>
+        <rc>RC_EXP_TWI_INVALID_IMAGE_SIZE</rc>
+        <description>
+            Explorer TWI firmware image must be less than 256KB
+        </description>
+        <ffdc>TARGET</ffdc>
+        <ffdc>MAX_SIZE</ffdc>
+        <ffdc>ACTUAL_SIZE</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>MEDIUM</priority>
+        </callout>
+    </hwpError>
+
 </hwpErrors>
