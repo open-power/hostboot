@@ -44,6 +44,7 @@
 
 const uint64_t M_PATH_CTRL_REG_CLEAR_VALUE = 0x0000000000000000;
 const uint64_t S_PATH_CTRL_REG_CLEAR_VALUE = 0x0000003F00000000;
+static const uint8_t P9A_PERV_ROOT_CTRL8_TP_PLL_CLKIN_SEL9_DC = 21;
 
 /// @brief MPIPL specific steps to clear the previous topology, this should be
 //  called only during MPIPL
@@ -778,12 +779,24 @@ fapi2::ReturnCode configure_m_path_ctrl_reg(
     const p9_tod_setup_osc_sel i_osc_sel)
 {
     fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_root_ctrl8_reg = 0;
+    bool l_tod_on_lpc_clock = false;
+
+    // Read ROOT_CTRL8 to determine TOD input clock selection
+    FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                            PERV_ROOT_CTRL8_SCOM,
+                            l_root_ctrl8_reg),
+             "Error from getScom (PERV_ROOT_CTRL8_SCOM)!");
+
+    l_tod_on_lpc_clock = l_root_ctrl8_reg.getBit<P9A_PERV_ROOT_CTRL8_TP_PLL_CLKIN_SEL9_DC>();
 
     // Read PERV_TOD_M_PATH_CTRL_REG to preserve any prior configuration
     FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
                             PERV_TOD_M_PATH_CTRL_REG,
                             l_m_path_ctrl_reg),
              "Error from getScom (PERV_TOD_M_PATH_CTRL_REG)!");
+
+    l_m_path_ctrl_reg.writeBit<PERV_TOD_M_PATH_CTRL_REG_STEP_CREATE_DUAL_EDGE_DISABLE>(l_tod_on_lpc_clock);
 
     // Configure Master OSC0/OSC1 path
     FAPI_DBG("Configuring Master OSC path in PERV_TOD_M_PATH_CTRL_REG");
