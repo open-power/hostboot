@@ -35,8 +35,8 @@
 
 #include <fapi2.H>
 #include <exp_mss_memdiag.H>
-
-#include <chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/exp_rank.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
