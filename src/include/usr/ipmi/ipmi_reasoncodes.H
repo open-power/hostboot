@@ -58,6 +58,7 @@ namespace IPMI
         RC_DCMI_CMD_FAILED              = IPMI_COMP_ID | 0x0a,
         RC_SENSOR_READING_NOT_AVAIL     = IPMI_COMP_ID | 0x0b,
         RC_GET_SENSOR_TYPE_CMD_FAILED   = IPMI_COMP_ID | 0x0c,
+        RC_GET_DCMI_CAP_CMD_FAILED      = IPMI_COMP_ID | 0x0d,
         RC_INVALID_VPD_DATA             = IPMI_COMP_ID | 0x0e,
         RC_SENSOR_NOT_FOUND             = IPMI_COMP_ID | 0x0f,
         RC_INVALID_SENSOR_NUMBER        = IPMI_COMP_ID | 0x10,

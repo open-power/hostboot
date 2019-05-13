@@ -294,7 +294,10 @@ namespace IPMI
     inline const command_t hiomap_event(void)
     { return std::make_pair(NETFUN_IBM, 0x0f); }
 
-    // $TODO RTC:123256 - need to add code to get dcmi capabilities
+    // Used to get dcmi capabilities
+    inline const command_t get_dcmi_capability_info(void)
+    { return std::make_pair(NETFUN_GRPEXT, 0x01); }
+
     // This is a dcmi message used to request the
     // user defined power limit from the BMC.
     inline const command_t get_power_limit(void)
