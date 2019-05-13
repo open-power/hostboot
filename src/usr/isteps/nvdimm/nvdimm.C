@@ -42,6 +42,7 @@
 #include <isteps/nvdimm/nvdimmreasoncodes.H>
 #include <isteps/nvdimm/nvdimm.H>
 #include <vpd/spdenums.H>
+#include <secureboot/trustedbootif.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -83,6 +84,9 @@ constexpr ops_timeoutInfo_t timeoutInfoTable[] =
     {"PAGE_SWITCH",  {PAGE_SWITCH_LATENCY1, PAGE_SWITCH_LATENCY0}, PAGE_SWITCH, 0xff, 0xff},
     {"CHARGE",       {ES_CHARGE_TIMEOUT1, ES_CHARGE_TIMEOUT0},     CHARGE     , MODULE_HEALTH_STATUS1, CHARGE_IN_PROGRESS},
 };
+
+const size_t NUM_KEYS_IN_ATTR = 3;
+const size_t MAX_KEY_SIZE = 32;
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C
@@ -1449,6 +1453,181 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
     }
 
     TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_restore()");
+}
+
+/**
+ * @brief Entry function to NVDIMM generate keys
+ *        Generate encryption keys if required and set the FW key attribute
+ */
+void nvdimm_gen_keys(TargetHandleList &i_nvdimmList)
+{
+    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_gen_keys()");
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        // Determine if key generation required
+        Target* l_sys = nullptr;
+        targetService().getTopLevelTarget( l_sys );
+        assert(l_sys, "nvdimm_gen_keys: no TopLevelTarget");
+
+        // Exit if encryption is not enabled via the attribute
+        if (!l_sys->getAttr<ATTR_NVDIMM_ENCRYPTION_ENABLE>())
+        {
+            break;
+        }
+
+        // Get the FW attribute
+        ATTR_NVDIMM_ENCRYPTION_KEYS_FW_type l_attrKeysFw = {0};
+        assert(l_sys->tryGetAttr
+            <ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysFw),
+            "nvdimm_gen_keys() Failed getting ATTR_NVDIMM_ENCRYPTION_KEYS_FW");
+
+        // FW attribute checks
+        size_t l_attrSizeFw = sizeof(ATTR_NVDIMM_ENCRYPTION_KEYS_FW_type);
+        // Attribute size must be a multiple of the key size
+        assert((l_attrSizeFw % NUM_KEYS_IN_ATTR) == 0,
+            "nvdimm_gen_keys() Size of ATTR_NVDIMM_ENCRYPTION_KEYS_FW is not a multiple of the key size");
+        // Attribute key size must not exceed max size
+        assert((l_attrSizeFw / NUM_KEYS_IN_ATTR) <= MAX_KEY_SIZE,
+            "nvdimm_gen_keys() Size of keys in ATTR_NVDIMM_ENCRYPTION_KEYS_FW is greater than MAX_KEY_SIZE");
+
+        // Check for FW attribute = zero
+        ATTR_NVDIMM_ENCRYPTION_KEYS_FW_type l_fwCompare = {0};
+        bool l_attrIsZeroFw = memcmp(l_attrKeysFw, l_fwCompare, l_attrSizeFw) == 0;
+
+        // Get the anchor attribute
+        ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR_type l_attrKeysAnchor = {0};
+        assert(l_sys->tryGetAttr
+            <ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR>(l_attrKeysAnchor),
+            "nvdimm_gen_keys() Failed getting ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR");
+
+        // Anchor attribute checks
+        size_t l_attrSizeAnchor = sizeof(ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR_type);
+        // Attribute size must be a multiple of the key size
+        assert((l_attrSizeAnchor % NUM_KEYS_IN_ATTR) == 0,
+            "nvdimm_gen_keys() Size of ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR is not a multiple of the key size");
+        // Attribute key size must not exceed max size
+        assert((l_attrSizeAnchor / NUM_KEYS_IN_ATTR) <= MAX_KEY_SIZE,
+            "nvdimm_gen_keys() Size of keys in ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR is greater than MAX_KEY_SIZE");
+
+        // Check for Anchor attribute = zero
+        ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR_type l_anchorCompare = {0};
+        bool l_attrIsZeroAnchor = memcmp(l_attrKeysAnchor, l_anchorCompare, l_attrSizeAnchor) == 0;
+
+        // Compare the attribute values
+        if (!l_attrIsZeroFw && !l_attrIsZeroAnchor)
+        {
+            if (memcmp(l_attrKeysFw,l_attrKeysAnchor,l_attrSizeFw) == 0)
+            {
+                TRACFCOMP(g_trac_nvdimm, "nvdimm_gen_keys() ATTR_NVDIMM_ENCRYPTION_KEYS_FW = ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR");
+            }
+            if (memcmp(l_attrKeysFw,l_attrKeysAnchor,l_attrSizeFw) != 0)
+            {
+                TRACFCOMP(g_trac_nvdimm, "nvdimm_gen_keys() ATTR_NVDIMM_ENCRYPTION_KEYS_FW != ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR");
+            }
+            break;
+        }
+        if (!l_attrIsZeroFw && l_attrIsZeroAnchor)
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimm_gen_keys() ATTR_NVDIMM_ENCRYPTION_KEYS_FW != 0 and ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR = 0");
+            break;
+        }
+        if (l_attrIsZeroFw && !l_attrIsZeroAnchor)
+        {
+            // Set FW attr = Anchor attr
+            TRACFCOMP(g_trac_nvdimm, "nvdimm_gen_keys() Setting ATTR_NVDIMM_ENCRYPTION_KEYS_FW = ATTR_NVDIMM_ENCRYPTION_KEYS_ANCHOR");
+            l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysAnchor);
+            break;
+        }
+
+        // Both key attributes are zero
+        // Generate random keys using the TPM hardware
+        TargetHandleList l_tpmList;
+        TRUSTEDBOOT::getTPMs(l_tpmList,
+                             TRUSTEDBOOT::TPM_FILTER::ALL_FUNCTIONAL);
+        if (l_tpmList.size() == 0)
+        {
+            TRACFCOMP(g_trac_nvdimm,ERR_MRK"No functional TPM found, encryption keys not generated.");
+
+            /*@
+            *@errortype
+            *@reasoncode    NVDIMM_TPM_NOT_FOUND
+            *@severity      ERRORLOG_SEV_PREDICTIVE
+            *@moduleid      NVDIMM_GEN_KEYS
+            *@userdata1     <UNUSED>
+            *@userdata2     <UNUSED>
+            *@devdesc       Encountered error generating NVDIMM encryption keys
+            *@custdesc      NVDIMM error generating encryption keys
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            NVDIMM_GEN_KEYS,
+                            NVDIMM_TPM_NOT_FOUND,
+                            0x0,
+                            0x0,
+                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+
+            l_err->collectTrace(NVDIMM_COMP_NAME, 1024 );
+
+            // Get all TPMs
+            TRUSTEDBOOT::getTPMs(l_tpmList,
+                             TRUSTEDBOOT::TPM_FILTER::ALL_IN_BLUEPRINT);
+            if (l_tpmList.size() == 0)
+            {
+                // No TPMs, we probably have nvdimms enabled
+                // when they should not be
+                l_err->addProcedureCallout(
+                                    HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_HIGH);
+            }
+            else
+            {
+                // If a TPM exists it must be deconfigured,
+                //   add callouts accordingly
+                l_err->addProcedureCallout(
+                                    HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                                    HWAS::SRCI_PRIORITY_HIGH);
+                l_err->addProcedureCallout(
+                                    HWAS::EPUB_PRC_HB_CODE,
+                                    HWAS::SRCI_PRIORITY_MED);
+            }
+
+            errlCommit( l_err, NVDIMM_COMP_ID );
+
+            // Set the status flag for all nvdimms
+            for (const auto & l_nvdimm : i_nvdimmList)
+            {
+                nvdimmSetStatusFlag(l_nvdimm, NSTD_ERR_NOBKUP);
+            }
+
+            break;
+        }
+
+
+        // TPM can only generate up to 34 bytes so gen 1 key at a time
+        size_t l_genSize = l_attrSizeFw / NUM_KEYS_IN_ATTR;
+        uint8_t l_genData[l_genSize] = {0};
+        for (uint32_t l_key=0; l_key<NUM_KEYS_IN_ATTR; l_key++)
+        {
+            l_err = TRUSTEDBOOT::GetRandom(l_tpmList[0], l_genSize, l_genData);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_gen_keys() Failing Trustedboot::GetRandom()");
+                errlCommit( l_err, NVDIMM_COMP_ID );
+            }
+            memcpy(
+                reinterpret_cast<uint8_t*>(l_attrKeysFw) + (l_key*l_genSize),
+                l_genData,
+                l_genSize );
+        }
+
+        // Set the FW attribute
+        l_sys->setAttr<ATTR_NVDIMM_ENCRYPTION_KEYS_FW>(l_attrKeysFw);
+
+    }while(0);
+
+    TRACUCOMP(g_trac_nvdimm, EXIT_MRK"nvdimm_gen_keys()");
 }
 
 /**
