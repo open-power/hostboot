@@ -108,3 +108,42 @@ if ($hb_mode == 1) {
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x01 "80000000" 32
     ($hb_masterproc_cecchip).invoke parallel_store FSIMBOX 0x08 "00080000" 32
 }
+
+###############################
+#Initialize Explorer Registers
+###############################
+if ($hb_mode == 0) { #Only do this on Axone and later models that have Explorer chip
+
+    # IDEC register consumed by Hostboot
+    # UCHIP(0x2134)=0x100600D2
+    set-class-attr ocmb  mscc_regs_xcbi_chip_info 0x100600D2
+
+    # Loop over all explorer chips
+    foreach $obj in (get-object-list ocmb -all){
+
+        # RAM1 image ID consumed by Hostboot
+        # UCHIP(0x2200)=0x00000000
+        $obj->mscc_regs_xcbi_ram1[0] = 0x00000000
+
+        # RAM1 hash value registers consumed by Hostboot
+        # This matches the hash of zero-filled 4k file.
+        $obj->mscc_regs_xcbi_ram1[1] = 0x2D23913D
+        $obj->mscc_regs_xcbi_ram1[2] = 0x3759EF01
+        $obj->mscc_regs_xcbi_ram1[3] = 0x704A86B4
+        $obj->mscc_regs_xcbi_ram1[4] = 0xBEE3AC8A
+        $obj->mscc_regs_xcbi_ram1[5] = 0x29002313
+        $obj->mscc_regs_xcbi_ram1[6] = 0xECC98A74
+        $obj->mscc_regs_xcbi_ram1[7] = 0x24425A78
+        $obj->mscc_regs_xcbi_ram1[8] = 0x170F2195
+        $obj->mscc_regs_xcbi_ram1[9] = 0x77822FD7
+        $obj->mscc_regs_xcbi_ram1[10] = 0x7E4AE963
+        $obj->mscc_regs_xcbi_ram1[11] = 0x13547696
+        $obj->mscc_regs_xcbi_ram1[12] = 0xAD7D5949
+        $obj->mscc_regs_xcbi_ram1[13] = 0xB58E12D5
+        $obj->mscc_regs_xcbi_ram1[14] = 0x063EF2EE
+        $obj->mscc_regs_xcbi_ram1[15] = 0x063B5957
+        $obj->mscc_regs_xcbi_ram1[16] = 0x40A3A12D
+    }
+}
+
+
