@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Maxim Polyakov                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -34,6 +35,8 @@
 #include <ipmi/ipmi_reasoncodes.H>
 extern trace_desc_t * g_trac_ipmi;
 
+#define DCMI_CAP_RESPONSE_DATA_LENGTH 7
+
 namespace SENSOR
 {
     enum dcmi_cc
@@ -41,6 +44,107 @@ namespace SENSOR
         POWER_LIMIT_ACTIVE     = 0x00,
         POWER_LIMIT_NOT_ACTIVE = 0x80,
     };
+
+    static errlHndl_t getPowerManagementSupportStatus(bool &support)
+    {
+        errlHndl_t err = NULL;
+        IPMI::completion_code cc = IPMI::CC_UNKBAD;
+
+        support = false;
+
+        size_t len = 2;
+        uint8_t* data = new uint8_t[len];
+        data[0] = 0xDC; // Group Extension Identification
+        data[1] = 0x01; // Selector - Supported DCMI Capabilities
+
+        err = IPMI::sendrecv(IPMI::get_dcmi_capability_info(), cc, len, data);
+        do
+        {
+            if (err)
+            {
+                TRACFCOMP(g_trac_ipmi,
+                          "Failed to send DCMI Capabilities Command to BMC");
+                break;
+            }
+
+            if (cc != IPMI::CC_OK)
+            {
+                TRACFCOMP(g_trac_ipmi,
+                          "Get DCMI Capabilities Command: "
+                          "bad completion code from BMC=0x%x",
+                          cc);
+
+                /*@
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        IPMI::MOD_IPMIDCMI
+                 * @reasoncode      IPMI::RC_GET_DCMI_CAP_CMD_FAILED
+                 * @userdata1       BMC IPMI Completion code.
+                 * @devdesc         Request to get DCMI Capabilities information
+                 *                  failed
+                 * @custdesc        The DCMI Capabilities Info Command retrieve
+                 *                  data from the BMC has failed.
+                 *
+                 */
+
+                err = new ERRORLOG::ErrlEntry(
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                      IPMI::MOD_IPMIDCMI,
+                      IPMI::RC_GET_DCMI_CAP_CMD_FAILED,
+                      static_cast<uint64_t>(cc),
+                      0,
+                      true);
+                break;
+            }
+
+            if (len != DCMI_CAP_RESPONSE_DATA_LENGTH)
+            {
+                TRACFCOMP(g_trac_ipmi,
+                          "Get DCMI Capabilities Command: "
+                          "invalid data length=%d",
+                          len);
+
+                /*@
+                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @moduleid        IPMI::MOD_IPMIDCMI
+                 * @reasoncode      IPMI::RC_INVALID_QRESPONSE
+                 * @userdata1       Response data length.
+                 * @devdesc         Request to get DCMI Capabilities information
+                 *                  failed
+                 * @custdesc        The DCMI Capabilities Info Command retrieve
+                 *                  data with invalid length.
+                 *
+                 */
+
+                err = new ERRORLOG::ErrlEntry(
+                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                      IPMI::MOD_IPMIDCMI,
+                      IPMI::RC_INVALID_QRESPONSE,
+                      static_cast<uint64_t>(len),
+                      0,
+                      true);
+                break;
+            }
+
+            // from the DCMI spec v1.5, Revision 1.0, August 23, 2011
+            // DCMI Capabilities Response Command Format:
+            // cc:       byte 1   completion code
+            // data:
+            // data[0]:  byte 1   0xDC
+            // data[1]:  byte 2   Major Version (01h)
+            // data[2]:  byte 3   Minor Version (05h)
+            // data[3]:  byte 4   Parameter Revision (02h)
+            // data[4]:  byte 5   Reserved
+            // data[5]:  byte 6   Platform capabilities
+            //           [7:1] Reserved
+            //           [0]   Power management
+            // data[6]:  byte 7   Manageability Access Capabilities
+            support = !!(data[5] & 0x1);
+
+        } while(false);
+
+        delete[] data;
+        return err;
+    }
 
     // fetch the user defined power limit stored on the BMC
     // using the DCMI Get Power Limit command
@@ -52,6 +156,31 @@ namespace SENSOR
         o_limitActive = false;
 
         errlHndl_t l_err = NULL;
+
+        // Power Management support check
+        bool support;
+        l_err = getPowerManagementSupportStatus(support);
+        if (l_err != NULL)
+        {
+            // Since the Power Management support information isn`t received,
+            // commit this error and still try to read the power limit. If the
+            // Power Management is really unsupported, the DCMI Get Power Limit
+            // command will return error code in l_cc
+            l_err->collectTrace(IPMI_COMP_NAME);
+            errlCommit(l_err, IPMI_COMP_ID);
+
+            TRACFCOMP(g_trac_ipmi,
+                "Failed to determine if the BMC supports Power Management");
+
+            support = true;
+        }
+
+        if (!support)
+        {
+            TRACFCOMP(g_trac_ipmi,
+                      "Power Management is not supported by BMC");
+            return NULL;
+        }
 
         // per DCMI spec data size is 3 bytes
         size_t len = 3;
