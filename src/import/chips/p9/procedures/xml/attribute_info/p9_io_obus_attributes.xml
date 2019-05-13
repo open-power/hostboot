@@ -93,6 +93,22 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IO_OBUS_LINK_SPARE_MARK</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Used to save indication that a spare lane has been deployed during
+    runtime link recovery retrain sequence.  This sparing will be posted
+    into the DL FIR after all other FIR clearing/unmasking has been
+    performed in the link recovery sequence.  Index 0 tracks the even half
+    link, index 1 the odd half link.
+  </description>
+  <array>2</array>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IO_OBUS_LANE_PDWN</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>
