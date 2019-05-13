@@ -5,9 +5,10 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Maxim Polyakov                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -64,6 +65,7 @@ namespace IPMI
         RC_INVALID_VPD_DATA             = IPMI_COMP_ID | 0x0e,
         RC_INVALID_SENSOR_NUMBER        = IPMI_COMP_ID | 0x0f,
         RC_INVALID_SENSOR_SETTING       = IPMI_COMP_ID | 0x10,
+        RC_GET_DCMI_CAP_CMD_FAILED      = IPMI_COMP_ID | 0x11,
     };
 };
 
