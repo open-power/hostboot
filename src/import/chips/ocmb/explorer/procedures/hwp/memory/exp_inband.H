@@ -359,6 +359,13 @@ fapi2::ReturnCode getOCCfg(
 ///
 fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
+///
+/// @brief Clears outbound (response ready) door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from

@@ -502,6 +502,25 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Clears outbound (response ready) door bell bit
+/// @param[in] i_target the OCMB target on which to operate
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode clear_outbound_doorbell(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Doorbell is cleared by writing a '1' to the doorbell bit
+    l_data.setBit<EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1_DOORBELL>();
+
+    FAPI_DBG("%s Clearing outbound doorbell...", mss::c_str(i_target));
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_MIPS_TO_OCMB_INTERRUPT_REGISTER1, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief Reads a response from the response buffer
 ///
 /// @param[in] i_target     The Explorer chip to read data from
@@ -546,6 +565,8 @@ fapi2::ReturnCode getRSP(
         // make sure no buffer data is returned
         o_data.clear();
     }
+
+    FAPI_TRY(clear_outbound_doorbell(i_target));
 
 fapi_try_exit:
     FAPI_DBG("%s Exiting with return code : 0x%08X...", mss::c_str(i_target), (uint64_t) fapi2::current_err);
