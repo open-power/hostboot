@@ -34,7 +34,7 @@
 /// *HWP HWP Owner:      Greg Still <stillgs@us.ibm.com>
 /// *HWP FW Owner:       Prem S Jha <premjha2@in.ibm.com>
 /// *HWP Team:           PM
-/// *HWP Level:          1
+/// *HWP Level:          2
 /// *HWP Consumed by:    HB:HBRT
 //
 
@@ -49,6 +49,9 @@ extern "C"
 #define HW_IMG_RING_BUF1_SIZE 307200
 
     typedef  const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > CONST_FAPI2_PROC;
+
+    namespace hcodeImageBuild
+    {
 
     /**
      * @brief   phases of system associated for hcode image build.
@@ -91,7 +94,7 @@ extern "C"
         uint32_t coreSprBuild: 1;               // SPR restore region inclusion in HOMER Build
         uint32_t coreScomBuild: 1;              // Core SCOM restore region inclusion in HOMER Build
         uint32_t cacheScomBuild: 1;             // Cache SCOM restore region inclusion in HOMER Build
-        uint32_t reserve: 20;
+        uint32_t reserved: 20;
 
         ImageType_t( )
         {
@@ -196,5 +199,8 @@ extern "C"
             const uint32_t      i_sizeBuf3,
             void* const         i_pBuf4,
             const uint32_t      i_sizeBuf4 );
+
+    } // namespace hcodeImageBuild
 } // extern C
+
 #endif //__HCODE_IMG_BUILD_H_
