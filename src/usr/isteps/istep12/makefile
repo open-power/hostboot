@@ -74,6 +74,7 @@ EXTRAINCDIR += ${P9A_MSS_ACCESSOR_PATH}
 EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory
 EXTRAINCDIR += ${GEM_PROCEDURES_PATH}/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib
 
 VPATH += $(P9_NEST_HWP_PATH)
 VPATH += $(P9_PERV_HWP_PATH)
@@ -148,5 +149,6 @@ OBJS += $(if $(CONFIG_AXONE),p9a_omic_io_scom.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_scominit.o,)
 OBJS += $(if $(CONFIG_AXONE),p9a_io_omi_dccal.o,)
 OBJS += $(if $(CONFIG_AXONE),gem_getecid.o,)
+OBJS += $(if $(CONFIG_AXONE),exp_getecid.o,)
 
 include ${ROOTPATH}/config.mk

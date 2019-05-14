@@ -50,8 +50,8 @@
     #include <p9c_mss_get_cen_ecid.H>
 #else
     #include <chipids.H>
-// @todo RTC 208512   #include  <exp_getecid.H>
-    #include  <gem_getecid.H>
+    #include <exp_getecid.H>
+    #include <gem_getecid.H>
 #endif
 
 
@@ -329,7 +329,7 @@ void axone_mss_getecid(IStepError & io_istepError)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Running exp_getecid HWP on target HUID 0x%.8X",
                 TARGETING::get_huid(l_ocmb_target) );
-            //@todo RTC 208512: FAPI_INVOKE_HWP(l_err, exp_getecid, l_fapi_ocmb_target);
+            FAPI_INVOKE_HWP(l_err, exp_getecid, l_fapi_ocmb_target);
         }
         else
         {
