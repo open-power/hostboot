@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -107,18 +107,6 @@
       <priority>HIGH</priority>
     </callout>
 </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
-    <description>Invalid cast or calculation for calc_nck</description>
-    <ffdc>TIMING_PS</ffdc>
-    <ffdc>NCK_NS</ffdc>
-    <ffdc>CORRECTION_FACTOR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_SPD_SLAVE_RANKS</rc>
@@ -512,23 +500,6 @@
     <ffdc>RTT_NOM_INDEX</ffdc>
     <ffdc>RTT_NOM_FROM_VPD</ffdc>
     <ffdc>DIMM_TARGET</ffdc>
-    <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>MCS_TARGET</refTarget>
-      </hw>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
-    <description>
-      VPD keyword is too big for space allocated for it.
-    </description>
-    <ffdc>MAX</ffdc>
-    <ffdc>ACTUAL</ffdc>
-    <ffdc>KEYWORD</ffdc>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>

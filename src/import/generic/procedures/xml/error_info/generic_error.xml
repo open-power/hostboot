@@ -68,6 +68,27 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_FAILED_SPD_REVISION_FALLBACK</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision. Most likely a programming error.
+    </description>
+    <ffdc>FAILED_REVISION</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX</rc>
     <description>
         Calculated Cas Latency exceeds JEDEC value for TAA Max
@@ -126,6 +147,17 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
+    <description>Error calculating the index into max_freq array</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>NUM_MAX_FREQS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -204,6 +236,18 @@
      </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
+    <description>Invalid cast or calculation for calc_nck</description>
+    <ffdc>TIMING_PS</ffdc>
+    <ffdc>NCK_NS</ffdc>
+    <ffdc>CORRECTION_FACTOR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 <hwpError>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
   <description>
@@ -216,17 +260,144 @@
   </callout>
 </hwpError>
 
-<hwpError>
-  <rc>RC_MSS_INVALID_FREQUENCY</rc>
-  <description>
-    An invalid frequency was passed to frequency to clock period
-  </description>
-  <ffdc>FREQ</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
+  <hwpError>
+    <rc>RC_MSS_INVALID_DB_MDQ_DRIVE_STRENGTH</rc>
+    <description>
+        Bad SPD data for bytes 145 - 147.
+        Reserved settings for data buffer MDQ drive strength received.
+        This could be code problem (decoding) or bad SPD.
+    </description>
+    <ffdc>DATA_RATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_SPEED</rc>
+    <description>
+      Invalid DIMM speed received. Possibly a programming error.
+    </description>
+    <ffdc>DIMM_SPEED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
+    <description>
+      Received a DIMM type unsupported by the SPD decoder factory
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_DRAM_GEN</rc>
+    <description>
+      Received a DRAM gen unsupported by the SPD decoder factory
+    </description>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQUENCY</rc>
+    <description>
+      An invalid frequency was passed to frequency to clock period
+    </description>
+    <ffdc>FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into frequency scoreboard function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_HYBRID_MODULE</rc>
+    <description>
+      Received an invalid or unsupported hybrid media (SPD byte 3, bits [6:4])
+      for a specified hybrid modue (SPD byte 3, bit [7])
+    </description>
+    <ffdc>HYBRID</ffdc>
+    <ffdc>HYBRID_MEDIA</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
@@ -254,6 +425,47 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_SPD_PARAMETER_RECEIVED</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision. Most likely a programming error.
+    </description>
+    <ffdc>SPD_PARAM</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
+    <description>
+        Invalid SPD reserved bits received.
+        This could be code problem (decoding) or bad SPD.
+    </description>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
@@ -268,6 +480,36 @@
     <gard>
         <target>DIMM_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into limit_freq_by_vpd function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
+    <description>
+      VPD keyword is too big for space allocated for it.
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>KEYWORD</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>VPD_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 <hwpError>
@@ -286,6 +528,16 @@
     <target>TARGET</target>
   </deconfigure>
 </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
+    <description>Attempt to run an MCBIST program with no subtests</description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 
   <hwpError>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
@@ -543,6 +795,21 @@
     </callout>
  </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_MAX_FREQ_ATTR_SIZE_CHANGED</rc>
+    <description>
+        Number of entries for MSS_MRW_MAX_FREQ attribute from VPD has changed without updating the code
+        Asserted because direct accesses to array
+    </description>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>SUPPOSED_SIZE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
  <hwpError>
     <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
     <description>
@@ -569,6 +836,66 @@
       </childTargets>
     </deconfigure>
  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPD_REV_ENCODING_LEVEL_NOT_SUPPORTED</rc>
+    <description>
+      SPD revision on byte 1 (bits 7~4) has a unsupported encoding level
+      that is greater than the largest decoded SPD decoder. There is
+      no backward compatible revision to fallback to.  This could be
+      bad SPD or a programming error.
+    </description>
+    <ffdc>ENCODING_LEVEL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SPD_TIMING_FAIL</rc>
+    <description>
+      Timing SPD parameter failed to meet JEDEC SPD timing
+      bounds.  FUNCTION_CODE ffdc field encodes which timing param.
+    </description>
+    <ffdc>FAILED_REVISION</ffdc>
+    <ffdc>FUNCTION_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_TOO_MANY_DIMMS_ON_PORT</rc>
+    <description>There seem to be too many dimms on the port</description>
+    <ffdc>DIMM_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
 
  <hwpError>
     <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>

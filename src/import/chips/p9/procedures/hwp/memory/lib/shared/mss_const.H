@@ -172,6 +172,7 @@ enum ffdc_function_codes
     DRAM_TO_RP_REG = 101,
 
     // eff_dimm.C
+    RAW_CARD_FACTORY = 115,
     PRIMARY_STACK_TYPE = 116,
 
     // CW engine information

@@ -58,6 +58,123 @@ class mcbistMCTraits< mss::mc_type::EXPLORER>
     public:
         static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
         static constexpr fapi2::TargetType FWMS_ADDR_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+
+        ///
+        /// @brief Returns an error for memdiags compare error in last pattern
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN memdiags_compare_error_in_last_pattern()
+        {
+            return fapi2::EXP_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN();
+        }
+
+        ///
+        /// @brief Returns an error for memdiags error in last pattern
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_ERROR_IN_LAST_PATTERN memdiags_error_in_last_pattern()
+        {
+            return fapi2::EXP_MEMDIAGS_ERROR_IN_LAST_PATTERN();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags failed to start
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_MCBIST_FAILED_TO_START memdiags_failed_to_start()
+        {
+            return fapi2::EXP_MEMDIAGS_MCBIST_FAILED_TO_START();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags failed to stop
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_MCBIST_FAILED_TO_STOP memdiags_failed_to_stop()
+        {
+            return fapi2::EXP_MEMDIAGS_MCBIST_FAILED_TO_STOP();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags has a non-functional port
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_PORT_NOT_FUNCTIONAL memdiags_port_not_functional()
+        {
+            return fapi2::EXP_MEMDIAGS_PORT_NOT_FUNCTIONAL();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags super fast init failed to init
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT memdiags_sf_init_failed_init()
+        {
+            return fapi2::EXP_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags super fast read failed to init
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT memdiags_sf_read_failed_init()
+        {
+            return fapi2::EXP_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags super fast read failed to init
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT memdiags_continuous_scrub_failed_init()
+        {
+            return fapi2::EXP_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags targeted scrub failed to init
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT memdiags_targeted_scrub_failed_init()
+        {
+            return fapi2::EXP_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT();
+        }
+
+        ///
+        /// @brief Returns an error if memdiags is already at a boundary
+        /// @return memdiags error
+        ///
+        static fapi2::EXP_MEMDIAGS_ALREADY_AT_BOUNDARY memdiags_already_at_boundary()
+        {
+            return fapi2::EXP_MEMDIAGS_ALREADY_AT_BOUNDARY();
+        }
+
+        ///
+        /// @brief Returns an error if MCBIST timesout
+        /// @return MCBIST error
+        ///
+        static fapi2::EXP_MCBIST_TIMEOUT mcbist_timeout()
+        {
+            return fapi2::EXP_MCBIST_TIMEOUT();
+        }
+
+        ///
+        /// @brief Returns an error if MCBIST has an unknown failure
+        /// @return MCBIST error
+        ///
+        static fapi2::EXP_MCBIST_UNKNOWN_FAILURE mcbist_unknown_failure()
+        {
+            return fapi2::EXP_MCBIST_UNKNOWN_FAILURE();
+        }
+
+        ///
+        /// @brief Returns an error if MCBIST has a data miscompare
+        /// @return MCBIST error
+        ///
+        static fapi2::EXP_MCBIST_DATA_FAIL mcbist_data_fail()
+        {
+            return fapi2::EXP_MCBIST_DATA_FAIL();
+        }
 };
 
 ///

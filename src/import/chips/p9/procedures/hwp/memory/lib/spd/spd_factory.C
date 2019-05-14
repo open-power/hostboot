@@ -131,7 +131,8 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_DIMM_TYPE()
                          .set_DIMM_TYPE(l_dimm_type)
-                         .set_DIMM_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target)
+                         .set_FUNCTION(mss::ffdc_function_codes::RAW_CARD_FACTORY),
                          "Recieved invalid dimm type: %d for %s",
                          l_dimm_type, mss::spd::c_str(i_target) );
             break;

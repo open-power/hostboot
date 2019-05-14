@@ -127,32 +127,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
-    <description>
-       Wrong size vector passed into limit_freq_by_vpd function
-    </description>
-    <ffdc>SIZE</ffdc>
-    <ffdc>EXPECTED</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
-    <description>
-       Wrong size vector passed into frequency scoreboard function
-    </description>
-    <ffdc>SIZE</ffdc>
-    <ffdc>EXPECTED</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_ERROR_FINDING_DIMM_SPEED_MAP</rc>
     <description>
        Empty MCBIST target vector found when constructing dimm speed mapping
@@ -198,22 +172,6 @@
     <ffdc>NUM_PORTS_FUNCTIONAL</ffdc>
     <ffdc>NUM_CAS_LATENCIES_FOUND</ffdc>
     <ffdc>MCS_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-
-  <hwpError>
-    <rc>RC_MSS_MAX_FREQ_ATTR_SIZE_CHANGED</rc>
-    <description>
-        Number of entries for MSS_MRW_MAX_FREQ attribute from VPD has changed without updating the code
-        Asserted because direct accesses to array
-    </description>
-    <ffdc>ACTUAL_SIZE</ffdc>
-    <ffdc>SUPPOSED_SIZE</ffdc>
-    <ffdc>MCA_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -282,34 +240,6 @@
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_TOO_MANY_DIMMS_ON_PORT</rc>
-    <description>There seem to be too many dimms on the port</description>
-    <ffdc>DIMM_COUNT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-        <childTargets>
-          <parent>PORT_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-        </childTargets>
-        <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
-    <description>Error calculating the index into max_freq array</description>
-    <ffdc>INDEX</ffdc>
-    <ffdc>NUM_MAX_FREQS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
     </callout>
   </hwpError>
 

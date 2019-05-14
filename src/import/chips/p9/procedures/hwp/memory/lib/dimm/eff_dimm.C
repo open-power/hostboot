@@ -5686,7 +5686,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
                      set_MAX(mss::VPD_KEYWORD_MAX).
                      set_ACTUAL(l_vpd_info.iv_size).
                      set_KEYWORD(fapi2::MemVpdData::MT).
-                     set_MCS_TARGET(i_target),
+                     set_VPD_TARGET(i_target),
                      "VPD MT keyword size retrieved: %d, is larger than max: %d for %s",
                      l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
@@ -5710,7 +5710,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
                          set_MAX(mss::VPD_KEYWORD_MAX).
                          set_ACTUAL(l_vpd_info.iv_size).
                          set_KEYWORD(fapi2::MemVpdData::MR).
-                         set_MCS_TARGET(i_target),
+                         set_VPD_TARGET(i_target),
                          "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
                          l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
@@ -5731,7 +5731,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
                  set_MAX(mss::VPD_KEYWORD_MAX).
                  set_ACTUAL(l_vpd_info.iv_size).
                  set_KEYWORD(fapi2::MemVpdData::CK).
-                 set_MCS_TARGET(i_target),
+                 set_VPD_TARGET(i_target),
                  "VPD CK keyword size retrieved: %d, is larger than max: %d for %s",
                  l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
@@ -5750,7 +5750,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
                  set_MAX(mss::VPD_KEYWORD_MAX).
                  set_ACTUAL(l_vpd_info.iv_size).
                  set_KEYWORD(fapi2::MemVpdData::DQ).
-                 set_MCS_TARGET(i_target),
+                 set_VPD_TARGET(i_target),
                  "VPD DQ keyword size retrieved: %d, is larger than max: %d for %s",
                  l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 

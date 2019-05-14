@@ -563,7 +563,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
                  fapi2::MSS_MAX_FREQ_ATTR_SIZE_CHANGED()
                  .set_ACTUAL_SIZE(i_max_mrw_freqs.size())
                  .set_SUPPOSED_SIZE(NUM_MAX_FREQS)
-                 .set_MCA_TARGET(i_target),
+                 .set_PORT_TARGET(i_target),
                  "%s Incorrect number of max frequencies in attribute for (%d)",
                  mss::c_str(i_target),
                  i_max_mrw_freqs.size());

@@ -493,7 +493,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                     right_aligned_insert(l_buffer, l_twrmin_msn, l_twrmin_lsb);
 
                     // Update output only after check passes
-                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWRMIN));
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, U, TWRMIN));
                     o_value = l_buffer;
 
                     FAPI_INF("%s. Minimum Write Recovery Time (tWRmin) in MTB units: %d",
@@ -526,7 +526,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                     right_aligned_insert(l_buffer, l_twtr_lmin_msn, l_twtr_lmin_lsb);
 
                     // Update output only after check passes
-                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_L_MIN));
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, U, TWTR_L_MIN));
                     o_value = l_buffer;
 
                     FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Lmin) in MTB units: %d",
@@ -560,7 +560,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                     right_aligned_insert(l_buffer, l_twtr_smin_msn, l_twtr_smin_lsb);
 
                     // Update output only after check passes
-                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_S_MIN));
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, U, TWTR_S_MIN));
                     o_value = l_buffer;
 
                     FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Smin) in MTB units: %d",
@@ -1275,7 +1275,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_tRASmin_msn, l_tRASmin_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRASMIN));
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, R, TRASMIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Active to Precharge Delay Time (tRASmin) in MTB units: %d",
@@ -1305,7 +1305,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_trcmin_msn, l_trcmin_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRCMIN));
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, R, TRCMIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Active to Active/Refresh Delay Time (tRCmin) in MTB units: %d",
@@ -1336,7 +1336,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_trfc1min_msb, l_trfc1min_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC1MIN));
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, R, TRFC1MIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Refresh Recovery Delay Time 1 (tRFC1min) in MTB units: %d",
@@ -1366,7 +1366,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_trfc2min_msb, l_trfc2min_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC2MIN));
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, R, TRFC2MIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Refresh Recovery Delay Time 2 (tRFC2min) in MTB units: %d",
@@ -1396,7 +1396,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_trfc4min_msb, l_trfc4min_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC4MIN));
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, R, TRFC4MIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Refresh Recovery Delay Time 4 (tRFC4min) in MTB units: %d",
@@ -1426,7 +1426,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 right_aligned_insert(l_buffer, l_tfawmin_msn, l_tfawmin_lsb);
 
                 // Update output only after check passes
-                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TFAWMIN));
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, R, TFAWMIN));
                 o_value = l_buffer;
 
                 FAPI_INF("%s. Minimum Four Activate Window Delay Time (tFAWmin) in MTB units: %d",

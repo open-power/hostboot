@@ -84,17 +84,84 @@
   </registerFfdc>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_TIMEOUT</rc>
+    <description>
+        MCBIST program failed to return in the time allowed
+        Software timer, MCBIST has not finished in the time allowed
+    </description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_DATA_FAIL</rc>
+    <description>
+        MCBIST program appeared to have failed, but set conflicting bits in the status register
+    </description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_UNKNOWN_FAILURE</rc>
+    <description>MCBIST program reported a failure but no error status was found</description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
     <description>An error was caused by the last MCBIST pattern</description>
     <ffdc>STATUS0</ffdc>
     <ffdc>STATUS1</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -106,11 +173,11 @@
     <ffdc>SUBTEST</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -209,11 +276,11 @@
     <description>The MCBIST engine failed to start its program</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -223,12 +290,12 @@
     <description>The MCBIST engine failed to stop its program</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <ffdc>POLL_COUNT</ffdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -238,10 +305,10 @@
     <description>The port used in an MCBIST program is not functional</description>
     <ffdc>RELATIVE_PORT_POSITION</ffdc>
     <ffdc>ADDRESS</ffdc>
-    <ffdc>MCBIST_TARGET</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -255,11 +322,11 @@
     <description>A superfast read operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -269,11 +336,11 @@
     <description>A superfast init operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -283,11 +350,11 @@
     <description>A continuous scrub operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -297,11 +364,11 @@
     <description>A continuous scrub operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -309,25 +376,15 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
     <description>A continue request asked to stop at a boundary, but we are there already</description>
-    <ffdc>MCBIST_TARGET</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <ffdc>BOUNDARY</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>MCBIST_TARGET</target>
+      <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
         <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
-    <description>Attempt to run an MCBIST program with no subtests</description>
-    <ffdc>MCBIST_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
