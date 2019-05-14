@@ -843,19 +843,19 @@ extern "C"
             // PAU1 --> OMIC 4/5
             // PAU2 --> OMIC 2/3
             // PAU3 --> OMIC 6/7
-            if (getChipletId() == 0)
+            if (getChipletId() == PAU0_CHIPLET_ID)
             {
                 l_instance = 0;
             }
-            else if (getChipletId() == 1)
+            else if (getChipletId() == PAU1_CHIPLET_ID)
             {
                 l_instance = 4;
             }
-            else if (getChipletId() == 2)
+            else if (getChipletId() == PAU2_CHIPLET_ID)
             {
                 l_instance = 2;
             }
-            else
+            else // PAU3_CHIPLET_ID
             {
                 l_instance = 6;
             }
