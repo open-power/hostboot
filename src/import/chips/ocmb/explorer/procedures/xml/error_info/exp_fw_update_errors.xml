@@ -137,4 +137,18 @@
         </callout>
     </hwpError>
 
+    <hwpError>
+        <rc>RC_MSS_EXP_I2C_FW_DOWNLOAD_INVALID_STATE</rc>
+        <description>
+            Must be in BOOT_ROM or FW_UPGRADE boot stage to issue FW_DOWNLOAD command
+        </description>
+        <ffdc>TARGET</ffdc>
+        <ffdc>BOOT_STAGE</ffdc>
+        <ffdc>STATUS_DATA</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>MEDIUM</priority>
+        </callout>
+    </hwpError>
+
 </hwpErrors>

@@ -100,11 +100,12 @@ inline void fw_status_setup(size_t& o_size,
 }
 
 ///
-/// @brief EXP_FW_STATUS
+/// @brief get EXP_FW_STATUS bytes
 /// @param[in] i_target the OCMB target
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+inline fapi2::ReturnCode get_fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       std::vector<uint8_t>& o_data)
 {
     // Retrieve setup data
     size_t l_size = 0;
@@ -112,13 +113,25 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     fw_status_setup(l_size, l_cmd_id);
 
     // Get data and check for errors
-    {
-        std::vector<uint8_t> l_data;
-        FAPI_TRY(fapi2::getI2c(i_target, l_size, l_cmd_id, l_data));
-        FAPI_INF( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
-                  l_data[0], l_data[1] , l_data[2], l_data[3], l_data[4]);
-        FAPI_TRY( check::status_code(i_target, l_cmd_id[0], l_data) );
-    }
+    FAPI_TRY(fapi2::getI2c(i_target, l_size, l_cmd_id, o_data));
+    FAPI_INF( "status returned ( 5 bytes ) : 0x%.02X 0x%.02X 0x%.02X 0x%.02X 0x%.02X",
+              o_data[0], o_data[1] , o_data[2], o_data[3], o_data[4]);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief EXP_FW_STATUS
+/// @param[in] i_target the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    std::vector<uint8_t> l_data;
+
+    // Get data and check for errors
+    FAPI_TRY(get_fw_status(i_target, l_data));
+    FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -396,6 +409,53 @@ inline uint32_t trans_micro_i2c_scom_addr(const uint32_t i_addr)
 {
     return (i_addr | OCMB_UNCACHED_OFFSET) ;
 }
+
+///
+/// @brief Issue the DOWNLOAD command to the given OCMB chip
+/// @param[in] i_target the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline  fapi2::ReturnCode fw_download(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    // create byte vector that will hold command bytes in sequence that will do the scom
+    std::vector<uint8_t> l_download_cmd;
+    std::vector<uint8_t> l_status_data;
+    uint8_t              l_boot_stage = 0;
+
+    // Read status to get the current boot_stage
+    FAPI_TRY(get_fw_status(i_target, l_status_data));
+
+    // Extract the boot_stage value
+    FAPI_TRY(status::get_boot_stage(i_target, l_status_data, l_boot_stage));
+
+    // Check that we are in the BOOT_ROM or FW_UPGRADE stage of booting.
+    // The FW_DOWNLOAD command can only be sent in one of these modes
+    // (see table 13-1, pboot flowchart in FW arch doc for more info)
+    FAPI_ASSERT(((l_boot_stage == BOOT_ROM_STAGE) ||
+                 (l_boot_stage == FW_UPGRADE_MODE)),
+                fapi2::MSS_EXP_I2C_FW_DOWNLOAD_INVALID_STATE().
+                set_TARGET(i_target).
+                set_BOOT_STAGE(l_boot_stage).
+                set_STATUS_DATA(l_status_data),
+                "Invalid boot stage[0x%02x] for FW_DOWNLOAD command on %s",
+                l_boot_stage, mss::c_str(i_target));
+
+    // Start building the cmd vector for the write operation
+    // Byte 0 = 0x06 (FW_DOWNLOAD)
+    l_download_cmd.push_back(FW_DOWNLOAD);
+
+    // Use fapi2 putI2c interface to execute command
+    FAPI_TRY(fapi2::putI2c(i_target, l_download_cmd),
+             "I2C FW_DOWNLOAD op failed to send FW_DOWNLOAD cmd to %s",
+             mss::c_str(i_target));
+
+    // NOTE: The EXP_FW_STATUS command will not work after sending the
+    //       EXP_FW_DOWNLOAD because we will be in TWI mode from this point on.
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 }// i2c
 }// exp
