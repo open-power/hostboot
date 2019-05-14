@@ -48,8 +48,10 @@
 #include <vpd/spdenums.H>
 #include <algorithm>
 #include "spd.H"
+#include "ocmb_spd.H"
 #include "spdDDR3.H"
 #include "spdDDR4.H"
+#include "spdDDR4_DDIMM.H"
 #include "errlud_vpd.H"
 #include <config.h>
 
@@ -1227,6 +1229,38 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
     return err;
 }
 
+
+errlHndl_t fetchDataFromEepromType(uint64_t i_byteAddr,
+                                   size_t i_numBytes,
+                                   void * o_data,
+                                   TARGETING::Target * i_target,
+                                   VPD::vpdCmdTarget i_location,
+                                   TARGETING::EEPROM_CONTENT_TYPE i_eepromType)
+{
+    errlHndl_t errl = nullptr;
+
+    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    {
+        errl = spdFetchData(i_byteAddr,
+                            i_numBytes,
+                            o_data,
+                            i_target,
+                            i_location);
+    }
+    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    {
+#ifndef __HOSTBOOT_RUNTIME
+        errl = ocmbFetchData(i_target,
+                             i_byteAddr,
+                             i_numBytes,
+                             o_data,
+                             EEPROM::AUTOSELECT);
+#endif
+    }
+
+    return errl;
+}
+
 // ------------------------------------------------------------------
 // ddr4SpecialCases
 // ------------------------------------------------------------------
@@ -1239,6 +1273,12 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
 
     TRACSSCOMP( g_trac_spd, ENTER_MRK"ddr4SpecialCases()" );
+
+    auto eepromVpd =
+        i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+    TARGETING::EEPROM_CONTENT_TYPE eepromType =
+       static_cast<TARGETING::EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
 
     switch( i_kwdData.keyword )
     {
@@ -1256,12 +1296,14 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
         case RMM_CRC:
         case MODSPEC_MM_MFR_ID_CODE:
         case LRMM_CRC:
+
             // Get MSB
-            err = spdFetchData( i_kwdData.offset,
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[0],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType(i_kwdData.offset,
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[0],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
 
             if( err ) break;
 
@@ -1273,22 +1315,24 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             }
 
             // Get LSB
-            err = spdFetchData( (i_kwdData.offset - 1),
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[1],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType((i_kwdData.offset - 1),
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[1],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
             break;
 
         // ==================================================
         // 2 byte - MSB with mask then LSB is 2 more than MSB
         case TRC_MIN:
             // Get MSB
-            err = spdFetchData( i_kwdData.offset,
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[0],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType(i_kwdData.offset,
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[0],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
 
             if( err ) break;
 
@@ -1300,49 +1344,54 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
             }
 
             // Get LSB
-            err = spdFetchData( (i_kwdData.offset + 2),
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[1],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType((i_kwdData.offset + 2),
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[1],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
             break;
 
         // ==================================================
         // 4 byte - LSB first, no mask
         case CAS_LATENCIES_SUPPORTED_DDR4:
             // Get 4th byte
-            err = spdFetchData( i_kwdData.offset,
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[0],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType(i_kwdData.offset,
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[0],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
 
             if( err ) break;
 
             // Get 3rd Byte
-            err = spdFetchData( (i_kwdData.offset - 1),
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[1],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType((i_kwdData.offset - 1),
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[1],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
 
             if( err ) break;
 
             // Get 2nd Byte
-            err = spdFetchData( (i_kwdData.offset - 2),
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[2],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType((i_kwdData.offset - 2),
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[2],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
 
             if( err ) break;
 
             // Get 1st Byte
-            err = spdFetchData( (i_kwdData.offset - 3),
-                                1, /* Read 1 byte at a time */
-                                &tmpBuffer[3],
-                                i_target,
-                                i_location );
+            err = fetchDataFromEepromType((i_kwdData.offset - 3),
+                                          1, /* Read 1 byte at a time */
+                                          &tmpBuffer[3],
+                                          i_target,
+                                          i_location,
+                                          eepromType);
             break;
 
         // ==================================================
@@ -1665,12 +1714,6 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 
     do
     {
-        // If not a Module Specific keyword, skip this logic
-        if( NA == i_kwdData.modSpec )
-        {
-            break;
-        }
-
         // Check that a Module Specific keyword is being accessed from a DIMM
         // of the correct Module Type.
         modSpecTypes_t modType = NA;
@@ -1681,263 +1724,43 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
             break;
         }
 
-        // Check Unbuffered Memory Module (UMM)
-        if (UMM == modType)
-        {
-            if ((UMM != i_kwdData.modSpec) &&
-                (ALL != i_kwdData.modSpec) )
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
-                           "Keyword (0x%04x) is not valid with UMM modules!",
-                           i_kwdData.keyword );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_UMM
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-                 * @userdata1[0:31]  Module Type (byte 3[3:0])
-                 * @userdata1[32:63] Memory Type (byte 2)
-                 * @userdata2[0:31]  SPD Keyword
-                 * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not UMM Module
-                 *                   specific.
-                 * @custdesc         A problem occurred during the IPL
-                 *                   of the system.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                    VPD::VPD_MOD_SPECIFIC_MISMATCH_UMM,
-                    TWO_UINT32_TO_UINT64( modType, i_memType ),
-                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                                          i_kwdData.modSpec ) );
-
-                // HB code asked for an unsupprted keyword for this Module
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                // Or user could have installed a bad/unsupported dimm
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_NULL );
-
-                err->collectTrace( "SPD", 256);
-
-                break;
-            }
-        }
-        // Check Registered Memory Module (RMM)
-        else if (RMM == modType)
-        {
-            if ((RMM != i_kwdData.modSpec) &&
-                (ALL != i_kwdData.modSpec) )
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
-                           "Keyword (0x%04x) is not valid with RMM modules!",
-                           i_kwdData.keyword );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_RMM
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-                 * @userdata1[0:31]  Module Type (byte 3[3:0])
-                 * @userdata1[32:63] Memory Type (byte 2)
-                 * @userdata2[0:31]  SPD Keyword
-                 * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not RMM Module
-                 *                   specific.
-                 * @custdesc         A problem occurred during the IPL
-                 *                   of the system.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                    VPD::VPD_MOD_SPECIFIC_MISMATCH_RMM,
-                    TWO_UINT32_TO_UINT64( modType, i_memType ),
-                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                                          i_kwdData.modSpec ) );
-
-                // HB code asked for an unsupprted keyword for this Module
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                // Or user could have installed a bad/unsupported dimm
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_NULL );
-
-                err->collectTrace( "SPD", 256);
-
-                break;
-            }
-        }
-        // Check Clocked Memory Module (CMM)
-        else if (CMM == modType)
-        {
-            if ((CMM != i_kwdData.modSpec) &&
-                (ALL != i_kwdData.modSpec) )
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
-                           "Keyword (0x%04x) is not valid with CMM modules!",
-                           i_kwdData.keyword );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_CMM
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-                 * @userdata1[0:31]  Module Type (byte 3[3:0])
-                 * @userdata1[32:63] Memory Type (byte 2)
-                 * @userdata2[0:31]  SPD Keyword
-                 * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not CMM Module
-                 *                   specific.
-                 * @custdesc         A problem occurred during the IPL
-                 *                   of the system.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                    VPD::VPD_MOD_SPECIFIC_MISMATCH_CMM,
-                    TWO_UINT32_TO_UINT64( modType, i_memType ),
-                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                                          i_kwdData.modSpec ) );
-
-                // HB code asked for an unsupprted keyword for this Module
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                // Or user could have installed a bad/unsupported dimm
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_NULL );
-
-                err->collectTrace( "SPD", 256);
-
-                break;
-            }
-        }
-        // Check Load Reduction Memory Module (LRMM)
-        else if (LRMM == modType)
-        {
-            if ((LRMM != i_kwdData.modSpec) &&
-                (ALL != i_kwdData.modSpec) )
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
-                           "Keyword (0x%04x) is not valid with LRMM modules!",
-                           i_kwdData.keyword );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_LRMM
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-                 * @userdata1[0:31]  Module Type (byte 3[3:0])
-                 * @userdata1[32:63] Memory Type (byte 2)
-                 * @userdata2[0:31]  SPD Keyword
-                 * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not LRMM Module
-                 *                   specific.
-                 * @custdesc         A problem occurred during the IPL
-                 *                    of the system.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                    VPD::VPD_MOD_SPECIFIC_MISMATCH_LRMM,
-                    TWO_UINT32_TO_UINT64( modType, i_memType ),
-                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                                          i_kwdData.modSpec ) );
-
-                // HB code asked for an unsupprted keyword for this Module
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                // Or user could have installed a bad/unsupported dimm
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_NULL );
-
-                err->collectTrace( "SPD", 256);
-
-                break;
-            }
-        }
-        else if(DDIMM == modType)
-        {
-            if ((DDIMM != i_kwdData.modSpec) &&
-                (ALL != i_kwdData.modSpec) )
-            {
-                TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
-                           "Keyword (0x%04x) is not valid with DDIMM modules!",
-                           i_kwdData.keyword );
-                /*@
-                 * @errortype
-                 * @reasoncode       VPD::VPD_MOD_SPECIFIC_MISMATCH_DDIMM
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-                 * @userdata1[0:31]  Module Type (byte 3[3:0])
-                 * @userdata1[32:63] Memory Type (byte 2)
-                 * @userdata2[0:31]  SPD Keyword
-                 * @userdata2[32:63] Module Specific flag
-                 * @devdesc          Keyword requested was not LRMM Module
-                 *                   specific.
-                 * @custdesc         A problem occurred during the IPL
-                 *                    of the system.
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                    VPD::VPD_MOD_SPECIFIC_MISMATCH_DDIMM,
-                    TWO_UINT32_TO_UINT64( modType, i_memType ),
-                    TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                                          i_kwdData.modSpec ) );
-
-                // HB code asked for an unsupprted keyword for this Module
-                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-                // Or user could have installed a bad/unsupported dimm
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_NULL );
-
-                err->collectTrace( "SPD", 256);
-
-                break;
-            }
-        }
-        else
+        if (!(modType & i_kwdData.modSpec))
         {
             TRACFCOMP( g_trac_spd, ERR_MRK"checkModSpecificKeyword: "
                        "Module specific keyword could not be matched with an "
                        "appropriate scenario!" );
+
             TRACFCOMP( g_trac_spd, ERR_MRK
                        "  Mem Type: 0x%04x, Mod Type: 0x%04x, Keyword: 0x%04x",
                        i_memType,
                        modType,
                        i_kwdData.keyword );
+
+            uint32_t udUpper32 = TWO_UINT16_TO_UINT32(modType, i_memType);
+            uint32_t udLower32 = TWO_UINT16_TO_UINT32(i_kwdData.keyword,
+                    i_kwdData.modSpec);
+            uint64_t userdata1 = TWO_UINT32_TO_UINT64(udUpper32, udLower32);
+
             /*@
              * @errortype
-             * @reasoncode       VPD::VPD_MOD_SPECIFIC_UNSUPPORTED
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD
-             * @userdata1        Module Type
-             * @userdata2        Memory Type (byte 2)
+             * @reasoncode       VPD::VPD_MOD_SPECIFIC_UNSUPPORTED
+             * @userdata1[00:15] Memory Module Type
+             * @userdata1[16:31] Memory Type (byte 2)
+             * @userdata1[32:47] SPD Keyword
+             * @userdata1[48:63] Module Specific Flag
+             * @userdata2        Target HUID
              * @devdesc          Unsupported Module Type.
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
-                VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
-                TWO_UINT32_TO_UINT64( modType, i_memType ),
-                TWO_UINT32_TO_UINT64( i_kwdData.keyword,
-                i_kwdData.modSpec ) );
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
+                                    VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
+                                    userdata1,
+                                    TARGETING::get_huid(i_target));
 
                 // HB code asked for an unsupprted keyword for this Module
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1998,12 +1821,19 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     errlHndl_t err{nullptr};
     o_modType = NA;
 
+    auto eepromVpd =
+        i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+    TARGETING::EEPROM_CONTENT_TYPE eepromType =
+       static_cast<TARGETING::EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+
     uint8_t modTypeVal = 0;
-    err = spdFetchData( MOD_TYPE_ADDR,
-                        MOD_TYPE_SZ,
-                        &modTypeVal,
-                        i_target,
-                        i_location );
+    err = fetchDataFromEepromType(MOD_TYPE_ADDR,
+                                  MOD_TYPE_SZ,
+                                  &modTypeVal,
+                                  i_target,
+                                  i_location,
+                                  eepromType);
 
     if (err)
     {
@@ -2125,8 +1955,18 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
         }
         else if ( SPD_DDR4_TYPE == i_memType )
         {
-            arraySize = (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
-            kwdData = ddr4Data;
+            modSpecTypes_t modType = NA;
+            err = getModType(modType, i_target, i_memType, VPD::AUTOSELECT);
+            if (modType == DDIMM)
+            {
+                arraySize = (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]));
+                kwdData = ddr4DDIMMData;
+            }
+            else
+            {
+                arraySize = (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+                kwdData = ddr4Data;
+            }
         }
         else
         {

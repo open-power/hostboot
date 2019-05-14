@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/spdDDR4.H $                                       */
+/* $Source: src/usr/vpd/spdDDR4_DDIMM.H $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,13 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SPDDDR4_H
-#define __SPDDDR4_H
+#ifndef __SPDDDR4_DDIMM_H
+#define __SPDDDR4_DDIMM_H
 
 /**
- * @file spdDDR4.H
+ * @file spdDDR4_DDIMM.H
  *
- * @brief Provides the DDR4 field information
+ * @brief Provides the DDR4 field information for DDIMM
  *
  */
 
@@ -44,7 +44,7 @@ namespace SPD
  * @brief Pre-defined lookup table for DDR4 keywords and the
  *      information needed to read that data from the SPD data.
  */
-const KeywordData ddr4Data[] =
+const KeywordData ddr4DDIMMData[] =
 {
     // ----------------------------------------------------------------------------------
     // NOTE: This list must remain an ordered list! The Keyword must be in numerical
@@ -104,16 +104,8 @@ const KeywordData ddr4Data[] =
     { TRPMIN_FINE_OFFSET,               0x79,   0x01,   0x00,   0x00, false, false, ALL },
     { TRCMIN_FINE_OFFSET,               0x78,   0x01,   0x00,   0x00, false, false, ALL },
     // Note - All data below 128 is common across all DDR4 DIMMs, except DDIMM
-    { MODULE_TYPE_SPECIFIC_SECTION,     0x80,   0x80,   0x00,   0x00, false, false, ALL },
-    { MODULE_MANUFACTURER_ID,           0x141,  0x02,   0x00,   0x00, true,  false, ALL },
-    { MODULE_MANUFACTURING_LOCATION,    0x142,  0x01,   0x00,   0x00, false, false, ALL },
-    { MODULE_MANUFACTURING_DATE,        0x143,  0x02,   0x00,   0x00, false, false, ALL },
-    { MODULE_SERIAL_NUMBER,             0x145,  0x04,   0x00,   0x00, false, false, ALL },
-    { MODULE_PART_NUMBER,               0x149,  0x14,   0x00,   0x00, false, false, ALL },
-    { DRAM_MANUFACTURER_ID,             0x15f,  0x02,   0x00,   0x00, true,  false, ALL },
-    { MANUFACTURER_SPECIFIC_DATA,       0x161,  0x1d,   0x00,   0x00, false, false, ALL },
-    { DIMM_BAD_DQ_DATA,                 0x180,  0x50,   0x00,   0x00, false, true,  ALL },
-    { MODULE_REVISION_CODE,             0x15d,  0x01,   0x00,   0x00, false, false, ALL },
+    { MODULE_SERIAL_NUMBER,             0x205,  0x04,   0x00,   0x00, false, false, ALL },
+    { MODULE_PART_NUMBER,               0x209,  0x30,   0x00,   0x00, false, false, ALL },
     // Normal fields supported on DDR4 only
     { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, ALL },
     { BANK_ADDRESS_BITS_DDR4,           0x04,   0x01,   0x30,   0x04, false, false, ALL },
@@ -134,63 +126,12 @@ const KeywordData ddr4Data[] =
     { TRRDS_FINE_OFFSET,                0x77,   0x01,   0x00,   0x00, false, false, ALL },
     { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, ALL },
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
-    { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, ALL },
-    { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, ALL },
-    { NVM_INIT_TIME,                    0xCB,   0x01,   0x00,   0x00, false, false, ALL },
-    { RAW_MODULE_PRODUCT_ID,            0xc0,   0x02,   0x00,   0x00, false, false, ALL },
-    { RAW_MODULE_MANUFACTURER_ID,       0x140,  0x02,   0x00,   0x00, false, false, ALL },
-    // Module Specific fields supported on both DDR3 and DDR4
-    { MODSPEC_COM_NOM_HEIGHT_MAX,       0x80,   0x01,   0x1f,   0x00, false, false, ALL },
-    { MODSPEC_COM_MAX_THICK_BACK,       0x81,   0x01,   0xf0,   0x04, false, false, ALL },
-    { MODSPEC_COM_MAX_THICK_FRONT,      0x81,   0x01,   0x0f,   0x00, false, false, ALL },
-    { MODSPEC_COM_REF_RAW_CARD_EXT,     0x82,   0x01,   0x80,   0x07, false, false, ALL },
-    { MODSPEC_COM_REF_RAW_CARD_REV,     0x82,   0x01,   0x60,   0x05, false, false, ALL },
-    { MODSPEC_COM_REF_RAW_CARD,         0x82,   0x01,   0x1f,   0x00, false, false, ALL },
-    { UMM_ADDR_MAPPING,                 0x83,   0x01,   0x01,   0x00, false, false, UMM },
-    { RMM_ROWS_RDIMM,                   0x83,   0x01,   0x0c,   0x02, false, false, RMM },
-    { RMM_REGS_RDIMM,                   0x83,   0x01,   0x03,   0x00, false, false, RMM },
-    { RMM_HEAT_SP,                      0x84,   0x01,   0x80,   0x07, false, false, RMM },
-    { RMM_HEAT_SP_CHARS,                0x84,   0x01,   0x7F,   0x00, false, false, RMM },
-    { RMM_MFR_ID_CODE,                  0x86,   0x02,   0x00,   0x00, true,  false, RMM },
-    { RMM_REG_REV_NUM,                  0x87,   0x01,   0x00,   0x00, false, false, RMM },
-    { LRMM_HEAT_SP,                     0x84,   0x01,   0x80,   0x07, false, false, LRMM },
-    { LRMM_NUM_ROWS,                    0x83,   0x01,   0x0c,   0x02, false, false, LRMM },
-    { LRMM_MIRRORING,                   0x83,   0x01,   0x03,   0x00, false, false, LRMM },
-    { LRMM_REVISION_NUM,                0x87,   0x01,   0x00,   0x00, false, false, LRMM },
-    { MODSPEC_MM_MFR_ID_CODE,           0x86,   0x02,   0x00,   0x00, true,  false, ALL },
     // Module Specific fields supported on DDR4 only
-    { MODSPEC_COM_RAW_CARD_EXT,         0x80,   0x01,   0xe0,   0x05, false, false, ALL },
-    { UMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, UMM },
-    { RMM_ADDR_MAPPING,                 0x88,   0x01,   0x01,   0x00, false, false, RMM },
-    { MODSPEC_MM_ATTRIBS,               0x83,   0x01,   0x00,   0x00, false, false, ALL },
-    { MODSPEC_MM_ADDR_MAPPING,          0x88,   0x01,   0x01,   0x00, false, false, ALL },
-    { MODSPEC_MM_DRV_STRENGTH_CNTL,     0x89,   0x01,   0x00,   0x00, false, false, ALL },
-    { MODSPEC_MM_DRV_STRENGTH_CK,       0x8a,   0x01,   0x00,   0x00, false, false, ALL },
-    { LRMM_VREF_DQ_RANK0,               0x8c,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_VREF_DQ_RANK1,               0x8d,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_VREF_DQ_RANK2,               0x8e,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_VREF_DQ_RANK3,               0x8f,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_VREF_DQ_FOR_DRAM,            0x90,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_MDQ_DRV_LT_1866,             0x91,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_MDQ_DRV_1866_2400,           0x92,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_MDQ_DRV_2400_3200,           0x93,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_DRV_STRENGTH,                0x94,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_WR_LT_1866,          0x95,   0x01,   0x07,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_NOM_LT_1866,         0x95,   0x01,   0x38,   0x03, false, false, LRMM },
-    { LRMM_ODT_RTT_WR_1866_2400,        0x96,   0x01,   0x07,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_NOM_1866_2400,       0x96,   0x01,   0x38,   0x03, false, false, LRMM },
-    { LRMM_ODT_RTT_WR_2400_3200,        0x97,   0x01,   0x07,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_NOM_2400_3200,       0x97,   0x01,   0x38,   0x03, false, false, LRMM },
-    { LRMM_ODT_RTT_PARK_LT_1866,        0x98,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_PARK_1866_2400,      0x99,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_ODT_RTT_PARK_2400_3200,      0x9a,   0x01,   0x00,   0x00, false, false, LRMM },
-    { RMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, RMM },
-    { LRMM_CRC,                         0xff,   0x02,   0x00,   0x00, true,  false, LRMM },
-    { ENTIRE_SPD,                       0x00,  0x200,   0x00,   0x00, false, false,  ALL },
+    { ENTIRE_SPD,                       0x00,   0x200,   0x00,   0x00, false, false, ALL },
     //---------------------------------------------------------------------------------------
 };
 
 
 }; // end SPD namespace
 
-#endif  // __SPDDDR4_H
+#endif  // __SPDDDR4_DDR4_H
