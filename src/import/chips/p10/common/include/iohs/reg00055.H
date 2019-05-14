@@ -259,6 +259,96 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_HOSTATTN_UNMASKED(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_UNMASKED;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_HOSTATTN_UNMASKED(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_UNMASKED;
+#endif
+    return fapi2::getScom(i_target, AXON_HOSTATTN_UNMASKED, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_HOSTATTN_UNMASKED(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_UNMASKED));
+#endif
+    return fapi2::putScom(i_target, AXON_HOSTATTN_UNMASKED, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_UNMASKED));
+#endif
+    return o_data.insertFromRight<AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN,
+           AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_UNMASKED));
+#endif
+    return o_data.insertFromRight<AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN,
+           AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_UNMASKED));
+#endif
+    return i_data.extractToRight<AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN,
+           AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_HOSTATTN_UNMASKED_HOSTATTN_UNMASKED_IN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_AXON_OPCG_REG2(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -8295,51 +8385,6 @@ fapi_try_exit:
     return i_data;
 #endif
 }
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_0_RD_5_RX_BIT_REGS_STAT1_PL, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
 
 
 }

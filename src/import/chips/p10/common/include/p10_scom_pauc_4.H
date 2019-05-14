@@ -98,9 +98,7 @@ static const uint64_t PCB_OPCG_GO = 0x10030020ull;
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
 // pauc/reg00004.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_XIDBGINF = 0x1000001full;
+static const uint64_t PPE_XIDBGINF = 0x10012c1full;
 
 static const uint32_t PPE_XIDBGINF_SRR0 = 0;
 static const uint32_t PPE_XIDBGINF_SRR0_LEN = 30;
@@ -108,9 +106,7 @@ static const uint32_t PPE_XIDBGINF_LR = 32;
 static const uint32_t PPE_XIDBGINF_LR_LEN = 32;
 // pauc/reg00004.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_SWO2_PB = 0x800f3c001000003full;
+static const uint64_t REGS_TX_IMPCAL_SWO2_PB = 0x800f3c0010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_SWO2_PB_IN_VAL = 48;
 static const uint32_t REGS_TX_IMPCAL_SWO2_PB_IN_VAL_LEN = 7;

@@ -50,10 +50,11 @@ static const uint32_t USTL_USTLINJ_FIR_INJECT_LEN = 5;
 static const uint32_t USTL_USTLINJ_US_DATA = 20;
 static const uint32_t USTL_USTLINJ_US_DATA_LEN = 3;
 static const uint32_t USTL_USTLINJ_CHAN_SEL = 24;
-static const uint32_t USTL_USTLINJ_DATA_DW_SEL = 25;
 static const uint32_t USTL_USTLINJ_US_DATA_ERR_EN = 26;
 static const uint32_t USTL_USTLINJ_ONE_SHOT = 27;
 static const uint32_t USTL_USTLINJ_DATA_OUT = 28;
+static const uint32_t USTL_USTLINJ_DATA_DW_SEL = 29;
+static const uint32_t USTL_USTLINJ_DATA_DW_SEL_LEN = 2;
 // mcc/reg00014.H
 
 }

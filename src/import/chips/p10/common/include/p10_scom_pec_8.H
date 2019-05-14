@@ -82,34 +82,7 @@ static const uint32_t EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL = 54;
 static const uint32_t EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL_LEN = 4;
 // pec/reg00008.H
 
-static const uint64_t EPS_FIR_GXSTOP1_MASK_REG = 0x08040014ull;
-
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP1_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// pec/reg00008.H
-
-static const uint64_t EPS_FIR_LOCAL_ACTION0 = 0x08040010ull;
+static const uint64_t EPS_FIR_LOCAL_ACTION0 = 0x08040106ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION0_00 = 0;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_01 = 1;
@@ -160,6 +133,21 @@ static const uint32_t EPS_FIR_LOCAL_ACTION0_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_ACTION0_63 = 63;
 // pec/reg00008.H
 
 static const uint64_t EPS_PSC_PSCOM_ERROR_MASK = 0x08010002ull;
@@ -205,6 +193,7 @@ static const uint32_t ERROR_REG_INT_TX_FSM_ERROR = 10;
 static const uint32_t ERROR_REG_INT_TYPE_ERROR = 11;
 static const uint32_t ERROR_REG_CL_DATA_ERROR = 12;
 static const uint32_t ERROR_REG_INFO_ERROR = 13;
+static const uint32_t ERROR_REG_SEQ_ERROR = 14;
 static const uint32_t ERROR_REG_CHIPLET_ATOMIC_LOCK_ERROR = 15;
 static const uint32_t ERROR_REG_PCB_INTERFACE_ERROR = 16;
 static const uint32_t ERROR_REG_CHIPLET_OFFLINE = 17;
@@ -216,6 +205,10 @@ static const uint32_t ERROR_REG_CONFIG_REG_PARITY_ERROR = 22;
 static const uint32_t ERROR_REG_DIV_REG_PARITY_ERROR = 23;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR = 24;
 static const uint32_t ERROR_REG_PLL_UNLOCK_ERROR_LEN = 8;
+static const uint32_t ERROR_REG_QME_INTERFACE_PARITY_ERROR = 32;
+static const uint32_t ERROR_REG_QME_DATA_PARITY_ERROR = 33;
+static const uint32_t ERROR_REG_QME_ADDR_PARITY_ERROR = 34;
+static const uint32_t ERROR_REG_QME_FSM_ERROR = 35;
 // pec/reg00008.H
 
 static const uint64_t OPCG_REG0 = 0x08030002ull;

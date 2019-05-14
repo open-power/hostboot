@@ -143,6 +143,11 @@ static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
 // eq/reg00001.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_EIPR_PPE = 0x00000006c0002680ull;
+static const uint64_t QME_EIPR_PPE1 = 0x00000006c00026b0ull;
+static const uint64_t QME_EIPR_PPE2 = 0x00000006c00026a0ull;
 static const uint64_t QME_EIPR_RW = 0x200e0268ull;
 static const uint64_t QME_EIPR_WO_CLEAR = 0x200e026bull;
 static const uint64_t QME_EIPR_WO_OR = 0x200e026aull;
@@ -151,24 +156,66 @@ static const uint32_t QME_EIPR_QME_EIPR_INTERRUPT_POLARITY = 0;
 static const uint32_t QME_EIPR_QME_EIPR_INTERRUPT_POLARITY_LEN = 64;
 // eq/reg00001.H
 
-static const uint64_t QME_LFIRMASK_RWX = 0x200e0004ull;
-static const uint64_t QME_LFIRMASK_WOX_AND = 0x200e0005ull;
-static const uint64_t QME_LFIRMASK_WOX_OR = 0x200e0006ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_LFIRMASK_PPE = 0x00000006c0000040ull;
+static const uint64_t QME_LFIRMASK_PPE1 = 0x00000006c0000050ull;
+static const uint64_t QME_LFIRMASK_PPE2 = 0x00000006c0000060ull;
+static const uint64_t QME_LFIRMASK_RW = 0x200e0004ull;
+static const uint64_t QME_LFIRMASK_WO_AND = 0x200e0005ull;
+static const uint64_t QME_LFIRMASK_WO_OR = 0x200e0006ull;
 
 static const uint32_t QME_LFIRMASK_QME_LFIRMASK_FIR_MASK = 0;
-static const uint32_t QME_LFIRMASK_QME_LFIRMASK_FIR_MASK_LEN = 27;
+static const uint32_t QME_LFIRMASK_QME_LFIRMASK_FIR_MASK_LEN = 28;
 // eq/reg00001.H
 
-static const uint64_t QME_SCDR = 0x200e0144ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCDR_PPE = 0x00000006c0001440ull;
+static const uint64_t QME_SCDR_RO = 0x200e0144ull;
 // eq/reg00001.H
 
-static const uint64_t QME_SCOM_XIDBGPRO = 0x200e0214ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIDBGPRO_PPE = 0x00000006c0002140ull;
+static const uint64_t QME_SCOM_XIDBGPRO_SCOM = 0x200e0214ull;
 // eq/reg00001.H
 
-static const uint64_t QME_SSDR = 0x200e0140ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SSDR_PPE = 0x00000006c0001400ull;
+static const uint64_t QME_SSDR_RO = 0x200e0140ull;
+
+static const uint32_t QME_SSDR_0_QME_SCSR_PM_EXIT = 8;
+static const uint32_t QME_SSDR_1_QME_SCSR_PM_EXIT = 9;
+static const uint32_t QME_SSDR_2_QME_SCSR_PM_EXIT = 10;
+static const uint32_t QME_SSDR_3_QME_SCSR_PM_EXIT = 11;
+static const uint32_t QME_SSDR_0_QME_SCSR_BLOCK_INTR_OUTPUTS = 32;
+static const uint32_t QME_SSDR_1_QME_SCSR_BLOCK_INTR_OUTPUTS = 33;
+static const uint32_t QME_SSDR_2_QME_SCSR_BLOCK_INTR_OUTPUTS = 34;
+static const uint32_t QME_SSDR_3_QME_SCSR_BLOCK_INTR_OUTPUTS = 35;
+static const uint32_t QME_SSDR_0_QME_SCSR_PM_BLOCK_INTR = 36;
+static const uint32_t QME_SSDR_1_QME_SCSR_PM_BLOCK_INTR = 37;
+static const uint32_t QME_SSDR_2_QME_SCSR_PM_BLOCK_INTR = 38;
+static const uint32_t QME_SSDR_3_QME_SCSR_PM_BLOCK_INTR = 39;
+static const uint32_t QME_SSDR_0_QME_SSH_SRC_SAMPLED_STOP_ACTIVE = 44;
+static const uint32_t QME_SSDR_1_QME_SSH_SRC_SAMPLED_STOP_ACTIVE = 45;
+static const uint32_t QME_SSDR_2_QME_SSH_SRC_SAMPLED_STOP_ACTIVE = 46;
+static const uint32_t QME_SSDR_3_QME_SSH_SRC_SAMPLED_STOP_ACTIVE = 47;
+static const uint32_t QME_SSDR_0_QME_SSH_SRC_SAMPLED_STOP_STATE = 48;
+static const uint32_t QME_SSDR_0_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
+static const uint32_t QME_SSDR_1_QME_SSH_SRC_SAMPLED_STOP_STATE = 52;
+static const uint32_t QME_SSDR_1_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
+static const uint32_t QME_SSDR_2_QME_SSH_SRC_SAMPLED_STOP_STATE = 56;
+static const uint32_t QME_SSDR_2_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
+static const uint32_t QME_SSDR_3_QME_SSH_SRC_SAMPLED_STOP_STATE = 60;
+static const uint32_t QME_SSDR_3_QME_SSH_SRC_SAMPLED_STOP_STATE_LEN = 4;
 // eq/reg00001.H
 
-static const uint64_t QME_SWHR = 0x200e014cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SWHR_PPE = 0x00000006c00014c0ull;
+static const uint64_t QME_SWHR_SCOM = 0x200e014cull;
 
 static const uint32_t QME_SWHR_0_QME_SSH_SRC_SPC_WKUP_RECENT_SET = 4;
 static const uint32_t QME_SWHR_0_QME_SSH_SRC_SPC_WKUP_RECENT_SET_LEN = 2;
@@ -220,7 +267,10 @@ static const uint32_t QME_SWHR_3_QME_SPWU_OCC_SPECIAL_WKUP_REQ = 62;
 static const uint32_t QME_SWHR_3_QME_SPWU_HYP_SPECIAL_WKUP_REQ = 63;
 // eq/reg00001.H
 
-static const uint64_t QME_SWPR0 = 0x200e0090ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SWPR0_PPE = 0x00000006c0000900ull;
+static const uint64_t QME_SWPR0_RW = 0x200e0090ull;
 
 static const uint32_t QME_SWPR0_BAR = 0;
 static const uint32_t QME_SWPR0_BAR_LEN = 27;
@@ -228,7 +278,10 @@ static const uint32_t QME_SWPR0_SIZE = 44;
 static const uint32_t QME_SWPR0_SIZE_LEN = 15;
 // eq/reg00001.H
 
-static const uint64_t QME_TBR = 0x200e0248ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_TBR_PPE = 0x00000006c0002480ull;
+static const uint64_t QME_TBR_RW = 0x200e0248ull;
 
 static const uint32_t QME_TBR_TIMEBASE = 0;
 static const uint32_t QME_TBR_TIMEBASE_LEN = 32;

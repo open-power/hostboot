@@ -132,17 +132,13 @@ static const uint64_t PB_PMU0_TLPM_COUNTER = 0x1001181bull;
 static const uint64_t RECOV_INTERRUPT_REG = 0x100f001bull;
 // pauc/reg00001.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_NVAL_PB = 0x800f1c001000003full;
+static const uint64_t REGS_TX_IMPCAL_NVAL_PB = 0x800f1c0010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N = 48;
 static const uint32_t REGS_TX_IMPCAL_NVAL_PB_TX_ZCAL_N_LEN = 9;
 // pauc/reg00001.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_SWO3_PB = 0x800f44001000003full;
+static const uint64_t REGS_TX_IMPCAL_SWO3_PB = 0x800f440010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15 = 48;
 static const uint32_t REGS_TX_IMPCAL_SWO3_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_0_15_LEN = 16;

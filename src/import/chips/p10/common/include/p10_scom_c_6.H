@@ -35,29 +35,28 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CERR = 0x200e0e10ull;
+static const uint64_t CPMS_CERR_PPE = 0x00000006c001e100ull;
+static const uint64_t CPMS_CERR_RW_WCLEAR = 0x200e0e10ull;
 
-static const uint32_t CPMS_CERR_L3_VDD_PFET_SEQ_ERR = 0;
-static const uint32_t CPMS_CERR_L3_VCS_PFET_SEQ_ERR = 1;
-static const uint32_t CPMS_CERR_CL2_VDD_PFET_SEQ_ERR = 2;
-static const uint32_t CPMS_CERR_CL2_VCS_PFET_SEQ_ERR = 3;
-static const uint32_t CPMS_CERR_MMA_VDD_PFET_SEQ_ERR = 4;
-static const uint32_t CPMS_CERR_DDS_ERR = 5;
-static const uint32_t CPMS_CERR_L3_CLOCK_SYNC_ERR = 6;
-static const uint32_t CPMS_CERR_CL2_CLOCK_SYNC_ERR = 7;
-static const uint32_t CPMS_CERR_SPARE = 8;
-static const uint32_t CPMS_CERR_DPT_ACCESS_ERROR = 9;
-static const uint32_t CPMS_CERR_FTC_INJECT_SMALL_ACTIVE = 10;
-static const uint32_t CPMS_CERR_FTC_INJECT_LARGE_ACTIVE = 11;
-static const uint32_t CPMS_CERR_FTC_LARGE_LARGE1 = 12;
-static const uint32_t CPMS_CERR_FTC_LARGE_LARGE2 = 13;
-static const uint32_t CPMS_CERR_FTC_SMALL_LARGE = 14;
-static const uint32_t CPMS_CERR_FTC_LARGE_SMALL = 15;
+static const uint32_t CPMS_CERR_L3_PFET_SEQ_ERR = 0;
+static const uint32_t CPMS_CERR_CL2_PFET_SEQ_ERR = 1;
+static const uint32_t CPMS_CERR_MMA_PFET_SEQ_ERR = 2;
+static const uint32_t CPMS_CERR_DDS_ERR = 3;
+static const uint32_t CPMS_CERR_L3_CLOCK_SYNC_ERR = 4;
+static const uint32_t CPMS_CERR_CL2_CLOCK_SYNC_ERR = 5;
+static const uint32_t CPMS_CERR_DPT_ACCESS_ERROR = 6;
+static const uint32_t CPMS_CERR_SPARE_ERR0 = 7;
+static const uint32_t CPMS_CERR_SPARE_ERR1 = 8;
+static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
+static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
 // c/reg00006.H
 
+static const uint64_t CPMS_MMA_PFETCNTL_PPE = 0x00000006c001e300ull;
+static const uint64_t CPMS_MMA_PFETCNTL_PPE1 = 0x00000006c001e320ull;
+static const uint64_t CPMS_MMA_PFETCNTL_PPE2 = 0x00000006c001e330ull;
 static const uint64_t CPMS_MMA_PFETCNTL_SCOM = 0x200e0e30ull;
-static const uint64_t CPMS_MMA_PFETCNTL_SCOM1 = 0x200e0e32ull;
-static const uint64_t CPMS_MMA_PFETCNTL_SCOM2 = 0x200e0e33ull;
+static const uint64_t CPMS_MMA_PFETCNTL_WO_CLEAR = 0x200e0e32ull;
+static const uint64_t CPMS_MMA_PFETCNTL_WO_OR = 0x200e0e33ull;
 
 static const uint32_t CPMS_MMA_PFETCNTL_VDD_PFET_SEQ_STATE = 0;
 static const uint32_t CPMS_MMA_PFETCNTL_VDD_PFET_SEQ_STATE_LEN = 2;
@@ -74,8 +73,8 @@ static const uint32_t CPMS_MMA_PFETCNTL_VDD_PG_SEL_LEN = 4;
 static const uint32_t CPMS_MMA_PFETCNTL_MMA_FORCE_CL2 = 63;
 // c/reg00006.H
 
-static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RWX_WAND = 0x20020492ull;
-static const uint64_t EC_PC_COMMON_SPR_V0_HMER_WOX_OR = 0x2002048eull;
+static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RW_WAND = 0x20020492ull;
+static const uint64_t EC_PC_COMMON_SPR_V0_HMER_WO_OR = 0x2002048eull;
 
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_MALFUNCTION_ALERT = 0;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_CME_REQUEST = 1;
@@ -91,9 +90,9 @@ static const uint32_t EC_PC_COMMON_SPR_V0_HMER_XSCOM_STATUS = 21;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_XSCOM_STATUS_LEN = 3;
 // c/reg00006.H
 
-static const uint64_t EC_PC_FIR_CORE_RWX = 0x20020440ull;
-static const uint64_t EC_PC_FIR_CORE_WOX_AND = 0x20020441ull;
-static const uint64_t EC_PC_FIR_CORE_WOX_OR = 0x20020442ull;
+static const uint64_t EC_PC_FIR_CORE_RW = 0x20020440ull;
+static const uint64_t EC_PC_FIR_CORE_WO_AND = 0x20020441ull;
+static const uint64_t EC_PC_FIR_CORE_WO_OR = 0x20020442ull;
 
 static const uint32_t EC_PC_FIR_CORE_IF_SRAM_REC_ERROR = 0;
 static const uint32_t EC_PC_FIR_CORE_TC_FIR_XSTOP_ERROR = 1;
@@ -212,6 +211,7 @@ static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_IFU = 1;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_ISU = 2;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_VSU = 3;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_PC = 4;
+static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_MMU = 5;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERROR_PULSE_OR_LEVEL = 6;
 static const uint32_t EC_PC_FIR_ERR_INJ_CLEAR_STICKY_LEVEL = 7;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_SCOM_WRITE = 8;

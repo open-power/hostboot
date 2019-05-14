@@ -54,6 +54,15 @@ static const uint32_t CLOCK_STAT_NSL_UNIT13_NSL = 17;
 static const uint32_t CLOCK_STAT_NSL_UNIT14_NSL = 18;
 // pec/reg00003.H
 
+static const uint64_t EPS_FIR_ANY_LOCAL_ERR_MASK = 0x08040080ull;
+
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_RECOV_TO_PCB = 1;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_SPATTN_TO_PCB = 2;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_LOCAL_XSTOP_TO_PCB = 3;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_HOSTATTN_TO_PCB = 4;
+// pec/reg00003.H
+
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT2 = 0x08050002ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT = 0;
@@ -86,7 +95,7 @@ static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
 // pec/reg00003.H
 
-static const uint64_t LOCAL_XSTOP = 0x08040018ull;
+static const uint64_t LOCAL_XSTOP = 0x08040003ull;
 
 static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
 static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
@@ -115,9 +124,9 @@ static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
 // pec/reg00003.H
 
-static const uint64_t NET_CTRL0_RWX = 0x080f0040ull;
-static const uint64_t NET_CTRL0_RWX_WAND = 0x080f0041ull;
-static const uint64_t NET_CTRL0_RWX_WOR = 0x080f0042ull;
+static const uint64_t NET_CTRL0_RW = 0x080f0040ull;
+static const uint64_t NET_CTRL0_RW_WAND = 0x080f0041ull;
+static const uint64_t NET_CTRL0_RW_WOR = 0x080f0042ull;
 
 static const uint32_t NET_CTRL0_CHIPLET_ENABLE = 0;
 static const uint32_t NET_CTRL0_PCB_EP_RESET = 1;
@@ -131,8 +140,7 @@ static const uint32_t NET_CTRL0_VITAL_PHASE = 8;
 static const uint32_t NET_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t NET_CTRL0_VITAL_AL = 10;
 static const uint32_t NET_CTRL0_ACT_DIS = 11;
-static const uint32_t NET_CTRL0_MPW1 = 12;
-static const uint32_t NET_CTRL0_MPW2 = 13;
+static const uint32_t NET_CTRL0_SYNC_PULSE = 13;
 static const uint32_t NET_CTRL0_MPW3 = 14;
 static const uint32_t NET_CTRL0_DELAY_LCLKR = 15;
 static const uint32_t NET_CTRL0_VITAL_THOLD = 16;
@@ -140,10 +148,10 @@ static const uint32_t NET_CTRL0_FLUSH_SCAN_N = 17;
 static const uint32_t NET_CTRL0_FENCE_EN = 18;
 static const uint32_t NET_CTRL0_CPLT_RCTRL = 19;
 static const uint32_t NET_CTRL0_CPLT_DCTRL = 20;
+static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
-static const uint32_t NET_CTRL0_TP_SRAM_ENABLE = 23;
+static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
-static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
@@ -187,65 +195,9 @@ static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
 static const uint64_t PLL_LOCK_REG = 0x080f0019ull;
 // pec/reg00003.H
 
-static const uint64_t RFIR = 0x08040001ull;
-
-static const uint32_t RFIR_ANY_RECOV = 0;
-static const uint32_t RFIR_RECOV_ANY_LOCAL_XSTOP = 1;
-static const uint32_t RFIR_RESERVED2R = 2;
-static const uint32_t RFIR_RESERVED3R = 3;
-static const uint32_t RFIR_RECOV_PERV = 4;
-static const uint32_t RFIR_RECOV_IN05 = 5;
-static const uint32_t RFIR_RECOV_IN06 = 6;
-static const uint32_t RFIR_RECOV_IN07 = 7;
-static const uint32_t RFIR_RECOV_IN08 = 8;
-static const uint32_t RFIR_RECOV_IN09 = 9;
-static const uint32_t RFIR_RECOV_IN10 = 10;
-static const uint32_t RFIR_RECOV_IN11 = 11;
-static const uint32_t RFIR_RECOV_IN12 = 12;
-static const uint32_t RFIR_RECOV_IN13 = 13;
-static const uint32_t RFIR_RECOV_IN14 = 14;
-static const uint32_t RFIR_RECOV_IN15 = 15;
-static const uint32_t RFIR_RECOV_IN16 = 16;
-static const uint32_t RFIR_RECOV_IN17 = 17;
-static const uint32_t RFIR_RECOV_IN18 = 18;
-static const uint32_t RFIR_RECOV_IN19 = 19;
-static const uint32_t RFIR_RECOV_IN20 = 20;
-static const uint32_t RFIR_RECOV_IN21 = 21;
-static const uint32_t RFIR_RECOV_IN22 = 22;
-static const uint32_t RFIR_RECOV_IN23 = 23;
-static const uint32_t RFIR_RECOV_IN24 = 24;
-static const uint32_t RFIR_RECOV_IN25 = 25;
-static const uint32_t RFIR_RECOV_IN26 = 26;
-static const uint32_t RFIR_RECOV_IN27 = 27;
-static const uint32_t RFIR_RECOV_IN28 = 28;
-static const uint32_t RFIR_RECOV_IN29 = 29;
-static const uint32_t RFIR_RECOV_IN30 = 30;
-static const uint32_t RFIR_RECOV_IN31 = 31;
-static const uint32_t RFIR_RECOV_IN32 = 32;
-static const uint32_t RFIR_RECOV_IN33 = 33;
-static const uint32_t RFIR_RECOV_IN34 = 34;
-static const uint32_t RFIR_RECOV_IN35 = 35;
-static const uint32_t RFIR_RECOV_IN36 = 36;
-static const uint32_t RFIR_RECOV_IN37 = 37;
-static const uint32_t RFIR_RECOV_IN38 = 38;
-static const uint32_t RFIR_RECOV_IN39 = 39;
-static const uint32_t RFIR_RECOV_IN40 = 40;
-static const uint32_t RFIR_RECOV_IN41 = 41;
-static const uint32_t RFIR_RECOV_IN42 = 42;
-static const uint32_t RFIR_RECOV_IN43 = 43;
-static const uint32_t RFIR_RECOV_IN44 = 44;
-static const uint32_t RFIR_RECOV_IN45 = 45;
-static const uint32_t RFIR_RECOV_IN46 = 46;
-static const uint32_t RFIR_RECOV_IN47 = 47;
-static const uint32_t RFIR_RECOV_IN48 = 48;
-static const uint32_t RFIR_RECOV_IN49 = 49;
-static const uint32_t RFIR_RECOV_IN50 = 50;
-static const uint32_t RFIR_RECOV_IN51 = 51;
-static const uint32_t RFIR_RECOV_IN52 = 52;
-static const uint32_t RFIR_RECOV_IN53 = 53;
-// pec/reg00003.H
-
-static const uint64_t SPATTN_MASK = 0x08040007ull;
+static const uint64_t SPATTN_MASK_RW = 0x08040042ull;
+static const uint64_t SPATTN_MASK_WO_CLEAR = 0x08040062ull;
+static const uint64_t SPATTN_MASK_WO_OR = 0x08040052ull;
 
 static const uint32_t SPATTN_MASK_01 = 1;
 static const uint32_t SPATTN_MASK_02 = 2;

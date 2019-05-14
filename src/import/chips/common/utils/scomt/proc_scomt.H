@@ -362,6 +362,146 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Check the correct register is prepared for the following operation.
+///
+/// @param[in]    i_reg0   One of the valid registers for this operation
+/// @param[in]    i_reg1   One of the valid registers for this operation
+/// @param[in]    i_reg2   One of the valid registers for this operation
+/// @param[in]    i_reg3   One of the valid registers for this operation
+/// @param[in]    i_reg4   One of the valid registers for this operation
+/// @param[in]    i_reg5   One of the valid registers for this operation
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
+                                       const uint64_t& i_reg1,
+                                       const uint64_t& i_reg2,
+                                       const uint64_t& i_reg3,
+                                       const uint64_t& i_reg4,
+                                       const uint64_t& i_reg5)
+{
+#ifdef SCOM_CHECKING
+
+    if (!scomt::no_regchk)
+    {
+#ifdef SCOM_CHECKING_PLAT_ASSERT
+
+        if (!((i_reg0 == scomt::last_scom ||
+               i_reg1 == scomt::last_scom ||
+               i_reg2 == scomt::last_scom ||
+               i_reg3 == scomt::last_scom ||
+               i_reg4 == scomt::last_scom ||
+               i_reg5 == scomt::last_scom)))
+        {
+            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
+                   scomt::last_scom,
+                   i_reg0,
+                   i_reg1,
+                   i_reg2,
+                   i_reg3,
+                   i_reg4,
+                   i_reg5);
+            assert(false);
+        }
+
+#endif
+        FAPI_ASSERT((i_reg0 == scomt::last_scom ||
+                     i_reg1 == scomt::last_scom ||
+                     i_reg2 == scomt::last_scom ||
+                     i_reg3 == scomt::last_scom ||
+                     i_reg4 == scomt::last_scom ||
+                     i_reg5 == scomt::last_scom),
+                    fapi2::INVALID_SCOM_FOR_CHIP_EC()
+                    .set_ADDRESS(i_reg0)
+                    .set_SCOMT_CHIP(scomt::chip)
+                    .set_SCOMT_EC(scomt::ec)
+                    .set_SCOMT_ADDRESS(scomt::last_scom),
+                    "This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx",
+                    scomt::last_scom,
+                    i_reg0,
+                    i_reg1,
+                    i_reg2,
+                    i_reg3,
+                    i_reg4,
+                    i_reg5);
+    }
+
+fapi_try_exit:
+#endif
+    return fapi2::current_err;
+}
+
+/// @brief Check the correct register is prepared for the following operation.
+///
+/// @param[in]    i_reg0   One of the valid registers for this operation
+/// @param[in]    i_reg1   One of the valid registers for this operation
+/// @param[in]    i_reg2   One of the valid registers for this operation
+/// @param[in]    i_reg3   One of the valid registers for this operation
+/// @param[in]    i_reg4   One of the valid registers for this operation
+/// @param[in]    i_reg5   One of the valid registers for this operation
+/// @param[in]    i_reg6   One of the valid registers for this operation
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
+                                       const uint64_t& i_reg1,
+                                       const uint64_t& i_reg2,
+                                       const uint64_t& i_reg3,
+                                       const uint64_t& i_reg4,
+                                       const uint64_t& i_reg5,
+                                       const uint64_t& i_reg6)
+{
+#ifdef SCOM_CHECKING
+
+    if (!scomt::no_regchk)
+    {
+#ifdef SCOM_CHECKING_PLAT_ASSERT
+
+        if (!((i_reg0 == scomt::last_scom ||
+               i_reg1 == scomt::last_scom ||
+               i_reg2 == scomt::last_scom ||
+               i_reg3 == scomt::last_scom ||
+               i_reg4 == scomt::last_scom ||
+               i_reg5 == scomt::last_scom ||
+               i_reg6 == scomt::last_scom)))
+        {
+            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
+                   scomt::last_scom,
+                   i_reg0,
+                   i_reg1,
+                   i_reg2,
+                   i_reg3,
+                   i_reg4,
+                   i_reg5,
+                   i_reg6);
+            assert(false);
+        }
+
+#endif
+        FAPI_ASSERT((i_reg0 == scomt::last_scom ||
+                     i_reg1 == scomt::last_scom ||
+                     i_reg2 == scomt::last_scom ||
+                     i_reg3 == scomt::last_scom ||
+                     i_reg4 == scomt::last_scom ||
+                     i_reg5 == scomt::last_scom ||
+                     i_reg6 == scomt::last_scom),
+                    fapi2::INVALID_SCOM_FOR_CHIP_EC()
+                    .set_ADDRESS(i_reg0)
+                    .set_SCOMT_CHIP(scomt::chip)
+                    .set_SCOMT_EC(scomt::ec)
+                    .set_SCOMT_ADDRESS(scomt::last_scom),
+                    "This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx",
+                    scomt::last_scom,
+                    i_reg0,
+                    i_reg1,
+                    i_reg2,
+                    i_reg3,
+                    i_reg4,
+                    i_reg5,
+                    i_reg6);
+    }
+
+fapi_try_exit:
+#endif
+    return fapi2::current_err;
+}
+
 /// @brief Fail if the current scomt::chip/ec is equal to specified arguments.
 ///
 /// @param[in]    i_chip   scomt::chip is this chip

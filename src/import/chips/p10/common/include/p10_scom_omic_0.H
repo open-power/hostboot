@@ -35,9 +35,7 @@ namespace omic
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_MODE19_PG = 0x800898600c00143full;
+static const uint64_t CTL_REGS_RX_MODE19_PG = 0x8008984010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE19_PG_HIST_BIAS_THRESH = 48;
 static const uint32_t CTL_REGS_RX_MODE19_PG_HIST_BIAS_THRESH_LEN = 5;
@@ -47,27 +45,19 @@ static const uint32_t CTL_REGS_RX_MODE19_PG_N1_BIAS_THRESH_LEN = 4;
 static const uint32_t CTL_REGS_RX_MODE19_PG_N2_SAMPLES = 58;
 // omic/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNTL8_PG = 0x8009c0600c00143full;
+static const uint64_t DATASM_REGS_RX_CNTL8_PG = 0x8009c04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
 static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
 // omic/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT16_PG = 0x800b08600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT16_PG = 0x800b084010012c3full;
 // omic/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT26_PG = 0x800b58600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT26_PG = 0x800b584010012c3full;
 // omic/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT8_PG = 0x800ac8600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT8_PG = 0x800ac84010012c3full;
 // omic/reg00000.H
 
 static const uint64_t MC_OMI_FIR_WOF_REG = 0x0c011748ull;

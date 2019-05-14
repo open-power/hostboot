@@ -35,17 +35,17 @@ namespace omic
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_CNTL5_PG = 0x800920600c00143full;
+static const uint64_t CTL_REGS_RX_CNTL5_PG = 0x8009204010012c3full;
 
 static const uint32_t CTL_REGS_RX_CNTL5_PG_PERVASIVE_CAPT = 48;
-static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK = 49;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD = 49;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD = 50;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD = 51;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD = 52;
+static const uint32_t CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD_LEN = 5;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_MODE16_PG = 0x800880600c00143full;
+static const uint64_t CTL_REGS_RX_MODE16_PG = 0x8008804010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT0 = 48;
 static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT0_LEN = 3;
@@ -57,9 +57,7 @@ static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2 = 59;
 static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2_LEN = 5;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_MODE3_PG = 0x800818600c00143full;
+static const uint64_t CTL_REGS_RX_MODE3_PG = 0x8008184010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE3_PG_FILTER_DEPTH = 48;
 static const uint32_t CTL_REGS_RX_MODE3_PG_FILTER_DEPTH_LEN = 4;
@@ -72,26 +70,20 @@ static const uint32_t CTL_REGS_RX_MODE3_PG_FORMAT = 61;
 static const uint32_t CTL_REGS_RX_MODE3_PG_VOTE_WIN_BOTH = 62;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG = 0x800938600c00143full;
+static const uint64_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG = 0x8009384010012c3full;
 
 static const uint32_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG_RX_PG_FIR1_ERR_INJ = 48;
 static const uint32_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG_RX_PG_FIR1_ERR_INJ_LEN = 11;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_TX_CNTL4_PG = 0x800c5c600c00143full;
+static const uint64_t CTL_REGS_TX_CNTL4_PG = 0x800c5c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL = 48;
 static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN = 8;
 static const uint32_t CTL_REGS_TX_CNTL4_PG_PHASE_SEL = 57;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNT14_PG = 0x8009f0600c00143full;
+static const uint64_t DATASM_REGS_RX_CNT14_PG = 0x8009f04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT14_PG_0_SEL = 48;
 static const uint32_t DATASM_REGS_RX_CNT14_PG_0_SEL_LEN = 5;
@@ -101,43 +93,31 @@ static const uint32_t DATASM_REGS_RX_CNT14_PG_2_SEL = 58;
 static const uint32_t DATASM_REGS_RX_CNT14_PG_2_SEL_LEN = 5;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNT24_PG = 0x800a40600c00143full;
+static const uint64_t DATASM_REGS_RX_CNT24_PG = 0x800a404010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT24_PG_RX_A_LANE_FAIL_16_23 = 48;
 static const uint32_t DATASM_REGS_RX_CNT24_PG_RX_A_LANE_FAIL_16_23_LEN = 8;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNTL7_PG = 0x8009b8600c00143full;
+static const uint64_t DATASM_REGS_RX_CNTL7_PG = 0x8009b84010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15 = 48;
 static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15_LEN = 16;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT19_PG = 0x800b20600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT19_PG = 0x800b204010012c3full;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT7_PG = 0x800ac0600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT7_PG = 0x800ac04010012c3full;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG = 0x800ce4600c00143full;
+static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG = 0x800ce44010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG_TX_PSAVE_FORCE_REQ_0_15 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG_TX_PSAVE_FORCE_REQ_0_15_LEN = 16;
 // omic/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT5_PG = 0x800d64600c00143full;
+static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT5_PG = 0x800d644010012c3full;
 // omic/reg00006.H
 
 }

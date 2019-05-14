@@ -201,24 +201,24 @@ static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA = 0;
 static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42;
 // pauc/reg00000.H
 
-static const uint64_t EPS_FIR_MODE_REG = 0x10040008ull;
+static const uint64_t EPS_FIR_MODE_REG = 0x10040088ull;
 
-static const uint32_t EPS_FIR_MODE_REG_00 = 0;
-static const uint32_t EPS_FIR_MODE_REG_01 = 1;
-static const uint32_t EPS_FIR_MODE_REG_02 = 2;
-static const uint32_t EPS_FIR_MODE_REG_03 = 3;
-static const uint32_t EPS_FIR_MODE_REG_04 = 4;
-static const uint32_t EPS_FIR_MODE_REG_05 = 5;
-static const uint32_t EPS_FIR_MODE_REG_06 = 6;
-static const uint32_t EPS_FIR_MODE_REG_07 = 7;
-static const uint32_t EPS_FIR_MODE_REG_08 = 8;
-static const uint32_t EPS_FIR_MODE_REG_09 = 9;
-static const uint32_t EPS_FIR_MODE_REG_10 = 10;
-static const uint32_t EPS_FIR_MODE_REG_11 = 11;
-static const uint32_t EPS_FIR_MODE_REG_12 = 12;
-static const uint32_t EPS_FIR_MODE_REG_13 = 13;
-static const uint32_t EPS_FIR_MODE_REG_14 = 14;
-static const uint32_t EPS_FIR_MODE_REG_15 = 15;
+static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK = 0;
+static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK_RECOV = 1;
+static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK_SPATTN = 2;
+static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK_LXSTOP = 3;
+static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK_HOSTATTN = 4;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG05 = 5;
+static const uint32_t EPS_FIR_MODE_REG_DISABLE_IOPB_ERR = 6;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG07 = 7;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG08 = 8;
+static const uint32_t EPS_FIR_MODE_REG_MASK_DIRECT_ERROR = 9;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG10 = 10;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG11 = 11;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG12 = 12;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG13 = 13;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG14 = 14;
+static const uint32_t EPS_FIR_MODE_REG_MODE_REG15 = 15;
 // pauc/reg00000.H
 
 static const uint64_t EPS_THERM_WSUB_DTS_TRC_RESULT = 0x10050003ull;
@@ -233,70 +233,70 @@ static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT_LEN = 16;
 static const uint64_t EPS_THERM_WSUB_ERR_STATUS_REG = 0x10050013ull;
 // pauc/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t FIR_WOF_REG = 0x10000048ull;
+static const uint64_t FIR_WOF_REG = 0x10012c48ull;
 // pauc/reg00000.H
 
-static const uint64_t HOSTATTN = 0x10040009ull;
+static const uint64_t HOSTATTN = 0x10040004ull;
 
-static const uint32_t HOSTATTN_ANY_HOST_ATTN = 0;
+static const uint32_t HOSTATTN_ANY_HOSTATTN = 0;
 static const uint32_t HOSTATTN_RESERVED1H = 1;
 static const uint32_t HOSTATTN_RESERVED2H = 2;
 static const uint32_t HOSTATTN_RESERVED3H = 3;
-static const uint32_t HOSTATTN_HOST_ATTN_PERV = 4;
-static const uint32_t HOSTATTN_HOST_ATTN_IN05 = 5;
-static const uint32_t HOSTATTN_HOST_ATTN_IN06 = 6;
-static const uint32_t HOSTATTN_HOST_ATTN_IN07 = 7;
-static const uint32_t HOSTATTN_HOST_ATTN_IN08 = 8;
-static const uint32_t HOSTATTN_HOST_ATTN_IN09 = 9;
-static const uint32_t HOSTATTN_HOST_ATTN_IN10 = 10;
-static const uint32_t HOSTATTN_HOST_ATTN_IN11 = 11;
-static const uint32_t HOSTATTN_HOST_ATTN_IN12 = 12;
-static const uint32_t HOSTATTN_HOST_ATTN_IN13 = 13;
-static const uint32_t HOSTATTN_HOST_ATTN_IN14 = 14;
-static const uint32_t HOSTATTN_HOST_ATTN_IN15 = 15;
-static const uint32_t HOSTATTN_HOST_ATTN_IN16 = 16;
-static const uint32_t HOSTATTN_HOST_ATTN_IN17 = 17;
-static const uint32_t HOSTATTN_HOST_ATTN_IN18 = 18;
-static const uint32_t HOSTATTN_HOST_ATTN_IN19 = 19;
-static const uint32_t HOSTATTN_HOST_ATTN_IN20 = 20;
-static const uint32_t HOSTATTN_HOST_ATTN_IN21 = 21;
-static const uint32_t HOSTATTN_HOST_ATTN_IN22 = 22;
-static const uint32_t HOSTATTN_HOST_ATTN_IN23 = 23;
-static const uint32_t HOSTATTN_HOST_ATTN_IN24 = 24;
-static const uint32_t HOSTATTN_HOST_ATTN_IN25 = 25;
-static const uint32_t HOSTATTN_HOST_ATTN_IN26 = 26;
-static const uint32_t HOSTATTN_HOST_ATTN_IN27 = 27;
-static const uint32_t HOSTATTN_HOST_ATTN_IN28 = 28;
-static const uint32_t HOSTATTN_HOST_ATTN_IN29 = 29;
-static const uint32_t HOSTATTN_HOST_ATTN_IN30 = 30;
-static const uint32_t HOSTATTN_HOST_ATTN_IN31 = 31;
-static const uint32_t HOSTATTN_HOST_ATTN_IN32 = 32;
-static const uint32_t HOSTATTN_HOST_ATTN_IN33 = 33;
-static const uint32_t HOSTATTN_HOST_ATTN_IN34 = 34;
-static const uint32_t HOSTATTN_HOST_ATTN_IN35 = 35;
-static const uint32_t HOSTATTN_HOST_ATTN_IN36 = 36;
-static const uint32_t HOSTATTN_HOST_ATTN_IN37 = 37;
-static const uint32_t HOSTATTN_HOST_ATTN_IN38 = 38;
-static const uint32_t HOSTATTN_HOST_ATTN_IN39 = 39;
-static const uint32_t HOSTATTN_HOST_ATTN_IN40 = 40;
-static const uint32_t HOSTATTN_HOST_ATTN_IN41 = 41;
-static const uint32_t HOSTATTN_HOST_ATTN_IN42 = 42;
-static const uint32_t HOSTATTN_HOST_ATTN_IN43 = 43;
-static const uint32_t HOSTATTN_HOST_ATTN_IN44 = 44;
-static const uint32_t HOSTATTN_HOST_ATTN_IN45 = 45;
-static const uint32_t HOSTATTN_HOST_ATTN_IN46 = 46;
-static const uint32_t HOSTATTN_HOST_ATTN_IN47 = 47;
-static const uint32_t HOSTATTN_HOST_ATTN_IN48 = 48;
-static const uint32_t HOSTATTN_HOST_ATTN_IN49 = 49;
-static const uint32_t HOSTATTN_HOST_ATTN_IN50 = 50;
-static const uint32_t HOSTATTN_HOST_ATTN_IN51 = 51;
-static const uint32_t HOSTATTN_HOST_ATTN_IN52 = 52;
-static const uint32_t HOSTATTN_HOST_ATTN_IN53 = 53;
+static const uint32_t HOSTATTN_HOSTATTN_PERV = 4;
+static const uint32_t HOSTATTN_HOSTATTN_IN05 = 5;
+static const uint32_t HOSTATTN_HOSTATTN_IN06 = 6;
+static const uint32_t HOSTATTN_HOSTATTN_IN07 = 7;
+static const uint32_t HOSTATTN_HOSTATTN_IN08 = 8;
+static const uint32_t HOSTATTN_HOSTATTN_IN09 = 9;
+static const uint32_t HOSTATTN_HOSTATTN_IN10 = 10;
+static const uint32_t HOSTATTN_HOSTATTN_IN11 = 11;
+static const uint32_t HOSTATTN_HOSTATTN_IN12 = 12;
+static const uint32_t HOSTATTN_HOSTATTN_IN13 = 13;
+static const uint32_t HOSTATTN_HOSTATTN_IN14 = 14;
+static const uint32_t HOSTATTN_HOSTATTN_IN15 = 15;
+static const uint32_t HOSTATTN_HOSTATTN_IN16 = 16;
+static const uint32_t HOSTATTN_HOSTATTN_IN17 = 17;
+static const uint32_t HOSTATTN_HOSTATTN_IN18 = 18;
+static const uint32_t HOSTATTN_HOSTATTN_IN19 = 19;
+static const uint32_t HOSTATTN_HOSTATTN_IN20 = 20;
+static const uint32_t HOSTATTN_HOSTATTN_IN21 = 21;
+static const uint32_t HOSTATTN_HOSTATTN_IN22 = 22;
+static const uint32_t HOSTATTN_HOSTATTN_IN23 = 23;
+static const uint32_t HOSTATTN_HOSTATTN_IN24 = 24;
+static const uint32_t HOSTATTN_HOSTATTN_IN25 = 25;
+static const uint32_t HOSTATTN_HOSTATTN_IN26 = 26;
+static const uint32_t HOSTATTN_HOSTATTN_IN27 = 27;
+static const uint32_t HOSTATTN_HOSTATTN_IN28 = 28;
+static const uint32_t HOSTATTN_HOSTATTN_IN29 = 29;
+static const uint32_t HOSTATTN_HOSTATTN_IN30 = 30;
+static const uint32_t HOSTATTN_HOSTATTN_IN31 = 31;
+static const uint32_t HOSTATTN_HOSTATTN_IN32 = 32;
+static const uint32_t HOSTATTN_HOSTATTN_IN33 = 33;
+static const uint32_t HOSTATTN_HOSTATTN_IN34 = 34;
+static const uint32_t HOSTATTN_HOSTATTN_IN35 = 35;
+static const uint32_t HOSTATTN_HOSTATTN_IN36 = 36;
+static const uint32_t HOSTATTN_HOSTATTN_IN37 = 37;
+static const uint32_t HOSTATTN_HOSTATTN_IN38 = 38;
+static const uint32_t HOSTATTN_HOSTATTN_IN39 = 39;
+static const uint32_t HOSTATTN_HOSTATTN_IN40 = 40;
+static const uint32_t HOSTATTN_HOSTATTN_IN41 = 41;
+static const uint32_t HOSTATTN_HOSTATTN_IN42 = 42;
+static const uint32_t HOSTATTN_HOSTATTN_IN43 = 43;
+static const uint32_t HOSTATTN_HOSTATTN_IN44 = 44;
+static const uint32_t HOSTATTN_HOSTATTN_IN45 = 45;
+static const uint32_t HOSTATTN_HOSTATTN_IN46 = 46;
+static const uint32_t HOSTATTN_HOSTATTN_IN47 = 47;
+static const uint32_t HOSTATTN_HOSTATTN_IN48 = 48;
+static const uint32_t HOSTATTN_HOSTATTN_IN49 = 49;
+static const uint32_t HOSTATTN_HOSTATTN_IN50 = 50;
+static const uint32_t HOSTATTN_HOSTATTN_IN51 = 51;
+static const uint32_t HOSTATTN_HOSTATTN_IN52 = 52;
+static const uint32_t HOSTATTN_HOSTATTN_IN53 = 53;
 // pauc/reg00000.H
 
-static const uint64_t HOSTATTN_MASK = 0x1004001aull;
+static const uint64_t HOSTATTN_MASK_RW = 0x10040044ull;
+static const uint64_t HOSTATTN_MASK_WO_CLEAR = 0x10040064ull;
+static const uint64_t HOSTATTN_MASK_WO_OR = 0x10040054ull;
 
 static const uint32_t HOSTATTN_MASK_01 = 1;
 static const uint32_t HOSTATTN_MASK_02 = 2;
@@ -411,17 +411,13 @@ static const uint32_t PB_PSAVE01_MISC_CFG_WSIZE = 56;
 static const uint32_t PB_PSAVE01_MISC_CFG_WSIZE_LEN = 3;
 // pauc/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_ARB_CSDR = 0x1000000eull;
+static const uint64_t PPE_ARB_CSDR = 0x10012c0eull;
 
 static const uint32_t PPE_ARB_CSDR_CSDR_SRAM_DATA = 0;
 static const uint32_t PPE_ARB_CSDR_CSDR_SRAM_DATA_LEN = 64;
 // pauc/reg00000.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_SWO8_PB = 0x800f6c001000003full;
+static const uint64_t REGS_TX_IMPCAL_SWO8_PB = 0x800f6c0010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_SWO8_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_32_39 = 48;
 static const uint32_t REGS_TX_IMPCAL_SWO8_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_32_39_LEN = 8;
@@ -451,6 +447,65 @@ static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+// pauc/reg00000.H
+
+static const uint64_t XSTOP_MASK_RW = 0x10040040ull;
+static const uint64_t XSTOP_MASK_WO_CLEAR = 0x10040060ull;
+static const uint64_t XSTOP_MASK_WO_OR = 0x10040050ull;
+
+static const uint32_t XSTOP_MASK_01 = 1;
+static const uint32_t XSTOP_MASK_02 = 2;
+static const uint32_t XSTOP_MASK_03 = 3;
+static const uint32_t XSTOP_MASK_04 = 4;
+static const uint32_t XSTOP_MASK_05 = 5;
+static const uint32_t XSTOP_MASK_06 = 6;
+static const uint32_t XSTOP_MASK_07 = 7;
+static const uint32_t XSTOP_MASK_08 = 8;
+static const uint32_t XSTOP_MASK_09 = 9;
+static const uint32_t XSTOP_MASK_10 = 10;
+static const uint32_t XSTOP_MASK_11 = 11;
+static const uint32_t XSTOP_MASK_12 = 12;
+static const uint32_t XSTOP_MASK_13 = 13;
+static const uint32_t XSTOP_MASK_14 = 14;
+static const uint32_t XSTOP_MASK_15 = 15;
+static const uint32_t XSTOP_MASK_16 = 16;
+static const uint32_t XSTOP_MASK_17 = 17;
+static const uint32_t XSTOP_MASK_18 = 18;
+static const uint32_t XSTOP_MASK_19 = 19;
+static const uint32_t XSTOP_MASK_20 = 20;
+static const uint32_t XSTOP_MASK_21 = 21;
+static const uint32_t XSTOP_MASK_22 = 22;
+static const uint32_t XSTOP_MASK_23 = 23;
+static const uint32_t XSTOP_MASK_24 = 24;
+static const uint32_t XSTOP_MASK_25 = 25;
+static const uint32_t XSTOP_MASK_26 = 26;
+static const uint32_t XSTOP_MASK_27 = 27;
+static const uint32_t XSTOP_MASK_28 = 28;
+static const uint32_t XSTOP_MASK_29 = 29;
+static const uint32_t XSTOP_MASK_30 = 30;
+static const uint32_t XSTOP_MASK_31 = 31;
+static const uint32_t XSTOP_MASK_32 = 32;
+static const uint32_t XSTOP_MASK_33 = 33;
+static const uint32_t XSTOP_MASK_34 = 34;
+static const uint32_t XSTOP_MASK_35 = 35;
+static const uint32_t XSTOP_MASK_36 = 36;
+static const uint32_t XSTOP_MASK_37 = 37;
+static const uint32_t XSTOP_MASK_38 = 38;
+static const uint32_t XSTOP_MASK_39 = 39;
+static const uint32_t XSTOP_MASK_40 = 40;
+static const uint32_t XSTOP_MASK_41 = 41;
+static const uint32_t XSTOP_MASK_42 = 42;
+static const uint32_t XSTOP_MASK_43 = 43;
+static const uint32_t XSTOP_MASK_44 = 44;
+static const uint32_t XSTOP_MASK_45 = 45;
+static const uint32_t XSTOP_MASK_46 = 46;
+static const uint32_t XSTOP_MASK_47 = 47;
+static const uint32_t XSTOP_MASK_48 = 48;
+static const uint32_t XSTOP_MASK_49 = 49;
+static const uint32_t XSTOP_MASK_50 = 50;
+static const uint32_t XSTOP_MASK_51 = 51;
+static const uint32_t XSTOP_MASK_52 = 52;
+static const uint32_t XSTOP_MASK_53 = 53;
 // pauc/reg00000.H
 
 }

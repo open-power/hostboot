@@ -161,86 +161,299 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK,
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK,
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return o_data.setBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK>();
+    return o_data.setBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return o_data.clearBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK>();
+    return o_data.clearBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return i_data.extractToRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK,
+    return i_data.extractToRight<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
 #endif
-    return i_data.getBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK>();
+    return i_data.getBit<CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_SHARED_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.setBit<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.clearBit<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return i_data.getBit<CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_OPCG_GO_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.setBit<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.clearBit<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return i_data.getBit<CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD,
+           CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return o_data.insertFromRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD,
+           CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CTL_REGS_RX_CNTL5_PG));
+#endif
+    return i_data.extractToRight<CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD,
+           CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CTL_REGS_RX_CNTL5_PG_BIST_MAX_LANES_OVRD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

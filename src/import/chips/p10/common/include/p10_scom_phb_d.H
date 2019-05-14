@@ -41,12 +41,21 @@ static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE = 0;
 static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE_LEN = 28;
 // phb/reg00013.H
 
-static const uint64_t REGS_PFIR_REG_RWX = 0x08010840ull;
-static const uint64_t REGS_PFIR_REG_WOX_AND = 0x08010841ull;
-static const uint64_t REGS_PFIR_REG_WOX_OR = 0x08010842ull;
+static const uint64_t REGS_PFIR_REG_RW = 0x08010840ull;
+static const uint64_t REGS_PFIR_REG_WO_AND = 0x08010841ull;
+static const uint64_t REGS_PFIR_REG_WO_OR = 0x08010842ull;
 
 static const uint32_t REGS_PFIR_REG_PFIRPFIR = 0;
 static const uint32_t REGS_PFIR_REG_PFIRPFIR_LEN = 6;
+// phb/reg00013.H
+
+static const uint64_t RSB_SCOM_SSR_PHB5_HVIAR = 0x08010900ull;
+
+static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VLD = 0;
+static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_4B = 1;
+static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_AUTO_INC = 2;
+static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE = 51;
+static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE_LEN = 11;
 // phb/reg00013.H
 
 }

@@ -35,7 +35,8 @@ namespace c
 {
 
 
-static const uint64_t CPMS_MMA_PFETSTAT = 0x200e0e34ull;
+static const uint64_t CPMS_MMA_PFETSTAT_PPE = 0x00000006c001e340ull;
+static const uint64_t CPMS_MMA_PFETSTAT_RO = 0x200e0e34ull;
 
 static const uint32_t CPMS_MMA_PFETSTAT_S_ENABLED_SENSE = 0;
 static const uint32_t CPMS_MMA_PFETSTAT_S_DISABLED_SENSE = 1;
@@ -43,7 +44,8 @@ static const uint32_t CPMS_MMA_PFETSTAT__ENABLE_ACTUAL = 16;
 static const uint32_t CPMS_MMA_PFETSTAT__ENABLE_ACTUAL_LEN = 8;
 // c/reg00013.H
 
-static const uint64_t CPMS_PFETDLY = 0x200e0e1cull;
+static const uint64_t CPMS_PFETDLY_PPE = 0x00000006c001e1c0ull;
+static const uint64_t CPMS_PFETDLY_RW = 0x200e0e1cull;
 
 static const uint32_t CPMS_PFETDLY_POWDN_DLY = 0;
 static const uint32_t CPMS_PFETDLY_POWDN_DLY_LEN = 4;
@@ -70,11 +72,10 @@ static const uint32_t EC_PC_COMMON_SPR_MODE_SPRC_LT4_SEL = 24;
 static const uint32_t EC_PC_COMMON_SPR_MODE_SPRC_LT5_SEL = 25;
 static const uint32_t EC_PC_COMMON_SPR_MODE_SPRC_LT6_SEL = 26;
 static const uint32_t EC_PC_COMMON_SPR_MODE_SPRC_LT7_SEL = 27;
-static const uint32_t EC_PC_COMMON_SPR_MODE_SPRC_CY_DISABLE = 28;
 // c/reg00013.H
 
-static const uint64_t EC_PC_COMMON_SPR_V2_HMER_RWX_WAND = 0x20020494ull;
-static const uint64_t EC_PC_COMMON_SPR_V2_HMER_WOX_OR = 0x20020490ull;
+static const uint64_t EC_PC_COMMON_SPR_V2_HMER_RW_WAND = 0x20020494ull;
+static const uint64_t EC_PC_COMMON_SPR_V2_HMER_WO_OR = 0x20020490ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_MALFUNCTION_ALERT = 0;
 static const uint32_t EC_PC_COMMON_SPR_V2_HMER_CME_REQUEST = 1;
@@ -110,9 +111,9 @@ static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_D = 24;
 static const uint32_t EC_PC_TRACE2_TR0_CONFIG_3_D_LEN = 24;
 // c/reg00013.H
 
-static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_RWX = 0x20020000ull;
-static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_WOX_AND = 0x20020001ull;
-static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_WOX_OR = 0x20020002ull;
+static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_RW = 0x20020000ull;
+static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_WO_AND = 0x20020001ull;
+static const uint64_t L2_L2MISC_L2CERRS_FIR_REG_WO_OR = 0x20020002ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_REG_CACHE_RD_CE = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_REG_CACHE_RD_UE = 1;
@@ -203,7 +204,8 @@ static const uint32_t PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
 // c/reg00013.H
 
-static const uint64_t QME_PSCRS0 = 0x200e0850ull;
+static const uint64_t QME_PSCRS0_PPE = 0x00000006c0018500ull;
+static const uint64_t QME_PSCRS0_RW = 0x200e0850ull;
 
 static const uint32_t QME_PSCRS0_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS0_SD = 1;

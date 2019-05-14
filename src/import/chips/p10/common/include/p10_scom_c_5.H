@@ -54,7 +54,7 @@ static const uint32_t ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
 static const uint64_t EC_PC_PMU_SPRCOR_CORE_FUSES = 0x2002040eull;
 // c/reg00005.H
 
-static const uint64_t EC_PC_SPURR_FREQ_REF = 0x20020aa1ull;
+static const uint64_t EC_PC_SPURR_FREQ_REF = 0x200204a1ull;
 
 static const uint32_t EC_PC_SPURR_FREQ_REF_FREQUENCY_REFERENCE = 0;
 static const uint32_t EC_PC_SPURR_FREQ_REF_FREQUENCY_REFERENCE_LEN = 8;
@@ -136,8 +136,10 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SPARE2TO4 = 2;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SPARE2TO4_LEN = 3;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SCOPE = 5;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SCOPE_LEN = 3;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR = 8;
-static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_LEN = 43;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SPARE8TO11 = 8;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_SPARE8TO11_LEN = 4;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR = 12;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_PDBAR_LEN = 39;
 // c/reg00005.H
 
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_TRIG = 0x20010684ull;
@@ -168,22 +170,26 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0_5_LPAR_ID = 40;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_SLOW_LPAR_REG0_5_LPAR_ID_LEN = 12;
 // c/reg00005.H
 
-static const uint64_t QME_CIIR = 0x200e0874ull;
+static const uint64_t QME_CIIR_PPE = 0x00000006c0018740ull;
+static const uint64_t QME_CIIR_WO_4P = 0x200e0874ull;
 
-static const uint32_t QME_CIIR_HMI_REQUEST = 0;
-static const uint32_t QME_CIIR_MSGSND_INTR_INJECT = 28;
-static const uint32_t QME_CIIR_MSGSND_INTR_INJECT_LEN = 4;
-static const uint32_t QME_CIIR_MSGSNDU_INTR_INJECT = 60;
-static const uint32_t QME_CIIR_MSGSNDU_INTR_INJECT_LEN = 4;
+static const uint32_t QME_CIIR__INTR_INJECT = 28;
+static const uint32_t QME_CIIR__INTR_INJECT_LEN = 4;
+static const uint32_t QME_CIIR_U_INTR_INJECT = 60;
+static const uint32_t QME_CIIR_U_INTR_INJECT_LEN = 4;
 // c/reg00005.H
 
-static const uint64_t QME_RMOR = 0x200e0868ull;
+static const uint64_t QME_RMOR_PPE = 0x00000006c0018680ull;
+static const uint64_t QME_RMOR_WO = 0x200e0868ull;
 
 static const uint32_t QME_RMOR_DATA = 0;
 static const uint32_t QME_RMOR_DATA_LEN = 63;
 static const uint32_t QME_RMOR_URMOR_SELECT = 63;
 // c/reg00005.H
 
+static const uint64_t QME_SCR_PPE = 0x00000006c00180c0ull;
+static const uint64_t QME_SCR_PPE1 = 0x00000006c00180f0ull;
+static const uint64_t QME_SCR_PPE2 = 0x00000006c00180e0ull;
 static const uint64_t QME_SCR_RW = 0x200e080cull;
 static const uint64_t QME_SCR_WO_CLEAR = 0x200e080full;
 static const uint64_t QME_SCR_WO_OR = 0x200e080eull;

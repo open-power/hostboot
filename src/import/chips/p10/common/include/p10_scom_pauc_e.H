@@ -69,7 +69,7 @@ static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
 // pauc/reg00014.H
 
-static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x10040011ull;
+static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x10040107ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION1_00 = 0;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_01 = 1;
@@ -120,13 +120,26 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 // pauc/reg00014.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t FIR_MASK_REG_RWX = 0x10000043ull;
-static const uint64_t FIR_MASK_REG_WOX_AND = 0x10000044ull;
-static const uint64_t FIR_MASK_REG_WOX_OR = 0x10000045ull;
+static const uint64_t FIR_MASK_REG_RW = 0x10012c43ull;
+static const uint64_t FIR_MASK_REG_WO_AND = 0x10012c44ull;
+static const uint64_t FIR_MASK_REG_WO_OR = 0x10012c45ull;
 
 static const uint32_t FIR_MASK_REG_IOO0_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 0;
 static const uint32_t FIR_MASK_REG_IOO1_RX_INVALID_STATE_OR_PARITY_ERROR_MASK = 1;
@@ -190,40 +203,50 @@ static const uint64_t PB_MAILBOX_11_REG = 0x10011833ull;
 static const uint64_t PB_PMU2_CNPM_COUNTER = 0x10011823ull;
 // pauc/reg00014.H
 
-static const uint64_t PB_PTL_FIR_MASK_REG_RWX = 0x10011803ull;
-static const uint64_t PB_PTL_FIR_MASK_REG_WOX_AND = 0x10011804ull;
-static const uint64_t PB_PTL_FIR_MASK_REG_WOX_OR = 0x10011805ull;
+static const uint64_t PB_PTL_FIR_MASK_REG_RW = 0x10011803ull;
+static const uint64_t PB_PTL_FIR_MASK_REG_WO_AND = 0x10011804ull;
+static const uint64_t PB_PTL_FIR_MASK_REG_WO_OR = 0x10011805ull;
 
 static const uint32_t PB_PTL_FIR_MASK_REG_FMR00_TRAINED_MASK = 0;
 static const uint32_t PB_PTL_FIR_MASK_REG_FMR01_TRAINED_MASK = 1;
 static const uint32_t PB_PTL_FIR_MASK_REG_FMR02_TRAINED_MASK = 2;
 static const uint32_t PB_PTL_FIR_MASK_REG_FMR03_TRAINED_MASK = 3;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_UE_MASK = 8;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_CE_MASK = 9;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK = 10;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_UE_MASK = 11;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_CE_MASK = 12;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK = 13;
-static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK = 20;
-static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK = 21;
-static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK = 22;
-static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK = 23;
-static const uint32_t PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK = 28;
-static const uint32_t PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK = 29;
-static const uint32_t PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK = 30;
-static const uint32_t PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK = 31;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK = 36;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK = 37;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK = 38;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK = 39;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK = 40;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK = 41;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK = 42;
-static const uint32_t PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK = 43;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK = 52;
-static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK = 53;
-static const uint32_t PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK = 56;
-static const uint32_t PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK = 57;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_UE_MASK = 4;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_CE_MASK = 5;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_SUE_MASK = 6;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB01_ERR_MASK = 7;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_UE_MASK = 8;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_CE_MASK = 9;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_SUE_MASK = 10;
+static const uint32_t PB_PTL_FIR_MASK_REG_DOB23_ERR_MASK = 11;
+static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER00_ATTN_MASK = 12;
+static const uint32_t PB_PTL_FIR_MASK_REG_CROB01_ATTN_MASK = 13;
+static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER01_ATTN_MASK = 14;
+static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER02_ATTN_MASK = 15;
+static const uint32_t PB_PTL_FIR_MASK_REG_CROB23_ATTN_MASK = 16;
+static const uint32_t PB_PTL_FIR_MASK_REG_FRAMER03_ATTN_MASK = 17;
+static const uint32_t PB_PTL_FIR_MASK_REG_PARSER00_ATTN_MASK = 18;
+static const uint32_t PB_PTL_FIR_MASK_REG_PARSER01_ATTN_MASK = 19;
+static const uint32_t PB_PTL_FIR_MASK_REG_PARSER02_ATTN_MASK = 20;
+static const uint32_t PB_PTL_FIR_MASK_REG_PARSER03_ATTN_MASK = 21;
+static const uint32_t PB_PTL_FIR_MASK_REG_LINK_DOWN_0_ATTN_MASK = 22;
+static const uint32_t PB_PTL_FIR_MASK_REG_LINK_DOWN_1_ATTN_MASK = 23;
+static const uint32_t PB_PTL_FIR_MASK_REG_LINK_DOWN_2_ATTN_MASK = 24;
+static const uint32_t PB_PTL_FIR_MASK_REG_LINK_DOWN_3_ATTN_MASK = 25;
+static const uint32_t PB_PTL_FIR_MASK_REG_DIB01_ERR_MASK = 26;
+static const uint32_t PB_PTL_FIR_MASK_REG_DIB23_ERR_MASK = 27;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB00_SPATTN_MASK = 28;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB01_SPATTN_MASK = 29;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB10_SPATTN_MASK = 30;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB11_SPATTN_MASK = 31;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB20_SPATTN_MASK = 32;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB21_SPATTN_MASK = 33;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB30_SPATTN_MASK = 34;
+static const uint32_t PB_PTL_FIR_MASK_REG_MB31_SPATTN_MASK = 35;
+static const uint32_t PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK = 36;
+static const uint32_t PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK = 37;
+static const uint32_t PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK = 38;
+static const uint32_t PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK = 39;
 // pauc/reg00014.H
 
 static const uint64_t RCMD_RATE_CFG = 0x1001180cull;
@@ -236,6 +259,12 @@ static const uint32_t RCMD_RATE_CFG_X_RCMD_RATE_ADDER = 16;
 static const uint32_t RCMD_RATE_CFG_X_RCMD_RATE_ADDER_LEN = 4;
 static const uint32_t RCMD_RATE_CFG_Y_RCMD_RATE_ADDER = 20;
 static const uint32_t RCMD_RATE_CFG_Y_RCMD_RATE_ADDER_LEN = 4;
+static const uint32_t RCMD_RATE_CFG_X_DISABLE_TURBO = 24;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG = 25;
+static const uint32_t RCMD_RATE_CFG_X_CMD_GAP_CFG_LEN = 2;
+static const uint32_t RCMD_RATE_CFG_Y_DISABLE_TURBO = 27;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG = 28;
+static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 2;
 // pauc/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x100f001eull;
@@ -254,6 +283,8 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
+static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 // pauc/reg00014.H
 
 static const uint64_t TRA1_TR0_CONFIG_1 = 0x10010484ull;

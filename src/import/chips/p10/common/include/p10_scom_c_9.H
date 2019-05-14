@@ -131,7 +131,8 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN = 45;
 // c/reg00009.H
 
-static const uint64_t QME_CDBB = 0x200e0804ull;
+static const uint64_t QME_CDBB_PPE = 0x00000006c0018040ull;
+static const uint64_t QME_CDBB_RW = 0x200e0804ull;
 
 static const uint32_t QME_CDBB_QME_CDBB_MESSAGE_NUMBER = 0;
 static const uint32_t QME_CDBB_QME_CDBB_MESSAGE_NUMBER_LEN = 8;

@@ -35,22 +35,16 @@ namespace omic
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_MODE8_PG = 0x800840600c00143full;
+static const uint64_t CTL_REGS_RX_MODE8_PG = 0x8008404010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE8_PG_RX_BO_TIME = 48;
 static const uint32_t CTL_REGS_RX_MODE8_PG_RX_BO_TIME_LEN = 5;
 // omic/reg00007.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT12_PG = 0x800ae8600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT12_PG = 0x800ae84010012c3full;
 // omic/reg00007.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT22_PG = 0x800b38600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT22_PG = 0x800b384010012c3full;
 // omic/reg00007.H
 
 static const uint64_t MC_OMI_FIR_ACTION0_REG = 0x0c011746ull;

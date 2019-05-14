@@ -35,14 +35,10 @@ namespace omic
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT10_PG = 0x800ad8600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT10_PG = 0x800ad84010012c3full;
 // omic/reg00012.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT20_PG = 0x800b28600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT20_PG = 0x800b284010012c3full;
 // omic/reg00012.H
 
 }

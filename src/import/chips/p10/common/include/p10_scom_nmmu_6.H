@@ -35,9 +35,9 @@ namespace nmmu
 {
 
 
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX = 0x02010c00ull;
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND = 0x02010c01ull;
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR = 0x02010c02ull;
+static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW = 0x02010c00ull;
+static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND = 0x02010c01ull;
+static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR = 0x02010c02ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR = 1;

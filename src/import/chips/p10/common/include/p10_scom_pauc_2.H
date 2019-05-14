@@ -59,6 +59,14 @@ static const uint32_t CPLT_STAT0_FREE_USAGE_20I = 20;
 static const uint32_t CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t CPLT_STAT0_FREE_USAGE_23I = 23;
+static const uint32_t CPLT_STAT0_FREE_USAGE_24I = 24;
+static const uint32_t CPLT_STAT0_FREE_USAGE_25I = 25;
+static const uint32_t CPLT_STAT0_FREE_USAGE_26I = 26;
+static const uint32_t CPLT_STAT0_FREE_USAGE_27I = 27;
+static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
+static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
+static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
+static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
 // pauc/reg00002.H
 
 static const uint64_t PB_FP23_CFG = 0x1001180bull;
@@ -107,9 +115,7 @@ static const uint32_t PB_TRACE_CFG_1R_SEL = 24;
 static const uint32_t PB_TRACE_CFG_1R_SEL_LEN = 8;
 // pauc/reg00002.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_XIDBGPRO = 0x10000015ull;
+static const uint64_t PPE_XIDBGPRO = 0x10012c15ull;
 
 static const uint32_t PPE_XIDBGPRO_SIBRC = 9;
 static const uint32_t PPE_XIDBGPRO_SIBRC_LEN = 3;
@@ -117,21 +123,16 @@ static const uint32_t PPE_XIDBGPRO_WE = 14;
 static const uint32_t PPE_XIDBGPRO_LP = 20;
 // pauc/reg00002.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_PVAL_PB = 0x800f24001000003full;
+static const uint64_t REGS_TX_IMPCAL_PVAL_PB = 0x800f240010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_PVAL_PB_TX_ZCAL_P = 48;
 static const uint32_t REGS_TX_IMPCAL_PVAL_PB_TX_ZCAL_P_LEN = 9;
 // pauc/reg00002.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_ZCAL_FIR_PB = 0x800f88001000003full;
+static const uint64_t REGS_ZCAL_FIR_PB = 0x800f880010012c3full;
 // pauc/reg00002.H
 
-static const uint64_t SPATTN_NCX = 0x10040005ull;
-static const uint64_t SPATTN_ROX = 0x10040004ull;
+static const uint64_t SPATTN = 0x10040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;

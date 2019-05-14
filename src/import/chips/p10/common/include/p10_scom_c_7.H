@@ -35,14 +35,16 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CERRMSK = 0x200e0e14ull;
+static const uint64_t CPMS_CERRMSK_PPE = 0x00000006c001e140ull;
+static const uint64_t CPMS_CERRMSK_RW = 0x200e0e14ull;
 
 static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
 static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
 static const uint32_t CPMS_CERRMSK_CLK_SYNC_ERR_MASK = 2;
-static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 3;
+static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
 static const uint32_t CPMS_CERRMSK_SPARE_MASK = 4;
-static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 5;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
 // c/reg00007.H
 
 static const uint64_t EC_PC_FIR_HOLD_OUT = 0x20020451ull;
@@ -172,7 +174,8 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_31 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG3_31_LEN = 4;
 // c/reg00007.H
 
-static const uint64_t QME_PSCRS3 = 0x200e085cull;
+static const uint64_t QME_PSCRS3_PPE = 0x00000006c00185c0ull;
+static const uint64_t QME_PSCRS3_RW = 0x200e085cull;
 
 static const uint32_t QME_PSCRS3_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS3_SD = 1;
@@ -196,6 +199,9 @@ static const uint32_t QME_PSCRS3_PLS = 24;
 static const uint32_t QME_PSCRS3_PLS_LEN = 4;
 // c/reg00007.H
 
+static const uint64_t QME_SCSR_PPE = 0x00000006c0018400ull;
+static const uint64_t QME_SCSR_PPE1 = 0x00000006c0018430ull;
+static const uint64_t QME_SCSR_PPE2 = 0x00000006c0018420ull;
 static const uint64_t QME_SCSR_SCOM = 0x200e0840ull;
 static const uint64_t QME_SCSR_SCOM1 = 0x200e0843ull;
 static const uint64_t QME_SCSR_SCOM2 = 0x200e0842ull;
@@ -218,8 +224,8 @@ static const uint32_t QME_SCSR_SPARE_MODE = 14;
 static const uint32_t QME_SCSR_SRESET_REQ = 15;
 static const uint32_t QME_SCSR_ASSERT_SPECIAL_WKUP_DONE = 16;
 static const uint32_t QME_SCSR_SPARE_OUT = 17;
-static const uint32_t QME_SCSR_SPARE18_19 = 18;
-static const uint32_t QME_SCSR_SPARE18_19_LEN = 2;
+static const uint32_t QME_SCSR_SPARE18 = 18;
+static const uint32_t QME_SCSR_IGNORE_PMCR_RECENT = 19;
 static const uint32_t QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE = 20;
 static const uint32_t QME_SCSR_HALTED_STOP_OVERRIDE_DISABLE = 21;
 static const uint32_t QME_SCSR_AUTO_PMSR_SHIFT_DIS = 22;
@@ -253,6 +259,9 @@ static const uint32_t QME_SCSR_PM_STATE = 60;
 static const uint32_t QME_SCSR_PM_STATE_LEN = 4;
 // c/reg00007.H
 
+static const uint64_t QME_TFCSR_PPE = 0x00000006c0018800ull;
+static const uint64_t QME_TFCSR_PPE1 = 0x00000006c0018830ull;
+static const uint64_t QME_TFCSR_PPE2 = 0x00000006c0018820ull;
 static const uint64_t QME_TFCSR_SCOM = 0x200e0880ull;
 static const uint64_t QME_TFCSR_SCOM1 = 0x200e0883ull;
 static const uint64_t QME_TFCSR_SCOM2 = 0x200e0882ull;

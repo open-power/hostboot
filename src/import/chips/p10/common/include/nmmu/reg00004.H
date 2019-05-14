@@ -1724,6 +1724,90 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return o_data.insertFromRight<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return o_data.insertFromRight<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return o_data.setBit<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return o_data.clearBit<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return i_data.extractToRight<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CFG_NMMU_CTL_SM));
+#endif
+    return i_data.getBit<CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_CFG_NMMU_CTL_SM_TW_PTE_UPD_INTR_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {

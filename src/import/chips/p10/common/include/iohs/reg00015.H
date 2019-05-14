@@ -34,6 +34,236 @@ namespace iohs
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL;
+#endif
+    return fapi2::getScom(i_target, IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return fapi2::putScom(i_target, IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return i_data.extractToRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL));
+#endif
+    return i_data.extractToRight<IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_CNTL22_PL_SEL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL;
+#endif
+    return fapi2::getScom(i_target, IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL));
+#endif
+    return fapi2::putScom(i_target, IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL));
+#endif
+    return i_data.extractToRight<IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS,
+           IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_0_DD_1_TX_BIT_REGS_STAT1_PL_TX_SEG_TEST_STATUS chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_IOO_TX0_0_DD_2_TX_BIT_REGS_CNTL14_PL(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -5912,6 +6142,188 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.setBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.clearBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.extractToRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.getBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.setBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.clearBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.extractToRight<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.getBit<IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_IOO_TX0_2_DD_3_TX_BIT_REGS_MODE1_PL_PSAVE_REQ_DIS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7982,11 +8394,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NET_CTRL0_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NET_CTRL0_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX;
+    scomt::last_scom = NET_CTRL0_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7996,14 +8408,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NET_CTRL0_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NET_CTRL0_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX;
+    scomt::last_scom = NET_CTRL0_RW;
 #endif
-    return fapi2::getScom(i_target, NET_CTRL0_RWX, o_data);
+    return fapi2::getScom(i_target, NET_CTRL0_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8011,13 +8423,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NET_CTRL0_RWX(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_NET_CTRL0_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return fapi2::putScom(i_target, NET_CTRL0_RWX, i_data);
+    return fapi2::putScom(i_target, NET_CTRL0_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8025,11 +8437,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NET_CTRL0_RWX_WAND(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NET_CTRL0_RW_WAND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX_WAND;
+    scomt::last_scom = NET_CTRL0_RW_WAND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8039,14 +8451,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NET_CTRL0_RWX_WAND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NET_CTRL0_RW_WAND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX_WAND;
+    scomt::last_scom = NET_CTRL0_RW_WAND;
 #endif
-    return fapi2::getScom(i_target, NET_CTRL0_RWX_WAND, o_data);
+    return fapi2::getScom(i_target, NET_CTRL0_RW_WAND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8054,13 +8466,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NET_CTRL0_RWX_WAND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_NET_CTRL0_RW_WAND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return fapi2::putScom(i_target, NET_CTRL0_RWX_WAND, i_data);
+    return fapi2::putScom(i_target, NET_CTRL0_RW_WAND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8068,11 +8480,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_NET_CTRL0_RWX_WOR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_NET_CTRL0_RW_WOR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX_WOR;
+    scomt::last_scom = NET_CTRL0_RW_WOR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -8082,14 +8494,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_NET_CTRL0_RWX_WOR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_NET_CTRL0_RW_WOR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = NET_CTRL0_RWX_WOR;
+    scomt::last_scom = NET_CTRL0_RW_WOR;
 #endif
-    return fapi2::getScom(i_target, NET_CTRL0_RWX_WOR, o_data);
+    return fapi2::getScom(i_target, NET_CTRL0_RW_WOR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8097,13 +8509,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_NET_CTRL0_RWX_WOR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_NET_CTRL0_RW_WOR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return fapi2::putScom(i_target, NET_CTRL0_RWX_WOR, i_data);
+    return fapi2::putScom(i_target, NET_CTRL0_RW_WOR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -8115,7 +8527,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CHIPLET_ENABLE(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CHIPLET_ENABLE,
            1>(i_data);
@@ -8130,7 +8542,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CHIPLET_ENABLE(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CHIPLET_ENABLE,
            1>(i_data);
@@ -8144,7 +8556,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CHIPLET_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_CHIPLET_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -8157,7 +8569,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_CHIPLET_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_CHIPLET_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -8171,7 +8583,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_CHIPLET_ENABLE(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_CHIPLET_ENABLE,
            1>(o_data);
@@ -8185,7 +8597,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_CHIPLET_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_CHIPLET_ENABLE>();
 #ifdef SCOM_CHECKING
@@ -8199,7 +8611,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PCB_EP_RESET(fapi2::buffer<
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PCB_EP_RESET,
            1>(i_data);
@@ -8214,7 +8626,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PCB_EP_RESET(const uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PCB_EP_RESET,
            1>(i_data);
@@ -8228,7 +8640,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PCB_EP_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_PCB_EP_RESET>();
 #ifdef SCOM_CHECKING
@@ -8241,7 +8653,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PCB_EP_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_PCB_EP_RESET>();
 #ifdef SCOM_CHECKING
@@ -8255,7 +8667,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PCB_EP_RESET(fapi2::buffer<
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_PCB_EP_RESET,
            1>(o_data);
@@ -8269,7 +8681,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_PCB_EP_RESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_PCB_EP_RESET>();
 #ifdef SCOM_CHECKING
@@ -8283,7 +8695,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CLK_ASYNC_RESET(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CLK_ASYNC_RESET,
            1>(i_data);
@@ -8298,7 +8710,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CLK_ASYNC_RESET(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CLK_ASYNC_RESET,
            1>(i_data);
@@ -8312,7 +8724,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CLK_ASYNC_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_CLK_ASYNC_RESET>();
 #ifdef SCOM_CHECKING
@@ -8325,7 +8737,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_CLK_ASYNC_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_CLK_ASYNC_RESET>();
 #ifdef SCOM_CHECKING
@@ -8339,7 +8751,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_CLK_ASYNC_RESET(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_CLK_ASYNC_RESET,
            1>(o_data);
@@ -8353,7 +8765,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_CLK_ASYNC_RESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_CLK_ASYNC_RESET>();
 #ifdef SCOM_CHECKING
@@ -8367,7 +8779,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_TEST_EN(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_TEST_EN,
            1>(i_data);
@@ -8382,7 +8794,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_TEST_EN(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_TEST_EN,
            1>(i_data);
@@ -8396,7 +8808,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_TEST_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_PLL_TEST_EN>();
 #ifdef SCOM_CHECKING
@@ -8409,7 +8821,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PLL_TEST_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_PLL_TEST_EN>();
 #ifdef SCOM_CHECKING
@@ -8423,7 +8835,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PLL_TEST_EN(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_PLL_TEST_EN,
            1>(o_data);
@@ -8437,7 +8849,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_PLL_TEST_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_PLL_TEST_EN>();
 #ifdef SCOM_CHECKING
@@ -8451,7 +8863,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_RESET(fapi2::buffer<uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_RESET,
            1>(i_data);
@@ -8466,7 +8878,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_RESET(const uint64_t i_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_RESET,
            1>(i_data);
@@ -8480,7 +8892,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_PLL_RESET>();
 #ifdef SCOM_CHECKING
@@ -8493,7 +8905,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PLL_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_PLL_RESET>();
 #ifdef SCOM_CHECKING
@@ -8507,7 +8919,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PLL_RESET(fapi2::buffer<uin
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_PLL_RESET,
            1>(o_data);
@@ -8521,7 +8933,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_PLL_RESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_PLL_RESET>();
 #ifdef SCOM_CHECKING
@@ -8535,7 +8947,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_BYPASS(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_BYPASS,
            1>(i_data);
@@ -8550,7 +8962,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_BYPASS(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLL_BYPASS,
            1>(i_data);
@@ -8564,7 +8976,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLL_BYPASS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_PLL_BYPASS>();
 #ifdef SCOM_CHECKING
@@ -8577,7 +8989,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PLL_BYPASS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_PLL_BYPASS>();
 #ifdef SCOM_CHECKING
@@ -8591,7 +9003,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PLL_BYPASS(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_PLL_BYPASS,
            1>(o_data);
@@ -8605,7 +9017,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_PLL_BYPASS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_PLL_BYPASS>();
 #ifdef SCOM_CHECKING
@@ -8619,7 +9031,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_SCAN,
            1>(i_data);
@@ -8634,7 +9046,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_SCAN,
            1>(i_data);
@@ -8648,7 +9060,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_VITAL_SCAN>();
 #ifdef SCOM_CHECKING
@@ -8661,7 +9073,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_VITAL_SCAN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_VITAL_SCAN>();
 #ifdef SCOM_CHECKING
@@ -8675,7 +9087,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_VITAL_SCAN(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_VITAL_SCAN,
            1>(o_data);
@@ -8689,7 +9101,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_VITAL_SCAN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_VITAL_SCAN>();
 #ifdef SCOM_CHECKING
@@ -8703,7 +9115,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN_IN(fapi2::buffer
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_SCAN_IN,
            1>(i_data);
@@ -8718,7 +9130,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN_IN(const uint64_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_SCAN_IN,
            1>(i_data);
@@ -8732,7 +9144,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_SCAN_IN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_VITAL_SCAN_IN>();
 #ifdef SCOM_CHECKING
@@ -8745,7 +9157,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_VITAL_SCAN_IN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_VITAL_SCAN_IN>();
 #ifdef SCOM_CHECKING
@@ -8759,7 +9171,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_VITAL_SCAN_IN(fapi2::buffer
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_VITAL_SCAN_IN,
            1>(o_data);
@@ -8773,7 +9185,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_VITAL_SCAN_IN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_VITAL_SCAN_IN>();
 #ifdef SCOM_CHECKING
@@ -8787,7 +9199,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_PHASE(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_PHASE,
            1>(i_data);
@@ -8802,7 +9214,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_PHASE(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_PHASE,
            1>(i_data);
@@ -8816,7 +9228,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_PHASE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_VITAL_PHASE>();
 #ifdef SCOM_CHECKING
@@ -8829,7 +9241,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_VITAL_PHASE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_VITAL_PHASE>();
 #ifdef SCOM_CHECKING
@@ -8843,7 +9255,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_VITAL_PHASE(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_VITAL_PHASE,
            1>(o_data);
@@ -8857,7 +9269,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_VITAL_PHASE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_VITAL_PHASE>();
 #ifdef SCOM_CHECKING
@@ -8871,7 +9283,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_ALIGN_OVR(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FLUSH_ALIGN_OVR,
            1>(i_data);
@@ -8886,7 +9298,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_ALIGN_OVR(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FLUSH_ALIGN_OVR,
            1>(i_data);
@@ -8900,7 +9312,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_ALIGN_OVR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_FLUSH_ALIGN_OVR>();
 #ifdef SCOM_CHECKING
@@ -8913,7 +9325,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_FLUSH_ALIGN_OVR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_FLUSH_ALIGN_OVR>();
 #ifdef SCOM_CHECKING
@@ -8927,7 +9339,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_FLUSH_ALIGN_OVR(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_FLUSH_ALIGN_OVR,
            1>(o_data);
@@ -8941,7 +9353,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_FLUSH_ALIGN_OVR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_FLUSH_ALIGN_OVR>();
 #ifdef SCOM_CHECKING
@@ -8955,7 +9367,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_AL(fapi2::buffer<uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_AL,
            1>(i_data);
@@ -8970,7 +9382,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_AL(const uint64_t i_d
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_AL,
            1>(i_data);
@@ -8984,7 +9396,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_AL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_VITAL_AL>();
 #ifdef SCOM_CHECKING
@@ -8997,7 +9409,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_VITAL_AL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_VITAL_AL>();
 #ifdef SCOM_CHECKING
@@ -9011,7 +9423,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_VITAL_AL(fapi2::buffer<uint
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_VITAL_AL,
            1>(o_data);
@@ -9025,7 +9437,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_VITAL_AL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_VITAL_AL>();
 #ifdef SCOM_CHECKING
@@ -9039,7 +9451,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ACT_DIS(fapi2::buffer<uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ACT_DIS,
            1>(i_data);
@@ -9054,7 +9466,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ACT_DIS(const uint64_t i_da
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ACT_DIS,
            1>(i_data);
@@ -9068,7 +9480,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ACT_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_ACT_DIS>();
 #ifdef SCOM_CHECKING
@@ -9081,7 +9493,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_ACT_DIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_ACT_DIS>();
 #ifdef SCOM_CHECKING
@@ -9095,7 +9507,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_ACT_DIS(fapi2::buffer<uint6
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_ACT_DIS,
            1>(o_data);
@@ -9109,7 +9521,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_ACT_DIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_ACT_DIS>();
 #ifdef SCOM_CHECKING
@@ -9119,170 +9531,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_SYNC_PULSE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_MPW1,
+    return o_data.insertFromRight<NET_CTRL0_SYNC_PULSE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW1(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_SYNC_PULSE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_MPW1,
+    return o_data.insertFromRight<NET_CTRL0_SYNC_PULSE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW1(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_SYNC_PULSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.setBit<NET_CTRL0_MPW1>();
+    return o_data.setBit<NET_CTRL0_SYNC_PULSE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_MPW1(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_SYNC_PULSE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.clearBit<NET_CTRL0_MPW1>();
+    return o_data.clearBit<NET_CTRL0_SYNC_PULSE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_MPW1(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_SYNC_PULSE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.extractToRight<NET_CTRL0_MPW1,
+    return i_data.extractToRight<NET_CTRL0_SYNC_PULSE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NET_CTRL0_MPW1(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NET_CTRL0_SYNC_PULSE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.getBit<NET_CTRL0_MPW1>();
+    return i_data.getBit<NET_CTRL0_SYNC_PULSE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW1 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW2(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.insertFromRight<NET_CTRL0_MPW2,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW2(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.insertFromRight<NET_CTRL0_MPW2,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW2(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.setBit<NET_CTRL0_MPW2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_MPW2(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.clearBit<NET_CTRL0_MPW2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_MPW2(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return i_data.extractToRight<NET_CTRL0_MPW2,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_NET_CTRL0_MPW2(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return i_data.getBit<NET_CTRL0_MPW2>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_MPW2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_SYNC_PULSE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -9291,7 +9619,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW3(fapi2::buffer<uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_MPW3,
            1>(i_data);
@@ -9306,7 +9634,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW3(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_MPW3,
            1>(i_data);
@@ -9320,7 +9648,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_MPW3(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_MPW3>();
 #ifdef SCOM_CHECKING
@@ -9333,7 +9661,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_MPW3(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_MPW3>();
 #ifdef SCOM_CHECKING
@@ -9347,7 +9675,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_MPW3(fapi2::buffer<uint64_t
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_MPW3,
            1>(o_data);
@@ -9361,7 +9689,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_MPW3(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_MPW3>();
 #ifdef SCOM_CHECKING
@@ -9375,7 +9703,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_DELAY_LCLKR(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_DELAY_LCLKR,
            1>(i_data);
@@ -9390,7 +9718,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_DELAY_LCLKR(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_DELAY_LCLKR,
            1>(i_data);
@@ -9404,7 +9732,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_DELAY_LCLKR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_DELAY_LCLKR>();
 #ifdef SCOM_CHECKING
@@ -9417,7 +9745,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_DELAY_LCLKR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_DELAY_LCLKR>();
 #ifdef SCOM_CHECKING
@@ -9431,7 +9759,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_DELAY_LCLKR(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_DELAY_LCLKR,
            1>(o_data);
@@ -9445,7 +9773,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_DELAY_LCLKR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_DELAY_LCLKR>();
 #ifdef SCOM_CHECKING
@@ -9459,7 +9787,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_THOLD(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_THOLD,
            1>(i_data);
@@ -9474,7 +9802,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_THOLD(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_VITAL_THOLD,
            1>(i_data);
@@ -9488,7 +9816,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_VITAL_THOLD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_VITAL_THOLD>();
 #ifdef SCOM_CHECKING
@@ -9501,7 +9829,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_VITAL_THOLD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_VITAL_THOLD>();
 #ifdef SCOM_CHECKING
@@ -9515,7 +9843,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_VITAL_THOLD(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_VITAL_THOLD,
            1>(o_data);
@@ -9529,7 +9857,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_VITAL_THOLD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_VITAL_THOLD>();
 #ifdef SCOM_CHECKING
@@ -9543,7 +9871,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_SCAN_N(fapi2::buffer<
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FLUSH_SCAN_N,
            1>(i_data);
@@ -9558,7 +9886,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_SCAN_N(const uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FLUSH_SCAN_N,
            1>(i_data);
@@ -9572,7 +9900,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FLUSH_SCAN_N(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_FLUSH_SCAN_N>();
 #ifdef SCOM_CHECKING
@@ -9585,7 +9913,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_FLUSH_SCAN_N(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_FLUSH_SCAN_N>();
 #ifdef SCOM_CHECKING
@@ -9599,7 +9927,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_FLUSH_SCAN_N(fapi2::buffer<
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_FLUSH_SCAN_N,
            1>(o_data);
@@ -9613,7 +9941,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_FLUSH_SCAN_N(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_FLUSH_SCAN_N>();
 #ifdef SCOM_CHECKING
@@ -9627,7 +9955,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FENCE_EN(fapi2::buffer<uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FENCE_EN,
            1>(i_data);
@@ -9642,7 +9970,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FENCE_EN(const uint64_t i_d
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_FENCE_EN,
            1>(i_data);
@@ -9656,7 +9984,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FENCE_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_FENCE_EN>();
 #ifdef SCOM_CHECKING
@@ -9669,7 +9997,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_FENCE_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_FENCE_EN>();
 #ifdef SCOM_CHECKING
@@ -9683,7 +10011,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_FENCE_EN(fapi2::buffer<uint
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_FENCE_EN,
            1>(o_data);
@@ -9697,7 +10025,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_FENCE_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_FENCE_EN>();
 #ifdef SCOM_CHECKING
@@ -9711,7 +10039,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CPLT_RCTRL,
            1>(i_data);
@@ -9726,7 +10054,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CPLT_RCTRL,
            1>(i_data);
@@ -9740,7 +10068,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_CPLT_RCTRL>();
 #ifdef SCOM_CHECKING
@@ -9753,7 +10081,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_CPLT_RCTRL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_CPLT_RCTRL>();
 #ifdef SCOM_CHECKING
@@ -9767,7 +10095,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_CPLT_RCTRL(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_CPLT_RCTRL,
            1>(o_data);
@@ -9781,7 +10109,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_CPLT_RCTRL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_CPLT_RCTRL>();
 #ifdef SCOM_CHECKING
@@ -9795,7 +10123,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_DCTRL(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CPLT_DCTRL,
            1>(i_data);
@@ -9810,7 +10138,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_DCTRL(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_CPLT_DCTRL,
            1>(i_data);
@@ -9824,7 +10152,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_DCTRL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_CPLT_DCTRL>();
 #ifdef SCOM_CHECKING
@@ -9837,7 +10165,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_CPLT_DCTRL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_CPLT_DCTRL>();
 #ifdef SCOM_CHECKING
@@ -9851,7 +10179,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_CPLT_DCTRL(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_CPLT_DCTRL,
            1>(o_data);
@@ -9865,7 +10193,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_CPLT_DCTRL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_CPLT_DCTRL>();
 #ifdef SCOM_CHECKING
@@ -9875,11 +10203,95 @@ fapi_try_exit:
 #endif
 }
 
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL2(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_CPLT_RCTRL2,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL2(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.insertFromRight<NET_CTRL0_CPLT_RCTRL2,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_CPLT_RCTRL2(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.setBit<NET_CTRL0_CPLT_RCTRL2>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_CPLT_RCTRL2(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return o_data.clearBit<NET_CTRL0_CPLT_RCTRL2>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_CPLT_RCTRL2(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.extractToRight<NET_CTRL0_CPLT_RCTRL2,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_NET_CTRL0_CPLT_RCTRL2(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
+#endif
+    return i_data.getBit<NET_CTRL0_CPLT_RCTRL2>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access NET_CTRL0_CPLT_RCTRL2 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ADJ_FUNC_CLKSEL(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ADJ_FUNC_CLKSEL,
            1>(i_data);
@@ -9894,7 +10306,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ADJ_FUNC_CLKSEL(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ADJ_FUNC_CLKSEL,
            1>(i_data);
@@ -9908,7 +10320,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ADJ_FUNC_CLKSEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_ADJ_FUNC_CLKSEL>();
 #ifdef SCOM_CHECKING
@@ -9921,7 +10333,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_ADJ_FUNC_CLKSEL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_ADJ_FUNC_CLKSEL>();
 #ifdef SCOM_CHECKING
@@ -9935,7 +10347,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_ADJ_FUNC_CLKSEL(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_ADJ_FUNC_CLKSEL,
            1>(o_data);
@@ -9949,7 +10361,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_ADJ_FUNC_CLKSEL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_ADJ_FUNC_CLKSEL>();
 #ifdef SCOM_CHECKING
@@ -9959,86 +10371,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_SRAM_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_TP_SRAM_ENABLE,
+    return o_data.insertFromRight<NET_CTRL0_FUNC_LCB_EDIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_SRAM_ENABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FUNC_LCB_EDIS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.insertFromRight<NET_CTRL0_TP_SRAM_ENABLE,
+    return o_data.insertFromRight<NET_CTRL0_FUNC_LCB_EDIS,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_SRAM_ENABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.setBit<NET_CTRL0_TP_SRAM_ENABLE>();
+    return o_data.setBit<NET_CTRL0_FUNC_LCB_EDIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_TP_SRAM_ENABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return o_data.clearBit<NET_CTRL0_TP_SRAM_ENABLE>();
+    return o_data.clearBit<NET_CTRL0_FUNC_LCB_EDIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_TP_SRAM_ENABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.extractToRight<NET_CTRL0_TP_SRAM_ENABLE,
+    return i_data.extractToRight<NET_CTRL0_FUNC_LCB_EDIS,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_NET_CTRL0_TP_SRAM_ENABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_NET_CTRL0_FUNC_LCB_EDIS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
-    return i_data.getBit<NET_CTRL0_TP_SRAM_ENABLE>();
+    return i_data.getBit<NET_CTRL0_FUNC_LCB_EDIS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_TP_SRAM_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access NET_CTRL0_FUNC_LCB_EDIS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -10047,7 +10459,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_FENCE_PCB(fapi2::buffer<
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_TP_FENCE_PCB,
            1>(i_data);
@@ -10062,7 +10474,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_FENCE_PCB(const uint64_t
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_TP_FENCE_PCB,
            1>(i_data);
@@ -10076,7 +10488,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_TP_FENCE_PCB(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_TP_FENCE_PCB>();
 #ifdef SCOM_CHECKING
@@ -10089,7 +10501,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_TP_FENCE_PCB(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_TP_FENCE_PCB>();
 #ifdef SCOM_CHECKING
@@ -10103,7 +10515,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_TP_FENCE_PCB(fapi2::buffer<
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_TP_FENCE_PCB,
            1>(o_data);
@@ -10117,7 +10529,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_TP_FENCE_PCB(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_TP_FENCE_PCB>();
 #ifdef SCOM_CHECKING
@@ -10127,95 +10539,11 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.insertFromRight<NET_CTRL0_LVLTRANS_FENCE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_LVLTRANS_FENCE(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.insertFromRight<NET_CTRL0_LVLTRANS_FENCE,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.setBit<NET_CTRL0_LVLTRANS_FENCE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return o_data.clearBit<NET_CTRL0_LVLTRANS_FENCE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return i_data.extractToRight<NET_CTRL0_LVLTRANS_FENCE,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_NET_CTRL0_LVLTRANS_FENCE(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
-#endif
-    return i_data.getBit<NET_CTRL0_LVLTRANS_FENCE>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access NET_CTRL0_LVLTRANS_FENCE chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ARRAY_WRITE_ASSIST_EN,
            1>(i_data);
@@ -10230,7 +10558,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_ARRAY_WRITE_ASSIST_EN,
            1>(i_data);
@@ -10244,7 +10572,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_ARRAY_WRITE_ASSIST_EN>();
 #ifdef SCOM_CHECKING
@@ -10257,7 +10585,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_ARRAY_WRITE_ASSIST_EN>();
 #ifdef SCOM_CHECKING
@@ -10271,7 +10599,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_ARRAY_WRITE_ASSIST_EN,
            1>(o_data);
@@ -10285,7 +10613,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_ARRAY_WRITE_ASSIST_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_ARRAY_WRITE_ASSIST_EN>();
 #ifdef SCOM_CHECKING
@@ -10299,7 +10627,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_INTEST(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_HTB_INTEST,
            1>(i_data);
@@ -10314,7 +10642,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_INTEST(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_HTB_INTEST,
            1>(i_data);
@@ -10328,7 +10656,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_INTEST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_HTB_INTEST>();
 #ifdef SCOM_CHECKING
@@ -10341,7 +10669,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_HTB_INTEST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_HTB_INTEST>();
 #ifdef SCOM_CHECKING
@@ -10355,7 +10683,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_HTB_INTEST(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_HTB_INTEST,
            1>(o_data);
@@ -10369,7 +10697,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_HTB_INTEST(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_HTB_INTEST>();
 #ifdef SCOM_CHECKING
@@ -10383,7 +10711,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_EXTEST(fapi2::buffer<ui
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_HTB_EXTEST,
            1>(i_data);
@@ -10398,7 +10726,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_EXTEST(const uint64_t i
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_HTB_EXTEST,
            1>(i_data);
@@ -10412,7 +10740,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_HTB_EXTEST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_HTB_EXTEST>();
 #ifdef SCOM_CHECKING
@@ -10425,7 +10753,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_HTB_EXTEST(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_HTB_EXTEST>();
 #ifdef SCOM_CHECKING
@@ -10439,7 +10767,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_HTB_EXTEST(fapi2::buffer<ui
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_HTB_EXTEST,
            1>(o_data);
@@ -10453,7 +10781,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_HTB_EXTEST(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_HTB_EXTEST>();
 #ifdef SCOM_CHECKING
@@ -10467,7 +10795,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLLFORCE_OUT_EN,
            1>(i_data);
@@ -10482,7 +10810,7 @@ static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLLFORCE_OUT_EN(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.insertFromRight<NET_CTRL0_PLLFORCE_OUT_EN,
            1>(i_data);
@@ -10496,7 +10824,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.setBit<NET_CTRL0_PLLFORCE_OUT_EN>();
 #ifdef SCOM_CHECKING
@@ -10509,7 +10837,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return o_data.clearBit<NET_CTRL0_PLLFORCE_OUT_EN>();
 #ifdef SCOM_CHECKING
@@ -10523,7 +10851,7 @@ static inline fapi2::buffer<uint64_t>& GET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.extractToRight<NET_CTRL0_PLLFORCE_OUT_EN,
            1>(o_data);
@@ -10537,7 +10865,7 @@ fapi_try_exit:
 static inline bool GET_NET_CTRL0_PLLFORCE_OUT_EN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(NET_CTRL0_RWX, NET_CTRL0_RWX_WAND, NET_CTRL0_RWX_WOR));
+    FAPI_TRY(scomt::chkReg(NET_CTRL0_RW, NET_CTRL0_RW_WAND, NET_CTRL0_RW_WOR));
 #endif
     return i_data.getBit<NET_CTRL0_PLLFORCE_OUT_EN>();
 #ifdef SCOM_CHECKING

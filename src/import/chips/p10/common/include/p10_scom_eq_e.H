@@ -69,7 +69,7 @@ static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
 // eq/reg00014.H
 
-static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x20040011ull;
+static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x20040107ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION1_00 = 0;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_01 = 1;
@@ -120,6 +120,21 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 // eq/reg00014.H
 
 static const uint64_t L3TRA0_TR0_CONFIG = 0x20018202ull;
@@ -244,7 +259,19 @@ static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 // eq/reg00014.H
 
-static const uint64_t QME_DERP = 0x200e0250ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_CRCR_PPE = 0x00000006c0003000ull;
+static const uint64_t QME_CRCR_RW = 0x200e0300ull;
+
+static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE = 1;
+static const uint32_t QME_CRCR_QME_CRCR_CYCLE_REPRO_COMPARE_VALUE_LEN = 7;
+// eq/reg00014.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_DERP_PPE = 0x00000006c0002500ull;
+static const uint64_t QME_DERP_RW = 0x200e0250ull;
 
 static const uint32_t QME_DERP_DEND = 0;
 static const uint32_t QME_DERP_DEND_LEN = 32;
@@ -252,15 +279,23 @@ static const uint32_t QME_DERP_SOR = 32;
 static const uint32_t QME_DERP_SOR_LEN = 32;
 // eq/reg00014.H
 
-static const uint64_t QME_EINR = 0x200e0274ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_EINR_PPE = 0x00000006c0002740ull;
+static const uint64_t QME_EINR_RO = 0x200e0274ull;
 
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT = 0;
 static const uint32_t QME_EINR_QME_EINR_INTERRUPT_INPUT_LEN = 64;
 // eq/reg00014.H
 
-static const uint64_t QME_LFIR_RWX = 0x200e0000ull;
-static const uint64_t QME_LFIR_WOX_AND = 0x200e0001ull;
-static const uint64_t QME_LFIR_WOX_OR = 0x200e0002ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_LFIR_PPE = 0x00000006c0000000ull;
+static const uint64_t QME_LFIR_PPE1 = 0x00000006c0000010ull;
+static const uint64_t QME_LFIR_PPE2 = 0x00000006c0000020ull;
+static const uint64_t QME_LFIR_RW = 0x200e0000ull;
+static const uint64_t QME_LFIR_WO_AND = 0x200e0001ull;
+static const uint64_t QME_LFIR_WO_OR = 0x200e0002ull;
 
 static const uint32_t QME_LFIR_PPE_HALT_ERROR = 0;
 static const uint32_t QME_LFIR_DEBUG_TRIGGER = 1;
@@ -285,13 +320,17 @@ static const uint32_t QME_LFIR_DISABLED_INTR = 19;
 static const uint32_t QME_LFIR_DECONFIGURED_INTR = 20;
 static const uint32_t QME_LFIR_RS4_TIMEOUT = 21;
 static const uint32_t QME_LFIR_PB_DATA_HANG = 22;
-static const uint32_t QME_LFIR_SPARE23 = 23;
+static const uint32_t QME_LFIR_WRITE_PROTECT_FAIL = 23;
 static const uint32_t QME_LFIR_SPARE24 = 24;
-static const uint32_t QME_LFIR_FIR_PARITY_ERR_DUP = 25;
-static const uint32_t QME_LFIR_FIR_PARITY_ERR = 26;
+static const uint32_t QME_LFIR_SPARE25 = 25;
+static const uint32_t QME_LFIR_SPARE26 = 26;
+static const uint32_t QME_LFIR_SPARE27 = 27;
 // eq/reg00014.H
 
-static const uint64_t QME_PCBSII = 0x200e0038ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_PCBSII_PPE = 0x00000006c0000380ull;
+static const uint64_t QME_PCBSII_RO = 0x200e0038ull;
 // eq/reg00014.H
 
 static const uint64_t SLAVE_CONFIG_REG = 0x200f001eull;
@@ -310,6 +349,8 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
+static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 // eq/reg00014.H
 
 static const uint64_t XSTOP2 = 0x2003000dull;

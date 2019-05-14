@@ -56,26 +56,13 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x100107d0ull;
 // pauc/reg00013.H
 
-static const uint64_t EPS_FIR_SUM_MASK_REG = 0x10040017ull;
-
-static const uint32_t EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB = 0;
-static const uint32_t EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
-static const uint32_t EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB = 2;
-static const uint32_t EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
-static const uint32_t EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
-// pauc/reg00013.H
-
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t FIR_ACTION0_REG = 0x10000046ull;
+static const uint64_t FIR_ACTION0_REG = 0x10012c46ull;
 
 static const uint32_t FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t FIR_ACTION0_REG_FIR_ACTION0_LEN = 26;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t FIR_ACTION1_REG = 0x10000047ull;
+static const uint64_t FIR_ACTION1_REG = 0x10012c47ull;
 
 static const uint32_t FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
@@ -111,51 +98,59 @@ static const uint32_t OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
 // pauc/reg00013.H
 
-static const uint64_t PB_PTL_FIR_REG_RWX = 0x10011800ull;
-static const uint64_t PB_PTL_FIR_REG_WOX_AND = 0x10011801ull;
-static const uint64_t PB_PTL_FIR_REG_WOX_OR = 0x10011802ull;
+static const uint64_t PB_PTL_FIR_REG_RW = 0x10011800ull;
+static const uint64_t PB_PTL_FIR_REG_WO_AND = 0x10011801ull;
+static const uint64_t PB_PTL_FIR_REG_WO_OR = 0x10011802ull;
 
 static const uint32_t PB_PTL_FIR_REG_FMR00_TRAINED = 0;
 static const uint32_t PB_PTL_FIR_REG_FMR01_TRAINED = 1;
 static const uint32_t PB_PTL_FIR_REG_FMR02_TRAINED = 2;
 static const uint32_t PB_PTL_FIR_REG_FMR03_TRAINED = 3;
-static const uint32_t PB_PTL_FIR_REG_DOB01_UE = 8;
-static const uint32_t PB_PTL_FIR_REG_DOB01_CE = 9;
-static const uint32_t PB_PTL_FIR_REG_DOB01_SUE = 10;
-static const uint32_t PB_PTL_FIR_REG_DOB23_UE = 11;
-static const uint32_t PB_PTL_FIR_REG_DOB23_CE = 12;
-static const uint32_t PB_PTL_FIR_REG_DOB23_SUE = 13;
-static const uint32_t PB_PTL_FIR_REG_FRAMER00_ATTN = 20;
-static const uint32_t PB_PTL_FIR_REG_FRAMER01_ATTN = 21;
-static const uint32_t PB_PTL_FIR_REG_FRAMER02_ATTN = 22;
-static const uint32_t PB_PTL_FIR_REG_FRAMER03_ATTN = 23;
-static const uint32_t PB_PTL_FIR_REG_PARSER00_ATTN = 28;
-static const uint32_t PB_PTL_FIR_REG_PARSER01_ATTN = 29;
-static const uint32_t PB_PTL_FIR_REG_PARSER02_ATTN = 30;
-static const uint32_t PB_PTL_FIR_REG_PARSER03_ATTN = 31;
-static const uint32_t PB_PTL_FIR_REG_MB00_SPATTN = 36;
-static const uint32_t PB_PTL_FIR_REG_MB01_SPATTN = 37;
-static const uint32_t PB_PTL_FIR_REG_MB10_SPATTN = 38;
-static const uint32_t PB_PTL_FIR_REG_MB11_SPATTN = 39;
-static const uint32_t PB_PTL_FIR_REG_MB20_SPATTN = 40;
-static const uint32_t PB_PTL_FIR_REG_MB21_SPATTN = 41;
-static const uint32_t PB_PTL_FIR_REG_MB30_SPATTN = 42;
-static const uint32_t PB_PTL_FIR_REG_MB31_SPATTN = 43;
-static const uint32_t PB_PTL_FIR_REG_DOB01_ERR = 52;
-static const uint32_t PB_PTL_FIR_REG_DOB23_ERR = 53;
-static const uint32_t PB_PTL_FIR_REG_DIB01_ERR = 56;
-static const uint32_t PB_PTL_FIR_REG_DIB23_ERR = 57;
+static const uint32_t PB_PTL_FIR_REG_DOB01_UE = 4;
+static const uint32_t PB_PTL_FIR_REG_DOB01_CE = 5;
+static const uint32_t PB_PTL_FIR_REG_DOB01_SUE = 6;
+static const uint32_t PB_PTL_FIR_REG_DOB01_ERR = 7;
+static const uint32_t PB_PTL_FIR_REG_DOB23_UE = 8;
+static const uint32_t PB_PTL_FIR_REG_DOB23_CE = 9;
+static const uint32_t PB_PTL_FIR_REG_DOB23_SUE = 10;
+static const uint32_t PB_PTL_FIR_REG_DOB23_ERR = 11;
+static const uint32_t PB_PTL_FIR_REG_FRAMER00_ATTN = 12;
+static const uint32_t PB_PTL_FIR_REG_CROB01_ATTN = 13;
+static const uint32_t PB_PTL_FIR_REG_FRAMER01_ATTN = 14;
+static const uint32_t PB_PTL_FIR_REG_FRAMER02_ATTN = 15;
+static const uint32_t PB_PTL_FIR_REG_CROB23_ATTN = 16;
+static const uint32_t PB_PTL_FIR_REG_FRAMER03_ATTN = 17;
+static const uint32_t PB_PTL_FIR_REG_PARSER00_ATTN = 18;
+static const uint32_t PB_PTL_FIR_REG_PARSER01_ATTN = 19;
+static const uint32_t PB_PTL_FIR_REG_PARSER02_ATTN = 20;
+static const uint32_t PB_PTL_FIR_REG_PARSER03_ATTN = 21;
+static const uint32_t PB_PTL_FIR_REG_LINK_DOWN_0_ATTN = 22;
+static const uint32_t PB_PTL_FIR_REG_LINK_DOWN_1_ATTN = 23;
+static const uint32_t PB_PTL_FIR_REG_LINK_DOWN_2_ATTN = 24;
+static const uint32_t PB_PTL_FIR_REG_LINK_DOWN_3_ATTN = 25;
+static const uint32_t PB_PTL_FIR_REG_DIB01_ERR = 26;
+static const uint32_t PB_PTL_FIR_REG_DIB23_ERR = 27;
+static const uint32_t PB_PTL_FIR_REG_MB00_SPATTN = 28;
+static const uint32_t PB_PTL_FIR_REG_MB01_SPATTN = 29;
+static const uint32_t PB_PTL_FIR_REG_MB10_SPATTN = 30;
+static const uint32_t PB_PTL_FIR_REG_MB11_SPATTN = 31;
+static const uint32_t PB_PTL_FIR_REG_MB20_SPATTN = 32;
+static const uint32_t PB_PTL_FIR_REG_MB21_SPATTN = 33;
+static const uint32_t PB_PTL_FIR_REG_MB30_SPATTN = 34;
+static const uint32_t PB_PTL_FIR_REG_MB31_SPATTN = 35;
+static const uint32_t PB_PTL_FIR_REG_PTL0_SPARE = 36;
+static const uint32_t PB_PTL_FIR_REG_PTL1_SPARE = 37;
+static const uint32_t PB_PTL_FIR_REG_PTL2_SPARE = 38;
+static const uint32_t PB_PTL_FIR_REG_PTL3_SPARE = 39;
 // pauc/reg00013.H
 
 static const uint64_t PB_PTL_FIR_WOF_REG = 0x10011808ull;
 
 static const uint32_t PB_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF = 0;
-static const uint32_t PB_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF_LEN = 62;
+static const uint32_t PB_PTL_FIR_WOF_REG_PB_PTL_FIR_WOF_LEN = 40;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_XIRAMRA = 0x10000011ull;
+static const uint64_t PPE_XIRAMRA = 0x10012c11ull;
 
 static const uint32_t PPE_XIRAMRA_XCR = 1;
 static const uint32_t PPE_XIRAMRA_XCR_LEN = 3;
@@ -166,30 +161,81 @@ static const uint32_t PPE_XIRAMRA_RAMRA_SPRG0_LEN = 32;
 static const uint64_t PRIMARY_ADDRESS_REG = 0x100f0000ull;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
+static const uint64_t RECOV_MASK_RW = 0x10040041ull;
+static const uint64_t RECOV_MASK_WO_CLEAR = 0x10040061ull;
+static const uint64_t RECOV_MASK_WO_OR = 0x10040051ull;
 
-static const uint64_t REGS_TX_IMPCAL1_PB = 0x800f04001000003full;
+static const uint32_t RECOV_MASK_1 = 1;
+static const uint32_t RECOV_MASK_2 = 2;
+static const uint32_t RECOV_MASK_3 = 3;
+static const uint32_t RECOV_MASK_4 = 4;
+static const uint32_t RECOV_MASK_5 = 5;
+static const uint32_t RECOV_MASK_6 = 6;
+static const uint32_t RECOV_MASK_7 = 7;
+static const uint32_t RECOV_MASK_8 = 8;
+static const uint32_t RECOV_MASK_9 = 9;
+static const uint32_t RECOV_MASK_10 = 10;
+static const uint32_t RECOV_MASK_11 = 11;
+static const uint32_t RECOV_MASK_12 = 12;
+static const uint32_t RECOV_MASK_13 = 13;
+static const uint32_t RECOV_MASK_14 = 14;
+static const uint32_t RECOV_MASK_15 = 15;
+static const uint32_t RECOV_MASK_16 = 16;
+static const uint32_t RECOV_MASK_17 = 17;
+static const uint32_t RECOV_MASK_18 = 18;
+static const uint32_t RECOV_MASK_19 = 19;
+static const uint32_t RECOV_MASK_20 = 20;
+static const uint32_t RECOV_MASK_21 = 21;
+static const uint32_t RECOV_MASK_22 = 22;
+static const uint32_t RECOV_MASK_23 = 23;
+static const uint32_t RECOV_MASK_24 = 24;
+static const uint32_t RECOV_MASK_25 = 25;
+static const uint32_t RECOV_MASK_26 = 26;
+static const uint32_t RECOV_MASK_27 = 27;
+static const uint32_t RECOV_MASK_28 = 28;
+static const uint32_t RECOV_MASK_29 = 29;
+static const uint32_t RECOV_MASK_30 = 30;
+static const uint32_t RECOV_MASK_31 = 31;
+static const uint32_t RECOV_MASK_32 = 32;
+static const uint32_t RECOV_MASK_33 = 33;
+static const uint32_t RECOV_MASK_34 = 34;
+static const uint32_t RECOV_MASK_35 = 35;
+static const uint32_t RECOV_MASK_36 = 36;
+static const uint32_t RECOV_MASK_37 = 37;
+static const uint32_t RECOV_MASK_38 = 38;
+static const uint32_t RECOV_MASK_39 = 39;
+static const uint32_t RECOV_MASK_40 = 40;
+static const uint32_t RECOV_MASK_41 = 41;
+static const uint32_t RECOV_MASK_42 = 42;
+static const uint32_t RECOV_MASK_43 = 43;
+static const uint32_t RECOV_MASK_44 = 44;
+static const uint32_t RECOV_MASK_45 = 45;
+static const uint32_t RECOV_MASK_46 = 46;
+static const uint32_t RECOV_MASK_47 = 47;
+static const uint32_t RECOV_MASK_48 = 48;
+static const uint32_t RECOV_MASK_49 = 49;
+static const uint32_t RECOV_MASK_50 = 50;
+static const uint32_t RECOV_MASK_51 = 51;
+static const uint32_t RECOV_MASK_52 = 52;
+static const uint32_t RECOV_MASK_53 = 53;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
+static const uint64_t REGS_TX_IMPCAL1_PB = 0x800f040010012c3full;
+// pauc/reg00013.H
 
-static const uint64_t REGS_TX_IMPCAL_P_4X_PB = 0x800f2c001000003full;
+static const uint64_t REGS_TX_IMPCAL_P_4X_PB = 0x800f2c0010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X = 48;
 static const uint32_t REGS_TX_IMPCAL_P_4X_PB_TX_ZCAL_P_4X_LEN = 5;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_SWO5_PB = 0x800f54001000003full;
+static const uint64_t REGS_TX_IMPCAL_SWO5_PB = 0x800f540010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39 = 48;
 static const uint32_t REGS_TX_IMPCAL_SWO5_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XN_32_39_LEN = 8;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_ZCAL_FIR_RESET_PB = 0x800f80001000003full;
+static const uint64_t REGS_ZCAL_FIR_RESET_PB = 0x800f800010012c3full;
 
 static const uint32_t REGS_ZCAL_FIR_RESET_PB_CLR_PAR_ERRS = 62;
 static const uint32_t REGS_ZCAL_FIR_RESET_PB_FIR_RESET = 63;
@@ -198,9 +244,7 @@ static const uint32_t REGS_ZCAL_FIR_RESET_PB_FIR_RESET = 63;
 static const uint64_t SCAN_UPDATEDR_LONG = 0x1003b000ull;
 // pauc/reg00013.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t SCOM_PPE_WORK_REG2 = 0x10000022ull;
+static const uint64_t SCOM_PPE_WORK_REG2 = 0x10012c22ull;
 
 static const uint32_t SCOM_PPE_WORK_REG2_SCOM_PPE_WORK2 = 0;
 static const uint32_t SCOM_PPE_WORK_REG2_SCOM_PPE_WORK2_LEN = 32;

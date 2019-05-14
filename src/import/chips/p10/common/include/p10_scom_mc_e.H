@@ -69,7 +69,7 @@ static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
 // mc/reg00014.H
 
-static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x0c040011ull;
+static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x0c040107ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION1_00 = 0;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_01 = 1;
@@ -120,6 +120,21 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 // mc/reg00014.H
 
 static const uint64_t MBA_SCOMFIR_AACR = 0x0c010f29ull;
@@ -252,6 +267,8 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_HEARTBEAT_ERRS = 10;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PCBSL_ERRS = 11;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
+static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
+static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 // mc/reg00014.H
 
 static const uint64_t TRA1_TR0_CONFIG_1 = 0x0c010444ull;

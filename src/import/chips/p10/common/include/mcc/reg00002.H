@@ -753,11 +753,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_USTL_USTLFIR_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_USTL_USTLFIR_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_RWX;
+    scomt::last_scom = USTL_USTLFIR_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -767,14 +767,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_USTL_USTLFIR_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_USTL_USTLFIR_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_RWX;
+    scomt::last_scom = USTL_USTLFIR_RW;
 #endif
-    return fapi2::getScom(i_target, USTL_USTLFIR_RWX, o_data);
+    return fapi2::getScom(i_target, USTL_USTLFIR_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -782,13 +782,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_USTL_USTLFIR_RWX(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_USTL_USTLFIR_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, USTL_USTLFIR_RWX, i_data);
+    return fapi2::putScom(i_target, USTL_USTLFIR_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -796,11 +796,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_USTL_USTLFIR_WOX_AND(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_USTL_USTLFIR_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_WOX_AND;
+    scomt::last_scom = USTL_USTLFIR_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -810,14 +810,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_USTL_USTLFIR_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_USTL_USTLFIR_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_WOX_AND;
+    scomt::last_scom = USTL_USTLFIR_WO_AND;
 #endif
-    return fapi2::getScom(i_target, USTL_USTLFIR_WOX_AND, o_data);
+    return fapi2::getScom(i_target, USTL_USTLFIR_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -825,13 +825,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_USTL_USTLFIR_WOX_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_USTL_USTLFIR_WO_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, USTL_USTLFIR_WOX_AND, i_data);
+    return fapi2::putScom(i_target, USTL_USTLFIR_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -839,11 +839,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_USTL_USTLFIR_WOX_OR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_USTL_USTLFIR_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_WOX_OR;
+    scomt::last_scom = USTL_USTLFIR_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -853,14 +853,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_USTL_USTLFIR_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_USTL_USTLFIR_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = USTL_USTLFIR_WOX_OR;
+    scomt::last_scom = USTL_USTLFIR_WO_OR;
 #endif
-    return fapi2::getScom(i_target, USTL_USTLFIR_WOX_OR, o_data);
+    return fapi2::getScom(i_target, USTL_USTLFIR_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -868,13 +868,13 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_USTL_USTLFIR_WOX_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_USTL_USTLFIR_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return fapi2::putScom(i_target, USTL_USTLFIR_WOX_OR, i_data);
+    return fapi2::putScom(i_target, USTL_USTLFIR_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -886,7 +886,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR,
            1>(i_data);
@@ -901,7 +901,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR,
            1>(i_data);
@@ -915,7 +915,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -928,7 +928,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -942,7 +942,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR,
            1>(o_data);
@@ -956,7 +956,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -970,7 +970,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR,
            1>(i_data);
@@ -985,7 +985,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR,
            1>(i_data);
@@ -999,7 +999,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -1012,7 +1012,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -1026,7 +1026,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR,
            1>(o_data);
@@ -1040,7 +1040,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_UNEXP_DATA_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>();
 #ifdef SCOM_CHECKING
@@ -1054,7 +1054,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_E
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR,
            1>(i_data);
@@ -1069,7 +1069,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_E
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR,
            1>(i_data);
@@ -1083,7 +1083,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1096,7 +1096,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1110,7 +1110,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_E
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR,
            1>(o_data);
@@ -1124,7 +1124,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1138,7 +1138,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_E
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR,
            1>(i_data);
@@ -1153,7 +1153,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_E
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR,
            1>(i_data);
@@ -1167,7 +1167,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1180,7 +1180,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1194,7 +1194,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_E
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR,
            1>(o_data);
@@ -1208,7 +1208,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1218,170 +1218,170 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_4(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<USTL_USTLFIR_CHANA_HALF_SPEED_MODE,
+    return o_data.insertFromRight<USTL_USTLFIR_RESERVED_4,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_4(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<USTL_USTLFIR_CHANA_HALF_SPEED_MODE,
+    return o_data.insertFromRight<USTL_USTLFIR_RESERVED_4,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.setBit<USTL_USTLFIR_CHANA_HALF_SPEED_MODE>();
+    return o_data.setBit<USTL_USTLFIR_RESERVED_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_RESERVED_4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.clearBit<USTL_USTLFIR_CHANA_HALF_SPEED_MODE>();
+    return o_data.clearBit<USTL_USTLFIR_RESERVED_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_RESERVED_4(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.extractToRight<USTL_USTLFIR_CHANA_HALF_SPEED_MODE,
+    return i_data.extractToRight<USTL_USTLFIR_RESERVED_4,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLFIR_CHANA_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLFIR_RESERVED_4(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.getBit<USTL_USTLFIR_CHANA_HALF_SPEED_MODE>();
+    return i_data.getBit<USTL_USTLFIR_RESERVED_4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANA_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_5(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<USTL_USTLFIR_CHANB_HALF_SPEED_MODE,
+    return o_data.insertFromRight<USTL_USTLFIR_RESERVED_5,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_5(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.insertFromRight<USTL_USTLFIR_CHANB_HALF_SPEED_MODE,
+    return o_data.insertFromRight<USTL_USTLFIR_RESERVED_5,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_5(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.setBit<USTL_USTLFIR_CHANB_HALF_SPEED_MODE>();
+    return o_data.setBit<USTL_USTLFIR_RESERVED_5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_RESERVED_5(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return o_data.clearBit<USTL_USTLFIR_CHANB_HALF_SPEED_MODE>();
+    return o_data.clearBit<USTL_USTLFIR_RESERVED_5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_RESERVED_5(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.extractToRight<USTL_USTLFIR_CHANB_HALF_SPEED_MODE,
+    return i_data.extractToRight<USTL_USTLFIR_RESERVED_5,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_USTL_USTLFIR_CHANB_HALF_SPEED_MODE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_USTL_USTLFIR_RESERVED_5(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
-    return i_data.getBit<USTL_USTLFIR_CHANB_HALF_SPEED_MODE>();
+    return i_data.getBit<USTL_USTLFIR_RESERVED_5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access USTL_USTLFIR_CHANB_HALF_SPEED_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access USTL_USTLFIR_RESERVED_5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -1390,7 +1390,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_CE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_CE,
            1>(i_data);
@@ -1405,7 +1405,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_CE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_CE,
            1>(i_data);
@@ -1419,7 +1419,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -1432,7 +1432,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -1446,7 +1446,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_BUFFER_CE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_BUFFER_CE,
            1>(o_data);
@@ -1460,7 +1460,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -1474,7 +1474,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_UE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_UE,
            1>(i_data);
@@ -1489,7 +1489,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_UE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_UE,
            1>(i_data);
@@ -1503,7 +1503,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -1516,7 +1516,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -1530,7 +1530,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_BUFFER_UE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_BUFFER_UE,
            1>(o_data);
@@ -1544,7 +1544,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -1558,7 +1558,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_SUE(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_SUE,
            1>(i_data);
@@ -1573,7 +1573,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_SUE(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_SUE,
            1>(i_data);
@@ -1587,7 +1587,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_SUE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -1600,7 +1600,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_BUFFER_SUE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -1614,7 +1614,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_BUFFER_SUE(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_BUFFER_SUE,
            1>(o_data);
@@ -1628,7 +1628,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_BUFFER_SUE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -1642,7 +1642,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_OVERRUN(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_OVERRUN,
            1>(i_data);
@@ -1657,7 +1657,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_OVERRUN(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_BUFFER_OVERRUN,
            1>(i_data);
@@ -1671,7 +1671,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_BUFFER_OVERRUN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_BUFFER_OVERRUN>();
 #ifdef SCOM_CHECKING
@@ -1684,7 +1684,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_BUFFER_OVERRUN(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_BUFFER_OVERRUN>();
 #ifdef SCOM_CHECKING
@@ -1698,7 +1698,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_BUFFER_OVERRUN(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_BUFFER_OVERRUN,
            1>(o_data);
@@ -1712,7 +1712,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_BUFFER_OVERRUN(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_BUFFER_OVERRUN>();
 #ifdef SCOM_CHECKING
@@ -1726,7 +1726,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_TAG_PARITY_ERROR,
            1>(i_data);
@@ -1741,7 +1741,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_TAG_PARITY_ERROR,
            1>(i_data);
@@ -1755,7 +1755,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_TAG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1768,7 +1768,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_TAG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1782,7 +1782,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_TAG_PARITY_ERROR,
            1>(o_data);
@@ -1796,7 +1796,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_TAG_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_TAG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1810,7 +1810,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR,
            1>(i_data);
@@ -1825,7 +1825,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR,
            1>(i_data);
@@ -1839,7 +1839,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1852,7 +1852,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1866,7 +1866,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR,
            1>(o_data);
@@ -1880,7 +1880,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1894,7 +1894,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(fapi
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR,
            1>(i_data);
@@ -1909,7 +1909,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(cons
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR,
            1>(i_data);
@@ -1923,7 +1923,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1936,7 +1936,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1950,7 +1950,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(fapi
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR,
            1>(o_data);
@@ -1964,7 +1964,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -1978,7 +1978,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR,
            1>(i_data);
@@ -1993,7 +1993,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR,
            1>(i_data);
@@ -2007,7 +2007,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2020,7 +2020,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2034,7 +2034,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERRO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR,
            1>(o_data);
@@ -2048,7 +2048,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2062,7 +2062,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_14(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_RESERVED_14,
            1>(i_data);
@@ -2077,7 +2077,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_14(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_RESERVED_14,
            1>(i_data);
@@ -2091,7 +2091,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RESERVED_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_RESERVED_14>();
 #ifdef SCOM_CHECKING
@@ -2104,7 +2104,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_RESERVED_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_RESERVED_14>();
 #ifdef SCOM_CHECKING
@@ -2118,7 +2118,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_RESERVED_14(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_RESERVED_14,
            1>(o_data);
@@ -2132,7 +2132,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_RESERVED_14(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_RESERVED_14>();
 #ifdef SCOM_CHECKING
@@ -2146,7 +2146,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0,
            1>(i_data);
@@ -2161,7 +2161,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0,
            1>(i_data);
@@ -2175,7 +2175,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -2188,7 +2188,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -2202,7 +2202,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0,
            1>(o_data);
@@ -2216,7 +2216,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_WR_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -2230,7 +2230,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(fap
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_CMT_PARITY_ERROR,
            1>(i_data);
@@ -2245,7 +2245,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(con
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WDF_CMT_PARITY_ERROR,
            1>(i_data);
@@ -2259,7 +2259,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WDF_CMT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2272,7 +2272,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WDF_CMT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2286,7 +2286,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(fap
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WDF_CMT_PARITY_ERROR,
            1>(o_data);
@@ -2300,7 +2300,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WDF_CMT_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WDF_CMT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2314,7 +2314,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_1(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_SPARE_1,
            1>(i_data);
@@ -2329,7 +2329,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_1(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_SPARE_1,
            1>(i_data);
@@ -2343,7 +2343,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_READ_SPARE_1>();
 #ifdef SCOM_CHECKING
@@ -2356,7 +2356,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_READ_SPARE_1(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_READ_SPARE_1>();
 #ifdef SCOM_CHECKING
@@ -2370,7 +2370,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_READ_SPARE_1(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_READ_SPARE_1,
            1>(o_data);
@@ -2384,7 +2384,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_READ_SPARE_1(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_READ_SPARE_1>();
 #ifdef SCOM_CHECKING
@@ -2398,7 +2398,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_2(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_SPARE_2,
            1>(i_data);
@@ -2413,7 +2413,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_2(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_SPARE_2,
            1>(i_data);
@@ -2427,7 +2427,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_SPARE_2(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_READ_SPARE_2>();
 #ifdef SCOM_CHECKING
@@ -2440,7 +2440,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_READ_SPARE_2(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_READ_SPARE_2>();
 #ifdef SCOM_CHECKING
@@ -2454,7 +2454,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_READ_SPARE_2(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_READ_SPARE_2,
            1>(o_data);
@@ -2468,7 +2468,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_READ_SPARE_2(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_READ_SPARE_2>();
 #ifdef SCOM_CHECKING
@@ -2482,7 +2482,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR,
            1>(i_data);
@@ -2497,7 +2497,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR,
            1>(i_data);
@@ -2511,7 +2511,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2524,7 +2524,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2538,7 +2538,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR,
            1>(o_data);
@@ -2552,7 +2552,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2566,7 +2566,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_CE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_CE,
            1>(i_data);
@@ -2581,7 +2581,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_CE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_CE,
            1>(i_data);
@@ -2595,7 +2595,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -2608,7 +2608,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_BUFFER_CE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -2622,7 +2622,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_BUFFER_CE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_BUFFER_CE,
            1>(o_data);
@@ -2636,7 +2636,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_BUFFER_CE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_BUFFER_CE>();
 #ifdef SCOM_CHECKING
@@ -2650,7 +2650,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_UE(fapi2::buf
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_UE,
            1>(i_data);
@@ -2665,7 +2665,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_UE(const uint
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_UE,
            1>(i_data);
@@ -2679,7 +2679,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -2692,7 +2692,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_BUFFER_UE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -2706,7 +2706,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_BUFFER_UE(fapi2::buf
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_BUFFER_UE,
            1>(o_data);
@@ -2720,7 +2720,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_BUFFER_UE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_BUFFER_UE>();
 #ifdef SCOM_CHECKING
@@ -2734,7 +2734,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_SUE(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_SUE,
            1>(i_data);
@@ -2749,7 +2749,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_SUE(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFFER_SUE,
            1>(i_data);
@@ -2763,7 +2763,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFFER_SUE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -2776,7 +2776,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_BUFFER_SUE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -2790,7 +2790,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_BUFFER_SUE(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_BUFFER_SUE,
            1>(o_data);
@@ -2804,7 +2804,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_BUFFER_SUE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_BUFFER_SUE>();
 #ifdef SCOM_CHECKING
@@ -2818,7 +2818,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(fapi2
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR,
            1>(i_data);
@@ -2833,7 +2833,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(const
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR,
            1>(i_data);
@@ -2847,7 +2847,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2860,7 +2860,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2874,7 +2874,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(fapi2
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR,
            1>(o_data);
@@ -2888,7 +2888,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_SCOM_SEQ_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_SCOM_SEQ_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2902,7 +2902,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR,
            1>(i_data);
@@ -2917,7 +2917,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR,
            1>(i_data);
@@ -2931,7 +2931,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2944,7 +2944,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2958,7 +2958,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERRO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR,
            1>(o_data);
@@ -2972,7 +2972,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -2986,7 +2986,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(fa
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0,
            1>(i_data);
@@ -3001,7 +3001,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(co
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0,
            1>(i_data);
@@ -3015,7 +3015,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -3028,7 +3028,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -3042,7 +3042,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(fa
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0,
            1>(o_data);
@@ -3056,7 +3056,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_DATA_SYNDROME_NE0(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_DATA_SYNDROME_NE0>();
 #ifdef SCOM_CHECKING
@@ -3070,7 +3070,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFF_ERR(fapi2::buff
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFF_ERR,
            1>(i_data);
@@ -3085,7 +3085,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFF_ERR(const uint6
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_WRT_BUFF_ERR,
            1>(i_data);
@@ -3099,7 +3099,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_WRT_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_WRT_BUFF_ERR>();
 #ifdef SCOM_CHECKING
@@ -3112,7 +3112,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_WRT_BUFF_ERR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_WRT_BUFF_ERR>();
 #ifdef SCOM_CHECKING
@@ -3126,7 +3126,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_WRT_BUFF_ERR(fapi2::buff
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_WRT_BUFF_ERR,
            1>(o_data);
@@ -3140,7 +3140,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_WRT_BUFF_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_WRT_BUFF_ERR>();
 #ifdef SCOM_CHECKING
@@ -3154,7 +3154,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP,
            1>(i_data);
@@ -3169,7 +3169,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP,
            1>(i_data);
@@ -3183,7 +3183,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3196,7 +3196,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3210,7 +3210,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP,
            1>(o_data);
@@ -3224,7 +3224,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3238,7 +3238,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP,
            1>(i_data);
@@ -3253,7 +3253,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP,
            1>(i_data);
@@ -3267,7 +3267,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3280,7 +3280,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3294,7 +3294,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP,
            1>(o_data);
@@ -3308,7 +3308,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3322,7 +3322,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER,
            1>(i_data);
@@ -3337,7 +3337,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER,
            1>(i_data);
@@ -3351,7 +3351,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3364,7 +3364,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3378,7 +3378,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER,
            1>(o_data);
@@ -3392,7 +3392,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3406,7 +3406,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER,
            1>(i_data);
@@ -3421,7 +3421,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER,
            1>(i_data);
@@ -3435,7 +3435,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3448,7 +3448,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3462,7 +3462,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER,
            1>(o_data);
@@ -3476,7 +3476,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_FAIL_RESP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3490,7 +3490,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP,
            1>(i_data);
@@ -3505,7 +3505,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP,
            1>(i_data);
@@ -3519,7 +3519,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3532,7 +3532,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3546,7 +3546,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP,
            1>(o_data);
@@ -3560,7 +3560,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3574,7 +3574,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP,
            1>(i_data);
@@ -3589,7 +3589,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP,
            1>(i_data);
@@ -3603,7 +3603,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3616,7 +3616,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3630,7 +3630,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP,
            1>(o_data);
@@ -3644,7 +3644,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_LOL_DROP_CHECKSTOP>();
 #ifdef SCOM_CHECKING
@@ -3658,7 +3658,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER,
            1>(i_data);
@@ -3673,7 +3673,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER,
            1>(i_data);
@@ -3687,7 +3687,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3700,7 +3700,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3714,7 +3714,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER,
            1>(o_data);
@@ -3728,7 +3728,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3742,7 +3742,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER,
            1>(i_data);
@@ -3757,7 +3757,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER,
            1>(i_data);
@@ -3771,7 +3771,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3784,7 +3784,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3798,7 +3798,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER,
            1>(o_data);
@@ -3812,7 +3812,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_LOL_DROP_RECOVER(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_LOL_DROP_RECOVER>();
 #ifdef SCOM_CHECKING
@@ -3826,7 +3826,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR,
            1>(i_data);
@@ -3841,7 +3841,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR,
            1>(i_data);
@@ -3855,7 +3855,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3868,7 +3868,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3882,7 +3882,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR,
            1>(o_data);
@@ -3896,7 +3896,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3910,7 +3910,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR,
            1>(i_data);
@@ -3925,7 +3925,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR,
            1>(i_data);
@@ -3939,7 +3939,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3952,7 +3952,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3966,7 +3966,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR,
            1>(o_data);
@@ -3980,7 +3980,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -3994,7 +3994,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR,
            1>(i_data);
@@ -4009,7 +4009,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR,
            1>(i_data);
@@ -4023,7 +4023,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4036,7 +4036,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4050,7 +4050,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR,
            1>(o_data);
@@ -4064,7 +4064,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4078,7 +4078,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR,
            1>(i_data);
@@ -4093,7 +4093,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR,
            1>(i_data);
@@ -4107,7 +4107,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4120,7 +4120,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4134,7 +4134,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR,
            1>(o_data);
@@ -4148,7 +4148,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -4162,7 +4162,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL,
            1>(i_data);
@@ -4177,7 +4177,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL,
            1>(i_data);
@@ -4191,7 +4191,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4204,7 +4204,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4218,7 +4218,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL,
            1>(o_data);
@@ -4232,7 +4232,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4246,7 +4246,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL,
            1>(i_data);
@@ -4261,7 +4261,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL,
            1>(i_data);
@@ -4275,7 +4275,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4288,7 +4288,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4302,7 +4302,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL,
            1>(o_data);
@@ -4316,7 +4316,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>();
 #ifdef SCOM_CHECKING
@@ -4330,7 +4330,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS,
            1>(i_data);
@@ -4345,7 +4345,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS,
            1>(i_data);
@@ -4359,7 +4359,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4372,7 +4372,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4386,7 +4386,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BI
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS,
            1>(o_data);
@@ -4400,7 +4400,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4414,7 +4414,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS,
            1>(i_data);
@@ -4429,7 +4429,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BI
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS,
            1>(i_data);
@@ -4443,7 +4443,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4456,7 +4456,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4470,7 +4470,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BI
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS,
            1>(o_data);
@@ -4484,7 +4484,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>();
 #ifdef SCOM_CHECKING
@@ -4498,7 +4498,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO,
            1>(i_data);
@@ -4513,7 +4513,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO,
            1>(i_data);
@@ -4527,7 +4527,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4541,7 +4541,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4555,7 +4555,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO,
            1>(o_data);
@@ -4569,7 +4569,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4583,7 +4583,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO,
            1>(i_data);
@@ -4598,7 +4598,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO,
            1>(i_data);
@@ -4612,7 +4612,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4626,7 +4626,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4640,7 +4640,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO,
            1>(o_data);
@@ -4654,7 +4654,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>();
 #ifdef SCOM_CHECKING
@@ -4668,7 +4668,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE,
            1>(i_data);
@@ -4683,7 +4683,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE,
            1>(i_data);
@@ -4697,7 +4697,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4710,7 +4710,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4724,7 +4724,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE,
            1>(o_data);
@@ -4738,7 +4738,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4752,7 +4752,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE,
            1>(i_data);
@@ -4767,7 +4767,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE,
            1>(i_data);
@@ -4781,7 +4781,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4794,7 +4794,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4808,7 +4808,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE,
            1>(o_data);
@@ -4822,7 +4822,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_MMIO_IN_LOL_MODE>();
 #ifdef SCOM_CHECKING
@@ -4836,7 +4836,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_DATA(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BAD_DATA,
            1>(i_data);
@@ -4851,7 +4851,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_DATA(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BAD_DATA,
            1>(i_data);
@@ -4865,7 +4865,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -4878,7 +4878,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -4892,7 +4892,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_BAD_DATA(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_BAD_DATA,
            1>(o_data);
@@ -4906,7 +4906,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_BAD_DATA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -4920,7 +4920,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_DATA(fapi2::bu
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BAD_DATA,
            1>(i_data);
@@ -4935,7 +4935,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_DATA(const uin
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BAD_DATA,
            1>(i_data);
@@ -4949,7 +4949,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -4962,7 +4962,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -4976,7 +4976,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_BAD_DATA(fapi2::bu
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_BAD_DATA,
            1>(o_data);
@@ -4990,7 +4990,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_BAD_DATA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_BAD_DATA>();
 #ifdef SCOM_CHECKING
@@ -5004,7 +5004,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR,
            1>(i_data);
@@ -5019,7 +5019,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR,
            1>(i_data);
@@ -5033,7 +5033,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5046,7 +5046,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5060,7 +5060,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR,
            1>(o_data);
@@ -5074,7 +5074,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5088,7 +5088,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR,
            1>(i_data);
@@ -5103,7 +5103,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR,
            1>(i_data);
@@ -5117,7 +5117,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5130,7 +5130,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5144,7 +5144,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR,
            1>(o_data);
@@ -5158,7 +5158,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5173,7 +5173,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR,
            1>(i_data);
@@ -5188,7 +5188,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR,
            1>(i_data);
@@ -5203,7 +5203,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5217,7 +5217,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5232,7 +5232,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR,
            1>(o_data);
@@ -5246,7 +5246,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5261,7 +5261,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR,
            1>(i_data);
@@ -5276,7 +5276,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VA
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR,
            1>(i_data);
@@ -5291,7 +5291,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5305,7 +5305,7 @@ static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5320,7 +5320,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR,
            1>(o_data);
@@ -5334,7 +5334,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5348,7 +5348,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR,
            1>(i_data);
@@ -5363,7 +5363,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR,
            1>(i_data);
@@ -5377,7 +5377,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5390,7 +5390,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5404,7 +5404,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERRO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR,
            1>(o_data);
@@ -5418,7 +5418,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5432,7 +5432,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR,
            1>(i_data);
@@ -5447,7 +5447,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERRO
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR,
            1>(i_data);
@@ -5461,7 +5461,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5474,7 +5474,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5488,7 +5488,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERRO
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR,
            1>(o_data);
@@ -5502,7 +5502,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5516,7 +5516,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR,
            1>(i_data);
@@ -5531,7 +5531,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR,
            1>(i_data);
@@ -5545,7 +5545,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5558,7 +5558,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5572,7 +5572,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR,
            1>(o_data);
@@ -5586,7 +5586,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5600,7 +5600,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR,
            1>(i_data);
@@ -5615,7 +5615,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR,
            1>(i_data);
@@ -5629,7 +5629,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5642,7 +5642,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5656,7 +5656,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR,
            1>(o_data);
@@ -5670,7 +5670,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_INVALID_CMD_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5684,7 +5684,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_FATAL_REG_PARITY_ERROR,
            1>(i_data);
@@ -5699,7 +5699,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_FATAL_REG_PARITY_ERROR,
            1>(i_data);
@@ -5713,7 +5713,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_FATAL_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5726,7 +5726,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_FATAL_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5740,7 +5740,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_FATAL_REG_PARITY_ERROR,
            1>(o_data);
@@ -5754,7 +5754,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_FATAL_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_FATAL_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5768,7 +5768,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(f
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_RECOV_REG_PARITY_ERROR,
            1>(i_data);
@@ -5783,7 +5783,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(c
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_RECOV_REG_PARITY_ERROR,
            1>(i_data);
@@ -5797,7 +5797,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_RECOV_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5810,7 +5810,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_RECOV_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5824,7 +5824,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(f
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_RECOV_REG_PARITY_ERROR,
            1>(o_data);
@@ -5838,7 +5838,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_RECOV_REG_PARITY_ERROR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_RECOV_REG_PARITY_ERROR>();
 #ifdef SCOM_CHECKING
@@ -5852,7 +5852,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMB
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO,
            1>(i_data);
@@ -5867,7 +5867,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMB
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO,
            1>(i_data);
@@ -5881,7 +5881,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -5894,7 +5894,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -5908,7 +5908,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMB
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO,
            1>(o_data);
@@ -5922,7 +5922,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -5936,7 +5936,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMB
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO,
            1>(i_data);
@@ -5951,7 +5951,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMB
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO,
            1>(i_data);
@@ -5965,7 +5965,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -5978,7 +5978,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -5992,7 +5992,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMB
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO,
            1>(o_data);
@@ -6006,7 +6006,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
 #ifdef SCOM_CHECKING
@@ -6020,7 +6020,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_SPARE_61,
            1>(i_data);
@@ -6035,7 +6035,7 @@ static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.insertFromRight<USTL_USTLFIR_SPARE_61,
            1>(i_data);
@@ -6049,7 +6049,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.setBit<USTL_USTLFIR_SPARE_61>();
 #ifdef SCOM_CHECKING
@@ -6062,7 +6062,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return o_data.clearBit<USTL_USTLFIR_SPARE_61>();
 #ifdef SCOM_CHECKING
@@ -6076,7 +6076,7 @@ static inline fapi2::buffer<uint64_t>& GET_USTL_USTLFIR_SPARE_61(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.extractToRight<USTL_USTLFIR_SPARE_61,
            1>(o_data);
@@ -6090,7 +6090,7 @@ fapi_try_exit:
 static inline bool GET_USTL_USTLFIR_SPARE_61(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RWX, USTL_USTLFIR_WOX_AND, USTL_USTLFIR_WOX_OR));
+    FAPI_TRY(scomt::chkReg(USTL_USTLFIR_RW, USTL_USTLFIR_WO_AND, USTL_USTLFIR_WO_OR));
 #endif
     return i_data.getBit<USTL_USTLFIR_SPARE_61>();
 #ifdef SCOM_CHECKING

@@ -257,47 +257,47 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_CNT29_PG));
 #endif
-    return o_data.insertFromRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16,
-           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16_LEN>(i_data);
+    return o_data.insertFromRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15,
+           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_CNT29_PG));
 #endif
-    return o_data.insertFromRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16,
-           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16_LEN>(i_data);
+    return o_data.insertFromRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15,
+           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(DATASM_REGS_RX_CNT29_PG));
 #endif
-    return i_data.extractToRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16,
-           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16_LEN>(o_data);
+    return i_data.extractToRight<DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15,
+           DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access DATASM_REGS_RX_CNT29_PG_RX_B_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

@@ -71,16 +71,16 @@ static const uint32_t DSTL_DSLTWAT_RESERVED_24_62 = 24;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62_LEN = 39;
 // mcc/reg00002.H
 
-static const uint64_t USTL_USTLFIR_RWX = 0x0c010e00ull;
-static const uint64_t USTL_USTLFIR_WOX_AND = 0x0c010e01ull;
-static const uint64_t USTL_USTLFIR_WOX_OR = 0x0c010e02ull;
+static const uint64_t USTL_USTLFIR_RW = 0x0c010e00ull;
+static const uint64_t USTL_USTLFIR_WO_AND = 0x0c010e01ull;
+static const uint64_t USTL_USTLFIR_WO_OR = 0x0c010e02ull;
 
 static const uint32_t USTL_USTLFIR_CHANA_UNEXP_DATA_ERR = 0;
 static const uint32_t USTL_USTLFIR_CHANB_UNEXP_DATA_ERR = 1;
 static const uint32_t USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR = 2;
 static const uint32_t USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR = 3;
-static const uint32_t USTL_USTLFIR_CHANA_HALF_SPEED_MODE = 4;
-static const uint32_t USTL_USTLFIR_CHANB_HALF_SPEED_MODE = 5;
+static const uint32_t USTL_USTLFIR_RESERVED_4 = 4;
+static const uint32_t USTL_USTLFIR_RESERVED_5 = 5;
 static const uint32_t USTL_USTLFIR_WDF_BUFFER_CE = 6;
 static const uint32_t USTL_USTLFIR_WDF_BUFFER_UE = 7;
 static const uint32_t USTL_USTLFIR_WDF_BUFFER_SUE = 8;

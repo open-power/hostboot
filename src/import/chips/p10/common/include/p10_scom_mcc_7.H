@@ -117,21 +117,24 @@ static const uint32_t DSTL_DSTLINJ_RESERVED_4_15_LEN = 12;
 
 static const uint64_t WRITE_READCFG = 0x0c010f4dull;
 
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ = 0;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ_LEN = 4;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL = 4;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL_LEN = 3;
-static const uint32_t WRITE_READCFG_SPARE_7 = 7;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DLY_ND = 8;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DLY_ND_LEN = 2;
-static const uint32_t WRITE_READCFG_SPARE_10_11 = 10;
-static const uint32_t WRITE_READCFG_SPARE_10_11_LEN = 2;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DLY_1X = 12;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE = 13;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ = 14;
-static const uint32_t WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 = 15;
-static const uint32_t WRITE_READCFG_EICR_PERSIST = 16;
-static const uint32_t WRITE_READCFG_EICR_PERSIST_LEN = 2;
+static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET = 0;
+static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET_LEN = 3;
+static const uint32_t WRITE_READCFG_CFG_RD_EINJ_RATE = 3;
+static const uint32_t WRITE_READCFG_CFG_RD_EINJ_RATE_LEN = 3;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_6 = 6;
+static const uint32_t WRITE_READCFG_CFG_RD_FAIL_ACTION = 7;
+static const uint32_t WRITE_READCFG_CFG_RD_FAIL_ACTION_LEN = 2;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_9_11 = 9;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_9_11_LEN = 3;
+static const uint32_t WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA = 12;
+static const uint32_t WRITE_READCFG_CFG_RTYFAIL_NO_BD = 13;
+static const uint32_t WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME = 14;
+static const uint32_t WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE = 15;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_16 = 16;
+static const uint32_t WRITE_READCFG_CFG_BOGUS_NO_BD = 17;
+static const uint32_t WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS = 18;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_19_31 = 19;
+static const uint32_t WRITE_READCFG_READCFG_RESERVED_19_31_LEN = 13;
 // mcc/reg00007.H
 
 static const uint64_t WRITE_WRT_DSTL_ECC = 0x0c010f4cull;

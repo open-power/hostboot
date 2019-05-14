@@ -56,15 +56,6 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x200183f0ull;
 // eq/reg00013.H
 
-static const uint64_t EPS_FIR_SUM_MASK_REG = 0x20040017ull;
-
-static const uint32_t EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB = 0;
-static const uint32_t EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB = 1;
-static const uint32_t EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB = 2;
-static const uint32_t EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB = 3;
-static const uint32_t EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB = 4;
-// eq/reg00013.H
-
 static const uint64_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ = 0x2005003cull;
 
 static const uint32_t EPS_THERM_WSUB2_TIMESTAMP_COUNTER_READ_VALUE = 0;
@@ -184,6 +175,11 @@ static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
 static const uint64_t PRIMARY_ADDRESS_REG = 0x200f0000ull;
 // eq/reg00013.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_EIMR_PPE = 0x00000006c0002640ull;
+static const uint64_t QME_EIMR_PPE1 = 0x00000006c0002670ull;
+static const uint64_t QME_EIMR_PPE2 = 0x00000006c0002660ull;
 static const uint64_t QME_EIMR_RW = 0x200e0264ull;
 static const uint64_t QME_EIMR_WO_CLEAR = 0x200e0267ull;
 static const uint64_t QME_EIMR_WO_OR = 0x200e0266ull;
@@ -192,7 +188,10 @@ static const uint32_t QME_EIMR_QME_EIMR_INTERRUPT_MASK = 0;
 static const uint32_t QME_EIMR_QME_EIMR_INTERRUPT_MASK_LEN = 64;
 // eq/reg00013.H
 
-static const uint64_t QME_PIG = 0x200e0030ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_PIG_PPE = 0x00000006c0000300ull;
+static const uint64_t QME_PIG_SCOM = 0x200e0030ull;
 
 static const uint32_t QME_PIG_REQ_INTR_TYPE = 1;
 static const uint32_t QME_PIG_REQ_INTR_TYPE_LEN = 4;
@@ -209,14 +208,24 @@ static const uint32_t QME_PIG_GRANTED_PACKET = 40;
 static const uint32_t QME_PIG_GRANTED_PACKET_LEN = 24;
 // eq/reg00013.H
 
-static const uint64_t QME_QSCR_SCOM = 0x200e0070ull;
-static const uint64_t QME_QSCR_SCOM1 = 0x200e0073ull;
-static const uint64_t QME_QSCR_SCOM2 = 0x200e0072ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_QSCR_PPE = 0x00000006c0000700ull;
+static const uint64_t QME_QSCR_PPE1 = 0x00000006c0000730ull;
+static const uint64_t QME_QSCR_PPE2 = 0x00000006c0000720ull;
+static const uint64_t QME_QSCR_RW = 0x200e0070ull;
+static const uint64_t QME_QSCR_WO_CLEAR = 0x200e0073ull;
+static const uint64_t QME_QSCR_WO_OR = 0x200e0072ull;
 // eq/reg00013.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_RCMR_PPE = 0x00000006c0001800ull;
+static const uint64_t QME_RCMR_PPE1 = 0x00000006c0001830ull;
+static const uint64_t QME_RCMR_PPE2 = 0x00000006c0001820ull;
 static const uint64_t QME_RCMR_SCOM = 0x200e0180ull;
-static const uint64_t QME_RCMR_SCOM1 = 0x200e0183ull;
-static const uint64_t QME_RCMR_SCOM2 = 0x200e0182ull;
+static const uint64_t QME_RCMR_WO_CLEAR = 0x200e0183ull;
+static const uint64_t QME_RCMR_WO_OR = 0x200e0182ull;
 
 static const uint32_t QME_RCMR_MR_STEP_ENABLE = 0;
 static const uint32_t QME_RCMR_MR_AUTO_ACK_ENABLE = 1;
@@ -234,6 +243,65 @@ static const uint32_t QME_RCMR_MR_CORE2_CONTROL_INDEX = 51;
 static const uint32_t QME_RCMR_MR_CORE2_CONTROL_INDEX_LEN = 5;
 static const uint32_t QME_RCMR_MR_CORE3_CONTROL_INDEX = 59;
 static const uint32_t QME_RCMR_MR_CORE3_CONTROL_INDEX_LEN = 5;
+// eq/reg00013.H
+
+static const uint64_t RECOV_MASK_RW = 0x20040041ull;
+static const uint64_t RECOV_MASK_WO_CLEAR = 0x20040061ull;
+static const uint64_t RECOV_MASK_WO_OR = 0x20040051ull;
+
+static const uint32_t RECOV_MASK_1 = 1;
+static const uint32_t RECOV_MASK_2 = 2;
+static const uint32_t RECOV_MASK_3 = 3;
+static const uint32_t RECOV_MASK_4 = 4;
+static const uint32_t RECOV_MASK_5 = 5;
+static const uint32_t RECOV_MASK_6 = 6;
+static const uint32_t RECOV_MASK_7 = 7;
+static const uint32_t RECOV_MASK_8 = 8;
+static const uint32_t RECOV_MASK_9 = 9;
+static const uint32_t RECOV_MASK_10 = 10;
+static const uint32_t RECOV_MASK_11 = 11;
+static const uint32_t RECOV_MASK_12 = 12;
+static const uint32_t RECOV_MASK_13 = 13;
+static const uint32_t RECOV_MASK_14 = 14;
+static const uint32_t RECOV_MASK_15 = 15;
+static const uint32_t RECOV_MASK_16 = 16;
+static const uint32_t RECOV_MASK_17 = 17;
+static const uint32_t RECOV_MASK_18 = 18;
+static const uint32_t RECOV_MASK_19 = 19;
+static const uint32_t RECOV_MASK_20 = 20;
+static const uint32_t RECOV_MASK_21 = 21;
+static const uint32_t RECOV_MASK_22 = 22;
+static const uint32_t RECOV_MASK_23 = 23;
+static const uint32_t RECOV_MASK_24 = 24;
+static const uint32_t RECOV_MASK_25 = 25;
+static const uint32_t RECOV_MASK_26 = 26;
+static const uint32_t RECOV_MASK_27 = 27;
+static const uint32_t RECOV_MASK_28 = 28;
+static const uint32_t RECOV_MASK_29 = 29;
+static const uint32_t RECOV_MASK_30 = 30;
+static const uint32_t RECOV_MASK_31 = 31;
+static const uint32_t RECOV_MASK_32 = 32;
+static const uint32_t RECOV_MASK_33 = 33;
+static const uint32_t RECOV_MASK_34 = 34;
+static const uint32_t RECOV_MASK_35 = 35;
+static const uint32_t RECOV_MASK_36 = 36;
+static const uint32_t RECOV_MASK_37 = 37;
+static const uint32_t RECOV_MASK_38 = 38;
+static const uint32_t RECOV_MASK_39 = 39;
+static const uint32_t RECOV_MASK_40 = 40;
+static const uint32_t RECOV_MASK_41 = 41;
+static const uint32_t RECOV_MASK_42 = 42;
+static const uint32_t RECOV_MASK_43 = 43;
+static const uint32_t RECOV_MASK_44 = 44;
+static const uint32_t RECOV_MASK_45 = 45;
+static const uint32_t RECOV_MASK_46 = 46;
+static const uint32_t RECOV_MASK_47 = 47;
+static const uint32_t RECOV_MASK_48 = 48;
+static const uint32_t RECOV_MASK_49 = 49;
+static const uint32_t RECOV_MASK_50 = 50;
+static const uint32_t RECOV_MASK_51 = 51;
+static const uint32_t RECOV_MASK_52 = 52;
+static const uint32_t RECOV_MASK_53 = 53;
 // eq/reg00013.H
 
 static const uint64_t SCAN_UPDATEDR_LONG = 0x2003b000ull;

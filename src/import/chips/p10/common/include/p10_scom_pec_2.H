@@ -60,6 +60,14 @@ static const uint32_t CPLT_STAT0_FREE_USAGE_20I = 20;
 static const uint32_t CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t CPLT_STAT0_FREE_USAGE_23I = 23;
+static const uint32_t CPLT_STAT0_FREE_USAGE_24I = 24;
+static const uint32_t CPLT_STAT0_FREE_USAGE_25I = 25;
+static const uint32_t CPLT_STAT0_FREE_USAGE_26I = 26;
+static const uint32_t CPLT_STAT0_FREE_USAGE_27I = 27;
+static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
+static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
+static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
+static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
 // pec/reg00002.H
 
 static const uint64_t PB_PBCQ_PEPBREGS_NWRSTKOVR_REG = 0x03011809ull;
@@ -77,8 +85,7 @@ static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0_PE_TOPOLOGY_ID_REG0 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0_PE_TOPOLOGY_ID_REG0_LEN = 40;
 // pec/reg00002.H
 
-static const uint64_t SPATTN_NCX = 0x08040005ull;
-static const uint64_t SPATTN_ROX = 0x08040004ull;
+static const uint64_t SPATTN = 0x08040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;

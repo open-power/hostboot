@@ -35,9 +35,9 @@ namespace phb
 {
 
 
-static const uint64_t REGS_NFIR_REG_RWX = 0x03011840ull;
-static const uint64_t REGS_NFIR_REG_WOX_AND = 0x03011841ull;
-static const uint64_t REGS_NFIR_REG_WOX_OR = 0x03011842ull;
+static const uint64_t REGS_NFIR_REG_RW = 0x03011840ull;
+static const uint64_t REGS_NFIR_REG_WO_AND = 0x03011841ull;
+static const uint64_t REGS_NFIR_REG_WO_OR = 0x03011842ull;
 
 static const uint32_t REGS_NFIR_REG_NFIRNFIR = 0;
 static const uint32_t REGS_NFIR_REG_NFIRNFIR_LEN = 28;

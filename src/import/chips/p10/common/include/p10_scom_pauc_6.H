@@ -74,33 +74,6 @@ static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x100107c3ull;
 static const uint64_t EPS_DBG_INST2_COND_REG_3 = 0x100107c6ull;
 // pauc/reg00006.H
 
-static const uint64_t EPS_FIR_GXSTOP0_MASK_REG = 0x10040013ull;
-
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// pauc/reg00006.H
-
 static const uint64_t EPS_PSC_PSCOM_STATUS_ERROR_REG = 0x10010001ull;
 
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_ACCUMULATED_PCB_WDATA_PARITY_ERROR = 0;
@@ -154,7 +127,9 @@ static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
 // pauc/reg00006.H
 
-static const uint64_t LOCAL_XSTOP_MASK = 0x10040019ull;
+static const uint64_t LOCAL_XSTOP_MASK_RW = 0x10040043ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x10040063ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x10040015ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -173,16 +148,18 @@ static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 // pauc/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
+static const uint64_t LOCAL_XSTOP_UNMASKED = 0x10040013ull;
 
-static const uint64_t PPE_MIB_XIICAC = 0x10000019ull;
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+// pauc/reg00006.H
+
+static const uint64_t PPE_MIB_XIICAC = 0x10012c19ull;
 
 static const uint32_t PPE_MIB_XIICAC_MIB_XIMEM_MEM_IFETCH_PENDING = 35;
 // pauc/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_XIXCR = 0x10000010ull;
+static const uint64_t PPE_XIXCR = 0x10012c10ull;
 
 static const uint32_t PPE_XIXCR_PPE_XIXCR_XCR = 1;
 static const uint32_t PPE_XIXCR_PPE_XIXCR_XCR_LEN = 3;
@@ -190,14 +167,10 @@ static const uint32_t PPE_XIXCR_NULL_CTR = 32;
 static const uint32_t PPE_XIXCR_NULL_CTR_LEN = 32;
 // pauc/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL3_PB = 0x800f14001000003full;
+static const uint64_t REGS_TX_IMPCAL3_PB = 0x800f140010012c3full;
 // pauc/reg00006.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_TX_IMPCAL_SWO7_PB = 0x800f64001000003full;
+static const uint64_t REGS_TX_IMPCAL_SWO7_PB = 0x800f640010012c3full;
 
 static const uint32_t REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31 = 48;
 static const uint32_t REGS_TX_IMPCAL_SWO7_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_16_31_LEN = 16;

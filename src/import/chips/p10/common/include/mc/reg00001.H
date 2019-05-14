@@ -6808,86 +6808,86 @@ fapi_try_exit:
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_ENABLE_CLIB_HANG(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_RESERVED_53(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCTO_ENABLE_CLIB_HANG,
+    return o_data.insertFromRight<SCOMFIR_MCTO_RESERVED_53,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_ENABLE_CLIB_HANG(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_RESERVED_53(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return o_data.insertFromRight<SCOMFIR_MCTO_ENABLE_CLIB_HANG,
+    return o_data.insertFromRight<SCOMFIR_MCTO_RESERVED_53,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_ENABLE_CLIB_HANG(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_SCOMFIR_MCTO_RESERVED_53(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return o_data.setBit<SCOMFIR_MCTO_ENABLE_CLIB_HANG>();
+    return o_data.setBit<SCOMFIR_MCTO_RESERVED_53>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_SCOMFIR_MCTO_ENABLE_CLIB_HANG(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_SCOMFIR_MCTO_RESERVED_53(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return o_data.clearBit<SCOMFIR_MCTO_ENABLE_CLIB_HANG>();
+    return o_data.clearBit<SCOMFIR_MCTO_RESERVED_53>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCTO_ENABLE_CLIB_HANG(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_SCOMFIR_MCTO_RESERVED_53(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return i_data.extractToRight<SCOMFIR_MCTO_ENABLE_CLIB_HANG,
+    return i_data.extractToRight<SCOMFIR_MCTO_RESERVED_53,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_SCOMFIR_MCTO_ENABLE_CLIB_HANG(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_SCOMFIR_MCTO_RESERVED_53(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(SCOMFIR_MCTO));
 #endif
-    return i_data.getBit<SCOMFIR_MCTO_ENABLE_CLIB_HANG>();
+    return i_data.getBit<SCOMFIR_MCTO_RESERVED_53>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_ENABLE_CLIB_HANG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access SCOMFIR_MCTO_RESERVED_53 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

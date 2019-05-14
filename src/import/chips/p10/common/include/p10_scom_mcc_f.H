@@ -58,7 +58,7 @@ static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED32_35_LEN = 4;
 static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEB = 0x0c010f5full;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB = 0;
-static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB_LEN = 17;
+static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB_LEN = 24;
 // mcc/reg00015.H
 
 static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEA = 0x0c010f56ull;
@@ -70,9 +70,9 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
 static const uint64_t USTL_USTLLOLDROP = 0x0c010e11ull;
 
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON = 0;
-static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 16;
+static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 18;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON = 32;
-static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 16;
+static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 18;
 // mcc/reg00015.H
 
 }

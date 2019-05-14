@@ -34,11 +34,11 @@ namespace nmmu
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -48,14 +48,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW;
 #endif
-    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, o_data);
+    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -63,15 +63,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, i_data);
+    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -79,11 +79,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -93,14 +93,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND;
 #endif
-    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND, o_data);
+    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -108,15 +108,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND, i_data);
+    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -124,11 +124,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -138,14 +138,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR;
+    scomt::last_scom = FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR;
 #endif
-    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR, o_data);
+    return fapi2::getScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -153,15 +153,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
-    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR, i_data);
+    return fapi2::putScom(i_target, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -173,8 +173,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR,
            1>(i_data);
@@ -189,8 +189,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR,
            1>(i_data);
@@ -204,8 +204,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR>();
 #ifdef SCOM_CHECKING
@@ -219,8 +219,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR>();
 #ifdef SCOM_CHECKING
@@ -234,8 +234,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR,
            1>(o_data);
@@ -249,8 +249,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBI_PE_FIR>();
 #ifdef SCOM_CHECKING
@@ -265,8 +265,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR,
            1>(i_data);
@@ -282,8 +282,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR,
            1>(i_data);
@@ -299,8 +299,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR>();
 #ifdef SCOM_CHECKING
@@ -315,8 +315,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR>();
 #ifdef SCOM_CHECKING
@@ -332,8 +332,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR,
            1>(o_data);
@@ -348,8 +348,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_CMD_HANG_FIR>();
 #ifdef SCOM_CHECKING
@@ -365,8 +365,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR,
            1>(i_data);
@@ -382,8 +382,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR,
            1>(i_data);
@@ -399,8 +399,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -415,8 +415,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -432,8 +432,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR,
            1>(o_data);
@@ -448,8 +448,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_READ_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -465,8 +465,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR,
            1>(i_data);
@@ -482,8 +482,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR,
            1>(i_data);
@@ -499,8 +499,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -515,8 +515,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -532,8 +532,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR,
            1>(o_data);
@@ -548,8 +548,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_WRITE_ARE_FIR>();
 #ifdef SCOM_CHECKING
@@ -565,8 +565,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR,
            1>(i_data);
@@ -582,8 +582,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR,
            1>(i_data);
@@ -599,8 +599,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR>();
 #ifdef SCOM_CHECKING
@@ -615,8 +615,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR>();
 #ifdef SCOM_CHECKING
@@ -632,8 +632,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR,
            1>(o_data);
@@ -648,8 +648,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_MISC_HW_FIR>();
 #ifdef SCOM_CHECKING
@@ -664,8 +664,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR,
            1>(i_data);
@@ -680,8 +680,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR,
            1>(i_data);
@@ -695,8 +695,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR>();
 #ifdef SCOM_CHECKING
@@ -709,8 +709,8 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR>();
 #ifdef SCOM_CHECKING
@@ -724,8 +724,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR,
            1>(o_data);
@@ -739,8 +739,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RSVD_FIR>();
 #ifdef SCOM_CHECKING
@@ -755,8 +755,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR,
            1>(i_data);
@@ -772,8 +772,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR,
            1>(i_data);
@@ -789,8 +789,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -805,8 +805,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -822,8 +822,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR,
            1>(o_data);
@@ -838,8 +838,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -855,8 +855,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR,
            1>(i_data);
@@ -872,8 +872,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR,
            1>(i_data);
@@ -889,8 +889,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -905,8 +905,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -922,8 +922,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR,
            1>(o_data);
@@ -938,8 +938,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_XLAT_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -955,8 +955,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR,
            1>(i_data);
@@ -972,8 +972,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR,
            1>(i_data);
@@ -989,8 +989,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1005,8 +1005,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1022,8 +1022,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR,
            1>(o_data);
@@ -1038,8 +1038,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1055,8 +1055,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR,
            1>(i_data);
@@ -1072,8 +1072,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR,
            1>(i_data);
@@ -1089,8 +1089,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1105,8 +1105,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1122,8 +1122,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR,
            1>(o_data);
@@ -1138,8 +1138,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1155,8 +1155,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR,
            1>(i_data);
@@ -1172,8 +1172,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR,
            1>(i_data);
@@ -1189,8 +1189,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1205,8 +1205,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1222,8 +1222,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR,
            1>(o_data);
@@ -1238,8 +1238,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1255,8 +1255,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR,
            1>(i_data);
@@ -1273,8 +1273,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR,
            1>(i_data);
@@ -1290,8 +1290,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1306,8 +1306,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1323,8 +1323,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR,
            1>(o_data);
@@ -1339,8 +1339,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1356,8 +1356,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR,
            1>(i_data);
@@ -1374,8 +1374,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR,
            1>(i_data);
@@ -1391,8 +1391,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1407,8 +1407,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1424,8 +1424,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR,
            1>(o_data);
@@ -1440,8 +1440,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1457,8 +1457,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR,
            1>(i_data);
@@ -1475,8 +1475,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR,
            1>(i_data);
@@ -1492,8 +1492,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1508,8 +1508,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1525,8 +1525,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR,
            1>(o_data);
@@ -1541,8 +1541,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_LCO_ARRAY_ECC_SUE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1558,8 +1558,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR,
            1>(i_data);
@@ -1575,8 +1575,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR,
            1>(i_data);
@@ -1592,8 +1592,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1608,8 +1608,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1625,8 +1625,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR,
            1>(o_data);
@@ -1641,8 +1641,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_CE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1658,8 +1658,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR,
            1>(i_data);
@@ -1675,8 +1675,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR,
            1>(i_data);
@@ -1692,8 +1692,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1708,8 +1708,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1725,8 +1725,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR,
            1>(o_data);
@@ -1741,8 +1741,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INBD_ARRAY_ECC_UE_FIR>();
 #ifdef SCOM_CHECKING
@@ -1758,8 +1758,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR,
            1>(i_data);
@@ -1775,8 +1775,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR,
            1>(i_data);
@@ -1792,8 +1792,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1808,8 +1808,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_IN
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1825,8 +1825,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR,
            1>(o_data);
@@ -1841,8 +1841,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1858,8 +1858,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR,
            1>(i_data);
@@ -1876,8 +1876,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR,
            1>(i_data);
@@ -1893,8 +1893,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1909,8 +1909,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1926,8 +1926,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR,
            1>(o_data);
@@ -1942,8 +1942,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -1959,8 +1959,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR,
            1>(i_data);
@@ -1977,8 +1977,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR,
            1>(i_data);
@@ -1994,8 +1994,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -2010,8 +2010,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -2027,8 +2027,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR,
            1>(o_data);
@@ -2043,8 +2043,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR>();
 #ifdef SCOM_CHECKING
@@ -2060,8 +2060,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR,
            1>(i_data);
@@ -2077,8 +2077,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.insertFromRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR,
            1>(i_data);
@@ -2094,8 +2094,8 @@ static inline fapi2::buffer<uint64_t>& SET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.setBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR>();
 #ifdef SCOM_CHECKING
@@ -2110,8 +2110,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PB
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return o_data.clearBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR>();
 #ifdef SCOM_CHECKING
@@ -2127,8 +2127,8 @@ static inline fapi2::buffer<uint64_t>& GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.extractToRight<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR,
            1>(o_data);
@@ -2143,8 +2143,8 @@ fapi_try_exit:
 static inline bool GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RWX, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_AND,
-                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WOX_OR));
+    FAPI_TRY(scomt::chkReg(FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW, FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND,
+                           FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR));
 #endif
     return i_data.getBit<FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR>();
 #ifdef SCOM_CHECKING

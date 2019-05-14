@@ -61,36 +61,9 @@ static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK = 22;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK_LEN = 2;
 // eq/reg00011.H
 
-static const uint64_t EPS_FIR_GXSTOP2_MASK_REG = 0x20040015ull;
-
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP2_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// eq/reg00011.H
-
-static const uint64_t EPS_FIR_LOCAL_MASK_RW = 0x2004000dull;
-static const uint64_t EPS_FIR_LOCAL_MASK_WO_AND = 0x2004000eull;
-static const uint64_t EPS_FIR_LOCAL_MASK_WO_OR = 0x2004000full;
+static const uint64_t EPS_FIR_LOCAL_MASK_RW = 0x20040103ull;
+static const uint64_t EPS_FIR_LOCAL_MASK_WO_AND = 0x20040104ull;
+static const uint64_t EPS_FIR_LOCAL_MASK_WO_OR = 0x20040105ull;
 
 static const uint32_t EPS_FIR_LOCAL_MASK_00 = 0;
 static const uint32_t EPS_FIR_LOCAL_MASK_01 = 1;
@@ -141,6 +114,21 @@ static const uint32_t EPS_FIR_LOCAL_MASK_45 = 45;
 static const uint32_t EPS_FIR_LOCAL_MASK_46 = 46;
 static const uint32_t EPS_FIR_LOCAL_MASK_47 = 47;
 static const uint32_t EPS_FIR_LOCAL_MASK_48 = 48;
+static const uint32_t EPS_FIR_LOCAL_MASK_49 = 49;
+static const uint32_t EPS_FIR_LOCAL_MASK_50 = 50;
+static const uint32_t EPS_FIR_LOCAL_MASK_51 = 51;
+static const uint32_t EPS_FIR_LOCAL_MASK_52 = 52;
+static const uint32_t EPS_FIR_LOCAL_MASK_53 = 53;
+static const uint32_t EPS_FIR_LOCAL_MASK_54 = 54;
+static const uint32_t EPS_FIR_LOCAL_MASK_55 = 55;
+static const uint32_t EPS_FIR_LOCAL_MASK_56 = 56;
+static const uint32_t EPS_FIR_LOCAL_MASK_57 = 57;
+static const uint32_t EPS_FIR_LOCAL_MASK_58 = 58;
+static const uint32_t EPS_FIR_LOCAL_MASK_59 = 59;
+static const uint32_t EPS_FIR_LOCAL_MASK_60 = 60;
+static const uint32_t EPS_FIR_LOCAL_MASK_61 = 61;
+static const uint32_t EPS_FIR_LOCAL_MASK_62 = 62;
+static const uint32_t EPS_FIR_LOCAL_MASK_63 = 63;
 // eq/reg00011.H
 
 static const uint64_t EPS_THERM_WSUB2_CONTROL_REG = 0x20050032ull;
@@ -213,62 +201,80 @@ static const uint32_t L3TRA2_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L3TRA2_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 // eq/reg00011.H
 
-static const uint64_t LOCAL_FIR_RWX = 0x2004000aull;
-static const uint64_t LOCAL_FIR_WOX_AND = 0x2004000bull;
-static const uint64_t LOCAL_FIR_WOX_OR = 0x2004000cull;
+static const uint64_t LOCAL_FIR_RW = 0x20040100ull;
+static const uint64_t LOCAL_FIR_WO_AND = 0x20040101ull;
+static const uint64_t LOCAL_FIR_WO_OR = 0x20040102ull;
 
-static const uint32_t LOCAL_FIR_00 = 0;
-static const uint32_t LOCAL_FIR_01 = 1;
-static const uint32_t LOCAL_FIR_02 = 2;
-static const uint32_t LOCAL_FIR_03 = 3;
-static const uint32_t LOCAL_FIR_04 = 4;
-static const uint32_t LOCAL_FIR_05 = 5;
-static const uint32_t LOCAL_FIR_06 = 6;
-static const uint32_t LOCAL_FIR_07 = 7;
-static const uint32_t LOCAL_FIR_08 = 8;
-static const uint32_t LOCAL_FIR_09 = 9;
-static const uint32_t LOCAL_FIR_10 = 10;
-static const uint32_t LOCAL_FIR_11 = 11;
-static const uint32_t LOCAL_FIR_12 = 12;
-static const uint32_t LOCAL_FIR_13 = 13;
-static const uint32_t LOCAL_FIR_14 = 14;
-static const uint32_t LOCAL_FIR_15 = 15;
-static const uint32_t LOCAL_FIR_16 = 16;
-static const uint32_t LOCAL_FIR_17 = 17;
-static const uint32_t LOCAL_FIR_18 = 18;
-static const uint32_t LOCAL_FIR_19 = 19;
-static const uint32_t LOCAL_FIR_20 = 20;
-static const uint32_t LOCAL_FIR_21 = 21;
-static const uint32_t LOCAL_FIR_22 = 22;
-static const uint32_t LOCAL_FIR_23 = 23;
-static const uint32_t LOCAL_FIR_24 = 24;
-static const uint32_t LOCAL_FIR_25 = 25;
-static const uint32_t LOCAL_FIR_26 = 26;
-static const uint32_t LOCAL_FIR_27 = 27;
-static const uint32_t LOCAL_FIR_28 = 28;
-static const uint32_t LOCAL_FIR_29 = 29;
-static const uint32_t LOCAL_FIR_30 = 30;
-static const uint32_t LOCAL_FIR_31 = 31;
-static const uint32_t LOCAL_FIR_32 = 32;
-static const uint32_t LOCAL_FIR_33 = 33;
-static const uint32_t LOCAL_FIR_34 = 34;
-static const uint32_t LOCAL_FIR_35 = 35;
-static const uint32_t LOCAL_FIR_36 = 36;
-static const uint32_t LOCAL_FIR_37 = 37;
-static const uint32_t LOCAL_FIR_38 = 38;
-static const uint32_t LOCAL_FIR_39 = 39;
-static const uint32_t LOCAL_FIR_40 = 40;
-static const uint32_t LOCAL_FIR_41 = 41;
-static const uint32_t LOCAL_FIR_42 = 42;
-static const uint32_t LOCAL_FIR_43 = 43;
-static const uint32_t LOCAL_FIR_44 = 44;
-static const uint32_t LOCAL_FIR_45 = 45;
-static const uint32_t LOCAL_FIR_46 = 46;
-static const uint32_t LOCAL_FIR_47 = 47;
-static const uint32_t LOCAL_FIR_48 = 48;
+static const uint32_t LOCAL_FIR_CFIR = 0;
+static const uint32_t LOCAL_FIR_CPLT_CTRL = 1;
+static const uint32_t LOCAL_FIR_CC_PCB = 2;
+static const uint32_t LOCAL_FIR_CC_OTHERS = 3;
+static const uint32_t LOCAL_FIR_IN04 = 4;
+static const uint32_t LOCAL_FIR_IN05 = 5;
+static const uint32_t LOCAL_FIR_IN06 = 6;
+static const uint32_t LOCAL_FIR_IN07 = 7;
+static const uint32_t LOCAL_FIR_IN08 = 8;
+static const uint32_t LOCAL_FIR_IN09 = 9;
+static const uint32_t LOCAL_FIR_IN10 = 10;
+static const uint32_t LOCAL_FIR_IN11 = 11;
+static const uint32_t LOCAL_FIR_IN12 = 12;
+static const uint32_t LOCAL_FIR_IN13 = 13;
+static const uint32_t LOCAL_FIR_IN14 = 14;
+static const uint32_t LOCAL_FIR_IN15 = 15;
+static const uint32_t LOCAL_FIR_IN16 = 16;
+static const uint32_t LOCAL_FIR_IN17 = 17;
+static const uint32_t LOCAL_FIR_IN18 = 18;
+static const uint32_t LOCAL_FIR_IN19 = 19;
+static const uint32_t LOCAL_FIR_IN20 = 20;
+static const uint32_t LOCAL_FIR_IN21 = 21;
+static const uint32_t LOCAL_FIR_IN22 = 22;
+static const uint32_t LOCAL_FIR_IN23 = 23;
+static const uint32_t LOCAL_FIR_IN24 = 24;
+static const uint32_t LOCAL_FIR_IN25 = 25;
+static const uint32_t LOCAL_FIR_IN26 = 26;
+static const uint32_t LOCAL_FIR_IN27 = 27;
+static const uint32_t LOCAL_FIR_IN28 = 28;
+static const uint32_t LOCAL_FIR_IN29 = 29;
+static const uint32_t LOCAL_FIR_IN30 = 30;
+static const uint32_t LOCAL_FIR_IN31 = 31;
+static const uint32_t LOCAL_FIR_IN32 = 32;
+static const uint32_t LOCAL_FIR_IN33 = 33;
+static const uint32_t LOCAL_FIR_IN34 = 34;
+static const uint32_t LOCAL_FIR_IN35 = 35;
+static const uint32_t LOCAL_FIR_IN36 = 36;
+static const uint32_t LOCAL_FIR_IN37 = 37;
+static const uint32_t LOCAL_FIR_IN38 = 38;
+static const uint32_t LOCAL_FIR_IN39 = 39;
+static const uint32_t LOCAL_FIR_IN40 = 40;
+static const uint32_t LOCAL_FIR_IN41 = 41;
+static const uint32_t LOCAL_FIR_IN42 = 42;
+static const uint32_t LOCAL_FIR_IN43 = 43;
+static const uint32_t LOCAL_FIR_IN44 = 44;
+static const uint32_t LOCAL_FIR_IN45 = 45;
+static const uint32_t LOCAL_FIR_IN46 = 46;
+static const uint32_t LOCAL_FIR_IN47 = 47;
+static const uint32_t LOCAL_FIR_IN48 = 48;
+static const uint32_t LOCAL_FIR_IN49 = 49;
+static const uint32_t LOCAL_FIR_IN50 = 50;
+static const uint32_t LOCAL_FIR_IN51 = 51;
+static const uint32_t LOCAL_FIR_IN52 = 52;
+static const uint32_t LOCAL_FIR_IN53 = 53;
+static const uint32_t LOCAL_FIR_IN54 = 54;
+static const uint32_t LOCAL_FIR_IN55 = 55;
+static const uint32_t LOCAL_FIR_IN56 = 56;
+static const uint32_t LOCAL_FIR_IN57 = 57;
+static const uint32_t LOCAL_FIR_IN58 = 58;
+static const uint32_t LOCAL_FIR_IN59 = 59;
+static const uint32_t LOCAL_FIR_IN60 = 60;
+static const uint32_t LOCAL_FIR_IN61 = 61;
+static const uint32_t LOCAL_FIR_IN62 = 62;
+static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 // eq/reg00011.H
 
-static const uint64_t QME_PCBQBI = 0x200e003cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_PCBQBI_PPE = 0x00000006c00003c0ull;
+static const uint64_t QME_PCBQBI_RO = 0x200e003cull;
 
 static const uint32_t QME_PCBQBI_ENTRY_VALID = 0;
 static const uint32_t QME_PCBQBI_MERGING_SCHEME = 2;
@@ -280,7 +286,10 @@ static const uint32_t QME_PCBQBI_ADDR = 16;
 static const uint32_t QME_PCBQBI_ADDR_LEN = 16;
 // eq/reg00011.H
 
-static const uint64_t QME_RCPTR = 0x200e0188ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_RCPTR_PPE = 0x00000006c0001880ull;
+static const uint64_t QME_RCPTR_SCOM = 0x200e0188ull;
 
 static const uint32_t QME_RCPTR_TARGET_PSTATE = 0;
 static const uint32_t QME_RCPTR_TARGET_PSTATE_LEN = 8;
@@ -289,7 +298,10 @@ static const uint32_t QME_RCPTR_TARGET_INDEX = 59;
 static const uint32_t QME_RCPTR_TARGET_INDEX_LEN = 5;
 // eq/reg00011.H
 
-static const uint64_t QME_SCOM_XIMEM = 0x200e021cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIMEM_PPE = 0x00000006c00021c0ull;
+static const uint64_t QME_SCOM_XIMEM_RO = 0x200e021cull;
 
 static const uint32_t QME_SCOM_XIMEM_ADDR = 0;
 static const uint32_t QME_SCOM_XIMEM_ADDR_LEN = 32;
@@ -305,7 +317,10 @@ static const uint32_t QME_SCOM_XIMEM_IFETCH_PENDING = 62;
 static const uint32_t QME_SCOM_XIMEM_DATAOP_PENDING = 63;
 // eq/reg00011.H
 
-static const uint64_t QME_SCOM_XIVDR30 = 0x200e029cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIVDR30_PPE = 0x00000006c00029c0ull;
+static const uint64_t QME_SCOM_XIVDR30_RO = 0x200e029cull;
 
 static const uint32_t QME_SCOM_XIVDR30_0 = 0;
 static const uint32_t QME_SCOM_XIVDR30_0_LEN = 32;
@@ -313,7 +328,68 @@ static const uint32_t QME_SCOM_XIVDR30_1 = 32;
 static const uint32_t QME_SCOM_XIVDR30_1_LEN = 32;
 // eq/reg00011.H
 
-static const uint64_t QME_TTSR = 0x200e0138ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_TTSR_PPE = 0x00000006c0001380ull;
+static const uint64_t QME_TTSR_RO_CLRPART = 0x200e0138ull;
+// eq/reg00011.H
+
+static const uint64_t RECOV = 0x20040001ull;
+
+static const uint32_t RECOV_ANY_RECOV = 0;
+static const uint32_t RECOV_RESERVED1R = 1;
+static const uint32_t RECOV_RECOV_ANY_LOCAL_XSTOP = 2;
+static const uint32_t RECOV_RESERVED3R = 3;
+static const uint32_t RECOV_RECOV_PERV = 4;
+static const uint32_t RECOV_RECOV_IN05 = 5;
+static const uint32_t RECOV_RECOV_IN06 = 6;
+static const uint32_t RECOV_RECOV_IN07 = 7;
+static const uint32_t RECOV_RECOV_IN08 = 8;
+static const uint32_t RECOV_RECOV_IN09 = 9;
+static const uint32_t RECOV_RECOV_IN10 = 10;
+static const uint32_t RECOV_RECOV_IN11 = 11;
+static const uint32_t RECOV_RECOV_IN12 = 12;
+static const uint32_t RECOV_RECOV_IN13 = 13;
+static const uint32_t RECOV_RECOV_IN14 = 14;
+static const uint32_t RECOV_RECOV_IN15 = 15;
+static const uint32_t RECOV_RECOV_IN16 = 16;
+static const uint32_t RECOV_RECOV_IN17 = 17;
+static const uint32_t RECOV_RECOV_IN18 = 18;
+static const uint32_t RECOV_RECOV_IN19 = 19;
+static const uint32_t RECOV_RECOV_IN20 = 20;
+static const uint32_t RECOV_RECOV_IN21 = 21;
+static const uint32_t RECOV_RECOV_IN22 = 22;
+static const uint32_t RECOV_RECOV_IN23 = 23;
+static const uint32_t RECOV_RECOV_IN24 = 24;
+static const uint32_t RECOV_RECOV_IN25 = 25;
+static const uint32_t RECOV_RECOV_IN26 = 26;
+static const uint32_t RECOV_RECOV_IN27 = 27;
+static const uint32_t RECOV_RECOV_IN28 = 28;
+static const uint32_t RECOV_RECOV_IN29 = 29;
+static const uint32_t RECOV_RECOV_IN30 = 30;
+static const uint32_t RECOV_RECOV_IN31 = 31;
+static const uint32_t RECOV_RECOV_IN32 = 32;
+static const uint32_t RECOV_RECOV_IN33 = 33;
+static const uint32_t RECOV_RECOV_IN34 = 34;
+static const uint32_t RECOV_RECOV_IN35 = 35;
+static const uint32_t RECOV_RECOV_IN36 = 36;
+static const uint32_t RECOV_RECOV_IN37 = 37;
+static const uint32_t RECOV_RECOV_IN38 = 38;
+static const uint32_t RECOV_RECOV_IN39 = 39;
+static const uint32_t RECOV_RECOV_IN40 = 40;
+static const uint32_t RECOV_RECOV_IN41 = 41;
+static const uint32_t RECOV_RECOV_IN42 = 42;
+static const uint32_t RECOV_RECOV_IN43 = 43;
+static const uint32_t RECOV_RECOV_IN44 = 44;
+static const uint32_t RECOV_RECOV_IN45 = 45;
+static const uint32_t RECOV_RECOV_IN46 = 46;
+static const uint32_t RECOV_RECOV_IN47 = 47;
+static const uint32_t RECOV_RECOV_IN48 = 48;
+static const uint32_t RECOV_RECOV_IN49 = 49;
+static const uint32_t RECOV_RECOV_IN50 = 50;
+static const uint32_t RECOV_RECOV_IN51 = 51;
+static const uint32_t RECOV_RECOV_IN52 = 52;
+static const uint32_t RECOV_RECOV_IN53 = 53;
 // eq/reg00011.H
 
 }

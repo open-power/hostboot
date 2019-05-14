@@ -3416,11 +3416,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3430,14 +3430,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3445,27 +3445,27 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3475,14 +3475,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3490,27 +3490,27 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3520,14 +3520,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3535,14 +3535,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3551,11 +3552,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3565,14 +3566,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3580,27 +3581,27 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
 
-
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3610,14 +3611,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3625,14 +3626,60 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1A_DATA_AREA_2_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3641,12 +3688,420 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M1B_DATA_AREA_8_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2A_DATA_AREA_11_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_FSI_BYTE,
+                           FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_M2B_DATA_AREA_4_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI(const fapi2::Target<K, M, V>&
         i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3656,14 +4111,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI(const fapi2::Target<K, M, V>&
         i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3671,14 +4126,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI(const fapi2::Target<K, M, V>&
         i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3686,12 +4142,58 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX(const fapi2::Target<K, M, V>&
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE(
+    const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE(
+    const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE(
+    const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW(const fapi2::Target<K, M, V>&
         i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3701,14 +4203,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX(const fapi2::Target<K, M, V>&
-        i_target, fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3716,14 +4218,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX(const fapi2::Target<K, M, V>&
-        i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3736,7 +4239,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A,
            FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A_LEN>(i_data);
@@ -3753,7 +4257,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMA
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A,
            FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A_LEN>(i_data);
@@ -3770,7 +4275,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMA
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_ROX, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A,
            FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_A_M1HC1A_MAILBOX_1_HEADER_COMMAND_A_LEN>(o_data);
@@ -3783,12 +4289,12 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX(
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI(
     const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3798,14 +4304,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX(
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3813,15 +4319,15 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX(
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX,
-                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3829,12 +4335,12 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX(
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -3844,14 +4350,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX(
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3859,15 +4365,61 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX(
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX,
-                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO(
+    const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO(const fapi2::Target<K, M, V>&
+        i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO(const fapi2::Target<K, M, V>&
+        i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -3880,8 +4432,8 @@ SET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX,
-                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B,
            FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B_LEN>(i_data);
@@ -3898,8 +4450,8 @@ SET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX,
-                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B,
            FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B_LEN>(i_data);
@@ -3916,8 +4468,8 @@ GET_FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_ROX,
-                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI,
+                           FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_FSI_BYTE, FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_RO));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B,
            FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B_LEN>(o_data);
@@ -3926,6 +4478,96 @@ fapi_try_exit:
     FAPI_ERR("Invalid dial access FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_1_B_M2HC1B_MAILBOX_2_HEADER_COMMAND_1_B chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL7_FSI;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL7_FSI;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
 #endif
 }
 
@@ -3964,7 +4606,8 @@ static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_ROOT_CTRL7_RW(const fapi2::Ta
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return fapi2::putScom(i_target, FSXCOMP_FSXLOG_ROOT_CTRL7_RW, i_data);
 #ifdef SCOM_CHECKING
@@ -3979,7 +4622,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -3995,7 +4639,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4011,7 +4656,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4026,7 +4672,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4042,7 +4689,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4057,7 +4705,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM0_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4073,7 +4722,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4089,7 +4739,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4105,7 +4756,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4120,7 +4772,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4136,7 +4789,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4151,7 +4805,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM1_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4167,7 +4822,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4183,7 +4839,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4199,7 +4856,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4214,7 +4872,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4230,7 +4889,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4245,7 +4905,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM2_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4261,7 +4922,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4277,7 +4939,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4293,7 +4956,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4308,7 +4972,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4324,7 +4989,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4339,7 +5005,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM3_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4355,7 +5022,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4371,7 +5039,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4387,7 +5056,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4402,7 +5072,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4418,7 +5089,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4433,7 +5105,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4449,7 +5122,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4465,7 +5139,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4481,7 +5156,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4496,7 +5172,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4512,7 +5189,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4527,7 +5205,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4543,7 +5222,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4559,7 +5239,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4575,7 +5256,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4590,7 +5272,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4606,7 +5289,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4621,7 +5305,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4637,7 +5322,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4653,7 +5339,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4669,7 +5356,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4684,7 +5372,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4700,7 +5389,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4715,7 +5405,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4731,7 +5422,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4747,7 +5439,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4763,7 +5456,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4778,7 +5472,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4794,7 +5489,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4809,7 +5505,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM8_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4825,7 +5522,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4841,7 +5539,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4857,7 +5556,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4872,7 +5572,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4888,7 +5589,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4903,7 +5605,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEM9_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4919,7 +5622,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4935,7 +5639,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -4951,7 +5656,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4966,7 +5672,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -4982,7 +5689,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -4997,7 +5705,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMA_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5013,7 +5722,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5029,7 +5739,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5045,7 +5756,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5060,7 +5772,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5076,7 +5789,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5091,7 +5805,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMB_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5107,7 +5822,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5123,7 +5839,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5139,7 +5856,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5154,7 +5872,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5170,7 +5889,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5185,7 +5905,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMC_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5201,7 +5922,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5217,7 +5939,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5233,7 +5956,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5248,7 +5972,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5264,7 +5989,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5279,7 +6005,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMD_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5295,7 +6022,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5311,7 +6039,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5327,7 +6056,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5342,7 +6072,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5358,7 +6089,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5373,7 +6105,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEME_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5389,7 +6122,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5405,7 +6139,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5421,7 +6156,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5436,7 +6172,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5452,7 +6189,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5467,7 +6205,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_MEMF_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5483,7 +6222,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5499,7 +6239,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5515,7 +6256,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5530,7 +6272,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5546,7 +6289,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5561,7 +6305,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5577,7 +6322,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5593,7 +6339,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5609,7 +6356,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5624,7 +6372,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5640,7 +6389,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5655,7 +6405,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP0B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5671,7 +6422,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5687,7 +6439,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5703,7 +6456,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5718,7 +6472,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5734,7 +6489,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5749,7 +6505,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3A_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5765,7 +6522,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5781,7 +6539,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REF
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5797,7 +6556,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REF
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5812,7 +6572,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_R
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5828,7 +6589,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REF
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5843,7 +6605,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP3B_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5859,7 +6622,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5875,7 +6639,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5891,7 +6656,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5906,7 +6672,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_RE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5922,7 +6689,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFC
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -5937,7 +6705,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP4_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -5953,7 +6722,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5969,7 +6739,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -5985,7 +6756,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6000,7 +6772,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_RE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6016,7 +6789,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFC
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -6031,7 +6805,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP5_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6047,7 +6822,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -6063,7 +6839,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -6079,7 +6856,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6094,7 +6872,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_RE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6110,7 +6889,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFC
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -6125,7 +6905,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP6_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6141,7 +6922,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -6157,7 +6939,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFC
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC,
            1>(i_data);
@@ -6173,7 +6956,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFC
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6188,7 +6972,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_RE
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6204,7 +6989,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFC
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC,
            1>(o_data);
@@ -6219,7 +7005,8 @@ fapi_try_exit:
 static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_TP_OP7_REFCLK_DRVR_EN_DC>();
 #ifdef SCOM_CHECKING
@@ -6235,7 +7022,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6252,7 +7040,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6268,7 +7057,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6283,7 +7073,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6299,7 +7090,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6315,7 +7107,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_24_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6331,7 +7124,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6348,7 +7142,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6364,7 +7159,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6379,7 +7175,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6395,7 +7192,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6411,7 +7209,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_25_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6427,7 +7226,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6444,7 +7244,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6460,7 +7261,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6475,7 +7277,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6491,7 +7294,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6507,7 +7311,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_26_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6523,7 +7328,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6540,7 +7346,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6556,7 +7363,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6571,7 +7379,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6587,7 +7396,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6603,7 +7413,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_27_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6619,7 +7430,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6636,7 +7448,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6652,7 +7465,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6667,7 +7481,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6683,7 +7498,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6699,7 +7515,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_28_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6715,7 +7532,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6732,7 +7550,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6748,7 +7567,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6763,7 +7583,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6779,7 +7600,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6795,7 +7617,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_29_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6811,7 +7634,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6828,7 +7652,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6844,7 +7669,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6859,7 +7685,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6875,7 +7702,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6891,7 +7719,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_30_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6907,7 +7736,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6924,7 +7754,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(i_data);
@@ -6940,7 +7771,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.setBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6955,7 +7787,8 @@ static inline fapi2::buffer<uint64_t>& CLEAR_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return o_data.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6971,7 +7804,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL,
            1>(o_data);
@@ -6987,7 +7821,8 @@ static inline bool GET_FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CL
     fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_ROOT_CTRL7_FSI, FSXCOMP_FSXLOG_ROOT_CTRL7_FSI_BYTE,
+                           FSXCOMP_FSXLOG_ROOT_CTRL7_RW));
 #endif
     return i_data.getBit<FSXCOMP_FSXLOG_ROOT_CTRL7_ROOT_CTRL7_31_SPARE_RESONANT_CLOCKING_CONTROL>();
 #ifdef SCOM_CHECKING
@@ -6999,11 +7834,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -7013,14 +7848,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX;
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI;
 #endif
-    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX, o_data);
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7028,14 +7863,105 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
 #endif
-    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX, i_data);
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW;
+#endif
+    return fapi2::getScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
+#endif
+    return fapi2::putScom(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -7048,7 +7974,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3_LEN>(i_data);
@@ -7065,7 +7992,8 @@ static inline fapi2::buffer<uint64_t>& SET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
 #endif
     return o_data.insertFromRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3_LEN>(i_data);
@@ -7082,7 +8010,8 @@ static inline fapi2::buffer<uint64_t>& GET_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RWX));
+    FAPI_TRY(scomt::chkReg(FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI_BYTE,
+                           FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW));
 #endif
     return i_data.extractToRight<FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3,
            FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_SR_SCRATCH_REGISTER_3_LEN>(o_data);

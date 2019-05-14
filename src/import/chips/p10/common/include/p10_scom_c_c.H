@@ -35,9 +35,12 @@ namespace c
 {
 
 
+static const uint64_t CPMS_CGCSR_PPE = 0x00000006c001e000ull;
+static const uint64_t CPMS_CGCSR_PPE1 = 0x00000006c001e020ull;
+static const uint64_t CPMS_CGCSR_PPE2 = 0x00000006c001e030ull;
 static const uint64_t CPMS_CGCSR_SCOM = 0x200e0e00ull;
-static const uint64_t CPMS_CGCSR_SCOM1 = 0x200e0e02ull;
-static const uint64_t CPMS_CGCSR_SCOM2 = 0x200e0e03ull;
+static const uint64_t CPMS_CGCSR_WO_CLEAR = 0x200e0e02ull;
+static const uint64_t CPMS_CGCSR_WO_OR = 0x200e0e03ull;
 
 static const uint32_t CPMS_CGCSR_L3_CLK_SYNC_ENABLE = 0;
 static const uint32_t CPMS_CGCSR_CL2_CLK_SYNC_ENABLE = 1;
@@ -65,7 +68,7 @@ static const uint32_t EC_PC_COMMON_SPR_SCOMC_MODE_CX_SCOMC_LEN = 7;
 static const uint64_t EC_PC_PMU_PMUC_SRC_MASK = 0x20020407ull;
 // c/reg00012.H
 
-static const uint64_t EC_PC_SPURR_FREQ_SCALE = 0x20020aa0ull;
+static const uint64_t EC_PC_SPURR_FREQ_SCALE = 0x200204a0ull;
 
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_OVERRIDE_EN = 0;
 static const uint32_t EC_PC_SPURR_FREQ_SCALE_FACTOR = 1;

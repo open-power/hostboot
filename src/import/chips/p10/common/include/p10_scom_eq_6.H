@@ -86,33 +86,6 @@ static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x200183e3ull;
 static const uint64_t EPS_DBG_INST2_COND_REG_3 = 0x200183e6ull;
 // eq/reg00006.H
 
-static const uint64_t EPS_FIR_GXSTOP0_MASK_REG = 0x20040013ull;
-
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
-// eq/reg00006.H
-
 static const uint64_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ = 0x2005001cull;
 
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE = 0;
@@ -173,7 +146,9 @@ static const uint32_t L3TRA3_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_2_B_LEN = 24;
 // eq/reg00006.H
 
-static const uint64_t LOCAL_XSTOP_MASK = 0x20040019ull;
+static const uint64_t LOCAL_XSTOP_MASK_RW = 0x20040043ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x20040063ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x20040015ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -192,7 +167,16 @@ static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
 // eq/reg00006.H
 
-static const uint64_t QME_PPEBAR = 0x200e0050ull;
+static const uint64_t LOCAL_XSTOP_UNMASKED = 0x20040013ull;
+
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+// eq/reg00006.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_PPEBAR_PPE = 0x00000006c0000500ull;
+static const uint64_t QME_PPEBAR_RW = 0x200e0050ull;
 
 static const uint32_t QME_PPEBAR_BASE = 8;
 static const uint32_t QME_PPEBAR_BASE_LEN = 36;
@@ -200,13 +184,19 @@ static const uint32_t QME_PPEBAR_SIZE = 61;
 static const uint32_t QME_PPEBAR_SIZE_LEN = 3;
 // eq/reg00006.H
 
-static const uint64_t QME_RCTAR2 = 0x200e0198ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_RCTAR2_PPE = 0x00000006c0001980ull;
+static const uint64_t QME_RCTAR2_RW = 0x200e0198ull;
 
 static const uint32_t QME_RCTAR2_QME_RCTAR2_DATA = 0;
 static const uint32_t QME_RCTAR2_QME_RCTAR2_DATA_LEN = 64;
 // eq/reg00006.H
 
-static const uint64_t QME_SCOM_PBTXTR3 = 0x200e0043ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_PBTXTR3_PPE = 0x00000006c0000430ull;
+static const uint64_t QME_SCOM_PBTXTR3_RW = 0x200e0043ull;
 
 static const uint32_t QME_SCOM_PBTXTR3__VALID = 0;
 static const uint32_t QME_SCOM_PBTXTR3__VALID_LEN = 8;
@@ -228,7 +218,10 @@ static const uint32_t QME_SCOM_PBTXTR3_7 = 36;
 static const uint32_t QME_SCOM_PBTXTR3_7_LEN = 4;
 // eq/reg00006.H
 
-static const uint64_t QME_SCOM_XIRAMEDR = 0x200e0210ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIRAMEDR_PPE = 0x00000006c0002100ull;
+static const uint64_t QME_SCOM_XIRAMEDR_SCOM = 0x200e0210ull;
 
 static const uint32_t QME_SCOM_XIRAMEDR_IR = 0;
 static const uint32_t QME_SCOM_XIRAMEDR_IR_LEN = 32;
@@ -236,7 +229,10 @@ static const uint32_t QME_SCOM_XIRAMEDR_EDR = 32;
 static const uint32_t QME_SCOM_XIRAMEDR_EDR_LEN = 32;
 // eq/reg00006.H
 
-static const uint64_t QME_SCOM_XIVDR2 = 0x200e0284ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIVDR2_PPE = 0x00000006c0002840ull;
+static const uint64_t QME_SCOM_XIVDR2_RO = 0x200e0284ull;
 
 static const uint32_t QME_SCOM_XIVDR2_2 = 0;
 static const uint32_t QME_SCOM_XIVDR2_2_LEN = 32;

@@ -63,15 +63,6 @@ static const uint32_t REGS_PBAIBTXDCR_REG_R = 44;
 static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
 // phb/reg00015.H
 
-static const uint64_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL = 0x08010904ull;
-
-static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_ENABLE = 0;
-static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
-static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
-static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
-static const uint32_t RSB_REGS_UVI_PHB4_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
-// phb/reg00015.H
-
 }
 }
 #include "phb/reg00015.H"

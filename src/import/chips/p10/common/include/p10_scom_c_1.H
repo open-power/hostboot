@@ -94,23 +94,23 @@ static const uint32_t L2TRA_TR1_CONFIG_5_D = 24;
 static const uint32_t L2TRA_TR1_CONFIG_5_D_LEN = 24;
 // c/reg00001.H
 
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_RWX = 0x20010600ull;
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_WOX_AND = 0x20010601ull;
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_WOX_OR = 0x20010602ull;
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_RW = 0x20010600ull;
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_AND = 0x20010601ull;
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_OR = 0x20010602ull;
 
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_RDDSP_SEGR_MODE_ALL_MEM_UNAVAIL_ERR = 0;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR = 1;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE2 = 2;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_SN_TOPO_TABLE_ERR = 2;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_DRAM_POS_WORDLINE_FAIL = 3;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_RD_CE_DET_NOT_LINDEL_REQ = 4;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_RD_UE_DET = 5;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_RD_SUE_DET = 6;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_CE_FROM_PB = 7;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_UE_FROM_PB = 8;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_SUE_FROM_PB = 9;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_CE_FROM_L2 = 10;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_UE_FROM_L2 = 11;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CAC_WR_DATA_SUE_FROM_L2_OR_WIHPC = 12;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_CE_DET_NOT_LINDEL_REQ = 4;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_UE_DET = 5;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_SUE_DET = 6;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_PB = 7;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_PB = 8;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_PB = 9;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_L2_OR_WIHPC = 10;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_L2_OR_WIHPC = 11;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_L2_OR_WIHPC = 12;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_CE_DET = 13;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_UE_DET = 14;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_PHANTOM_ERROR = 15;
@@ -187,7 +187,8 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23_LEN = 4;
 // c/reg00001.H
 
-static const uint64_t QME_DCSR = 0x200e0870ull;
+static const uint64_t QME_DCSR_PPE = 0x00000006c0018700ull;
+static const uint64_t QME_DCSR_WO = 0x200e0870ull;
 
 static const uint32_t QME_DCSR_PLS_T0 = 0;
 static const uint32_t QME_DCSR_PLS_T0_LEN = 4;
@@ -208,19 +209,22 @@ static const uint32_t QME_DCSR_SL_T3_LEN = 2;
 static const uint32_t QME_DCSR_SRESET_MSR_S = 24;
 // c/reg00001.H
 
-static const uint64_t QME_PMCRS = 0x200e0860ull;
+static const uint64_t QME_PMCRS_PPE = 0x00000006c0018600ull;
+static const uint64_t QME_PMCRS_RW = 0x200e0860ull;
 
 static const uint32_t QME_PMCRS_QME_PMCRS_DATA = 0;
 static const uint32_t QME_PMCRS_QME_PMCRS_DATA_LEN = 64;
 // c/reg00001.H
 
-static const uint64_t QME_PMSRS = 0x200e0864ull;
+static const uint64_t QME_PMSRS_PPE = 0x00000006c0018640ull;
+static const uint64_t QME_PMSRS_RW = 0x200e0864ull;
 
 static const uint32_t QME_PMSRS_QME_PMSRS_DATA = 0;
 static const uint32_t QME_PMSRS_QME_PMSRS_DATA_LEN = 64;
 // c/reg00001.H
 
-static const uint64_t QME_PSCRS2 = 0x200e0858ull;
+static const uint64_t QME_PSCRS2_PPE = 0x00000006c0018580ull;
+static const uint64_t QME_PSCRS2_RW = 0x200e0858ull;
 
 static const uint32_t QME_PSCRS2_DPDES_EXIT_ENABLE = 0;
 static const uint32_t QME_PSCRS2_SD = 1;

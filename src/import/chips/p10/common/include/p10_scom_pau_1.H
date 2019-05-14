@@ -35,39 +35,10 @@ namespace pau
 {
 
 
-static const uint64_t AME_AME0_MISC_DEBUG0_CONFIG = 0x10010bc4ull;
-
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B0_SEL = 0;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B0_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B1_SEL = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B1_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B2_SEL = 10;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B2_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B3_SEL = 15;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B3_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B4_SEL = 20;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B4_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B5_SEL = 25;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B5_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B6_SEL = 30;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B6_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B7_SEL = 35;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B7_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B8_SEL = 40;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B8_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B9_SEL = 45;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B9_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B10_SEL = 50;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_B10_SEL_LEN = 5;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_RESERVED = 55;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_RESERVED_LEN = 8;
-static const uint32_t AME_AME0_MISC_DEBUG0_CONFIG_ENABLE = 63;
-// pau/reg00001.H
-
 static const uint64_t AME_AME1_MISC_CERR_RPT_MASK = 0x10010bd9ull;
 
-static const uint32_t AME_AME1_MISC_CERR_RPT_MASK_CONFIG_CERR_RPT_MASK = 48;
-static const uint32_t AME_AME1_MISC_CERR_RPT_MASK_CONFIG_CERR_RPT_MASK_LEN = 16;
+static const uint32_t AME_AME1_MISC_CERR_RPT_MASK_CONFIG_CERR_RPT_MASK = 47;
+static const uint32_t AME_AME1_MISC_CERR_RPT_MASK_CONFIG_CERR_RPT_MASK_LEN = 17;
 // pau/reg00001.H
 
 static const uint64_t AME_ATL_MISC_CERR_RPT_CONTROL = 0x10010bf9ull;
@@ -582,17 +553,14 @@ static const uint32_t MISC_REGS_HOLD_NDL0_STALL = 0;
 static const uint32_t MISC_REGS_HOLD_NDL0_NOSTALL = 1;
 static const uint32_t MISC_REGS_HOLD_NDL1_STALL = 2;
 static const uint32_t MISC_REGS_HOLD_NDL1_NOSTALL = 3;
-static const uint32_t MISC_REGS_HOLD_NDL2_STALL = 4;
-static const uint32_t MISC_REGS_HOLD_NDL2_NOSTALL = 5;
-static const uint32_t MISC_REGS_HOLD_NDL3_STALL = 6;
-static const uint32_t MISC_REGS_HOLD_NDL3_NOSTALL = 7;
-static const uint32_t MISC_REGS_HOLD_MISC_RING_ERRP = 8;
-static const uint32_t MISC_REGS_HOLD_MISC_IBAR_ERRP = 9;
-static const uint32_t MISC_REGS_HOLD_MISC_SCOMDAA_ERRP = 10;
-static const uint32_t MISC_REGS_HOLD_MISC_CNTL_ERRP = 11;
-static const uint32_t MISC_REGS_HOLD_RESERVED = 12;
-static const uint32_t MISC_REGS_HOLD_RX00_FAULT = 13;
-static const uint32_t MISC_REGS_HOLD_RX01_FAULT = 14;
+static const uint32_t MISC_REGS_HOLD_MISC_RING_ERRP = 4;
+static const uint32_t MISC_REGS_HOLD_MISC_IBAR_ERRP = 5;
+static const uint32_t MISC_REGS_HOLD_MISC_SCOMDAA_ERRP = 6;
+static const uint32_t MISC_REGS_HOLD_MISC_CNTL_ERRP = 7;
+static const uint32_t MISC_REGS_HOLD_RESERVED = 8;
+static const uint32_t MISC_REGS_HOLD_RX00_FAULT = 9;
+static const uint32_t MISC_REGS_HOLD_RX01_FAULT = 10;
+static const uint32_t MISC_REGS_HOLD_RX20_FAULT = 11;
 // pau/reg00001.H
 
 static const uint64_t NTL1_REGS_CONFIG1 = 0x10010a18ull;

@@ -3364,647 +3364,899 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_EINJ_TARGET(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ,
-           WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_EINJ_TARGET,
+           WRITE_READCFG_CFG_RD_EINJ_TARGET_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_TARGET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_EINJ_TARGET(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ,
-           WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_EINJ_TARGET,
+           WRITE_READCFG_CFG_RD_EINJ_TARGET_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_TARGET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RD_EINJ_TARGET(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ,
-           WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_CFG_RD_EINJ_TARGET,
+           WRITE_READCFG_CFG_RD_EINJ_TARGET_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_ERR_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_TARGET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_EINJ_RATE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL,
-           WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_EINJ_RATE,
+           WRITE_READCFG_CFG_RD_EINJ_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_RATE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_EINJ_RATE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL,
-           WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_EINJ_RATE,
+           WRITE_READCFG_CFG_RD_EINJ_RATE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_RATE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RD_EINJ_RATE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL,
-           WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_CFG_RD_EINJ_RATE,
+           WRITE_READCFG_CFG_RD_EINJ_RATE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DBG_CNTL chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_EINJ_RATE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_SPARE_7(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_6(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_SPARE_7,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_6,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_SPARE_7(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_6(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_SPARE_7,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_6,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_SPARE_7(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_6(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.setBit<WRITE_READCFG_SPARE_7>();
+    return o_data.setBit<WRITE_READCFG_READCFG_RESERVED_6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_SPARE_7(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_READCFG_RESERVED_6(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.clearBit<WRITE_READCFG_SPARE_7>();
+    return o_data.clearBit<WRITE_READCFG_READCFG_RESERVED_6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_SPARE_7(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_6(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_SPARE_7,
+    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_6,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_WRITE_READCFG_SPARE_7(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_WRITE_READCFG_READCFG_RESERVED_6(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.getBit<WRITE_READCFG_SPARE_7>();
+    return i_data.getBit<WRITE_READCFG_READCFG_RESERVED_6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_ND(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_FAIL_ACTION(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_ND,
-           WRITE_READCFG_ECC_RDC_CFG_DLY_ND_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_FAIL_ACTION,
+           WRITE_READCFG_CFG_RD_FAIL_ACTION_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_ND chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_FAIL_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_ND(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RD_FAIL_ACTION(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_ND,
-           WRITE_READCFG_ECC_RDC_CFG_DLY_ND_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RD_FAIL_ACTION,
+           WRITE_READCFG_CFG_RD_FAIL_ACTION_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_ND chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_FAIL_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_DLY_ND(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RD_FAIL_ACTION(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_DLY_ND,
-           WRITE_READCFG_ECC_RDC_CFG_DLY_ND_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_CFG_RD_FAIL_ACTION,
+           WRITE_READCFG_CFG_RD_FAIL_ACTION_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_ND chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RD_FAIL_ACTION chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_SPARE_10_11(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_9_11(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_SPARE_10_11,
-           WRITE_READCFG_SPARE_10_11_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_9_11,
+           WRITE_READCFG_READCFG_RESERVED_9_11_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_10_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_9_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_SPARE_10_11(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_9_11(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_SPARE_10_11,
-           WRITE_READCFG_SPARE_10_11_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_9_11,
+           WRITE_READCFG_READCFG_RESERVED_9_11_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_10_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_9_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_SPARE_10_11(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_9_11(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_SPARE_10_11,
-           WRITE_READCFG_SPARE_10_11_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_9_11,
+           WRITE_READCFG_READCFG_RESERVED_9_11_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_SPARE_10_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_9_11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_1X,
+    return o_data.insertFromRight<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_1X,
+    return o_data.insertFromRight<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.setBit<WRITE_READCFG_ECC_RDC_CFG_DLY_1X>();
+    return o_data.setBit<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.clearBit<WRITE_READCFG_ECC_RDC_CFG_DLY_1X>();
+    return o_data.clearBit<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_DLY_1X,
+    return i_data.extractToRight<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_WRITE_READCFG_ECC_RDC_CFG_DLY_1X(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.getBit<WRITE_READCFG_ECC_RDC_CFG_DLY_1X>();
+    return i_data.getBit<WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_1X chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_MMIO_SUE_BAD_DATA chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RTYFAIL_NO_BD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE,
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RTYFAIL_NO_BD,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RTYFAIL_NO_BD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE,
+    return o_data.insertFromRight<WRITE_READCFG_CFG_RTYFAIL_NO_BD,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_RTYFAIL_NO_BD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.setBit<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE>();
+    return o_data.setBit<WRITE_READCFG_CFG_RTYFAIL_NO_BD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_CFG_RTYFAIL_NO_BD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.clearBit<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE>();
+    return o_data.clearBit<WRITE_READCFG_CFG_RTYFAIL_NO_BD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_RTYFAIL_NO_BD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE,
+    return i_data.extractToRight<WRITE_READCFG_CFG_RTYFAIL_NO_BD,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_WRITE_READCFG_CFG_RTYFAIL_NO_BD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.getBit<WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE>();
+    return i_data.getBit<WRITE_READCFG_CFG_RTYFAIL_NO_BD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_DLY_NULLABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_RTYFAIL_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.setBit<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ>();
+    return o_data.setBit<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.clearBit<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ>();
+    return o_data.clearBit<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ,
+    return i_data.extractToRight<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.getBit<WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ>();
+    return i_data.getBit<WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_RD_PAR_NOT_SEQ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_CAPTURE_1ST_SYNDROME chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3,
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.setBit<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3>();
+    return o_data.setBit<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.clearBit<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3>();
+    return o_data.clearBit<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3,
+    return i_data.extractToRight<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.getBit<WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3>();
+    return i_data.getBit<WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_ECC_RDC_CFG_FIFO_TENURE_3 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_SYNDROME_FIR_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_EICR_PERSIST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_16(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_EICR_PERSIST,
-           WRITE_READCFG_EICR_PERSIST_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_16,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_EICR_PERSIST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_EICR_PERSIST(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_16(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return o_data.insertFromRight<WRITE_READCFG_EICR_PERSIST,
-           WRITE_READCFG_EICR_PERSIST_LEN>(i_data);
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_16,
+           1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_EICR_PERSIST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_EICR_PERSIST(fapi2::buffer<uint64_t>& i_data,
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_16(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.setBit<WRITE_READCFG_READCFG_RESERVED_16>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_READCFG_RESERVED_16(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.clearBit<WRITE_READCFG_READCFG_RESERVED_16>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_16(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(WRITE_READCFG));
 #endif
-    return i_data.extractToRight<WRITE_READCFG_EICR_PERSIST,
-           WRITE_READCFG_EICR_PERSIST_LEN>(o_data);
+    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_16,
+           1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access WRITE_READCFG_EICR_PERSIST chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_WRITE_READCFG_READCFG_RESERVED_16(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.getBit<WRITE_READCFG_READCFG_RESERVED_16>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_BOGUS_NO_BD(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_BOGUS_NO_BD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_BOGUS_NO_BD(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_BOGUS_NO_BD,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_BOGUS_NO_BD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.setBit<WRITE_READCFG_CFG_BOGUS_NO_BD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_CFG_BOGUS_NO_BD(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.clearBit<WRITE_READCFG_CFG_BOGUS_NO_BD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_BOGUS_NO_BD(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.extractToRight<WRITE_READCFG_CFG_BOGUS_NO_BD,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_WRITE_READCFG_CFG_BOGUS_NO_BD(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.getBit<WRITE_READCFG_CFG_BOGUS_NO_BD>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_BOGUS_NO_BD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.setBit<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.clearBit<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.extractToRight<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.getBit<WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_CFG_DO_DUAL_PACKET_ANALYSIS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_19_31(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_19_31,
+           WRITE_READCFG_READCFG_RESERVED_19_31_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_19_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_WRITE_READCFG_READCFG_RESERVED_19_31(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return o_data.insertFromRight<WRITE_READCFG_READCFG_RESERVED_19_31,
+           WRITE_READCFG_READCFG_RESERVED_19_31_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_19_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_WRITE_READCFG_READCFG_RESERVED_19_31(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(WRITE_READCFG));
+#endif
+    return i_data.extractToRight<WRITE_READCFG_READCFG_RESERVED_19_31,
+           WRITE_READCFG_READCFG_RESERVED_19_31_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access WRITE_READCFG_READCFG_RESERVED_19_31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }

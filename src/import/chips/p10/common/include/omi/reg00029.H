@@ -34,6 +34,148 @@ namespace omi
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL;
+#endif
+    return fapi2::getScom(i_target, RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return fapi2::putScom(i_target, RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return o_data.insertFromRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return o_data.insertFromRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return i_data.extractToRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return o_data.insertFromRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return o_data.insertFromRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL));
+#endif
+    return i_data.extractToRight<RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP,
+           RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access RXPACKS_1_RD_2_RX_BIT_REGS_MODE4_PL_PHASE_STEP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_RXPACKS_1_RD_2_RX_BIT_REGS_STAT2_PL(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
@@ -2118,6 +2260,194 @@ static inline fapi2::buffer<uint64_t>& GET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_LANE_QUIESCE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.setBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.clearBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.extractToRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.getBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_MAIN_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.insertFromRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.setBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return o_data.clearBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.extractToRight<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL));
+#endif
+    return i_data.getBit<TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE1_PL_FFE_PKG_EN chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

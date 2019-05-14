@@ -61,6 +61,7 @@ static const uint32_t CFG_NMMU_CTL_SM_TW_RDX_INT_PWC_DIS = 53;
 static const uint32_t CFG_NMMU_CTL_SM_TW_RDX_INT_TLB_DIS = 54;
 static const uint32_t CFG_NMMU_CTL_SM_TW_RDX_PWC_SPLIT_EN = 55;
 static const uint32_t CFG_NMMU_CTL_SM_TW_RDX_PWC_VA_HASH = 56;
+static const uint32_t CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_OVERLAP_EN = 57;
 static const uint32_t CFG_NMMU_CTL_SM_TW_PTE_UPD_INTR_EN = 58;
 static const uint32_t CFG_NMMU_CTL_SM_NCU_SNP_TLBIE_PACING_CNT_EN = 59;
 // nmmu/reg00004.H

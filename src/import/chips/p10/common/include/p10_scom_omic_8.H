@@ -35,9 +35,7 @@ namespace omic
 {
 
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_RX_MODE15_PG = 0x800878600c00143full;
+static const uint64_t CTL_REGS_RX_MODE15_PG = 0x8008784010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE15_PG_0 = 48;
 static const uint32_t CTL_REGS_RX_MODE15_PG_0_LEN = 4;
@@ -49,17 +47,13 @@ static const uint32_t CTL_REGS_RX_MODE15_PG_3 = 60;
 static const uint32_t CTL_REGS_RX_MODE15_PG_3_LEN = 4;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_TX_CNTL7_PG = 0x800c74600c00143full;
+static const uint64_t CTL_REGS_TX_CNTL7_PG = 0x800c744010012c3full;
 
 static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15 = 48;
 static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15_LEN = 16;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t CTL_REGS_TX_MODE1_PG = 0x800c0c600c00143full;
+static const uint64_t CTL_REGS_TX_MODE1_PG = 0x800c0c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN = 48;
 static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN_LEN = 3;
@@ -72,9 +66,7 @@ static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_LS_EN = 56;
 static const uint32_t CTL_REGS_TX_MODE1_PG_BIST_HS_EN = 57;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNT17_PG = 0x800a08600c00143full;
+static const uint64_t DATASM_REGS_RX_CNT17_PG = 0x800a084010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT17_PG_2 = 48;
 static const uint32_t DATASM_REGS_RX_CNT17_PG_2_LEN = 6;
@@ -82,35 +74,25 @@ static const uint32_t DATASM_REGS_RX_CNT17_PG_3 = 54;
 static const uint32_t DATASM_REGS_RX_CNT17_PG_3_LEN = 6;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
+static const uint64_t DATASM_REGS_RX_CNT27_PG = 0x800a584010012c3full;
 
-static const uint64_t DATASM_REGS_RX_CNT27_PG = 0x800a58600c00143full;
-
-static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16 = 48;
-static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16_LEN = 16;
+static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15 = 48;
+static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN = 16;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_CNTL4_PG = 0x8009a0600c00143full;
+static const uint64_t DATASM_REGS_RX_CNTL4_PG = 0x8009a04010012c3full;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t DATASM_REGS_RX_STAT4_PG = 0x800aa8600c00143full;
+static const uint64_t DATASM_REGS_RX_STAT4_PG = 0x800aa84010012c3full;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG = 0x800cec600c00143full;
+static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG = 0x800cec4010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG_TX_PSAVE_FORCE_REQ_16_23_0 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG_TX_PSAVE_FORCE_REQ_16_23_0_LEN = 8;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG = 0x800ca4600c00143full;
+static const uint64_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG = 0x800ca44010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_0 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_1 = 49;
@@ -122,9 +104,7 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_6 = 54;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_7 = 55;
 // omic/reg00008.H
 
-//ERRCODE: // Some of the name targets not found in address targets: omic
-
-static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT6_PG = 0x800d6c600c00143full;
+static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT6_PG = 0x800d6c4010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_DCC_FAIL = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_LS_FAIL = 49;

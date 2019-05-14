@@ -84,6 +84,33 @@ static const uint32_t CPLT_CTRL5_18 = 18;
 static const uint32_t CPLT_CTRL5_19 = 19;
 // pauc/reg00015.H
 
+static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x10040082ull;
+
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_XSTOP_ERR = 0;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_RECOV_ERR = 1;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_SPATTN_ERR = 2;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_LXSTOP_ERR = 3;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_HOSTATTN_ERR = 4;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYSTEM_XSTOP = 5;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1 = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP010 = 21;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP011 = 22;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP012 = 23;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP013 = 24;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP014 = 25;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP015 = 26;
+// pauc/reg00015.H
+
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT0 = 0x10050000ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_0_RESULT = 0;
@@ -120,9 +147,7 @@ static const uint32_t PB_MAILBOX_CTL_REG_B_SPARE_LEN = 4;
 static const uint64_t PB_TL_LINK_SYN_01_REG = 0x10011812ull;
 // pauc/reg00015.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t PPE_XIRAMDBG = 0x10000013ull;
+static const uint64_t PPE_XIRAMDBG = 0x10012c13ull;
 
 static const uint32_t PPE_XIRAMDBG_NULL_MSR_SIBRC = 9;
 static const uint32_t PPE_XIRAMDBG_NULL_MSR_SIBRC_LEN = 3;
@@ -138,9 +163,7 @@ static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // pauc/reg00015.H
 
-//ERRCODE: // Some of the name targets not found in address targets: pauc
-
-static const uint64_t REGS_ZCAL_FIR_MASK_PB = 0x800f90001000003full;
+static const uint64_t REGS_ZCAL_FIR_MASK_PB = 0x800f900010012c3full;
 
 static const uint32_t REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK = 48;
 static const uint32_t REGS_ZCAL_FIR_MASK_PB_ZCAL_FIR_ERRS_MASK_LEN = 2;
@@ -156,6 +179,12 @@ static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 // pauc/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x100f0017ull;
+// pauc/reg00015.H
+
+static const uint64_t XSTOP_UNMASKED = 0x10040010ull;
+
+static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 // pauc/reg00015.H
 
 }

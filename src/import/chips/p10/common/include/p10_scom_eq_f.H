@@ -84,6 +84,33 @@ static const uint32_t CPLT_CTRL5_18 = 18;
 static const uint32_t CPLT_CTRL5_19 = 19;
 // eq/reg00015.H
 
+static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x20040082ull;
+
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_XSTOP_ERR = 0;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_RECOV_ERR = 1;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_SPATTN_ERR = 2;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_LXSTOP_ERR = 3;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ANY_HOSTATTN_ERR = 4;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYSTEM_XSTOP = 5;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_OOB1 = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP010 = 21;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP011 = 22;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP012 = 23;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP013 = 24;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP014 = 25;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP015 = 26;
+// eq/reg00015.H
+
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT0 = 0x20050000ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_0_RESULT = 0;
@@ -176,15 +203,26 @@ static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
 // eq/reg00015.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_PBCR_PPE = 0x00000006c0000440ull;
+static const uint64_t QME_PBCR_PPE1 = 0x00000006c0000470ull;
+static const uint64_t QME_PBCR_PPE2 = 0x00000006c0000460ull;
 static const uint64_t QME_PBCR_RW = 0x200e0044ull;
 static const uint64_t QME_PBCR_WO_CLEAR = 0x200e0047ull;
 static const uint64_t QME_PBCR_WO_OR = 0x200e0046ull;
 // eq/reg00015.H
 
-static const uint64_t QME_QSAR = 0x200e0074ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_QSAR_PPE = 0x00000006c0000740ull;
+static const uint64_t QME_QSAR_SCOM = 0x200e0074ull;
 // eq/reg00015.H
 
-static const uint64_t QME_SCOM_XIVDR6 = 0x200e028cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIVDR6_PPE = 0x00000006c00028c0ull;
+static const uint64_t QME_SCOM_XIVDR6_RO = 0x200e028cull;
 
 static const uint32_t QME_SCOM_XIVDR6_6 = 0;
 static const uint32_t QME_SCOM_XIVDR6_6_LEN = 32;
@@ -196,6 +234,12 @@ static const uint64_t TIMEOUT_REG = 0x200f0010ull;
 // eq/reg00015.H
 
 static const uint64_t VITAL_SCAN_OUT = 0x200f0017ull;
+// eq/reg00015.H
+
+static const uint64_t XSTOP_UNMASKED = 0x20040010ull;
+
+static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN = 1;
+static const uint32_t XSTOP_UNMASKED_XSTOP_UNMASKED_IN_LEN = 53;
 // eq/reg00015.H
 
 }

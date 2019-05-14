@@ -35,31 +35,31 @@ namespace eq
 {
 
 
-static const uint64_t EPS_FIR_GXSTOP3_MASK_REG = 0x20040016ull;
+static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x20040081ull;
 
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP3_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ANY_XSTOP_ERR = 0;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ANY_RECOV_ERR = 1;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ANY_SPATTN_ERR = 2;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ANY_LXSTOP_ERR = 3;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ANY_HOSTATTN_ERR = 4;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYSTEM_XSTOP = 5;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_OOB1 = 6;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_FIR_XSTOP_ON_TRIG = 7;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
+static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
 // eq/reg00005.H
 
 static const uint64_t EPS_THERM_WSUB_SKITTER_DATA0 = 0x20050019ull;
@@ -153,32 +153,40 @@ static const uint32_t L3TRA3_TR0_CONFIG_5_D = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_5_D_LEN = 24;
 // eq/reg00005.H
 
-static const uint64_t NET_CTRL1_RWX = 0x200f0044ull;
-static const uint64_t NET_CTRL1_RWX_WAND = 0x200f0045ull;
-static const uint64_t NET_CTRL1_RWX_WOR = 0x200f0046ull;
+static const uint64_t NET_CTRL1_RW = 0x200f0044ull;
+static const uint64_t NET_CTRL1_RW_WAND = 0x200f0045ull;
+static const uint64_t NET_CTRL1_RW_WOR = 0x200f0046ull;
 
-static const uint32_t NET_CTRL1_PLL_CLKIN_SEL = 0;
-static const uint32_t NET_CTRL1_CLK_DCC_BYPASS_EN = 1;
-static const uint32_t NET_CTRL1_CLK_PDLY_BYPASS_EN = 2;
-static const uint32_t NET_CTRL1_CLK_DIV_BYPASS_EN = 3;
-static const uint32_t NET_CTRL1_REFCLK_CLKMUX0_SEL = 4;
-static const uint32_t NET_CTRL1_REFCLK_CLKMUX1_SEL = 5;
-static const uint32_t NET_CTRL1_PLL_BNDY_BYPASS_EN = 6;
-static const uint32_t NET_CTRL1_DPLL_TEST_SEL = 8;
-static const uint32_t NET_CTRL1_DPLL_TEST_SEL_LEN = 8;
-static const uint32_t NET_CTRL1_SB_STRENGTH = 16;
-static const uint32_t NET_CTRL1_SB_STRENGTH_LEN = 4;
-static const uint32_t NET_CTRL1_ASYNC_TYPE = 20;
-static const uint32_t NET_CTRL1_ASYNC_OBS = 21;
-static const uint32_t NET_CTRL1_CPM_CAL_SET = 22;
-static const uint32_t NET_CTRL1_SENSEADJ_RESET0 = 23;
-static const uint32_t NET_CTRL1_SENSEADJ_RESET1 = 24;
-static const uint32_t NET_CTRL1_CLK_PULSE_EN = 25;
-static const uint32_t NET_CTRL1_CLK_PULSE_MODE = 26;
-static const uint32_t NET_CTRL1_CLK_PULSE_MODE_LEN = 2;
+static const uint32_t NET_CTRL1_ACHE0_CLK_DCC_BYPASS = 0;
+static const uint32_t NET_CTRL1_ACHE1_CLK_DCC_BYPASS = 1;
+static const uint32_t NET_CTRL1_ACHE2_CLK_DCC_BYPASS = 2;
+static const uint32_t NET_CTRL1_ACHE3_CLK_DCC_BYPASS = 3;
+static const uint32_t NET_CTRL1_ORE0_CLK_DCC_BYPASS = 4;
+static const uint32_t NET_CTRL1_ORE1_CLK_DCC_BYPASS = 5;
+static const uint32_t NET_CTRL1_ORE2_CLK_DCC_BYPASS = 6;
+static const uint32_t NET_CTRL1_ORE3_CLK_DCC_BYPASS = 7;
+static const uint32_t NET_CTRL1_ACHE0_CLK_PDLY_BYPASS = 8;
+static const uint32_t NET_CTRL1_ACHE1_CLK_PDLY_BYPASS = 9;
+static const uint32_t NET_CTRL1_ACHE2_CLK_PDLY_BYPASS = 10;
+static const uint32_t NET_CTRL1_ACHE3_CLK_PDLY_BYPASS = 11;
+static const uint32_t NET_CTRL1_ORE0_CLK_PDLY_BYPASS = 12;
+static const uint32_t NET_CTRL1_ORE1_CLK_PDLY_BYPASS = 13;
+static const uint32_t NET_CTRL1_ORE2_CLK_PDLY_BYPASS = 14;
+static const uint32_t NET_CTRL1_ORE3_CLK_PDLY_BYPASS = 15;
+static const uint32_t NET_CTRL1_ACHE0_CLK_SKEWADJUST_RESET_DC = 16;
+static const uint32_t NET_CTRL1_ACHE1_CLK_SKEWADJUST_RESET_DC = 17;
+static const uint32_t NET_CTRL1_ACHE2_CLK_SKEWADJUST_RESET_DC = 18;
+static const uint32_t NET_CTRL1_ACHE3_CLK_SKEWADJUST_RESET_DC = 19;
+static const uint32_t NET_CTRL1_ORE0_CLK_DCADJUST_RESET_DC = 20;
+static const uint32_t NET_CTRL1_ORE1_CLK_DCADJUST_RESET_DC = 21;
+static const uint32_t NET_CTRL1_ORE2_CLK_DCADJUST_RESET_DC = 22;
+static const uint32_t NET_CTRL1_ORE3_CLK_DCADJUST_RESET_DC = 23;
 // eq/reg00005.H
 
-static const uint64_t QME_DB0 = 0x200e0100ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_DB0_PPE = 0x00000006c0001000ull;
+static const uint64_t QME_DB0_RW = 0x200e0100ull;
 
 static const uint32_t QME_DB0_NUMBER = 0;
 static const uint32_t QME_DB0_NUMBER_LEN = 8;
@@ -186,6 +194,11 @@ static const uint32_t QME_DB0_DATA = 8;
 static const uint32_t QME_DB0_DATA_LEN = 56;
 // eq/reg00005.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_EITR_PPE = 0x00000006c00026c0ull;
+static const uint64_t QME_EITR_PPE1 = 0x00000006c00026f0ull;
+static const uint64_t QME_EITR_PPE2 = 0x00000006c00026e0ull;
 static const uint64_t QME_EITR_RW = 0x200e026cull;
 static const uint64_t QME_EITR_WO_CLEAR = 0x200e026full;
 static const uint64_t QME_EITR_WO_OR = 0x200e026eull;

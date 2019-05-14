@@ -54,6 +54,12 @@ static const uint64_t RSB_REGS_WOF_REG = 0x08010910ull;
 // phb/reg00003.H
 
 static const uint64_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x08010913ull;
+
+static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_PCI_GEN = 5;
+static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_PCI_GEN_LEN = 3;
+static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_PCI_SIZE = 8;
+static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_PCI_SIZE_LEN = 2;
+static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_FREEZE_INFO = 11;
 // phb/reg00003.H
 
 }

@@ -59,6 +59,14 @@ static const uint32_t CPLT_STAT0_MC_TC_8_FIR_HOST_ATTN = 20;
 static const uint32_t CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t CPLT_STAT0_FREE_USAGE_23I = 23;
+static const uint32_t CPLT_STAT0_FREE_USAGE_24I = 24;
+static const uint32_t CPLT_STAT0_FREE_USAGE_25I = 25;
+static const uint32_t CPLT_STAT0_FREE_USAGE_26I = 26;
+static const uint32_t CPLT_STAT0_FREE_USAGE_27I = 27;
+static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
+static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
+static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
+static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
 // mc/reg00002.H
 
 static const uint64_t MBA_SCOMFIR_DBG0_SCOM0Q = 0x0c010f94ull;
@@ -96,8 +104,7 @@ static const uint32_t MBA_SCOMFIR_MCWATDATA2_MASK_B = 22;
 static const uint32_t MBA_SCOMFIR_MCWATDATA2_MASK_B_LEN = 22;
 // mc/reg00002.H
 
-static const uint64_t SPATTN_NCX = 0x0c040005ull;
-static const uint64_t SPATTN_ROX = 0x0c040004ull;
+static const uint64_t SPATTN = 0x0c040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;

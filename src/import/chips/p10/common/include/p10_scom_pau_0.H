@@ -37,6 +37,7 @@ namespace pau
 
 static const uint64_t AME_AME0_MISC_CERR_RPT_HOLD = 0x10010bc8ull;
 
+static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_FIRMWARE = 47;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CREGA_PERR = 48;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_CREGM_PERR = 49;
 static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_LDW_UE = 50;
@@ -57,8 +58,10 @@ static const uint32_t AME_AME0_MISC_CERR_RPT_HOLD_XCT_CE = 63;
 
 static const uint64_t AME_AME0_MISC_CERR_RPT_INFO = 0x10010bcaull;
 
-static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FU_ETYPE = 5;
+static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FU_ETYPE = 1;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FU_ETYPE_LEN = 13;
+static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FW_ECODE = 14;
+static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FW_ECODE_LEN = 4;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_XCTS = 18;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_XCTS_LEN = 2;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_ERATS = 20;
@@ -73,6 +76,40 @@ static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FIRST_UE = 48;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FIRST_UE_LEN = 10;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FIRST_CE = 58;
 static const uint32_t AME_AME0_MISC_CERR_RPT_INFO_FIRST_CE_LEN = 6;
+// pau/reg00000.H
+
+static const uint64_t AME_ATL_MISC_DEBUG_CONFIG2 = 0x10010bf6ull;
+
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B8_SEL = 0;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B8_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B8_SEL = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B8_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G0_SEL = 6;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G0_SEL_LEN = 4;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G1_SEL = 10;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G1_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G2_SEL = 13;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B8_G2_SEL_LEN = 2;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B9_SEL = 15;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B9_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B9_SEL = 18;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B9_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G0_SEL = 21;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G0_SEL_LEN = 4;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G1_SEL = 25;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G1_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G2_SEL = 28;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B9_G2_SEL_LEN = 2;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B10_SEL = 30;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_0_B10_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B10_SEL = 33;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2_1_B10_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G0_SEL = 36;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G0_SEL_LEN = 4;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G1_SEL = 40;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G1_SEL_LEN = 3;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G2_SEL = 43;
+static const uint32_t AME_ATL_MISC_DEBUG_CONFIG2__B10_G2_SEL_LEN = 2;
 // pau/reg00000.H
 
 static const uint64_t ATS_REG_PAU_AT_ECC = 0x10010ab2ull;
@@ -1176,7 +1213,6 @@ static const uint32_t XTS_REG_DEBUG1_CONFIG_ACT = 63;
 
 static const uint64_t XTS_REG_CONFIG = 0x10010af4ull;
 
-static const uint32_t XTS_REG_CONFIG_BRAZOS = 0;
 static const uint32_t XTS_REG_CONFIG_MMIOSD = 1;
 static const uint32_t XTS_REG_CONFIG_BIG_RSP = 2;
 static const uint32_t XTS_REG_CONFIG_CHOP1G = 3;

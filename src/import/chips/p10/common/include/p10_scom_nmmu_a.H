@@ -35,9 +35,9 @@ namespace nmmu
 {
 
 
-static const uint64_t FIR1_REG_RWX = 0x02010c40ull;
-static const uint64_t FIR1_REG_WOX_AND = 0x02010c41ull;
-static const uint64_t FIR1_REG_WOX_OR = 0x02010c42ull;
+static const uint64_t FIR1_REG_RW = 0x02010c40ull;
+static const uint64_t FIR1_REG_WO_AND = 0x02010c41ull;
+static const uint64_t FIR1_REG_WO_OR = 0x02010c42ull;
 
 static const uint32_t FIR1_REG_FBC_XLAT_ARY_ECC_CE_DET = 0;
 static const uint32_t FIR1_REG_FBC_XLAT_ARY_ECC_UE_DET = 1;

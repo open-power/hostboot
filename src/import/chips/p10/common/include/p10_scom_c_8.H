@@ -35,7 +35,8 @@ namespace c
 {
 
 
-static const uint64_t CPMS_CL2_PFETSTAT = 0x200e0e2cull;
+static const uint64_t CPMS_CL2_PFETSTAT_PPE = 0x00000006c001e2c0ull;
+static const uint64_t CPMS_CL2_PFETSTAT_RO = 0x200e0e2cull;
 
 static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE = 0;
 static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFETS_DISABLED_SENSE = 1;
@@ -48,8 +49,8 @@ static const uint32_t CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL = 63;
 // c/reg00008.H
 
-static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RWX_WAND = 0x20020495ull;
-static const uint64_t EC_PC_COMMON_SPR_V3_HMER_WOX_OR = 0x20020491ull;
+static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RW_WAND = 0x20020495ull;
+static const uint64_t EC_PC_COMMON_SPR_V3_HMER_WO_OR = 0x20020491ull;
 
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_MALFUNCTION_ALERT = 0;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_CME_REQUEST = 1;

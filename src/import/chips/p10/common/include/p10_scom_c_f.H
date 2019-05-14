@@ -35,13 +35,24 @@ namespace c
 {
 
 
+static const uint64_t CPMS_MMAR_PPE = 0x00000006c001e380ull;
+static const uint64_t CPMS_MMAR_PPE1 = 0x00000006c001e3a0ull;
+static const uint64_t CPMS_MMAR_PPE2 = 0x00000006c001e3b0ull;
+static const uint64_t CPMS_MMAR_RW = 0x200e0e38ull;
+static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3aull;
+static const uint64_t CPMS_MMAR_WO_OR = 0x200e0e3bull;
+
+static const uint32_t CPMS_MMAR_AVAILABLE = 0;
+static const uint32_t CPMS_MMAR_FUNC_RESET = 1;
+// c/reg00015.H
+
 static const uint64_t EC_PC_COMMON_SPR_SCOMD = 0x20020481ull;
 // c/reg00015.H
 
 static const uint64_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT = 0x200204b7ull;
 // c/reg00015.H
 
-static const uint64_t EC_PC_PWM_EVENTS = 0x20020aa2ull;
+static const uint64_t EC_PC_PWM_EVENTS = 0x200204a2ull;
 
 static const uint32_t EC_PC_PWM_EVENTS_PWM_EVENTS_RESERVED_32 = 32;
 static const uint32_t EC_PC_PWM_EVENTS_FREQ_SCALE_A_THRESHOLD = 33;
@@ -130,9 +141,9 @@ static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG = 0
 static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG_LEN = 2;
 // c/reg00015.H
 
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_RWX = 0x20010640ull;
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WOX_AND = 0x20010641ull;
-static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WOX_OR = 0x20010642ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_RW = 0x20010640ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_AND = 0x20010641ull;
+static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_OR = 0x20010642ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_CONTROL_ERR = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_TLBIE_CONTROL_ERR = 1;

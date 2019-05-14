@@ -68,37 +68,37 @@ static const uint64_t CPLT_CONF1_WO_CLEAR = 0x00000029ull;
 static const uint64_t CPLT_CONF1_WO_OR = 0x00000019ull;
 
 static const uint32_t CPLT_CONF1_OD_IOVALID_DC = 0;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_EQ_DC_0H = 0;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQ_DC_0H = 0;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_0H = 0;
 static const uint32_t CPLT_CONF1_EN_EQ_DC_0H = 0;
 static const uint32_t CPLT_CONF1_0_IOVALID_DC = 0;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_0H = 0;
 static const uint32_t CPLT_CONF1_EV_IOVALID_DC = 1;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_EQ_DC_1H = 1;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQ_DC_1H = 1;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_1H = 1;
 static const uint32_t CPLT_CONF1_EN_EQ_DC_1H = 1;
 static const uint32_t CPLT_CONF1_1_IOVALID_DC = 1;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_1H = 1;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_EQALL_DC_2H = 2;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_2H = 2;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_DC_2H = 2;
 static const uint32_t CPLT_CONF1_NORTH_DC_2H = 2;
 static const uint32_t CPLT_CONF1_2_IOVALID_DC = 2;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_2H = 2;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_EQALL_DC_3H = 3;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_3H = 3;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_3H = 3;
 static const uint32_t CPLT_CONF1_NORTH_DC_3H = 3;
 static const uint32_t CPLT_CONF1_3_IOVALID_DC = 3;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_3H = 3;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_EQALL_DC_4H = 4;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_EQALL_DC_4H = 4;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_4H = 4;
 static const uint32_t CPLT_CONF1_NORTH_DC_4H = 4;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_4H = 4;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_VDN_DC_5H = 5;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_5H = 5;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_5H = 5;
 static const uint32_t CPLT_CONF1_LANE_CFG_DC_5H = 5;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_VDN_DC_6H = 6;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_6H = 6;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_OCB_MH_DC_6H = 6;
-static const uint32_t CPLT_CONF1__ANES_AMUX_VSEL_ES_VDN_DC_7H = 7;
+static const uint32_t CPLT_CONF1_ANES_AMUX_VSEL_ES_VDN_DC_7H = 7;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_7H = 7;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_8H = 8;
 static const uint32_t CPLT_CONF1_IOVALID_DC_8H = 8;
@@ -106,17 +106,14 @@ static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_PWR_DC_9H = 9;
 static const uint32_t CPLT_CONF1_IOVALID_DC_9H = 9;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_10H = 10;
 static const uint32_t CPLT_CONF1_IOVALID_DC_10H = 10;
-static const uint32_t CPLT_CONF1__LP_RESET = 11;
+static const uint32_t CPLT_CONF1_LP_RESET = 11;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_QUAD_DC_11H = 11;
 static const uint32_t CPLT_CONF1__AMUX_EQ_VSEL_VMEAS_DC = 12;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_12H = 12;
-static const uint32_t CPLT_CONF1__ANES_VMEAS_CALIBRATE_DC = 13;
 static const uint32_t CPLT_CONF1__ANEQ_VMEAS_CALIBRATE_DC = 13;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_13H = 13;
-static const uint32_t CPLT_CONF1__ANES_VMEAS_MEASURE_DC = 14;
 static const uint32_t CPLT_CONF1__ANEQ_VMEAS_MEASURE_DC = 14;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_14H = 14;
-static const uint32_t CPLT_CONF1_CPLT_ANES_VMEAS_RESET_CLK_STOPPED_DC = 15;
 static const uint32_t CPLT_CONF1_CPLT_ANEQ_VMEAS_RESET_CLK_STOPPED_DC = 15;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_15H = 15;
 static const uint32_t CPLT_CONF1_APP0_RATIO_DC_16H = 16;
@@ -164,7 +161,7 @@ static const uint64_t DPLL_CNTL_NEST_REGS_CTRL_WO_OR = 0x00000054ull;
 
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_DPLL_LOCK_SEL = 0;
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_ENABLE_JUMP_PROTECT = 1;
-static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_BYPASS = 2;
+static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_FF_BYPASS = 2;
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_DCO_OVERRIDE = 3;
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_DCO_INCR = 4;
 static const uint32_t DPLL_CNTL_NEST_REGS_CTRL_DCO_DECR = 5;
@@ -192,33 +189,6 @@ static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x000107c3ull;
 // perv/reg00008.H
 
 static const uint64_t EPS_DBG_INST2_COND_REG_3 = 0x000107c6ull;
-// perv/reg00008.H
-
-static const uint64_t EPS_FIR_GXSTOP0_MASK_REG = 0x00040013ull;
-
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_XSTOP = 0;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_RECOV = 1;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_SPATTN = 2;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_LOCAL_XSTOP = 3;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SUM_TYPE4 = 4;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_SYSTEM_XSTOP = 5;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_OOB1 = 6;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_DBG_FIR_XSTOP_ON_TRIG = 7;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP01 = 12;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP02 = 13;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP03 = 14;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP04 = 15;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP05 = 16;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP06 = 17;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP07 = 18;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP08 = 19;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP09 = 20;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP10 = 21;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP11 = 22;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP12 = 23;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
-static const uint32_t EPS_FIR_GXSTOP0_MASK_REG_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
 // perv/reg00008.H
 
 static const uint64_t EPS_PSC_PSCOM_STATUS_ERROR_REG = 0x00010001ull;
@@ -282,23 +252,30 @@ static const uint32_t FIRST_REPLY_REG_FIRST_REPLY_REGISTER_LEN = 6;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_RWX = 0x00002886ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_FSI = 0x00002886ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_FSI_BYTE = 0x00002a18ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_6_RW = 0x00050086ull;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_RWX = 0x000028c0ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_FSI = 0x000028c0ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_FSI_BYTE = 0x00002b00ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_0_RW = 0x000500c0ull;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_RWX = 0x0000290dull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_FSI = 0x0000290dull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_FSI_BYTE = 0x00002c34ull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_13_RW = 0x0005010dull;
 // perv/reg00008.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_ROX = 0x00002821ull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_RWX = 0x00050021ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_FSI = 0x00002821ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_FSI_BYTE = 0x00002884ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_RW = 0x00050021ull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_M1HC0A_MAILBOX_1_HEADER_COMMAND_0_A = 0;
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_M1HC0A_MAILBOX_1_HEADER_COMMAND_0_A_LEN = 32;
@@ -306,8 +283,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_0_A_M1HC0A_MAILBOX
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_ROX = 0x0005002dull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_RWX = 0x0000282dull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_FSI = 0x0000282dull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_FSI_BYTE = 0x000028b4ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_RO = 0x0005002dull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_M2HC0B_MAILBOX_2_HEADER_COMMAND_0_B = 0;
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_M2HC0B_MAILBOX_2_HEADER_COMMAND_0_B_LEN = 32;
@@ -315,7 +293,19 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_0_B_M2HC0B_MAILBOX
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_RW = 0x00002912ull;
+static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_FSI = 0x00002941ull;
+static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_FSI_BYTE = 0x00002d04ull;
+static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_RO = 0x00050141ull;
+
+static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_RCS_EVENTLOG_1 = 0;
+static const uint32_t FSXCOMP_FSXLOG_RCS_EL1_RCS_EVENTLOG_1_LEN = 32;
+// perv/reg00008.H
+
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI = 0x00002912ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_FSI_BYTE = 0x00002c48ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL2_COPY_RW = 0x00050112ull;
 // perv/reg00008.H
 
 static const uint64_t L3TRA0_TR0_CONFIG_5 = 0x00018208ull;
@@ -371,7 +361,9 @@ static const uint32_t L3TRA3_TR0_CONFIG_2_B = 24;
 static const uint32_t L3TRA3_TR0_CONFIG_2_B_LEN = 24;
 // perv/reg00008.H
 
-static const uint64_t LOCAL_XSTOP_MASK = 0x00040019ull;
+static const uint64_t LOCAL_XSTOP_MASK_RW = 0x00040043ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x00040063ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x00040015ull;
 
 static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
 static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
@@ -388,6 +380,12 @@ static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
 static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
+// perv/reg00008.H
+
+static const uint64_t LOCAL_XSTOP_UNMASKED = 0x00040013ull;
+
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN = 1;
+static const uint32_t LOCAL_XSTOP_UNMASKED_LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
 // perv/reg00008.H
 
 static const uint64_t REC_ERR_MST14_REG2 = 0x000f007aull;
@@ -794,7 +792,7 @@ static const uint64_t TRA5_TR0_TRACE_HI_DATA_REG = 0x00010680ull;
 
 static const uint32_t TRA5_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA5_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-// perv/reg00008.H
+// perv/reg00009.H
 
 static const uint64_t TRA5_TR1_CONFIG_5 = 0x000106c8ull;
 

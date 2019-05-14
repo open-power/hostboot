@@ -52,6 +52,14 @@ static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_CLK_STOPPED = 12;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_OUT = 13;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_OUT_LEN = 10;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_VALID = 23;
+static const uint32_t CPLT_STAT0_FREE_USAGE_24I = 24;
+static const uint32_t CPLT_STAT0_FREE_USAGE_25I = 25;
+static const uint32_t CPLT_STAT0_FREE_USAGE_26I = 26;
+static const uint32_t CPLT_STAT0_FREE_USAGE_27I = 27;
+static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
+static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
+static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
+static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
 // eq/reg00002.H
 
 static const uint64_t EPS_THERM_WSUB2_MODE_REG = 0x2005002full;
@@ -130,16 +138,24 @@ static const uint32_t L3TRA3_TR1_CONFIG_2_B = 24;
 static const uint32_t L3TRA3_TR1_CONFIG_2_B_LEN = 24;
 // eq/reg00002.H
 
-static const uint64_t QME_DUCR = 0x200e0170ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_DUCR_PPE = 0x00000006c0001700ull;
+static const uint64_t QME_DUCR_SCOM = 0x200e0170ull;
 // eq/reg00002.H
 
-static const uint64_t QME_EISR_RWX = 0x200e0260ull;
-static const uint64_t QME_EISR_WOX_CLEAR = 0x200e0263ull;
-static const uint64_t QME_EISR_WOX_OR = 0x200e0262ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_EISR_PPE = 0x00000006c0002600ull;
+static const uint64_t QME_EISR_PPE1 = 0x00000006c0002630ull;
+static const uint64_t QME_EISR_PPE2 = 0x00000006c0002620ull;
+static const uint64_t QME_EISR_RW = 0x200e0260ull;
+static const uint64_t QME_EISR_WO_CLEAR = 0x200e0263ull;
+static const uint64_t QME_EISR_WO_OR = 0x200e0262ull;
 
 static const uint32_t QME_EISR_DEBUGGER = 0;
 static const uint32_t QME_EISR_DEBUG_TRIGGER = 1;
-static const uint32_t QME_EISR_QUAD_CHECKSTOP = 2;
+static const uint32_t QME_EISR_SYSTEM_CHECKSTOP = 2;
 static const uint32_t QME_EISR_LFIR_INDICATION = 3;
 static const uint32_t QME_EISR_SPARE4 = 4;
 static const uint32_t QME_EISR_SPARE5 = 5;
@@ -181,19 +197,28 @@ static const uint32_t QME_EISR_CPMS_INTERRUPT1 = 60;
 static const uint32_t QME_EISR_CPMS_INTERRUPT1_LEN = 4;
 // eq/reg00002.H
 
-static const uint64_t QME_LFIRACT1 = 0x200e000cull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_LFIRACT1_PPE = 0x00000006c00000c0ull;
+static const uint64_t QME_LFIRACT1_RW = 0x200e000cull;
 
 static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1_LEN = 27;
+static const uint32_t QME_LFIRACT1_QME_LFIRACT1_FIR_ACTION1_LEN = 28;
 // eq/reg00002.H
 
-static const uint64_t QME_SCOM_XIICAC = 0x200e0224ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XIICAC_PPE = 0x00000006c0002240ull;
+static const uint64_t QME_SCOM_XIICAC_RO = 0x200e0224ull;
 
 static const uint32_t QME_SCOM_XIICAC_SIB_PIB_IFETCH_PENDING = 34;
 static const uint32_t QME_SCOM_XIICAC_MEM_IFETCH_PENDING = 35;
 // eq/reg00002.H
 
-static const uint64_t QME_SCOM_XISGB = 0x200e0220ull;
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCOM_XISGB_PPE = 0x00000006c0002200ull;
+static const uint64_t QME_SCOM_XISGB_RO = 0x200e0220ull;
 
 static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS = 0;
 static const uint32_t QME_SCOM_XISGB_TORE_ADDRESS_LEN = 32;
@@ -202,6 +227,11 @@ static const uint32_t QME_SCOM_XISGB_GB_BYTE_VALID_LEN = 4;
 static const uint32_t QME_SCOM_XISGB_GB_FLUSH_PENDING = 63;
 // eq/reg00002.H
 
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint64_t QME_SCRB_PPE = 0x00000006c0001280ull;
+static const uint64_t QME_SCRB_PPE1 = 0x00000006c00012b0ull;
+static const uint64_t QME_SCRB_PPE2 = 0x00000006c00012a0ull;
 static const uint64_t QME_SCRB_RW = 0x200e0128ull;
 static const uint64_t QME_SCRB_WO_CLEAR = 0x200e012bull;
 static const uint64_t QME_SCRB_WO_OR = 0x200e012aull;
@@ -210,8 +240,7 @@ static const uint32_t QME_SCRB_QME_SCRB_DATA = 0;
 static const uint32_t QME_SCRB_QME_SCRB_DATA_LEN = 32;
 // eq/reg00002.H
 
-static const uint64_t SPATTN_NCX = 0x20040005ull;
-static const uint64_t SPATTN_ROX = 0x20040004ull;
+static const uint64_t SPATTN = 0x20040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;

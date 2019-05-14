@@ -67,7 +67,7 @@ static const uint64_t DPLL_CNTL_PAU_REGS_CTRL_WO_OR = 0x00000054ull;
 
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DPLL_LOCK_SEL = 0;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_ENABLE_JUMP_PROTECT = 1;
-static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_BYPASS = 2;
+static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_FF_BYPASS = 2;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_OVERRIDE = 3;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_INCR = 4;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_DCO_DECR = 5;
@@ -89,6 +89,15 @@ static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S = 41;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_L_S_LEN = 3;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N = 45;
 static const uint32_t DPLL_CNTL_PAU_REGS_CTRL_JUMP_VALUE_S_N_LEN = 3;
+// perv/reg00004.H
+
+static const uint64_t EPS_FIR_ANY_LOCAL_ERR_MASK = 0x00040080ull;
+
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_RECOV_TO_PCB = 1;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_SPATTN_TO_PCB = 2;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_LOCAL_XSTOP_TO_PCB = 3;
+static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_HOSTATTN_TO_PCB = 4;
 // perv/reg00004.H
 
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT2 = 0x00050002ull;
@@ -165,29 +174,38 @@ static const uint32_t FSXCOMP_FSXLOG_DOORBELL_STATUS_CONTROL_2A_DATA_COUNT_2B_LE
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_0_RWX = 0x00002880ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_0_FSI = 0x00002880ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_0_FSI_BYTE = 0x00002a00ull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_0_RW = 0x00050080ull;
 // perv/reg00004.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_11_RWX = 0x0000288bull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_11_FSI = 0x0000288bull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_11_FSI_BYTE = 0x00002a2cull;
+static const uint32_t FSXCOMP_FSXLOG_M1B_DATA_AREA_11_RW = 0x0005008bull;
 // perv/reg00004.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_6_RWX = 0x000028c6ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_6_FSI = 0x000028c6ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_6_FSI_BYTE = 0x00002b18ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_6_RW = 0x000500c6ull;
 // perv/reg00004.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_15_RWX = 0x0000290full;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_15_FSI = 0x0000290full;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_15_FSI_BYTE = 0x00002c3cull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_15_RW = 0x0005010full;
 // perv/reg00004.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_ROX = 0x00002833ull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_RWX_WOR = 0x00050033ull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_WOX_CLEAR = 0x00050034ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_FSI = 0x00002833ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_FSI_BYTE = 0x000028ccull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_RW_WOR = 0x00050033ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_WO_CLEAR = 0x00050034ull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_PIB_SLAVE_A_DOORBELL_ERROR_MAILBOX_1 =
     29;
@@ -197,7 +215,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_SLAVE_A_DOORBELL_INTERRUPT_MASK_P
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_ROX = 0x00002835ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_FSI = 0x00002835ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_FSI_BYTE = 0x000028d4ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_RO = 0x00050035ull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_LBUS_SLAVE_B_DOORBELL_ERROR_MAILBOX_2 = 26;
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_LBUS_SLAVE_B_DOORBELL_ERROR_MAILBOX_1 = 27;
@@ -209,7 +229,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_SLAVE_B_DOORBELL_INTERRUPT_LBUS_SLA
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_WO_CLEAR = 0x00002931ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_FSI = 0x00002931ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_FSI_BYTE = 0x00002cc4ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_WO_CLEAR = 0x00050131ull;
 
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_PROBE0_SEL_DC = 0;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_TP_PROBE0_SEL_DC_LEN = 4;
@@ -243,7 +265,9 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_ROOT_CTRL1_31_SPARE_TEST_C
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_RW = 0x00002913ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_FSI = 0x00002913ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_FSI_BYTE = 0x00002c4cull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL3_COPY_RW = 0x00050113ull;
 // perv/reg00004.H
 
 static const uint64_t L3TRA0_TR0_CONFIG_3 = 0x00018206ull;
@@ -335,7 +359,7 @@ static const uint32_t L3TRA3_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t L3TRA3_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 // perv/reg00004.H
 
-static const uint64_t LOCAL_XSTOP = 0x00040018ull;
+static const uint64_t LOCAL_XSTOP = 0x00040003ull;
 
 static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
 static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
@@ -364,9 +388,9 @@ static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
 // perv/reg00004.H
 
-static const uint64_t NET_CTRL0_RWX = 0x000f0040ull;
-static const uint64_t NET_CTRL0_RWX_WAND = 0x000f0041ull;
-static const uint64_t NET_CTRL0_RWX_WOR = 0x000f0042ull;
+static const uint64_t NET_CTRL0_RW = 0x000f0040ull;
+static const uint64_t NET_CTRL0_RW_WAND = 0x000f0041ull;
+static const uint64_t NET_CTRL0_RW_WOR = 0x000f0042ull;
 
 static const uint32_t NET_CTRL0_CHIPLET_ENABLE = 0;
 static const uint32_t NET_CTRL0_PCB_EP_RESET = 1;
@@ -380,8 +404,7 @@ static const uint32_t NET_CTRL0_VITAL_PHASE = 8;
 static const uint32_t NET_CTRL0_FLUSH_ALIGN_OVR = 9;
 static const uint32_t NET_CTRL0_VITAL_AL = 10;
 static const uint32_t NET_CTRL0_ACT_DIS = 11;
-static const uint32_t NET_CTRL0_MPW1 = 12;
-static const uint32_t NET_CTRL0_MPW2 = 13;
+static const uint32_t NET_CTRL0_SYNC_PULSE = 13;
 static const uint32_t NET_CTRL0_MPW3 = 14;
 static const uint32_t NET_CTRL0_DELAY_LCLKR = 15;
 static const uint32_t NET_CTRL0_VITAL_THOLD = 16;
@@ -389,10 +412,10 @@ static const uint32_t NET_CTRL0_FLUSH_SCAN_N = 17;
 static const uint32_t NET_CTRL0_FENCE_EN = 18;
 static const uint32_t NET_CTRL0_CPLT_RCTRL = 19;
 static const uint32_t NET_CTRL0_CPLT_DCTRL = 20;
+static const uint32_t NET_CTRL0_CPLT_RCTRL2 = 21;
 static const uint32_t NET_CTRL0_ADJ_FUNC_CLKSEL = 22;
-static const uint32_t NET_CTRL0_TP_SRAM_ENABLE = 23;
+static const uint32_t NET_CTRL0_FUNC_LCB_EDIS = 24;
 static const uint32_t NET_CTRL0_TP_FENCE_PCB = 25;
-static const uint32_t NET_CTRL0_LVLTRANS_FENCE = 26;
 static const uint32_t NET_CTRL0_ARRAY_WRITE_ASSIST_EN = 27;
 static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
@@ -569,64 +592,6 @@ static const uint32_t REC_ERR_MST9_REG3_63_MST9_ERROR_CODE = 61;
 static const uint32_t REC_ERR_MST9_REG3_63_MST9_ERROR_CODE_LEN = 3;
 // perv/reg00004.H
 
-static const uint64_t RFIR = 0x00040001ull;
-
-static const uint32_t RFIR_ANY_RECOV = 0;
-static const uint32_t RFIR_RECOV_ANY_LOCAL_XSTOP = 1;
-static const uint32_t RFIR_RESERVED2R = 2;
-static const uint32_t RFIR_RESERVED3R = 3;
-static const uint32_t RFIR_RECOV_PERV = 4;
-static const uint32_t RFIR_RECOV_IN05 = 5;
-static const uint32_t RFIR_RECOV_IN06 = 6;
-static const uint32_t RFIR_RECOV_IN07 = 7;
-static const uint32_t RFIR_RECOV_IN08 = 8;
-static const uint32_t RFIR_RECOV_IN09 = 9;
-static const uint32_t RFIR_RECOV_IN10 = 10;
-static const uint32_t RFIR_RECOV_IN11 = 11;
-static const uint32_t RFIR_RECOV_IN12 = 12;
-static const uint32_t RFIR_RECOV_IN13 = 13;
-static const uint32_t RFIR_RECOV_IN14 = 14;
-static const uint32_t RFIR_RECOV_IN15 = 15;
-static const uint32_t RFIR_RECOV_IN16 = 16;
-static const uint32_t RFIR_RECOV_IN17 = 17;
-static const uint32_t RFIR_RECOV_IN18 = 18;
-static const uint32_t RFIR_RECOV_IN19 = 19;
-static const uint32_t RFIR_RECOV_IN20 = 20;
-static const uint32_t RFIR_RECOV_IN21 = 21;
-static const uint32_t RFIR_RECOV_IN22 = 22;
-static const uint32_t RFIR_RECOV_IN23 = 23;
-static const uint32_t RFIR_RECOV_IN24 = 24;
-static const uint32_t RFIR_RECOV_IN25 = 25;
-static const uint32_t RFIR_RECOV_IN26 = 26;
-static const uint32_t RFIR_RECOV_IN27 = 27;
-static const uint32_t RFIR_RECOV_IN28 = 28;
-static const uint32_t RFIR_RECOV_IN29 = 29;
-static const uint32_t RFIR_RECOV_IN30 = 30;
-static const uint32_t RFIR_RECOV_IN31 = 31;
-static const uint32_t RFIR_RECOV_IN32 = 32;
-static const uint32_t RFIR_RECOV_IN33 = 33;
-static const uint32_t RFIR_RECOV_IN34 = 34;
-static const uint32_t RFIR_RECOV_IN35 = 35;
-static const uint32_t RFIR_RECOV_IN36 = 36;
-static const uint32_t RFIR_RECOV_IN37 = 37;
-static const uint32_t RFIR_RECOV_IN38 = 38;
-static const uint32_t RFIR_RECOV_IN39 = 39;
-static const uint32_t RFIR_RECOV_IN40 = 40;
-static const uint32_t RFIR_RECOV_IN41 = 41;
-static const uint32_t RFIR_RECOV_IN42 = 42;
-static const uint32_t RFIR_RECOV_IN43 = 43;
-static const uint32_t RFIR_RECOV_IN44 = 44;
-static const uint32_t RFIR_RECOV_IN45 = 45;
-static const uint32_t RFIR_RECOV_IN46 = 46;
-static const uint32_t RFIR_RECOV_IN47 = 47;
-static const uint32_t RFIR_RECOV_IN48 = 48;
-static const uint32_t RFIR_RECOV_IN49 = 49;
-static const uint32_t RFIR_RECOV_IN50 = 50;
-static const uint32_t RFIR_RECOV_IN51 = 51;
-static const uint32_t RFIR_RECOV_IN52 = 52;
-static const uint32_t RFIR_RECOV_IN53 = 53;
-// perv/reg00004.H
-
 static const uint64_t SINGLE_OTP_ROM_OTPROM_REG108 = 0x0000806cull;
 
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG108_REGISTER108 = 0;
@@ -687,7 +652,9 @@ static const uint32_t SINGLE_OTP_ROM_OTPROM_REG92_REGISTER92 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG92_REGISTER92_LEN = 64;
 // perv/reg00004.H
 
-static const uint64_t SPATTN_MASK = 0x00040007ull;
+static const uint64_t SPATTN_MASK_RW = 0x00040042ull;
+static const uint64_t SPATTN_MASK_WO_CLEAR = 0x00040062ull;
+static const uint64_t SPATTN_MASK_WO_OR = 0x00040052ull;
 
 static const uint32_t SPATTN_MASK_01 = 1;
 static const uint32_t SPATTN_MASK_02 = 2;

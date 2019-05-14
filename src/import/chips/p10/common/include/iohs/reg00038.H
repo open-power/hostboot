@@ -253,11 +253,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_AXON_EPS_FIR_SUM_MASK_REG(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_EPS_FIR_SUM_MASK_REG;
+    scomt::last_scom = AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -267,14 +267,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_AXON_EPS_FIR_SUM_MASK_REG(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_EPS_FIR_SUM_MASK_REG;
+    scomt::last_scom = AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4;
 #endif
-    return fapi2::getScom(i_target, AXON_EPS_FIR_SUM_MASK_REG, o_data);
+    return fapi2::getScom(i_target, AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -282,14 +282,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_AXON_EPS_FIR_SUM_MASK_REG(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode PUT_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return fapi2::putScom(i_target, AXON_EPS_FIR_SUM_MASK_REG, i_data);
+    return fapi2::putScom(i_target, AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -297,423 +297,2170 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.setBit<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.clearBit<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.extractToRight<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.getBit<AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.setBit<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.clearBit<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.extractToRight<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.getBit<AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_RECOV_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.setBit<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.clearBit<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.extractToRight<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.getBit<AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_SPATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB,
-           1>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.setBit<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(
+    fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return o_data.clearBit<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.extractToRight<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB,
-           1>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline bool GET_AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB(fapi2::buffer<uint64_t>& i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return i_data.getBit<AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB>();
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_LOCAL_XSTOP_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
-#endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB,
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(const uint64_t i_data,
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return o_data.insertFromRight<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB,
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR,
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return o_data.setBit<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB>();
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(fapi2::buffer<uint64_t>& o_data)
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(
+    fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return o_data.clearBit<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB>();
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data,
-        uint64_t& o_data)
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return i_data.extractToRight<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB,
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR,
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
 
-static inline bool GET_AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB(fapi2::buffer<uint64_t>& i_data)
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_SUM_MASK_REG));
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
 #endif
-    return i_data.getBit<AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB>();
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access AXON_EPS_FIR_SUM_MASK_REG_HOSTATTN_TO_PCB chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_XSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_RECOV_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_SPATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_LXSTOP_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ANY_HOSTATTN_ERR chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYSTEM_XSTOP chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_OOB1 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_FIR_XSTOP_ON_TRIG chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.insertFromRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.setBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return o_data.clearBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.extractToRight<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4));
+#endif
+    return i_data.getBit<AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access AXON_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
@@ -2453,11 +4200,11 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_AXON_HOSTATTN_MASK(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_AXON_HOSTATTN_MASK_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_HOSTATTN_MASK;
+    scomt::last_scom = AXON_HOSTATTN_MASK_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -2467,14 +4214,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_AXON_HOSTATTN_MASK(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_AXON_HOSTATTN_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_HOSTATTN_MASK;
+    scomt::last_scom = AXON_HOSTATTN_MASK_RW;
 #endif
-    return fapi2::getScom(i_target, AXON_HOSTATTN_MASK, o_data);
+    return fapi2::getScom(i_target, AXON_HOSTATTN_MASK_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -2482,13 +4229,101 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_AXON_HOSTATTN_MASK(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_AXON_HOSTATTN_MASK_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, AXON_HOSTATTN_MASK, i_data);
+    return fapi2::putScom(i_target, AXON_HOSTATTN_MASK_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_HOSTATTN_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_MASK_WO_CLEAR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_HOSTATTN_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_MASK_WO_CLEAR;
+#endif
+    return fapi2::getScom(i_target, AXON_HOSTATTN_MASK_WO_CLEAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_HOSTATTN_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_HOSTATTN_MASK_WO_CLEAR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_HOSTATTN_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_MASK_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_HOSTATTN_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_HOSTATTN_MASK_WO_OR;
+#endif
+    return fapi2::getScom(i_target, AXON_HOSTATTN_MASK_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_HOSTATTN_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_HOSTATTN_MASK_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -2500,7 +4335,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_01(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_01,
            1>(i_data);
@@ -2515,7 +4350,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_01(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_01,
            1>(i_data);
@@ -2529,7 +4364,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_01(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -2542,7 +4377,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_01(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -2556,7 +4391,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_01(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_01,
            1>(o_data);
@@ -2570,7 +4405,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_01(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -2584,7 +4419,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_02(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_02,
            1>(i_data);
@@ -2599,7 +4434,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_02(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_02,
            1>(i_data);
@@ -2613,7 +4448,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_02(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -2626,7 +4461,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_02(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -2640,7 +4475,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_02(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_02,
            1>(o_data);
@@ -2654,7 +4489,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_02(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -2668,7 +4503,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_03(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_03,
            1>(i_data);
@@ -2683,7 +4518,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_03(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_03,
            1>(i_data);
@@ -2697,7 +4532,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_03(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -2710,7 +4545,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_03(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -2724,7 +4559,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_03(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_03,
            1>(o_data);
@@ -2738,7 +4573,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_03(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -2752,7 +4587,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_04(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_04,
            1>(i_data);
@@ -2767,7 +4602,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_04(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_04,
            1>(i_data);
@@ -2781,7 +4616,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_04(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -2794,7 +4629,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_04(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -2808,7 +4643,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_04(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_04,
            1>(o_data);
@@ -2822,7 +4657,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_04(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -2836,7 +4671,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_05(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_05,
            1>(i_data);
@@ -2851,7 +4686,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_05(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_05,
            1>(i_data);
@@ -2865,7 +4700,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -2878,7 +4713,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -2892,7 +4727,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_05(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_05,
            1>(o_data);
@@ -2906,7 +4741,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_05(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -2920,7 +4755,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_06(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_06,
            1>(i_data);
@@ -2935,7 +4770,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_06(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_06,
            1>(i_data);
@@ -2949,7 +4784,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -2962,7 +4797,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -2976,7 +4811,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_06(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_06,
            1>(o_data);
@@ -2990,7 +4825,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_06(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -3004,7 +4839,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_07(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_07,
            1>(i_data);
@@ -3019,7 +4854,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_07(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_07,
            1>(i_data);
@@ -3033,7 +4868,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -3046,7 +4881,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -3060,7 +4895,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_07(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_07,
            1>(o_data);
@@ -3074,7 +4909,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_07(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -3088,7 +4923,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_08(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_08,
            1>(i_data);
@@ -3103,7 +4938,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_08(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_08,
            1>(i_data);
@@ -3117,7 +4952,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -3130,7 +4965,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -3144,7 +4979,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_08(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_08,
            1>(o_data);
@@ -3158,7 +4993,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_08(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -3172,7 +5007,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_09(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_09,
            1>(i_data);
@@ -3187,7 +5022,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_09(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_09,
            1>(i_data);
@@ -3201,7 +5036,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -3214,7 +5049,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -3228,7 +5063,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_09(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_09,
            1>(o_data);
@@ -3242,7 +5077,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_09(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -3256,7 +5091,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_10(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_10,
            1>(i_data);
@@ -3271,7 +5106,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_10(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_10,
            1>(i_data);
@@ -3285,7 +5120,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -3298,7 +5133,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -3312,7 +5147,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_10(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_10,
            1>(o_data);
@@ -3326,7 +5161,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_10(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -3340,7 +5175,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_11(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_11,
            1>(i_data);
@@ -3355,7 +5190,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_11(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_11,
            1>(i_data);
@@ -3369,7 +5204,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -3382,7 +5217,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -3396,7 +5231,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_11(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_11,
            1>(o_data);
@@ -3410,7 +5245,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_11(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -3424,7 +5259,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_12(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_12,
            1>(i_data);
@@ -3439,7 +5274,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_12(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_12,
            1>(i_data);
@@ -3453,7 +5288,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -3466,7 +5301,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -3480,7 +5315,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_12(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_12,
            1>(o_data);
@@ -3494,7 +5329,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_12(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -3508,7 +5343,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_13(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_13,
            1>(i_data);
@@ -3523,7 +5358,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_13(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_13,
            1>(i_data);
@@ -3537,7 +5372,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -3550,7 +5385,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -3564,7 +5399,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_13(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_13,
            1>(o_data);
@@ -3578,7 +5413,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_13(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -3592,7 +5427,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_14(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_14,
            1>(i_data);
@@ -3607,7 +5442,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_14(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_14,
            1>(i_data);
@@ -3621,7 +5456,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -3634,7 +5469,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -3648,7 +5483,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_14(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_14,
            1>(o_data);
@@ -3662,7 +5497,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_14(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -3676,7 +5511,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_15(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_15,
            1>(i_data);
@@ -3691,7 +5526,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_15(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_15,
            1>(i_data);
@@ -3705,7 +5540,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -3718,7 +5553,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -3732,7 +5567,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_15(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_15,
            1>(o_data);
@@ -3746,7 +5581,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_15(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -3760,7 +5595,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_16(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_16,
            1>(i_data);
@@ -3775,7 +5610,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_16(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_16,
            1>(i_data);
@@ -3789,7 +5624,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_16>();
 #ifdef SCOM_CHECKING
@@ -3802,7 +5637,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_16>();
 #ifdef SCOM_CHECKING
@@ -3816,7 +5651,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_16(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_16,
            1>(o_data);
@@ -3830,7 +5665,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_16(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_16>();
 #ifdef SCOM_CHECKING
@@ -3844,7 +5679,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_17(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_17,
            1>(i_data);
@@ -3859,7 +5694,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_17(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_17,
            1>(i_data);
@@ -3873,7 +5708,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_17(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_17>();
 #ifdef SCOM_CHECKING
@@ -3886,7 +5721,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_17(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_17>();
 #ifdef SCOM_CHECKING
@@ -3900,7 +5735,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_17(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_17,
            1>(o_data);
@@ -3914,7 +5749,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_17(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_17>();
 #ifdef SCOM_CHECKING
@@ -3928,7 +5763,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_18(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_18,
            1>(i_data);
@@ -3943,7 +5778,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_18(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_18,
            1>(i_data);
@@ -3957,7 +5792,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_18(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_18>();
 #ifdef SCOM_CHECKING
@@ -3970,7 +5805,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_18(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_18>();
 #ifdef SCOM_CHECKING
@@ -3984,7 +5819,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_18(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_18,
            1>(o_data);
@@ -3998,7 +5833,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_18(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_18>();
 #ifdef SCOM_CHECKING
@@ -4012,7 +5847,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_19(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_19,
            1>(i_data);
@@ -4027,7 +5862,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_19(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_19,
            1>(i_data);
@@ -4041,7 +5876,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_19(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_19>();
 #ifdef SCOM_CHECKING
@@ -4054,7 +5889,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_19(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_19>();
 #ifdef SCOM_CHECKING
@@ -4068,7 +5903,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_19(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_19,
            1>(o_data);
@@ -4082,7 +5917,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_19(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_19>();
 #ifdef SCOM_CHECKING
@@ -4096,7 +5931,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_20(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_20,
            1>(i_data);
@@ -4111,7 +5946,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_20(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_20,
            1>(i_data);
@@ -4125,7 +5960,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_20(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_20>();
 #ifdef SCOM_CHECKING
@@ -4138,7 +5973,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_20(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_20>();
 #ifdef SCOM_CHECKING
@@ -4152,7 +5987,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_20(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_20,
            1>(o_data);
@@ -4166,7 +6001,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_20(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_20>();
 #ifdef SCOM_CHECKING
@@ -4180,7 +6015,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_21(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_21,
            1>(i_data);
@@ -4195,7 +6030,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_21(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_21,
            1>(i_data);
@@ -4209,7 +6044,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_21(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_21>();
 #ifdef SCOM_CHECKING
@@ -4222,7 +6057,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_21(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_21>();
 #ifdef SCOM_CHECKING
@@ -4236,7 +6071,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_21(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_21,
            1>(o_data);
@@ -4250,7 +6085,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_21(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_21>();
 #ifdef SCOM_CHECKING
@@ -4264,7 +6099,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_22(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_22,
            1>(i_data);
@@ -4279,7 +6114,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_22(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_22,
            1>(i_data);
@@ -4293,7 +6128,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_22(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_22>();
 #ifdef SCOM_CHECKING
@@ -4306,7 +6141,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_22(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_22>();
 #ifdef SCOM_CHECKING
@@ -4320,7 +6155,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_22(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_22,
            1>(o_data);
@@ -4334,7 +6169,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_22(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_22>();
 #ifdef SCOM_CHECKING
@@ -4348,7 +6183,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_23(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_23,
            1>(i_data);
@@ -4363,7 +6198,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_23(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_23,
            1>(i_data);
@@ -4377,7 +6212,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_23(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_23>();
 #ifdef SCOM_CHECKING
@@ -4390,7 +6225,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_23(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_23>();
 #ifdef SCOM_CHECKING
@@ -4404,7 +6239,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_23(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_23,
            1>(o_data);
@@ -4418,7 +6253,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_23(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_23>();
 #ifdef SCOM_CHECKING
@@ -4432,7 +6267,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_24(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_24,
            1>(i_data);
@@ -4447,7 +6282,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_24(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_24,
            1>(i_data);
@@ -4461,7 +6296,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_24(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_24>();
 #ifdef SCOM_CHECKING
@@ -4474,7 +6309,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_24(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_24>();
 #ifdef SCOM_CHECKING
@@ -4488,7 +6323,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_24(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_24,
            1>(o_data);
@@ -4502,7 +6337,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_24(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_24>();
 #ifdef SCOM_CHECKING
@@ -4516,7 +6351,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_25(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_25,
            1>(i_data);
@@ -4531,7 +6366,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_25(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_25,
            1>(i_data);
@@ -4545,7 +6380,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_25(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_25>();
 #ifdef SCOM_CHECKING
@@ -4558,7 +6393,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_25(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_25>();
 #ifdef SCOM_CHECKING
@@ -4572,7 +6407,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_25(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_25,
            1>(o_data);
@@ -4586,7 +6421,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_25(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_25>();
 #ifdef SCOM_CHECKING
@@ -4600,7 +6435,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_26(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_26,
            1>(i_data);
@@ -4615,7 +6450,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_26(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_26,
            1>(i_data);
@@ -4629,7 +6464,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_26(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_26>();
 #ifdef SCOM_CHECKING
@@ -4642,7 +6477,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_26(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_26>();
 #ifdef SCOM_CHECKING
@@ -4656,7 +6491,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_26(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_26,
            1>(o_data);
@@ -4670,7 +6505,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_26(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_26>();
 #ifdef SCOM_CHECKING
@@ -4684,7 +6519,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_27(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_27,
            1>(i_data);
@@ -4699,7 +6534,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_27(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_27,
            1>(i_data);
@@ -4713,7 +6548,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_27(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_27>();
 #ifdef SCOM_CHECKING
@@ -4726,7 +6561,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_27(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_27>();
 #ifdef SCOM_CHECKING
@@ -4740,7 +6575,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_27(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_27,
            1>(o_data);
@@ -4754,7 +6589,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_27(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_27>();
 #ifdef SCOM_CHECKING
@@ -4768,7 +6603,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_28(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_28,
            1>(i_data);
@@ -4783,7 +6618,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_28(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_28,
            1>(i_data);
@@ -4797,7 +6632,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_28(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_28>();
 #ifdef SCOM_CHECKING
@@ -4810,7 +6645,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_28(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_28>();
 #ifdef SCOM_CHECKING
@@ -4824,7 +6659,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_28(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_28,
            1>(o_data);
@@ -4838,7 +6673,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_28(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_28>();
 #ifdef SCOM_CHECKING
@@ -4852,7 +6687,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_29(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_29,
            1>(i_data);
@@ -4867,7 +6702,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_29(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_29,
            1>(i_data);
@@ -4881,7 +6716,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_29(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_29>();
 #ifdef SCOM_CHECKING
@@ -4894,7 +6729,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_29(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_29>();
 #ifdef SCOM_CHECKING
@@ -4908,7 +6743,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_29(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_29,
            1>(o_data);
@@ -4922,7 +6757,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_29(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_29>();
 #ifdef SCOM_CHECKING
@@ -4936,7 +6771,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_30(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_30,
            1>(i_data);
@@ -4951,7 +6786,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_30(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_30,
            1>(i_data);
@@ -4965,7 +6800,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_30(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_30>();
 #ifdef SCOM_CHECKING
@@ -4978,7 +6813,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_30(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_30>();
 #ifdef SCOM_CHECKING
@@ -4992,7 +6827,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_30(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_30,
            1>(o_data);
@@ -5006,7 +6841,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_30(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_30>();
 #ifdef SCOM_CHECKING
@@ -5020,7 +6855,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_31(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_31,
            1>(i_data);
@@ -5035,7 +6870,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_31(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_31,
            1>(i_data);
@@ -5049,7 +6884,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_31(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_31>();
 #ifdef SCOM_CHECKING
@@ -5062,7 +6897,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_31(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_31>();
 #ifdef SCOM_CHECKING
@@ -5076,7 +6911,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_31(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_31,
            1>(o_data);
@@ -5090,7 +6925,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_31(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_31>();
 #ifdef SCOM_CHECKING
@@ -5104,7 +6939,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_32(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_32,
            1>(i_data);
@@ -5119,7 +6954,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_32(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_32,
            1>(i_data);
@@ -5133,7 +6968,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_32(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_32>();
 #ifdef SCOM_CHECKING
@@ -5146,7 +6981,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_32(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_32>();
 #ifdef SCOM_CHECKING
@@ -5160,7 +6995,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_32(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_32,
            1>(o_data);
@@ -5174,7 +7009,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_32(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_32>();
 #ifdef SCOM_CHECKING
@@ -5188,7 +7023,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_33(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_33,
            1>(i_data);
@@ -5203,7 +7038,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_33(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_33,
            1>(i_data);
@@ -5217,7 +7052,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_33(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_33>();
 #ifdef SCOM_CHECKING
@@ -5230,7 +7065,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_33(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_33>();
 #ifdef SCOM_CHECKING
@@ -5244,7 +7079,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_33(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_33,
            1>(o_data);
@@ -5258,7 +7093,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_33(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_33>();
 #ifdef SCOM_CHECKING
@@ -5272,7 +7107,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_34(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_34,
            1>(i_data);
@@ -5287,7 +7122,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_34(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_34,
            1>(i_data);
@@ -5301,7 +7136,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_34(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_34>();
 #ifdef SCOM_CHECKING
@@ -5314,7 +7149,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_34(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_34>();
 #ifdef SCOM_CHECKING
@@ -5328,7 +7163,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_34(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_34,
            1>(o_data);
@@ -5342,7 +7177,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_34(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_34>();
 #ifdef SCOM_CHECKING
@@ -5356,7 +7191,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_35(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_35,
            1>(i_data);
@@ -5371,7 +7206,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_35(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_35,
            1>(i_data);
@@ -5385,7 +7220,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_35(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_35>();
 #ifdef SCOM_CHECKING
@@ -5398,7 +7233,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_35(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_35>();
 #ifdef SCOM_CHECKING
@@ -5412,7 +7247,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_35(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_35,
            1>(o_data);
@@ -5426,7 +7261,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_35(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_35>();
 #ifdef SCOM_CHECKING
@@ -5440,7 +7275,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_36(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_36,
            1>(i_data);
@@ -5455,7 +7290,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_36(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_36,
            1>(i_data);
@@ -5469,7 +7304,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_36(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_36>();
 #ifdef SCOM_CHECKING
@@ -5482,7 +7317,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_36(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_36>();
 #ifdef SCOM_CHECKING
@@ -5496,7 +7331,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_36(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_36,
            1>(o_data);
@@ -5510,7 +7345,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_36(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_36>();
 #ifdef SCOM_CHECKING
@@ -5524,7 +7359,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_37(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_37,
            1>(i_data);
@@ -5539,7 +7374,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_37(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_37,
            1>(i_data);
@@ -5553,7 +7388,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_37(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_37>();
 #ifdef SCOM_CHECKING
@@ -5566,7 +7401,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_37(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_37>();
 #ifdef SCOM_CHECKING
@@ -5580,7 +7415,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_37(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_37,
            1>(o_data);
@@ -5594,7 +7429,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_37(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_37>();
 #ifdef SCOM_CHECKING
@@ -5608,7 +7443,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_38(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_38,
            1>(i_data);
@@ -5623,7 +7458,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_38(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_38,
            1>(i_data);
@@ -5637,7 +7472,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_38(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_38>();
 #ifdef SCOM_CHECKING
@@ -5650,7 +7485,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_38(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_38>();
 #ifdef SCOM_CHECKING
@@ -5664,7 +7499,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_38(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_38,
            1>(o_data);
@@ -5678,7 +7513,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_38(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_38>();
 #ifdef SCOM_CHECKING
@@ -5692,7 +7527,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_39(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_39,
            1>(i_data);
@@ -5707,7 +7542,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_39(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_39,
            1>(i_data);
@@ -5721,7 +7556,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_39(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_39>();
 #ifdef SCOM_CHECKING
@@ -5734,7 +7569,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_39(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_39>();
 #ifdef SCOM_CHECKING
@@ -5748,7 +7583,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_39(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_39,
            1>(o_data);
@@ -5762,7 +7597,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_39(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_39>();
 #ifdef SCOM_CHECKING
@@ -5776,7 +7611,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_40(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_40,
            1>(i_data);
@@ -5791,7 +7626,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_40(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_40,
            1>(i_data);
@@ -5805,7 +7640,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_40(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_40>();
 #ifdef SCOM_CHECKING
@@ -5818,7 +7653,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_40(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_40>();
 #ifdef SCOM_CHECKING
@@ -5832,7 +7667,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_40(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_40,
            1>(o_data);
@@ -5846,7 +7681,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_40(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_40>();
 #ifdef SCOM_CHECKING
@@ -5860,7 +7695,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_41(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_41,
            1>(i_data);
@@ -5875,7 +7710,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_41(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_41,
            1>(i_data);
@@ -5889,7 +7724,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_41(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_41>();
 #ifdef SCOM_CHECKING
@@ -5902,7 +7737,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_41(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_41>();
 #ifdef SCOM_CHECKING
@@ -5916,7 +7751,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_41(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_41,
            1>(o_data);
@@ -5930,7 +7765,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_41(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_41>();
 #ifdef SCOM_CHECKING
@@ -5944,7 +7779,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_42(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_42,
            1>(i_data);
@@ -5959,7 +7794,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_42(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_42,
            1>(i_data);
@@ -5973,7 +7808,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_42(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_42>();
 #ifdef SCOM_CHECKING
@@ -5986,7 +7821,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_42(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_42>();
 #ifdef SCOM_CHECKING
@@ -6000,7 +7835,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_42(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_42,
            1>(o_data);
@@ -6014,7 +7849,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_42(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_42>();
 #ifdef SCOM_CHECKING
@@ -6028,7 +7863,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_43(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_43,
            1>(i_data);
@@ -6043,7 +7878,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_43(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_43,
            1>(i_data);
@@ -6057,7 +7892,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_43(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_43>();
 #ifdef SCOM_CHECKING
@@ -6070,7 +7905,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_43(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_43>();
 #ifdef SCOM_CHECKING
@@ -6084,7 +7919,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_43(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_43,
            1>(o_data);
@@ -6098,7 +7933,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_43(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_43>();
 #ifdef SCOM_CHECKING
@@ -6112,7 +7947,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_44(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_44,
            1>(i_data);
@@ -6127,7 +7962,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_44(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_44,
            1>(i_data);
@@ -6141,7 +7976,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_44(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_44>();
 #ifdef SCOM_CHECKING
@@ -6154,7 +7989,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_44(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_44>();
 #ifdef SCOM_CHECKING
@@ -6168,7 +8003,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_44(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_44,
            1>(o_data);
@@ -6182,7 +8017,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_44(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_44>();
 #ifdef SCOM_CHECKING
@@ -6196,7 +8031,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_45(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_45,
            1>(i_data);
@@ -6211,7 +8046,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_45(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_45,
            1>(i_data);
@@ -6225,7 +8060,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_45(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_45>();
 #ifdef SCOM_CHECKING
@@ -6238,7 +8073,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_45(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_45>();
 #ifdef SCOM_CHECKING
@@ -6252,7 +8087,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_45(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_45,
            1>(o_data);
@@ -6266,7 +8101,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_45(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_45>();
 #ifdef SCOM_CHECKING
@@ -6280,7 +8115,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_46(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_46,
            1>(i_data);
@@ -6295,7 +8130,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_46(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_46,
            1>(i_data);
@@ -6309,7 +8144,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_46(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_46>();
 #ifdef SCOM_CHECKING
@@ -6322,7 +8157,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_46(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_46>();
 #ifdef SCOM_CHECKING
@@ -6336,7 +8171,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_46(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_46,
            1>(o_data);
@@ -6350,7 +8185,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_46(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_46>();
 #ifdef SCOM_CHECKING
@@ -6364,7 +8199,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_47(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_47,
            1>(i_data);
@@ -6379,7 +8214,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_47(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_47,
            1>(i_data);
@@ -6393,7 +8228,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_47(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_47>();
 #ifdef SCOM_CHECKING
@@ -6406,7 +8241,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_47(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_47>();
 #ifdef SCOM_CHECKING
@@ -6420,7 +8255,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_47(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_47,
            1>(o_data);
@@ -6434,7 +8269,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_47(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_47>();
 #ifdef SCOM_CHECKING
@@ -6448,7 +8283,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_48(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_48,
            1>(i_data);
@@ -6463,7 +8298,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_48(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_48,
            1>(i_data);
@@ -6477,7 +8312,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_48(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_48>();
 #ifdef SCOM_CHECKING
@@ -6490,7 +8325,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_48(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_48>();
 #ifdef SCOM_CHECKING
@@ -6504,7 +8339,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_48(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_48,
            1>(o_data);
@@ -6518,7 +8353,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_48(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_48>();
 #ifdef SCOM_CHECKING
@@ -6532,7 +8367,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_49(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_49,
            1>(i_data);
@@ -6547,7 +8382,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_49(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_49,
            1>(i_data);
@@ -6561,7 +8396,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_49>();
 #ifdef SCOM_CHECKING
@@ -6574,7 +8409,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_49(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_49>();
 #ifdef SCOM_CHECKING
@@ -6588,7 +8423,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_49(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_49,
            1>(o_data);
@@ -6602,7 +8437,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_49(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_49>();
 #ifdef SCOM_CHECKING
@@ -6616,7 +8451,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_50(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_50,
            1>(i_data);
@@ -6631,7 +8466,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_50(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_50,
            1>(i_data);
@@ -6645,7 +8480,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_50(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_50>();
 #ifdef SCOM_CHECKING
@@ -6658,7 +8493,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_50(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_50>();
 #ifdef SCOM_CHECKING
@@ -6672,7 +8507,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_50(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_50,
            1>(o_data);
@@ -6686,7 +8521,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_50(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_50>();
 #ifdef SCOM_CHECKING
@@ -6700,7 +8535,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_51(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_51,
            1>(i_data);
@@ -6715,7 +8550,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_51(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_51,
            1>(i_data);
@@ -6729,7 +8564,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_51(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_51>();
 #ifdef SCOM_CHECKING
@@ -6742,7 +8577,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_51(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_51>();
 #ifdef SCOM_CHECKING
@@ -6756,7 +8591,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_51(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_51,
            1>(o_data);
@@ -6770,7 +8605,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_51(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_51>();
 #ifdef SCOM_CHECKING
@@ -6784,7 +8619,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_52(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_52,
            1>(i_data);
@@ -6799,7 +8634,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_52(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_52,
            1>(i_data);
@@ -6813,7 +8648,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_52(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_52>();
 #ifdef SCOM_CHECKING
@@ -6826,7 +8661,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_52(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_52>();
 #ifdef SCOM_CHECKING
@@ -6840,7 +8675,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_52(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_52,
            1>(o_data);
@@ -6854,7 +8689,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_52(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_52>();
 #ifdef SCOM_CHECKING
@@ -6868,7 +8703,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_53(fapi2::buffer<u
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_53,
            1>(i_data);
@@ -6883,7 +8718,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_53(const uint64_t 
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_HOSTATTN_MASK_53,
            1>(i_data);
@@ -6897,7 +8732,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_HOSTATTN_MASK_53(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_HOSTATTN_MASK_53>();
 #ifdef SCOM_CHECKING
@@ -6910,7 +8745,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_HOSTATTN_MASK_53(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_HOSTATTN_MASK_53>();
 #ifdef SCOM_CHECKING
@@ -6924,7 +8759,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_HOSTATTN_MASK_53(fapi2::buffer<u
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_HOSTATTN_MASK_53,
            1>(o_data);
@@ -6938,7 +8773,7 @@ fapi_try_exit:
 static inline bool GET_AXON_HOSTATTN_MASK_53(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_HOSTATTN_MASK_RW, AXON_HOSTATTN_MASK_WO_CLEAR, AXON_HOSTATTN_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_HOSTATTN_MASK_53>();
 #ifdef SCOM_CHECKING
@@ -8749,101 +10584,6 @@ static inline bool GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT21_PG_RX_IO_PB_NV_IOBIST_
 fapi_try_exit:
     FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT21_PG_RX_IO_PB_NV_IOBIST_RESET chip: %x, ec: %x",
              scomt::chip, scomt::ec);
-    return i_data;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG(const fapi2::Target<K, M, V>& i_target)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG;
-#endif
-    return fapi2::current_err;
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG(const fapi2::Target<K, M, V>& i_target,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG;
-#endif
-    return fapi2::getScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG, o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t i_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG));
-#endif
-    return fapi2::putScom(i_target, IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG, i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
-
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL(
-    fapi2::buffer<uint64_t>& i_data,
-    fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG));
-#endif
-    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL(const uint64_t i_data,
-        fapi2::buffer<uint64_t>& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG));
-#endif
-    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL_LEN>(i_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
-    return o_data;
-#endif
-}
-
-static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL(
-    fapi2::buffer<uint64_t>& i_data,
-    uint64_t& o_data)
-{
-#ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG));
-#endif
-    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL_LEN>(o_data);
-#ifdef SCOM_CHECKING
-fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT31_PG_RX_SECTION_FAIL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
     return i_data;
 #endif
 }
@@ -14563,6 +16303,239 @@ static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNT
 fapi_try_exit:
     FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_LOFF_B_CNTLX83_PL_RX_BD_LATCH_DAC_W000 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL;
+#endif
+    return fapi2::getScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return fapi2::putScom(i_target, IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.setBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.clearBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return i_data.extractToRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return i_data.getBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_A_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.insertFromRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.setBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& CLEAR_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return o_data.clearBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return i_data.extractToRight<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+
+static inline bool GET_IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL));
+#endif
+    return i_data.getBit<IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("Invalid dial access IOO_RX0_0_RD_3_RX_DAC_REGS_CNTL15_PL_B_FENCE_EN chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }

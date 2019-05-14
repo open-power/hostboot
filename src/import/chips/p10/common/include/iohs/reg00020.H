@@ -4452,11 +4452,11 @@ fapi_try_exit:
 
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PREP_AXON_LOCAL_XSTOP_MASK(const fapi2::Target<K, M, V>& i_target)
+static inline fapi2::ReturnCode PREP_AXON_LOCAL_XSTOP_MASK_RW(const fapi2::Target<K, M, V>& i_target)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_LOCAL_XSTOP_MASK;
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_RW;
 #endif
     return fapi2::current_err;
 #ifdef SCOM_CHECKING
@@ -4466,14 +4466,14 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode GET_AXON_LOCAL_XSTOP_MASK(const fapi2::Target<K, M, V>& i_target,
+static inline fapi2::ReturnCode GET_AXON_LOCAL_XSTOP_MASK_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    scomt::last_scom = AXON_LOCAL_XSTOP_MASK;
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_RW;
 #endif
-    return fapi2::getScom(i_target, AXON_LOCAL_XSTOP_MASK, o_data);
+    return fapi2::getScom(i_target, AXON_LOCAL_XSTOP_MASK_RW, o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -4481,13 +4481,102 @@ fapi_try_exit:
 }
 
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
-static inline fapi2::ReturnCode PUT_AXON_LOCAL_XSTOP_MASK(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+static inline fapi2::ReturnCode PUT_AXON_LOCAL_XSTOP_MASK_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::init(i_target));
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
-    return fapi2::putScom(i_target, AXON_LOCAL_XSTOP_MASK, i_data);
+    return fapi2::putScom(i_target, AXON_LOCAL_XSTOP_MASK_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_LOCAL_XSTOP_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_WO_CLEAR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_LOCAL_XSTOP_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_WO_CLEAR;
+#endif
+    return fapi2::getScom(i_target, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_LOCAL_XSTOP_MASK_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_LOCAL_XSTOP_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_LOCAL_XSTOP_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_LOCAL_XSTOP_MASK_WO_OR;
+#endif
+    return fapi2::getScom(i_target, AXON_LOCAL_XSTOP_MASK_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_LOCAL_XSTOP_MASK_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_LOCAL_XSTOP_MASK_WO_OR, i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
     return fapi2::current_err;
@@ -4499,7 +4588,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_01(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_01,
            1>(i_data);
@@ -4514,7 +4603,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_01(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_01,
            1>(i_data);
@@ -4528,7 +4617,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_01(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -4541,7 +4630,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_01(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -4555,7 +4644,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_01(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_01,
            1>(o_data);
@@ -4569,7 +4658,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_01(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_01>();
 #ifdef SCOM_CHECKING
@@ -4583,7 +4672,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_02(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_02,
            1>(i_data);
@@ -4598,7 +4687,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_02(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_02,
            1>(i_data);
@@ -4612,7 +4701,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_02(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -4625,7 +4714,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_02(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -4639,7 +4728,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_02(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_02,
            1>(o_data);
@@ -4653,7 +4742,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_02(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_02>();
 #ifdef SCOM_CHECKING
@@ -4667,7 +4756,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_03(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_03,
            1>(i_data);
@@ -4682,7 +4771,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_03(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_03,
            1>(i_data);
@@ -4696,7 +4785,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_03(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -4709,7 +4798,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_03(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -4723,7 +4812,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_03(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_03,
            1>(o_data);
@@ -4737,7 +4826,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_03(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_03>();
 #ifdef SCOM_CHECKING
@@ -4751,7 +4840,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_04(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_04,
            1>(i_data);
@@ -4766,7 +4855,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_04(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_04,
            1>(i_data);
@@ -4780,7 +4869,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_04(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -4793,7 +4882,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_04(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -4807,7 +4896,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_04(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_04,
            1>(o_data);
@@ -4821,7 +4910,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_04(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_04>();
 #ifdef SCOM_CHECKING
@@ -4835,7 +4924,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_05(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_05,
            1>(i_data);
@@ -4850,7 +4939,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_05(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_05,
            1>(i_data);
@@ -4864,7 +4953,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -4877,7 +4966,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_05(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -4891,7 +4980,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_05(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_05,
            1>(o_data);
@@ -4905,7 +4994,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_05(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_05>();
 #ifdef SCOM_CHECKING
@@ -4919,7 +5008,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_06(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_06,
            1>(i_data);
@@ -4934,7 +5023,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_06(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_06,
            1>(i_data);
@@ -4948,7 +5037,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -4961,7 +5050,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_06(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -4975,7 +5064,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_06(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_06,
            1>(o_data);
@@ -4989,7 +5078,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_06(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_06>();
 #ifdef SCOM_CHECKING
@@ -5003,7 +5092,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_07(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_07,
            1>(i_data);
@@ -5018,7 +5107,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_07(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_07,
            1>(i_data);
@@ -5032,7 +5121,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -5045,7 +5134,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_07(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -5059,7 +5148,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_07(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_07,
            1>(o_data);
@@ -5073,7 +5162,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_07(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_07>();
 #ifdef SCOM_CHECKING
@@ -5087,7 +5176,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_08(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_08,
            1>(i_data);
@@ -5102,7 +5191,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_08(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_08,
            1>(i_data);
@@ -5116,7 +5205,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -5129,7 +5218,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_08(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -5143,7 +5232,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_08(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_08,
            1>(o_data);
@@ -5157,7 +5246,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_08(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_08>();
 #ifdef SCOM_CHECKING
@@ -5171,7 +5260,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_09(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_09,
            1>(i_data);
@@ -5186,7 +5275,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_09(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_09,
            1>(i_data);
@@ -5200,7 +5289,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -5213,7 +5302,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_09(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -5227,7 +5316,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_09(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_09,
            1>(o_data);
@@ -5241,7 +5330,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_09(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_09>();
 #ifdef SCOM_CHECKING
@@ -5255,7 +5344,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_10(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_10,
            1>(i_data);
@@ -5270,7 +5359,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_10(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_10,
            1>(i_data);
@@ -5284,7 +5373,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -5297,7 +5386,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -5311,7 +5400,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_10(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_10,
            1>(o_data);
@@ -5325,7 +5414,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_10(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_10>();
 #ifdef SCOM_CHECKING
@@ -5339,7 +5428,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_11(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_11,
            1>(i_data);
@@ -5354,7 +5443,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_11(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_11,
            1>(i_data);
@@ -5368,7 +5457,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -5381,7 +5470,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -5395,7 +5484,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_11(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_11,
            1>(o_data);
@@ -5409,7 +5498,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_11(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_11>();
 #ifdef SCOM_CHECKING
@@ -5423,7 +5512,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_12(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_12,
            1>(i_data);
@@ -5438,7 +5527,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_12(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_12,
            1>(i_data);
@@ -5452,7 +5541,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -5465,7 +5554,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -5479,7 +5568,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_12(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_12,
            1>(o_data);
@@ -5493,7 +5582,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_12(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_12>();
 #ifdef SCOM_CHECKING
@@ -5507,7 +5596,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_13(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_13,
            1>(i_data);
@@ -5522,7 +5611,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_13(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_13,
            1>(i_data);
@@ -5536,7 +5625,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -5549,7 +5638,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -5563,7 +5652,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_13(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_13,
            1>(o_data);
@@ -5577,7 +5666,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_13(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_13>();
 #ifdef SCOM_CHECKING
@@ -5591,7 +5680,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_14(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_14,
            1>(i_data);
@@ -5606,7 +5695,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_14(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_14,
            1>(i_data);
@@ -5620,7 +5709,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -5633,7 +5722,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -5647,7 +5736,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_14(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_14,
            1>(o_data);
@@ -5661,7 +5750,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_14(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_14>();
 #ifdef SCOM_CHECKING
@@ -5675,7 +5764,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_15(fapi2::buffe
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_15,
            1>(i_data);
@@ -5690,7 +5779,7 @@ static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_15(const uint64
         fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.insertFromRight<AXON_LOCAL_XSTOP_MASK_15,
            1>(i_data);
@@ -5704,7 +5793,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& SET_AXON_LOCAL_XSTOP_MASK_15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.setBit<AXON_LOCAL_XSTOP_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -5717,7 +5806,7 @@ fapi_try_exit:
 static inline fapi2::buffer<uint64_t>& CLEAR_AXON_LOCAL_XSTOP_MASK_15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return o_data.clearBit<AXON_LOCAL_XSTOP_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -5731,7 +5820,7 @@ static inline fapi2::buffer<uint64_t>& GET_AXON_LOCAL_XSTOP_MASK_15(fapi2::buffe
         uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.extractToRight<AXON_LOCAL_XSTOP_MASK_15,
            1>(o_data);
@@ -5745,7 +5834,7 @@ fapi_try_exit:
 static inline bool GET_AXON_LOCAL_XSTOP_MASK_15(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
-    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK));
+    FAPI_TRY(scomt::chkReg(AXON_LOCAL_XSTOP_MASK_RW, AXON_LOCAL_XSTOP_MASK_WO_CLEAR, AXON_LOCAL_XSTOP_MASK_WO_OR));
 #endif
     return i_data.getBit<AXON_LOCAL_XSTOP_MASK_15>();
 #ifdef SCOM_CHECKING
@@ -6789,52 +6878,52 @@ fapi_try_exit:
 }
 
 
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16(
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG));
 #endif
-    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16_LEN>(i_data);
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16(
+static inline fapi2::buffer<uint64_t>& SET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG));
 #endif
-    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16_LEN>(i_data);
+    return o_data.insertFromRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return o_data;
 #endif
 }
 
-static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16(
+static inline fapi2::buffer<uint64_t>& GET_IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
 {
 #ifdef SCOM_CHECKING
     FAPI_TRY(scomt::chkReg(IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG));
 #endif
-    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16,
-           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16_LEN>(o_data);
+    return i_data.extractToRight<IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15,
+           IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_16 chip: %x, ec: %x", scomt::chip,
+    FAPI_ERR("Invalid dial access IOO_RX0_RXCTL_DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15 chip: %x, ec: %x", scomt::chip,
              scomt::ec);
     return i_data;
 #endif

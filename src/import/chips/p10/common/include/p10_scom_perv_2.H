@@ -54,12 +54,9 @@ static const uint32_t CPLT_STAT0_FREE_USAGE_11I = 11;
 static const uint32_t CPLT_STAT0_CC_CTRL_PARALLEL_SCAN_COMPARE_HEADER_ERR = 11;
 static const uint32_t CPLT_STAT0_IOPCI_TC_HSSPRTREADYB = 11;
 static const uint32_t CPLT_STAT0_FREE_USAGE_12I = 12;
-static const uint32_t CPLT_STAT0_ANES_TP_VMEAS_CLK_STOPPED = 12;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_CLK_STOPPED = 12;
 static const uint32_t CPLT_STAT0_MC_TC_0_FIR_HOST_ATTN = 12;
 static const uint32_t CPLT_STAT0_FREE_USAGE_13I = 13;
-static const uint32_t CPLT_STAT0_ANES_TP_VMEAS_RESULT_OUT = 13;
-static const uint32_t CPLT_STAT0_ANES_TP_VMEAS_RESULT_OUT_LEN = 10;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_OUT = 13;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_OUT_LEN = 10;
 static const uint32_t CPLT_STAT0_MC_TC_1_FIR_HOST_ATTN = 13;
@@ -80,8 +77,15 @@ static const uint32_t CPLT_STAT0_MC_TC_8_FIR_HOST_ATTN = 20;
 static const uint32_t CPLT_STAT0_FREE_USAGE_21I = 21;
 static const uint32_t CPLT_STAT0_FREE_USAGE_22I = 22;
 static const uint32_t CPLT_STAT0_FREE_USAGE_23I = 23;
-static const uint32_t CPLT_STAT0_ANES_TP_VMEAS_RESULT_VALID = 23;
 static const uint32_t CPLT_STAT0_ANEQ_TP_VMEAS_RESULT_VALID = 23;
+static const uint32_t CPLT_STAT0_FREE_USAGE_24I = 24;
+static const uint32_t CPLT_STAT0_FREE_USAGE_25I = 25;
+static const uint32_t CPLT_STAT0_FREE_USAGE_26I = 26;
+static const uint32_t CPLT_STAT0_FREE_USAGE_27I = 27;
+static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
+static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
+static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
+static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
 // perv/reg00003.H
 
 static const uint64_t EPS_THERM_WSUB2_MODE_REG = 0x0005002full;
@@ -109,28 +113,37 @@ static const uint32_t EPS_THERM_WSUB2_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_12_RWX = 0x0000284cull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_12_FSI = 0x0000284cull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_12_FSI_BYTE = 0x00002930ull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_12_RW = 0x0005004cull;
 // perv/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_5_RWX = 0x00002845ull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_5_FSI = 0x00002845ull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_5_FSI_BYTE = 0x00002914ull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_5_RW = 0x00050045ull;
 // perv/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_9_RWX = 0x000028c9ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_9_FSI = 0x000028c9ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_9_FSI_BYTE = 0x00002b24ull;
+static const uint32_t FSXCOMP_FSXLOG_M2A_DATA_AREA_9_RW = 0x000500c9ull;
 // perv/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_3_RWX = 0x00002903ull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_3_FSI = 0x00002903ull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_3_FSI_BYTE = 0x00002c0cull;
+static const uint32_t FSXCOMP_FSXLOG_M2B_DATA_AREA_3_RW = 0x00050103ull;
 // perv/reg00003.H
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_ROX = 0x00050027ull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_RWX = 0x00002827ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_FSI = 0x00002827ull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_FSI_BYTE = 0x0000289cull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_RO = 0x00050027ull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_M1HC2B_MAILBOX_1_HEADER_COMMAND_2_B = 0;
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_M1HC2B_MAILBOX_1_HEADER_COMMAND_2_B_LEN = 32;
@@ -138,8 +151,9 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_1_HEADER_COMMAND_2_B_M1HC2B_MAILBOX
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_ROX = 0x0000282bull;
-static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_RWX = 0x0005002bull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_FSI = 0x0000282bull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_FSI_BYTE = 0x000028acull;
+static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_RW = 0x0005002bull;
 
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_M2HC2A_MAILBOX_2_HEADER_COMMAND_A = 0;
 static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_M2HC2A_MAILBOX_2_HEADER_COMMAND_A_LEN = 32;
@@ -147,11 +161,13 @@ static const uint32_t FSXCOMP_FSXLOG_MAILBOX_2_HEADER_COMMAND_A_M2HC2A_MAILBOX_2
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_RW = 0x0000281aull;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_FSI = 0x0000281aull;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_FSI_BYTE = 0x00002868ull;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_RW = 0x0005001aull;
 
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_CHIPLET_EN_DC = 0;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_PCB_EP_RESET_DC = 1;
-static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_CLK_ASYNC_RESET_DC = 2;
+static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_TP_AN_CLKGLM_TEST_TCK_ASYNC_RESET = 2;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_3_RESERVED = 3;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_4_RESERVED = 4;
 static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_5_RESERVED = 5;
@@ -185,7 +201,9 @@ static const uint32_t FSXCOMP_FSXLOG_PERV_CTRL0_PERV_CTRL0_31_SPARE = 31;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_RW = 0x00002810ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_FSI = 0x00002810ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_FSI_BYTE = 0x00002840ull;
+static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_RW = 0x00050010ull;
 
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_ROOT_CTRL0_0_SPARE = 0;
 static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_TP_FENCE_VTLIO_DC = 1;
@@ -221,7 +239,9 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL0_GLOBAL_EP_RESET_DC = 31;
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RWX = 0x0000283bull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI = 0x0000283bull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI_BYTE = 0x000028ecull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW = 0x0005003bull;
 
 static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_SR_SCRATCH_REGISTER_4 = 0;
 static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_SR_SCRATCH_REGISTER_4_LEN = 32;
@@ -229,7 +249,9 @@ static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_SR_SCRATCH_REGISTER_4_LE
 
 //ERRCODE: // The addresses of this register do not all translate to the same targets.
 
-static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_ROX = 0x0000281dull;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FSI = 0x0000281dull;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_FSI_BYTE = 0x00002874ull;
+static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_RO = 0x0005001dull;
 
 static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SNS1_0_31 = 0;
 static const uint32_t FSXCOMP_FSXLOG_SNS1LTH_SNS1_0_31_LEN = 32;
@@ -504,8 +526,7 @@ static const uint32_t SINGLE_OTP_ROM_OTPROM_REG82_REGISTER82 = 0;
 static const uint32_t SINGLE_OTP_ROM_OTPROM_REG82_REGISTER82_LEN = 64;
 // perv/reg00003.H
 
-static const uint64_t SPATTN_NCX = 0x00040005ull;
-static const uint64_t SPATTN_ROX = 0x00040004ull;
+static const uint64_t SPATTN = 0x00040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
 static const uint32_t SPATTN_RESERVED1S = 1;
