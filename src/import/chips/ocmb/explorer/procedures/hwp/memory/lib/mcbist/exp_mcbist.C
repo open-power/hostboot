@@ -89,6 +89,19 @@ const std::vector< mss::mcbist::op_type > mcbistTraits<mss::mc_type::EXPLORER>::
 namespace mcbist
 {
 ///
+/// @brief Get a list of ports involved in the program
+/// Specialization for program<>
+/// @param[in] i_target the target for this program
+/// @return vector of port targets
+///
+template<>
+std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>
+        program<>::get_port_list( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target ) const
+{
+
+    return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+}
+///
 /// @brief Configures broadcast mode, if it is needed
 /// @param[in] i_target the target to effect
 /// @param[in,out] io_program the mcbist::program
